@@ -20,11 +20,19 @@
   --bb-ink-800: #1a1a1a; /* Tarjetas, inputs */
   --bb-ink-700: #1e1e1e; /* Hover de tarjeta */
   --bb-ink-600: #2a2a2a; /* Bordes fuertes, separadores, pista de la barra de XP */
-  --bb-glass: #2b2b2bce; /* Isla de navegación (con `--bb-glass-blur`) */
+  --bb-glass: #2b2b2bce; /* Isla de navegación SIN cristal (con `--bb-glass-blur`), §3.1 */
+  --bb-glass-card: rgba(
+    0,
+    0,
+    0,
+    0.58
+  ); /* Cristal (GlassSurface): isla con cristal, tarjetas, botón de contorno */
+  --bb-glass-band: rgba(0, 0, 0, 0.4); /* Banda del marquee (Hero.css `.hero-marquee`) */
 
   /* ── Color: líneas y velos ──────────────────────────────────────────────────────────────── */
   --bb-line: rgba(255, 255, 255, 0.08); /* Bordes de tarjeta */
-  --bb-line-strong: rgba(255, 255, 255, 0.18); /* Bordes de botón de contorno, rareza común */
+  --bb-line-strong: rgba(255, 255, 255, 0.18); /* Bordes de tarjetas de cristal, rareza común */
+  --bb-line-button: rgba(255, 255, 255, 0.3); /* Borde del botón de contorno (medido en el sello, §3.2) */
   --bb-fill-hover: rgba(255, 255, 255, 0.06); /* §3.3: el botón de contorno «rellena de blanco al 6 %» */
   --bb-fill-active: rgba(255, 255, 255, 0.1); /* Enlace activo o en hover de la isla (Header.css) */
   --bb-scrim: rgba(0, 0, 0, 0.7); /* §3.3: fondo de modal «oscurecido al 70 %» */
@@ -39,9 +47,17 @@
   --bb-red: #ff003c; /* Marca, CTA, progreso, foco. 5,3:1 sobre negro: vale para cualquier texto */
   --bb-red-hover: #e6003a; /* Hover de CTA */
   --bb-red-press: #cc0030; /* Pulsado */
+  --bb-red-cta: #e6003a; /* Fondo de botones y chips activos con texto blanco: 4,7:1 (con --bb-red, 3,9:1) */
   --bb-red-text: #ff4d6d; /* Texto rojo pequeño sobre tarjetas (5,4:1 sobre --bb-ink-800), RNF-A11Y-02 */
   --bb-red-glow: rgba(255, 0, 60, 0.4); /* Halos de CTA y de contorno */
   --bb-red-wash: rgba(255, 0, 60, 0.1); /* Fondos de chip activo, filas seleccionadas */
+  --bb-red-line: rgba(255, 0, 60, 0.25); /* Filetes del marquee (Hero.css `.hero-marquee`) */
+  --bb-red-rule: rgba(
+    255,
+    0,
+    60,
+    0.5
+  ); /* Filetes de los rótulos verticales y líneas de la rejilla del hero */
   --bb-wine: #4a0d1c; /* Color del Silk (fondo ambiental) */
   --bb-wave-idle: #3a3a3a; /* §3.3: barras de la forma de onda aún no reproducidas */
 
@@ -77,6 +93,7 @@
   --bb-font-body: "Montserrat", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   --bb-font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
+  --bb-weight-light: 300; /* Subtítulo del hero (Hero.css) */
   --bb-weight-regular: 400;
   --bb-weight-medium: 500;
   --bb-weight-semibold: 600;
@@ -97,21 +114,46 @@
   --bb-font-size-xl: clamp(1.25rem, 1.152rem + 0.435vw, 1.5rem); /* 20 → 24 px */
   --bb-font-size-2xl: clamp(1.5rem, 1.304rem + 0.87vw, 2rem); /* 24 → 32 px */
   --bb-font-size-3xl: clamp(2.25rem, 1.956rem + 1.304vw, 3rem); /* 36 → 48 px */
-  --bb-font-size-hero: clamp(3.5rem, 11vw, 8.5rem);
+  --bb-font-size-hero: clamp(2.8rem, 8vw, 6rem); /* El del sello: 96 px a 1440, 44,8 px a 390 (§3.2) */
 
-  --bb-leading-tight: 0.95; /* Titular del hero (Hero.css) */
+  /*
+   * Medidas del sello que no caen en la escala (Hero.css, Footer.css, MobileNavPanel.css): se conservan
+   * para clavar sus proporciones. Las que cambian por tramos se redefinen en las media queries del final.
+   */
+  --bb-font-size-label: 0.7rem; /* 11,2 px: rótulos verticales del hero (Hero.css `.hero-side`) */
+  --bb-font-size-cta: 0.95rem; /* 15,2 px: botones píldora del hero (Hero.css); 13,6 px en móvil */
+  --bb-font-size-subtitle: clamp(0.95rem, 1.6vw, 1.15rem); /* Subtítulo del hero; 12,8 px en tableta */
+  --bb-font-size-marquee: 0.85rem; /* 13,6 px: palabras del marquee (Hero.css); 12 px en tableta */
+  --bb-font-size-footer-name: clamp(1.5rem, 3vw, 2.25rem); /* Nombre del sello en el pie (Footer.css) */
+  --bb-font-size-footer-tagline: 0.95rem; /* 15,2 px: entradilla del pie (Footer.css) */
+  --bb-font-size-footer-link: 0.9rem; /* 14,4 px: enlaces del pie (Footer.css) */
+  --bb-font-size-footer-legal: 0.8rem; /* 12,8 px: franja inferior del pie (Footer.css) */
+
+  --bb-leading-tight: 0.95; /* Titulares macizos muy grandes */
+  --bb-leading-compact: 1.05; /* Titular del hero en tableta y nombre del pie (Hero.css, Footer.css) */
+  --bb-leading-hero: var(--bb-leading-tight); /* Titular del hero (Hero.css); compact en tableta */
   --bb-leading-snug: 1.15; /* Titulares */
   --bb-leading-body: 1.5; /* Texto */
+  --bb-leading-relaxed: 1.6; /* Entradilla del pie (Footer.css) */
 
   --bb-tracking-display: -0.02em; /* Titulares en mayúsculas */
-  --bb-tracking-cta: 0.12em; /* Botón CTA (§3.3) */
-  --bb-tracking-caps: 0.2em; /* Subtítulos en mayúsculas espaciadas («SAMPLE · FLIP · VOTA · REPITE») */
+  --bb-tracking-hero: -0.03em; /* Titular del hero (Hero.css); 0 en móvil, ver media queries al final */
+  --bb-tracking-hero-outline: var(--bb-tracking-hero); /* Contorno: 0,01 em en tableta, 0,02 en móvil */
+  --bb-tracking-wide: 0.02em; /* Nombre y crédito del pie (Footer.css) */
+  --bb-tracking-nav: 0.04em; /* Enlaces del menú móvil (MobileNavPanel.css) */
+  --bb-tracking-cta: 0.1em; /* Botones (§3.2, medido en el sello); 0,08 em en móvil, ver al final */
+  --bb-tracking-caps: 0.15em; /* Subtítulos en mayúsculas espaciadas («SAMPLE · FLIP · VOTA · REPITE») */
+  --bb-tracking-marquee: 0.3em; /* Palabras del marquee (Hero.css `.hero-marquee__item`) */
   --bb-tracking-label: 0.4em; /* Rótulos verticales laterales (`.hero-side`) */
+  --bb-tracking-eyebrow: 0.16em; /* Títulos de las tarjetas del pie (Footer.css) */
 
-  /* Contorno rojo de los titulares: `-webkit-text-stroke` + color transparente + halo */
+  /*
+   * Contorno rojo de los titulares: `-webkit-text-stroke` + relleno negro (`--bb-black`, como el sello)
+   * + halo de 30 px. El trazo baja a 1,5 px en tableta y a 1 px en móvil (media queries al final).
+   */
   --bb-text-stroke-width: 2px;
   --bb-text-stroke: var(--bb-text-stroke-width) var(--bb-red);
-  --bb-text-glow: 0 0 24px var(--bb-red-glow);
+  --bb-text-glow: 0 0 30px var(--bb-red-glow);
 
   /* ── Espaciado: múltiplos de 4 px, en rem para que escale con el tamaño de texto ─────────── */
   --bb-space-1: 0.25rem; /* 4 px */
@@ -130,6 +172,7 @@
   --bb-space-14: 3.5rem; /* 56 px */
   --bb-space-15: 3.75rem; /* 60 px */
   --bb-space-16: 4rem; /* 64 px */
+  --bb-space-20: 5rem; /* 80 px: relleno superior del pie (Footer.css) */
 
   /* ── Radios ─────────────────────────────────────────────────────────────────────────────── */
   --bb-radius-sm: 8px;
@@ -142,9 +185,26 @@
   --bb-shadow-card: 0 8px 24px rgba(0, 0, 0, 0.45);
   --bb-shadow-float: 0 8px 32px rgba(0, 0, 0, 0.55); /* Isla (Header.css) */
   --bb-shadow-glow-red: 0 0 24px var(--bb-red-glow);
+  --bb-shadow-cta: 0 4px 20px rgba(255, 0, 60, 0.45); /* Botón CTA en reposo (medido en el sello) */
+  --bb-shadow-cta-hover: 0 8px 30px rgba(255, 0, 60, 0.7); /* Botón CTA en hover: el halo crece (Hero.css) */
+  --bb-shadow-hero-title: 0 4px 24px rgba(0, 0, 0, 0.6); /* Titular del hero (§3.2) */
+  --bb-shadow-hero-subtitle: 0 2px 8px rgba(0, 0, 0, 0.6); /* Subtítulo del hero (Hero.css) */
+  --bb-shadow-dot: 0 0 8px rgba(255, 0, 60, 0.6); /* Punto rojo del marquee (Hero.css) */
+
+  /* ── Degradados del hero (Hero.css) ─────────────────────────────────────────────────────── */
+  --bb-hero-vignette: radial-gradient(
+    ellipse at center,
+    transparent 35%,
+    rgba(0, 0, 0, 0.55) 90%,
+    rgba(0, 0, 0, 0.85) 100%
+  ); /* Viñeta cinematográfica */
 
   /* ── Desenfoques de cristal ─────────────────────────────────────────────────────────────── */
-  --bb-glass-blur: 8px; /* Isla: `backdrop-filter: blur(8px)` */
+  --bb-glass-blur: 8px; /* Isla sin cristal: `backdrop-filter: blur(8px)` (Header.css) */
+  --bb-glass-blur-card: 3px; /* Con cristal (GlassSurface): `blur(3px)` además del desplazamiento SVG */
+  --bb-glass-blur-band: 10px; /* Banda del marquee */
+  --bb-blur-scrim: 4px; /* Fondo bajo el panel del menú móvil (MobileNavOverlay.css) */
+  --bb-blur-orb: 100px; /* Orbes rojos del fondo (ListingPage.css `.listing-orb`) */
 
   /* ── Capas (z-index) ────────────────────────────────────────────────────────────────────── */
   --bb-z-stage: 0; /* Escenario (canvas único) */
@@ -203,6 +263,20 @@
    * mueven lo usan en sus transformaciones, p. ej. `translateY(calc(-1px * var(--bb-motion)))`.
    */
   --bb-motion: 1;
+
+  /*
+   * ── Movimiento: periodos de los bucles ────────────────────────────────────────────────────
+   * No cambian con «reducir movimiento» (ver arriba): con la preferencia, la pieza en bucle pasa a
+   * su variante estática. Espejo en milisegundos: `loop` de `@beatbattle/shared/tokens`.
+   */
+  --bb-loop-marquee: 35s; /* Una vuelta del marquee (Hero.css `marqueeScroll`) */
+  --bb-loop-ticker-step: 5s; /* Marquee sin movimiento: lista estática que rota cada 5 s (Anexo E) */
+  --bb-loop-orb-drift-1: 14s; /* Orbes del fondo: deriva y pulso de cada uno (ListingPage.css) */
+  --bb-loop-orb-drift-2: 18s;
+  --bb-loop-orb-drift-3: 22s;
+  --bb-loop-orb-pulse-1: 11s;
+  --bb-loop-orb-pulse-2: 14s;
+  --bb-loop-orb-pulse-3: 9s;
 }
 
 /*
@@ -223,9 +297,34 @@
   }
 }
 
+/*
+ * Hero en tableta (Hero.css ≤ 768 px): titular sin interletraje negativo, más interlineado y trazo de
+ * 1,5 px; subtítulo y marquee más pequeños.
+ */
+@media (max-width: 768px) {
+  :root {
+    --bb-tracking-hero: 0em;
+    --bb-tracking-hero-outline: 0.01em;
+    --bb-leading-hero: var(--bb-leading-compact);
+    --bb-text-stroke-width: 1.5px;
+    --bb-font-size-subtitle: 0.8rem;
+    --bb-font-size-marquee: var(--bb-font-size-xs);
+  }
+}
+
 @media (max-width: 600px) {
   :root {
     --nav-h: 54px;
+  }
+}
+
+/* Móvil (Hero.css ≤ 480 px): trazo de 1 px y botones con letra de 13,6 px e interletraje 0,08 em. */
+@media (max-width: 480px) {
+  :root {
+    --bb-text-stroke-width: 1px;
+    --bb-tracking-hero-outline: 0.02em;
+    --bb-tracking-cta: 0.08em;
+    --bb-font-size-cta: 0.85rem;
   }
 }
 
