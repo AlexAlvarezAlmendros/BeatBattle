@@ -3,7 +3,7 @@
  * (título, ajustes e índice) se pinte sin esperar a cargar los componentes.
  */
 
-/** Secciones, en orden (las de los componentes cuelgan de «Componentes»). */
+/** Secciones, en orden (los componentes y las piezas del layout cuelgan de la suya). */
 export const SECTION_ANCHORS = [
   { id: 'color', key: 'color' },
   { id: 'tipografia', key: 'typography' },
@@ -12,6 +12,7 @@ export const SECTION_ANCHORS = [
   { id: 'sombras', key: 'shadows' },
   { id: 'movimiento', key: 'motion' },
   { id: 'componentes', key: 'components' },
+  { id: 'layout', key: 'layout' },
 ] as const
 
 /** Componentes, en el orden de §3.3. */
@@ -31,3 +32,17 @@ export const COMPONENT_ANCHORS = [
 ] as const
 
 export type ComponentKey = (typeof COMPONENT_ANCHORS)[number]['key']
+
+/** Piezas del layout del sello (tarea 0.7): marco de la página y hero. */
+export const LAYOUT_ANCHORS = [
+  { id: 'isla', key: 'island' },
+  { id: 'pie', key: 'footer' },
+  { id: 'titular', key: 'heroTitle' },
+  { id: 'rotulos', key: 'sideLabel' },
+  { id: 'rejilla', key: 'backdrop' },
+  { id: 'marquee', key: 'marquee' },
+  { id: 'orbes', key: 'orbs' },
+  { id: 'cristal', key: 'glassSurface' },
+] as const
+
+export type LayoutKey = (typeof LAYOUT_ANCHORS)[number]['key']

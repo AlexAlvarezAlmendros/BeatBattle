@@ -2,13 +2,23 @@ import { color } from '@beatbattle/shared/tokens'
 import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
+import { resetGlassCapabilityCache } from '../../ui/glass'
 import { useToasts } from '../../ui/Toast'
-import { COMPONENT_ANCHORS } from './anchors'
+import { COMPONENT_ANCHORS, LAYOUT_ANCHORS } from './anchors'
 import { GalleryPage } from './GalleryPage'
 
-const SECTION_KEYS = ['color', 'typography', 'spacing', 'radii', 'shadows', 'motion', 'components'] as const
+const SECTION_KEYS = [
+  'color',
+  'typography',
+  'spacing',
+  'radii',
+  'shadows',
+  'motion',
+  'components',
+  'layout',
+] as const
 
 /** Pinta la galería y espera a su cuerpo, que se carga aparte (`React.lazy`). */
 async function renderGallery() {
@@ -28,9 +38,13 @@ async function renderGallery() {
 afterEach(() => {
   document.documentElement.removeAttribute('data-motion')
   act(() => useToasts.getState().clear())
+  vi.unstubAllGlobals()
+  resetGlassCapabilityCache()
 })
 
-describe('galería /dev/galeria (0.9)', () => {
+// El cuerpo de la galería (todos los componentes y el layout) se importa aparte: con todo el monorepo
+// en paralelo, la primera importación pasa de los 5 s por defecto. Mismo margen que `renderGallery`.
+describe('galería /dev/galeria (0.9)', { timeout: 15_000 }, () => {
   it('la cabecera (título, ajustes e índice) sale al momento, sin esperar a los componentes', () => {
     render(
       <MemoryRouter initialEntries={['/dev/galeria']}>
@@ -42,7 +56,7 @@ describe('galería /dev/galeria (0.9)', () => {
     expect(screen.getByRole('navigation', { name: t('dev.gallery.indexLabel') })).toBeInTheDocument()
   })
 
-  it('RD-VIS-03: un solo <h1> y todas las secciones (tokens, tipografía, espaciado, radios, sombras, movimiento y componentes)', async () => {
+  it('RD-VIS-03: un solo <h1> y todas las secciones (tokens, tipografía, espaciado, radios, sombras, movimiento, componentes y layout)', async () => {
     await renderGallery()
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
     expect(screen.getByRole('heading', { level: 1, name: t('dev.gallery.title') })).toBeInTheDocument()
@@ -103,6 +117,64 @@ describe('galería /dev/galeria (0.9)', () => {
     }
   })
 
+  it('RD-VIS-03: el layout del sello enseña isla, pie, titular, rótulos, rejilla y viñeta, marquee, orbes y GlassSurface', async () => {
+    vi.stubGlobal('CSS', { supports: () => true })
+    resetGlassCapabilityCache()
+    await renderGallery()
+    for (const { id, key } of LAYOUT_ANCHORS) {
+      const block = document.getElementById(id)
+      expect(block, id).not.toBeNull()
+      expect(within(block!).getAllByRole('heading', { level: 3 })[0]!.textContent).toBe(
+        t(`dev.gallery.layout.pieces.${key}`),
+      )
+    }
+    const byId = (id: string) => document.getElementById(id)!
+    // Isla con cristal y sin él (alternativa), como muestras inertes: no duplican la navegación.
+    const islands = byId('isla').querySelectorAll('.site-header')
+    expect(islands).toHaveLength(2)
+    expect(islands[0]).toHaveAttribute('data-glass', 'on')
+    expect(islands[1]).not.toHaveAttribute('data-glass')
+    for (const island of islands) expect(island.closest('[inert][aria-hidden="true"]')).not.toBeNull()
+    expect(within(byId('isla')).queryByRole('navigation')).toBeNull()
+    expect(byId('pie').querySelector('.site-footer')?.closest('[inert]')).not.toBeNull()
+    expect(byId('titular').querySelector('.hero-title')).not.toBeNull()
+    expect(byId('rotulos').querySelectorAll('.side-label')).toHaveLength(2)
+    expect(byId('rejilla').querySelectorAll('.hero-grid')).toHaveLength(2)
+    expect(byId('rejilla').querySelectorAll('.hero-vignette')).toHaveLength(2)
+    expect(within(byId('marquee')).getByRole('marquee', { name: t('home.ticker.label') })).toBeInTheDocument()
+    expect(byId('orbes').querySelectorAll('.ambient-orbs__orb')).toHaveLength(3)
+    const panels = byId('cristal').querySelectorAll('[data-glass="on"]')
+    expect(panels).toHaveLength(3)
+    expect(byId('cristal').querySelectorAll('[data-glass="on"] feColorMatrix')).toHaveLength(3)
+  })
+
+  it('RNF-A11Y-03 / RD-MOT-03: con «reducir movimiento» el layout pasa a su variante (marquee quieto, sin cristal)', async () => {
+    vi.stubGlobal('CSS', { supports: () => true })
+    resetGlassCapabilityCache()
+    const user = userEvent.setup()
+    await renderGallery()
+    const layout = document.getElementById('layout')!
+    const marquee = within(layout).getByRole('marquee')
+    expect(marquee).not.toHaveAttribute('data-static')
+    expect(layout.querySelectorAll('[data-glass="on"]').length).toBeGreaterThan(0)
+    await user.click(screen.getByRole('switch', { name: t('dev.gallery.controls.reducedMotion') }))
+    await act(async () => {})
+    expect(marquee).toHaveAttribute('data-static', 'true')
+    expect(layout.querySelectorAll('[data-glass="on"]')).toHaveLength(0)
+    expect(layout.querySelector('[data-glass-capability]')).toHaveAttribute('data-glass-capability', 'off')
+  })
+
+  it('el interruptor de cristal apaga también las GlassSurface del layout (calidad baja)', async () => {
+    vi.stubGlobal('CSS', { supports: () => true })
+    resetGlassCapabilityCache()
+    const user = userEvent.setup()
+    await renderGallery()
+    const layout = document.getElementById('layout')!
+    expect(layout.querySelectorAll('[data-glass="on"]').length).toBeGreaterThan(0)
+    await user.click(screen.getByRole('switch', { name: t('dev.gallery.controls.glass') }))
+    expect(layout.querySelectorAll('[data-glass="on"]')).toHaveLength(0)
+  })
+
   it('las muestras de color salen de @beatbattle/shared/tokens con su contraste', async () => {
     await renderGallery()
     const swatches = within(document.getElementById('color')!).getAllByRole('listitem')
@@ -117,7 +189,7 @@ describe('galería /dev/galeria (0.9)', () => {
     const targets = within(index)
       .getAllByRole('link')
       .map((link) => link.getAttribute('href')!.slice(1))
-    expect(targets).toHaveLength(SECTION_KEYS.length + COMPONENT_ANCHORS.length)
+    expect(targets).toHaveLength(SECTION_KEYS.length + COMPONENT_ANCHORS.length + LAYOUT_ANCHORS.length)
     for (const id of targets) expect(document.getElementById(id), id).not.toBeNull()
   })
 

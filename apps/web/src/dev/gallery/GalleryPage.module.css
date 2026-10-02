@@ -661,6 +661,146 @@
   max-width: 14rem;
 }
 
+/* ── Layout del sello (tarea 0.7) ──────────────────────────────────────────────────────── */
+.layoutStatus {
+  max-width: 70ch;
+  color: var(--bb-text-2);
+  font-size: var(--bb-font-size-sm);
+}
+
+/*
+ * Muestra de una pieza de página (isla, pie, titular): su propio contexto de apilamiento, para que el
+ * `z-index` de página de la pieza no la ponga encima de la isla de verdad al hacer scroll.
+ */
+.specimen {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+}
+
+/* La isla sin su `sticky` (se quedaría pegada dentro de la celda) y con sitio para el logo, que asoma
+   por debajo como en la página. */
+.islandSpecimen {
+  padding-bottom: var(--bb-space-12);
+}
+
+.islandSpecimen :global(.site-header) {
+  position: relative;
+  top: auto;
+  margin-top: 0;
+}
+
+.footerSpecimen {
+  overflow: hidden;
+  border-radius: var(--bb-radius-md);
+}
+
+/* Escenario del titular: el hero en pequeño, con rejilla y viñeta detrás. */
+.heroStage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 26rem;
+  overflow: hidden;
+  border-radius: var(--bb-radius-md);
+  background-color: var(--bb-black);
+}
+
+.heroBackdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.heroContent {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--bb-space-10) var(--bb-space-4);
+  text-align: center;
+}
+
+.sideLabelStage {
+  position: relative;
+  min-height: 16rem;
+  overflow: hidden;
+  border-radius: var(--bb-radius-md);
+  background-color: var(--bb-black);
+}
+
+/* En la página se ocultan por debajo de 1024 px; aquí se enseñan siempre. */
+.sideLabelStage :global(.side-label) {
+  display: block;
+}
+
+.backdropFrame {
+  position: relative;
+  height: 12rem;
+  overflow: hidden;
+  border-radius: var(--bb-radius-md);
+  background-color: var(--bb-black);
+  background-image: radial-gradient(circle at 50% 50%, var(--bb-wine), transparent 70%);
+}
+
+/* Los orbes son fijos detrás de la página: aquí, dentro de su marco. */
+.orbsFrame {
+  position: relative;
+  height: 18rem;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: var(--bb-radius-md);
+  background-color: var(--bb-black);
+}
+
+.orbsFrame :global(.ambient-orbs) {
+  position: absolute;
+}
+
+/* Fondo con forma (rayas y una palabra) para que se vea la refracción del borde del cristal. */
+.glassScene {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 10rem;
+  overflow: hidden;
+  border-radius: var(--bb-radius-md);
+  background-color: var(--bb-black);
+  background-image: repeating-linear-gradient(
+    135deg,
+    var(--bb-red-glow) 0 var(--bb-space-2),
+    transparent var(--bb-space-2) var(--bb-space-5)
+  );
+}
+
+.glassSceneWord {
+  position: absolute;
+  color: var(--bb-red);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-font-size-3xl);
+  font-weight: var(--bb-weight-black);
+  letter-spacing: var(--bb-tracking-display);
+  text-transform: uppercase;
+}
+
+/* Alternativa sin capacidad (la de las tarjetas del pie); con cristal, GlassSurface pinta el fondo. */
+.glassPanel {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 75%;
+  min-height: 5rem;
+  border: 1px solid var(--bb-line-strong);
+  border-radius: var(--bb-radius-lg);
+  background-color: var(--bb-glass-card);
+  -webkit-backdrop-filter: blur(var(--bb-glass-blur));
+  backdrop-filter: blur(var(--bb-glass-blur));
+  box-shadow: var(--bb-shadow-glass);
+  color: var(--bb-text);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-section);
+  text-transform: uppercase;
+}
+
 /* ── Móvil ─────────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .motionRow {

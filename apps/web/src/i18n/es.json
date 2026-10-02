@@ -260,7 +260,7 @@
   "dev": {
     "gallery": {
       "title": "Galería de componentes",
-      "summary": "Los tokens, la tipografía, el movimiento y los componentes base con todos sus estados, con y sin movimiento. Solo existe en desarrollo.",
+      "summary": "Los tokens, la tipografía, el movimiento, los componentes base con todos sus estados y el layout del sello, con y sin movimiento. Solo existe en desarrollo.",
       "indexLabel": "Índice de la galería",
       "combined": "{first} · {second}",
       "controls": {
@@ -269,7 +269,7 @@
         "reducedMotionHint": "Pone data-motion=\"reduced\" en la página, como el ajuste de accesibilidad.",
         "reducedMotionSystem": "Tu sistema ya pide reducir el movimiento: todo va sin movimiento aunque el interruptor esté apagado.",
         "glass": "Superficies de cristal",
-        "glassHint": "Apagado: tarjetas y modales macizos, como en calidad baja."
+        "glassHint": "Apagado: tarjetas y modales macizos y el layout sin cristal, como en calidad baja."
       },
       "sections": {
         "color": "Color",
@@ -278,7 +278,8 @@
         "radii": "Radios",
         "shadows": "Sombras",
         "motion": "Movimiento",
-        "components": "Componentes"
+        "components": "Componentes",
+        "layout": "Layout del sello"
       },
       "components": {
         "button": "Botón",
@@ -455,6 +456,40 @@
           "errorMessage": "Tu ficha sigue aquí: reintenta."
         },
         "countdownLabel": "Cierre de votos"
+      },
+      "layout": {
+        "intro": "Las piezas del marco y del hero de la línea 0.7, en sus variantes. Con «Reducir movimiento» pasan a la suya: isla y cristal sin refracción, titular con un fundido, marquee quieto que rota cada 5 s y orbes quietos.",
+        "specimen": "Muestra: la de verdad está arriba (isla) o abajo (pie) de esta página.",
+        "pieces": {
+          "island": "Isla de navegación",
+          "footer": "Pie del sello",
+          "heroTitle": "Titular del hero",
+          "sideLabel": "Rótulos laterales",
+          "backdrop": "Rejilla y viñeta",
+          "marquee": "Banda de marquee",
+          "orbs": "Orbes del fondo",
+          "glassSurface": "GlassSurface"
+        },
+        "capability": {
+          "on": "Este navegador pinta el cristal con refracción.",
+          "off": "Este navegador no pinta el cristal ahora (equipo modesto, «reducir movimiento» o «reducir transparencia», Safari o Firefox, o el interruptor de cristal apagado): se ve la alternativa."
+        },
+        "variants": {
+          "glassOn": "Con cristal",
+          "glassOff": "Sin cristal (alternativa)",
+          "default": "Cristal",
+          "aberration": "Con aberración cromática",
+          "island": "Como la isla (blur de 3 px)",
+          "grid": "Rejilla",
+          "vignette": "Viñeta",
+          "both": "Rejilla y viñeta",
+          "entrance": "Entrada (sube y aparece; sin movimiento, fundido de 200 ms)",
+          "labels": "Izquierda y derecha (en la página, solo por encima de 1024 px)",
+          "live": "En marcha (se pausa con el ratón o con el botón)",
+          "orbs": "Deriva y pulso lentos; sin movimiento, quietos"
+        },
+        "replay": "Repetir la entrada",
+        "glassSample": "Cristal"
       }
     }
   },

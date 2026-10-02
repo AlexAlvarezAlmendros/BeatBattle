@@ -9,7 +9,7 @@ import {
 } from '../../hooks/useReducedMotion'
 import { t } from '../../i18n'
 import type { CardSurface } from '../../ui/Card'
-import { COMPONENT_ANCHORS, SECTION_ANCHORS } from './anchors'
+import { COMPONENT_ANCHORS, LAYOUT_ANCHORS, SECTION_ANCHORS } from './anchors'
 import styles from './GalleryPage.module.css'
 import { Switch } from './parts'
 
@@ -22,7 +22,8 @@ const GalleryContent = lazy(async () => ({ default: (await import('./GalleryCont
  *
  * Enseña los tokens (color con su contraste, tipografía, espaciado, radios, sombras y movimiento) y
  * cada componente base de §3.3 en todos sus estados, forzados con `state` para verlos sin
- * interactuar, más una versión interactiva. Dos interruptores: «Reducir movimiento» (pone
+ * interactuar, más una versión interactiva, y las piezas del layout del sello (isla, pie, hero, orbes y
+ * `GlassSurface`). Dos interruptores: «Reducir movimiento» (pone
  * `data-motion="reduced"` en `<html>`, como el ajuste de accesibilidad) y cristal o macizo.
  *
  * El interruptor de movimiento lee el atributo (sigue también los cambios hechos fuera de la galería)
@@ -79,6 +80,16 @@ export function GalleryPage() {
                   {COMPONENT_ANCHORS.map((component) => (
                     <li key={component.id}>
                       <a href={`#${component.id}`}>{t(`dev.gallery.components.${component.key}`)}</a>
+                    </li>
+                  ))}
+                </ol>
+              )}
+              {key === 'layout' && (
+                // biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none
+                <ol role="list" className={styles.indexSub}>
+                  {LAYOUT_ANCHORS.map((piece) => (
+                    <li key={piece.id}>
+                      <a href={`#${piece.id}`}>{t(`dev.gallery.layout.pieces.${piece.key}`)}</a>
                     </li>
                   ))}
                 </ol>
