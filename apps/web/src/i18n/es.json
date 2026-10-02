@@ -210,6 +210,7 @@
       "title": "Galería de componentes",
       "summary": "Los tokens, la tipografía, el movimiento y los componentes base con todos sus estados, con y sin movimiento. Solo existe en desarrollo.",
       "indexLabel": "Índice de la galería",
+      "combined": "{first} · {second}",
       "controls": {
         "label": "Ajustes de la galería",
         "reducedMotion": "Reducir movimiento",
@@ -267,7 +268,8 @@
         "progressFull": "Escuchada",
         "text": "Texto",
         "row": "Fila",
-        "card": "Tarjeta"
+        "card": "Tarjeta",
+        "mini": "Mini (24 px)"
       },
       "variants": {
         "cta": "CTA",

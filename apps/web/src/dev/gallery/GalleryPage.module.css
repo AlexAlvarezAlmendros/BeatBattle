@@ -443,7 +443,11 @@
 .headlineOutline {
   color: var(--bb-black);
   -webkit-text-stroke: var(--bb-text-stroke);
-  text-shadow: var(--bb-text-glow);
+  /*
+   * El halo como filtro y no como `text-shadow`: axe toma un `text-shadow` fino como fondo del texto
+   * y mide negro sobre granate (1,06:1); el trazo rojo, que es lo que se lee, no lo tiene en cuenta.
+   */
+  filter: drop-shadow(var(--bb-text-glow));
 }
 
 /*

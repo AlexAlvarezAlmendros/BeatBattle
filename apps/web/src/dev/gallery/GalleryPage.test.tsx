@@ -5,17 +5,24 @@ import { MemoryRouter } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
 import { t } from '../../i18n'
 import { useToasts } from '../../ui/Toast'
-import { COMPONENT_ANCHORS } from './ComponentSections'
+import { COMPONENT_ANCHORS } from './anchors'
 import { GalleryPage } from './GalleryPage'
 
 const SECTION_KEYS = ['color', 'typography', 'spacing', 'radii', 'shadows', 'motion', 'components'] as const
 
-function renderGallery() {
-  return render(
+/** Pinta la galería y espera a su cuerpo, que se carga aparte (`React.lazy`). */
+async function renderGallery() {
+  const view = render(
     <MemoryRouter initialEntries={['/dev/galeria']}>
       <GalleryPage />
     </MemoryRouter>,
   )
+  await screen.findByRole(
+    'heading',
+    { level: 2, name: t('dev.gallery.sections.components') },
+    { timeout: 10_000 },
+  )
+  return view
 }
 
 afterEach(() => {
@@ -24,16 +31,27 @@ afterEach(() => {
 })
 
 describe('galería /dev/galeria (0.9)', () => {
-  it('RD-VIS-03: un solo <h1> y todas las secciones (tokens, tipografía, espaciado, radios, sombras, movimiento y componentes)', () => {
-    renderGallery()
+  it('la cabecera (título, ajustes e índice) sale al momento, sin esperar a los componentes', () => {
+    render(
+      <MemoryRouter initialEntries={['/dev/galeria']}>
+        <GalleryPage />
+      </MemoryRouter>,
+    )
+    expect(screen.getByRole('heading', { level: 1, name: t('dev.gallery.title') })).toBeInTheDocument()
+    expect(screen.getAllByRole('switch')).toHaveLength(2)
+    expect(screen.getByRole('navigation', { name: t('dev.gallery.indexLabel') })).toBeInTheDocument()
+  })
+
+  it('RD-VIS-03: un solo <h1> y todas las secciones (tokens, tipografía, espaciado, radios, sombras, movimiento y componentes)', async () => {
+    await renderGallery()
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
     expect(screen.getByRole('heading', { level: 1, name: t('dev.gallery.title') })).toBeInTheDocument()
     const sections = screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent)
     expect(sections).toEqual(SECTION_KEYS.map((key) => t(`dev.gallery.sections.${key}`)))
   })
 
-  it('RD-VIS-03: pinta cada componente base de §3.3 en su bloque', () => {
-    renderGallery()
+  it('RD-VIS-03: pinta cada componente base de §3.3 en su bloque', async () => {
+    await renderGallery()
     for (const { id, key } of COMPONENT_ANCHORS) {
       const block = document.getElementById(id)
       expect(block, id).not.toBeNull()
@@ -58,8 +76,8 @@ describe('galería /dev/galeria (0.9)', () => {
     expect(within(byId('cuenta-atras')).getAllByRole('timer')).toHaveLength(5)
   })
 
-  it('RD-VIS-03: cada estado de §3.3 aparece (reposo, hover, foco, pulsado, cargando, deshabilitado, éxito y error)', () => {
-    renderGallery()
+  it('RD-VIS-03: cada estado de §3.3 aparece (reposo, hover, foco, pulsado, cargando, deshabilitado, éxito y error)', async () => {
+    await renderGallery()
     const buttons = document.getElementById('boton')!
     for (const state of ['hover', 'focus', 'pressed']) {
       expect(buttons.querySelectorAll(`[data-force-state="${state}"]`).length, state).toBeGreaterThanOrEqual(
@@ -85,16 +103,16 @@ describe('galería /dev/galeria (0.9)', () => {
     }
   })
 
-  it('las muestras de color salen de @beatbattle/shared/tokens con su contraste', () => {
-    renderGallery()
+  it('las muestras de color salen de @beatbattle/shared/tokens con su contraste', async () => {
+    await renderGallery()
     const swatches = within(document.getElementById('color')!).getAllByRole('listitem')
     expect(swatches).toHaveLength(Object.keys(color).length)
     expect(swatches[0]).toHaveTextContent('--bb-black')
     expect(swatches[0]).toHaveTextContent(t('dev.gallery.color.onBlack'))
   })
 
-  it('el índice enlaza con cada sección y con cada componente', () => {
-    renderGallery()
+  it('el índice enlaza con cada sección y con cada componente', async () => {
+    await renderGallery()
     const index = screen.getByRole('navigation', { name: t('dev.gallery.indexLabel') })
     const targets = within(index)
       .getAllByRole('link')
@@ -105,7 +123,7 @@ describe('galería /dev/galeria (0.9)', () => {
 
   it('RNF-A11Y-03 / RD-MOT-03: el interruptor «Reducir movimiento» pone data-motion="reduced" en <html>', async () => {
     const user = userEvent.setup()
-    renderGallery()
+    await renderGallery()
     const toggle = screen.getByRole('switch', { name: t('dev.gallery.controls.reducedMotion') })
     expect(toggle).toHaveAttribute('aria-checked', 'false')
     await user.click(toggle)
@@ -121,7 +139,7 @@ describe('galería /dev/galeria (0.9)', () => {
 
   it('RNF-A11Y-01: los interruptores se usan con teclado; cristal o macizo cambia las superficies', async () => {
     const user = userEvent.setup()
-    renderGallery()
+    await renderGallery()
     const glass = screen.getByRole('switch', { name: t('dev.gallery.controls.glass') })
     expect(glass).toHaveAttribute('aria-checked', 'true')
     expect(document.querySelectorAll('#tarjeta [data-surface="glass"]').length).toBeGreaterThan(0)
@@ -134,7 +152,7 @@ describe('galería /dev/galeria (0.9)', () => {
 
   it('los botones de la demo lanzan avisos de verdad', async () => {
     const user = userEvent.setup()
-    renderGallery()
+    await renderGallery()
     await user.click(screen.getByRole('button', { name: t('dev.gallery.demo.toastError') }))
     expect(useToasts.getState().toasts).toMatchObject([{ tone: 'error' }])
   })

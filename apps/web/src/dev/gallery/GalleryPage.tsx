@@ -1,32 +1,15 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { DocumentTitle } from '../../app/DocumentTitle'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { hasReducedMotionSetting, REDUCED_MOTION_QUERY, setReducedMotion } from '../../hooks/useReducedMotion'
 import { t } from '../../i18n'
 import type { CardSurface } from '../../ui/Card'
-import { ToastViewport } from '../../ui/Toast'
-import { COMPONENT_ANCHORS, ComponentsSection } from './ComponentSections'
-import {
-  ColorSection,
-  MotionSection,
-  RadiiSection,
-  ShadowsSection,
-  SpacingSection,
-  TypographySection,
-} from './FoundationSections'
+import { COMPONENT_ANCHORS, SECTION_ANCHORS } from './anchors'
 import styles from './GalleryPage.module.css'
 import { Switch } from './parts'
 
-/** Secciones de la galería, en orden, con su ancla (las de los componentes cuelgan de «Componentes»). */
-const SECTIONS = [
-  { id: 'color', key: 'color' },
-  { id: 'tipografia', key: 'typography' },
-  { id: 'espaciado', key: 'spacing' },
-  { id: 'radios', key: 'radii' },
-  { id: 'sombras', key: 'shadows' },
-  { id: 'movimiento', key: 'motion' },
-  { id: 'componentes', key: 'components' },
-] as const
+/** El cuerpo (todos los componentes y Motion) se carga aparte: la cabecera sale al momento. */
+const GalleryContent = lazy(async () => ({ default: (await import('./GalleryContent')).GalleryContent }))
 
 /**
  * `/dev/galeria` — galería de componentes (`RD-VIS-03`, `RD-MOT-03`), solo en desarrollo: la ruta no
@@ -78,7 +61,7 @@ export function GalleryPage() {
       <nav className={styles.index} aria-label={t('dev.gallery.indexLabel')}>
         {/* biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none */}
         <ol role="list" className={styles.indexList}>
-          {SECTIONS.map(({ id, key }) => (
+          {SECTION_ANCHORS.map(({ id, key }) => (
             <li key={id}>
               <a href={`#${id}`}>{t(`dev.gallery.sections.${key}`)}</a>
               {key === 'components' && (
@@ -96,14 +79,9 @@ export function GalleryPage() {
         </ol>
       </nav>
 
-      <ColorSection />
-      <TypographySection />
-      <SpacingSection />
-      <RadiiSection />
-      <ShadowsSection />
-      <MotionSection />
-      <ComponentsSection surface={surface} />
-      <ToastViewport />
+      <Suspense fallback={<p className={styles.summary}>{t('common.loading')}</p>}>
+        <GalleryContent surface={surface} />
+      </Suspense>
     </div>
   )
 }

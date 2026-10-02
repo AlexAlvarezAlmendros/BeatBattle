@@ -1,5 +1,5 @@
 import { levelProgress } from '@beatbattle/rules'
-import { type ReactNode, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { type Messages, t } from '../../i18n'
 import { Button, type ButtonProps } from '../../ui/Button'
 import { Card, type CardState, type CardSurface } from '../../ui/Card'
@@ -13,29 +13,13 @@ import { Skeleton, SkeletonGroup } from '../../ui/Skeleton'
 import { Toast, toast } from '../../ui/Toast'
 import { Waveform } from '../../ui/Waveform'
 import { XpBar } from '../../ui/XpBar'
+import { COMPONENT_ANCHORS, type ComponentKey } from './anchors'
 import styles from './GalleryPage.module.css'
 import { GalleryBlock, GalleryRow, GallerySection, StateCell } from './parts'
 import { GALLERY_NOW, samplePeaks } from './samples'
 
-/** Componentes de la galería, en el orden de §3.3, con su ancla. */
-export const COMPONENT_ANCHORS = [
-  { id: 'boton', key: 'button' },
-  { id: 'chip', key: 'chip' },
-  { id: 'tarjeta', key: 'card' },
-  { id: 'tesela', key: 'dataTile' },
-  { id: 'rotulo', key: 'sectionLabel' },
-  { id: 'onda', key: 'waveform' },
-  { id: 'fila', key: 'entryRow' },
-  { id: 'modal', key: 'modal' },
-  { id: 'aviso', key: 'toast' },
-  { id: 'xp', key: 'xpBar' },
-  { id: 'esqueleto', key: 'skeleton' },
-  { id: 'cuenta-atras', key: 'countdown' },
-] as const
-
-const title = (key: (typeof COMPONENT_ANCHORS)[number]['key']) => t(`dev.gallery.components.${key}`)
-const anchor = (key: (typeof COMPONENT_ANCHORS)[number]['key']) =>
-  COMPONENT_ANCHORS.find((item) => item.key === key)!.id
+const title = (key: ComponentKey) => t(`dev.gallery.components.${key}`)
+const anchor = (key: ComponentKey) => COMPONENT_ANCHORS.find((item) => item.key === key)!.id
 
 const ENTRIES = ['first', 'second', 'third', 'fourth'] as const
 
@@ -69,6 +53,9 @@ type ButtonStateDemo = {
 type StateKey = keyof Messages['dev']['gallery']['states']
 
 const stateLabel = (key: StateKey) => t(`dev.gallery.states.${key}`)
+
+/** Dos rótulos juntos («Activo · Foco»), con el separador de `es.json`. */
+const both = (first: string, second: string) => t('dev.gallery.combined', { first, second })
 
 const BUTTON_STATES: readonly ButtonStateDemo[] = [
   { label: 'rest', props: {} },
@@ -189,7 +176,7 @@ function ChipBlock() {
         <StateCell label={stateLabel('selected')}>
           <Chip selected>{drill}</Chip>
         </StateCell>
-        <StateCell label={`${stateLabel('selected')} · ${stateLabel('focus')}`}>
+        <StateCell label={both(stateLabel('selected'), stateLabel('focus'))}>
           <Chip selected state="focus">
             {drill}
           </Chip>
@@ -246,11 +233,7 @@ function SampleCard({
 
 function CardBlock({ surface }: { surface: CardSurface }) {
   return (
-    <GalleryBlock
-      id={anchor('card')}
-      title={`${title('card')} · ${t(`dev.gallery.variants.${surface}`)}`}
-      stage
-    >
+    <GalleryBlock id={anchor('card')} title={both(title('card'), t(`dev.gallery.variants.${surface}`))} stage>
       <GalleryRow wide>
         <StateCell label={stateLabel('rest')}>
           <SampleCard surface={surface} />
@@ -261,7 +244,7 @@ function CardBlock({ surface }: { surface: CardSurface }) {
         <StateCell label={stateLabel('focus')}>
           <SampleCard surface={surface} state="focus" />
         </StateCell>
-        <StateCell label={`${stateLabel('hover')} · ${stateLabel('static')}`}>
+        <StateCell label={both(stateLabel('hover'), stateLabel('static'))}>
           <SampleCard surface={surface} state="hover" tilt={false} />
         </StateCell>
       </GalleryRow>
@@ -365,7 +348,7 @@ function WaveformBlock() {
         <StateCell label={stateLabel('progressFull')} span>
           <Waveform key={`c-${replay}`} peaks={peaks} progress={1} />
         </StateCell>
-        <StateCell label={`${stateLabel('progressHalf')} · 24 px`} span>
+        <StateCell label={both(stateLabel('progressHalf'), stateLabel('mini'))} span>
           <Waveform key={`d-${replay}`} peaks={peaks} progress={0.62} height={24} playhead={false} />
         </StateCell>
       </GalleryRow>
@@ -385,7 +368,7 @@ function EntryRowBlock() {
       peaks: peaks[index]!,
     }
   }
-  const rows: { label: ReactNode; props: Partial<Parameters<typeof EntryRow>[0]> }[] = [
+  const rows: { label: string; props: Partial<Parameters<typeof EntryRow>[0]> }[] = [
     { label: stateLabel('rest'), props: { genres: [t('dev.gallery.sample.genres.drill')], bpm: 142 } },
     {
       label: stateLabel('hover'),
@@ -403,7 +386,7 @@ function EntryRowBlock() {
   return (
     <GalleryBlock id={anchor('entryRow')} title={title('entryRow')}>
       <GalleryRow wide>
-        <StateCell label={rows.map((row) => row.label).join(' · ')} span>
+        <StateCell label={rows.map((row) => row.label).reduce((all, label) => both(all, label))} span>
           <EntryList className={styles.entryList}>
             {rows.map((row, index) => (
               <EntryRow key={ENTRIES[index]} titleAs="h4" {...sample(index)} {...row.props} />
@@ -449,7 +432,7 @@ function ModalBlock({ surface }: { surface: CardSurface }) {
   return (
     <GalleryBlock
       id={anchor('modal')}
-      title={`${title('modal')} · ${t(`dev.gallery.variants.${surface}`)}`}
+      title={both(title('modal'), t(`dev.gallery.variants.${surface}`))}
       stage
     >
       <GalleryRow wide>
@@ -507,7 +490,7 @@ function ToastBlock() {
             onDismiss={() => {}}
           />
         </StateCell>
-        <StateCell label={`${stateLabel('success')} · ${stateLabel('hover')}`}>
+        <StateCell label={both(stateLabel('success'), stateLabel('hover'))}>
           <Toast
             toast={{
               tone: 'success',
@@ -518,7 +501,7 @@ function ToastBlock() {
             state="hover"
           />
         </StateCell>
-        <StateCell label={`${stateLabel('error')} · ${stateLabel('focus')}`}>
+        <StateCell label={both(stateLabel('error'), stateLabel('focus'))}>
           <Toast
             toast={{
               tone: 'error',
