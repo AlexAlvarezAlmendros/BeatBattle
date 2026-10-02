@@ -1,6 +1,6 @@
 # Plan 00 — Fundaciones
 
-> Fase: 0 de 10 | Estado: ✅ Hecho | Iniciado: 2026-10-02 | Cerrado: 2026-10-02
+> Fase: 0 de 10 | Estado: 🔄 En curso (rediseño) | Iniciado: 2026-10-02 | Cerrado: —
 > Hito del roadmap: CI verde; la galería de componentes (`/dev/galeria`) muestra los tokens y los
 > componentes base con la estética del sello y pasa la «prueba del sello» (`RD-VIS-02`) sin diferencias
 > sin justificar, salvo el fondo Silk, que llega con la tarea 1.1 (decisión del 2026-10-02).
@@ -85,6 +85,25 @@ contratos compartidos y cliente de API tipado (§4.7.2, §4.10–4.13).
 | 0.19 | Servicios locales: `docker-compose.yml` con Mailpit, `apps/server/.env.example` con todas las variables de §4.15 comentadas, `pnpm dev:all` (web + API) | ✅ Hecho | 0.1 | §4.15, §4.19.1 · `.env.example` completo, `api/index.ts` con migraciones y previews, y web + API juntas comprobadas. Falta levantar `docker-compose.yml` (Mailpit): **Docker no está instalado** en esta máquina; se hará al empezar la base de email (Fase 2), que es su primer uso · Cerrada sin Docker: la comprobación de `docker compose up` (Mailpit) pasa a la Fase 2, donde se usa por primera vez (decisión de alcance del 2026-10-02) |
 | 0.20 | Dependabot para npm y GitHub Actions (§4.13 «Dependencias») | ❌ Cancelado | confirmación del usuario | ⚠️ Empieza a abrir PRs en el repositorio de GitHub: se activa cuando el usuario lo confirme · Sale de la Fase 0: pasa a la Fase 10 (auditoría de dependencias, §4.13) y sigue pendiente de confirmación porque abre PRs en GitHub |
 
+
+### Rediseño: arena de lucha (decisión del usuario del 2026-10-02)
+
+La primera versión del sistema de diseño copiaba la web de Other People. El usuario la rechaza: quiere
+una web **distinta**, con aire de **menú de juego de lucha (versus)**, que del sello solo herede **los
+colores y el logo**. Estas tareas sustituyen lo visual de 0.5, 0.7, 0.8 y 0.9 (la infraestructura
+—tokens, lint, i18n, router, servidor, reglas, tests— se queda).
+
+| # | Tarea | Estado | Depende de | Notas |
+|---|-------|--------|------------|-------|
+| 0.21 | Dirección de arte «arena» en la guía (v0.6): tres propuestas independientes con maquetas renderizadas, jurado y síntesis; reescribir §1.2, §1.7, §3 (salvo el sonido), §3.8 (pantallas), §3.9, Anexo E y `RD-VIS-02` (prueba de marca y de juego) | 🔄 En curso | — | Decisión del usuario: juego de lucha, colores y logo del sello |
+| 0.22 | Tipografía y tokens de la arena: fuentes nuevas con licencia OFL alojadas en el proyecto, tokens nuevos (ángulos, trazos, texturas, sombras de juego) sobre la paleta del sello, lint al día | 🔒 Bloqueado | 0.21 | §3.2 |
+| 0.23 | Marco de juego: HUD superior (título del juego, firma *by Other People*, ronda y reloj, hueco del jugador), barra de controles abajo, fondo de arena, transición entre pantallas y navegación de menús con teclado (y mando) | 🔒 Bloqueado | 0.22 | §3.3, §3.6, §3.8 |
+| 0.24 | Menú principal (home) como pantalla de título y selección de modo, en estado «calendario vacío» | 🔒 Bloqueado | 0.23 | §3.8 |
+| 0.25 | Componentes al estilo arena con todos sus estados y la galería al día | 🔒 Bloqueado | 0.22 | §3.3, `RD-VIS-03`, `RD-MOT-03` |
+| 0.26 | Plantilla de pantalla interior y páginas provisionales en el marco nuevo | 🔒 Bloqueado | 0.23 | §2.18 |
+| 0.27 | Retirada de lo copiado del sello (isla, pie, hero, orbes, cristal, marquee, Montserrat; la evidencia A/B queda como histórico) y tests y E2E al día | 🔒 Bloqueado | 0.23–0.26 | — |
+| 0.28 | Prueba de marca y de juego con jurado visual, revisión adversarial (accesibilidad AA, rendimiento) y README al día | 🔒 Bloqueado | 0.27 | `RD-VIS-02` |
+
 ---
 
 ## Entregable
@@ -136,6 +155,7 @@ todas las bases transversales probadas.
 | 2026-10-02 | 0.7 | CTA del hero sobre el `Button` base: tamaño `hero` (15,2 px, relleno 15,2 × 32, 13,6 px y 0,08 em en móvil, `--bb-shadow-cta`) y contorno `glass` sobre `GlassSurface`, también en la galería; se borra `HeroCta`. Medidas del hero sin cambios (`getBoundingClientRect`/`getComputedStyle` a 1440 × 900 y 390 × 844). El trozo de la home pasa de 1,9 a 8,8 kB gz (el `animate` de Motion del muelle del botón y los iconos). |
 | 2026-10-02 | — | Plan creado. 0.3 hecha junto con la planificación. |
 | 2026-10-02 | 0.13 | Playwright + axe hecho: humo, navegación (escritorio y menú móvil), 404, galería, axe WCAG 2.2 AA, teclado y «reducir movimiento». Sin violaciones de axe; arreglado el 404 del icono de la pestaña. `tsconfig.json` raíz con `playwright.config.ts` y `tests/` dentro de `pnpm typecheck`. Pasos de Playwright en la CI (su primera ejecución, con la 0.2). |
+| 2026-10-02 | 0.21 | **Fase reabierta** por el cambio de dirección de arte: tareas 0.21–0.28. |
 | 2026-10-02 | Cierre | CI de GitHub en verde en la PR #1 (tras declarar `vite` en `@beatbattle/server`). 0.19 cerrada con la prueba de Docker movida a la Fase 2; 0.20 (Dependabot) pasa a la Fase 10. Criterios de aceptación 1–6 cumplidos; del 7, `RD-VIS-02` (fondo Silk) y `RD-VIS-03` (estrellas) siguen en la Fase 1 (1.1, 1.5 y 1.12) por decisión registrada en el roadmap. **Fase 0 cerrada.** |
 | 2026-10-02 | Ola 3 | Consolidación (CTA del hero sobre `Button`, avisos en el marco con parte diferida, troceado del bundle), prueba del sello con jurado de tres lentes (5 diferencias corregidas; el Silk queda para la 1.1), revisión adversarial de toda la fase (50 hallazgos, 24 confirmados por dos verificadores y arreglados con test que fallaba antes) y README (0.15). Guía v0.5 con todas las desviaciones. Calidad: web 346 tests, server 144, rules 178, E2E 51 (con el proyecto `perf`), build con la API empaquetada y su prueba de humo. Pendiente para cerrar: primera ejecución de la CI en GitHub (0.2, 0.13), Mailpit con Docker (0.19), Dependabot (0.20, confirmación). |
 | 2026-10-02 | Ola 2 | Layout del sello (0.7) y componentes + galería (0.8, 0.9) en paralelo con revisión y arreglos; fusión con integración (un solo `useReducedMotion`, GlassSurface en modal y tarjeta, layout en la galería) y Playwright + axe (0.13). Calidad: web 288 tests, E2E 28, axe sin violaciones, JS inicial 166 kB gz. Quedan: CTA del hero sobre el `Button` base, visor de avisos en el marco, tokens nuevos a la guía, comparación A/B formal (`RD-VIS-02`), README y primera ejecución de la CI. |

@@ -28,7 +28,7 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 
 | # | Fase | Estado | Plan | Hito |
 |---|------|--------|------|------|
-| 0 | Fundaciones | ✅ Hecho (2026-10-02; CI de GitHub en verde en la PR #1) | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes con la estética del sello; prueba del sello sin diferencias sin justificar salvo el Silk (1.1) |
+| 0 | Fundaciones | 🔄 Reabierta por el cambio de dirección de arte (0.21–0.28) | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes con la estética del sello; prueba del sello sin diferencias sin justificar salvo el Silk (1.1) |
 | 1 | Spike de sensación y audio | ⬜ Lista (1.1, 1.4 y 1.9 se pueden empezar) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio; efectos < 30 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
 | 2 | Cuentas y base de email | 🔒 Bloqueada (F0, GO de F1) | — (se crea al llegar) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, preferencias, consentimientos y bajas |
 | 3 | Semanas y samples | 🔒 Bloqueada (F2) | — | 3 semanas programadas; cambio de semana en la frontera con reloj simulado; email del drop (también sin cuenta) |
@@ -43,9 +43,9 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 
 ## Foco actual
 
-**Fase 0 cerrada** (PR #1 a `main`, pendiente de revisión). **Siguiente: Fase 1** (spike GO/NO-GO):
-1.1 Silk y Escenario, 1.4 motor de audio y 1.9 port del análisis se pueden empezar ya. Antes de 1.7 y
-1.8 (recursos en la nube) hay que cerrar la decisión de la cuenta de Cloudinary.
+**Rediseño de la Fase 0** con la nueva dirección de arte de **arena de lucha** (tareas 0.21–0.28): primero
+la dirección de arte en la guía (v0.6) y después el marco de juego, el menú principal y los componentes.
+La Fase 1 espera a que termine, porque su Escenario (1.1) dependía del Silk del sello.
 
 ## Grafo de dependencias
 
@@ -114,6 +114,14 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
   remitente coherente con la cuenta, 1 mensaje por segundo, cupo diario en ventana móvil de 24 h con
   el 25 % reservado para servicio y aplazamiento por prioridad, y rebotes leídos por IMAP. Todo
   detrás de la interfaz `Mailer` y de la cola *outbox*. Guía §4.19 (v0.3).
+- 2026-10-02 — **Cambio de dirección de arte (decisión del usuario): arena de lucha.** La primera
+  versión copiaba la web de Other People y no era la idea. BeatBattle es una web **distinta**, con
+  aire de **menú de juego de lucha (versus)**, que solo hereda del sello **los colores y el logo**
+  (firma «by Other People») para que se entienda que forma parte de él. Se sustituyen la isla, el pie,
+  el hero, los orbes, el cristal y la tipografía copiados del sello; la «prueba del sello» deja de ser
+  «parecer una sección de otherpeople.es» y pasa a ser una prueba de marca y de juego. El voto sigue
+  siendo de 1 a 5 estrellas por entrada: el versus es escenificación, no cambia las reglas (§2.7).
+  Tareas 0.21–0.28 del plan 00; la guía pasa a la v0.6.
 - 2026-10-02 — **Hito de la Fase 0 sin el Silk**: la prueba del sello (`RD-VIS-02`) se da por buena en la
   Fase 0 sin diferencias sin justificar salvo el fondo, porque el Silk en WebGL es la tarea 1.1 (canvas
   único del Escenario). Se repite la A/B con el Silk en la 1.12, junto con las propuestas del jurado
@@ -145,6 +153,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-02 | F0 | **Reabierta**: cambio de dirección de arte a arena de lucha (decisión del usuario). |
 | 2026-10-02 | F0 | **Cerrada.** CI de GitHub en verde en la PR #1 (la primera ejecución destapó una dependencia sin declarar, ya arreglada). |
 | 2026-10-02 | F0 | Fase 0 implementada en tres olas de agentes en paralelo con revisión independiente, jurado de la prueba del sello y revisión adversarial; guía v0.4 y v0.5 con las desviaciones. Pendiente: primera CI en GitHub. |
 | 2026-10-02 | — | Guía maestra v0.3: email con nodemailer + Gmail (decisión del usuario). |
