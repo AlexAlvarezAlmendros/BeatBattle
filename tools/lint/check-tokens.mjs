@@ -9,8 +9,11 @@
  * |--------------------|------------------------------------------------------------------------------|
  * | `color-hex`        | `#rgb`, `#rgba`, `#rrggbb`, `#rrggbbaa`                                       |
  * | `color-function`   | `rgb()`, `rgba()`, `hsl()`, `hsla()`, `hwb()`, `lab()`, `lch()`, `oklab()`,  |
- * |                    | `oklch()`, `color()`; se permite el color relativo `rgb(from var(--…) …)`    |
- * | `color-named`      | Nombres de color (`white`, `red`…) en propiedades de color                   |
+ * |                    | `oklch()`, `color()`                                                          |
+ * | `color-relative`   | Color relativo que no sea solo «el token con otro alfa por token»: canales   |
+ * |                    | distintos de sus palabras (`r g b`, `h s l`…) o alfa literal                  |
+ * | `color-named`      | Nombres de color (`white`, `red`…) en propiedades de color, dentro de        |
+ * |                    | cualquier `*-gradient()` y en el canvas (`fillStyle`, `addColorStop`…)        |
  * | `duration-literal` | Tiempos (`150ms`, `.3s`) en `transition*`, `animation*` y variables CSS      |
  * | `easing-literal`   | `cubic-bezier()`, `linear()` y `ease*` en `transition*` y `animation*`       |
  * | `radius-literal`   | Longitudes en `border-radius` y sus variantes, salvo `0` y `50%`             |
@@ -18,7 +21,15 @@
  * |                    | y `drop-shadow()`                                                             |
  *
  * En CSS se miran los valores de las declaraciones (los selectores como `#contenido` no cuentan); en
- * TS/TSX, el contenido de las cadenas y las propiedades de estilo en línea (`borderRadius: 8`).
+ * TS/TSX, el contenido de las cadenas, las propiedades de estilo en línea (`borderRadius: 8`) y las
+ * de color del canvas 2D (`ctx.fillStyle = …`, `gradient.addColorStop(0, …)`).
+ *
+ * Color relativo (CSS Color 5): solo se admite para cambiar el alfa de un token, con los canales
+ * como sus propias palabras y en su orden, y el alfa como `alpha`, `var(--…)` o `calc()` solo con
+ * variables y `alpha`: `rgb(from var(--bb-red) r g b / var(--…))`. Un número o un porcentaje en un
+ * canal o en el alfa fabrica un color nuevo a partir del token: si hace falta, va a tokens.css.
+ * `color-mix()` entre tokens se admite (no introduce canales literales); si una mezcla se repite,
+ * que pase a tokens.css.
  *
  * Excepciones, siempre razonadas:
  * - Ficheros: ver `EXCLUDED_FILES` (cada uno con su motivo).
@@ -27,9 +38,16 @@
  * - Una línea concreta: comentario `lint-tokens-allow: <motivo>` en esa línea o en la anterior. Sin
  *   motivo, la propia excepción es un error (`allow-without-reason`).
  *
- * Límites conocidos: no sigue variables locales (`--r: 8px` fuera de tokens.css sí se detecta como
- * duración o color, pero no como radio) ni las duraciones numéricas de Motion
- * (`transition={{ duration: 0.3 }}`): esas salen de `@beatbattle/shared/tokens` por revisión.
+ * Límites conocidos:
+ * - No sigue variables locales (`--r: 8px` fuera de tokens.css sí se detecta como duración o color,
+ *   pero no como radio) ni las duraciones numéricas de Motion (`transition={{ duration: 0.3 }}`):
+ *   esas salen de `@beatbattle/shared/tokens` por revisión.
+ * - En TS/TSX, `color-named` mira los objetos (`{ color: 'white' }`, que suelen ser estilos en
+ *   línea), los atributos de pintura de SVG (`fill`, `stroke`, `stopColor`, `floodColor`,
+ *   `lightingColor`) y el canvas. No mira otros atributos JSX ni asignaciones (`<Medal color="gold">`
+ *   o `const color = 'gold'` son datos, no estilos). Un objeto de datos con una clave `color` y un
+ *   valor que es un nombre de color (`{ place: 1, color: 'gold' }`) da un falso positivo: se usa
+ *   otra clave (`metal: 'gold'`) o `lint-tokens-allow` con su motivo.
  *
  * Uso: `node tools/lint/check-tokens.mjs [--root <dir>]` (por defecto, la raíz del repo).
  */
@@ -91,11 +109,43 @@ const NAMED_COLORS = new Set(
 )
 
 const HEX = /(?<![\w&.$-])#(?:[0-9a-f]{8}|[0-9a-f]{6}|[0-9a-f]{3,4})(?![\w-])/gi
-const COLOR_FUNCTION = /(?<![\w-])(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\((?!\s*from\s+var\()/gi
+const COLOR_FUNCTION = /(?<![\w-])(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(/gi
+const GRADIENT = /(?<![\w-])(?:repeating-)?(?:linear|radial|conic)-gradient\(/gi
 const TIME = /(?<![\w.-])(?:\d+\.?\d*|\.\d+)m?s(?![\w-])/gi
 const ZERO_TIME = /^0*\.?0*m?s$/i
 const EASING = /(?<![\w-])(?:cubic-bezier\(|linear\(|ease(?:-in-out|-in|-out)?(?![\w-(]))/gi
 const LENGTH = /^-?(?:\d+\.?\d*|\.\d+)(?:px|rem|em|%|vh|vw|vmin|vmax|svh|lvh|dvh|ch|ex|cqw|cqh|cqi|cqb)$/i
+
+/** Palabras de canal de cada función de color, en orden (color relativo de CSS Color 5). */
+/** @type {Record<string, string[]>} */
+const CHANNELS = {
+  rgb: ['r', 'g', 'b'],
+  rgba: ['r', 'g', 'b'],
+  hsl: ['h', 's', 'l'],
+  hsla: ['h', 's', 'l'],
+  hwb: ['h', 'w', 'b'],
+  lab: ['l', 'a', 'b'],
+  oklab: ['l', 'a', 'b'],
+  lch: ['l', 'c', 'h'],
+  oklch: ['l', 'c', 'h'],
+}
+
+/** Palabras de canal de `color(from … <espacio> …)` según el espacio de color. */
+/** @type {Record<string, string[]>} */
+const COLOR_SPACE_CHANNELS = {
+  srgb: ['r', 'g', 'b'],
+  'srgb-linear': ['r', 'g', 'b'],
+  'display-p3': ['r', 'g', 'b'],
+  'a98-rgb': ['r', 'g', 'b'],
+  'prophoto-rgb': ['r', 'g', 'b'],
+  rec2020: ['r', 'g', 'b'],
+  xyz: ['x', 'y', 'z'],
+  'xyz-d50': ['x', 'y', 'z'],
+  'xyz-d65': ['x', 'y', 'z'],
+}
+
+/** Una variable sin valor de respaldo: `var(--bb-red)`. */
+const PLAIN_VAR = /^var\(\s*--[\w-]+\s*\)$/i
 
 /** Propiedades CSS cuyos valores son colores (o los contienen). */
 const CSS_COLOR_PROPERTY =
@@ -104,6 +154,8 @@ const CSS_MOTION_PROPERTY = /^(?:transition|animation)(?:-[a-z-]+)?$/i
 const CSS_RADIUS_PROPERTY = /^border(?:-[a-z]+)*-radius$/i
 const CSS_SHADOW_PROPERTY = /^(?:box-shadow|text-shadow)$/i
 const CSS_FILTER_PROPERTY = /^(?:-webkit-)?(?:filter|backdrop-filter)$/i
+/** Atributos JSX de pintura de SVG: con `=` solo estos se miran como color (los demás son props). */
+const SVG_PAINT_ATTRIBUTE = /^(?:fill|stroke|stopColor|floodColor|lightingColor)$/
 
 /**
  * @typedef {{ file: string, line: number, column: number, rule: string, match: string, message: string }} Violation
@@ -137,6 +189,132 @@ function stripVars(value) {
   return current
 }
 
+/**
+ * Argumentos de la función cuyo paréntesis abre en `open`, hasta su pareja. Si no se cierra (una
+ * plantilla cortada por `${…}`), `undefined`.
+ * @param {string} text @param {number} open
+ */
+function argumentsAt(text, open) {
+  let depth = 0
+  for (let i = open; i < text.length; i += 1) {
+    if (text[i] === '(') depth += 1
+    else if (text[i] === ')') {
+      depth -= 1
+      if (depth === 0) return text.slice(open + 1, i)
+    }
+  }
+  return undefined
+}
+
+/** Parte unos argumentos por espacios y `/` sin romper los paréntesis anidados. @param {string} args */
+function splitArguments(args) {
+  /** @type {string[]} */
+  const parts = []
+  let depth = 0
+  let current = ''
+  const push = () => {
+    if (current) parts.push(current)
+    current = ''
+  }
+  for (const char of args) {
+    if (char === '(') depth += 1
+    if (char === ')') depth -= 1
+    if (depth === 0 && /\s/.test(char)) push()
+    else if (depth === 0 && char === '/') {
+      push()
+      parts.push('/')
+    } else current += char
+  }
+  push()
+  return parts
+}
+
+/** Alfa admitido en un color relativo: `alpha`, `var(--…)` o `calc()` solo con variables y `alpha`. */
+function isTokenAlpha(/** @type {string} */ alpha) {
+  if (alpha.toLowerCase() === 'alpha' || PLAIN_VAR.test(alpha)) return true
+  const calc = /^calc\(([\s\S]*)\)$/i.exec(alpha)
+  if (!calc) return false
+  const rest = calc[1]
+    .replace(/var\(\s*--[\w-]+\s*\)/gi, ' ')
+    .replace(/(?<![\w-])alpha(?![\w-])/gi, ' ')
+    .replace(/[\s()+*/-]/g, '')
+  return rest === ''
+}
+
+/**
+ * ¿Es un color relativo que solo cambia el alfa de un token? `rgb(from var(--bb-red) r g b)`,
+ * `oklch(from var(--bb-red) l c h / var(--…))`, `color(from var(--bb-red) srgb r g b / alpha)`.
+ * @param {string} fn nombre de la función, en minúsculas
+ * @param {string} args lo que hay entre sus paréntesis
+ */
+function isTokenRelativeColor(fn, args) {
+  const parts = splitArguments(args.trim())
+  if (parts.shift()?.toLowerCase() !== 'from') return false
+  if (!PLAIN_VAR.test(parts.shift() ?? '')) return false
+  const channels = fn === 'color' ? COLOR_SPACE_CHANNELS[parts.shift()?.toLowerCase() ?? ''] : CHANNELS[fn]
+  if (!channels) return false
+  for (const channel of channels) {
+    if (parts.shift()?.toLowerCase() !== channel) return false
+  }
+  if (parts.length === 0) return true
+  return parts.length === 2 && parts[0] === '/' && isTokenAlpha(parts[1])
+}
+
+/**
+ * Colores literales de un texto: hex, funciones de color y colores relativos no admitidos.
+ * @param {string} text
+ * @returns {{ index: number, rule: string, match: string }[]}
+ */
+function colorLiteralHits(text) {
+  /** @type {{ index: number, rule: string, match: string }[]} */
+  const found = []
+  for (const m of text.matchAll(HEX)) found.push({ index: m.index, rule: 'color-hex', match: m[0] })
+  for (const m of text.matchAll(COLOR_FUNCTION)) {
+    const open = m.index + m[0].length - 1
+    const args = argumentsAt(text, open)
+    const call = (args === undefined ? text.slice(m.index) : `${m[0]}${args})`).replace(/\s+/g, ' ').trim()
+    if (/^\s*from(?![\w-])/i.test(args ?? text.slice(open + 1))) {
+      if (args === undefined || !isTokenRelativeColor(m[1].toLowerCase(), args)) {
+        found.push({ index: m.index, rule: 'color-relative', match: call })
+      }
+    } else {
+      found.push({ index: m.index, rule: 'color-function', match: call })
+    }
+  }
+  return found
+}
+
+/**
+ * Nombres de color de un texto, fuera de `var()`.
+ * @param {string} text
+ * @returns {{ index: number, rule: string, match: string }[]}
+ */
+function namedColorHits(text) {
+  const withoutVars = text.replace(/var\([^)]*\)/g, (m) => blank(m))
+  /** @type {{ index: number, rule: string, match: string }[]} */
+  const found = []
+  for (const m of withoutVars.matchAll(/(?<![\w-])[a-z]+(?![\w-(])/gi)) {
+    if (NAMED_COLORS.has(m[0].toLowerCase())) found.push({ index: m.index, rule: 'color-named', match: m[0] })
+  }
+  return found
+}
+
+/**
+ * Nombres de color dentro de los argumentos de cualquier `*-gradient()` (en cualquier propiedad:
+ * `background-image`, `mask-image`, `border-image`…).
+ * @param {string} text
+ */
+function gradientNamedColorHits(text) {
+  /** @type {{ index: number, rule: string, match: string }[]} */
+  const found = []
+  for (const m of text.matchAll(GRADIENT)) {
+    const open = m.index + m[0].length - 1
+    const args = argumentsAt(text, open) ?? text.slice(open + 1)
+    for (const hit of namedColorHits(args)) found.push({ ...hit, index: open + 1 + hit.index })
+  }
+  return found
+}
+
 /** Quita `url(...)` y cadenas entre comillas de un valor CSS. @param {string} value */
 function stripUrlsAndStrings(value) {
   return value
@@ -157,17 +335,9 @@ function checkCssValue(property, value) {
   const isCustom = property.startsWith('--')
   const isMotion = CSS_MOTION_PROPERTY.test(property)
 
-  for (const m of clean.matchAll(HEX)) found.push({ index: m.index, rule: 'color-hex', match: m[0] })
-  for (const m of clean.matchAll(COLOR_FUNCTION))
-    found.push({ index: m.index, rule: 'color-function', match: m[0] })
-
-  if (CSS_COLOR_PROPERTY.test(property)) {
-    const withoutVars = clean.replace(/var\([^)]*\)/g, (m) => blank(m))
-    for (const m of withoutVars.matchAll(/(?<![\w-])[a-z]+(?![\w-(])/gi)) {
-      if (NAMED_COLORS.has(m[0].toLowerCase()))
-        found.push({ index: m.index, rule: 'color-named', match: m[0] })
-    }
-  }
+  found.push(...colorLiteralHits(clean))
+  // En una propiedad de color, cualquier nombre de color; en las demás, los de dentro de un degradado.
+  found.push(...(CSS_COLOR_PROPERTY.test(property) ? namedColorHits(clean) : gradientNamedColorHits(clean)))
 
   if (isMotion || isCustom) {
     for (const m of clean.matchAll(TIME)) {
@@ -356,27 +526,48 @@ function scanTs(source) {
   const { code, strings } = lexTs(source)
   /** @type {{ offset: number, rule: string, match: string }[]} */
   const found = []
-
-  // Colores literales en cualquier cadena: `'#fff'`, `"rgba(…)"`, `` `hsl(…)` ``.
-  for (const { start, text } of strings) {
-    for (const m of text.matchAll(HEX))
-      found.push({ offset: start + m.index, rule: 'color-hex', match: m[0] })
-    for (const m of text.matchAll(COLOR_FUNCTION)) {
-      found.push({ offset: start + m.index, rule: 'color-function', match: m[0] })
+  /** Una misma coincidencia puede salir por dos caminos (la cadena y la propiedad): se cuenta una vez. */
+  const seen = new Set()
+  /** @param {number} offset @param {{ index: number, rule: string, match: string }[]} hits */
+  const add = (offset, hits) => {
+    for (const hit of hits) {
+      const key = `${offset + hit.index}:${hit.rule}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      found.push({ offset: offset + hit.index, rule: hit.rule, match: hit.match })
     }
+  }
+
+  // En cualquier cadena: colores literales (`'#fff'`, `"rgba(…)"`, `` `hsl(…)` ``) y nombres de
+  // color dentro de un degradado (`'linear-gradient(white, …)'`).
+  for (const { start, text } of strings) {
+    add(start, colorLiteralHits(text))
+    add(start, gradientNamedColorHits(text))
   }
 
   // Propiedades de estilo en línea con un valor de cadena: `transition: 'opacity 200ms'`,
   // `color: 'white'`, `boxShadow: '0 0 4px …'`, `fill="white"`.
-  const styleString = /(?<![\w$.-])([a-zA-Z]+)\s*[:=]\s*\{?\s*(['"`])((?:\\.|(?!\2)[^\\])*)\2/g
+  const styleString = /(?<![\w$.-])([a-zA-Z]+)\s*([:=])\s*\{?\s*(['"`])((?:\\.|(?!\3)[^\\])*)\3/g
   for (const m of code.matchAll(styleString)) {
-    const property = cssPropertyFromJs(m[1])
-    const valueOffset = m.index + m[0].length - m[3].length - 1
-    const value = source.slice(valueOffset, valueOffset + m[3].length)
-    for (const hit of checkCssValue(property, value)) {
-      if (hit.rule === 'color-hex' || hit.rule === 'color-function') continue // ya contadas arriba
-      found.push({ offset: valueOffset + hit.index, rule: hit.rule, match: hit.match })
-    }
+    const [, key, operator, , rawValue] = m
+    const property = cssPropertyFromJs(key)
+    const valueOffset = m.index + m[0].length - rawValue.length - 1
+    const value = source.slice(valueOffset, valueOffset + rawValue.length)
+    // Con `=` (atributo JSX o asignación) solo los atributos de pintura de SVG son colores: `color`
+    // en `<Medal color="gold" />` o en `const color = 'gold'` es un dato.
+    const dataOnly = operator === '=' && !SVG_PAINT_ATTRIBUTE.test(key)
+    add(
+      valueOffset,
+      checkCssValue(property, value).filter((hit) => !(dataOnly && hit.rule === 'color-named')),
+    )
+  }
+
+  // Canvas 2D: `ctx.fillStyle = 'red'`, `ctx.shadowColor = 'black'`, `gradient.addColorStop(0, 'gold')`.
+  const canvasColor =
+    /\.(?:(?:fillStyle|strokeStyle|shadowColor)\s*=|addColorStop\s*\([^,()]*,)\s*(['"`])((?:\\.|(?!\1)[^\\])*)\1/g
+  for (const m of code.matchAll(canvasColor)) {
+    const valueOffset = m.index + m[0].length - m[2].length - 1
+    add(valueOffset, namedColorHits(source.slice(valueOffset, valueOffset + m[2].length)))
   }
 
   // Radios numéricos en estilos en línea: `borderRadius: 8` (React lo lee como px).
@@ -439,7 +630,10 @@ const MESSAGES = {
   'color-hex': 'Color literal: usa un token de color (`var(--bb-…)` o `color` de @beatbattle/shared/tokens).',
   'color-function':
     'Color literal: usa un token de color (`var(--bb-…)` o `color` de @beatbattle/shared/tokens).',
-  'color-named': 'Color con nombre: usa un token de color (`var(--bb-…)`).',
+  'color-relative':
+    'Color relativo con canales o alfa literales: solo `rgb(from var(--bb-…) r g b / var(--…))`; si hace falta un color o un velo nuevo, va a tokens.css.',
+  'color-named':
+    'Color con nombre: usa un token de color (`var(--bb-…)` o `color` de @beatbattle/shared/tokens).',
   'duration-literal': 'Duración literal: usa `var(--bb-dur-…)` (o `duration` de @beatbattle/shared/tokens).',
   'easing-literal': 'Curva literal: usa `var(--bb-ease-…)` (o `ease` de @beatbattle/shared/tokens).',
   'radius-literal': 'Radio literal: usa `var(--bb-radius-…)` (se permiten 0 y 50 %).',

@@ -15,4 +15,6 @@
 
 .local {
   --card-delay: 0.3s;
+  outline-color: rgb(from var(--bb-black) 255 0 0);
+  mask-image: linear-gradient(black, transparent);
 }

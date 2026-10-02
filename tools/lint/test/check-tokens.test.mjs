@@ -29,6 +29,21 @@ describe('RD-VIS-01: check-tokens en CSS', () => {
     ['color: oklch(60% 0.2 20);', 'color-function'],
     ['border: 1px solid white;', 'color-named'],
     ['outline-color: red;', 'color-named'],
+    ['background-image: linear-gradient(white, var(--bb-black));', 'color-named'],
+    ['mask-image: linear-gradient(black, transparent);', 'color-named'],
+    ['border-image: linear-gradient(red, var(--bb-red)) 1;', 'color-named'],
+    ['background-image: repeating-radial-gradient(circle, var(--bb-red), gold 10%);', 'color-named'],
+    // Color relativo: los canales y el alfa no pueden ser literales (fabricarían un color nuevo).
+    ['color: rgb(from var(--bb-black) 255 0 0);', 'color-relative'],
+    ['color: hsl(from var(--bb-red) 120 100% 50%);', 'color-relative'],
+    ['color: rgb(from var(--bb-red) b g r);', 'color-relative'],
+    ['color: oklch(from var(--bb-red) calc(l - 10%) c h);', 'color-relative'],
+    ['border-color: rgb(from var(--bb-red) r g b / 50%);', 'color-relative'],
+    ['border-color: rgb(from var(--bb-red) r g b / calc(alpha * 0.5));', 'color-relative'],
+    ['color: rgb(from var(--bb-red, white) r g b);', 'color-relative'],
+    ['color: rgb(from currentcolor r g b / var(--a));', 'color-relative'],
+    ['color: color(from var(--bb-red) srgb 1 g b);', 'color-relative'],
+    ['color: rgb(from #fff r g b);', 'color-hex'],
     ['transition: opacity 150ms;', 'duration-literal'],
     ['transition: opacity var(--bb-dur-fast) ease-out;', 'easing-literal'],
     ['transition-duration: .3s;', 'duration-literal'],
@@ -57,7 +72,13 @@ describe('RD-VIS-01: check-tokens en CSS', () => {
     'fill: currentcolor;',
     'color: inherit;',
     'border: 1px solid var(--bb-line);',
-    'border-color: rgb(from var(--bb-red) r g b / 50%);',
+    'border-color: rgb(from var(--bb-red) r g b / var(--veil-alpha));',
+    'color: oklch(from var(--bb-red) l c h / alpha);',
+    'color: hsl(from var(--bb-red) h s l);',
+    'color: color(from var(--bb-red) display-p3 r g b / calc(alpha * var(--fade)));',
+    'background-image: linear-gradient(to right, var(--bb-red), transparent);',
+    'mask-image: linear-gradient(to bottom, var(--bb-black), transparent);',
+    'background-image: conic-gradient(from var(--bb-holo-angle), var(--bb-rarity-epic-stops));',
     'background: color-mix(in srgb, var(--bb-red) 30%, transparent);',
     'transition: transform var(--bb-dur-fast) var(--bb-ease-out);',
     'transition: none;',
@@ -106,6 +127,36 @@ describe('RD-VIS-01: check-tokens en TS/TSX', () => {
     assert.deepEqual(tsx('const a = `hsl(0 100% 50%)`\n'), ['color-function'])
   })
 
+  it('falla con colores relativos que no son «el token con otro alfa por token»', () => {
+    assert.deepEqual(tsx("const a = 'rgb(from var(--bb-black) 255 0 0)'\n"), ['color-relative'])
+    assert.deepEqual(tsx("const a = 'rgb(from var(--bb-red) r g b / var(--veil-alpha))'\n"), [])
+  })
+
+  it('falla con nombres de color en degradados, en cualquier cadena o propiedad', () => {
+    assert.deepEqual(tsx("const s = { backgroundImage: 'linear-gradient(white, black)' }\n"), [
+      'color-named',
+      'color-named',
+    ])
+    assert.deepEqual(tsx("const g = 'radial-gradient(circle, var(--bb-red), gold)'\n"), ['color-named'])
+  })
+
+  it('falla con nombres de color en el canvas 2D', () => {
+    assert.deepEqual(tsx("ctx.fillStyle = 'red'\n"), ['color-named'])
+    assert.deepEqual(tsx('ctx.strokeStyle = "white"\n'), ['color-named'])
+    assert.deepEqual(tsx("this.ctx.shadowColor = 'black'\n"), ['color-named'])
+    assert.deepEqual(tsx("gradient.addColorStop(0.5, 'gold')\n"), ['color-named'])
+    assert.deepEqual(tsx("ctx.fillStyle = '#ff003c'\n"), ['color-hex'])
+    assert.deepEqual(tsx('ctx.fillStyle = color.red\ngradient.addColorStop(0, color.gold)\n'), [])
+  })
+
+  it('un atributo o una variable `color` con un nombre de color es un dato, no un estilo', () => {
+    assert.deepEqual(tsx('const el = <Medal place={1} color="gold" />\n'), [])
+    assert.deepEqual(tsx("const color = 'gold'\n"), [])
+    // Límite documentado: en un objeto, `color` se mira como estilo en línea. Los datos usan otra clave.
+    assert.deepEqual(tsx("const medal = { place: 1, color: 'gold' }\n"), ['color-named'])
+    assert.deepEqual(tsx("const medal = { place: 1, metal: 'gold' }\n"), [])
+  })
+
   it('falla con estilos en línea literales', () => {
     assert.deepEqual(tsx('const s = { borderRadius: 8 }\n'), ['radius-literal'])
     assert.deepEqual(tsx("const s = { borderTopLeftRadius: '4px' }\n"), ['radius-literal'])
@@ -114,6 +165,7 @@ describe('RD-VIS-01: check-tokens en TS/TSX', () => {
     assert.deepEqual(tsx("const s = { animationTimingFunction: 'ease-in' }\n"), ['easing-literal'])
     assert.deepEqual(tsx("const s = { color: 'white' }\n"), ['color-named'])
     assert.deepEqual(tsx('const el = <rect fill="white" />\n'), ['color-named'])
+    assert.deepEqual(tsx('const el = <stop stopColor="gold" />\n'), ['color-named'])
   })
 
   it('acepta tokens, anclas, campos privados, comentarios y cadenas normales', () => {
@@ -167,6 +219,7 @@ describe('RD-VIS-01: escaneo de un repo', () => {
     for (const rule of [
       'color-hex',
       'color-function',
+      'color-relative',
       'color-named',
       'duration-literal',
       'easing-literal',

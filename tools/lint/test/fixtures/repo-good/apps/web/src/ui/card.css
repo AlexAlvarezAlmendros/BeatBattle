@@ -13,7 +13,8 @@
 }
 
 .card:hover {
-  border-color: rgb(from var(--bb-red) r g b / 50%);
+  border-color: rgb(from var(--bb-red) r g b / var(--card-veil));
+  background-image: linear-gradient(to bottom, var(--bb-ink-800), transparent);
   outline-color: color-mix(in srgb, var(--bb-red) 50%, transparent);
   box-shadow: var(--bb-focus-halo), var(--bb-shadow-glow-red);
   animation: spin var(--bb-dur-slow) steps(4) 0s infinite;
