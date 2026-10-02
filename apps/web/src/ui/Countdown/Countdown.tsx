@@ -1,4 +1,4 @@
-import { type CSSProperties, Fragment, useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { t } from '../../i18n'
 import { cx } from '../forceState'
 import styles from './Countdown.module.css'
@@ -47,17 +47,18 @@ export function Countdown({ target, now = Date.now, label, size = 'lg', onEnd, c
   const onEndRef = useRef(onEnd)
   onEndRef.current = onEnd
 
-  // Fase del parpadeo de los separadores: el ciclo de 1 s empieza en un cambio de cifra, así que el
-  // separador está entero cada vez que cambian los dígitos (el retardo negativo adelanta el ciclo).
-  const [blinkDelay] = useState(() => msToNextSecond(target - current) - SECOND_MS)
+  const rootRef = useRef<HTMLDivElement>(null)
 
   // Un temporizador por cambio de cifra, encadenado y alineado con el segundo del objetivo (un
-  // intervalo fijo desde el montaje iba hasta casi 1 s por detrás). Se para al llegar a cero.
+  // intervalo fijo desde el montaje iba hasta casi 1 s por detrás). Se para al llegar a cero. En
+  // cada tick, el parpadeo de los separadores se pone en fase: su ciclo de 1 s empieza en el cambio
+  // de cifra, así que el separador está entero cada vez que cambian los dígitos.
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined
     const tick = () => {
       const now = nowRef.current()
       setCurrent(now)
+      if (rootRef.current) syncBlink(rootRef.current, SECOND_MS - msToNextSecond(target - now))
       if (now < target) timer = setTimeout(tick, msToNextSecond(target - now))
     }
     tick()
@@ -76,11 +77,7 @@ export function Countdown({ target, now = Date.now, label, size = 'lg', onEnd, c
   const parts = countdownParts(remaining)
 
   return (
-    <div
-      className={cx(styles.countdown, styles[size], className)}
-      data-phase={phase}
-      style={{ '--blink-delay': `${blinkDelay}ms` } as CSSProperties}
-    >
+    <div ref={rootRef} className={cx(styles.countdown, styles[size], className)} data-phase={phase}>
       <div role="timer" aria-label={label ?? t('ui.countdown.label')} className={styles.timer}>
         <span className="sr-only">
           {phase === 'ended' ? t('ui.countdown.milestone.ended') : spoken(parts)}
@@ -88,7 +85,11 @@ export function Countdown({ target, now = Date.now, label, size = 'lg', onEnd, c
         <div className={styles.segments} aria-hidden="true">
           {UNITS.map((unit, index) => (
             <Fragment key={unit}>
-              {index > 0 && <span className={styles.separator}>:</span>}
+              {index > 0 && (
+                <span className={styles.separator} data-separator="">
+                  :
+                </span>
+              )}
               <span className={styles.segment}>
                 <span className={styles.digits}>
                   {[...pad2(parts[unit])].map((char, position, all) => (
@@ -110,6 +111,19 @@ export function Countdown({ target, now = Date.now, label, size = 'lg', onEnd, c
       </p>
     </div>
   )
+}
+
+/**
+ * Pone el parpadeo CSS de los separadores en `phaseMs` de su ciclo (Web Animations). Un retardo
+ * calculado al montar no basta: la animación arranca cuando el navegador pinta, a veces cientos de ms
+ * después (una página pesada), y quedaba en contrafase. Sin la API (jsdom) o sin movimiento (sin
+ * animaciones) no hace nada.
+ */
+function syncBlink(root: HTMLElement, phaseMs: number) {
+  for (const separator of root.querySelectorAll<HTMLElement>('[data-separator]')) {
+    if (typeof separator.getAnimations !== 'function') return
+    for (const animation of separator.getAnimations()) animation.currentTime = phaseMs
+  }
 }
 
 /** «Tiempo restante: 2 días, 14 horas, 5 minutos y 33 segundos». */

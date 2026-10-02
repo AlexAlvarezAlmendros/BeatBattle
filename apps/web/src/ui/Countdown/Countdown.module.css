@@ -21,9 +21,8 @@
 .separator {
   color: var(--bb-text-3);
   font-weight: var(--bb-weight-bold);
+  /* En fase con el cambio de cifra: la ajusta el componente en cada tick (`syncBlink`). */
   animation: blink var(--bb-loop-blink) var(--bb-ease-in-out) infinite;
-  /* Fase alineada con el cambio de cifra (la calcula el componente al montar). */
-  animation-delay: var(--blink-delay);
 }
 
 .segment {

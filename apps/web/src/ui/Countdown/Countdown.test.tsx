@@ -119,10 +119,34 @@ describe('Countdown', () => {
     clock.advance(89_000)
     expect(digits()).toBe('00:00:00:00')
     expect(onEnd).toHaveBeenCalledTimes(1)
-    // El parpadeo de los separadores arranca en fase con el cambio de cifra.
-    expect((container.firstElementChild as HTMLElement).style.getPropertyValue('--blink-delay')).toBe(
-      '-750ms',
-    )
+    expect(container.querySelectorAll('[data-separator]')).toHaveLength(3)
+  })
+
+  it('el parpadeo de los separadores se pone en fase con el cambio de cifra en cada tick', () => {
+    // jsdom no tiene Web Animations: una animación falsa por separador recoge la fase.
+    const phases: (number | null)[] = []
+    const fake = {
+      set currentTime(value: number) {
+        phases.push(value)
+      },
+    }
+    const proto = HTMLElement.prototype
+    const had = Object.hasOwn(proto, 'getAnimations')
+    proto.getAnimations = function (this: HTMLElement) {
+      return (this.hasAttribute('data-separator') ? [fake] : []) as unknown as Animation[]
+    }
+    try {
+      const clock = testClock(TARGET - 90_250)
+      render(<Countdown target={TARGET} now={clock.now} />)
+      // Al montar faltan 250 ms para el cambio: va por 750 ms de su ciclo de 1 s (3 separadores).
+      expect(phases).toEqual([750, 750, 750])
+      phases.length = 0
+      clock.advance(250)
+      // En el cambio de cifra, el ciclo empieza: separador entero.
+      expect(phases).toEqual([0, 0, 0])
+    } finally {
+      if (!had) Reflect.deleteProperty(proto, 'getAnimations')
+    }
   })
 
   it('msToNextSecond: lo que falta hasta el próximo segundo entero', () => {
