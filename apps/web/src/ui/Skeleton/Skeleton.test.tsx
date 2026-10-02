@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { t } from '../../i18n'
 import { Skeleton, SkeletonGroup } from './Skeleton'
+import skeletonCss from './Skeleton.module.css?raw'
 
 afterEach(() => {
   document.documentElement.removeAttribute('data-motion')
@@ -30,12 +31,19 @@ describe('Skeleton', () => {
     expect(bone.style.height).toBe('48px')
   })
 
+  it('el barrido es un pseudoelemento que se mueve con transform (compuesto, sin repintar el fondo)', () => {
+    const keyframes = /@keyframes shimmer \{([\s\S]*?)\n\}/.exec(skeletonCss)?.[1] ?? ''
+    expect(keyframes).toMatch(/transform: translateX\(100%\)/)
+    expect(keyframes).not.toMatch(/background-position/)
+    expect(skeletonCss).toMatch(/\.skeleton::after \{[^}]*animation: shimmer var\(--bb-loop-shimmer\)/)
+    expect(skeletonCss).not.toMatch(/background-size/)
+  })
+
   it('RNF-A11Y-03 / RD-MOT-03: con «reducir movimiento» es gris fijo, sin barrido', () => {
-    const { container } = render(<Skeleton />)
-    const bone = container.querySelector('[data-skeleton]')!
-    const animation = () => getComputedStyle(bone).getPropertyValue('animation')
-    expect(animation()).toMatch(/shimmer/)
-    document.documentElement.setAttribute('data-motion', 'reduced')
-    expect(animation()).toBe('none')
+    // jsdom no calcula estilos de pseudoelementos: se comprueban las dos reglas tal cual.
+    expect(skeletonCss).toMatch(
+      /@media \(prefers-reduced-motion: reduce\) \{\s*\.skeleton::after \{\s*display: none;/,
+    )
+    expect(skeletonCss).toMatch(/:root\[data-motion="reduced"\]\) \.skeleton::after \{\s*display: none;/)
   })
 })
