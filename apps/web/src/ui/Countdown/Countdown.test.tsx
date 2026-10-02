@@ -130,6 +130,8 @@ describe('Countdown', () => {
     const animation = (el: Element) => getComputedStyle(el).getPropertyValue('animation')
     expect(animation(separator)).toMatch(/blink/)
     expect(animation(digit)).toMatch(/blind/)
+    // RNF-PERF-03: la persiana no se queda «en efecto» al terminar.
+    expect(animation(digit)).toMatch(/\bbackwards$/)
     expect(animation(segments)).toMatch(/heartbeat/)
     document.documentElement.setAttribute('data-motion', 'reduced')
     expect(animation(separator)).toBe('none')

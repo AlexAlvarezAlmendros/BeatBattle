@@ -86,6 +86,9 @@ describe('Waveform', () => {
     const { container } = render(<Waveform peaks={PEAKS} />)
     const bar = container.querySelector('rect')!
     expect(getComputedStyle(bar).getPropertyValue('animation')).toMatch(/grow/)
+    // RNF-PERF-03: al terminar no queda «en efecto» (con `both`, miles de barras se recalculaban
+    // en cada fotograma).
+    expect(getComputedStyle(bar).getPropertyValue('animation')).toMatch(/\bbackwards$/)
     document.documentElement.setAttribute('data-motion', 'reduced')
     expect(getComputedStyle(bar).getPropertyValue('animation')).toBe('none')
   })

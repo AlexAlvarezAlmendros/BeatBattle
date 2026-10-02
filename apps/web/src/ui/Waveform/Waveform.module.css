@@ -32,7 +32,13 @@
 
 .animated .bar,
 .animated .played {
-  animation: grow var(--bb-dur-slow) var(--bb-ease-out) both;
+  /*
+   * `backwards` y no `both`: el retardo escalonado necesita el primer fotograma, pero el último ya
+   * coincide con el estilo natural. Con `both` cada barra deja una animación terminada «en efecto»
+   * para siempre, y Chrome las recalcula todas en cada fotograma mientras corre cualquier bucle de la
+   * página (con una lista de filas, miles: de 61 a 28 fps, §4.17).
+   */
+  animation: grow var(--bb-dur-slow) var(--bb-ease-out) backwards;
   animation-delay: calc(var(--i) * var(--bb-stagger-wave));
 }
 

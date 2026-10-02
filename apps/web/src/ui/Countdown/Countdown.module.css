@@ -45,12 +45,16 @@
   font-size: var(--bb-font-size-2xl);
 }
 
-/* Persiana: el dígito nuevo baja de arriba abajo. */
+/*
+ * Persiana: el dígito nuevo baja de arriba abajo. Sin `forwards` ni `both`: el último fotograma es el
+ * estilo natural, y una animación terminada que sigue «en efecto» se recalcula en cada fotograma
+ * mientras parpadean los separadores (§4.17).
+ */
 .digit {
   display: inline-block;
   width: 1ch;
   text-align: center;
-  animation: blind var(--bb-dur-base) var(--bb-ease-out) both;
+  animation: blind var(--bb-dur-base) var(--bb-ease-out) backwards;
 }
 
 @keyframes blind {
