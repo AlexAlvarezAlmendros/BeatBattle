@@ -1,7 +1,12 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from 'react'
 import { DocumentTitle } from '../../app/DocumentTitle'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
-import { hasReducedMotionSetting, REDUCED_MOTION_QUERY, setReducedMotion } from '../../hooks/useReducedMotion'
+import {
+  hasReducedMotionSetting,
+  REDUCED_MOTION_QUERY,
+  setReducedMotion,
+  subscribeReducedMotion,
+} from '../../hooks/useReducedMotion'
 import { t } from '../../i18n'
 import type { CardSurface } from '../../ui/Card'
 import { COMPONENT_ANCHORS, SECTION_ANCHORS } from './anchors'
@@ -19,17 +24,21 @@ const GalleryContent = lazy(async () => ({ default: (await import('./GalleryCont
  * cada componente base de §3.3 en todos sus estados, forzados con `state` para verlos sin
  * interactuar, más una versión interactiva. Dos interruptores: «Reducir movimiento» (pone
  * `data-motion="reduced"` en `<html>`, como el ajuste de accesibilidad) y cristal o macizo.
+ *
+ * El interruptor de movimiento lee el atributo (sigue también los cambios hechos fuera de la galería)
+ * y, al salir de `/dev/galeria`, el atributo vuelve a como estaba al entrar: el ajuste de prueba no se
+ * arrastra al resto de la app.
  */
 export function GalleryPage() {
-  const [reduced, setReduced] = useState(hasReducedMotionSetting)
+  const reduced = useSyncExternalStore(subscribeReducedMotion, hasReducedMotionSetting, () => false)
   const [glass, setGlass] = useState(true)
   const systemReduced = useMediaQuery(REDUCED_MOTION_QUERY)
   const surface: CardSurface = glass ? 'glass' : 'solid'
 
-  const toggleReduced = (on: boolean) => {
-    setReducedMotion(on)
-    setReduced(on)
-  }
+  useEffect(() => {
+    const before = hasReducedMotionSetting()
+    return () => setReducedMotion(before)
+  }, [])
 
   return (
     <div className={styles.page}>
@@ -41,7 +50,7 @@ export function GalleryPage() {
           <legend className="sr-only">{t('dev.gallery.controls.label')}</legend>
           <Switch
             checked={reduced}
-            onChange={toggleReduced}
+            onChange={setReducedMotion}
             label={t('dev.gallery.controls.reducedMotion')}
             hint={
               systemReduced

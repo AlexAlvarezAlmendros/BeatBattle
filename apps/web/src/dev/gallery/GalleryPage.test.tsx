@@ -137,6 +137,34 @@ describe('galería /dev/galeria (0.9)', () => {
     expect(document.documentElement).not.toHaveAttribute('data-motion')
   })
 
+  it('el interruptor sigue el atributo aunque cambie fuera y, al salir de la galería, lo deja como estaba', async () => {
+    const user = userEvent.setup()
+    const { unmount } = await renderGallery()
+    const toggle = screen.getByRole('switch', { name: t('dev.gallery.controls.reducedMotion') })
+    // Un cambio hecho fuera (el ajuste de accesibilidad de la app) se refleja.
+    await act(async () => document.documentElement.setAttribute('data-motion', 'reduced'))
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+    await act(async () => document.documentElement.removeAttribute('data-motion'))
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
+    // Al salir con el ajuste de prueba puesto, se quita (al entrar no estaba).
+    await user.click(toggle)
+    expect(document.documentElement).toHaveAttribute('data-motion', 'reduced')
+    unmount()
+    expect(document.documentElement).not.toHaveAttribute('data-motion')
+  })
+
+  it('al salir respeta el ajuste que ya había al entrar', async () => {
+    const user = userEvent.setup()
+    document.documentElement.setAttribute('data-motion', 'reduced')
+    const { unmount } = await renderGallery()
+    const toggle = screen.getByRole('switch', { name: t('dev.gallery.controls.reducedMotion') })
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+    await user.click(toggle)
+    expect(document.documentElement).not.toHaveAttribute('data-motion')
+    unmount()
+    expect(document.documentElement).toHaveAttribute('data-motion', 'reduced')
+  })
+
   it('RNF-A11Y-01: los interruptores se usan con teclado; cristal o macizo cambia las superficies', async () => {
     const user = userEvent.setup()
     await renderGallery()
