@@ -120,8 +120,8 @@ export function Countdown({ target, now = Date.now, label, size = 'lg', onEnd, c
  * animaciones) no hace nada.
  */
 function syncBlink(root: HTMLElement, phaseMs: number) {
+  if (typeof root.getAnimations !== 'function') return
   for (const separator of root.querySelectorAll<HTMLElement>('[data-separator]')) {
-    if (typeof separator.getAnimations !== 'function') return
     for (const animation of separator.getAnimations()) animation.currentTime = phaseMs
   }
 }
