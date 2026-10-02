@@ -191,10 +191,271 @@
       "cookies": "Política de cookies"
     }
   },
+  "ui": {
+    "button": {
+      "loading": "Cargando…",
+      "success": "Hecho",
+      "error": "Ha fallado",
+      "stateHint": "({state})",
+      "withState": "{label} ({state})"
+    },
+    "modal": {
+      "close": "Cerrar"
+    },
+    "toast": {
+      "region": "Avisos",
+      "close": "Cerrar aviso",
+      "tone": {
+        "info": "Aviso",
+        "success": "Hecho",
+        "error": "Error"
+      }
+    },
+    "entryRow": {
+      "by": "Prod. by {alias}",
+      "bpm": "{bpm} BPM",
+      "play": "Reproducir «{title}»",
+      "pause": "Pausar «{title}»",
+      "genres": "Géneros",
+      "cover": "Portada de «{title}»"
+    },
+    "waveform": {
+      "label": "Forma de onda",
+      "progress": "Forma de onda, {percent} % escuchado"
+    },
+    "xpBar": {
+      "label": "Experiencia",
+      "level": "Nivel {level}",
+      "value": "{value} / {max} XP",
+      "valueText": "{value} de {max} XP para el nivel {next}"
+    },
+    "skeleton": {
+      "loading": "Cargando…"
+    },
+    "countdown": {
+      "label": "Cuenta atrás",
+      "units": {
+        "days": "Días",
+        "hours": "Horas",
+        "minutes": "Min",
+        "seconds": "Seg"
+      },
+      "days_one": "{count} día",
+      "days_other": "{count} días",
+      "hours_one": "{count} hora",
+      "hours_other": "{count} horas",
+      "minutes_one": "{count} minuto",
+      "minutes_other": "{count} minutos",
+      "seconds_one": "{count} segundo",
+      "seconds_other": "{count} segundos",
+      "remaining": "Tiempo restante: {days}, {hours}, {minutes} y {seconds}",
+      "milestone": {
+        "day": "Quedan 24 horas",
+        "hour": "Queda 1 hora",
+        "tenMinutes": "Quedan 10 minutos",
+        "ended": "Tiempo agotado"
+      }
+    }
+  },
   "dev": {
     "gallery": {
       "title": "Galería de componentes",
-      "summary": "Aquí irán los tokens, la tipografía y los componentes base con todos sus estados, con y sin movimiento (solo en desarrollo)."
+      "summary": "Los tokens, la tipografía, el movimiento y los componentes base con todos sus estados, con y sin movimiento. Solo existe en desarrollo.",
+      "indexLabel": "Índice de la galería",
+      "combined": "{first} · {second}",
+      "controls": {
+        "label": "Ajustes de la galería",
+        "reducedMotion": "Reducir movimiento",
+        "reducedMotionHint": "Pone data-motion=\"reduced\" en la página, como el ajuste de accesibilidad.",
+        "reducedMotionSystem": "Tu sistema ya pide reducir el movimiento: todo va sin movimiento aunque el interruptor esté apagado.",
+        "glass": "Superficies de cristal",
+        "glassHint": "Apagado: tarjetas y modales macizos, como en calidad baja."
+      },
+      "sections": {
+        "color": "Color",
+        "typography": "Tipografía",
+        "spacing": "Espaciado",
+        "radii": "Radios",
+        "shadows": "Sombras",
+        "motion": "Movimiento",
+        "components": "Componentes"
+      },
+      "components": {
+        "button": "Botón",
+        "chip": "Chip",
+        "card": "Tarjeta",
+        "dataTile": "Tesela de dato",
+        "sectionLabel": "Rótulo de sección",
+        "waveform": "Forma de onda",
+        "entryRow": "Fila de entrada",
+        "modal": "Modal",
+        "toast": "Aviso",
+        "xpBar": "Barra de XP",
+        "skeleton": "Esqueleto de carga",
+        "countdown": "Cuenta atrás"
+      },
+      "states": {
+        "rest": "Reposo",
+        "hover": "Hover",
+        "focus": "Foco",
+        "pressed": "Pulsado",
+        "loading": "Cargando",
+        "success": "Éxito",
+        "error": "Error",
+        "disabled": "Deshabilitado",
+        "selected": "Activo",
+        "playing": "Sonando",
+        "gain": "Subiendo (brillo)",
+        "levelUp": "Subida de nivel (destello)",
+        "hud": "Línea del HUD",
+        "normal": "Más de 24 h",
+        "urgent": "Menos de 24 h",
+        "final": "Última hora",
+        "ended": "Terminada",
+        "live": "En vivo",
+        "interactive": "Interactivo",
+        "static": "Quieto",
+        "progressNone": "Sin escuchar",
+        "progressHalf": "A medias",
+        "progressFull": "Escuchada",
+        "text": "Texto",
+        "row": "Fila",
+        "card": "Tarjeta",
+        "mini": "Mini (24 px)"
+      },
+      "variants": {
+        "cta": "CTA",
+        "outline": "Contorno",
+        "icon": "Icono",
+        "sizes": "Tamaños",
+        "sizeSm": "sm",
+        "sizeMd": "md",
+        "sizeLg": "lg",
+        "link": "Enlace",
+        "glass": "Cristal",
+        "solid": "Maciza"
+      },
+      "color": {
+        "note": "Contraste WCAG de cada color usado como texto o icono. Los que llevan transparencia se mezclan antes con el fondo.",
+        "onBlack": "Sobre negro",
+        "onInk": "Sobre --bb-ink-800",
+        "ratio": "{ratio}:1",
+        "aa": "AA",
+        "aaLarge": "AA grande",
+        "fail": "No AA"
+      },
+      "typography": {
+        "families": "Familias",
+        "display": "Display · Montserrat 800–900",
+        "body": "Texto · Montserrat 400–700",
+        "mono": "Mono · JetBrains Mono 500–700, cifras tabulares",
+        "sampleDisplay": "Beat Battle",
+        "sampleBody": "Pilla el sample, cocina tu flip y sube tu beat antes del domingo.",
+        "sampleMono": "142 BPM · 02:14:05 · +5 XP",
+        "weights": "Pesos",
+        "scale": "Escala",
+        "scaleSample": "Pilla el sample",
+        "headline": "Titular en contorno",
+        "headlineSolid": "Beat",
+        "headlineOutline": "Battle",
+        "caps": "Mayúsculas espaciadas",
+        "capsSample": "Sample · Flip · Vota · Repite"
+      },
+      "motion": {
+        "durations": "Duraciones",
+        "curves": "Curvas",
+        "springs": "Muelles",
+        "loops": "Bucles",
+        "play": "Reproducir",
+        "reset": "Volver",
+        "note": "Con «reducir movimiento», las duraciones se recortan (200 ms como mucho), no hay desplazamientos y solo quedan fundidos. Los bucles no se aceleran: se quitan.",
+        "ms": "{ms} ms",
+        "reducedMs": "{ms} ms (sin movimiento: {reduced} ms)",
+        "spring": "rigidez {stiffness} · amortiguación {damping}",
+        "perSecond": "{ms} ms · {rate} por segundo",
+        "stagger": "Escalonado de la onda: {ms} ms por barra"
+      },
+      "demo": {
+        "primary": "Pillar el sample",
+        "secondary": "Escuchar",
+        "upload": "Subir mi beat",
+        "uploaded": "Subido",
+        "retry": "Reintentar",
+        "uploading": "Subiendo tu beat…",
+        "play": "Reproducir",
+        "openModal": "Abrir modal",
+        "replay": "Repetir la entrada",
+        "toastInfo": "Lanzar aviso",
+        "toastSuccess": "Lanzar éxito",
+        "toastError": "Lanzar error",
+        "addXp": "+{xp} XP",
+        "resetXp": "Reiniciar XP",
+        "linkToWeeks": "Ver semanas"
+      },
+      "sample": {
+        "entries": {
+          "first": {
+            "title": "Tigre púrpura",
+            "alias": "lilbru",
+            "key": "Fa menor"
+          },
+          "second": {
+            "title": "Luz de freno",
+            "alias": "santamaria",
+            "key": "Re♯ menor"
+          },
+          "third": {
+            "title": "Humo en la cabina",
+            "alias": "cornho",
+            "key": "Do menor"
+          },
+          "fourth": {
+            "title": "Ruido blanco",
+            "alias": "yepes",
+            "key": "Sol menor"
+          }
+        },
+        "genres": {
+          "drill": "Drill",
+          "trap": "Trap",
+          "boomBap": "Boom Bap",
+          "reggaeton": "Reggaeton",
+          "jerk": "Jerk",
+          "amapiano": "Amapiano",
+          "club": "Club"
+        },
+        "card": {
+          "title": "Tigre púrpura",
+          "meta": "Drill · 142 BPM",
+          "action": "Escuchar"
+        },
+        "tiles": {
+          "published": "Publicado",
+          "publishedValue": "26 sept 2026",
+          "bpm": "BPM",
+          "key": "Tonalidad",
+          "genre": "Género"
+        },
+        "sectionLabel": {
+          "info": "Información",
+          "licenses": "Licencias"
+        },
+        "modal": {
+          "title": "Entra y vota",
+          "description": "Tu voto queda guardado y se aplica en cuanto entres.",
+          "later": "Ahora no",
+          "signIn": "Entrar"
+        },
+        "toast": {
+          "info": "Nueva entrada en la batalla",
+          "infoMessage": "Ya sois 23 productores esta semana.",
+          "success": "Beat subido",
+          "successMessage": "Te llegará el recibo por email.",
+          "error": "Se ha cortado la subida",
+          "errorMessage": "Tu ficha sigue aquí: reintenta."
+        },
+        "countdownLabel": "Cierre de votos"
+      }
     }
   },
   "rank": {

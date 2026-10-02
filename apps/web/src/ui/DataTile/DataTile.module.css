@@ -1,0 +1,66 @@
+/*
+ * Tesela de dato (§3.3). Medidas de la ficha del sello (`otp-metrics.json`, `.beat-detail__info-item`):
+ * 136×75 px, radio 8, fondo `#111`, borde de 1 px `#1e1e1e`, relleno 10×12, hueco 4; icono rojo de
+ * 12 px; etiqueta de 11,2 px en mayúsculas con interletraje 0,05 em; valor en negrita.
+ */
+.list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: var(--bb-space-2);
+  margin: 0;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--bb-space-1);
+  min-width: 0;
+  padding: 0.625rem var(--bb-space-3);
+  border: 1px solid var(--bb-ink-700);
+  border-radius: var(--bb-radius-sm);
+  background-color: var(--bb-ink-850);
+  text-align: center;
+  transition: border-color var(--bb-dur-fast) var(--bb-ease-out);
+}
+
+.tile:hover,
+.tile[data-force-state="hover"] {
+  border-color: var(--bb-ink-600);
+}
+
+.term {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--bb-space-1);
+}
+
+.icon {
+  color: var(--bb-red);
+  font-size: var(--bb-font-size-xs);
+}
+
+.label {
+  color: var(--bb-text-3);
+  font-size: var(--bb-font-size-2xs);
+  letter-spacing: var(--bb-tracking-meta);
+  text-transform: uppercase;
+}
+
+.value {
+  display: flex;
+  justify-content: center;
+  min-height: 1.2em;
+  margin: 0;
+  color: var(--bb-text);
+  font-size: var(--bb-font-size-md);
+  font-weight: var(--bb-weight-bold);
+  line-height: var(--bb-leading-snug);
+  overflow-wrap: anywhere;
+}
+
+.mono {
+  font-family: var(--bb-font-mono);
+  font-variant-numeric: tabular-nums;
+}

@@ -15,6 +15,7 @@ export const color = {
   black: '#000000',
   ink950: '#0a0a0a',
   ink900: '#0e0e0e',
+  ink850: '#111111',
   ink800: '#1a1a1a',
   ink700: '#1e1e1e',
   ink600: '#2a2a2a',
@@ -25,9 +26,12 @@ export const color = {
   line: 'rgba(255, 255, 255, 0.08)',
   lineStrong: 'rgba(255, 255, 255, 0.18)',
   lineButton: 'rgba(255, 255, 255, 0.3)',
+  lineLit: 'rgba(255, 255, 255, 0.4)',
   fillHover: 'rgba(255, 255, 255, 0.06)',
   fillActive: 'rgba(255, 255, 255, 0.1)',
   scrim: 'rgba(0, 0, 0, 0.7)',
+  glare: 'rgba(255, 255, 255, 0.14)',
+  shine: 'rgba(255, 255, 255, 0.55)',
 
   text: '#ffffff',
   text2: '#cccccc',
@@ -80,6 +84,43 @@ export const reducedDuration = {
   reward: 200,
 } as const satisfies Record<DurationToken, number>
 
+/**
+ * Periodos de los bucles en milisegundos (`--bb-loop-*`; en `tokens.css` van en `ms` o en `s`). No
+ * cambian con «reducir movimiento»: con la preferencia, la pieza quita el bucle o pasa a su variante
+ * estática (RNF-A11Y-03, RNF-A11Y-04 y Anexo E).
+ */
+export const loop = {
+  /** §3.3: separadores de la cuenta atrás, 1 Hz. */
+  blink: 1000,
+  /** §3.3: latido de la cuenta atrás en la última hora. */
+  heartbeat: 1000,
+  /** Barrido del esqueleto de carga. */
+  shimmer: 1500,
+  /** Onda de 5 barras del botón cargando. */
+  loader: 1000,
+  /** Anexo E: mini onda que «respira» en el hover de una fila. */
+  breathe: 2400,
+  /** Una vuelta del marquee del hero. */
+  marquee: 35_000,
+  /** Marquee sin movimiento: la lista estática rota cada 5 s. */
+  tickerStep: 5_000,
+  /** Orbes del fondo: deriva y pulso de cada uno. */
+  orbDrift1: 14_000,
+  orbDrift2: 18_000,
+  orbDrift3: 22_000,
+  orbPulse1: 11_000,
+  orbPulse2: 14_000,
+  orbPulse3: 9_000,
+} as const
+
+export type LoopToken = keyof typeof loop
+
+/** Escalonados en milisegundos (`--bb-stagger-*`): retardo entre piezas de una misma entrada. */
+export const stagger = {
+  /** Anexo E: barras de la forma de onda al crecer desde el centro. */
+  wave: 2,
+} as const
+
 /** Tope de cualquier animación con «reducir movimiento», en ms. */
 export const REDUCED_MOTION_MAX_MS = 200
 
@@ -96,26 +137,6 @@ export const ease = {
 } as const satisfies Record<string, CubicBezier>
 
 export type EaseToken = keyof typeof ease
-
-/**
- * Periodos de los bucles en milisegundos (`--bb-loop-*`). No se recortan con «reducir movimiento»:
- * con la preferencia, la pieza en bucle pasa a su variante estática (Anexo E).
- */
-export const loop = {
-  /** Una vuelta del marquee del hero. */
-  marquee: 35_000,
-  /** Marquee sin movimiento: la lista estática rota cada 5 s. */
-  tickerStep: 5_000,
-  /** Orbes del fondo: deriva y pulso de cada uno. */
-  orbDrift1: 14_000,
-  orbDrift2: 18_000,
-  orbDrift3: 22_000,
-  orbPulse1: 11_000,
-  orbPulse2: 14_000,
-  orbPulse3: 9_000,
-} as const
-
-export type LoopToken = keyof typeof loop
 
 /** Muelles de §3.6 para Motion (`transition={{ type: 'spring', ...spring.interaction }}`). */
 export const spring = {
@@ -139,13 +160,17 @@ export const zIndex = {
 } as const
 
 /** Nombre de la variable CSS de un token: `cssVarName('color', 'ink950')` → `--bb-ink-950`. */
-export function cssVarName(group: 'color' | 'duration' | 'ease' | 'loop' | 'zIndex', key: string): string {
+export function cssVarName(
+  group: 'color' | 'duration' | 'ease' | 'zIndex' | 'loop' | 'stagger',
+  key: string,
+): string {
   const prefix = {
     color: '--bb-',
     duration: '--bb-dur-',
     ease: '--bb-ease-',
-    loop: '--bb-loop-',
     zIndex: '--bb-z-',
+    loop: '--bb-loop-',
+    stagger: '--bb-stagger-',
   }[group]
   return prefix + toKebab(key)
 }

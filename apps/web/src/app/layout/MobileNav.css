@@ -63,8 +63,8 @@
   inset: 0;
   z-index: var(--bb-z-modal);
   background-color: var(--bb-scrim);
-  -webkit-backdrop-filter: blur(var(--bb-blur-scrim));
-  backdrop-filter: blur(var(--bb-blur-scrim));
+  -webkit-backdrop-filter: blur(var(--bb-scrim-blur));
+  backdrop-filter: blur(var(--bb-scrim-blur));
 }
 
 /* ── Panel ────────────────────────────────────────────────────────────────────────────────── */

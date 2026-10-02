@@ -1,0 +1,120 @@
+/*
+ * Avisos (§3.3). Anatomía del `Toast` del sello (fondo `#1a1a1a`, radio 12, icono del tono, mensaje y
+ * cerrar) con los tokens: acento lateral del tono y el icono con nombre (nunca solo el color).
+ */
+.viewport {
+  position: fixed;
+  right: var(--bb-space-6);
+  bottom: var(--bb-space-6);
+  z-index: var(--bb-z-toast);
+  display: flex;
+  flex-direction: column;
+  width: min(26rem, calc(100vw - 2 * var(--bb-space-6)));
+  pointer-events: none;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bb-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Las dos regiones existen siempre (si no, no se anuncian); el hueco, solo entre las que tienen algo. */
+.stack:not(:empty) + .stack:not(:empty) {
+  margin-top: var(--bb-space-3);
+}
+
+.item {
+  pointer-events: auto;
+}
+
+.toast {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--bb-space-3);
+  padding: var(--bb-space-3) var(--bb-space-3) var(--bb-space-3) var(--bb-space-4);
+  overflow: hidden;
+  border: 1px solid var(--bb-line-strong);
+  border-radius: var(--bb-radius-md);
+  background-color: var(--bb-ink-800);
+  box-shadow: var(--bb-shadow-float);
+  color: var(--bb-text);
+  transition: border-color var(--bb-dur-fast) var(--bb-ease-out);
+}
+
+/* Acento del tono: la barra lateral (como el rótulo de sección, en vertical). */
+.toast::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background-color: var(--toast-accent);
+}
+
+/* Información en neutro: el rojo queda para el error (§3.2 distingue el peligro del rojo de marca). */
+.toast[data-tone="info"] {
+  --toast-accent: var(--bb-text-2);
+}
+
+.toast[data-tone="success"] {
+  --toast-accent: var(--bb-success);
+}
+
+.toast[data-tone="error"] {
+  --toast-accent: var(--bb-danger);
+}
+
+.toast:hover,
+.toast[data-force-state="hover"],
+.toast:focus-within,
+.toast[data-force-state="focus"] {
+  border-color: var(--bb-line-lit);
+}
+
+.icon {
+  margin-top: var(--bb-space-2);
+  color: var(--toast-accent);
+  font-size: var(--bb-font-size-lg);
+}
+
+.text {
+  display: grid;
+  flex: 1;
+  gap: var(--bb-space-1);
+  min-width: 0;
+  padding-block: var(--bb-space-2);
+}
+
+.title {
+  font-size: var(--bb-font-size-sm);
+  font-weight: var(--bb-weight-semibold);
+  line-height: var(--bb-leading-snug);
+}
+
+.message {
+  color: var(--bb-text-2);
+  font-size: var(--bb-font-size-xs);
+  line-height: var(--bb-leading-body);
+}
+
+.close {
+  flex-shrink: 0;
+  border-color: transparent;
+}
+
+/* Móvil: arriba, bajo la isla de navegación, de lado a lado. */
+@media (max-width: 600px) {
+  .viewport {
+    top: calc(var(--nav-flow) + var(--bb-space-2));
+    right: var(--bb-layout-gutter);
+    bottom: auto;
+    left: var(--bb-layout-gutter);
+    width: auto;
+  }
+}

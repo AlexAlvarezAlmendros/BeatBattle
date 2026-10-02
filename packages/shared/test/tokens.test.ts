@@ -7,9 +7,11 @@ import {
   cssVarName,
   duration,
   ease,
+  loop,
   REDUCED_MOTION_MAX_MS,
   reducedDuration,
   spring,
+  stagger,
   toCssCubicBezier,
   toKebab,
   toRgba01,
@@ -69,6 +71,13 @@ function parseCubicBezier(value: string): CubicBezier {
   return numbers as unknown as CubicBezier
 }
 
+/** `1500ms` → 1500, `35s` → 35000: los bucles largos van en segundos y los cortos en milisegundos. */
+function toMs(value: string | undefined): number | undefined {
+  const match = /^(\d+(?:\.\d+)?)(ms|s)$/.exec(value ?? '')
+  if (!match) return undefined
+  return Number(match[1]) * (match[2] === 's' ? 1000 : 1)
+}
+
 function expectSameColor(actual: string, expected: string) {
   const a = toRgba01(actual)
   const b = toRgba01(expected)
@@ -122,6 +131,39 @@ describe('tokens: tokens.css ↔ tokens.ts', () => {
         .map((key) => cssVarName('ease', key))
         .sort(),
     )
+  })
+
+  it('RD-VIS-01: los periodos de los bucles (--bb-loop-*) coinciden y no falta ninguno', () => {
+    for (const [key, ms] of Object.entries(loop)) {
+      const name = cssVarName('loop', key)
+      expect(toMs(root.get(name)), name).toBe(ms)
+    }
+    const cssLoops = [...root.keys()].filter((name) => name.startsWith('--bb-loop-'))
+    expect(cssLoops.sort()).toEqual(
+      Object.keys(loop)
+        .map((key) => cssVarName('loop', key))
+        .sort(),
+    )
+  })
+
+  it('RD-VIS-01: los escalonados (--bb-stagger-*) coinciden y no falta ninguno', () => {
+    for (const [key, ms] of Object.entries(stagger)) {
+      expect(root.get(cssVarName('stagger', key))).toBe(`${ms}ms`)
+    }
+    const cssStaggers = [...root.keys()].filter((name) => name.startsWith('--bb-stagger-'))
+    expect(cssStaggers).toHaveLength(Object.keys(stagger).length)
+  })
+
+  it('RNF-A11Y-04: ningún bucle destella más de 3 veces por segundo', () => {
+    for (const ms of Object.values(loop)) expect(1000 / ms).toBeLessThanOrEqual(3)
+  })
+
+  it('RNF-A11Y-03: «reducir movimiento» no cambia bucles ni escalonados (la pieza pasa a su variante estática)', () => {
+    for (const block of reducedBlocks) {
+      for (const name of block!.keys()) expect(name).not.toMatch(/^--bb-(loop|stagger)-/)
+    }
+    // Anexo E: el teletipo sin movimiento rota cada 5 s.
+    expect(loop.tickerStep).toBe(5000)
   })
 
   it('RD-VIS-01: los tokens de :root solo usan variables declaradas en :root', () => {
@@ -182,6 +224,9 @@ describe('tokens: utilidades', () => {
     expect(toKebab('text2')).toBe('text-2')
     expect(toKebab('inOut')).toBe('in-out')
     expect(cssVarName('color', 'redGlow')).toBe('--bb-red-glow')
+    expect(cssVarName('loop', 'orbDrift1')).toBe('--bb-loop-orb-drift-1')
+    expect(cssVarName('loop', 'tickerStep')).toBe('--bb-loop-ticker-step')
+    expect(cssVarName('stagger', 'wave')).toBe('--bb-stagger-wave')
   })
 
   it('toRgba01 entiende hex de 3, 4, 6 y 8 cifras y rgba()', () => {

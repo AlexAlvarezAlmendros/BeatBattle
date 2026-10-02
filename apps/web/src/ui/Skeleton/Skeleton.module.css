@@ -1,0 +1,60 @@
+/*
+ * Esqueleto (§3.3): el barrido diagonal del sello (`Skeleton.css`: 110°, #1a1a1a → #2a2a2a → #1a1a1a,
+ * 1,5 s), con los grises de los tokens.
+ */
+.skeleton {
+  display: block;
+  width: 100%;
+  background-color: var(--bb-ink-800);
+  background-image: linear-gradient(
+    110deg,
+    var(--bb-ink-800) 8%,
+    var(--bb-ink-600) 18%,
+    var(--bb-ink-800) 33%
+  );
+  background-size: 200% 100%;
+  animation: shimmer var(--bb-loop-shimmer) var(--bb-ease-in-out) infinite;
+}
+
+.block {
+  height: var(--bb-space-12);
+  border-radius: var(--bb-radius-sm);
+}
+
+.text {
+  height: 1em;
+  border-radius: var(--bb-radius-xs);
+}
+
+.circle {
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.group {
+  display: grid;
+  gap: var(--bb-space-2);
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Sin movimiento (Anexo E): gris fijo. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    background-image: none;
+    animation: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .skeleton {
+  background-image: none;
+  animation: none;
+}
