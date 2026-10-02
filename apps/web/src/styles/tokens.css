@@ -236,6 +236,13 @@
   --nav-gap: 16px; /* Separación de la isla con el borde */
   --nav-h: 69px; /* Alto de la isla; baja en móvil (ver media queries al final) */
   --nav-flow: calc(var(--nav-gap) + var(--nav-h)); /* Espacio que la isla ocupa en el flujo */
+  /*
+   * Alto que la isla tapa por arriba al desplazarse, con el logo OTP. que cuelga de ella: el logo de
+   * 120 px girado −10° baja hasta y = 119 en escritorio (117 en ≤ 992 px), más que la isla (85 / 78 /
+   * 70). Con el anillo de foco (4 px) y un poco de aire, 128 px. Lo usan los destinos de foco y las
+   * anclas del contenido (`scroll-margin-top` en global.css); nunca los controles de la propia isla.
+   */
+  --nav-obscured: 128px;
   --bb-layout-max: 1320px; /* Ancho máximo de la isla (el contenido va a todo el ancho, como el sello) */
   --bb-layout-gutter: 1rem; /* Margen lateral mínimo: `min(1320px, 100% − 2rem)` */
   --bb-layout-width: min(var(--bb-layout-max), calc(100% - 2 * var(--bb-layout-gutter)));
@@ -317,6 +324,7 @@
 @media (max-width: 992px) {
   :root {
     --nav-h: 62px;
+    --nav-obscured: 124px; /* Logo centrado, hasta y = 117 */
   }
 }
 

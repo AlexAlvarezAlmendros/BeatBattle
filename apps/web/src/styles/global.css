@@ -19,7 +19,16 @@ html {
   color-scheme: dark;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  scroll-padding-top: var(--nav-flow);
+}
+
+/*
+ * Lo que la isla sticky (y el logo que cuelga de ella) taparía al desplazarse para mostrarlo: controles
+ * enfocados con el teclado y destinos de anclas del contenido y del pie. No va en `html` como
+ * `scroll-padding-top`: los controles de la isla siempre caen dentro de esa franja, así que cada Tab en
+ * la isla desplazaba la página (RNF-A11Y-01).
+ */
+:where(.site-main, .site-footer) :is(a[href], button, input, select, textarea, summary, [tabindex], [id]) {
+  scroll-margin-top: var(--nav-obscured);
 }
 
 body {

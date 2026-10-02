@@ -104,6 +104,73 @@ test('RNF-A11Y-01: foco visible en el botón base de §3.3 (galería), que lo co
   await expectVisibleFocus(live)
 })
 
+const scrollY = (page: Page) => page.evaluate(() => Math.round(window.scrollY))
+
+/**
+ * Desde el último enlace del pie, Tab vuelve a empezar por arriba: «Saltar al contenido» y la isla. La
+ * isla es sticky y siempre está a la vista, así que enfocarla no debe mover la página (antes, con
+ * `scroll-padding-top` en `html`, cada Tab la subía media ventana).
+ */
+async function tabThroughIslandFromFooter(page: Page, last: Locator, max = 12): Promise<string[]> {
+  await page.getByRole('contentinfo').getByRole('link').last().focus()
+  const start = await scrollY(page)
+  expect(start).toBeGreaterThan(200)
+  const visited: string[] = []
+  while (!(await last.evaluate((element) => element === document.activeElement))) {
+    expect(visited.length, `el foco no llegó tras ${visited.join(' → ')}`).toBeLessThan(max)
+    await page.keyboard.press('Tab')
+    visited.push(
+      await page.evaluate(() => {
+        const active = document.activeElement
+        return active && active !== document.body
+          ? active.textContent?.trim() || active.tagName
+          : '(documento)'
+      }),
+    )
+    expect(await scrollY(page), `tras enfocar ${visited.join(' → ')}`).toBe(start)
+  }
+  return visited
+}
+
+test('RNF-A11Y-01: recorrer la isla con Tab desde el pie no desplaza la página', async ({ page }) => {
+  await open(page, '/', 'Beat Battle')
+  const visited = await tabThroughIslandFromFooter(
+    page,
+    page.getByRole('banner').getByRole('link', { name: 'Entrar', exact: true }),
+  )
+  // Pasa por «Saltar al contenido» y los enlaces de la isla antes de «Entrar».
+  expect(visited).toEqual(
+    expect.arrayContaining(['Saltar al contenido', 'Semana', 'Jurado', 'Cómo funciona']),
+  )
+  // Mayús+Tab de vuelta por la isla tampoco la mueve.
+  const start = await scrollY(page)
+  for (let step = 0; step < 6; step++) {
+    await page.keyboard.press('Shift+Tab')
+    expect(await scrollY(page)).toBe(start)
+  }
+})
+
+test('RNF-A11Y-01: un control del contenido enfocado bajo el logo que cuelga de la isla se desplaza hasta verse entero', async ({
+  page,
+}) => {
+  await open(page, '/como-funciona', 'Cómo funciona')
+  await page.getByRole('contentinfo').scrollIntoViewIfNeeded()
+  const link = page.getByRole('main').getByRole('link', { name: 'Bases de la competición' })
+  // Deja el enlace a y ≈ 100: por debajo de la isla (85 px) pero bajo el logo (hasta y = 119).
+  await link.evaluate((element) => window.scrollBy(0, element.getBoundingClientRect().top - 100))
+  expect(Math.round((await link.boundingBox())?.y ?? 0)).toBe(100)
+  await link.focus()
+  const box = await link.boundingBox()
+  // Con su anillo (2 + 2 px) por debajo del logo, y lo que hay en su centro es el propio enlace.
+  expect(box?.y ?? 0).toBeGreaterThanOrEqual(123)
+  const hit = await link.evaluate((element) => {
+    const rect = element.getBoundingClientRect()
+    const atCenter = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
+    return atCenter === element || element.contains(atCenter)
+  })
+  expect(hit).toBe(true)
+})
+
 test.describe('móvil (390 × 844)', () => {
   test.use({ viewport: { width: 390, height: 844 } })
 
@@ -135,5 +202,32 @@ test.describe('móvil (390 × 844)', () => {
     await page.keyboard.press('Escape')
     await expect(dialog).toBeHidden()
     await expectVisibleFocus(toggle)
+  })
+
+  test('RNF-A11Y-01: enfocar el botón «Menú» desde el pie no desplaza la página', async ({ page }) => {
+    await open(page, '/como-funciona', 'Cómo funciona')
+    const visited = await tabThroughIslandFromFooter(
+      page,
+      page.getByRole('banner').getByRole('button', { name: 'Menú' }),
+    )
+    expect(visited).toContain('Saltar al contenido')
+  })
+
+  test('RNF-A11Y-01: un enlace enfocado bajo el logo centrado se desplaza hasta verse entero', async ({
+    page,
+  }) => {
+    await open(page, '/como-funciona', 'Cómo funciona')
+    await page.getByRole('contentinfo').scrollIntoViewIfNeeded()
+    const link = page.getByRole('main').getByRole('link', { name: 'Bases de la competición' })
+    // A y ≈ 80: por debajo de la isla (70 px) pero bajo el logo (hasta y = 117).
+    await link.evaluate((element) => window.scrollBy(0, element.getBoundingClientRect().top - 80))
+    await link.focus()
+    expect((await link.boundingBox())?.y ?? 0).toBeGreaterThanOrEqual(121)
+    const hit = await link.evaluate((element) => {
+      const rect = element.getBoundingClientRect()
+      const atCenter = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
+      return atCenter === element || element.contains(atCenter)
+    })
+    expect(hit).toBe(true)
   })
 })
