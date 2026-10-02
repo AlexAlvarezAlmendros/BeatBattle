@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { eq } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 import { runBatch } from '../src/db/batch'
-import { createDb, filePathOf } from '../src/db/client'
+import { createDb, filePathOf, isLocalDb } from '../src/db/client'
 import { runMigrations } from '../src/db/migrate'
 import { appRateLimit } from '../src/db/schema'
 import { createTestDb } from '../src/db/testDb'
@@ -53,6 +53,22 @@ describe('base de datos', () => {
     } finally {
       db.$client.close()
       rmSync(root, { recursive: true, force: true })
+    }
+  })
+
+  it('en local las claves ajenas quedan activas tras migrar', async () => {
+    const db = await createTestDb()
+    expect(isLocalDb(db)).toBe(true)
+    expect((await db.$client.execute('PRAGMA foreign_keys')).rows[0]?.foreign_keys).toBe(1)
+  })
+
+  it('con una BD remota createDb no hace ninguna petición (ni el PRAGMA de claves ajenas)', async () => {
+    // nada escucha en el puerto 1: si createDb consultara algo, fallaría
+    const db = await createDb('http://127.0.0.1:1')
+    try {
+      expect(isLocalDb(db)).toBe(false)
+    } finally {
+      db.$client.close()
     }
   })
 
