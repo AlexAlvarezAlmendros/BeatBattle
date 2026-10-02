@@ -28,7 +28,7 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 
 | # | Fase | Estado | Plan | Hito |
 |---|------|--------|------|------|
-| 0 | Fundaciones | 🔄 Hito cumplido en local; falta la primera CI en GitHub (al subir la rama) | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes con la estética del sello; prueba del sello sin diferencias sin justificar salvo el Silk (1.1) |
+| 0 | Fundaciones | ✅ Hecho (2026-10-02; CI de GitHub en verde en la PR #1) | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes con la estética del sello; prueba del sello sin diferencias sin justificar salvo el Silk (1.1) |
 | 1 | Spike de sensación y audio | ⬜ Lista (1.1, 1.4 y 1.9 se pueden empezar) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio; efectos < 30 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
 | 2 | Cuentas y base de email | 🔒 Bloqueada (F0, GO de F1) | — (se crea al llegar) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, preferencias, consentimientos y bajas |
 | 3 | Semanas y samples | 🔒 Bloqueada (F2) | — | 3 semanas programadas; cambio de semana en la frontera con reloj simulado; email del drop (también sin cuenta) |
@@ -43,10 +43,9 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 
 ## Foco actual
 
-**Fase 0 cerrada en local** (rama `feat/f0-fundaciones`): falta la primera ejecución de la CI en GitHub,
-que llega al abrir la PR. **Siguiente: Fase 1** (spike GO/NO-GO): 1.1 Silk y Escenario, 1.4 motor de
-audio y 1.9 port del análisis se pueden empezar ya. Antes de 1.7 y 1.8 (recursos en la nube) hay que
-cerrar la decisión de la cuenta de Cloudinary.
+**Fase 0 cerrada** (PR #1 a `main`, pendiente de revisión). **Siguiente: Fase 1** (spike GO/NO-GO):
+1.1 Silk y Escenario, 1.4 motor de audio y 1.9 port del análisis se pueden empezar ya. Antes de 1.7 y
+1.8 (recursos en la nube) hay que cerrar la decisión de la cuenta de Cloudinary.
 
 ## Grafo de dependencias
 
@@ -140,11 +139,13 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 | Nombre de marca | «Beat Battle by Other People» | F0 (0.7) | Logo y textos |
 | Modelo de semana | Envíos y votos a la vez | Tras la beta | Revisar con datos de participación |
 | Fecha de lanzamiento | Primera semana completa tras F10 | F10 | — |
+| Dependabot | Activarlo en la Fase 10 | F10 | Abre PRs en GitHub: necesita confirmación |
 
 ## Registro de avance
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-02 | F0 | **Cerrada.** CI de GitHub en verde en la PR #1 (la primera ejecución destapó una dependencia sin declarar, ya arreglada). |
 | 2026-10-02 | F0 | Fase 0 implementada en tres olas de agentes en paralelo con revisión independiente, jurado de la prueba del sello y revisión adversarial; guía v0.4 y v0.5 con las desviaciones. Pendiente: primera CI en GitHub. |
 | 2026-10-02 | — | Guía maestra v0.3: email con nodemailer + Gmail (decisión del usuario). |
 | 2026-10-02 | — | Guía maestra v0.2: sistema de emails (recibos, avisos y marketing) y fases ajustadas. |
