@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, matchRoutes, type RouteObject, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -95,8 +95,11 @@ describe('router (0.10, guía §2.18)', () => {
     // Destino de foco programático: global.css le quita el anillo solo a lo que lleva esta marca.
     expect(screen.getByRole('main')).toHaveAttribute('data-focus-target')
     expect(screen.getByRole('contentinfo')).toBeInTheDocument()
-    expect(screen.getByRole('navigation', { name: t('nav.label') })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: t('nav.weeks') })).toHaveAttribute('aria-current', 'page')
+    const nav = screen.getByRole('navigation', { name: t('layout.nav.label') })
+    expect(within(nav).getByRole('link', { name: t('layout.nav.results') })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
   })
 
   it('RNF-A11Y-01: «Saltar al contenido» lleva el foco al <main>', async () => {
@@ -144,7 +147,8 @@ describe('router (0.10, guía §2.18)', () => {
     await h1(t('pages.home.title'))
     const scrollTo = vi.mocked(window.scrollTo)
     scrollTo.mockClear()
-    await user.click(screen.getByRole('link', { name: t('nav.howItWorks') }))
+    const nav = screen.getByRole('navigation', { name: t('layout.nav.label') })
+    await user.click(within(nav).getByRole('link', { name: t('layout.nav.howItWorks') }))
     expect(await h1(t('pages.howItWorks.title'))).toBeInTheDocument()
     expect(scrollTo).toHaveBeenCalledWith(0, 0)
     expect(screen.getByRole('main')).toHaveFocus()

@@ -1,0 +1,437 @@
+/*
+ * Piezas del hero del sello (guía §3.1, §3.2 y §3.8.3), portadas de `ReactOtpWeb/.../Landing/Hero.css`
+ * con sus medidas (ver `docs/planning/evidence/f0/otp/otp-metrics.json`) y solo con tokens. Tramos del
+ * sello: ≤ 1024 px sin rótulos laterales, ≤ 768 px tableta, ≤ 480 px móvil.
+ */
+
+/* ── Sección ──────────────────────────────────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100dvh;
+  min-height: 640px;
+  max-height: 1000px;
+  margin-bottom: var(--bb-space-16);
+  overflow: hidden;
+  /* Sin fondo propio: deja ver el fondo de la página (orbes o Silk) y se funde con él abajo. */
+}
+
+/* Capas de fondo, fundidas a transparente en los últimos 260 px para encadenar con la página. */
+.hero__backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  -webkit-mask-image: linear-gradient(to bottom, var(--bb-black) calc(100% - 260px), transparent 100%);
+  mask-image: linear-gradient(to bottom, var(--bb-black) calc(100% - 260px), transparent 100%);
+}
+
+.hero-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--bb-hero-vignette);
+}
+
+/* Rejilla roja: líneas de 1 px cada 60 px, al 8 %, con máscara radial. */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.08;
+  background-image:
+    linear-gradient(var(--bb-red-rule) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bb-red-rule) 1px, transparent 1px);
+  background-size: 60px 60px;
+  -webkit-mask-image: radial-gradient(ellipse at center, var(--bb-black) 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse at center, var(--bb-black) 30%, transparent 75%);
+}
+
+/* ── Contenido centrado ───────────────────────────────────────────────────────────────────── */
+.hero__content {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 900px;
+  padding: 0 var(--bb-space-8);
+  color: var(--bb-text);
+  text-align: center;
+}
+
+/* ── Titular: maciza blanca + contorno rojo con relleno negro ─────────────────────────────── */
+.hero-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1em;
+  margin: 0;
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-font-size-hero);
+  font-weight: var(--bb-weight-black);
+  letter-spacing: var(--bb-tracking-hero);
+  line-height: var(--bb-leading-tight);
+  text-shadow: var(--bb-shadow-hero-title);
+  text-transform: uppercase;
+}
+
+.hero-title__line {
+  display: block;
+  color: var(--bb-text);
+}
+
+.hero-title__line--outline {
+  position: relative;
+  color: var(--bb-black);
+  -webkit-text-fill-color: var(--bb-black);
+  -webkit-text-stroke: var(--bb-text-stroke);
+  text-shadow: var(--bb-text-glow);
+}
+
+/*
+ * Montserrat variable trae contornos solapados (las uniones de los trazos de B, A, E…) y el
+ * `-webkit-text-stroke` los dibuja por dentro de la letra. Pintando el trazo antes que el relleno, el
+ * relleno negro tapa la mitad interior y esas líneas; el trazo se dobla para que la parte visible, por
+ * fuera, siga siendo la del sello (2 / 1,5 / 1 px). La Arial del sello es estática y no tiene ese
+ * problema.
+ */
+@supports (paint-order: stroke fill) {
+  .hero-title__line--outline {
+    -webkit-text-stroke-width: calc(2 * var(--bb-text-stroke-width));
+    paint-order: stroke fill;
+  }
+}
+
+/* Filete: 80 × 3 px, degradado rojo a transparente. */
+.hero-divider {
+  position: relative;
+  width: 80px;
+  height: 3px;
+  margin: 1.75rem 0 var(--bb-space-5);
+  background: linear-gradient(90deg, transparent, var(--bb-red), transparent);
+}
+
+.hero-subtitle {
+  margin: 0 0 var(--bb-space-10);
+  color: var(--bb-text-2);
+  font-size: clamp(0.95rem, 1.6vw, 1.15rem);
+  font-weight: var(--bb-weight-light);
+  letter-spacing: var(--bb-tracking-caps);
+  line-height: normal;
+  text-shadow: var(--bb-shadow-hero-subtitle);
+  text-transform: uppercase;
+}
+
+/* ── Botones píldora ──────────────────────────────────────────────────────────────────────── */
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--bb-space-4);
+}
+
+.hero-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  max-width: 100%;
+  padding: 0.95rem var(--bb-space-8);
+  border: 1px solid transparent;
+  border-radius: var(--bb-radius-pill);
+  overflow: hidden;
+  color: var(--bb-text);
+  font-size: 0.95rem;
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-cta);
+  line-height: normal;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    translate var(--bb-dur-fast) var(--bb-ease-out),
+    scale var(--bb-dur-instant) var(--bb-ease-out),
+    box-shadow var(--bb-dur-fast) var(--bb-ease-out),
+    background-color var(--bb-dur-fast) var(--bb-ease-out),
+    border-color var(--bb-dur-fast) var(--bb-ease-out);
+}
+
+/* Hover: sube 1 px; pulsado: escala 0,97. Con «reducir movimiento» (--bb-motion: 0), solo color. */
+.hero-cta:hover {
+  translate: 0 calc(-1px * var(--bb-motion));
+}
+
+.hero-cta:active {
+  scale: calc(1 - 0.03 * var(--bb-motion));
+}
+
+.hero-cta--primary {
+  border-color: var(--bb-red-cta);
+  background-color: var(--bb-red-cta);
+  box-shadow: var(--bb-shadow-cta);
+}
+
+.hero-cta--primary:hover {
+  box-shadow: var(--bb-shadow-cta-hover);
+}
+
+.hero-cta--primary:active {
+  border-color: var(--bb-red-press);
+  background-color: var(--bb-red-press);
+}
+
+/* Contorno: sin cristal, velo oscuro; con cristal, GlassSurface pinta --bb-glass-card + refracción. */
+.hero-cta--ghost {
+  border-color: var(--bb-line-button);
+  background-color: var(--bb-glass-card);
+}
+
+.hero-cta--ghost:hover {
+  border-color: var(--bb-text);
+}
+
+.hero-cta--ghost:hover::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-color: var(--bb-fill-hover);
+  content: "";
+  pointer-events: none;
+}
+
+.hero-note {
+  margin-top: var(--bb-space-6);
+  color: var(--bb-text-2);
+  font-size: var(--bb-font-size-sm);
+  font-weight: var(--bb-weight-medium);
+}
+
+/* ── Rótulos verticales laterales ─────────────────────────────────────────────────────────── */
+.side-label {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  color: var(--bb-text-3);
+  font-size: 0.7rem;
+  font-weight: var(--bb-weight-semibold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
+  writing-mode: vertical-rl;
+}
+
+.side-label--left {
+  left: var(--bb-space-6);
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.side-label--right {
+  right: var(--bb-space-6);
+  transform: translateY(-50%);
+}
+
+.side-label__text {
+  display: inline-block;
+  padding: var(--bb-space-2) 0;
+  /* Físicos (arriba y abajo en pantalla), no lógicos: en escritura vertical, `border-block` serían los
+     lados. */
+  border-top: 1px solid var(--bb-red-rule);
+  border-bottom: 1px solid var(--bb-red-rule);
+}
+
+/* ── Banda de marquee ─────────────────────────────────────────────────────────────────────── */
+.marquee {
+  overflow: hidden;
+  padding: 0.9rem 0;
+  border-block: 1px solid var(--bb-red-line);
+  background-color: var(--bb-glass-band);
+  -webkit-backdrop-filter: blur(var(--bb-glass-blur-band));
+  backdrop-filter: blur(var(--bb-glass-blur-band));
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    var(--bb-black) 8%,
+    var(--bb-black) 92%,
+    transparent
+  );
+  mask-image: linear-gradient(90deg, transparent, var(--bb-black) 8%, var(--bb-black) 92%, transparent);
+}
+
+/* En el hero, abajo y a todo el ancho, como en el sello. */
+.hero__band {
+  position: absolute;
+  bottom: 70px;
+  left: 0;
+  z-index: 4;
+  width: 100%;
+}
+
+.marquee__track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll var(--bb-loop-marquee) linear infinite;
+}
+
+.marquee:hover .marquee__track,
+.marquee:focus-within .marquee__track {
+  animation-play-state: paused;
+}
+
+.marquee__group {
+  display: flex;
+  flex: none;
+  gap: var(--bb-space-12);
+  margin: 0;
+  /* El hueco final iguala el de entre palabras: así cada copia mide lo mismo y el bucle no salta. */
+  padding: 0 var(--bb-space-12) 0 0;
+  list-style: none;
+}
+
+.marquee__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-4);
+  color: var(--bb-text-2);
+  font-size: 0.85rem;
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-marquee);
+  line-height: normal;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.marquee__dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--bb-red);
+  box-shadow: var(--bb-shadow-dot);
+}
+
+/* Una vuelta: la pista se desplaza exactamente una copia de la lista. */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% / 3));
+  }
+}
+
+/* Sin movimiento: lista quieta que rota cada 5 s con un fundido. Centrada si cabe; si no, desde la
+   izquierda (pasado el fundido del borde), para que se vea la primera palabra y cómo rota. */
+.marquee__track--static {
+  justify-content: safe center;
+  width: auto;
+  padding-inline: 8%;
+  animation: marquee-fade var(--bb-dur-fast) var(--bb-ease-out);
+}
+
+@keyframes marquee-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ── Responsive (Hero.css) ────────────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .side-label {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: 560px;
+    margin-bottom: var(--bb-space-8);
+  }
+
+  .hero__backdrop {
+    -webkit-mask-image: linear-gradient(to bottom, var(--bb-black) calc(100% - 160px), transparent 100%);
+    mask-image: linear-gradient(to bottom, var(--bb-black) calc(100% - 160px), transparent 100%);
+  }
+
+  .hero__content {
+    padding: 0 var(--bb-space-5);
+  }
+
+  .hero-title {
+    gap: 0.15em;
+    line-height: 1.05;
+  }
+
+  .hero-title__line--outline {
+    letter-spacing: 0.01em;
+  }
+
+  .hero-divider {
+    margin: var(--bb-space-5) 0 var(--bb-space-4);
+  }
+
+  .hero-subtitle {
+    margin-bottom: var(--bb-space-8);
+    font-size: 0.8rem;
+  }
+
+  /* 360 px en tableta: «Avísame del próximo drop» es más largo que los botones del sello y a 15,2 px no
+     cabría en una línea; en móvil (≤ 480 px, letra de 13,6 px) vuelve a los 320 px del sello. */
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .hero-cta {
+    width: 100%;
+    padding: 0.9rem var(--bb-space-6);
+  }
+
+  .hero__band {
+    bottom: 60px;
+  }
+
+  .marquee {
+    padding: 0.7rem 0;
+  }
+
+  .marquee__group {
+    gap: var(--bb-space-8);
+    padding-right: var(--bb-space-8);
+  }
+
+  .marquee__item {
+    gap: var(--bb-space-3);
+    font-size: var(--bb-font-size-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    min-height: 520px;
+  }
+
+  .hero__backdrop {
+    -webkit-mask-image: linear-gradient(to bottom, var(--bb-black) calc(100% - 120px), transparent 100%);
+    mask-image: linear-gradient(to bottom, var(--bb-black) calc(100% - 120px), transparent 100%);
+  }
+
+  .hero-title__line--outline {
+    letter-spacing: 0.02em;
+  }
+
+  .hero-actions {
+    max-width: 320px;
+  }
+
+  .hero-cta {
+    font-size: 0.85rem;
+  }
+}

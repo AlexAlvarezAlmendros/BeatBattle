@@ -1,6 +1,7 @@
 import { type MouseEvent, useEffect, useRef } from 'react'
 import { Outlet, ScrollRestoration, useLocation, useNavigation } from 'react-router'
 import { t } from '../../i18n'
+import { AmbientOrbs } from './AmbientOrbs'
 import { SiteFooter } from './SiteFooter'
 import { SiteHeader } from './SiteHeader'
 import './layout.css'
@@ -9,7 +10,8 @@ import './layout.css'
 export const MAIN_ID = 'contenido'
 
 /**
- * Marco de todas las páginas: «Saltar al contenido», cabecera, `<main id="contenido">` y pie.
+ * Marco de todas las páginas, con el layout del sello (tarea 0.7, guía §3.1): fondo de orbes rojos,
+ * «Saltar al contenido», isla de navegación con el logo *OTP.*, `<main id="contenido">` y pie del sello.
  *
  * - Vuelta arriba al navegar (y posición recuperada al volver atrás) con `ScrollRestoration`.
  * - Al cambiar de página, el foco pasa al `<main>` para que teclado y lector de pantalla empiecen
@@ -36,6 +38,7 @@ export function RootLayout() {
 
   return (
     <>
+      <AmbientOrbs />
       <a className="skip-link" href={`#${MAIN_ID}`} onClick={skipToContent}>
         {t('app.skipToContent')}
       </a>

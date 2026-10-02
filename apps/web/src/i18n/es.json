@@ -15,24 +15,73 @@
     "count_one": "{count} entrada",
     "count_other": "{count} entradas"
   },
-  "nav": {
-    "label": "Principal",
-    "home": "Inicio",
-    "weeks": "Semanas",
-    "hallOfFame": "Salón de la fama",
-    "howItWorks": "Cómo funciona",
-    "signIn": "Entrar"
-  },
   "footer": {
     "credit": "{brand} · {otherPeople}",
     "legalLabel": "Legal",
     "otherPeople": "Other People Records",
     "tagline": "La batalla semanal de productores de Other People Records."
   },
+  "layout": {
+    "newTab": "(se abre en una pestaña nueva)",
+    "nav": {
+      "label": "Principal",
+      "week": "Semana",
+      "jury": "Jurado",
+      "results": "Resultados",
+      "hallOfFame": "Salón de la fama",
+      "howItWorks": "Cómo funciona",
+      "signIn": "Entrar"
+    },
+    "logo": {
+      "alt": "Other People Records"
+    },
+    "mobileNav": {
+      "toggle": "Menú",
+      "title": "Menú",
+      "close": "Cerrar el menú"
+    },
+    "footer": {
+      "labelTitle": "Other People",
+      "labelNav": "Web de Other People Records",
+      "artists": "Artistas",
+      "beats": "Beats",
+      "events": "Eventos",
+      "contact": "Contacto",
+      "socialTitle": "Síguenos",
+      "socialNav": "Redes de Other People Records",
+      "instagram": "Instagram",
+      "youtube": "YouTube",
+      "threads": "Threads",
+      "copyright": "© {year} Other People Records"
+    }
+  },
+  "home": {
+    "hero": {
+      "sideWeek": "Próximo drop",
+      "sideSeason": "Temporada —",
+      "titleSolid": "Beat",
+      "titleOutline": "Battle",
+      "subtitle": "Sample · Flip · Vota · Repite",
+      "notify": "Avísame del próximo drop",
+      "howItWorks": "Cómo funciona",
+      "emptyCalendar": "El próximo drop está en el horno."
+    },
+    "ticker": {
+      "label": "Teletipo de la batalla",
+      "idle": {
+        "nextDrop": "Próximo drop en el horno",
+        "everyMonday": "Un sample cada lunes",
+        "flip": "Flipéalo a tu manera",
+        "upload": "Sube tu beat",
+        "vote": "La comunidad vota",
+        "seal": "El domingo se sella",
+        "brand": "Beat Battle by Other People"
+      }
+    }
+  },
   "pages": {
     "home": {
-      "title": "Beat Battle",
-      "summary": "Aquí irá la semana en curso: el drop, la cuenta atrás, las entradas, el campeón anterior y cómo funciona."
+      "title": "Beat Battle"
     },
     "week": {
       "title": "Semana",
