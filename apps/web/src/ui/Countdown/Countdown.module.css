@@ -22,6 +22,8 @@
   color: var(--bb-text-3);
   font-weight: var(--bb-weight-bold);
   animation: blink var(--bb-loop-blink) var(--bb-ease-in-out) infinite;
+  /* Fase alineada con el cambio de cifra (la calcula el componente al montar). */
+  animation-delay: var(--blink-delay);
 }
 
 .segment {

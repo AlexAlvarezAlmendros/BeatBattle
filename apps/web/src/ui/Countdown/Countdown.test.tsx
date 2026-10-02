@@ -2,7 +2,15 @@ import { act, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
 import { Countdown } from './Countdown'
-import { countdownParts, countdownPhase, crossedMilestone, DAY_MS, HOUR_MS, MINUTE_MS } from './countdown'
+import {
+  countdownParts,
+  countdownPhase,
+  crossedMilestone,
+  DAY_MS,
+  HOUR_MS,
+  MINUTE_MS,
+  msToNextSecond,
+} from './countdown'
 
 /** Sábado 10 de octubre de 2026, 20:00 en Madrid (18:00 UTC). */
 const TARGET = Date.UTC(2026, 9, 10, 18, 0, 0)
@@ -87,6 +95,40 @@ describe('Countdown', () => {
     expect(digits()).toBe('00:00:01:30')
     clock.advance(1000)
     expect(digits()).toBe('00:00:01:29')
+  })
+
+  it('cambia en el instante justo aunque el objetivo no caiga en un segundo entero desde el montaje', () => {
+    // Faltan 90,25 s: se ve 01:31 (los segundos se redondean hacia arriba) y cambia a los 250 ms.
+    const clock = testClock(TARGET - 90_250)
+    const onEnd = vi.fn()
+    const { container } = render(<Countdown target={TARGET} now={clock.now} onEnd={onEnd} />)
+    const digits = () =>
+      [...screen.getByRole('timer').querySelectorAll('[class*="digits"]')]
+        .map((el) => el.textContent)
+        .join(':')
+    expect(digits()).toBe('00:00:01:31')
+    clock.advance(249)
+    expect(digits()).toBe('00:00:01:31')
+    clock.advance(1)
+    expect(digits()).toBe('00:00:01:30')
+    clock.advance(999)
+    expect(digits()).toBe('00:00:01:30')
+    clock.advance(1)
+    expect(digits()).toBe('00:00:01:29')
+    // El final llega en su instante, no hasta 1 s después.
+    clock.advance(89_000)
+    expect(digits()).toBe('00:00:00:00')
+    expect(onEnd).toHaveBeenCalledTimes(1)
+    // El parpadeo de los separadores arranca en fase con el cambio de cifra.
+    expect((container.firstElementChild as HTMLElement).style.getPropertyValue('--blink-delay')).toBe(
+      '-750ms',
+    )
+  })
+
+  it('msToNextSecond: lo que falta hasta el próximo segundo entero', () => {
+    expect(msToNextSecond(90_250)).toBe(250)
+    expect(msToNextSecond(90_000)).toBe(1000)
+    expect(msToNextSecond(1)).toBe(1)
   })
 
   it('RNF-A11Y-07: anuncia solo los hitos de 24 h, 1 h y 10 min, y el final', () => {

@@ -60,5 +60,15 @@ export function crossedMilestone(beforeMs: number, afterMs: number): CountdownMi
   return null
 }
 
+/**
+ * Milisegundos hasta el próximo cambio de cifra: cuando lo que falta cruza un segundo entero (los
+ * segundos se redondean hacia arriba). Así el reloj cambia en el instante justo y no hasta casi un
+ * segundo tarde, como haría un intervalo fijo que empieza al montar.
+ */
+export function msToNextSecond(remainingMs: number): number {
+  const rest = ((remainingMs % SECOND_MS) + SECOND_MS) % SECOND_MS
+  return rest === 0 ? SECOND_MS : rest
+}
+
 /** Número con al menos dos cifras: `7` → `"07"`. */
 export const pad2 = (value: number) => String(value).padStart(2, '0')

@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from 'react'
+import { type CSSProperties, Fragment, useEffect, useRef, useState } from 'react'
 import { t } from '../../i18n'
 import { cx } from '../forceState'
 import styles from './Countdown.module.css'
@@ -8,6 +8,7 @@ import {
   countdownParts,
   countdownPhase,
   crossedMilestone,
+  msToNextSecond,
   pad2,
   SECOND_MS,
 } from './countdown'
@@ -46,12 +47,22 @@ export function Countdown({ target, now = Date.now, label, size = 'lg', onEnd, c
   const onEndRef = useRef(onEnd)
   onEndRef.current = onEnd
 
+  // Fase del parpadeo de los separadores: el ciclo de 1 s empieza en un cambio de cifra, así que el
+  // separador está entero cada vez que cambian los dígitos (el retardo negativo adelanta el ciclo).
+  const [blinkDelay] = useState(() => msToNextSecond(target - current) - SECOND_MS)
+
+  // Un temporizador por cambio de cifra, encadenado y alineado con el segundo del objetivo (un
+  // intervalo fijo desde el montaje iba hasta casi 1 s por detrás). Se para al llegar a cero.
   useEffect(() => {
-    const tick = () => setCurrent(nowRef.current())
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const tick = () => {
+      const now = nowRef.current()
+      setCurrent(now)
+      if (now < target) timer = setTimeout(tick, msToNextSecond(target - now))
+    }
     tick()
-    const timer = setInterval(tick, SECOND_MS)
-    return () => clearInterval(timer)
-  }, [])
+    return () => clearTimeout(timer)
+  }, [target])
 
   useEffect(() => {
     const milestone = crossedMilestone(previousRemaining.current, remaining)
@@ -65,7 +76,11 @@ export function Countdown({ target, now = Date.now, label, size = 'lg', onEnd, c
   const parts = countdownParts(remaining)
 
   return (
-    <div className={cx(styles.countdown, styles[size], className)} data-phase={phase}>
+    <div
+      className={cx(styles.countdown, styles[size], className)}
+      data-phase={phase}
+      style={{ '--blink-delay': `${blinkDelay}ms` } as CSSProperties}
+    >
       <div role="timer" aria-label={label ?? t('ui.countdown.label')} className={styles.timer}>
         <span className="sr-only">
           {phase === 'ended' ? t('ui.countdown.milestone.ended') : spoken(parts)}
