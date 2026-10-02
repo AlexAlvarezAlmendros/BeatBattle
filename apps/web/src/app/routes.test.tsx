@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { type SimpleMessageKey, t } from '../i18n'
 import { documentTitle } from './DocumentTitle'
 import { LEGAL_DOCS, paths } from './paths'
+import { RouteErrorBoundary } from './RouteErrorBoundary'
 import { type RouteAccess, type RouteHandle, routes } from './routes'
 
 function renderAt(path: string, routeList: RouteObject[] = routes) {
@@ -118,6 +119,18 @@ describe('router (0.10, guía §2.18)', () => {
       await waitFor(() => expect(document.title).toBe(documentTitle(t('pages.notFound.title'))))
     },
   )
+
+  it('un error en una página pinta la pantalla de error (§2.19) sin repetir el titular', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const Broken = () => {
+      throw new Error('boom')
+    }
+    renderAt('/', [{ path: '/', ErrorBoundary: RouteErrorBoundary, Component: Broken }])
+    expect(await h1(t('pages.error.title'))).toBeInTheDocument()
+    expect(screen.getByText(t('pages.error.summary'))).toBeInTheDocument()
+    expect(screen.getAllByText(new RegExp(t('pages.error.title')))).toHaveLength(1)
+    expect(screen.getByRole('link', { name: t('common.backHome') })).toHaveAttribute('href', '/')
+  })
 
   it('/ajustes lleva a /ajustes/cuenta', async () => {
     const router = renderAt('/ajustes')
