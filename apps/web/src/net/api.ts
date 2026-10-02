@@ -1,0 +1,111 @@
+import { type ErrorCode, errorEnvelopeSchema } from '@beatbattle/shared'
+import { z } from 'zod'
+
+/**
+ * Cliente de la API tipado (guía §4.7.2). Mismo origen (`/api`; en desarrollo lo reenvía el proxy
+ * de Vite), cookies solo del propio sitio y sobre `{ data } | { error }` validado con Zod.
+ *
+ * Todo fallo llega como `ApiClientError` con un código estable que la UI traduce por i18n:
+ * - los del servidor (`NOT_FOUND`, `RATE_LIMITED`…), con su estado HTTP;
+ * - `NETWORK_ERROR` (estado 0) si no hubo respuesta;
+ * - `BAD_RESPONSE` si la respuesta no es el sobre esperado (un 502 en HTML del proxy, JSON roto o
+ *   datos que no cumplen el esquema).
+ * Una cancelación (`signal`) se propaga tal cual (`AbortError`), como espera TanStack Query.
+ */
+export class ApiClientError extends Error {
+  /** Segundos que pide esperar un 429 (`Retry-After`), si los indicó. */
+  retryAfterSeconds?: number
+
+  constructor(
+    /** Código del catálogo de `@beatbattle/shared`; puede ser uno nuevo que este cliente aún no conoce. */
+    readonly code: ErrorCode | (string & {}),
+    /** Estado HTTP; 0 si no hubo respuesta. */
+    readonly status: number,
+    message: string,
+    readonly details?: unknown,
+  ) {
+    super(message)
+    this.name = 'ApiClientError'
+  }
+}
+
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
+
+export interface ApiFetchOptions<T> {
+  method?: HttpMethod
+  /** Cuerpo JSON (se serializa aquí y añade `Content-Type: application/json`). */
+  body?: unknown
+  /** Esquema del contenido de `data`; la respuesta se valida antes de devolverla. */
+  schema: z.ZodType<T>
+  signal?: AbortSignal
+}
+
+const anyEnvelopeSchema = z.union([z.object({ data: z.unknown() }), errorEnvelopeSchema])
+
+function retryAfter(res: Response): number | undefined {
+  const seconds = Number(res.headers.get('Retry-After'))
+  return Number.isFinite(seconds) && seconds > 0 ? seconds : undefined
+}
+
+/**
+ * Llama a la API y devuelve `data` validado. `path` es la ruta completa del servidor
+ * (`/api/health`), para que se pueda buscar igual en el cliente y en el servidor.
+ */
+export async function apiFetch<T>(path: string, options: ApiFetchOptions<T>): Promise<T> {
+  const { method = 'GET', body, schema, signal } = options
+  if (!path.startsWith('/api/')) throw new TypeError(`apiFetch: la ruta debe empezar por /api/ (${path})`)
+
+  const headers: Record<string, string> = { Accept: 'application/json' }
+  if (body !== undefined) headers['Content-Type'] = 'application/json'
+
+  let res: Response
+  try {
+    res = await fetch(path, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      credentials: 'same-origin',
+      signal,
+    })
+  } catch (err) {
+    if (signal?.aborted) throw err
+    throw new ApiClientError('NETWORK_ERROR', 0, 'No hay conexión con el servidor.')
+  }
+
+  let json: unknown
+  try {
+    json = await res.json()
+  } catch (err) {
+    if (signal?.aborted) throw err
+    throw new ApiClientError('BAD_RESPONSE', res.status, `Respuesta no válida del servidor (${res.status}).`)
+  }
+
+  const envelope = anyEnvelopeSchema.safeParse(json)
+  if (envelope.success && 'error' in envelope.data) {
+    const { code, message, details } = envelope.data.error
+    const error = new ApiClientError(code, res.status, message, details)
+    error.retryAfterSeconds = retryAfter(res)
+    throw error
+  }
+  if (!res.ok || !envelope.success || !('data' in envelope.data))
+    throw new ApiClientError('BAD_RESPONSE', res.status, `Respuesta no válida del servidor (${res.status}).`)
+
+  const data = schema.safeParse(envelope.data.data)
+  if (!data.success)
+    throw new ApiClientError(
+      'BAD_RESPONSE',
+      res.status,
+      'La respuesta del servidor no tiene la forma esperada.',
+      data.error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
+    )
+  return data.data
+}
+
+/**
+ * ¿Merece la pena reintentar? Sí ante fallos de red, respuestas rotas y 5xx; no ante errores del
+ * cliente (4xx), que se repetirían igual. Para `retry` de TanStack Query.
+ */
+export function isRetryable(error: unknown): boolean {
+  if (!(error instanceof ApiClientError)) return false
+  return error.status === 0 || error.status >= 500 || error.code === 'BAD_RESPONSE'
+}
