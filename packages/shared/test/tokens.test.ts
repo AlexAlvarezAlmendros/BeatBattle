@@ -124,6 +124,28 @@ describe('tokens: tokens.css ↔ tokens.ts', () => {
     )
   })
 
+  it('RD-VIS-01: los tokens de :root solo usan variables declaradas en :root', () => {
+    // Una variable resuelve sus `var()` en el elemento que la declara: si un token de :root usara una
+    // variable que pone cada pieza (p. ej. el ángulo del borde holográfico), los descendientes
+    // heredarían el valor ya resuelto y el cambio de la pieza no tendría efecto.
+    for (const [name, value] of root) {
+      for (const [, used] of value.matchAll(/var\(\s*(--[\w-]+)/g)) {
+        expect(root.has(used!), `${name} usa ${used}, que no está declarada en :root`).toBe(true)
+      }
+    }
+  })
+
+  it('RD-VIS-01: la rareza épica da las paradas y --bb-holo-angle está registrada para girar', () => {
+    expect(root.get('--bb-rarity-epic-stops')).toBe(
+      'var(--bb-red), var(--bb-diamond), var(--bb-platinum), var(--bb-gold), var(--bb-red)',
+    )
+    expect(root.has('--bb-rarity-epic-border')).toBe(false)
+    const registration = /@property\s+--bb-holo-angle\s*\{([^}]*)\}/.exec(tokensCss)?.[1] ?? ''
+    expect(registration).toMatch(/syntax:\s*"<angle>"/)
+    expect(registration).toMatch(/inherits:\s*false/)
+    expect(registration).toMatch(/initial-value:\s*0deg/)
+  })
+
   it('RD-VIS-01: las capas coinciden', () => {
     for (const [key, z] of Object.entries(zIndex)) expect(root.get(cssVarName('zIndex', key))).toBe(String(z))
     const cssLayers = [...root.keys()].filter((name) => name.startsWith('--bb-z-'))

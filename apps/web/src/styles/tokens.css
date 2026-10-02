@@ -60,15 +60,15 @@
   --bb-rarity-common-icon: var(--bb-text); /* …e icono blanco */
   --bb-rarity-rare-border: var(--bb-red); /* Rara: borde y halo rojos */
   --bb-rarity-rare-glow: 0 0 24px var(--bb-red-glow);
-  /* Épica: borde holográfico; §3.5 anima `--bb-holo-angle` para que el gradiente gire */
-  --bb-rarity-epic-border: conic-gradient(
-    from var(--bb-holo-angle, 0deg),
-    var(--bb-red),
-    var(--bb-diamond),
-    var(--bb-platinum),
-    var(--bb-gold),
-    var(--bb-red)
-  );
+  /*
+   * Épica: borde holográfico (gradiente cónico que gira, §3.5). El token lleva solo las paradas de
+   * color; el gradiente lo monta la pieza, que es quien anima el ángulo:
+   *   background-image: conic-gradient(from var(--bb-holo-angle), var(--bb-rarity-epic-stops));
+   * No puede ser un token con el gradiente entero: una variable resuelve sus `var()` en el elemento
+   * que la declara (aquí, :root), así que heredaría el gradiente con el ángulo ya fijado en 0deg.
+   * `--bb-holo-angle` está registrada con `@property` (al final) para que se pueda animar.
+   */
+  --bb-rarity-epic-stops: var(--bb-red), var(--bb-diamond), var(--bb-platinum), var(--bb-gold), var(--bb-red);
   --bb-rarity-legendary-border: var(--bb-gold); /* Legendaria: dorado con brillo que la recorre */
   --bb-rarity-legendary-glow: 0 0 24px var(--bb-gold-glow);
 
@@ -195,6 +195,17 @@
    * mueven lo usan en sus transformaciones, p. ej. `translateY(calc(-1px * var(--bb-motion)))`.
    */
   --bb-motion: 1;
+}
+
+/*
+ * Ángulo del borde holográfico de la rareza épica (§3.2, §3.5). Registrado para que una animación
+ * lo pueda interpolar (sin registro, una variable salta de valor a valor). No se hereda: cada pieza
+ * holográfica gira por su cuenta.
+ */
+@property --bb-holo-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
 }
 
 /* La isla es más baja sin enlaces (≤ 992 px) y con menos padding (≤ 600 px), como en Header.css. */
