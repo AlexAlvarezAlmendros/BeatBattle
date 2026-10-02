@@ -15,16 +15,22 @@ export const color = {
   black: '#000000',
   ink950: '#0a0a0a',
   ink900: '#0e0e0e',
+  ink850: '#111111',
   ink800: '#1a1a1a',
   ink700: '#1e1e1e',
   ink600: '#2a2a2a',
   glass: '#2b2b2bce',
+  glassCard: 'rgba(0, 0, 0, 0.58)',
 
   line: 'rgba(255, 255, 255, 0.08)',
   lineStrong: 'rgba(255, 255, 255, 0.18)',
+  lineButton: 'rgba(255, 255, 255, 0.3)',
+  lineLit: 'rgba(255, 255, 255, 0.4)',
   fillHover: 'rgba(255, 255, 255, 0.06)',
   fillActive: 'rgba(255, 255, 255, 0.1)',
   scrim: 'rgba(0, 0, 0, 0.7)',
+  glare: 'rgba(255, 255, 255, 0.14)',
+  shine: 'rgba(255, 255, 255, 0.55)',
 
   text: '#ffffff',
   text2: '#cccccc',
@@ -34,6 +40,7 @@ export const color = {
   red: '#ff003c',
   redHover: '#e6003a',
   redPress: '#cc0030',
+  redCta: '#e6003a',
   redText: '#ff4d6d',
   redGlow: 'rgba(255, 0, 60, 0.4)',
   redWash: 'rgba(255, 0, 60, 0.1)',
@@ -74,6 +81,27 @@ export const reducedDuration = {
   reward: 200,
 } as const satisfies Record<DurationToken, number>
 
+/**
+ * Periodos de los bucles en milisegundos (`--bb-loop-*`): separadores y latido de la cuenta atrás,
+ * barrido del esqueleto, onda del botón cargando y respiración de la mini onda. No cambian con
+ * «reducir movimiento»: con la preferencia, la pieza quita el bucle (RNF-A11Y-03 y RNF-A11Y-04).
+ */
+export const loop = {
+  blink: 1000,
+  heartbeat: 1000,
+  shimmer: 1500,
+  loader: 1000,
+  breathe: 2400,
+} as const
+
+export type LoopToken = keyof typeof loop
+
+/** Escalonados en milisegundos (`--bb-stagger-*`): retardo entre piezas de una misma entrada. */
+export const stagger = {
+  /** Anexo E: barras de la forma de onda al crecer desde el centro. */
+  wave: 2,
+} as const
+
 /** Tope de cualquier animación con «reducir movimiento», en ms. */
 export const REDUCED_MOTION_MAX_MS = 200
 
@@ -113,8 +141,18 @@ export const zIndex = {
 } as const
 
 /** Nombre de la variable CSS de un token: `cssVarName('color', 'ink950')` → `--bb-ink-950`. */
-export function cssVarName(group: 'color' | 'duration' | 'ease' | 'zIndex', key: string): string {
-  const prefix = { color: '--bb-', duration: '--bb-dur-', ease: '--bb-ease-', zIndex: '--bb-z-' }[group]
+export function cssVarName(
+  group: 'color' | 'duration' | 'ease' | 'zIndex' | 'loop' | 'stagger',
+  key: string,
+): string {
+  const prefix = {
+    color: '--bb-',
+    duration: '--bb-dur-',
+    ease: '--bb-ease-',
+    zIndex: '--bb-z-',
+    loop: '--bb-loop-',
+    stagger: '--bb-stagger-',
+  }[group]
   return prefix + toKebab(key)
 }
 
