@@ -105,14 +105,14 @@
   --bb-font-size-xl: clamp(1.25rem, 1.152rem + 0.435vw, 1.5rem); /* 20 → 24 px */
   --bb-font-size-2xl: clamp(1.5rem, 1.304rem + 0.87vw, 2rem); /* 24 → 32 px */
   --bb-font-size-3xl: clamp(2.25rem, 1.956rem + 1.304vw, 3rem); /* 36 → 48 px */
-  --bb-font-size-hero: clamp(3.5rem, 11vw, 8.5rem);
+  --bb-font-size-hero: clamp(2.8rem, 8vw, 6rem); /* El del sello: 96 px a 1440, 44,8 px a 390 (§3.2) */
 
   --bb-leading-tight: 0.95; /* Titular del hero (Hero.css) */
   --bb-leading-snug: 1.15; /* Titulares */
   --bb-leading-body: 1.5; /* Texto */
 
   --bb-tracking-display: -0.02em; /* Titulares en mayúsculas */
-  --bb-tracking-cta: 0.12em; /* Botón CTA (§3.3) */
+  --bb-tracking-cta: 0.1em; /* Botones (§3.2, medido en el sello); en móvil, --bb-tracking-cta-compact */
   --bb-tracking-cta-compact: 0.08em; /* §3.2: botones en móvil (Hero.css del sello, ≤ 480 px) */
   --bb-tracking-section: 0.1em; /* Rótulo de sección «▌INFORMACIÓN» (ficha del sello) */
   --bb-tracking-meta: 0.05em; /* Etiqueta de las teselas de datos (ficha del sello) */
