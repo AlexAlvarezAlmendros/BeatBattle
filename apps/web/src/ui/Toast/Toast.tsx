@@ -20,7 +20,7 @@ export interface ToastProps {
 
 /**
  * La pieza visible de un aviso: icono del tono (con nombre para lectores de pantalla: el error nunca
- * es solo color), título, mensaje y botón de cerrar. `ToastViewport` la anima y le pone el
+ * es solo color), título, mensaje y botón de cerrar. `ToastList` la anima y le pone el
  * temporizador; la galería la enseña quieta.
  */
 export function Toast({ toast, onDismiss, state, className }: ToastProps) {

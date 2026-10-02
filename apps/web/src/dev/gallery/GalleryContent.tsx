@@ -1,6 +1,5 @@
 import type { CardSurface } from '../../ui/Card'
 import { GlassProvider } from '../../ui/glass'
-import { ToastViewport } from '../../ui/Toast'
 import { ComponentsSection } from './ComponentSections'
 import {
   ColorSection,
@@ -17,7 +16,8 @@ import { LayoutSection } from './LayoutSection'
  * (`React.lazy` en `GalleryPage`) porque arrastra todos los componentes y Motion.
  *
  * Con el interruptor de cristal apagado, además de tarjetas y modales macizos, las `GlassSurface` de
- * dentro pasan a su alternativa (`GlassProvider`), como en calidad baja.
+ * dentro pasan a su alternativa (`GlassProvider`), como en calidad baja. Los avisos de prueba salen en
+ * la zona de avisos del marco (`RootLayout`), la misma que en el resto de la app.
  */
 export function GalleryContent({ surface }: { surface: CardSurface }) {
   return (
@@ -30,7 +30,6 @@ export function GalleryContent({ surface }: { surface: CardSurface }) {
       <MotionSection />
       <ComponentsSection surface={surface} />
       <LayoutSection />
-      <ToastViewport />
     </GlassProvider>
   )
 }

@@ -1,10 +1,17 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
 import { Toast } from './Toast'
-import { ToastViewport } from './ToastViewport'
+import { loadToastMotion } from './ToastList'
+import { loadToastList, ToastViewport } from './ToastViewport'
 import { TOAST_DURATION_MS, TOAST_LIMIT, toast, useToasts } from './useToasts'
+
+// La parte animada y las funciones de Motion, ya cargadas: aquí se prueba la zona con todo dentro (la
+// carga en diferido se prueba en `ToastViewport.test.tsx`).
+beforeAll(async () => {
+  await Promise.all([loadToastList(), loadToastMotion()])
+})
 
 beforeEach(() => {
   useToasts.getState().clear()

@@ -1,0 +1,72 @@
+/*
+ * Zona de avisos (§3.3): la posición y las dos regiones vivas, que se pintan desde el principio en el
+ * marco (trozo inicial). La pieza de cada aviso está en `Toast.module.css` y llega con la parte animada.
+ */
+.viewport {
+  position: fixed;
+  right: var(--bb-space-6);
+  bottom: var(--bb-space-6);
+  z-index: var(--bb-z-toast);
+  display: flex;
+  flex-direction: column;
+  width: min(26rem, calc(100vw - 2 * var(--bb-space-6)));
+  pointer-events: none;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bb-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Las dos regiones existen siempre (si no, no se anuncian); el hueco, solo entre las que tienen algo. */
+.stack:not(:empty) + .stack:not(:empty) {
+  margin-top: var(--bb-space-3);
+}
+
+/*
+ * Aviso sin animar: solo si la parte animada no ha podido llegar (sin red, despliegue nuevo). Sobrio,
+ * con la paleta de la pieza normal.
+ */
+.plain {
+  display: grid;
+  gap: var(--bb-space-1);
+  padding: var(--bb-space-3) var(--bb-space-4);
+  border: 1px solid var(--bb-line-strong);
+  border-radius: var(--bb-radius-md);
+  background-color: var(--bb-ink-800);
+  color: var(--bb-text);
+  font-size: var(--bb-font-size-sm);
+  pointer-events: auto;
+}
+
+.plainMessage {
+  color: var(--bb-text-2);
+  font-size: var(--bb-font-size-xs);
+}
+
+.plainClose {
+  justify-self: end;
+  min-height: var(--bb-space-11);
+  padding: 0 var(--bb-space-2);
+  border: 0;
+  background: none;
+  color: var(--bb-text-2);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Móvil: arriba, bajo la isla de navegación, de lado a lado. */
+@media (max-width: 600px) {
+  .viewport {
+    top: calc(var(--nav-flow) + var(--bb-space-2));
+    right: var(--bb-layout-gutter);
+    bottom: auto;
+    left: var(--bb-layout-gutter);
+    width: auto;
+  }
+}

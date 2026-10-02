@@ -1,30 +1,78 @@
-import { duration, ease, reducedDuration, spring } from '@beatbattle/shared/tokens'
-import { AnimatePresence, motion, useIsPresent } from 'motion/react'
-import { type FocusEvent, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { type ComponentType, type FocusEvent, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useReducedMotion } from '../../hooks/useReducedMotion'
 import { t } from '../../i18n'
-import { Toast } from './Toast'
-import styles from './Toast.module.css'
+import { whenIdleAfterFirstPaint } from '../afterFirstPaint'
+import type { ToastListProps } from './ToastList'
+import styles from './ToastViewport.module.css'
 import { type ToastData, useToasts } from './useToasts'
 
-/** Distancia desde la que entra un aviso por la derecha, en px. */
-const ENTER_OFFSET_PX = 48
+type ToastListComponent = ComponentType<ToastListProps>
+
+let loadedList: ToastListComponent | undefined
+let pendingList: Promise<ToastListComponent> | undefined
 
 /**
- * Zona de avisos (§3.3): esquina inferior derecha (arriba en móvil), en un portal. Hay dos regiones
- * vivas que existen desde el principio, para que los lectores de pantalla anuncien lo que entra:
- * `polite` para información y éxito, y `assertive` para errores (RNF-A11Y-07).
+ * Pide la parte animada de los avisos (`ToastList`: Motion, la pieza `Toast` y el botón de cerrar), que
+ * va en su propio trozo para no cargar el inicial (§4.17). Una sola petición, compartida; si falla (sin
+ * red, despliegue nuevo), se queda la lista sin animar de este fichero.
+ */
+export function loadToastList(): Promise<ToastListComponent> {
+  pendingList ??= import('./ToastList').then(
+    (module) => module.ToastList,
+    () => PlainToastList,
+  )
+  return pendingList.then((component) => {
+    loadedList = component
+    return component
+  })
+}
+
+/**
+ * La parte animada, si ya está (`null` mientras no). Se pide tras la primera pintura, cuando el
+ * navegador queda libre, o, si llega antes un aviso, en ese momento.
+ */
+function useToastList(needed: boolean): ToastListComponent | null {
+  const [list, setList] = useState<ToastListComponent | null>(() => loadedList ?? null)
+  useEffect(() => {
+    if (list) return
+    let active = true
+    const load = () => {
+      void loadToastList().then((component) => {
+        if (active) setList(() => component)
+      })
+    }
+    if (needed) {
+      load()
+      return () => {
+        active = false
+      }
+    }
+    const cancel = whenIdleAfterFirstPaint(load)
+    return () => {
+      active = false
+      cancel()
+    }
+  }, [list, needed])
+  return list
+}
+
+/**
+ * Zona de avisos (§3.3): esquina inferior derecha (arriba en móvil), en un portal. Se monta una sola
+ * vez, en el marco de la app (`RootLayout`).
+ *
+ * Las dos regiones vivas se pintan vacías desde el principio, para que los lectores de pantalla
+ * anuncien lo que entra (RNF-A11Y-07): `polite` para información y éxito, y `assertive` para errores.
+ * Lo animado (`ToastList`, con Motion) llega en diferido y pinta los avisos dentro de ellas; un aviso
+ * lanzado antes sale en cuanto llega.
  *
  * Foco (RNF-A11Y-01, WCAG 2.4.3): si se va un aviso que tiene el foco (cerrado con el teclado o
  * expulsado por el tope de avisos), el foco pasa al botón de cerrar del siguiente o del anterior y,
  * si no queda ninguno, vuelve al elemento que lo tenía antes de entrar en la zona de avisos.
- *
- * Se monta una vez en el marco de la app (la galería la monta por su cuenta mientras tanto).
  */
 export function ToastViewport() {
   const toasts = useToasts((state) => state.toasts)
   const dismiss = useToasts((state) => state.dismiss)
+  const List = useToastList(toasts.length > 0)
   const viewportRef = useRef<HTMLElement>(null)
   // Dónde estaba el foco antes de entrar en la zona de avisos (para devolverlo al irse el último).
   const returnFocus = useRef<HTMLElement | null>(null)
@@ -57,29 +105,11 @@ export function ToastViewport() {
     >
       {/* biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none */}
       <ol role="list" className={styles.stack} aria-live="polite" aria-relevant="additions text">
-        <AnimatePresence initial={false}>
-          {polite.map((toast) => (
-            <ToastItem
-              key={toast.id}
-              toast={toast}
-              onDismiss={() => dismiss(toast.id)}
-              onFocusLost={handOffFocus}
-            />
-          ))}
-        </AnimatePresence>
+        {List && <List toasts={polite} onDismiss={dismiss} onFocusLost={handOffFocus} />}
       </ol>
       {/* biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none */}
       <ol role="list" className={styles.stack} aria-live="assertive" aria-relevant="additions text">
-        <AnimatePresence initial={false}>
-          {assertive.map((toast) => (
-            <ToastItem
-              key={toast.id}
-              toast={toast}
-              onDismiss={() => dismiss(toast.id)}
-              onFocusLost={handOffFocus}
-            />
-          ))}
-        </AnimatePresence>
+        {List && <List toasts={assertive} onDismiss={dismiss} onFocusLost={handOffFocus} />}
       </ol>
     </section>,
     document.body,
@@ -87,75 +117,32 @@ export function ToastViewport() {
 }
 
 /**
- * Un aviso en la zona: entra desde la derecha con el muelle de interacción (sin movimiento, fundido)
- * y se cierra solo a los `duration` ms, con la cuenta en pausa mientras el ratón está encima o el
- * foco dentro (WCAG 2.2.1).
+ * Si la parte animada no llega, los avisos salen igual, sin animar: texto con su tono en palabras,
+ * botón de cerrar y cierre automático (sin pausa).
  */
-function ToastItem({
-  toast,
-  onDismiss,
-  onFocusLost,
-}: {
-  toast: ToastData
-  onDismiss: () => void
-  /** El aviso empieza a irse con el foco dentro. */
-  onFocusLost: (item: HTMLElement) => void
-}) {
-  const reduced = useReducedMotion()
-  const itemRef = useRef<HTMLLIElement>(null)
-  const isPresent = useIsPresent()
-  const focusLostRef = useRef(onFocusLost)
-  focusLostRef.current = onFocusLost
+function PlainToastList({ toasts, onDismiss }: ToastListProps) {
+  return toasts.map((toast) => (
+    <PlainToast key={toast.id} toast={toast} onDismiss={() => onDismiss(toast.id)} />
+  ))
+}
 
-  // Al empezar a salir (cerrado o expulsado por el tope), si tenía el foco, lo pasa. En la fase de
-  // diseño: el aviso sigue en el DOM durante la salida y el foco no llega a caer en `<body>`.
-  useLayoutEffect(() => {
-    const item = itemRef.current
-    if (!isPresent && item?.contains(document.activeElement)) focusLostRef.current(item)
-  }, [isPresent])
-  const [hovered, setHovered] = useState(false)
-  const [focused, setFocused] = useState(false)
-  const paused = hovered || focused
-  const remaining = useRef(toast.duration ?? 0)
+function PlainToast({ toast, onDismiss }: { toast: ToastData; onDismiss: () => void }) {
   const dismissRef = useRef(onDismiss)
   dismissRef.current = onDismiss
-
   useEffect(() => {
-    if (toast.duration === null || paused) return
-    const startedAt = Date.now()
-    const timer = setTimeout(() => dismissRef.current(), Math.max(0, remaining.current))
-    return () => {
-      clearTimeout(timer)
-      remaining.current -= Date.now() - startedAt
-    }
-  }, [paused, toast.duration])
-
-  const fade = {
-    duration: (reduced ? reducedDuration.fast : duration.fast) / 1000,
-    ease: [...ease.out] as [number, number, number, number],
-  }
-  const offset = reduced ? 0 : ENTER_OFFSET_PX
-
+    if (toast.duration === null) return
+    const timer = setTimeout(() => dismissRef.current(), toast.duration)
+    return () => clearTimeout(timer)
+  }, [toast.duration])
   return (
-    <motion.li
-      ref={itemRef}
-      className={styles.item}
-      layout={!reduced}
-      initial={{ opacity: 0, x: offset }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: offset }}
-      transition={{ ...fade, x: reduced ? fade : { type: 'spring', ...spring.interaction } }}
-      onPointerEnter={() => setHovered(true)}
-      onPointerLeave={() => setHovered(false)}
-      onFocus={() => setFocused(true)}
-      onBlur={(event: FocusEvent<HTMLLIElement>) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocused(false)
-      }}
-      data-paused={paused || undefined}
-      data-toast-item=""
-      data-exiting={isPresent ? undefined : ''}
-    >
-      <Toast toast={toast} onDismiss={onDismiss} />
-    </motion.li>
+    <li className={styles.plain} data-toast-item="">
+      <p>
+        <strong>{t(`ui.toast.tone.${toast.tone}`)}:</strong> {toast.title}
+      </p>
+      {toast.message && <p className={styles.plainMessage}>{toast.message}</p>}
+      <button type="button" className={styles.plainClose} onClick={onDismiss}>
+        {t('ui.toast.close')}
+      </button>
+    </li>
   )
 }

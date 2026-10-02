@@ -250,10 +250,12 @@ describe('galería /dev/galeria (0.9)', { timeout: 15_000 }, () => {
     expect(document.querySelectorAll('#modal [data-surface="solid"]').length).toBeGreaterThan(0)
   })
 
-  it('los botones de la demo lanzan avisos de verdad', async () => {
+  it('los botones de la demo lanzan avisos de verdad, que pinta la zona del marco (no una propia)', async () => {
     const user = userEvent.setup()
     await renderGallery()
     await user.click(screen.getByRole('button', { name: t('dev.gallery.demo.toastError') }))
     expect(useToasts.getState().toasts).toMatchObject([{ tone: 'error' }])
+    // Sin el marco (`RootLayout`), la galería no tiene zona de avisos: no monta una segunda.
+    expect(screen.queryByRole('region', { name: t('ui.toast.region') })).toBeNull()
   })
 })

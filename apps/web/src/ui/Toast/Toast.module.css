@@ -1,32 +1,8 @@
 /*
  * Avisos (§3.3). Anatomía del `Toast` del sello (fondo `#1a1a1a`, radio 12, icono del tono, mensaje y
- * cerrar) con los tokens: acento lateral del tono y el icono con nombre (nunca solo el color).
+ * cerrar) con los tokens: acento lateral del tono y el icono con nombre (nunca solo el color). La zona
+ * (posición y regiones vivas) está en `ToastViewport.module.css`, que va en el trozo inicial.
  */
-.viewport {
-  position: fixed;
-  right: var(--bb-space-6);
-  bottom: var(--bb-space-6);
-  z-index: var(--bb-z-toast);
-  display: flex;
-  flex-direction: column;
-  width: min(26rem, calc(100vw - 2 * var(--bb-space-6)));
-  pointer-events: none;
-}
-
-.stack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--bb-space-3);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* Las dos regiones existen siempre (si no, no se anuncian); el hueco, solo entre las que tienen algo. */
-.stack:not(:empty) + .stack:not(:empty) {
-  margin-top: var(--bb-space-3);
-}
-
 .item {
   pointer-events: auto;
 }
@@ -106,15 +82,4 @@
 .close {
   flex-shrink: 0;
   border-color: transparent;
-}
-
-/* Móvil: arriba, bajo la isla de navegación, de lado a lado. */
-@media (max-width: 600px) {
-  .viewport {
-    top: calc(var(--nav-flow) + var(--bb-space-2));
-    right: var(--bb-layout-gutter);
-    bottom: auto;
-    left: var(--bb-layout-gutter);
-    width: auto;
-  }
 }
