@@ -7,19 +7,12 @@ export const BODY_LIMIT_BYTES = 64 * 1024
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 
-/**
- * Rutas de escritura exentas de la comprobación de `Origin`. Vacío en la Fase 0.
- *
- * Hueco previsto: `/api/cron/*` (Fase 3, §4.12). Vercel Cron llama por GET, que ya no se comprueba,
- * pero si el flujo de GitHub Actions la llama con un método de escritura no traerá `Origin`: esa ruta
- * se añadirá aquí y se autenticará con `CRON_SECRET` (comparación en tiempo constante) en su propio
- * `preHandler`. Nada más debe entrar en esta lista sin otra autenticación equivalente.
- */
 declare module 'fastify' {
   interface FastifyContextConfig {
     /**
      * Exime la ruta de la comprobación de `Origin` (nunca del «solo JSON» ni del tamaño). Solo para
-     * rutas que se autentican con otro secreto y no las llama un navegador. Vacío en la Fase 0.
+     * rutas que se autentican con otro secreto y no las llama un navegador. Ninguna ruta lo usa en la
+     * Fase 0.
      *
      * Hueco previsto: `/api/cron/tick` (Fase 3, §4.12). Vercel Cron llama por GET, que no se
      * comprueba, pero si el flujo de GitHub Actions la llama con un método de escritura no traerá

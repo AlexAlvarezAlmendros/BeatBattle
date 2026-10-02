@@ -34,7 +34,6 @@ function send(reply: FastifyReply, status: number, error: ErrorEnvelope['error']
 }
 
 interface FastifyLikeError {
-  code?: unknown
   statusCode?: unknown
   validation?: unknown
 }
