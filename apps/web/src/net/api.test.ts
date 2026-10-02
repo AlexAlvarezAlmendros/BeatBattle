@@ -144,12 +144,18 @@ describe('apiFetch', () => {
 })
 
 describe('isRetryable', () => {
-  it('reintenta red, respuestas rotas y 5xx; no 4xx ni errores ajenos', () => {
+  it('reintenta red y 5xx (con sobre o sin él); no 4xx ni errores ajenos', () => {
     expect(isRetryable(new ApiClientError('NETWORK_ERROR', 0, ''))).toBe(true)
-    expect(isRetryable(new ApiClientError('BAD_RESPONSE', 200, ''))).toBe(true)
+    expect(isRetryable(new ApiClientError('BAD_RESPONSE', 502, ''))).toBe(true)
     expect(isRetryable(new ApiClientError('SERVICE_UNAVAILABLE', 503, ''))).toBe(true)
+    expect(isRetryable(new ApiClientError('INTERNAL', 500, ''))).toBe(true)
     expect(isRetryable(new ApiClientError('NOT_FOUND', 404, ''))).toBe(false)
     expect(isRetryable(new ApiClientError('RATE_LIMITED', 429, ''))).toBe(false)
     expect(isRetryable(new Error('x'))).toBe(false)
+  })
+
+  it('no reintenta un desajuste de contrato (BAD_RESPONSE con 2xx o 4xx)', () => {
+    expect(isRetryable(new ApiClientError('BAD_RESPONSE', 200, ''))).toBe(false)
+    expect(isRetryable(new ApiClientError('BAD_RESPONSE', 404, ''))).toBe(false)
   })
 })

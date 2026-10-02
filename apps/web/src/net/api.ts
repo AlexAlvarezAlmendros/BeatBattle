@@ -104,10 +104,12 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions<T>): Pr
 }
 
 /**
- * ¿Merece la pena reintentar? Sí ante fallos de red, respuestas rotas y 5xx; no ante errores del
- * cliente (4xx), que se repetirían igual. Para `retry` de TanStack Query.
+ * ¿Merece la pena reintentar? Solo si el fallo puede ser pasajero: sin respuesta (estado 0) o un 5xx,
+ * venga con el sobre o no (p. ej. el 502 en HTML de un proxy). No ante 4xx ni ante un
+ * `BAD_RESPONSE` con 2xx (datos que no cumplen el esquema): es un desajuste de contrato y repetir la
+ * petición daría lo mismo. Para `retry` de TanStack Query.
  */
 export function isRetryable(error: unknown): boolean {
   if (!(error instanceof ApiClientError)) return false
-  return error.status === 0 || error.status >= 500 || error.code === 'BAD_RESPONSE'
+  return error.status === 0 || error.status >= 500
 }
