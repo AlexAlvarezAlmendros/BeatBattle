@@ -1,13 +1,5 @@
 import { createBrowserRouter } from 'react-router'
+import { routes } from './routes'
 
-/** Rutas de la app (guía §2.18). La tarea 0.10 las completa con todas las páginas. */
-export const router = createBrowserRouter([
-  {
-    path: '/',
-    element: (
-      <main>
-        <h1>Beat Battle</h1>
-      </main>
-    ),
-  },
-])
+/** Router de la app (guía §2.18). Las rutas viven en `routes.tsx` para poder probarlas en memoria. */
+export const router = createBrowserRouter(routes)
