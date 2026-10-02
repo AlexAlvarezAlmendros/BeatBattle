@@ -1,7 +1,8 @@
 import type { FastifyInstance } from 'fastify'
 import { buildApp } from '../src/app'
 import { type AppConfig, type LogLevel, testConfig } from '../src/config/env'
-import { createDb, type Db } from '../src/db/client'
+import type { Db } from '../src/db/client'
+import { createTestDb } from '../src/db/testDb'
 import { type FixedClock, fixedClock } from '../src/lib/clock'
 
 /** Origen permitido por defecto en tests (el de Vite en local). */
@@ -30,7 +31,7 @@ export interface MakeAppOptions {
 export async function makeApp(options: MakeAppOptions = {}): Promise<TestApp> {
   const logs: string[] = []
   const config = testConfig({ ...options.config, logLevel: options.logLevel ?? 'silent' })
-  const db = options.db ?? (await createDb(':memory:'))
+  const db = options.db ?? (await createTestDb())
   const clock = fixedClock(T0)
   const app = buildApp({ config, db, clock, logStream: { write: (line) => logs.push(line) } })
   options.routes?.(app)

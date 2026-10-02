@@ -1,11 +1,16 @@
 import { buildApp } from './app'
 import { EnvError, loadEnv } from './config/env'
 import { createDb } from './db/client'
+import { runMigrations } from './db/migrate'
 
-/** Arranque local y autoalojado: entorno → BD → app → escucha. En Vercel arranca `api/index.ts`. */
+/**
+ * Arranque local y autoalojado: entorno → BD (crea `./data/` si hace falta) → migraciones → app →
+ * escucha. En Vercel arranca `api/index.ts`.
+ */
 async function main(): Promise<void> {
   const config = loadEnv(process.env)
   const db = await createDb(config.databaseUrl, config.databaseAuthToken)
+  await runMigrations(db)
   const app = buildApp({ config, db })
   // cierre ordenado (Ctrl+C, `tsx watch`, Docker): termina las peticiones en curso y suelta la BD
   for (const signal of ['SIGINT', 'SIGTERM'] as const)

@@ -1,0 +1,2 @@
+# BD local de desarrollo (DATABASE_URL=file:./data/local.db) y sus ficheros auxiliares
+data/

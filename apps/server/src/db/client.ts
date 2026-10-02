@@ -21,7 +21,7 @@ export function filePathOf(url: string): string | null {
  * Claves ajenas: se activan en local para que un orden de borrado incorrecto falle en los tests,
  * pero **ninguna lógica depende de ellas**: libSQL por HTTP (Turso, `sqld`) no mantiene
  * `PRAGMA foreign_keys` entre peticiones. Por eso no se usa `ON DELETE CASCADE` y los borrados son
- * explícitos, hijos antes que padres, en un único `batch`.
+ * explícitos, hijos antes que padres, en un único `batch` (`runBatch`, en `batch.ts`).
  *
  * Con `:memory:` no se usan transacciones interactivas (abrirían otra conexión, es decir, otra BD
  * vacía): las operaciones atómicas van por `batch`.
