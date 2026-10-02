@@ -3,10 +3,10 @@ import { expect, type Locator, test } from '@playwright/test'
 import { open } from './support'
 
 /**
- * Página interior contra el sello (tareas 0.7 y 0.14, `RD-VIS-02`), a 1440 × 900 y a 390 × 844: el
- * título de una página interior se compara con el de `/beats` medido en `otp-metrics.json`. El alto
- * del título no se compara: lo marca la fuente (el sello pinta Liberation Sans porque no carga
- * Montserrat).
+ * Página interior y pie contra el sello (tareas 0.7 y 0.14, `RD-VIS-02`), a 1440 × 900 y a 390 × 844:
+ * el título de una página interior se compara con el de `/beats` medido en `otp-metrics.json`, y el
+ * pie, con la maqueta del pie del sello (títulos centrados y tarjetas de la misma altura). El alto del
+ * título no se compara: lo marca la fuente (el sello pinta Liberation Sans porque no carga Montserrat).
  */
 
 interface OtpPageTitle {
@@ -55,6 +55,29 @@ for (const viewport of ['desktop', 'mobile'] as const) {
       // A 32 px del borde y a 32 px por debajo de la isla, como en el sello.
       expect(title.x).toBe(otp.rect.x)
       expect(title.y).toBe(otp.rect.y)
+    })
+
+    test(`RD-VIS-02: el pie centra los títulos de las tarjetas y las estira a la misma altura (${viewport})`, async ({
+      page,
+    }) => {
+      await open(page, '/como-funciona', 'Cómo funciona')
+      const footer = page.getByRole('contentinfo')
+      const cards = footer.locator('.site-footer__card')
+      await expect(cards).toHaveCount(2)
+      for (const title of await footer.locator('.site-footer__card-title').all()) {
+        expect(await title.evaluate((element) => getComputedStyle(element).textAlign)).toBe('center')
+      }
+      const boxes = await cards.evaluateAll((elements) =>
+        elements.map((element) => element.getBoundingClientRect()),
+      )
+      const [first, second] = boxes
+      // En escritorio van en la misma fila y miden lo mismo; en móvil, una por fila.
+      if (viewport === 'desktop') {
+        expect(second!.y).toBe(first!.y)
+        expect(second!.height).toBe(first!.height)
+      } else {
+        expect(second!.y).toBeGreaterThan(first!.y + first!.height)
+      }
     })
   })
 }
