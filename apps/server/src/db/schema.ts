@@ -12,7 +12,7 @@ import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 /**
  * Contadores de rate limit (guía §4.11, §4.13): en serverless no hay memoria compartida, así que
- * viven en la BD. Ventana fija por clave; `modules/rateLimit` la incrementa o reinicia con un único
+ * viven en la BD. Ventana fija por clave; `lib/rateLimit` la incrementa o reinicia con un único
  * UPSERT atómico.
  */
 export const appRateLimit = sqliteTable('app_rate_limit', {

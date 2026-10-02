@@ -24,8 +24,16 @@ export interface AppDeps {
  * Vercel (`api/index.ts`) la monta una vez por instancia. Todas las dependencias entran por
  * argumento (guía §4.4): nada de singletons con la BD ni lecturas de `process.env` aquí dentro.
  *
- * Orden: reloj → seguridad → errores → módulos. Los módulos siguen el patrón
- * `modules/<recurso>/{routes,service,repo,schema}.ts`, con `health` como ejemplo.
+ * Orden: reloj → seguridad → errores → módulos.
+ *
+ * Patrón único de módulo (§4.18), con `health` como ejemplo:
+ * - `modules/<recurso>/schema.ts`: contratos (de `@beatbattle/shared`) y esquemas internos.
+ * - `repo.ts`: solo SQL, funciones que reciben la BD: `xRepo.find(db, …)`.
+ * - `service.ts`: `createXService(deps)` con un objeto de dependencias (`{ db, clock, mailer… }`): las
+ *   guarda y no sabe nada de HTTP; el instante de la petición entra como argumento (`req.now`).
+ * - `routes.ts`: `xRoutes(app, service)`; traduce la petición, llama al servicio y devuelve el sobre.
+ * Lo transversal sin rutas (rate limit, auditoría…) va en `lib/` con el mismo patrón de fábrica:
+ * `createRateLimiter({ db })`.
  */
 export function buildApp(deps: AppDeps): FastifyInstance {
   const { config, db } = deps
@@ -43,7 +51,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   registerSecurity(app, config)
   registerErrorHandling(app)
 
-  healthRoutes(app, createHealthService(db))
+  healthRoutes(app, createHealthService({ db }))
 
   return app
 }

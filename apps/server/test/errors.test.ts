@@ -1,7 +1,7 @@
-import { errorEnvelopeSchema } from '@beatbattle/shared'
+import { ERROR_STATUS, errorEnvelopeSchema } from '@beatbattle/shared'
 import { afterEach, describe, expect, it } from 'vitest'
 import { z } from 'zod'
-import { AppError, conflict, notFound, rateLimited } from '../src/lib/errors'
+import { AppError, appError, conflict, notFound, rateLimited } from '../src/lib/errors'
 import { validate } from '../src/lib/validate'
 import { makeApp, ORIGIN, type TestApp } from './helpers'
 
@@ -139,10 +139,28 @@ describe('sobre de error { error: { code, message, details? } }', () => {
 
 describe('AppError', () => {
   it('guarda código, estado, detalles y cabeceras', () => {
-    const e = new AppError('FORBIDDEN', 403, 'No.', { a: 1 }, { headers: { 'X-Test': '1' } })
+    const e = new AppError('FORBIDDEN', 'No.', { details: { a: 1 }, headers: { 'X-Test': '1' } })
     expect(e).toBeInstanceOf(Error)
     expect(e).toMatchObject({ code: 'FORBIDDEN', status: 403, message: 'No.', details: { a: 1 } })
     expect(e.headers).toEqual({ 'X-Test': '1' })
+  })
+
+  it('el estado sale del catálogo del código (ERROR_STATUS) salvo que se fuerce', () => {
+    for (const [code, status] of Object.entries(ERROR_STATUS))
+      expect(new AppError(code as keyof typeof ERROR_STATUS, 'x').status, code).toBe(status)
+    expect(new AppError('CONFLICT', 'x', { status: 422 }).status).toBe(422)
+  })
+
+  it('appError acepta causa, detalles y cabeceras', () => {
+    const cause = new Error('libsql: SQLITE_BUSY')
+    const e = appError('SERVICE_UNAVAILABLE', 'Servicio no disponible.', {
+      details: { db: 'down' },
+      headers: { 'Retry-After': '5' },
+      cause,
+    })
+    expect(e).toMatchObject({ status: 503, details: { db: 'down' } })
+    expect(e.cause).toBe(cause)
+    expect(e.headers['Retry-After']).toBe('5')
   })
 
   it('Retry-After es al menos 1 segundo', () => {

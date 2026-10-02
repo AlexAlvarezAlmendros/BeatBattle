@@ -6,12 +6,7 @@ import { createDb, type Db } from '../src/db/client'
 import { runMigrations } from '../src/db/migrate'
 import { createTestDb } from '../src/db/testDb'
 import { AppError } from '../src/lib/errors'
-import {
-  enforceRateLimit,
-  purgeExpiredRateLimits,
-  type RateLimitInput,
-  rateLimit,
-} from '../src/modules/rateLimit/service'
+import { createRateLimiter, type RateLimitInput } from '../src/lib/rateLimit'
 import { T0 } from './helpers'
 
 const MIN = 60_000
@@ -19,6 +14,13 @@ let db: Db
 beforeEach(async () => {
   db = await createTestDb()
 })
+
+/** Atajos con la forma de antes: el limitador de la BD de cada test. */
+const rateLimit = (target: Db, input: RateLimitInput) => createRateLimiter({ db: target }).check(input)
+const enforceRateLimit = (target: Db, input: RateLimitInput) =>
+  createRateLimiter({ db: target }).enforce(input)
+const purgeExpiredRateLimits = (target: Db, now: number) =>
+  createRateLimiter({ db: target }).purgeExpired(now)
 
 const rule = (now: number, over: Partial<RateLimitInput> = {}): RateLimitInput => ({
   key: 'test:user:1',
@@ -98,7 +100,7 @@ describe('rateLimit (contadores en BD, base de los límites de §4.13)', () => {
   })
 })
 
-describe('enforceRateLimit', () => {
+describe('createRateLimiter: enforce', () => {
   it('lanza 429 RATE_LIMITED con Retry-After hasta el fin de la ventana', async () => {
     for (let i = 0; i < 3; i++) await enforceRateLimit(db, rule(T0))
     const err = await enforceRateLimit(db, rule(T0 + 15_500)).catch((e: unknown) => e)
@@ -117,7 +119,7 @@ describe('enforceRateLimit', () => {
   })
 })
 
-describe('purgeExpiredRateLimits', () => {
+describe('createRateLimiter: purgeExpired', () => {
   it('borra solo los contadores con la ventana cerrada', async () => {
     await rateLimit(db, rule(T0, { key: 'viejo', windowMs: MIN }))
     await rateLimit(db, rule(T0, { key: 'vigente', windowMs: 10 * MIN }))
