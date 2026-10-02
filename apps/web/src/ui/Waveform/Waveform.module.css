@@ -1,7 +1,11 @@
 /*
  * Forma de onda (§3.3, Anexo E): barras grises (`--bb-wave-idle`) que pasan a rojo al reproducirse y
- * cabeza de lectura blanca con halo. Al montar, las barras crecen desde el centro con 2 ms de
- * escalonado; sin movimiento, aparece entera.
+ * cabeza de lectura blanca con halo. Al montar, la onda crece desde el centro y se descubre de
+ * izquierda a derecha al ritmo del escalonado de 2 ms por barra; sin movimiento, aparece entera.
+ *
+ * Una sola animación por onda, en el `<svg>`, y no una por barra: las animaciones de los elementos SVG
+ * no se componen, y con una por `<rect>` cada fotograma recalculaba el estilo de cientos o miles de
+ * barras en el hilo principal (tirones de hasta 1 s con CPU ×4 en la galería; INP, §4.17).
  */
 .waveform {
   position: relative;
@@ -17,8 +21,6 @@
 
 .bar,
 .played {
-  transform-box: fill-box;
-  transform-origin: center;
   transition: fill var(--bb-dur-fast) var(--bb-ease-out);
 }
 
@@ -30,21 +32,32 @@
   fill: var(--bb-red);
 }
 
-.animated .bar,
-.animated .played {
-  /*
-   * `backwards` y no `both`: el retardo escalonado necesita el primer fotograma, pero el último ya
-   * coincide con el estilo natural. Con `both` cada barra deja una animación terminada «en efecto»
-   * para siempre, y Chrome las recalcula todas en cada fotograma mientras corre cualquier bucle de la
-   * página (con una lista de filas, miles: de 61 a 28 fps, §4.17).
-   */
-  animation: grow var(--bb-dur-slow) var(--bb-ease-out) backwards;
-  animation-delay: calc(var(--i) * var(--bb-stagger-wave));
+/*
+ * Crece desde el centro (`grow`, transform del `<svg>`: compuesto) y se descubre de izquierda a derecha
+ * (`sweep`) en tantos 2 ms como barras tiene (`--wave-bars`), como el escalonado por barra del Anexo E.
+ * `backwards` y no `both`: al terminar no queda ninguna animación «en efecto».
+ */
+.animated .svg {
+  transform-origin: center;
+  animation:
+    grow var(--bb-dur-slow) var(--bb-ease-out) backwards,
+    sweep calc(var(--wave-bars, 1) * var(--bb-stagger-wave)) linear backwards;
 }
 
 @keyframes grow {
   from {
     transform: scaleY(0);
+  }
+}
+
+/* Con los dos extremos: entre `inset()` y `none` (el estilo natural) no se interpola, salta a la mitad. */
+@keyframes sweep {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  to {
+    clip-path: inset(0);
   }
 }
 
@@ -61,13 +74,11 @@
 
 /* Sin movimiento (Anexo E): la onda aparece entera. */
 @media (prefers-reduced-motion: reduce) {
-  .animated .bar,
-  .animated .played {
+  .animated .svg {
     animation: none;
   }
 }
 
-:global(:root[data-motion="reduced"]) .animated .bar,
-:global(:root[data-motion="reduced"]) .animated .played {
+:global(:root[data-motion="reduced"]) .animated .svg {
   animation: none;
 }

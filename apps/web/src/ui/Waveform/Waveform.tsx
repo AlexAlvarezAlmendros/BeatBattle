@@ -21,7 +21,10 @@ export interface WaveformProps {
   height?: number
   /** Cabeza de lectura blanca con halo en el punto de `progress` (si está entre 0 y 1). */
   playhead?: boolean
-  /** Crecimiento desde el centro al montar (Anexo E). Sin movimiento, aparece entera. */
+  /**
+   * Crecimiento desde el centro al montar (Anexo E). Sin movimiento, aparece entera. En una lista (la
+   * mini onda de las filas) no aporta: va apagado.
+   */
   animateIn?: boolean
   /** Decorativa: fuera del árbol de accesibilidad (p. ej. cuando su fila ya dice qué suena). */
   decorative?: boolean
@@ -79,6 +82,8 @@ export function Waveform({
         shapeRendering="crispEdges"
         aria-hidden="true"
         focusable="false"
+        // Barras de la onda: lo que dura el barrido de la entrada (2 ms por barra, Anexo E).
+        style={{ '--wave-bars': bars.length } as CSSProperties}
       >
         {bars.map(([min, max], i) => {
           // Al menos 2 px de alto: el silencio se ve como una línea, no como un hueco.
@@ -93,7 +98,6 @@ export function Waveform({
               y={top}
               width={WAVE_BAR_WIDTH}
               height={barHeight}
-              style={{ '--i': i } as CSSProperties}
             />
           )
         })}

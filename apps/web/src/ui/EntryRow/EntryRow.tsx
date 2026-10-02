@@ -123,7 +123,15 @@ export function EntryRow({
           </div>
         </div>
         <div className={styles.wave}>
-          <Waveform peaks={peaks} progress={progress} height={24} playhead={false} decorative />
+          {/* Sin entrada animada: en una lista no aporta y serían decenas de animaciones a la vez. */}
+          <Waveform
+            peaks={peaks}
+            progress={progress}
+            height={24}
+            playhead={false}
+            animateIn={false}
+            decorative
+          />
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { t } from '../../i18n'
 import { barsForWidth, playedBars, resamplePeaks, type WaveformPeak } from './peaks'
 import { Waveform } from './Waveform'
+import waveCss from './Waveform.module.css?raw'
 
 const PEAKS: WaveformPeak[] = [
   [-0.2, 0.3],
@@ -84,12 +85,36 @@ describe('Waveform', () => {
 
   it('RNF-A11Y-03 / RD-MOT-03: crece desde el centro al montar, y sin movimiento aparece entera', () => {
     const { container } = render(<Waveform peaks={PEAKS} />)
-    const bar = container.querySelector('rect')!
-    expect(getComputedStyle(bar).getPropertyValue('animation')).toMatch(/grow/)
-    // RNF-PERF-03: al terminar no queda «en efecto» (con `both`, miles de barras se recalculaban
-    // en cada fotograma).
-    expect(getComputedStyle(bar).getPropertyValue('animation')).toMatch(/\bbackwards$/)
+    const svg = container.querySelector('svg')!
+    const animation = () => getComputedStyle(svg).getPropertyValue('animation')
+    expect(animation()).toMatch(/grow/)
+    expect(animation()).toMatch(/sweep/)
+    // Al terminar no queda «en efecto» (con `both` se recalculaba en cada fotograma).
+    expect(animation()).not.toMatch(/\bboth\b/)
+    // El barrido dura 2 ms por barra (`--bb-stagger-wave`), como el escalonado del Anexo E.
+    expect(svg.style.getPropertyValue('--wave-bars')).toBe(String(container.querySelectorAll('rect').length))
     document.documentElement.setAttribute('data-motion', 'reduced')
-    expect(getComputedStyle(bar).getPropertyValue('animation')).toBe('none')
+    expect(animation()).toBe('none')
+  })
+
+  it('INP (§4.17): una sola animación por onda, en el <svg>; ninguna por barra', () => {
+    const { container } = render(<Waveform peaks={PEAKS} progress={0.5} />)
+    const rects = [...container.querySelectorAll('rect')]
+    expect(rects.length).toBeGreaterThan(1)
+    for (const rect of rects)
+      expect(getComputedStyle(rect).getPropertyValue('animation-name')).toMatch(/^(none)?$/)
+  })
+
+  it('Anexo E: el barrido va de inset(0 100% 0 0) a inset(0) (sin el final explícito, no se interpola)', () => {
+    const sweep = /@keyframes sweep \{([\s\S]*?)\n\}/.exec(waveCss)?.[1] ?? ''
+    expect(sweep).toMatch(/from \{\s*clip-path: inset\(0 100% 0 0\);/)
+    expect(sweep).toMatch(/to \{\s*clip-path: inset\(0\);/)
+  })
+
+  it('sin animateIn, ni el <svg> se anima', () => {
+    const { container } = render(<Waveform peaks={PEAKS} animateIn={false} />)
+    expect(getComputedStyle(container.querySelector('svg')!).getPropertyValue('animation-name')).toMatch(
+      /^(none)?$/,
+    )
   })
 })
