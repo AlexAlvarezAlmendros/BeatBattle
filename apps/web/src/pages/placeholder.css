@@ -1,18 +1,25 @@
-/* Páginas provisionales (0.10): solo jerarquía tipográfica con tokens, sin piezas de marca. */
+/*
+ * Páginas provisionales (0.10): solo jerarquía tipográfica con tokens, sin piezas de marca. Como las
+ * páginas interiores del sello (`/beats`, `.beats-page-header`): todo centrado (el `.container` del
+ * sello lleva `text-align: center`) y el título es el `h1` del navegador, 32 px en 700, sin mayúsculas
+ * ni interletraje, en escritorio y en móvil. Lo de titular (900, mayúsculas, −0,02 em) es solo del hero.
+ */
 .placeholder-page {
   display: grid;
   gap: var(--bb-space-4);
-  max-width: 60ch;
+  text-align: center;
 }
 
 .placeholder-page h1 {
-  font-size: var(--bb-font-size-3xl);
-  font-weight: var(--bb-weight-display);
-  letter-spacing: var(--bb-tracking-display);
-  line-height: var(--bb-leading-snug);
-  text-transform: uppercase;
+  font-family: var(--bb-font-body);
+  font-size: var(--bb-font-size-page-title);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .placeholder-page p {
+  max-width: 60ch;
+  margin-inline: auto;
   color: var(--bb-text-2);
 }

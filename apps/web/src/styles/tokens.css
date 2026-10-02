@@ -133,6 +133,7 @@
   --bb-font-size-footer-tagline: 0.95rem; /* 15,2 px: entradilla del pie (Footer.css) */
   --bb-font-size-footer-link: 0.9rem; /* 14,4 px: enlaces del pie (Footer.css) */
   --bb-font-size-footer-legal: 0.8rem; /* 12,8 px: franja inferior del pie (Footer.css) */
+  --bb-font-size-page-title: 2rem; /* 32 px fijo: título de página interior (`/beats`: el `h1` del navegador, 2em) */
 
   --bb-leading-tight: 0.95; /* Titulares macizos muy grandes */
   --bb-leading-compact: 1.05; /* Titular del hero en tableta y nombre del pie (Hero.css, Footer.css) */
@@ -234,7 +235,7 @@
   --nav-gap: 16px; /* Separación de la isla con el borde */
   --nav-h: 69px; /* Alto de la isla; baja en móvil (ver media queries al final) */
   --nav-flow: calc(var(--nav-gap) + var(--nav-h)); /* Espacio que la isla ocupa en el flujo */
-  --bb-layout-max: 1320px; /* Ancho máximo de la isla y del contenido */
+  --bb-layout-max: 1320px; /* Ancho máximo de la isla (el contenido va a todo el ancho, como el sello) */
   --bb-layout-gutter: 1rem; /* Margen lateral mínimo: `min(1320px, 100% − 2rem)` */
   --bb-layout-width: min(var(--bb-layout-max), calc(100% - 2 * var(--bb-layout-gutter)));
 

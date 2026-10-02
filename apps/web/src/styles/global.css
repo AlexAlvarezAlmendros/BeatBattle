@@ -45,7 +45,8 @@ h5,
 h6 {
   margin: 0;
   font-family: var(--bb-font-display);
-  font-weight: var(--bb-weight-extrabold);
+  /* El de los títulos del sello (el del navegador). Los titulares de 800–900 lo ponen en su clase. */
+  font-weight: var(--bb-weight-bold);
   line-height: var(--bb-leading-snug);
 }
 

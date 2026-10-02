@@ -13,12 +13,15 @@
 }
 
 .site-main {
-  /* Relleno superior del contenido: lo leen los bloques que suben hasta el borde (`.bleed-top`). */
-  --site-main-pad: var(--bb-space-12);
-  width: var(--bb-layout-width);
+  /*
+   * Relleno del contenido: el del `.container` del sello (`index.css`: `padding: 2rem`, sin ancho
+   * máximo), a 32 px de los bordes en escritorio y en móvil; el título de `/beats` queda a 32 px bajo
+   * la isla y a 32 px del borde. Cada página pone su ancho máximo si lo necesita. Lo leen también los
+   * bloques que suben hasta el borde (`.bleed-top`).
+   */
+  --site-main-pad: var(--bb-space-8);
   min-height: 60vh;
-  margin-inline: auto;
-  padding-block: var(--site-main-pad);
+  padding: var(--site-main-pad);
 }
 
 /*

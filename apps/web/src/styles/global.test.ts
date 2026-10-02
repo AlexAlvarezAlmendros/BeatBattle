@@ -124,3 +124,19 @@ describe('global.css: red de «reducir movimiento»', () => {
     ])
   })
 })
+
+describe('global.css: encabezados', () => {
+  afterEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('RD-VIS-02: los encabezados sin clase pesan 700, como los títulos del sello (el del navegador)', () => {
+    for (const level of [1, 2, 3, 4, 5, 6]) {
+      document.body.innerHTML = `<h${level}>Título</h${level}>`
+      const weights = matchingRules(document.body.firstElementChild as Element)
+        .map((rule) => rule.style.getPropertyValue('font-weight'))
+        .filter(Boolean)
+      expect(weights).toEqual(['var(--bb-weight-bold)'])
+    }
+  })
+})
