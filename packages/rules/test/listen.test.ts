@@ -6,17 +6,17 @@ import { isListenThresholdMet, listenThresholdMs } from '../src/listen'
 const MINUTE_MS = 60_000
 
 describe('listenThresholdMs', () => {
-  it('RF-VOTE-04: casos del Anexo G (3 min → 45 s; 60 s → 30 s)', () => {
+  it('RF-VOTE-04 (parcial: umbral puro; el 409 LISTEN_REQUIRED llega en la Fase 5): casos del Anexo G (3 min → 45 s; 60 s → 30 s)', () => {
     expect(listenThresholdMs(3 * MINUTE_MS)).toBe(45_000)
     expect(listenThresholdMs(60_000)).toBe(30_000)
   })
 
-  it('RF-VOTE-04: en una entrada de 3 min, a los 20 s no se cumple y a los 46 s sí', () => {
+  it('RF-VOTE-04 (parcial: umbral puro; el 409 LISTEN_REQUIRED llega en la Fase 5): en una entrada de 3 min, a los 20 s no se cumple y a los 46 s sí', () => {
     expect(isListenThresholdMet(20_000, 3 * MINUTE_MS)).toBe(false)
     expect(isListenThresholdMet(46_000, 3 * MINUTE_MS)).toBe(true)
   })
 
-  it('RF-VOTE-04: la frontera está incluida (45 000 ms cumple, 44 999 ms no)', () => {
+  it('RF-VOTE-04 (parcial: umbral puro; el 409 LISTEN_REQUIRED llega en la Fase 5): la frontera está incluida (45 000 ms cumple, 44 999 ms no)', () => {
     expect(isListenThresholdMet(45_000, 3 * MINUTE_MS)).toBe(true)
     expect(isListenThresholdMet(44_999, 3 * MINUTE_MS)).toBe(false)
   })

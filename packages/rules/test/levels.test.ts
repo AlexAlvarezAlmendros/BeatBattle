@@ -122,7 +122,7 @@ describe('niveles', () => {
 })
 
 describe('bonus de racha', () => {
-  it('RF-GAME-04: bonus = min(0,5, 0,1 · (racha − 1)) para racha ≥ 2 (Anexo G)', () => {
+  it('RF-GAME-04 (parcial: bonus; la racha con comodín llega en la Fase 7): bonus = min(0,5, 0,1 · (racha − 1)) para racha ≥ 2 (Anexo G)', () => {
     const expected: [streak: number, bonus: number][] = [
       [0, 0],
       [1, 0],

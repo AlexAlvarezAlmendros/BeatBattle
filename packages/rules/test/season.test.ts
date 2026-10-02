@@ -3,20 +3,20 @@ import { describe, expect, it } from 'vitest'
 import { seasonPoints } from '../src/season'
 
 describe('seasonPoints', () => {
-  it('RF-ARC-03: 25, 18, 15, 12, 10, 8, 6, 4, 2, 1 del 1.º al 10.º (Anexo B)', () => {
+  it('RF-ARC-03 (parcial: tabla; los desempates llegan en la Fase 7): 25, 18, 15, 12, 10, 8, 6, 4, 2, 1 del 1.º al 10.º (Anexo B)', () => {
     const table = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
     table.forEach((points, i) => {
       expect(seasonPoints(i + 1, true), `posición ${i + 1}`).toBe(points)
     })
   })
 
-  it('RF-ARC-03: 1 punto por cada entrada clasificada fuera del top 10', () => {
+  it('RF-ARC-03 (parcial: tabla; los desempates llegan en la Fase 7): 1 punto por cada entrada clasificada fuera del top 10', () => {
     expect(seasonPoints(11, true)).toBe(1)
     expect(seasonPoints(50, true)).toBe(1)
     expect(seasonPoints(1_000, true)).toBe(1)
   })
 
-  it('RF-ARC-03: una entrada sin clasificar no suma', () => {
+  it('RF-ARC-03 (parcial: tabla; los desempates llegan en la Fase 7): una entrada sin clasificar no suma', () => {
     expect(seasonPoints(1, false)).toBe(0)
     expect(seasonPoints(11, false)).toBe(0)
   })

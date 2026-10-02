@@ -115,7 +115,7 @@ describe('bayes', () => {
 })
 
 describe('votos, media, mediana e histograma', () => {
-  it('RF-VOTE-01: un voto es un entero de 1 a 5 (0, 6 y 3,5 no lo son)', () => {
+  it('RF-VOTE-01 (parcial: validación pura; el 422 llega en la Fase 5): un voto es un entero de 1 a 5 (0, 6 y 3,5 no lo son)', () => {
     for (const ok of [1, 2, 3, 4, 5]) expect(isStars(ok)).toBe(true)
     for (const bad of [0, 6, 3.5, -1, Number.NaN, '3', null, undefined]) expect(isStars(bad)).toBe(false)
   })
@@ -167,7 +167,7 @@ describe('votos, media, mediana e histograma', () => {
 })
 
 describe('orden de los votos', () => {
-  it('RF-RES-04 (parcial: puntuación, media, mediana e histograma; el snapshot llega con el sellado): barajar los votos no cambia nada', () => {
+  it('RF-RES-04 (parcial: puntuación, mediana e histograma; el snapshot llega en la Fase 6): barajar los votos no cambia nada', () => {
     fc.assert(
       fc.property(votesAndPermutation, weekMean, ([stars, shuffled], m) => {
         expect(shuffled.slice().sort()).toEqual(stars.slice().sort())

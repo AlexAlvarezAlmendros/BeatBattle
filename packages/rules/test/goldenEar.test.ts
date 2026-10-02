@@ -35,7 +35,7 @@ describe('averageRanks', () => {
 })
 
 describe('spearman', () => {
-  it('RF-GAME-06: sin empates coincide con la fórmula del Anexo G', () => {
+  it('RF-GAME-06 (parcial: Spearman; excluir el propio voto llega en la Fase 7): sin empates coincide con la fórmula del Anexo G', () => {
     // d = [−1, 1, −1, 1, 0] → Σd² = 4 → ρ = 1 − 24 / 120 = 0,8.
     expect(spearman([1, 2, 3, 4, 5], [2, 1, 4, 3, 5])).toBeCloseTo(0.8, 12)
     fc.assert(
@@ -48,7 +48,7 @@ describe('spearman', () => {
     )
   })
 
-  it('RF-GAME-06: con empates usa rangos medios y Pearson sobre los rangos', () => {
+  it('RF-GAME-06 (parcial: Spearman; excluir el propio voto llega en la Fase 7): con empates usa rangos medios y Pearson sobre los rangos', () => {
     // Estrellas del jurado y puntuación de cada entrada (recalculada sin su voto, guía §2.10).
     const stars = [5, 4, 4, 2, 1]
     const scores = [4.4, 4.0, 3.8333, 3.5, 3.9]
