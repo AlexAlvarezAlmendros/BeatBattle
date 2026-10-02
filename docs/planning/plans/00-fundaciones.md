@@ -22,14 +22,14 @@ aleje del sello: por eso la fase termina con una comparación A/B contra captura
 
 | Id | Tarea(s) | Verificación |
 |----|----------|--------------|
-| `RD-VIS-01` | 0.4 | Script `lint:tokens` en `pnpm check` que falla con un color literal fuera de los tokens (test del propio script) |
+| `RD-VIS-01` | 0.4 | ✅ `pnpm lint:tokens` dentro de `pnpm check`, con 87 tests del propio lint |
 | `RD-VIS-02` | 0.7, 0.8, 0.14 | Comparación A/B con capturas del sello registrada en `docs/planning/evidence/f0/` |
 | `RD-VIS-03` | 0.9 | Galería `/dev/galeria` con todos los estados de §3.3 |
 | `RD-MOT-03` | 0.8, 0.9 | Cada componente con variante sin movimiento, visible en la galería |
 | `RF-OTP-01` | 0.7 | Logo del sello enlazado y pie compartido, revisión visual |
-| `RNF-SEC-01` | 0.12, 0.16 | Test de humo de cabeceras sobre `/api/health` y `vercel.json` validado |
-| `RNF-SEC-05` | 0.16 | Tests: `Origin` ajeno → 403; `text/plain` → 415 |
-| `RNF-SEC-06` | 0.3 | Hook `guard-secrets` probado |
+| `RNF-SEC-01` | 0.12, 0.16 | ✅ Test estático de `vercel.json` + cabeceras de la API con `inject` (humo en despliegue real: Fase 10, guía v0.4) |
+| `RNF-SEC-05` | 0.16 | ✅ Tests: `Origin` ajeno → 403; `text/plain` → 415 |
+| `RNF-SEC-06` | 0.3 | ✅ Hook `guard-secrets` probado |
 | `RNF-A11Y-02` | 0.13 | axe sin errores en la home y la galería |
 | `RNF-A11Y-03` | 0.8, 0.9 | Galería con «reducir movimiento» emulado |
 
@@ -46,39 +46,40 @@ contratos compartidos y cliente de API tipado (§4.7.2, §4.10–4.13).
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
 | 0.1 | Scaffold: pnpm workspaces (`apps/web`, `apps/server`, `packages/{rules,audio,covers,shared,emails}`, `tools/{shot,seed}`), TypeScript estricto, Biome, Vitest; `apps/web` con Vite + React 19 + React Router 7; `apps/server` con Fastify y `GET /api/health`; `api/index.ts` para Vercel; versiones alineadas con Orchard; `.nvmrc` (22); todas las dependencias de la fase instaladas de una vez | ✅ Hecho | — | §4.1, §4.4. Verificado: `pnpm check`, `pnpm typecheck`, `pnpm test` (9 tests) y `pnpm build` en verde; API y web arrancan y el proxy de Vite sirve `/api/health`. React Router 7.18.4 (la 8 ya existe, pero la guía fija la 7); `noUncheckedIndexedAccess` activado además de lo de Orchard |
-| 0.2 | CI en GitHub Actions: `pnpm install --frozen-lockfile` → auditoría → Biome y lints propios → tipos → Vitest → build → Playwright | ⬜ Listo | 0.1 | §4.16 |
+| 0.2 | CI en GitHub Actions: `pnpm install --frozen-lockfile` → auditoría → Biome y lints propios → tipos → Vitest → build → Playwright | 🔄 En curso | 0.1 | §4.16 · Escrito y verificado en local (`pnpm check`, `typecheck`, `test`, `build` y `pnpm audit`); falta la primera ejecución en GitHub Actions al subir la rama. Los pasos de Playwright los añade la 0.13 |
 | 0.3 | Hooks de Claude Code: `guard-secrets`, `no-ai-attribution`, `format-quality` (Biome) | ✅ Hecho | — | Creados con el plan (2026-10-02) a partir de los de Orchard. Verificados con entradas de prueba: bloquean `git add .env` y `*.db`, y commits y PRs con atribución (también el pie «Generated with [Claude Code]», que el de Orchard dejaba pasar). `format-quality` queda inactivo hasta que exista Biome (0.1) |
-| 0.4 | Tokens: `apps/web/src/styles/tokens.css` + espejo `packages/shared/src/tokens.ts`; script `lint:tokens` que prohíbe colores, radios y duraciones literales fuera de los tokens | ⬜ Listo | 0.1 | §3.2 · `RD-VIS-01` |
-| 0.5 | Fuentes alojadas en el proyecto: Montserrat y JetBrains Mono (variables, `@fontsource-variable`), `preload` de la principal y `font-display: swap` | ⬜ Listo | 0.1 | §3.1 (hallazgo de las fuentes del sello), §3.2 |
-| 0.6 | `packages/rules`: esqueleto por módulos de §4.5, regla de pureza (Biome `noRestrictedImports`/`noRestrictedGlobals` + script que prohíbe `Date.now`, `Math.random` y `new Date()` sin argumentos), PRNG con semilla (`hash → sfc32`) y `balance.ts` con las constantes del Anexo B, todo con tests | ⬜ Listo | 0.1 | §4.5 · Anexo B · Anexo G |
+| 0.4 | Tokens: `apps/web/src/styles/tokens.css` + espejo `packages/shared/src/tokens.ts`; script `lint:tokens` que prohíbe colores, radios y duraciones literales fuera de los tokens | ✅ Hecho | 0.1 | §3.2 · `RD-VIS-01` · Verificado: `tokens.css` + `@beatbattle/shared/tokens` con test de sincronía en los dos sentidos (mutación comprobada); `tools/lint` con 87 tests; `pnpm lint:tokens` limpio; foco y «reducir movimiento» comprobados en Chrome |
+| 0.5 | Fuentes alojadas en el proyecto: Montserrat y JetBrains Mono (variables, `@fontsource-variable`), `preload` de la principal y `font-display: swap` | ✅ Hecho | 0.1 | §3.1 (hallazgo de las fuentes del sello), §3.2 · Verificado: `preload` del woff2 latino con hash en `dist/index.html`; Montserrat 900 cargada en dev y en prod (`document.fonts.check`); el latino extendido solo se descarga si hace falta |
+| 0.6 | `packages/rules`: esqueleto por módulos de §4.5, regla de pureza (Biome `noRestrictedImports`/`noRestrictedGlobals` + script que prohíbe `Date.now`, `Math.random` y `new Date()` sin argumentos), PRNG con semilla (`hash → sfc32`) y `balance.ts` con las constantes del Anexo B, todo con tests | ✅ Hecho | 0.1 | §4.5 · Anexo B · Anexo G · Verificado: 177 tests (casos exactos del Anexo G, tabla de niveles recalculada, propiedades con fast-check); pureza con Biome + `lint:purity` dentro de `pnpm check`. Adelanta fórmulas puras ya especificadas (`listen`, `scoring`, `levels`, `season`, `loudness`, `goldenEar`) que reutilizarán las fases 3, 6 y 7 |
 
 ### Sistema de diseño
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 0.7 | Layout del sello: isla de navegación flotante (medidas de `Header.css`), logo *OTP.* fijo a −10° enlazado a `otherpeople.es`, pie compartido, rótulos verticales laterales, banda de marquee, rejilla roja y viñeta del hero; titular «BEAT / BATTLE» (macizo + contorno rojo con halo). Nombre de marca por defecto: «Beat Battle by Other People» | 🔒 Bloqueado | 0.4, 0.5, 0.10 | §3.1, §3.8.3 · `RF-OTP-01` |
-| 0.8 | Componentes base con todos sus estados (reposo, hover, foco, pulsado, cargando, deshabilitado, éxito, error): botón CTA, contorno, icono; chip; tarjeta con inclinación 3D; tesela de dato; rótulo de sección; fila de entrada (sin audio); modal de cristal; aviso; barra de XP; esqueleto; cuenta atrás (visual) | 🔒 Bloqueado | 0.4, 0.5 | §3.3 · Anexo E |
+| 0.7 | Layout del sello: isla de navegación flotante (medidas de `Header.css`), logo *OTP.* fijo a −10° enlazado a `otherpeople.es`, pie compartido, rótulos verticales laterales, banda de marquee, rejilla roja y viñeta del hero; titular «BEAT / BATTLE» (macizo + contorno rojo con halo). Nombre de marca por defecto: «Beat Battle by Other People» | ⬜ Listo | 0.4, 0.5, 0.10 | §3.1, §3.8.3 · `RF-OTP-01` |
+| 0.8 | Componentes base con todos sus estados (reposo, hover, foco, pulsado, cargando, deshabilitado, éxito, error): botón CTA, contorno, icono; chip; tarjeta con inclinación 3D; tesela de dato; rótulo de sección; fila de entrada (sin audio); modal de cristal; aviso; barra de XP; esqueleto; cuenta atrás (visual) | ⬜ Listo | 0.4, 0.5 | §3.3 · Anexo E |
 | 0.9 | Galería `/dev/galeria` (solo en desarrollo) con tokens, tipografía, componentes y cada estado, en calidad normal y con «reducir movimiento» | 🔒 Bloqueado | 0.8 | `RD-VIS-03`, `RD-MOT-03` |
-| 0.10 | Router y layouts de todas las rutas de §2.18 como páginas vacías con su título; 404 provisional; proveedores (Query) | ⬜ Listo | 0.1 | §2.18 |
-| 0.11 | i18n mínimo: `t()` con `Intl.PluralRules`, `es.json`, formato de fechas en `Europe/Madrid` | ⬜ Listo | 0.1 | §4.7.8 |
+| 0.10 | Router y layouts de todas las rutas de §2.18 como páginas vacías con su título; 404 provisional; proveedores (Query) | ✅ Hecho | 0.1 | §2.18 · Verificado: 43 tests de rutas con `createMemoryRouter` (27 URLs, 404 dentro del marco, títulos, foco y vuelta arriba); la galería no entra en la build de producción |
+| 0.11 | i18n mínimo: `t()` con `Intl.PluralRules`, `es.json`, formato de fechas en `Europe/Madrid` | ✅ Hecho | 0.1 | §4.7.8 · Verificado: 16 tests (plurales, modo estricto, fechas en Madrid con los dos cambios de hora) |
 
 ### Plataforma
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 0.12 | `vercel.json` base: build, salida, reescrituras de `/api`, cabeceras de seguridad y CSP de §4.13 (sin desplegar) | ⬜ Listo | 0.1 | `RNF-SEC-01` |
+| 0.12 | `vercel.json` base: build, salida, reescrituras de `/api`, cabeceras de seguridad y CSP de §4.13 (sin desplegar) | ✅ Hecho | 0.1 | `RNF-SEC-01` · Verificado: test estático de cada directiva de la CSP y de cada cabecera. Las reescrituras de compartir a `api/share` llegan con esa función (Fase 6) |
 | 0.13 | Playwright + axe: humo de la home y de la galería, auditoría de accesibilidad en CI | 🔒 Bloqueado | 0.2, 0.9 | §4.16 · `RNF-A11Y-02` |
-| 0.14 | `tools/shot` portado de Orchard (`shot.mjs`, `bench.mjs`) + capturas de referencia de `otherpeople.es` (home, beats, ficha) para la «prueba del sello» | ⬜ Listo | 0.1 | `RD-VIS-02` |
+| 0.14 | `tools/shot` portado de Orchard (`shot.mjs`, `bench.mjs`) + capturas de referencia de `otherpeople.es` (home, beats, ficha) para la «prueba del sello» | ✅ Hecho | 0.1 | `RD-VIS-02` · Verificado: `shot.mjs`, `bench.mjs` y `otp.mjs`; 10 capturas del sello y `otp-metrics.json` en `docs/planning/evidence/f0/otp/`, revisadas a ojo |
 | 0.15 | README inicial al estilo de SampleCurator (problema, por qué, cómo arrancarlo; sin checklist ni badges inventados) | ⬜ Listo | 0.1 | Memoria de estilo de README |
 
 ### Bases del servidor y de los datos
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 0.16 | Servidor base: configuración validada con Zod (`config/env.ts`), `Clock` inyectable (cabecera `x-bb-test-now` solo con `BB_TEST_CLOCK=1`; el arranque falla si coincide con `NODE_ENV=production`), `AppError` con catálogo de códigos y sobre `{ data } \| { error }`, plugin de seguridad (comprobación de `Origin` y solo JSON en escrituras, cuerpo ≤ 64 kB, cabeceras), registro sin PII, patrón de módulo (`routes`, `service`, `repo`, `schema`) con el módulo `health`, `buildApp()` probado con `inject` | ⬜ Listo | 0.1 | §4.10, §4.12, §4.13 · `RNF-SEC-01`, `RNF-SEC-05` |
-| 0.17 | Datos: Drizzle + libSQL (fichero en local, memoria en tests), `drizzle-kit` y migraciones aplicadas al arrancar, helper `createTestDb()`, ids uuid v7, ayudante de `batch`, tabla `app_rate_limit` y `rateLimit()` genérico con tests (base de `RNF-SEC-02`) | 🔒 Bloqueado | 0.16 | §4.11, §4.13 |
-| 0.18 | Contratos compartidos: `packages/shared` con el sobre de respuesta en Zod, catálogo de códigos de error y esquema de `health`; cliente de API tipado en `apps/web/src/net` sobre TanStack Query | 🔒 Bloqueado | 0.16 | §4.7.2 |
-| 0.19 | Servicios locales: `docker-compose.yml` con Mailpit, `apps/server/.env.example` con todas las variables de §4.15 comentadas, `pnpm dev:all` (web + API) | ⬜ Listo | 0.1 | §4.15, §4.19.1 |
+| 0.16 | Servidor base: configuración validada con Zod (`config/env.ts`), `Clock` inyectable (cabecera `x-bb-test-now` solo con `BB_TEST_CLOCK=1`; el arranque falla si coincide con `NODE_ENV=production`), `AppError` con catálogo de códigos y sobre `{ data } \| { error }`, plugin de seguridad (comprobación de `Origin` y solo JSON en escrituras, cuerpo ≤ 64 kB, cabeceras), registro sin PII, patrón de módulo (`routes`, `service`, `repo`, `schema`) con el módulo `health`, `buildApp()` probado con `inject` | ✅ Hecho | 0.1 | §4.10, §4.12, §4.13 · `RNF-SEC-01`, `RNF-SEC-05` · Verificado: tests con `inject` (Origin ajeno 403, text/plain 415, cuerpo grande 413, sobre de error, 404, guarda del reloj) y con curl contra la API en marcha |
+| 0.17 | Datos: Drizzle + libSQL (fichero en local, memoria en tests), `drizzle-kit` y migraciones aplicadas al arrancar, helper `createTestDb()`, ids uuid v7, ayudante de `batch`, tabla `app_rate_limit` y `rateLimit()` genérico con tests (base de `RNF-SEC-02`) | ✅ Hecho | 0.16 | §4.11, §4.13 · Verificado: primera migración generada con drizzle-kit y aplicada al arrancar; `rateLimit` atómico con tests de ventana, reinicio y concurrencia; `uuidv7` con tests |
+| 0.18 | Contratos compartidos: `packages/shared` con el sobre de respuesta en Zod, catálogo de códigos de error y esquema de `health`; cliente de API tipado en `apps/web/src/net` sobre TanStack Query | ✅ Hecho | 0.16 | §4.7.2 · Verificado: esquemas compartidos con tests; `apiFetch` con fetch simulado (errores de red, respuestas no JSON, reintentos solo si tiene sentido); `useHealth` contra la API real por el proxy de Vite |
+| 0.19 | Servicios locales: `docker-compose.yml` con Mailpit, `apps/server/.env.example` con todas las variables de §4.15 comentadas, `pnpm dev:all` (web + API) | 🔄 En curso | 0.1 | §4.15, §4.19.1 · `.env.example` completo, `api/index.ts` con migraciones y previews, y web + API juntas comprobadas. Falta levantar `docker-compose.yml` (Mailpit): **Docker no está instalado** en esta máquina; se hará al empezar la base de email (Fase 2), que es su primer uso |
+| 0.20 | Dependabot para npm y GitHub Actions (§4.13 «Dependencias») | 🔒 Bloqueado | confirmación del usuario | ⚠️ Empieza a abrir PRs en el repositorio de GitHub: se activa cuando el usuario lo confirme |
 
 ---
 
@@ -108,5 +109,6 @@ todas las bases transversales probadas.
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
 | 2026-10-02 | — | Plan creado. 0.3 hecha junto con la planificación. |
+| 2026-10-02 | Ola 1 | Cuatro líneas en paralelo (worktrees) con revisión independiente y arreglos, fusionadas en `feat/f0-fundaciones` sin conflictos de texto: 0.4, 0.5, 0.6, 0.10, 0.11, 0.12, 0.14, 0.16, 0.17 y 0.18 hechas; 0.2 y 0.19 parciales. Calidad tras fusionar: Biome, `lint:tokens`, `lint:purity`, tipos, ~525 tests y build en verde. Desviaciones llevadas a la guía v0.4 (medidas reales del sello incluidas). Se añade 0.20 (Dependabot, pendiente de confirmación). Desbloquea 0.7 y 0.8. |
 | 2026-10-02 | 0.1 | Scaffold del monorepo hecho y verificado. Desbloquea 0.2, 0.4–0.6, 0.10–0.12, 0.14–0.16 y 0.19. |
 | 2026-10-02 | — | Se añaden 0.16–0.19 (bases del servidor, datos, contratos y servicios locales) y la tabla de cobertura. Empieza la fase en la rama `feat/f0-fundaciones`. |
