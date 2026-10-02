@@ -112,6 +112,33 @@ describe('vercel.json: construcción y función', () => {
       maxDuration: 10,
     })
   })
+
+  it('el build empaqueta la API antes de la función y la prueba con node puro', () => {
+    const rootPackage = JSON.parse(
+      readFileSync(new URL('../../../package.json', import.meta.url), 'utf8'),
+    ) as {
+      scripts: Record<string, string>
+    }
+    const serverPackage = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as {
+      scripts: Record<string, string>
+    }
+    // `buildCommand` de Vercel es `pnpm build`, que construye la web y empaqueta la API.
+    expect(config.buildCommand).toBe('pnpm build')
+    expect(rootPackage.scripts.build).toContain('pnpm --filter @beatbattle/server build')
+    expect(serverPackage.scripts.build).toBe(
+      'vite build --config build.config.mjs && node scripts/smoke-bundle.mjs',
+    )
+  })
+
+  it('api/index.ts carga el artefacto empaquetado y no la fuente TypeScript', () => {
+    const source = readFileSync(new URL('../../../api/index.ts', import.meta.url), 'utf8')
+    expect(source).toMatch(/^import handler from '\.\.\/apps\/server\/dist\/vercel\.mjs'$/m)
+    // De la fuente, solo tipos (se borran al compilar): ningún import de valor de `apps/server/src`.
+    const valueImports = [...source.matchAll(/^import (?!type )[^\n]* from '([^']+)'/gm)].map(
+      (match) => match[1],
+    )
+    expect(valueImports).toEqual(['../apps/server/dist/vercel.mjs'])
+  })
 })
 
 describe('vercel.json: reescrituras', () => {

@@ -141,8 +141,10 @@ describe('createServerlessHandler', () => {
     expect(calls).toBe(1)
   })
 
-  it('importar api/index.ts no arranca nada (ni deja rechazos sin manejar)', async () => {
-    const mod = await import('../../../api/index')
+  it('importar la entrada de la función (src/vercel.ts) no arranca nada (ni deja rechazos sin manejar)', async () => {
+    // `api/index.ts` carga su versión empaquetada (`dist/vercel.mjs`), que prueba `pnpm build` con
+    // `node` puro (`scripts/smoke-bundle.mjs`).
+    const mod = await import('../src/vercel')
     expect(typeof mod.default).toBe('function')
   })
 })
