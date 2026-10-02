@@ -1,0 +1,17 @@
+{
+  "app": {
+    "name": "Beat Battle",
+    "brand": "Beat Battle by Other People",
+    "documentTitle": "Beat Battle · Other People",
+    "pageTitle": "{page} · Beat Battle",
+    "skipToContent": "Saltar al contenido"
+  },
+  "common": {
+    "loading": "Cargando…"
+  },
+  "entries": {
+    "count_zero": "Pista libre",
+    "count_one": "{count} entrada",
+    "count_other": "{count} entradas"
+  }
+}
