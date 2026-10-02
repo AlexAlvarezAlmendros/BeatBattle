@@ -22,8 +22,9 @@ import { assertFiniteAtLeast, assertIntegerInRange } from './internal/guards'
  * XP acumulado necesario para el nivel `level`:
  * `xpNivel(n) = 50 · round(150 · (n − 1)^1,6 / 50)` (Anexo G).
  *
- * Ningún umbral de los niveles 1–20 cae a menos de 0,004 de un empate de redondeo, así que una
- * diferencia de un ULP en `**` entre motores no puede cambiar la tabla (lo comprueba un test).
+ * Ningún umbral de los niveles 1–20 cae a menos de 0,0039 pasos de un empate de redondeo (el más
+ * cercano es el del nivel 8: 67,49601 pasos de 50 XP, a 0,003987 del empate), así que una diferencia
+ * de un ULP en `**` entre motores no puede cambiar la tabla (el test exige un margen de 0,001).
  */
 export function xpForLevel(level: number): number {
   assertIntegerInRange(level, LEVEL_MIN, LEVEL_MAX, 'level')
