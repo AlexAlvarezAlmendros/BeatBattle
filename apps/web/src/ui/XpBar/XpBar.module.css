@@ -95,10 +95,14 @@
   }
 }
 
-/* Estados forzados de la galería: el brillo a medio recorrido y el destello en su pico, quietos. */
+/*
+ * Estados forzados de la galería: el brillo a medio recorrido y el destello en su pico, quietos. El
+ * brillo se fija en el centro del relleno (con un retardo negativo de media duración, la curva de
+ * salida ya lo había llevado casi al final y no se veía).
+ */
 .xp[data-force-state="gain"] .shine {
-  animation-delay: calc(var(--bb-dur-reward) / -2);
-  animation-play-state: paused;
+  animation: none;
+  transform: none;
 }
 
 .xp[data-force-state="levelUp"] .flash {
