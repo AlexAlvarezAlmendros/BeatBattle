@@ -1,0 +1,38 @@
+# Calidad en cada PR y en cada push a main (guía §4.16). Los pasos de Playwright (E2E, axe y capturas)
+# llegan con la tarea 0.13.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# Un push nuevo a la misma rama o PR cancela la ejecución anterior.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      # Sin `version`: instala la de `packageManager` del package.json raíz.
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Dependencias de producción sin vulnerabilidades altas conocidas (guía §4.13).
+      - run: pnpm audit --prod --audit-level high
+      - run: pnpm check
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
