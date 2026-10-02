@@ -9,8 +9,11 @@
 # máquina. Con sqld, DATABASE_URL=http://127.0.0.1:8080 reproduce el comportamiento de Turso por
 # HTTP (p. ej. que `PRAGMA foreign_keys` no se mantiene entre peticiones, guía §4.11).
 #
-# Los puertos solo escuchan en 127.0.0.1. Imágenes en `latest` mientras sea solo para desarrollo;
-# fija la versión cuando lo use la CI.
+# Los puertos solo escuchan en 127.0.0.1 y se pueden cambiar si chocan con otro servicio, con
+# variables del shell o de un `.env` junto a este fichero (no el de apps/server):
+#   MAILPIT_SMTP_PORT (1025), MAILPIT_WEB_PORT (8025), SQLD_PORT (8080)
+# p. ej. `MAILPIT_SMTP_PORT=2025 docker compose up -d`; entonces SMTP_URL=smtp://127.0.0.1:2025.
+# Imágenes en `latest` mientras sea solo para desarrollo; fija la versión cuando lo use la CI.
 name: beatbattle
 
 services:
