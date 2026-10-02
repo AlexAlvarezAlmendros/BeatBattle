@@ -1,0 +1,76 @@
+/*
+ * Tarjeta (§3.3). Medidas de las tarjetas de la home del sello (`otp-metrics.json`): radio 16, borde
+ * blanco al 18 %, fondo de cristal negro al 58 %, sombra `0 4px 24px` + filete interior, relleno y
+ * hueco de 16 px.
+ */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--bb-space-4);
+  min-width: 0;
+  padding: var(--bb-space-4);
+  border: 1px solid var(--bb-line-strong);
+  border-radius: var(--bb-radius-lg);
+  color: var(--bb-text);
+  transition:
+    border-color var(--bb-dur-fast) var(--bb-ease-out),
+    box-shadow var(--bb-dur-fast) var(--bb-ease-out);
+}
+
+.glass {
+  background-color: var(--bb-glass-card);
+  box-shadow: var(--bb-shadow-glass);
+  backdrop-filter: blur(var(--bb-glass-blur));
+  -webkit-backdrop-filter: blur(var(--bb-glass-blur));
+}
+
+.solid {
+  background-color: var(--bb-ink-800);
+  box-shadow: var(--bb-shadow-card);
+}
+
+/* Brillo especular: sigue al cursor (`--tilt-glare-x/y`, que escribe `useTilt`). */
+.glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: radial-gradient(
+    circle at var(--tilt-glare-x, 50%) var(--tilt-glare-y, 50%),
+    var(--bb-glare),
+    transparent 60%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--bb-dur-fast) var(--bb-ease-out);
+}
+
+.card[data-tilt="on"] {
+  will-change: transform;
+}
+
+.card[data-tilt="on"]:hover .glare,
+.card[data-tilt="on"][data-force-state="hover"] .glare {
+  opacity: 1;
+}
+
+/* Hover forzado de la galería: una inclinación fija, la que daría el cursor arriba a la izquierda. */
+.card[data-tilt="on"][data-force-state="hover"] {
+  --tilt-glare-x: 25%;
+  --tilt-glare-y: 20%;
+  transform: perspective(800px) rotateX(3.6deg) rotateY(-3deg);
+}
+
+/* El borde se ilumina al pasar por encima; sin inclinación (Anexo E) es todo el efecto. */
+.card:hover,
+.card[data-force-state="hover"],
+.card:focus-within {
+  border-color: var(--bb-line-lit);
+}
+
+.card:focus-visible,
+.card[data-force-state="focus"] {
+  border-color: var(--bb-line-lit);
+  outline: var(--bb-focus-width) solid var(--bb-focus-color);
+  outline-offset: var(--bb-focus-offset);
+}

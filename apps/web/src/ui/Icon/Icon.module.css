@@ -1,0 +1,19 @@
+/* Iconos: 1 em por defecto, para que escalen con el texto de su pieza. */
+.icon {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: middle;
+}
+
+/* Formas macizas (play, pausa): relleno sin trazo. */
+.solid {
+  fill: currentcolor;
+  stroke: none;
+}

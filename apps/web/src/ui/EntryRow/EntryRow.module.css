@@ -1,0 +1,220 @@
+/*
+ * Fila de entrada (§3.3). Medidas de la lista de `/beats` del sello (`otp-metrics.json`,
+ * `BeatListRow.css`): fila de radio 8 con borde transparente, relleno 10,4×12 y hueco de 16 px;
+ * portada de 48 px; play redondo; título 14,4 px 600; productor 12,5 px; chip de género con radio 12;
+ * filete `#111` entre filas. Con los grises de AA (§3.1): productor, BPM y tonalidad en `--bb-text-3`.
+ */
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item + .item {
+  border-top: 1px solid var(--bb-ink-850);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-4);
+  min-width: 0;
+  padding: 0.65rem var(--bb-space-3);
+  border: 1px solid transparent;
+  border-radius: var(--bb-radius-sm);
+  transition:
+    background-color var(--bb-dur-fast) var(--bb-ease-out),
+    border-color var(--bb-dur-fast) var(--bb-ease-out);
+}
+
+.row:hover,
+.row[data-force-state="hover"],
+.row:focus-within,
+.row[data-force-state="focus"] {
+  background-color: var(--bb-ink-700);
+}
+
+.row[data-playing] {
+  border-color: var(--bb-red-wash);
+  background-color: var(--bb-red-wash);
+}
+
+/* ── Portada ───────────────────────────────────────────────────────────────────────────── */
+.thumb {
+  flex-shrink: 0;
+  width: var(--bb-space-12);
+  height: var(--bb-space-12);
+  overflow: hidden;
+  border-radius: var(--bb-radius-sm);
+  background-color: var(--bb-ink-800);
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Sin portada propia (las generativas llegan con `packages/covers`): un degradado de la marca. */
+.coverFallback {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(
+    circle at 30% 25%,
+    var(--bb-red) 0%,
+    var(--bb-wine) 55%,
+    var(--bb-black) 100%
+  );
+}
+
+/* ── Play: el botón icono; sonando, en rojo ────────────────────────────────────────────── */
+.play {
+  flex-shrink: 0;
+}
+
+.row[data-playing] .play {
+  border-color: var(--bb-red);
+  background-color: var(--bb-red-wash);
+  color: var(--bb-red);
+}
+
+/* ── Centro: datos y mini onda ─────────────────────────────────────────────────────────── */
+.center {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--bb-space-2);
+  min-width: 0;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.title {
+  overflow: hidden;
+  margin: 0;
+  color: var(--bb-text);
+  font-family: var(--bb-font-body);
+  font-size: var(--bb-font-size-sm);
+  font-weight: var(--bb-weight-semibold);
+  line-height: var(--bb-leading-snug);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.titleLink {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--bb-dur-fast) var(--bb-ease-out);
+}
+
+.titleLink:hover {
+  color: var(--bb-red-text);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bb-space-2);
+  min-width: 0;
+  color: var(--bb-text-3);
+  font-size: var(--bb-font-size-xs);
+}
+
+.alias {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tags {
+  display: flex;
+  gap: var(--bb-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--bb-ink-600);
+  border-radius: var(--bb-radius-md);
+  background-color: var(--bb-ink-800);
+  font-size: var(--bb-font-size-2xs);
+  line-height: var(--bb-leading-snug);
+  white-space: nowrap;
+}
+
+.data {
+  font-family: var(--bb-font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.data::before {
+  content: "·" / "";
+  margin-right: var(--bb-space-2);
+  color: var(--bb-text-4);
+}
+
+/* Mini onda: «respira» al pasar por encima (Anexo E). */
+.wave {
+  transform-origin: center;
+}
+
+.row:hover .wave,
+.row[data-force-state="hover"] .wave {
+  animation: breathe var(--bb-loop-breathe) var(--bb-ease-in-out) infinite;
+}
+
+@keyframes breathe {
+  50% {
+    transform: scaleY(0.72);
+  }
+}
+
+.actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--bb-space-3);
+}
+
+/* ── Móvil: como el sello, sin chips ni datos y con la portada más pequeña ─────────────── */
+@media (max-width: 768px) {
+  .row {
+    gap: var(--bb-space-3);
+    padding: var(--bb-space-2);
+  }
+
+  .tags,
+  .data {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .thumb {
+    width: var(--bb-space-10);
+    height: var(--bb-space-10);
+  }
+}
+
+/* Sin movimiento (Anexo E): solo el fondo. */
+@media (prefers-reduced-motion: reduce) {
+  .row:hover .wave,
+  .row[data-force-state="hover"] .wave {
+    animation: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .row:hover .wave,
+:global(:root[data-motion="reduced"]) .row[data-force-state="hover"] .wave {
+  animation: none;
+}

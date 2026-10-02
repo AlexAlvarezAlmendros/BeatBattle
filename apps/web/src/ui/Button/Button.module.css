@@ -1,0 +1,337 @@
+/*
+ * Botón base (§3.3, Anexo E). Medidas del CTA del sello (`Hero.css`, `otp-metrics.json`): píldora,
+ * 49 px de alto en `md`, 700, mayúsculas e interletraje de CTA. Cada estado real comparte regla con su
+ * estado forzado (`data-force-state`) para que la galería enseñe exactamente lo mismo.
+ *
+ * Movimiento: el hover sube 1 px con `translate` (independiente del `transform` que pone el muelle al
+ * pulsar) multiplicado por `--bb-motion`, que vale 0 con «reducir movimiento»: entonces solo cambia
+ * el color.
+ */
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--bb-radius-pill);
+  color: var(--bb-text);
+  font-family: var(--bb-font-body);
+  font-weight: var(--bb-weight-bold);
+  line-height: var(--bb-leading-snug);
+  letter-spacing: var(--bb-tracking-cta);
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    translate var(--bb-dur-fast) var(--bb-ease-out),
+    box-shadow var(--bb-dur-fast) var(--bb-ease-out),
+    background-color var(--bb-dur-instant) var(--bb-ease-out),
+    border-color var(--bb-dur-instant) var(--bb-ease-out),
+    color var(--bb-dur-instant) var(--bb-ease-out);
+}
+
+.content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bb-space-2);
+}
+
+.glyph {
+  font-size: 1.15em;
+}
+
+.full {
+  width: 100%;
+}
+
+/* ── Tamaños ──────────────────────────────────────────────────────────────────────────────── */
+.sm {
+  min-height: var(--bb-space-9);
+  padding: var(--bb-space-2) var(--bb-space-5);
+  font-size: var(--bb-font-size-xs);
+}
+
+.md {
+  min-height: var(--bb-space-11);
+  padding: var(--bb-space-4) var(--bb-space-8);
+  font-size: var(--bb-font-size-sm);
+}
+
+.lg {
+  min-height: var(--bb-space-13);
+  padding: var(--bb-space-5) var(--bb-space-10);
+  font-size: var(--bb-font-size-md);
+}
+
+/* ── CTA: rojo de botón accesible (blanco sobre --bb-red-cta, 4,7:1) con halo ──────────────── */
+.cta {
+  background-color: var(--bb-red-cta);
+  box-shadow: var(--bb-shadow-cta);
+}
+
+.cta:hover,
+.cta[data-force-state="hover"] {
+  translate: 0 calc(-1px * var(--bb-motion));
+  box-shadow: var(--bb-shadow-cta-hover);
+}
+
+.cta:active,
+.cta[data-force-state="pressed"] {
+  background-color: var(--bb-red-press);
+}
+
+/* ── Contorno: píldora transparente con borde al 30 % (medido en el sello) ─────────────────── */
+.outline {
+  background-color: transparent;
+  border-color: var(--bb-line-button);
+}
+
+.outline:hover,
+.outline[data-force-state="hover"] {
+  background-color: var(--bb-fill-hover);
+}
+
+.outline:active,
+.outline[data-force-state="pressed"] {
+  background-color: var(--bb-fill-active);
+}
+
+/* ── Icono: círculo de 36–44 px como el play de la lista del sello ────────────────────────── */
+.iconButton {
+  padding: 0;
+  border-color: var(--bb-ink-600);
+  background-color: transparent;
+  color: var(--bb-text-2);
+  letter-spacing: 0;
+}
+
+.iconButton.sm {
+  width: var(--bb-space-9);
+  min-height: var(--bb-space-9);
+  height: var(--bb-space-9);
+  font-size: var(--bb-font-size-sm);
+}
+
+.iconButton.md {
+  width: var(--bb-space-10);
+  min-height: var(--bb-space-10);
+  height: var(--bb-space-10);
+  font-size: var(--bb-font-size-md);
+}
+
+.iconButton.lg {
+  width: var(--bb-space-11);
+  min-height: var(--bb-space-11);
+  height: var(--bb-space-11);
+  font-size: var(--bb-font-size-lg);
+}
+
+.iconButton .glyph {
+  font-size: 1em;
+}
+
+.iconButton:hover,
+.iconButton[data-force-state="hover"] {
+  border-color: var(--bb-red);
+  background-color: var(--bb-red-wash);
+  color: var(--bb-red);
+}
+
+.iconButton:active,
+.iconButton[data-force-state="pressed"] {
+  border-color: var(--bb-red-press);
+  background-color: var(--bb-red-wash);
+  color: var(--bb-red-press);
+}
+
+/* ── Pulsado forzado: la escala del muelle, quieta (sin movimiento, 1) ────────────────────── */
+.button[data-force-state="pressed"] {
+  scale: calc(1 - 0.03 * var(--bb-motion));
+}
+
+/* ── Foco (RNF-A11Y-01): el anillo de global.css, también forzado; el CTA conserva su halo ──── */
+.button:focus-visible,
+.button[data-force-state="focus"] {
+  outline: var(--bb-focus-width) solid var(--bb-focus-color);
+  outline-offset: var(--bb-focus-offset);
+  box-shadow: var(--bb-focus-halo);
+}
+
+.cta:focus-visible,
+.cta[data-force-state="focus"] {
+  box-shadow: var(--bb-focus-halo), var(--bb-shadow-cta);
+}
+
+/* ── Deshabilitado (exento de contraste, WCAG 1.4.3) ──────────────────────────────────────── */
+.button:disabled,
+.button[aria-disabled="true"]:not([aria-busy="true"]) {
+  border-color: var(--bb-ink-600);
+  background-color: var(--bb-ink-700);
+  box-shadow: none;
+  color: var(--bb-text-4);
+  translate: none;
+  cursor: not-allowed;
+}
+
+/* ── Cargando: la onda ocupa el sitio del contenido, que se queda para no cambiar el ancho ─── */
+.button[aria-busy="true"] {
+  cursor: progress;
+}
+
+.button[aria-busy="true"] .content {
+  visibility: hidden;
+}
+
+.loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bb-space-1);
+  pointer-events: none;
+}
+
+.loaderBar {
+  width: 3px;
+  height: 1.1em;
+  border-radius: var(--bb-radius-pill);
+  background-color: currentcolor;
+  transform: scaleY(0.45);
+  animation: wave var(--bb-loop-loader) var(--bb-ease-in-out) infinite;
+  /* Retardos negativos: cada barra empieza ya a media fase, sin arranque en seco. */
+  animation-delay: calc(var(--bb-loop-loader) * (var(--i) / 5 - 1));
+}
+
+/* Forma de la onda en reposo (se ve tal cual con «reducir movimiento»). */
+.loaderBar:nth-child(2),
+.loaderBar:nth-child(4) {
+  transform: scaleY(0.75);
+}
+
+.loaderBar:nth-child(3) {
+  transform: scaleY(1);
+}
+
+.iconButton .loaderBar {
+  width: 2px;
+  height: 0.9em;
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* ── Éxito: destello blanco y check ───────────────────────────────────────────────────────── */
+.flash {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-color: var(--bb-text);
+  opacity: 0;
+  pointer-events: none;
+  animation: flash var(--bb-dur-slow) var(--bb-ease-out) 1;
+}
+
+@keyframes flash {
+  30% {
+    opacity: 0.6;
+  }
+}
+
+.outline[data-status="success"],
+.iconButton[data-status="success"] {
+  border-color: var(--bb-success);
+}
+
+.outline[data-status="success"] .glyph,
+.iconButton[data-status="success"] .glyph {
+  color: var(--bb-success);
+}
+
+/* ── Error: icono y borde de peligro (nunca solo el color) y una sacudida corta ───────────── */
+.button[data-status="error"] {
+  border-color: var(--bb-danger);
+  animation: shake var(--bb-dur-slow) var(--bb-ease-out) 1;
+}
+
+.cta[data-status="error"] {
+  background-color: var(--bb-ink-800);
+  box-shadow: none;
+}
+
+.button[data-status="error"] .glyph {
+  color: var(--bb-danger);
+}
+
+@keyframes shake {
+  20% {
+    translate: calc(-4px * var(--bb-motion)) 0;
+  }
+
+  40% {
+    translate: calc(4px * var(--bb-motion)) 0;
+  }
+
+  60% {
+    translate: calc(-2px * var(--bb-motion)) 0;
+  }
+
+  80% {
+    translate: calc(2px * var(--bb-motion)) 0;
+  }
+}
+
+/* ── Táctil: objetivos de 44 px (RNF-A11Y-09) ─────────────────────────────────────────────── */
+@media (pointer: coarse) {
+  .button {
+    min-height: var(--bb-space-11);
+  }
+
+  .iconButton.sm,
+  .iconButton.md {
+    width: var(--bb-space-11);
+    height: var(--bb-space-11);
+  }
+}
+
+/* Móvil: como el CTA del sello (≤ 480 px), menos aire y menos interletraje. */
+@media (max-width: 480px) {
+  .button {
+    letter-spacing: var(--bb-tracking-cta-compact);
+  }
+
+  .md {
+    padding-inline: var(--bb-space-6);
+  }
+
+  .iconButton {
+    letter-spacing: 0;
+  }
+}
+
+/* ── Sin movimiento (RD-MOT-03): sin bucles, sin destello ni sacudida; solo color ─────────── */
+@media (prefers-reduced-motion: reduce) {
+  .loaderBar,
+  .flash,
+  .button[data-status="error"] {
+    animation: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .loaderBar,
+:global(:root[data-motion="reduced"]) .flash,
+:global(:root[data-motion="reduced"]) .button[data-status="error"] {
+  animation: none;
+}

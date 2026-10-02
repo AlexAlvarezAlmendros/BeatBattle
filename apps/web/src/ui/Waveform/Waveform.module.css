@@ -1,0 +1,67 @@
+/*
+ * Forma de onda (§3.3, Anexo E): barras grises (`--bb-wave-idle`) que pasan a rojo al reproducirse y
+ * cabeza de lectura blanca con halo. Al montar, las barras crecen desde el centro con 2 ms de
+ * escalonado; sin movimiento, aparece entera.
+ */
+.waveform {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.svg {
+  display: block;
+  max-width: none;
+}
+
+.bar,
+.played {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: fill var(--bb-dur-fast) var(--bb-ease-out);
+}
+
+.bar {
+  fill: var(--bb-wave-idle);
+}
+
+.played {
+  fill: var(--bb-red);
+}
+
+.animated .bar,
+.animated .played {
+  animation: grow var(--bb-dur-slow) var(--bb-ease-out) both;
+  animation-delay: calc(var(--i) * var(--bb-stagger-wave));
+}
+
+@keyframes grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+.playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  border-radius: var(--bb-radius-xs);
+  background-color: var(--bb-text);
+  box-shadow: var(--bb-shadow-playhead);
+  pointer-events: none;
+}
+
+/* Sin movimiento (Anexo E): la onda aparece entera. */
+@media (prefers-reduced-motion: reduce) {
+  .animated .bar,
+  .animated .played {
+    animation: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .animated .bar,
+:global(:root[data-motion="reduced"]) .animated .played {
+  animation: none;
+}

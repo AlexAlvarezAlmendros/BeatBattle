@@ -141,6 +141,70 @@
       "cookies": "Política de cookies"
     }
   },
+  "ui": {
+    "button": {
+      "loading": "Cargando…",
+      "success": "Hecho",
+      "error": "Ha fallado"
+    },
+    "modal": {
+      "close": "Cerrar"
+    },
+    "toast": {
+      "region": "Avisos",
+      "close": "Cerrar aviso",
+      "tone": {
+        "info": "Aviso",
+        "success": "Hecho",
+        "error": "Error"
+      }
+    },
+    "entryRow": {
+      "by": "Prod. by {alias}",
+      "bpm": "{bpm} BPM",
+      "play": "Reproducir «{title}»",
+      "pause": "Pausar «{title}»",
+      "genres": "Géneros",
+      "cover": "Portada de «{title}»"
+    },
+    "waveform": {
+      "label": "Forma de onda",
+      "progress": "Forma de onda, {percent} % escuchado"
+    },
+    "xpBar": {
+      "label": "Experiencia",
+      "level": "Nivel {level}",
+      "value": "{value} / {max} XP",
+      "valueText": "{value} de {max} XP para el nivel {next}"
+    },
+    "skeleton": {
+      "loading": "Cargando…"
+    },
+    "countdown": {
+      "label": "Cuenta atrás",
+      "units": {
+        "days": "Días",
+        "hours": "Horas",
+        "minutes": "Min",
+        "seconds": "Seg"
+      },
+      "days_one": "{count} día",
+      "days_other": "{count} días",
+      "hours_one": "{count} hora",
+      "hours_other": "{count} horas",
+      "minutes_one": "{count} minuto",
+      "minutes_other": "{count} minutos",
+      "seconds_one": "{count} segundo",
+      "seconds_other": "{count} segundos",
+      "remaining": "Tiempo restante: {days}, {hours}, {minutes} y {seconds}",
+      "milestone": {
+        "day": "Quedan 24 horas",
+        "hour": "Queda 1 hora",
+        "tenMinutes": "Quedan 10 minutos",
+        "ended": "Tiempo agotado"
+      }
+    }
+  },
   "dev": {
     "gallery": {
       "title": "Galería de componentes",
