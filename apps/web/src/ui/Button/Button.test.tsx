@@ -178,12 +178,24 @@ describe('Button', () => {
     expect(screen.getByRole('button', { name: 'D' })).not.toHaveAttribute('data-force-state')
   })
 
+  it('pulsado: el muelle escala el botón (Motion escribe scale en el transform)', async () => {
+    media = mockMatchMedia()
+    const user = userEvent.setup()
+    render(<Button>Votar</Button>)
+    const button = screen.getByRole('button', { name: 'Votar' })
+    await user.pointer({ keys: '[MouseLeft>]', target: button })
+    await waitFor(() => expect(button.style.transform).toMatch(/scale\(0\.9\d*\)/))
+    await user.pointer({ keys: '[/MouseLeft]', target: button })
+  })
+
   it('RNF-A11Y-03: con «reducir movimiento» pulsar no escala (solo cambia el color)', async () => {
     media = mockMatchMedia({ [REDUCED_MOTION_QUERY]: true })
     const user = userEvent.setup()
     render(<Button>Votar</Button>)
     const button = screen.getByRole('button', { name: 'Votar' })
     await user.pointer({ keys: '[MouseLeft>]', target: button })
+    // Varios fotogramas: sin la guarda, Motion ya habría escrito el transform (caso de arriba).
+    await new Promise((resolve) => setTimeout(resolve, 120))
     expect(button.style.transform).toBe('')
     await user.pointer({ keys: '[/MouseLeft]', target: button })
   })

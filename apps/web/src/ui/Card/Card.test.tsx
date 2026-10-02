@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { type MatchMediaController, mockMatchMedia } from '../../hooks/mockMatchMedia'
 import { COARSE_POINTER_QUERY } from '../../hooks/useMediaQuery'
@@ -48,22 +48,29 @@ describe('Card', () => {
     expect(screen.getByRole('listitem')).toHaveAttribute('data-surface', 'solid')
   })
 
-  it('con ratón se inclina siguiendo al cursor', () => {
+  it('con ratón se inclina siguiendo al cursor (rotación y brillo)', async () => {
     media = mockMatchMedia()
     render(<Card data-testid="card">Carta</Card>)
     const card = screen.getByTestId('card')
     card.getBoundingClientRect = () => ({ left: 0, top: 0, width: 300, height: 400 }) as DOMRect
+    // Esquina superior derecha: se inclina hacia arriba (rotateX > 0) y a la derecha (rotateY > 0).
     fireEvent.pointerMove(card, { clientX: 300, clientY: 0, pointerType: 'mouse' })
     expect(card.style.getPropertyValue(GLARE_X_VAR)).toBe('100.0%')
+    await waitFor(() =>
+      expect(card.style.transform).toMatch(/rotateX\([1-9][\d.]*deg\) rotateY\([1-9][\d.]*deg\)/),
+    )
+    expect(card.style.transform).toMatch(/^perspective\(800px\)/)
   })
 
-  it('RNF-A11Y-03 / RD-MOT-03: sin movimiento no hay 3D, solo el borde que se ilumina', () => {
+  it('RNF-A11Y-03 / RD-MOT-03: sin movimiento no hay 3D, solo el borde que se ilumina', async () => {
     media = mockMatchMedia({ [REDUCED_MOTION_QUERY]: true })
     render(<Card data-testid="card">Carta</Card>)
     const card = screen.getByTestId('card')
     expect(card).toHaveAttribute('data-tilt', 'off')
     card.getBoundingClientRect = () => ({ left: 0, top: 0, width: 300, height: 400 }) as DOMRect
     fireEvent.pointerMove(card, { clientX: 300, clientY: 0, pointerType: 'mouse' })
+    // Varios fotogramas: con inclinación, el muelle ya habría escrito la rotación (caso de arriba).
+    await new Promise((resolve) => setTimeout(resolve, 120))
     expect(card.style.transform).toBe('')
   })
 
