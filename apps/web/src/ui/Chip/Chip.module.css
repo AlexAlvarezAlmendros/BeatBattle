@@ -51,7 +51,6 @@
   border-radius: inherit;
   background-color: var(--bb-red-cta);
   clip-path: circle(0 at var(--chip-x, 50%) var(--chip-y, 50%));
-  transition: clip-path var(--bb-dur-base) var(--bb-ease-out);
 }
 
 .icon {
@@ -75,8 +74,10 @@
   box-shadow: var(--bb-shadow-chip);
 }
 
+/* Solo se anima al activar (al desactivar, cambio de color): el origen se mueve sin transición. */
 .chip[aria-pressed="true"]::after {
   clip-path: circle(150% at var(--chip-x, 50%) var(--chip-y, 50%));
+  transition: clip-path var(--bb-dur-base) var(--bb-ease-out);
 }
 
 .chip[aria-pressed="true"]:active,
@@ -115,11 +116,11 @@
 
 /* Sin movimiento (Anexo E): cambio de color, sin relleno que crece. */
 @media (prefers-reduced-motion: reduce) {
-  .chip::after {
+  .chip[aria-pressed="true"]::after {
     transition: none;
   }
 }
 
-:global(:root[data-motion="reduced"]) .chip::after {
+:global(:root[data-motion="reduced"]) .chip[aria-pressed="true"]::after {
   transition: none;
 }
