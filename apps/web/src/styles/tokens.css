@@ -182,19 +182,51 @@
   --bb-space-14: 3.5rem; /* 56 px */
   --bb-space-15: 3.75rem; /* 60 px */
   --bb-space-16: 4rem; /* 64 px */
+  --bb-space-20: 5rem; /* 80 px: relleno superior del pie (Footer.css) */
+
+  /*
+   * ── Medidas del sello fuera de la escala de 4 px ────────────────────────────────────────────
+   * Rellenos y huecos medidos en el sello (`otp-metrics.json` y su CSS) que no caen en múltiplos de
+   * 4 px. Van aquí con su origen, como las tipográficas (`--bb-font-size-cta`…), y no escritos a mano en
+   * cada pieza. Los de `em` escalan con la letra de la pieza, como en el sello.
+   */
+  --bb-space-cta-y: 0.95rem; /* 15,2 px: relleno vertical del CTA del hero (Hero.css `.hero-cta`) */
+  --bb-space-cta-y-compact: 0.9rem; /* 14,4 px: el mismo en tableta (Hero.css ≤ 768 px) */
+  --bb-space-cta-gap: 0.7rem; /* 11,2 px: entre el icono y el texto del CTA del hero */
+  --bb-space-nav-link-y: 0.95rem; /* 15,2 px: relleno de los enlaces del menú móvil (Header.css) */
+  --bb-space-nav-toggle: 7px; /* Botón «Menú»: 44 px de objetivo en el hueco del de 30 px del sello */
+  --bb-space-chip: 0.45em 1.15em; /* Chip de género (BeatsFilterBar.css) */
+  --bb-space-chip-compact: 0.4em 1em; /* El mismo en móvil (≤ 480 px) */
+  --bb-space-tile-y: 0.625rem; /* 10 px: relleno vertical de la tesela de dato (ficha del sello) */
+  --bb-space-row-y: 0.65rem; /* 10,4 px: relleno vertical de la fila de la lista (BeatListRow.css) */
+  --bb-space-row-lines: 0.15rem; /* 2,4 px: entre el título de la fila y «Prod. by» */
+  --bb-space-tag: 0.2rem 0.6rem; /* 3,2 × 9,6 px: chip de género de la fila (BeatListRow.css) */
+  --bb-space-marquee-y: 0.9rem; /* 14,4 px: relleno de la banda del marquee (Hero.css) */
+  --bb-space-marquee-y-compact: 0.7rem; /* 11,2 px: el mismo en ≤ 1024 px */
   /*
    * Hueco entre filas de chips en táctil (ChipGroup): 44 px de objetivo (RNF-A11Y-09) menos el alto del
    * chip (25,4 px en ≤ 480 px; 26,6 en el resto), redondeado arriba a 20 px. Así el área de 44 px de una
    * fila no pisa la de la siguiente.
    */
   --bb-chip-row-gap-touch: 1.25rem;
-  --bb-space-20: 5rem; /* 80 px: relleno superior del pie (Footer.css) */
+
+  /*
+   * ── Desplazamientos de movimiento ──────────────────────────────────────────────────────────
+   * Se usan siempre multiplicados por `--bb-motion` (0 con «reducir movimiento»): `calc(-1 *
+   * var(--bb-shift-hover) * var(--bb-motion))`.
+   */
+  --bb-shift-hover: 1px; /* Botón al pasar el ratón: sube 1 px (§3.3) */
+  --bb-shift-shake: 4px; /* Sacudida de error del botón: ±4 px y luego ±2 (Anexo E) */
+  --bb-shift-shake-small: 2px;
+  --bb-shift-link: 6px; /* Enlace del pie al pasar el ratón (Footer.css) */
+  --bb-shift-lift: 3px; /* Icono social del pie al pasar el ratón (Footer.css) */
+  --bb-shift-blind: 0.35em; /* Persiana de los dígitos de la cuenta atrás (§3.3) */
 
   /* ── Radios ─────────────────────────────────────────────────────────────────────────────── */
   --bb-radius-xs: 2px; /* Barra del rótulo de sección y pistas finas (ficha del sello) */
   --bb-radius-sm: 8px;
-  --bb-radius-md: 12px; /* Tarjetas */
-  --bb-radius-lg: 16px; /* Paneles */
+  --bb-radius-md: 12px; /* Campos y modales (§3.2) */
+  --bb-radius-lg: 16px; /* Tarjetas y paneles, como el sello (§3.2) */
   --bb-radius-xl: 20px; /* Isla de navegación */
   --bb-radius-pill: 999px; /* Botones, chips */
 
@@ -265,8 +297,8 @@
    * cuenta atrás a 1 Hz, latido de la última hora, marquee; §3.3 y Anexo E) NO usan `--bb-dur-*`:
    * con «reducir movimiento» se recortan (ver abajo) y el bucle iría más rápido, con riesgo de pasar
    * de 3 destellos por segundo (RNF-A11Y-04). Su periodo va en un token de bucle propio, que no cambia
-   * con la preferencia, y se añade (aquí y en §3.6) con la primera pieza que lo necesite. Además,
-   * `global.css` deja cualquier bucle en una sola pasada con «reducir movimiento».
+   * con la preferencia (`--bb-loop-*`, abajo; la guía aún no los recoge en §3.6: pendiente de su
+   * v0.5). Además, `global.css` deja cualquier bucle en una sola pasada con «reducir movimiento».
    */
   --bb-dur-instant: 80ms; /* Pulsado, cambio de color */
   --bb-dur-fast: 150ms; /* Hover, chips, tooltips */
@@ -310,7 +342,8 @@
 
   /*
    * Multiplicador de desplazamiento: 1 normalmente, 0 con «reducir movimiento». Las piezas que se
-   * mueven lo usan en sus transformaciones, p. ej. `translateY(calc(-1px * var(--bb-motion)))`.
+   * mueven lo usan en sus transformaciones, p. ej.
+   * `translateY(calc(-1 * var(--bb-shift-hover) * var(--bb-motion)))`.
    */
   --bb-motion: 1;
 }

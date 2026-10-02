@@ -14,8 +14,9 @@
      conserva su alto (62 / 54 px). */
   width: var(--bb-space-11);
   height: var(--bb-space-11);
-  margin: -7px -7px -7px auto;
-  padding: 7px;
+  margin: calc(-1 * var(--bb-space-nav-toggle)) calc(-1 * var(--bb-space-nav-toggle))
+    calc(-1 * var(--bb-space-nav-toggle)) auto;
+  padding: var(--bb-space-nav-toggle);
   border: 0;
   border-radius: var(--bb-radius-sm);
   background: transparent;
@@ -144,7 +145,7 @@
   align-items: center;
   gap: var(--bb-space-4);
   min-height: var(--bb-space-11);
-  padding: 0.95rem var(--bb-space-6);
+  padding: var(--bb-space-nav-link-y) var(--bb-space-6);
   color: var(--bb-text-3);
   font-size: var(--bb-font-size-md);
   font-weight: var(--bb-weight-semibold);

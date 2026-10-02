@@ -76,7 +76,7 @@
  */
 .hero {
   max-width: 100%;
-  padding: 0.95rem var(--bb-space-8);
+  padding: var(--bb-space-cta-y) var(--bb-space-8);
   overflow: hidden;
   font-size: var(--bb-font-size-cta);
   line-height: normal;
@@ -85,12 +85,12 @@
 }
 
 .hero .content {
-  gap: 0.7rem;
+  gap: var(--bb-space-cta-gap);
 }
 
 .hero:hover,
 .hero[data-force-state="hover"] {
-  translate: 0 calc(-1px * var(--bb-motion));
+  translate: 0 calc(-1 * var(--bb-shift-hover) * var(--bb-motion));
 }
 
 /* ── CTA: rojo de botón accesible (blanco sobre --bb-red-cta, 4,7:1) con halo ──────────────── */
@@ -103,7 +103,7 @@
 
 .cta:hover,
 .cta[data-force-state="hover"] {
-  translate: 0 calc(-1px * var(--bb-motion));
+  translate: 0 calc(-1 * var(--bb-shift-hover) * var(--bb-motion));
   box-shadow: var(--bb-shadow-cta-hover);
 }
 
@@ -346,26 +346,26 @@
 
 @keyframes shake {
   20% {
-    translate: calc(-4px * var(--bb-motion)) 0;
+    translate: calc(-1 * var(--bb-shift-shake) * var(--bb-motion)) 0;
   }
 
   40% {
-    translate: calc(4px * var(--bb-motion)) 0;
+    translate: calc(var(--bb-shift-shake) * var(--bb-motion)) 0;
   }
 
   60% {
-    translate: calc(-2px * var(--bb-motion)) 0;
+    translate: calc(-1 * var(--bb-shift-shake-small) * var(--bb-motion)) 0;
   }
 
   80% {
-    translate: calc(2px * var(--bb-motion)) 0;
+    translate: calc(var(--bb-shift-shake-small) * var(--bb-motion)) 0;
   }
 }
 
 /* Hero en tableta (Hero.css ≤ 768 px): menos aire a los lados. */
 @media (max-width: 768px) {
   .hero {
-    padding: 0.9rem var(--bb-space-6);
+    padding: var(--bb-space-cta-y-compact) var(--bb-space-6);
   }
 }
 

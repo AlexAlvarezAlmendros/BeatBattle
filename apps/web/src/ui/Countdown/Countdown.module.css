@@ -61,7 +61,7 @@
 @keyframes blind {
   from {
     clip-path: inset(0 0 100% 0);
-    transform: translateY(calc(-0.35em * var(--bb-motion)));
+    transform: translateY(calc(-1 * var(--bb-shift-blind) * var(--bb-motion)));
   }
 
   to {

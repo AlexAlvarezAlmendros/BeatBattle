@@ -122,7 +122,7 @@
 
 .site-footer__link:hover {
   /* Se desplaza 6 px como en el sello; con «reducir movimiento», --bb-motion es 0 y solo cambia el color. */
-  translate: calc(6px * var(--bb-motion)) 0;
+  translate: calc(var(--bb-shift-link) * var(--bb-motion)) 0;
   color: var(--bb-red-text);
 }
 
@@ -150,7 +150,7 @@
 }
 
 .site-footer__social-link:hover {
-  translate: 0 calc(-3px * var(--bb-motion));
+  translate: 0 calc(-1 * var(--bb-shift-lift) * var(--bb-motion));
   border-color: var(--bb-red-cta);
   background-color: var(--bb-red-cta);
   color: var(--bb-text);

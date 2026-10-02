@@ -187,7 +187,7 @@
 
 .marquee__viewport {
   overflow: hidden;
-  padding: 0.9rem 0;
+  padding: var(--bb-space-marquee-y) 0;
   border-block: 1px solid var(--bb-red-line);
   background-color: var(--bb-glass-band);
   -webkit-backdrop-filter: blur(var(--bb-glass-blur-band));
@@ -380,7 +380,7 @@
   }
 
   .marquee__viewport {
-    padding: 0.7rem 0;
+    padding: var(--bb-space-marquee-y-compact) 0;
   }
 
   .marquee__toggle {

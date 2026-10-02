@@ -19,7 +19,7 @@
   align-items: center;
   gap: var(--bb-space-4);
   min-width: 0;
-  padding: 0.65rem var(--bb-space-3);
+  padding: var(--bb-space-row-y) var(--bb-space-3);
   border: 1px solid transparent;
   border-radius: var(--bb-radius-sm);
   transition:
@@ -106,7 +106,7 @@
 .info {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: var(--bb-space-row-lines);
   min-width: 0;
 }
 
@@ -177,7 +177,7 @@
 }
 
 .tag {
-  padding: 0.2rem 0.6rem;
+  padding: var(--bb-space-tag);
   border: 1px solid var(--bb-ink-600);
   border-radius: var(--bb-radius-md);
   background-color: var(--bb-ink-800);

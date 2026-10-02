@@ -9,7 +9,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--bb-space-1);
-  padding: 0.45em 1.15em;
+  padding: var(--bb-space-chip);
   border: 1px solid var(--bb-ink-600);
   border-radius: var(--bb-radius-pill);
   background-color: transparent;
@@ -110,7 +110,7 @@
 
 @media (max-width: 480px) {
   .chip {
-    padding: 0.4em 1em;
+    padding: var(--bb-space-chip-compact);
   }
 }
 
