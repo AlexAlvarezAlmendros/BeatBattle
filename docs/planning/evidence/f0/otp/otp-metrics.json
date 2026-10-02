@@ -1,0 +1,3455 @@
+{
+  "capturedAt": "2026-10-02T12:03:30.258Z",
+  "base": "https://www.otherpeople.es",
+  "browser": "Chrome 154.0.8037.57",
+  "platform": "linux",
+  "beatPath": "/beats/6ab7bac7977d308f61ee596c",
+  "viewports": {
+    "desktop": {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "home": {
+        "page": {
+          "selector": "body",
+          "rect": {
+            "x": 0,
+            "y": 16,
+            "width": 1440,
+            "height": 3076.34
+          },
+          "size": {
+            "width": 1440,
+            "height": 3076.34
+          },
+          "text": "InicioArtistasEventosDiscografíaBeatsEstudiosContactoIniciar",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 16,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "navIsland": {
+          "selector": "header.header",
+          "rect": {
+            "x": 60,
+            "y": 16,
+            "width": 1320,
+            "height": 69
+          },
+          "size": {
+            "width": 1320,
+            "height": 69
+          },
+          "text": "InicioArtistasEventosDiscografíaBeatsEstudiosContactoIniciar",
+          "borderRadius": "20px",
+          "backgroundColor": "rgba(0, 0, 0, 0.58)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "rgba(0, 0, 0, 0.55) 0px 8px 32px 0px",
+          "backdropFilter": "url(\"#glass-filter-_r_0_\") saturate(1) blur(3px)",
+          "padding": "16px",
+          "opacity": "1",
+          "position": "sticky",
+          "top": "16px",
+          "left": "auto",
+          "zIndex": "15",
+          "display": "block",
+          "gap": "normal",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb",
+          "style": "border-radius: 20px; --glass-bg: hsl(0 0% 0% / 0.58); --glass-saturation: 1; --glass-backdrop-blur: 3px; --filter-id: url(…);"
+        },
+        "logo": {
+          "selector": ".logo-section .logo",
+          "rect": {
+            "x": 78.18,
+            "y": 22.17,
+            "width": 131.65,
+            "height": 97.24
+          },
+          "size": {
+            "width": 120,
+            "height": 77.58
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "position": "fixed",
+          "top": "16px",
+          "left": "24px",
+          "zIndex": "auto",
+          "display": "block",
+          "gap": "normal",
+          "transform": "none",
+          "rotate": "-10deg",
+          "rotateDeg": -10,
+          "writingMode": "horizontal-tb"
+        },
+        "navLink": {
+          "selector": ".nav-links a:not(.active)",
+          "rect": {
+            "x": 471.47,
+            "y": 33.5,
+            "width": 85.34,
+            "height": 34
+          },
+          "size": {
+            "width": 53.34,
+            "height": 18
+          },
+          "text": "Artistas",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "8px 16px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 16,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "navLinkActive": {
+          "selector": ".nav-links a.active",
+          "rect": {
+            "x": 398.11,
+            "y": 33.5,
+            "width": 69.36,
+            "height": 34
+          },
+          "size": {
+            "width": 37.36,
+            "height": 18
+          },
+          "text": "Inicio",
+          "borderRadius": "8px",
+          "backgroundColor": "rgba(255, 255, 255, 0.1)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "8px 16px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 16,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "navLinks": {
+          "selector": ".nav-links",
+          "rect": {
+            "x": 398.11,
+            "y": 33.5,
+            "width": 643.78,
+            "height": 34
+          },
+          "size": {
+            "width": 643.78,
+            "height": 34
+          },
+          "text": "InicioArtistasEventosDiscografíaBeatsEstudiosContacto",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "position": "absolute",
+          "top": "1.5px",
+          "left": "640px",
+          "zIndex": "auto",
+          "display": "flex",
+          "gap": "4px",
+          "transform": "matrix(1, 0, 0, 1, -321.891, 0)",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb"
+        },
+        "loginButton": {
+          "selector": "header .login-button",
+          "rect": {
+            "x": 1231.33,
+            "y": 32,
+            "width": 128.67,
+            "height": 37
+          },
+          "size": {
+            "width": 128.67,
+            "height": 37
+          },
+          "text": "Iniciar Sesión",
+          "borderRadius": "5px",
+          "backgroundColor": "rgba(0, 0, 0, 0.41)",
+          "border": "1px solid rgba(128, 128, 128, 0.718)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "10px 20px",
+          "opacity": "1",
+          "fontFamily": "Arial",
+          "fontSize": 13.33,
+          "fontWeight": "700",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "mobileNavToggle": null,
+        "heroTitle": {
+          "selector": ".hero-title",
+          "rect": {
+            "x": 361.2,
+            "y": 392.83,
+            "width": 717.56,
+            "height": 191.97
+          },
+          "size": {
+            "width": 717.56,
+            "height": 191.97
+          },
+          "text": "OTHER PEOPLERECORDS",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 96,
+          "fontWeight": "900",
+          "letterSpacing": "-2.88px",
+          "letterSpacingEm": -0.03,
+          "lineHeight": "91.2px",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "heroTitleSolid": {
+          "selector": ".hero-title__line:not(.hero-title__line--accent)",
+          "rect": {
+            "x": 361.2,
+            "y": 392.83,
+            "width": 717.56,
+            "height": 91.19
+          },
+          "size": {
+            "width": 717.56,
+            "height": 91.19
+          },
+          "text": "OTHER PEOPLE",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 96,
+          "fontWeight": "900",
+          "letterSpacing": "-2.88px",
+          "letterSpacingEm": -0.03,
+          "lineHeight": "91.2px",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal",
+          "webkitTextStroke": "0px rgb(255, 255, 255)",
+          "webkitTextFillColor": "rgb(255, 255, 255)",
+          "textShadow": "rgba(0, 0, 0, 0.6) 0px 4px 24px"
+        },
+        "heroTitleOutline": {
+          "selector": ".hero-title__line--accent",
+          "rect": {
+            "x": 490.03,
+            "y": 493.61,
+            "width": 459.89,
+            "height": 91.19
+          },
+          "size": {
+            "width": 459.89,
+            "height": 91.19
+          },
+          "text": "RECORDS",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(0, 0, 0)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 96,
+          "fontWeight": "900",
+          "letterSpacing": "-2.88px",
+          "letterSpacingEm": -0.03,
+          "lineHeight": "91.2px",
+          "textTransform": "none",
+          "color": "rgb(0, 0, 0)",
+          "fontVariantNumeric": "normal",
+          "webkitTextStroke": "2px rgb(255, 0, 60)",
+          "webkitTextFillColor": "rgb(0, 0, 0)",
+          "textShadow": "rgba(255, 0, 60, 0.4) 0px 0px 30px"
+        },
+        "heroDivider": {
+          "selector": ".hero-divider",
+          "rect": {
+            "x": 679.98,
+            "y": 612.8,
+            "width": 80,
+            "height": 3
+          },
+          "size": {
+            "width": 80,
+            "height": 3
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(90deg, rgba(0, 0, 0, 0), rgb(255, 0, 60), rgba(0, 0, 0, 0))",
+          "backgroundSize": "auto",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "heroSubtitle": {
+          "selector": ".hero-subtitle",
+          "rect": {
+            "x": 338.36,
+            "y": 635.8,
+            "width": 763.27,
+            "height": 22
+          },
+          "size": {
+            "width": 763.27,
+            "height": 22
+          },
+          "text": "Sello independiente · Producción · Distribución · Booking",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgba(255, 255, 255, 0.85)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 18.4,
+          "fontWeight": "300",
+          "letterSpacing": "2.76px",
+          "letterSpacingEm": 0.15,
+          "lineHeight": "normal",
+          "textTransform": "uppercase",
+          "color": "rgba(255, 255, 255, 0.85)",
+          "fontVariantNumeric": "normal"
+        },
+        "heroSide": {
+          "selector": ".hero-side__text",
+          "rect": {
+            "x": 24,
+            "y": 390.3,
+            "width": 12,
+            "height": 119.39
+          },
+          "size": {
+            "width": 12,
+            "height": 101.39
+          },
+          "text": "EST · 2020",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "1px solid rgba(255, 0, 60, 0.5)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "8px 0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 11.2,
+          "fontWeight": "600",
+          "letterSpacing": "4.48px",
+          "letterSpacingEm": 0.4,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgba(255, 255, 255, 0.45)",
+          "fontVariantNumeric": "normal",
+          "position": "static",
+          "top": "auto",
+          "left": "auto",
+          "zIndex": "auto",
+          "display": "inline-block",
+          "gap": "normal",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "vertical-rl"
+        },
+        "heroGrid": {
+          "selector": ".hero-grid",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 1440,
+            "height": 900
+          },
+          "size": {
+            "width": 1440,
+            "height": 900
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgba(255, 0, 60, 0.5) 1px, rgba(0, 0, 0, 0) 1px), linear-gradient(90deg, rgba(255, 0, 60, 0.5) 1px, rgba(0, 0, 0, 0) 1px)",
+          "backgroundSize": "60px 60px, 60px 60px",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "0.08",
+          "position": "absolute",
+          "top": "0px",
+          "left": "0px",
+          "zIndex": "3",
+          "display": "block",
+          "gap": "normal",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb",
+          "maskImage": "radial-gradient(rgb(0, 0, 0) 30%, rgba(0, 0, 0, 0) 75%)"
+        },
+        "heroVignette": {
+          "selector": ".hero-vignette",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 1440,
+            "height": 900
+          },
+          "size": {
+            "width": 1440,
+            "height": 900
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "radial-gradient(rgba(0, 0, 0, 0) 35%, rgba(0, 0, 0, 0.55) 90%, rgba(0, 0, 0, 0.85) 100%)",
+          "backgroundSize": "auto",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "heroLogo": {
+          "selector": ".hero-logo",
+          "rect": {
+            "x": 609.98,
+            "y": 152.83,
+            "width": 220,
+            "height": 220
+          },
+          "size": {
+            "width": 220,
+            "height": 220
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "ctaPrimary": {
+          "selector": ".hero-cta--primary",
+          "rect": {
+            "x": 496.84,
+            "y": 697.8,
+            "width": 256.59,
+            "height": 49.38
+          },
+          "size": {
+            "width": 256.59,
+            "height": 49.38
+          },
+          "text": "Escuchar ahora",
+          "borderRadius": "999px",
+          "backgroundColor": "rgba(255, 0, 60, 0.62)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "rgba(255, 0, 60, 0.45) 0px 4px 20px 0px",
+          "backdropFilter": "url(\"#glass-filter-_r_1_\") saturate(1) blur(0px)",
+          "padding": "15.2px 32px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 15.2,
+          "fontWeight": "700",
+          "letterSpacing": "1.52px",
+          "letterSpacingEm": 0.1,
+          "lineHeight": "normal",
+          "textTransform": "uppercase",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "ctaGhost": {
+          "selector": ".hero-cta--ghost",
+          "rect": {
+            "x": 769.44,
+            "y": 697.8,
+            "width": 173.69,
+            "height": 49.38
+          },
+          "size": {
+            "width": 173.69,
+            "height": 49.38
+          },
+          "text": "Booking",
+          "borderRadius": "999px",
+          "backgroundColor": "rgba(0, 0, 0, 0.58)",
+          "border": "1px solid rgba(255, 255, 255, 0.3)",
+          "boxShadow": "none",
+          "backdropFilter": "url(\"#glass-filter-_r_2_\") saturate(1) blur(0px)",
+          "padding": "15.2px 32px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 15.2,
+          "fontWeight": "700",
+          "letterSpacing": "1.52px",
+          "letterSpacingEm": 0.1,
+          "lineHeight": "normal",
+          "textTransform": "uppercase",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "marquee": {
+          "selector": ".hero-marquee",
+          "rect": {
+            "x": 0,
+            "y": 784.22,
+            "width": 1440,
+            "height": 45.78
+          },
+          "size": {
+            "width": 1440,
+            "height": 15
+          },
+          "text": "LILBRUYNXEFØSKARBLACK FACESAINT JABIRAINA<3SANXOSTRESS KIDDM",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0.4)",
+          "border": "1px solid rgba(255, 0, 60, 0.25)",
+          "boxShadow": "none",
+          "backdropFilter": "blur(10px)",
+          "padding": "14.4px 0px",
+          "opacity": "1"
+        },
+        "marqueeItem": {
+          "selector": ".hero-marquee__item",
+          "rect": {
+            "x": -269.41,
+            "y": 799.61,
+            "width": 96.33,
+            "height": 15
+          },
+          "size": {
+            "width": 96.33,
+            "height": 15
+          },
+          "text": "LILBRU",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 13.6,
+          "fontWeight": "700",
+          "letterSpacing": "4.08px",
+          "letterSpacingEm": 0.3,
+          "lineHeight": "normal",
+          "textTransform": "uppercase",
+          "color": "rgba(255, 255, 255, 0.75)",
+          "fontVariantNumeric": "normal"
+        },
+        "marqueeDot": {
+          "selector": ".hero-marquee__dot",
+          "rect": {
+            "x": -269.41,
+            "y": 804.11,
+            "width": 6,
+            "height": 6
+          },
+          "size": {
+            "width": 6,
+            "height": 6
+          },
+          "borderRadius": "50%",
+          "backgroundColor": "rgb(255, 0, 60)",
+          "border": "0px none rgba(255, 255, 255, 0.75)",
+          "boxShadow": "rgba(255, 0, 60, 0.6) 0px 0px 8px 0px",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "silk": {
+          "selector": ".silk-background",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 1440,
+            "height": 900
+          },
+          "size": {
+            "width": 1440,
+            "height": 900
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "position": "fixed",
+          "top": "0px",
+          "left": "0px",
+          "zIndex": "-1",
+          "display": "block",
+          "gap": "normal",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb"
+        },
+        "fonts": {
+          "navLink": {
+            "selector": ".nav-links a",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans",
+                "isCustomFont": false,
+                "glyphCount": 6
+              }
+            ]
+          },
+          "heroTitle": {
+            "selector": ".hero-title__line",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans-Bold",
+                "isCustomFont": false,
+                "glyphCount": 12
+              }
+            ]
+          },
+          "heroSubtitle": {
+            "selector": ".hero-subtitle",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans",
+                "isCustomFont": false,
+                "glyphCount": 57
+              }
+            ]
+          },
+          "ctaPrimary": {
+            "selector": ".hero-cta--primary",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans-Bold",
+                "isCustomFont": false,
+                "glyphCount": 14
+              }
+            ]
+          },
+          "sectionTitle": {
+            "selector": ".ultimos-lanzamientos-title",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans-Bold",
+                "isCustomFont": false,
+                "glyphCount": 20
+              }
+            ]
+          }
+        },
+        "fontInventory": {
+          "fontFaceRules": [
+            "UTSouthDrink",
+            "BerlinSans"
+          ],
+          "documentFonts": [
+            "UTSouthDrink 400 (unloaded)",
+            "BerlinSans 400 (unloaded)"
+          ],
+          "googleFontsLink": false,
+          "montserratFontFace": false,
+          "externalSheets": [
+            "https://www.otherpeople.es/assets/index-UxzmpZ8a.css"
+          ]
+        },
+        "htmlBackground": "rgb(0, 0, 0)",
+        "sectionTitle": {
+          "selector": ".ultimos-lanzamientos-title",
+          "rect": {
+            "x": 64,
+            "y": 109,
+            "width": 1344,
+            "height": 45
+          },
+          "size": {
+            "width": 1344,
+            "height": 45
+          },
+          "text": "Últimos lanzamientos",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 40,
+          "fontWeight": "700",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "releaseCard": {
+          "selector": ".ultimos-lanzamientos-list .card",
+          "rect": {
+            "x": 171.5,
+            "y": 178,
+            "width": 349,
+            "height": 503.38
+          },
+          "size": {
+            "width": 315,
+            "height": 469.38
+          },
+          "text": "OTRO ROUNDMarkus Bach, Giadda, Trave, ProkkimoSpotify",
+          "borderRadius": "16px",
+          "backgroundColor": "rgba(0, 0, 0, 0.58)",
+          "border": "1px solid rgba(255, 255, 255, 0.18)",
+          "boxShadow": "rgba(0, 0, 0, 0.4) 0px 4px 24px 0px, rgba(255, 255, 255, 0.12) 0px 1px 0px 0px inset",
+          "backdropFilter": "url(\"#glass-filter-_r_a_\") saturate(1) blur(0px)",
+          "padding": "16px",
+          "opacity": "1",
+          "position": "relative",
+          "top": "0px",
+          "left": "0px",
+          "zIndex": "auto",
+          "display": "flex",
+          "gap": "16px",
+          "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -0.00125, 0, 0, 0, 1)",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb",
+          "style": "border-radius: 16px; --glass-bg: hsl(0 0% 0% / 0.58); --glass-saturation: 1; --glass-backdrop-blur: 0px; --filter-id: url(…); transform: perspective(800px) rotateX(0deg) rotateY(0deg) scale(1);"
+        },
+        "releaseCardImage": {
+          "selector": ".ultimos-lanzamientos-list .card .card-image-link",
+          "rect": {
+            "x": 172.5,
+            "y": 179,
+            "width": 347,
+            "height": 347
+          },
+          "size": {
+            "width": 347,
+            "height": 347
+          },
+          "borderRadius": "12px 12px 0px 0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "releaseCardTitle": {
+          "selector": ".ultimos-lanzamientos-list .card-content h2",
+          "rect": {
+            "x": 188.5,
+            "y": 542,
+            "width": 315,
+            "height": 37
+          },
+          "size": {
+            "width": 315,
+            "height": 37
+          },
+          "text": "OTRO ROUND",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 32,
+          "fontWeight": "100",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "releaseCardArtists": {
+          "selector": ".ultimos-lanzamientos-list .card-content p",
+          "rect": {
+            "x": 188.5,
+            "y": 579,
+            "width": 315,
+            "height": 18
+          },
+          "size": {
+            "width": 315,
+            "height": 18
+          },
+          "text": "Markus Bach, Giadda, Trave, Prokkimo",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 16,
+          "fontWeight": "100",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "releaseCardLink": {
+          "selector": ".ultimos-lanzamientos-list .card__buttons a",
+          "rect": {
+            "x": 274.39,
+            "y": 621,
+            "width": 143.2,
+            "height": 43.38
+          },
+          "size": {
+            "width": 136.83,
+            "height": 37
+          },
+          "text": "Spotify",
+          "borderRadius": "4px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "3.2px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 32,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "beatCard": {
+          "selector": ".ultimos-beats-list .card",
+          "rect": {
+            "x": 171.5,
+            "y": 783.56,
+            "width": 349,
+            "height": 505.38
+          },
+          "size": {
+            "width": 315,
+            "height": 471.38
+          },
+          "text": "MaliantosaProd. by LilBru, SantamariaReggaeton • 92 BPMVer L",
+          "borderRadius": "16px",
+          "backgroundColor": "rgba(0, 0, 0, 0.58)",
+          "border": "1px solid rgba(255, 255, 255, 0.18)",
+          "boxShadow": "rgba(0, 0, 0, 0.4) 0px 4px 24px 0px, rgba(255, 255, 255, 0.12) 0px 1px 0px 0px inset",
+          "backdropFilter": "url(\"#glass-filter-_r_d_\") saturate(1) blur(0px)",
+          "padding": "16px",
+          "opacity": "1",
+          "position": "relative",
+          "top": "0px",
+          "left": "0px",
+          "zIndex": "auto",
+          "display": "flex",
+          "gap": "16px",
+          "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, -0.00125, 0, 0, 0, 1)",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb",
+          "style": "border-radius: 16px; --glass-bg: hsl(0 0% 0% / 0.58); --glass-saturation: 1; --glass-backdrop-blur: 0px; --filter-id: url(…); transform: perspective(800px) rotateX(0deg) rotateY(0deg) scale(1);"
+        },
+        "beatCardTitle": {
+          "selector": ".ultimos-beats-list .card-content h2",
+          "rect": {
+            "x": 191.69,
+            "y": 1150.75,
+            "width": 308.63,
+            "height": 37
+          },
+          "size": {
+            "width": 308.63,
+            "height": 37
+          },
+          "text": "Maliantosa",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 32,
+          "fontWeight": "100",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "beatCardMeta": {
+          "selector": ".ultimos-beats-list .card-content p + p",
+          "rect": {
+            "x": 188.5,
+            "y": 1208.94,
+            "width": 315,
+            "height": 18
+          },
+          "size": {
+            "width": 315,
+            "height": 18
+          },
+          "text": "Reggaeton • 92 BPM",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 16,
+          "fontWeight": "100",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(153, 153, 153)",
+          "fontVariantNumeric": "normal"
+        },
+        "beatCardPlay": {
+          "selector": ".ultimos-beats-list .beat-play-button",
+          "rect": {
+            "x": 322,
+            "y": 934.06,
+            "width": 48,
+            "height": 48
+          },
+          "size": {
+            "width": 60,
+            "height": 60
+          },
+          "borderRadius": "50%",
+          "backgroundColor": "rgba(255, 0, 60, 0.9)",
+          "border": "3px solid rgba(255, 255, 255, 0.9)",
+          "boxShadow": "rgba(255, 0, 60, 0.4) 0px 4px 20px 0px",
+          "backdropFilter": "none",
+          "padding": "1px 6px",
+          "opacity": "0"
+        },
+        "beatCardBuy": {
+          "selector": ".ultimos-beats-list .beat-purchase-btn",
+          "rect": {
+            "x": 188.5,
+            "y": 1234.94,
+            "width": 315,
+            "height": 37
+          },
+          "size": {
+            "width": 315,
+            "height": 37
+          },
+          "text": "Ver Licencias",
+          "borderRadius": "8px",
+          "backgroundColor": "rgb(255, 0, 60)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "10px 16px",
+          "opacity": "1",
+          "fontFamily": "Arial",
+          "fontSize": 15.2,
+          "fontWeight": "700",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        }
+      },
+      "beats": {
+        "pageTitle": {
+          "selector": ".beats-page-header h1",
+          "rect": {
+            "x": 32,
+            "y": 117,
+            "width": 1376,
+            "height": 37
+          },
+          "size": {
+            "width": 1376,
+            "height": 37
+          },
+          "text": "Beats de nuestros productores",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 32,
+          "fontWeight": "700",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "genreChip": {
+          "selector": ".genre-chip",
+          "rect": {
+            "x": 180.81,
+            "y": 178,
+            "width": 57.14,
+            "height": 28.19
+          },
+          "size": {
+            "width": 57.14,
+            "height": 28.19
+          },
+          "text": "Trap",
+          "borderRadius": "20px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "1px solid rgb(42, 42, 42)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "5.6px 14.4px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12.8,
+          "fontWeight": "500",
+          "letterSpacing": "0.128px",
+          "letterSpacingEm": 0.01,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(153, 153, 153)",
+          "fontVariantNumeric": "normal"
+        },
+        "filterSelect": {
+          "selector": ".beats-filter-select",
+          "rect": {
+            "x": 394.58,
+            "y": 218.19,
+            "width": 130,
+            "height": 31.38
+          },
+          "size": {
+            "width": 130,
+            "height": 31.38
+          },
+          "text": "BeatMaker",
+          "borderRadius": "6px",
+          "backgroundColor": "rgb(26, 26, 26)",
+          "backgroundImage": "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23666'/%3E%3C/svg%3E\")",
+          "backgroundSize": "auto",
+          "border": "1px solid rgb(42, 42, 42)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "7.2px 32px 7.2px 13.6px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 13.12,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(204, 204, 204)",
+          "fontVariantNumeric": "normal"
+        },
+        "viewToggleActive": {
+          "selector": ".beats-view-btn.active",
+          "rect": {
+            "x": 1369,
+            "y": 118.5,
+            "width": 34,
+            "height": 34
+          },
+          "size": {
+            "width": 34,
+            "height": 34
+          },
+          "borderRadius": "6px",
+          "backgroundColor": "rgb(26, 26, 26)",
+          "border": "0px none rgb(255, 0, 60)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "1px 6px",
+          "opacity": "1"
+        },
+        "row": {
+          "selector": ".beat-list-row",
+          "rect": {
+            "x": 32,
+            "y": 281.56,
+            "width": 1376,
+            "height": 82.73
+          },
+          "size": {
+            "width": 1350,
+            "height": 59.95
+          },
+          "text": "MaliantosaProd. by LilBru, SantamariaReggaeton92 BPMD# min0:",
+          "borderRadius": "8px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "1px solid rgba(0, 0, 0, 0)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "10.4px 12px",
+          "opacity": "1",
+          "position": "static",
+          "top": "auto",
+          "left": "auto",
+          "zIndex": "auto",
+          "display": "flex",
+          "gap": "16px",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb"
+        },
+        "rowThumb": {
+          "selector": ".beat-list-row__thumb",
+          "rect": {
+            "x": 45,
+            "y": 298.92,
+            "width": 48,
+            "height": 48
+          },
+          "size": {
+            "width": 48,
+            "height": 48
+          },
+          "borderRadius": "6px",
+          "backgroundColor": "rgb(26, 26, 26)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "rowPlay": {
+          "selector": ".beat-list-row__play",
+          "rect": {
+            "x": 109,
+            "y": 306.92,
+            "width": 32,
+            "height": 32
+          },
+          "size": {
+            "width": 32,
+            "height": 32
+          },
+          "borderRadius": "50%",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "1px solid rgb(51, 51, 51)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "1px 6px",
+          "opacity": "1"
+        },
+        "rowTitle": {
+          "selector": ".beat-list-row__title",
+          "rect": {
+            "x": 157,
+            "y": 293.95,
+            "width": 74.38,
+            "height": 16
+          },
+          "size": {
+            "width": "auto",
+            "height": "auto"
+          },
+          "text": "Maliantosa",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 14.4,
+          "fontWeight": "600",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "rowProducer": {
+          "selector": ".beat-list-row__producer",
+          "rect": {
+            "x": 157,
+            "y": 316.53,
+            "width": 152.5,
+            "height": 14
+          },
+          "size": {
+            "width": 152.5,
+            "height": 14
+          },
+          "text": "Prod. by LilBru, Santamaria",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12.48,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(102, 102, 102)",
+          "fontVariantNumeric": "normal"
+        },
+        "rowGenreTag": {
+          "selector": ".beat-list-row__tag",
+          "rect": {
+            "x": 317.5,
+            "y": 313.34,
+            "width": 77.55,
+            "height": 20.38
+          },
+          "size": {
+            "width": 56.36,
+            "height": 12
+          },
+          "text": "Reggaeton",
+          "borderRadius": "12px",
+          "backgroundColor": "rgb(26, 26, 26)",
+          "border": "1px solid rgb(42, 42, 42)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "3.2px 9.6px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 11.52,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(136, 136, 136)",
+          "fontVariantNumeric": "normal"
+        },
+        "rowMeta": {
+          "selector": ".beat-list-row__dot",
+          "rect": {
+            "x": 403.05,
+            "y": 316.53,
+            "width": 52.3,
+            "height": 14
+          },
+          "size": {
+            "width": 52.3,
+            "height": 14
+          },
+          "text": "92 BPM",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(68, 68, 68)",
+          "fontVariantNumeric": "normal"
+        },
+        "rowMetaDot": {
+          "selector": ".beat-list-row__dot::before",
+          "size": {
+            "width": "auto",
+            "height": "auto"
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(42, 42, 42)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(42, 42, 42)",
+          "fontVariantNumeric": "normal"
+        },
+        "rowTime": {
+          "selector": ".beat-list-row__time",
+          "rect": {
+            "x": 157,
+            "y": 340.91,
+            "width": 28,
+            "height": 12
+          },
+          "size": {
+            "width": 28,
+            "height": 12
+          },
+          "text": "0:00",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 11.52,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(68, 68, 68)",
+          "fontVariantNumeric": "tabular-nums"
+        },
+        "rowProgress": {
+          "selector": ".beat-list-row__progress-wrap",
+          "rect": {
+            "x": 194.59,
+            "y": 344.91,
+            "width": 939.5,
+            "height": 4
+          },
+          "size": {
+            "width": 939.5,
+            "height": 4
+          },
+          "borderRadius": "2px",
+          "backgroundColor": "rgb(30, 30, 30)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "rowPrice": {
+          "selector": ".beat-list-row__price",
+          "rect": {
+            "x": 1187.69,
+            "y": 314.92,
+            "width": 48,
+            "height": 16
+          },
+          "size": {
+            "width": 48,
+            "height": 16
+          },
+          "text": "29.99 €",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 14.08,
+          "fontWeight": "600",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(204, 204, 204)",
+          "fontVariantNumeric": "normal"
+        },
+        "rowDownload": {
+          "selector": ".beat-list-row__download-btn",
+          "rect": {
+            "x": 1247.69,
+            "y": 305.92,
+            "width": 34,
+            "height": 34
+          },
+          "size": {
+            "width": 34,
+            "height": 34
+          },
+          "borderRadius": "6px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "1px solid rgb(42, 42, 42)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "1px 6px",
+          "opacity": "1"
+        },
+        "rowBuy": {
+          "selector": ".beat-list-row__buy",
+          "rect": {
+            "x": 1293.69,
+            "y": 309.03,
+            "width": 101.31,
+            "height": 27.78
+          },
+          "size": {
+            "width": 101.31,
+            "height": 27.78
+          },
+          "text": "Comprar",
+          "borderRadius": "6px",
+          "backgroundColor": "rgb(255, 0, 60)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "6.4px 13.6px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12.8,
+          "fontWeight": "700",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "fonts": {
+          "rowTitle": {
+            "selector": ".beat-list-row__title",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans-Bold",
+                "isCustomFont": false,
+                "glyphCount": 10
+              }
+            ]
+          },
+          "rowMeta": {
+            "selector": ".beat-list-row__dot",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans",
+                "isCustomFont": false,
+                "glyphCount": 7
+              }
+            ]
+          },
+          "rowTime": {
+            "selector": ".beat-list-row__time",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans",
+                "isCustomFont": false,
+                "glyphCount": 4
+              }
+            ]
+          }
+        },
+        "rowCount": 20,
+        "genreChipActive": {
+          "selector": ".genre-chip.active",
+          "rect": {
+            "x": 180.81,
+            "y": 178,
+            "width": 57.14,
+            "height": 28.19
+          },
+          "size": {
+            "width": 57.14,
+            "height": 28.19
+          },
+          "text": "Trap",
+          "borderRadius": "20px",
+          "backgroundColor": "rgb(255, 0, 60)",
+          "border": "1px solid rgb(255, 0, 60)",
+          "boxShadow": "rgba(255, 0, 60, 0.35) 0px 2px 10px 0px",
+          "backdropFilter": "none",
+          "padding": "5.6px 14.4px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12.8,
+          "fontWeight": "500",
+          "letterSpacing": "0.128px",
+          "letterSpacingEm": 0.01,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        }
+      },
+      "beatDetail": {
+        "backLink": {
+          "selector": ".beat-detail__back-link",
+          "rect": {
+            "x": 120,
+            "y": 141,
+            "width": 82.06,
+            "height": 34
+          },
+          "size": {
+            "width": 56.06,
+            "height": 16
+          },
+          "text": "Beats",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 14,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(153, 153, 153)",
+          "fontVariantNumeric": "normal"
+        },
+        "cover": {
+          "selector": ".beat-detail__cover-wrapper",
+          "rect": {
+            "x": 120,
+            "y": 199,
+            "width": 280,
+            "height": 280
+          },
+          "size": {
+            "width": 280,
+            "height": 280
+          },
+          "borderRadius": "8px",
+          "backgroundColor": "rgb(14, 14, 14)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "title": {
+          "selector": ".beat-detail__title",
+          "rect": {
+            "x": 120,
+            "y": 491,
+            "width": 280,
+            "height": 26
+          },
+          "size": {
+            "width": 280,
+            "height": 26
+          },
+          "text": "Maliantosa",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 20,
+          "fontWeight": "700",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "26px",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "producer": {
+          "selector": ".beat-detail__producer",
+          "rect": {
+            "x": 120,
+            "y": 523,
+            "width": 280,
+            "height": 16
+          },
+          "size": {
+            "width": 280,
+            "height": 16
+          },
+          "text": "LilBru, Santamaria",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 14,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(153, 153, 153)",
+          "fontVariantNumeric": "normal"
+        },
+        "player": {
+          "selector": ".beat-detail__player",
+          "rect": {
+            "x": 120,
+            "y": 567,
+            "width": 280,
+            "height": 36
+          },
+          "size": {
+            "width": 280,
+            "height": 36
+          },
+          "text": "0:002:18",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "playerPlay": {
+          "selector": ".beat-detail__player-play",
+          "rect": {
+            "x": 120,
+            "y": 567,
+            "width": 36,
+            "height": 36
+          },
+          "size": {
+            "width": 36,
+            "height": 36
+          },
+          "borderRadius": "50%",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "1px solid rgb(42, 42, 42)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "1px 6px",
+          "opacity": "1"
+        },
+        "tag": {
+          "selector": ".beat-detail__tag",
+          "rect": {
+            "x": 120,
+            "y": 957,
+            "width": 82.73,
+            "height": 24
+          },
+          "size": {
+            "width": 60.73,
+            "height": 14
+          },
+          "text": "#reggaeton",
+          "borderRadius": "20px",
+          "backgroundColor": "rgb(26, 26, 26)",
+          "border": "1px solid rgb(42, 42, 42)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "4px 10px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12,
+          "fontWeight": "500",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(153, 153, 153)",
+          "fontVariantNumeric": "normal"
+        },
+        "sectionLabel": {
+          "selector": ".beat-detail__section-title",
+          "rect": {
+            "x": 448,
+            "y": 203,
+            "width": 109.41,
+            "height": 28
+          },
+          "size": {
+            "width": 109.41,
+            "height": 28
+          },
+          "text": "Licencias",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 24,
+          "fontWeight": "600",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "infoLabel": {
+          "selector": ".beat-detail__info-title",
+          "rect": {
+            "x": 120,
+            "y": 706,
+            "width": 101.94,
+            "height": 12
+          },
+          "size": {
+            "width": 101.94,
+            "height": 12
+          },
+          "text": "Información",
+          "fontFamily": "Arial",
+          "fontSize": 11,
+          "fontWeight": "600",
+          "letterSpacing": "1.1px",
+          "letterSpacingEm": 0.1,
+          "lineHeight": "normal",
+          "textTransform": "uppercase",
+          "color": "rgb(119, 119, 119)",
+          "fontVariantNumeric": "normal"
+        },
+        "infoLabelBar": {
+          "selector": ".beat-detail__info-title::before",
+          "size": {
+            "width": 3,
+            "height": 12
+          },
+          "borderRadius": "2px",
+          "backgroundColor": "rgb(255, 0, 60)",
+          "border": "0px none rgb(119, 119, 119)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "dataTile": {
+          "selector": ".beat-detail__info-item",
+          "rect": {
+            "x": 120,
+            "y": 732,
+            "width": 136,
+            "height": 75
+          },
+          "size": {
+            "width": 110,
+            "height": 53
+          },
+          "text": "Publicado26 sept 2026",
+          "borderRadius": "8px",
+          "backgroundColor": "rgb(17, 17, 17)",
+          "border": "1px solid rgb(30, 30, 30)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "10px 12px",
+          "opacity": "1",
+          "position": "static",
+          "top": "auto",
+          "left": "auto",
+          "zIndex": "auto",
+          "display": "flex",
+          "gap": "4px",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb"
+        },
+        "dataTileIcon": {
+          "selector": ".beat-detail__info-icon",
+          "rect": {
+            "x": 182.75,
+            "y": 743,
+            "width": 10.5,
+            "height": 14
+          },
+          "size": {
+            "width": 10.5,
+            "height": 14
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 0, 60)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 0, 60)",
+          "fontVariantNumeric": "normal"
+        },
+        "dataTileLabel": {
+          "selector": ".beat-detail__info-label",
+          "rect": {
+            "x": 153.14,
+            "y": 763,
+            "width": 69.7,
+            "height": 12
+          },
+          "size": {
+            "width": 69.7,
+            "height": 12
+          },
+          "text": "Publicado",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 11.2,
+          "fontWeight": "400",
+          "letterSpacing": "0.56px",
+          "letterSpacingEm": 0.05,
+          "lineHeight": "normal",
+          "textTransform": "uppercase",
+          "color": "rgb(102, 102, 102)",
+          "fontVariantNumeric": "normal"
+        },
+        "dataTileValue": {
+          "selector": ".beat-detail__info-value",
+          "rect": {
+            "x": 143.38,
+            "y": 779,
+            "width": 89.23,
+            "height": 17
+          },
+          "size": {
+            "width": 89.23,
+            "height": 17
+          },
+          "text": "26 sept 2026",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 15,
+          "fontWeight": "600",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "licenseCard": {
+          "selector": ".beat-detail__license-card:not(.selected)",
+          "rect": {
+            "x": 669,
+            "y": 259,
+            "width": 209,
+            "height": 97
+          },
+          "size": {
+            "width": 173,
+            "height": 61
+          },
+          "text": "Premium$49.99MP3, WAV",
+          "borderRadius": "8px",
+          "backgroundColor": "rgb(14, 14, 14)",
+          "border": "2px solid rgb(27, 27, 27)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "16px",
+          "opacity": "1"
+        },
+        "licenseCardSelected": {
+          "selector": ".beat-detail__license-card.selected",
+          "rect": {
+            "x": 448,
+            "y": 259,
+            "width": 209,
+            "height": 97
+          },
+          "size": {
+            "width": 173,
+            "height": 61
+          },
+          "text": "Basic$29.99MP3",
+          "borderRadius": "8px",
+          "backgroundColor": "rgba(255, 0, 60, 0.06)",
+          "border": "2px solid rgb(255, 0, 60)",
+          "boxShadow": "rgba(255, 0, 60, 0.3) 0px 0px 0px 1px",
+          "backdropFilter": "none",
+          "padding": "16px",
+          "opacity": "1"
+        },
+        "buyNow": {
+          "selector": ".beat-detail__buy-now-btn, .beat-detail__mobile-buy-btn",
+          "rect": {
+            "x": 1122.59,
+            "y": 199,
+            "width": 197.41,
+            "height": 36
+          },
+          "size": {
+            "width": 197.41,
+            "height": 36
+          },
+          "text": "Comprar desde $29.99",
+          "borderRadius": "8px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(135deg, rgb(255, 0, 60), rgb(204, 0, 48))",
+          "backgroundSize": "auto",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "rgba(255, 0, 60, 0.3) 0px 4px 16px 0px",
+          "backdropFilter": "none",
+          "padding": "10px 24px",
+          "opacity": "1",
+          "fontFamily": "Arial",
+          "fontSize": 14,
+          "fontWeight": "700",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "downloadBtn": {
+          "selector": ".beat-detail__download-btn",
+          "rect": {
+            "x": 120,
+            "y": 619,
+            "width": 280,
+            "height": 42
+          },
+          "size": {
+            "width": 280,
+            "height": 42
+          },
+          "text": "Descargar gratis",
+          "borderRadius": "8px",
+          "backgroundColor": "rgb(26, 26, 26)",
+          "border": "1px solid rgb(51, 51, 51)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "12px 16px",
+          "opacity": "1",
+          "fontFamily": "Arial",
+          "fontSize": 14,
+          "fontWeight": "600",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "fonts": {
+          "title": {
+            "selector": ".beat-detail__title",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans-Bold",
+                "isCustomFont": false,
+                "glyphCount": 10
+              }
+            ]
+          },
+          "dataTileValue": {
+            "selector": ".beat-detail__info-value",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans-Bold",
+                "isCustomFont": false,
+                "glyphCount": 12
+              }
+            ]
+          }
+        }
+      }
+    },
+    "mobile": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "home": {
+        "page": {
+          "selector": "body",
+          "rect": {
+            "x": 0,
+            "y": 16,
+            "width": 390,
+            "height": 5795.52
+          },
+          "size": {
+            "width": 390,
+            "height": 5795.52
+          },
+          "text": "InicioArtistasEventosDiscografíaBeatsEstudiosContactoIniciar",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 16,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "navIsland": {
+          "selector": "header.header",
+          "rect": {
+            "x": 16,
+            "y": 16,
+            "width": 358,
+            "height": 54
+          },
+          "size": {
+            "width": 358,
+            "height": 54
+          },
+          "text": "InicioArtistasEventosDiscografíaBeatsEstudiosContactoIniciar",
+          "borderRadius": "20px",
+          "backgroundColor": "rgba(0, 0, 0, 0.58)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "rgba(0, 0, 0, 0.55) 0px 8px 32px 0px",
+          "backdropFilter": "url(\"#glass-filter-_r_0_\") saturate(1) blur(3px)",
+          "padding": "12px",
+          "opacity": "1",
+          "position": "sticky",
+          "top": "16px",
+          "left": "auto",
+          "zIndex": "15",
+          "display": "block",
+          "gap": "normal",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb",
+          "style": "border-radius: 20px; --glass-bg: hsl(0 0% 0% / 0.58); --glass-saturation: 1; --glass-backdrop-blur: 3px; --filter-id: url(…);"
+        },
+        "logo": {
+          "selector": ".logo-section .logo",
+          "rect": {
+            "x": 130.09,
+            "y": 19.78,
+            "width": 131.65,
+            "height": 97.24
+          },
+          "size": {
+            "width": 120,
+            "height": 77.58
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "position": "fixed",
+          "top": "3.2px",
+          "left": "179px",
+          "zIndex": "auto",
+          "display": "block",
+          "gap": "normal",
+          "transform": "matrix(1, 0, 0, 1, -60, 0)",
+          "rotate": "-10deg",
+          "rotateDeg": -10,
+          "writingMode": "horizontal-tb"
+        },
+        "navLink": null,
+        "navLinkActive": null,
+        "navLinks": null,
+        "loginButton": null,
+        "mobileNavToggle": {
+          "selector": ".mobile-nav-toggle",
+          "rect": {
+            "x": 332,
+            "y": 28,
+            "width": 30,
+            "height": 30
+          },
+          "size": {
+            "width": 30,
+            "height": 30
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "position": "relative",
+          "top": "0px",
+          "left": "0px",
+          "zIndex": "26",
+          "display": "flex",
+          "gap": "normal",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb"
+        },
+        "heroTitle": {
+          "selector": ".hero-title",
+          "rect": {
+            "x": 20,
+            "y": 317.81,
+            "width": 350,
+            "height": 147.81
+          },
+          "size": {
+            "width": 350,
+            "height": 147.81
+          },
+          "text": "OTHER PEOPLERECORDS",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 44.8,
+          "fontWeight": "900",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "47.04px",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "heroTitleSolid": {
+          "selector": ".hero-title__line:not(.hero-title__line--accent)",
+          "rect": {
+            "x": 20,
+            "y": 317.81,
+            "width": 350,
+            "height": 94.06
+          },
+          "size": {
+            "width": 350,
+            "height": 94.06
+          },
+          "text": "OTHER PEOPLE",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 44.8,
+          "fontWeight": "900",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "47.04px",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal",
+          "webkitTextStroke": "0px rgb(255, 255, 255)",
+          "webkitTextFillColor": "rgb(255, 255, 255)",
+          "textShadow": "rgba(0, 0, 0, 0.6) 0px 4px 24px"
+        },
+        "heroTitleOutline": {
+          "selector": ".hero-title__line--accent",
+          "rect": {
+            "x": 79.86,
+            "y": 418.59,
+            "width": 230.28,
+            "height": 47.03
+          },
+          "size": {
+            "width": 230.28,
+            "height": 47.03
+          },
+          "text": "RECORDS",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(0, 0, 0)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 44.8,
+          "fontWeight": "900",
+          "letterSpacing": "0.896px",
+          "letterSpacingEm": 0.02,
+          "lineHeight": "47.04px",
+          "textTransform": "none",
+          "color": "rgb(0, 0, 0)",
+          "fontVariantNumeric": "normal",
+          "webkitTextStroke": "1px rgb(255, 0, 60)",
+          "webkitTextFillColor": "rgb(0, 0, 0)",
+          "textShadow": "rgba(255, 0, 60, 0.4) 0px 0px 30px"
+        },
+        "heroDivider": {
+          "selector": ".hero-divider",
+          "rect": {
+            "x": 155,
+            "y": 485.63,
+            "width": 80,
+            "height": 3
+          },
+          "size": {
+            "width": 80,
+            "height": 3
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(90deg, rgba(0, 0, 0, 0), rgb(255, 0, 60), rgba(0, 0, 0, 0))",
+          "backgroundSize": "auto",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "heroSubtitle": {
+          "selector": ".hero-subtitle",
+          "rect": {
+            "x": 20,
+            "y": 504.63,
+            "width": 350,
+            "height": 30
+          },
+          "size": {
+            "width": 350,
+            "height": 30
+          },
+          "text": "Sello independiente · Producción · Distribución · Booking",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgba(255, 255, 255, 0.85)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12.8,
+          "fontWeight": "300",
+          "letterSpacing": "1.92px",
+          "letterSpacingEm": 0.15,
+          "lineHeight": "normal",
+          "textTransform": "uppercase",
+          "color": "rgba(255, 255, 255, 0.85)",
+          "fontVariantNumeric": "normal"
+        },
+        "heroSide": null,
+        "heroGrid": {
+          "selector": ".hero-grid",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 844
+          },
+          "size": {
+            "width": 390,
+            "height": 844
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(rgba(255, 0, 60, 0.5) 1px, rgba(0, 0, 0, 0) 1px), linear-gradient(90deg, rgba(255, 0, 60, 0.5) 1px, rgba(0, 0, 0, 0) 1px)",
+          "backgroundSize": "60px 60px, 60px 60px",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "0.08",
+          "position": "absolute",
+          "top": "0px",
+          "left": "0px",
+          "zIndex": "3",
+          "display": "block",
+          "gap": "normal",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb",
+          "maskImage": "radial-gradient(rgb(0, 0, 0) 30%, rgba(0, 0, 0, 0) 75%)"
+        },
+        "heroVignette": {
+          "selector": ".hero-vignette",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 844
+          },
+          "size": {
+            "width": 390,
+            "height": 844
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "radial-gradient(rgba(0, 0, 0, 0) 35%, rgba(0, 0, 0, 0.55) 90%, rgba(0, 0, 0, 0.85) 100%)",
+          "backgroundSize": "auto",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "heroLogo": {
+          "selector": ".hero-logo",
+          "rect": {
+            "x": 130,
+            "y": 171.81,
+            "width": 130,
+            "height": 130
+          },
+          "size": {
+            "width": 130,
+            "height": 130
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "ctaPrimary": {
+          "selector": ".hero-cta--primary",
+          "rect": {
+            "x": 35,
+            "y": 566.63,
+            "width": 320,
+            "height": 43.78
+          },
+          "size": {
+            "width": 320,
+            "height": 43.78
+          },
+          "text": "Escuchar ahora",
+          "borderRadius": "999px",
+          "backgroundColor": "rgba(255, 0, 60, 0.62)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "rgba(255, 0, 60, 0.45) 0px 4px 20px 0px",
+          "backdropFilter": "url(\"#glass-filter-_r_1_\") saturate(1) blur(0px)",
+          "padding": "14.4px 24px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 13.6,
+          "fontWeight": "700",
+          "letterSpacing": "1.088px",
+          "letterSpacingEm": 0.08,
+          "lineHeight": "normal",
+          "textTransform": "uppercase",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "ctaGhost": {
+          "selector": ".hero-cta--ghost",
+          "rect": {
+            "x": 35,
+            "y": 626.41,
+            "width": 320,
+            "height": 45.78
+          },
+          "size": {
+            "width": 320,
+            "height": 45.78
+          },
+          "text": "Booking",
+          "borderRadius": "999px",
+          "backgroundColor": "rgba(0, 0, 0, 0.58)",
+          "border": "1px solid rgba(255, 255, 255, 0.3)",
+          "boxShadow": "none",
+          "backdropFilter": "url(\"#glass-filter-_r_2_\") saturate(1) blur(0px)",
+          "padding": "14.4px 24px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 13.6,
+          "fontWeight": "700",
+          "letterSpacing": "1.088px",
+          "letterSpacingEm": 0.08,
+          "lineHeight": "normal",
+          "textTransform": "uppercase",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "marquee": {
+          "selector": ".hero-marquee",
+          "rect": {
+            "x": 0,
+            "y": 745.63,
+            "width": 390,
+            "height": 38.38
+          },
+          "size": {
+            "width": 390,
+            "height": 14
+          },
+          "text": "LILBRUYNXEFØSKARBLACK FACESAINT JABIRAINA<3SANXOSTRESS KIDDM",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0.4)",
+          "border": "1px solid rgba(255, 0, 60, 0.25)",
+          "boxShadow": "none",
+          "backdropFilter": "blur(10px)",
+          "padding": "11.2px 0px",
+          "opacity": "1"
+        },
+        "marqueeItem": {
+          "selector": ".hero-marquee__item",
+          "rect": {
+            "x": -171.23,
+            "y": 757.81,
+            "width": 83.59,
+            "height": 14
+          },
+          "size": {
+            "width": 83.59,
+            "height": 14
+          },
+          "text": "LILBRU",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12,
+          "fontWeight": "700",
+          "letterSpacing": "3.6px",
+          "letterSpacingEm": 0.3,
+          "lineHeight": "normal",
+          "textTransform": "uppercase",
+          "color": "rgba(255, 255, 255, 0.75)",
+          "fontVariantNumeric": "normal"
+        },
+        "marqueeDot": {
+          "selector": ".hero-marquee__dot",
+          "rect": {
+            "x": -171.23,
+            "y": 761.81,
+            "width": 6,
+            "height": 6
+          },
+          "size": {
+            "width": 6,
+            "height": 6
+          },
+          "borderRadius": "50%",
+          "backgroundColor": "rgb(255, 0, 60)",
+          "border": "0px none rgba(255, 255, 255, 0.75)",
+          "boxShadow": "rgba(255, 0, 60, 0.6) 0px 0px 8px 0px",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "silk": {
+          "selector": ".silk-background",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 844
+          },
+          "size": {
+            "width": 390,
+            "height": 844
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "position": "fixed",
+          "top": "0px",
+          "left": "0px",
+          "zIndex": "-1",
+          "display": "block",
+          "gap": "normal",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb"
+        },
+        "fonts": {
+          "navLink": {
+            "selector": ".nav-links a",
+            "fonts": []
+          },
+          "heroTitle": {
+            "selector": ".hero-title__line",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans-Bold",
+                "isCustomFont": false,
+                "glyphCount": 11
+              }
+            ]
+          },
+          "heroSubtitle": {
+            "selector": ".hero-subtitle",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans",
+                "isCustomFont": false,
+                "glyphCount": 56
+              }
+            ]
+          },
+          "ctaPrimary": {
+            "selector": ".hero-cta--primary",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans-Bold",
+                "isCustomFont": false,
+                "glyphCount": 14
+              }
+            ]
+          },
+          "sectionTitle": {
+            "selector": ".ultimos-lanzamientos-title",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans-Bold",
+                "isCustomFont": false,
+                "glyphCount": 19
+              }
+            ]
+          }
+        },
+        "fontInventory": {
+          "fontFaceRules": [
+            "UTSouthDrink",
+            "BerlinSans"
+          ],
+          "documentFonts": [
+            "UTSouthDrink 400 (unloaded)",
+            "BerlinSans 400 (unloaded)"
+          ],
+          "googleFontsLink": false,
+          "montserratFontFace": false,
+          "externalSheets": [
+            "https://www.otherpeople.es/assets/index-UxzmpZ8a.css"
+          ]
+        },
+        "htmlBackground": "rgb(0, 0, 0)",
+        "sectionTitle": {
+          "selector": ".ultimos-lanzamientos-title",
+          "rect": {
+            "x": 48,
+            "y": 94,
+            "width": 310,
+            "height": 74
+          },
+          "size": {
+            "width": 310,
+            "height": 74
+          },
+          "text": "Últimos lanzamientos",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 32,
+          "fontWeight": "700",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "releaseCard": {
+          "selector": ".ultimos-lanzamientos-list .card",
+          "rect": {
+            "x": 20.5,
+            "y": 192,
+            "width": 349,
+            "height": 503.38
+          },
+          "size": {
+            "width": 315,
+            "height": 469.38
+          },
+          "text": "OTRO ROUNDMarkus Bach, Giadda, Trave, ProkkimoSpotify",
+          "borderRadius": "16px",
+          "backgroundColor": "rgba(0, 0, 0, 0.58)",
+          "border": "1px solid rgba(255, 255, 255, 0.18)",
+          "boxShadow": "rgba(0, 0, 0, 0.4) 0px 4px 24px 0px, rgba(255, 255, 255, 0.12) 0px 1px 0px 0px inset",
+          "backdropFilter": "url(\"#glass-filter-_r_a_\") saturate(1) blur(0px)",
+          "padding": "16px",
+          "opacity": "1",
+          "position": "relative",
+          "top": "0px",
+          "left": "0px",
+          "zIndex": "auto",
+          "display": "flex",
+          "gap": "16px",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb",
+          "style": "border-radius: 16px; --glass-bg: hsl(0 0% 0% / 0.58); --glass-saturation: 1; --glass-backdrop-blur: 0px; --filter-id: url(…);"
+        },
+        "releaseCardImage": {
+          "selector": ".ultimos-lanzamientos-list .card .card-image-link",
+          "rect": {
+            "x": 21.5,
+            "y": 193,
+            "width": 347,
+            "height": 347
+          },
+          "size": {
+            "width": 347,
+            "height": 347
+          },
+          "borderRadius": "12px 12px 0px 0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "releaseCardTitle": {
+          "selector": ".ultimos-lanzamientos-list .card-content h2",
+          "rect": {
+            "x": 37.5,
+            "y": 556,
+            "width": 315,
+            "height": 37
+          },
+          "size": {
+            "width": 315,
+            "height": 37
+          },
+          "text": "OTRO ROUND",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 32,
+          "fontWeight": "100",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "releaseCardArtists": {
+          "selector": ".ultimos-lanzamientos-list .card-content p",
+          "rect": {
+            "x": 37.5,
+            "y": 593,
+            "width": 315,
+            "height": 18
+          },
+          "size": {
+            "width": 315,
+            "height": 18
+          },
+          "text": "Markus Bach, Giadda, Trave, Prokkimo",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 16,
+          "fontWeight": "100",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "releaseCardLink": {
+          "selector": ".ultimos-lanzamientos-list .card__buttons a",
+          "rect": {
+            "x": 123.39,
+            "y": 635,
+            "width": 143.2,
+            "height": 43.38
+          },
+          "size": {
+            "width": 136.83,
+            "height": 37
+          },
+          "text": "Spotify",
+          "borderRadius": "4px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "3.2px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 32,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "beatCard": {
+          "selector": ".ultimos-beats-list .card",
+          "rect": {
+            "x": 20.5,
+            "y": 1837.67,
+            "width": 349,
+            "height": 505.38
+          },
+          "size": {
+            "width": 315,
+            "height": 471.38
+          },
+          "text": "MaliantosaProd. by LilBru, SantamariaReggaeton • 92 BPMVer L",
+          "borderRadius": "16px",
+          "backgroundColor": "rgba(0, 0, 0, 0.58)",
+          "border": "1px solid rgba(255, 255, 255, 0.18)",
+          "boxShadow": "rgba(0, 0, 0, 0.4) 0px 4px 24px 0px, rgba(255, 255, 255, 0.12) 0px 1px 0px 0px inset",
+          "backdropFilter": "url(\"#glass-filter-_r_d_\") saturate(1) blur(0px)",
+          "padding": "16px",
+          "opacity": "1",
+          "position": "relative",
+          "top": "0px",
+          "left": "0px",
+          "zIndex": "auto",
+          "display": "flex",
+          "gap": "16px",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb",
+          "style": "border-radius: 16px; --glass-bg: hsl(0 0% 0% / 0.58); --glass-saturation: 1; --glass-backdrop-blur: 0px; --filter-id: url(…);"
+        },
+        "beatCardTitle": {
+          "selector": ".ultimos-beats-list .card-content h2",
+          "rect": {
+            "x": 40.69,
+            "y": 2204.86,
+            "width": 308.63,
+            "height": 37
+          },
+          "size": {
+            "width": 308.63,
+            "height": 37
+          },
+          "text": "Maliantosa",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 32,
+          "fontWeight": "100",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "beatCardMeta": {
+          "selector": ".ultimos-beats-list .card-content p + p",
+          "rect": {
+            "x": 37.5,
+            "y": 2263.05,
+            "width": 315,
+            "height": 18
+          },
+          "size": {
+            "width": 315,
+            "height": 18
+          },
+          "text": "Reggaeton • 92 BPM",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 16,
+          "fontWeight": "100",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(153, 153, 153)",
+          "fontVariantNumeric": "normal"
+        },
+        "beatCardPlay": {
+          "selector": ".ultimos-beats-list .beat-play-button",
+          "rect": {
+            "x": 171,
+            "y": 1988.17,
+            "width": 48,
+            "height": 48
+          },
+          "size": {
+            "width": 60,
+            "height": 60
+          },
+          "borderRadius": "50%",
+          "backgroundColor": "rgba(255, 0, 60, 0.9)",
+          "border": "3px solid rgba(255, 255, 255, 0.9)",
+          "boxShadow": "rgba(255, 0, 60, 0.4) 0px 4px 20px 0px",
+          "backdropFilter": "none",
+          "padding": "1px 6px",
+          "opacity": "0"
+        },
+        "beatCardBuy": {
+          "selector": ".ultimos-beats-list .beat-purchase-btn",
+          "rect": {
+            "x": 37.5,
+            "y": 2289.05,
+            "width": 315,
+            "height": 37
+          },
+          "size": {
+            "width": 315,
+            "height": 37
+          },
+          "text": "Ver Licencias",
+          "borderRadius": "8px",
+          "backgroundColor": "rgb(255, 0, 60)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "10px 16px",
+          "opacity": "1",
+          "fontFamily": "Arial",
+          "fontSize": 15.2,
+          "fontWeight": "700",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        }
+      },
+      "beats": {
+        "pageTitle": {
+          "selector": ".beats-page-header h1",
+          "rect": {
+            "x": 32,
+            "y": 102,
+            "width": 326,
+            "height": 74
+          },
+          "size": {
+            "width": 326,
+            "height": 74
+          },
+          "text": "Beats de nuestros productores",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 32,
+          "fontWeight": "700",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "genreChip": {
+          "selector": ".genre-chip",
+          "rect": {
+            "x": 71.27,
+            "y": 200,
+            "width": 50.72,
+            "height": 25.59
+          },
+          "size": {
+            "width": 50.72,
+            "height": 25.59
+          },
+          "text": "Trap",
+          "borderRadius": "20px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "1px solid rgb(42, 42, 42)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "4.8px 12px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12,
+          "fontWeight": "500",
+          "letterSpacing": "0.12px",
+          "letterSpacingEm": 0.01,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(153, 153, 153)",
+          "fontVariantNumeric": "normal"
+        },
+        "filterSelect": {
+          "selector": ".beats-filter-select",
+          "rect": {
+            "x": 32,
+            "y": 338.38,
+            "width": 326,
+            "height": 30.38
+          },
+          "size": {
+            "width": 326,
+            "height": 30.38
+          },
+          "text": "BeatMaker",
+          "borderRadius": "6px",
+          "backgroundColor": "rgb(26, 26, 26)",
+          "backgroundImage": "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23666'/%3E%3C/svg%3E\")",
+          "backgroundSize": "auto",
+          "border": "1px solid rgb(42, 42, 42)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "7.2px 32px 7.2px 13.6px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12.48,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(204, 204, 204)",
+          "fontVariantNumeric": "normal"
+        },
+        "viewToggleActive": null,
+        "row": {
+          "selector": ".beat-list-row",
+          "rect": {
+            "x": 32,
+            "y": 516.88,
+            "width": 326,
+            "height": 71.58
+          },
+          "size": {
+            "width": 308,
+            "height": 53.58
+          },
+          "text": "MaliantosaProd. by LilBru, SantamariaReggaeton92 BPMD# min0:",
+          "borderRadius": "8px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "1px solid rgba(0, 0, 0, 0)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "8px",
+          "opacity": "1",
+          "position": "static",
+          "top": "auto",
+          "left": "auto",
+          "zIndex": "auto",
+          "display": "flex",
+          "gap": "9.6px",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb"
+        },
+        "rowThumb": {
+          "selector": ".beat-list-row__thumb",
+          "rect": {
+            "x": 41,
+            "y": 528.66,
+            "width": 48,
+            "height": 48
+          },
+          "size": {
+            "width": 48,
+            "height": 48
+          },
+          "borderRadius": "6px",
+          "backgroundColor": "rgb(26, 26, 26)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "rowPlay": {
+          "selector": ".beat-list-row__play",
+          "rect": {
+            "x": 98.59,
+            "y": 536.66,
+            "width": 32,
+            "height": 32
+          },
+          "size": {
+            "width": 32,
+            "height": 32
+          },
+          "borderRadius": "50%",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "1px solid rgb(51, 51, 51)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "1px 6px",
+          "opacity": "1"
+        },
+        "rowTitle": {
+          "selector": ".beat-list-row__title",
+          "rect": {
+            "x": 140.19,
+            "y": 526.88,
+            "width": 74.38,
+            "height": 16
+          },
+          "size": {
+            "width": "auto",
+            "height": "auto"
+          },
+          "text": "Maliantosa",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 14.4,
+          "fontWeight": "600",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "rowProducer": {
+          "selector": ".beat-list-row__producer",
+          "rect": {
+            "x": 140.19,
+            "y": 546.27,
+            "width": 119.64,
+            "height": 14
+          },
+          "size": {
+            "width": 119.64,
+            "height": 14
+          },
+          "text": "Prod. by LilBru, Santamaria",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12.48,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(102, 102, 102)",
+          "fontVariantNumeric": "normal"
+        },
+        "rowGenreTag": null,
+        "rowMeta": null,
+        "rowMetaDot": null,
+        "rowTime": {
+          "selector": ".beat-list-row__time",
+          "rect": {
+            "x": 140.19,
+            "y": 567.45,
+            "width": 28,
+            "height": 12
+          },
+          "size": {
+            "width": 28,
+            "height": 12
+          },
+          "text": "0:00",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 11.52,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(68, 68, 68)",
+          "fontVariantNumeric": "tabular-nums"
+        },
+        "rowProgress": {
+          "selector": ".beat-list-row__progress-wrap",
+          "rect": {
+            "x": 177.78,
+            "y": 571.45,
+            "width": 82.05,
+            "height": 4
+          },
+          "size": {
+            "width": 82.05,
+            "height": 4
+          },
+          "borderRadius": "2px",
+          "backgroundColor": "rgb(30, 30, 30)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "rowPrice": null,
+        "rowDownload": {
+          "selector": ".beat-list-row__download-btn",
+          "rect": {
+            "x": 269.42,
+            "y": 535.66,
+            "width": 34,
+            "height": 34
+          },
+          "size": {
+            "width": 34,
+            "height": 34
+          },
+          "borderRadius": "6px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "1px solid rgb(42, 42, 42)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "1px 6px",
+          "opacity": "1"
+        },
+        "rowBuy": {
+          "selector": ".beat-list-row__buy",
+          "rect": {
+            "x": 315.42,
+            "y": 539.86,
+            "width": 33.58,
+            "height": 25.58
+          },
+          "size": {
+            "width": 33.58,
+            "height": 25.58
+          },
+          "text": "Comprar",
+          "borderRadius": "6px",
+          "backgroundColor": "rgb(255, 0, 60)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "6.4px 9.6px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12.8,
+          "fontWeight": "700",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "fonts": {
+          "rowTitle": {
+            "selector": ".beat-list-row__title",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans-Bold",
+                "isCustomFont": false,
+                "glyphCount": 10
+              }
+            ]
+          },
+          "rowMeta": {
+            "selector": ".beat-list-row__dot",
+            "fonts": []
+          },
+          "rowTime": {
+            "selector": ".beat-list-row__time",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans",
+                "isCustomFont": false,
+                "glyphCount": 4
+              }
+            ]
+          }
+        },
+        "rowCount": 20,
+        "genreChipActive": {
+          "selector": ".genre-chip.active",
+          "rect": {
+            "x": 71.27,
+            "y": 200,
+            "width": 50.72,
+            "height": 25.59
+          },
+          "size": {
+            "width": 50.72,
+            "height": 25.59
+          },
+          "text": "Trap",
+          "borderRadius": "20px",
+          "backgroundColor": "rgb(255, 0, 60)",
+          "border": "1px solid rgb(255, 0, 60)",
+          "boxShadow": "rgba(255, 0, 60, 0.35) 0px 2px 10px 0px",
+          "backdropFilter": "none",
+          "padding": "4.8px 12px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12,
+          "fontWeight": "500",
+          "letterSpacing": "0.12px",
+          "letterSpacingEm": 0.01,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        }
+      },
+      "beatDetail": {
+        "backLink": null,
+        "cover": {
+          "selector": ".beat-detail__cover-wrapper",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 390
+          },
+          "size": {
+            "width": 390,
+            "height": 390
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgb(14, 14, 14)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "title": {
+          "selector": ".beat-detail__title",
+          "rect": {
+            "x": 16,
+            "y": 282.14,
+            "width": 358,
+            "height": 22.86
+          },
+          "size": {
+            "width": 358,
+            "height": 22.86
+          },
+          "text": "Maliantosa",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 17.6,
+          "fontWeight": "700",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "22.88px",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "producer": {
+          "selector": ".beat-detail__producer",
+          "rect": {
+            "x": 16,
+            "y": 310,
+            "width": 358,
+            "height": 16
+          },
+          "size": {
+            "width": 358,
+            "height": 16
+          },
+          "text": "LilBru, Santamaria",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 14,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(153, 153, 153)",
+          "fontVariantNumeric": "normal"
+        },
+        "player": {
+          "selector": ".beat-detail__player",
+          "rect": {
+            "x": 16,
+            "y": 332,
+            "width": 44,
+            "height": 44
+          },
+          "size": {
+            "width": 44,
+            "height": 44
+          },
+          "text": "0:002:18",
+          "borderRadius": "50%",
+          "backgroundColor": "rgba(0, 0, 0, 0.5)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "blur(8px)",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "playerPlay": {
+          "selector": ".beat-detail__player-play",
+          "rect": {
+            "x": 16,
+            "y": 332,
+            "width": 44,
+            "height": 44
+          },
+          "size": {
+            "width": 44,
+            "height": 44
+          },
+          "borderRadius": "50%",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "1px solid rgba(255, 255, 255, 0.35)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "1px 6px",
+          "opacity": "1"
+        },
+        "tag": {
+          "selector": ".beat-detail__tag",
+          "rect": {
+            "x": 78.91,
+            "y": 400,
+            "width": 82.73,
+            "height": 24
+          },
+          "size": {
+            "width": 60.73,
+            "height": 14
+          },
+          "text": "#reggaeton",
+          "borderRadius": "20px",
+          "backgroundColor": "rgb(26, 26, 26)",
+          "border": "1px solid rgb(42, 42, 42)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "4px 10px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12,
+          "fontWeight": "500",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(153, 153, 153)",
+          "fontVariantNumeric": "normal"
+        },
+        "sectionLabel": {
+          "selector": ".beat-detail__section-title",
+          "rect": {
+            "x": 16,
+            "y": 657,
+            "width": 131.14,
+            "height": 23
+          },
+          "size": {
+            "width": 131.14,
+            "height": 23
+          },
+          "text": "Más de LilBru",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 20,
+          "fontWeight": "600",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "infoLabel": {
+          "selector": ".beat-detail__info-title",
+          "rect": {
+            "x": 16,
+            "y": 573,
+            "width": 101.94,
+            "height": 12
+          },
+          "size": {
+            "width": 101.94,
+            "height": 12
+          },
+          "text": "Información",
+          "fontFamily": "Arial",
+          "fontSize": 11,
+          "fontWeight": "600",
+          "letterSpacing": "1.1px",
+          "letterSpacingEm": 0.1,
+          "lineHeight": "normal",
+          "textTransform": "uppercase",
+          "color": "rgb(119, 119, 119)",
+          "fontVariantNumeric": "normal"
+        },
+        "infoLabelBar": {
+          "selector": ".beat-detail__info-title::before",
+          "size": {
+            "width": 3,
+            "height": 12
+          },
+          "borderRadius": "2px",
+          "backgroundColor": "rgb(255, 0, 60)",
+          "border": "0px none rgb(119, 119, 119)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "dataTile": null,
+        "dataTileIcon": null,
+        "dataTileLabel": null,
+        "dataTileValue": null,
+        "licenseCard": null,
+        "licenseCardSelected": null,
+        "buyNow": {
+          "selector": ".beat-detail__buy-now-btn, .beat-detail__mobile-buy-btn",
+          "rect": {
+            "x": 16,
+            "y": 446,
+            "width": 358,
+            "height": 46
+          },
+          "size": {
+            "width": 358,
+            "height": 46
+          },
+          "text": "Comprar desde $29.99",
+          "borderRadius": "10px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "linear-gradient(135deg, rgb(255, 0, 60), rgb(204, 0, 48))",
+          "backgroundSize": "auto",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "rgba(255, 0, 60, 0.35) 0px 4px 16px 0px",
+          "backdropFilter": "none",
+          "padding": "14px 20px",
+          "opacity": "1",
+          "fontFamily": "Arial",
+          "fontSize": 16,
+          "fontWeight": "700",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "downloadBtn": {
+          "selector": ".beat-detail__download-btn",
+          "rect": {
+            "x": 16,
+            "y": 502,
+            "width": 358,
+            "height": 42
+          },
+          "size": {
+            "width": 358,
+            "height": 42
+          },
+          "text": "Descargar gratis",
+          "borderRadius": "8px",
+          "backgroundColor": "rgb(26, 26, 26)",
+          "border": "1px solid rgb(51, 51, 51)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "12px 16px",
+          "opacity": "1",
+          "fontFamily": "Arial",
+          "fontSize": 14,
+          "fontWeight": "600",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "fonts": {
+          "title": {
+            "selector": ".beat-detail__title",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans-Bold",
+                "isCustomFont": false,
+                "glyphCount": 10
+              }
+            ]
+          },
+          "dataTileValue": {
+            "selector": ".beat-detail__info-value",
+            "fonts": []
+          }
+        }
+      }
+    }
+  }
+}
