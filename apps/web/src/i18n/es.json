@@ -221,7 +221,10 @@
       "play": "Reproducir «{title}»",
       "pause": "Pausar «{title}»",
       "genres": "Géneros",
-      "cover": "Portada de «{title}»"
+      "cover": "Portada de «{title}»",
+      "loading": "Cargando «{title}»",
+      "retry": "Reintentar «{title}»",
+      "loadError": "No hemos podido cargar este beat"
     },
     "waveform": {
       "label": "Forma de onda",
@@ -267,6 +270,31 @@
       "summary": "Los tokens, la tipografía, el movimiento, los componentes base con todos sus estados y el layout del sello, con y sin movimiento. Solo existe en desarrollo.",
       "indexLabel": "Índice de la galería",
       "combined": "{first} · {second}",
+      "matrix": {
+        "title": "Estados de §3.3 que no enseña",
+        "notApplicable": "No aplica",
+        "deferred": "Aplazado",
+        "reasons": {
+          "chipInstant": "Filtra al momento en el cliente: no espera, no confirma y no falla. Activarlo es su estado «Activo».",
+          "cardNotControl": "La tarjeta no es un control: se pulsa lo que lleva dentro (su botón).",
+          "cardContent": "Lo cuenta su contenido: un aviso o el botón que reintenta.",
+          "tileData": "No es interactiva: enseña un dato. El rótulo que la pliega en móvil es un botón con el foco del sistema.",
+          "tileNoResult": "Enseña un dato: no confirma nada y, si el dato falta, no se pinta.",
+          "staticText": "Es texto: no tiene interacción, carga ni resultado.",
+          "wavePlayer": "El salto con clic y teclado, la previsualización del punto al pasar el ratón y su estado deshabilitado llegan con el reproductor (Fase 5).",
+          "waveData": "Sin picos no se pinta: mientras llegan, la pantalla enseña su esqueleto. No confirma nada.",
+          "rowPlaying": "Reproducir no tiene confirmación: «Sonando» es su estado activo.",
+          "modalButtons": "Se pasa el ratón y se pulsa en sus botones (ver Botón).",
+          "modalClose": "Un modal no se deshabilita: se cierra.",
+          "modalToast": "El resultado de lo que se hace en un modal lo cuenta un aviso (ver Aviso).",
+          "toastPast": "Avisa de algo que ya ha pasado: lo que carga lo cuentan su botón o su esqueleto.",
+          "toastDismiss": "No hay nada que deshabilitar: se cierra o se va solo.",
+          "notInteractive": "No es interactiva.",
+          "xpData": "Se pinta con el perfil ya cargado (el HUD enseña su esqueleto); sin datos, no se pinta.",
+          "skeletonOnly": "Solo existe mientras algo carga: su único estado es «Cargando».",
+          "countdownCalendar": "Con el calendario vacío no se pinta (§2.19) y al llegar a cero la semana cambia de fase: no tiene carga, éxito ni error propios."
+        }
+      },
       "controls": {
         "label": "Ajustes de la galería",
         "reducedMotion": "Reducir movimiento",
@@ -327,7 +355,9 @@
         "row": "Fila",
         "card": "Tarjeta",
         "mini": "Mini (24 px)",
-        "collapsedMobile": "Plegada en móvil"
+        "collapsedMobile": "Plegada en móvil",
+        "focusTitle": "Foco (título)",
+        "otherText": "Otro texto"
       },
       "variants": {
         "cta": "CTA",
@@ -451,7 +481,8 @@
           "title": "Entra y vota",
           "description": "Tu voto queda guardado y se aplica en cuanto entres.",
           "later": "Ahora no",
-          "signIn": "Entrar"
+          "signIn": "Entrar",
+          "error": "No hemos podido cargar las bases. Reintenta en un momento."
         },
         "toast": {
           "info": "Nueva entrada en la batalla",

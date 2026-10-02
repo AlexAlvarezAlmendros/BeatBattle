@@ -39,6 +39,21 @@
   background-color: var(--bb-red-wash);
 }
 
+/* Error de carga (RF-PLAY-09): aviso con icono bajo el título (nunca solo el color). */
+.error {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-1);
+  margin: 0;
+  color: var(--bb-danger);
+  font-size: var(--bb-font-size-xs);
+  font-weight: var(--bb-weight-semibold);
+}
+
+.errorIcon {
+  flex-shrink: 0;
+}
+
 /* ── Portada ───────────────────────────────────────────────────────────────────────────── */
 .thumb {
   flex-shrink: 0;
@@ -204,6 +219,20 @@
   flex-shrink: 0;
   align-items: center;
   gap: var(--bb-space-3);
+}
+
+/*
+ * Deshabilitada (no se puede reproducir): portada y onda (decorativas) apagadas y en gris; el texto
+ * conserva su contraste AA (§3.1) y el play va deshabilitado.
+ */
+.row[data-disabled] .thumb,
+.row[data-disabled] .wave {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
+.row[data-disabled] .title {
+  color: var(--bb-text-2);
 }
 
 /*

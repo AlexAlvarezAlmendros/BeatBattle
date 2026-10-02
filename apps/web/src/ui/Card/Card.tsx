@@ -19,6 +19,11 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   tilt?: boolean
   /** Estado forzado para la galería. */
   state?: CardState
+  /**
+   * Apagada: lo que lleva no se puede usar (p. ej. una entrada retirada). Sin inclinación ni borde que
+   * se ilumina; deshabilitar sus controles le toca a quien la pinta (la tarjeta no es un control).
+   */
+  disabled?: boolean
   children: ReactNode
 }
 
@@ -34,18 +39,20 @@ export function Card({
   surface = 'glass',
   tilt: tiltEnabled = true,
   state,
+  disabled = false,
   className,
   children,
   ...rest
 }: CardProps) {
-  const tilt = useTilt<HTMLElement>({ disabled: !tiltEnabled })
+  const tilt = useTilt<HTMLElement>({ disabled: !tiltEnabled || disabled })
   const cardProps = {
     ...rest,
     ref: tilt.ref as never,
     className: cx(styles.card, surface === 'glass' ? styles.glass : styles.solid, className),
     'data-surface': surface,
     'data-tilt': tilt.enabled ? 'on' : 'off',
-    ...forceStateAttr(state),
+    'data-disabled': disabled || undefined,
+    ...forceStateAttr(disabled ? undefined : state),
     ...tilt.handlers,
   }
   const content = (

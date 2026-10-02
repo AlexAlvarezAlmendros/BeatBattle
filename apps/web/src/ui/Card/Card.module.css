@@ -79,3 +79,14 @@
   outline: var(--bb-focus-width) solid var(--bb-focus-color);
   outline-offset: var(--bb-focus-offset);
 }
+
+/*
+ * Apagada: en gris, sin borde que se ilumina (sus controles van deshabilitados). Sin opacidad en el
+ * texto: se tiene que seguir leyendo con contraste AA (§3.1).
+ */
+.card[data-disabled],
+.card[data-disabled]:hover,
+.card[data-disabled]:focus-within {
+  border-color: var(--bb-line);
+  filter: grayscale(1);
+}

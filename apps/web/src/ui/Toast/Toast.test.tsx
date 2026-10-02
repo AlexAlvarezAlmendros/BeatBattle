@@ -179,3 +179,14 @@ describe('Toast (pieza)', () => {
     expect(screen.queryByRole('button')).toBeNull()
   })
 })
+
+describe('Toast: pulsado forzado (RD-VIS-03)', () => {
+  it('va en el botón de cerrar, no en el aviso', () => {
+    render(<Toast toast={{ tone: 'info', title: 'Hola' }} onDismiss={() => {}} state="pressed" />)
+    expect(screen.getByRole('button', { name: t('ui.toast.close') })).toHaveAttribute(
+      'data-force-state',
+      'pressed',
+    )
+    expect(document.querySelector('[data-tone]')).not.toHaveAttribute('data-force-state')
+  })
+})

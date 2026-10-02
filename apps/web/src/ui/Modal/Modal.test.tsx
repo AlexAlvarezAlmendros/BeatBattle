@@ -217,3 +217,36 @@ describe('Modal', () => {
     expect(screen.getByRole('heading', { level: 3, name: 'Vista previa' })).toBeInTheDocument()
   })
 })
+
+describe('ModalSurface: estados de §3.3 (RD-VIS-03)', () => {
+  const base = { title: 'Bases', onClose: () => {}, surface: 'solid' as const }
+
+  it('cargando: esqueleto en el cuerpo con aria-busy', () => {
+    const { container } = render(
+      <ModalSurface {...base} busy>
+        Texto
+      </ModalSurface>,
+    )
+    const body = container.querySelector('[aria-busy="true"]')
+    expect(body?.querySelector('[data-skeleton]')).not.toBeNull()
+    expect(screen.queryByText('Texto')).not.toBeInTheDocument()
+  })
+
+  it('error: el mensaje en lugar del cuerpo', () => {
+    render(
+      <ModalSurface {...base} error="No hemos podido cargar las bases.">
+        Texto
+      </ModalSurface>,
+    )
+    expect(screen.getByText('No hemos podido cargar las bases.')).toBeInTheDocument()
+    expect(screen.queryByText('Texto')).not.toBeInTheDocument()
+  })
+
+  it('foco forzado en el botón de cerrar', () => {
+    render(<ModalSurface {...base} closeState="focus" />)
+    expect(screen.getByRole('button', { name: t('ui.modal.close') })).toHaveAttribute(
+      'data-force-state',
+      'focus',
+    )
+  })
+})

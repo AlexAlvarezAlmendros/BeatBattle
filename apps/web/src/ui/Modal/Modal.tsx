@@ -17,6 +17,8 @@ import { Button } from '../Button'
 import { cx } from '../forceState'
 import { GlassSurface } from '../GlassSurface'
 import { useReducedMotion } from '../hooks/useReducedMotion'
+import { Icon } from '../Icon'
+import { Skeleton, SkeletonGroup } from '../Skeleton'
 import { isTopModalLayer, lockScroll, pushModalLayer, trapTab } from './focus'
 import styles from './Modal.module.css'
 
@@ -38,6 +40,12 @@ export interface ModalSurfaceProps extends Omit<HTMLAttributes<HTMLDivElement>, 
   surface?: ModalSurfaceKind
   titleAs?: 'h2' | 'h3' | 'h4'
   children?: ReactNode
+  /** El cuerpo está cargando: esqueleto en su lugar y `aria-busy` (§3.3, estado «cargando»). */
+  busy?: boolean
+  /** El cuerpo no ha cargado: este mensaje, con el icono de peligro, en su lugar (estado «error»). */
+  error?: ReactNode
+  /** Estado forzado del botón de cerrar, para la galería (el foco atrapado empieza ahí). */
+  closeState?: 'rest' | 'focus'
   ref?: RefObject<HTMLDivElement | null>
 }
 
@@ -61,8 +69,25 @@ export function ModalSurface({
   titleAs: TitleTag = 'h2',
   className,
   children,
+  busy = false,
+  error,
+  closeState,
   ...rest
 }: ModalSurfaceProps) {
+  const body = busy ? (
+    <SkeletonGroup>
+      <Skeleton shape="text" width="85%" />
+      <Skeleton shape="text" />
+      <Skeleton shape="text" width="60%" />
+    </SkeletonGroup>
+  ) : error ? (
+    <p className={styles.error}>
+      <Icon name="alert" className={styles.errorIcon} />
+      <span>{error}</span>
+    </p>
+  ) : (
+    children
+  )
   const content = (
     <>
       <header className={styles.header}>
@@ -76,6 +101,7 @@ export function ModalSurface({
             icon="close"
             aria-label={t('ui.modal.close')}
             onClick={onClose}
+            state={closeState === 'focus' ? 'focus' : undefined}
             className={styles.close}
           />
         )}
@@ -85,7 +111,11 @@ export function ModalSurface({
           {description}
         </p>
       )}
-      {children && <div className={styles.body}>{children}</div>}
+      {body && (
+        <div className={styles.body} aria-busy={busy || undefined}>
+          {body}
+        </div>
+      )}
       {footer && <footer className={styles.footer}>{footer}</footer>}
     </>
   )

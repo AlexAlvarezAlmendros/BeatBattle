@@ -1,6 +1,9 @@
 import { type ReactNode, useId } from 'react'
+import { t } from '../../i18n'
 import { cx } from '../forceState'
+import type { ComponentKey } from './anchors'
 import styles from './GalleryPage.module.css'
+import { type SealState, uncoveredStates } from './stateMatrix'
 
 /** Sección de la galería (`<h2>`), con su ancla para el índice. */
 export function GallerySection({
@@ -66,18 +69,27 @@ export function GalleryRow({
   )
 }
 
-/** Una celda: la pieza en un estado y su nombre debajo. */
+/**
+ * Una celda: la pieza en un estado y su nombre debajo. `state` la marca como el estado de §3.3 que
+ * enseña (`data-state`), para que el test compruebe la matriz bloque a bloque.
+ */
 export function StateCell({
   label,
   children,
   span = false,
+  state,
 }: {
   label: string
   children: ReactNode
   span?: boolean
+  state?: SealState
 }) {
   return (
-    <figure className={cx(styles.cell, span && styles.cellSpan)}>
+    <figure
+      className={cx(styles.cell, span && styles.cellSpan)}
+      data-state={state}
+      data-coverage={state ? 'shown' : undefined}
+    >
       <div className={styles.cellStage}>{children}</div>
       <figcaption className={styles.caption}>{label}</figcaption>
     </figure>
@@ -121,5 +133,31 @@ export function Switch({
         </p>
       )}
     </div>
+  )
+}
+
+/**
+ * Fila con los estados de §3.3 que el componente no enseña (`STATE_MATRIX`): una celda por estado con
+ * «No aplica» o «Aplazado» y el motivo.
+ */
+export function StateMatrixRow({ component }: { component: ComponentKey }) {
+  const missing = uncoveredStates(component)
+  if (missing.length === 0) return null
+  return (
+    <GalleryRow title={t('dev.gallery.matrix.title')}>
+      {missing.map(({ state, coverage }) => (
+        <figure key={state} className={styles.cell} data-state={state} data-coverage={coverage.kind}>
+          <div className={cx(styles.cellStage, styles.matrixStage)}>
+            <p className={styles.matrixReason}>{t(`dev.gallery.matrix.reasons.${coverage.reason}`)}</p>
+          </div>
+          <figcaption className={styles.caption}>
+            {t('dev.gallery.combined', {
+              first: t(`dev.gallery.states.${state}`),
+              second: t(`dev.gallery.matrix.${coverage.kind}`),
+            })}
+          </figcaption>
+        </figure>
+      ))}
+    </GalleryRow>
   )
 }

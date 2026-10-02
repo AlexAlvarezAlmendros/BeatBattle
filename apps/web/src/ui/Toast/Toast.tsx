@@ -7,7 +7,8 @@ import type { ToastData, ToastTone } from './useToasts'
 
 const TONE_ICON: Record<ToastTone, IconName> = { info: 'info', success: 'check', error: 'alert' }
 
-export type ToastState = 'rest' | 'hover' | 'focus'
+/** Estados forzables para la galería; `pressed` es el del botón de cerrar. */
+export type ToastState = 'rest' | 'hover' | 'focus' | 'pressed'
 
 export interface ToastProps {
   toast: Pick<ToastData, 'tone' | 'title' | 'message'>
@@ -25,7 +26,11 @@ export interface ToastProps {
  */
 export function Toast({ toast, onDismiss, state, className }: ToastProps) {
   return (
-    <div className={cx(styles.toast, className)} data-tone={toast.tone} {...forceStateAttr(state)}>
+    <div
+      className={cx(styles.toast, className)}
+      data-tone={toast.tone}
+      {...forceStateAttr(state === 'pressed' ? undefined : state)}
+    >
       <Icon name={TONE_ICON[toast.tone]} label={t(`ui.toast.tone.${toast.tone}`)} className={styles.icon} />
       <div className={styles.text}>
         <p className={styles.title}>{toast.title}</p>
@@ -38,7 +43,7 @@ export function Toast({ toast, onDismiss, state, className }: ToastProps) {
           icon="close"
           aria-label={t('ui.toast.close')}
           onClick={onDismiss}
-          state={state === 'focus' ? 'focus' : undefined}
+          state={state === 'focus' || state === 'pressed' ? state : undefined}
           className={styles.close}
         />
       )}

@@ -126,3 +126,39 @@ describe('EntryRow', () => {
     expect(getComputedStyle(wave).getPropertyValue('animation')).toBe('none')
   })
 })
+
+describe('EntryRow: estados de §3.3 (RD-VIS-03)', () => {
+  it('cargando: el play enseña la carga (aria-busy) y dice qué carga', () => {
+    renderRow({ status: 'loading' })
+    const play = screen.getByRole('button', { name: /Tigre púrpura/ })
+    expect(play).toHaveAttribute('aria-busy', 'true')
+    expect(screen.getByRole('article')).toHaveAttribute('data-status', 'loading')
+  })
+
+  it('RF-PLAY-09: si el audio no carga, lo dice bajo el título y el play pasa a «Reintentar»', async () => {
+    const user = userEvent.setup()
+    const onPlayToggle = vi.fn()
+    renderRow({ status: 'error', onPlayToggle })
+    expect(screen.getByText(t('ui.entryRow.loadError'))).toBeInTheDocument()
+    expect(t('ui.entryRow.loadError')).toBe('No hemos podido cargar este beat')
+    // El botón añade su estado al nombre («…, error»): empieza por «Reintentar».
+    const retry = screen.getByRole('button', { name: /^Reintentar «Tigre púrpura»/ })
+    expect(retry).toHaveAttribute('data-status', 'error')
+    await user.click(retry)
+    expect(onPlayToggle).toHaveBeenCalledTimes(1)
+  })
+
+  it('deshabilitada: el play no se puede usar y la fila va apagada', () => {
+    renderRow({ disabled: true })
+    expect(screen.getByRole('button', { name: /Tigre púrpura/ })).toBeDisabled()
+    expect(screen.getByRole('article')).toHaveAttribute('data-disabled')
+  })
+
+  it('pulsado forzado: en el play', () => {
+    renderRow({ state: 'pressed' })
+    expect(screen.getByRole('button', { name: /Tigre púrpura/ })).toHaveAttribute(
+      'data-force-state',
+      'pressed',
+    )
+  })
+})

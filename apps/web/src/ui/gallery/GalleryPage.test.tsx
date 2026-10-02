@@ -8,6 +8,7 @@ import { resetGlassCapabilityCache } from '../glass'
 import { useToasts } from '../Toast'
 import { COMPONENT_ANCHORS, LAYOUT_ANCHORS } from './anchors'
 import { GalleryPage } from './GalleryPage'
+import { SEAL_STATES, STATE_MATRIX } from './stateMatrix'
 
 const SECTION_KEYS = [
   'color',
@@ -83,15 +84,45 @@ describe('galería /dev/galeria (0.9)', { timeout: 15_000 }, () => {
     expect(within(byId('rotulo')).getByText(t('dev.gallery.sample.sectionLabel.info'))).toBeInTheDocument()
     expect(within(byId('onda')).getAllByRole('img').length).toBeGreaterThanOrEqual(4)
     expect(within(byId('fila')).getAllByRole('article').length).toBeGreaterThanOrEqual(4)
-    expect(within(byId('modal')).getByText(t('dev.gallery.sample.modal.title'))).toBeInTheDocument()
+    expect(within(byId('modal')).getAllByText(t('dev.gallery.sample.modal.title')).length).toBeGreaterThan(0)
     expect(within(byId('aviso')).getByText(t('dev.gallery.sample.toast.error'))).toBeInTheDocument()
     expect(within(byId('xp')).getAllByRole('progressbar').length).toBeGreaterThanOrEqual(5)
     expect(byId('esqueleto').querySelectorAll('[data-skeleton]').length).toBeGreaterThan(0)
     expect(within(byId('cuenta-atras')).getAllByRole('timer')).toHaveLength(5)
   })
 
-  it('RD-VIS-03: cada estado de §3.3 aparece (reposo, hover, foco, pulsado, cargando, deshabilitado, éxito y error)', async () => {
+  it('RD-VIS-03: cada bloque enseña los estados de su matriz y dice por qué no enseña el resto', async () => {
     await renderGallery()
+    // La matriz cubre todos los componentes de la galería (Estrellas llega con la tarea 1.5).
+    expect(Object.keys(STATE_MATRIX).sort()).toEqual(COMPONENT_ANCHORS.map(({ key }) => key).sort())
+    for (const { id, key } of COMPONENT_ANCHORS) {
+      const block = document.getElementById(id)!
+      for (const state of SEAL_STATES) {
+        const coverage = STATE_MATRIX[key][state]
+        // Dentro de su bloque, no en la galería entera: el botón ya no tapa a los demás.
+        const cells = [...block.querySelectorAll<HTMLElement>(`figure[data-state="${state}"]`)]
+        expect(cells.length, `${id} · ${state}`).toBeGreaterThan(0)
+        for (const cell of cells) expect(cell.dataset.coverage, `${id} · ${state}`).toBe(coverage.kind)
+        if (coverage.kind === 'shown') {
+          // La celda enseña la pieza: algo más que el texto del motivo.
+          expect(cells[0]!.querySelector('figcaption')?.textContent, `${id} · ${state}`).toContain(
+            t(`dev.gallery.states.${state}`),
+          )
+        } else {
+          expect(cells[0], `${id} · ${state}`).toHaveTextContent(
+            t(`dev.gallery.matrix.reasons.${coverage.reason}`),
+          )
+          expect(cells[0], `${id} · ${state}`).toHaveTextContent(t(`dev.gallery.matrix.${coverage.kind}`))
+        }
+      }
+    }
+  })
+
+  it('RD-VIS-03: los estados que se enseñan están forzados de verdad en su pieza', async () => {
+    await renderGallery()
+    const cell = (id: string, state: string) =>
+      document.getElementById(id)!.querySelector<HTMLElement>(`figure[data-state="${state}"]`)!
+    // Botón: los 8 en las tres variantes.
     const buttons = document.getElementById('boton')!
     for (const state of ['hover', 'focus', 'pressed']) {
       expect(buttons.querySelectorAll(`[data-force-state="${state}"]`).length, state).toBeGreaterThanOrEqual(
@@ -102,19 +133,32 @@ describe('galería /dev/galeria (0.9)', { timeout: 15_000 }, () => {
     expect(buttons.querySelectorAll('[data-status="success"]').length).toBeGreaterThanOrEqual(3)
     expect(buttons.querySelectorAll('[data-status="error"]').length).toBeGreaterThanOrEqual(3)
     expect(buttons.querySelectorAll('button:disabled').length).toBeGreaterThanOrEqual(3)
-    const captions = [...document.querySelectorAll('figcaption')].map((caption) => caption.textContent)
-    for (const state of [
-      'rest',
-      'hover',
-      'focus',
-      'pressed',
-      'loading',
-      'disabled',
-      'success',
-      'error',
-    ] as const) {
-      expect(captions, state).toContain(t(`dev.gallery.states.${state}`))
-    }
+    // Chip.
+    for (const state of ['hover', 'focus', 'pressed'])
+      expect(cell('chip', state).querySelector(`[data-force-state="${state}"]`), state).not.toBeNull()
+    expect(cell('chip', 'disabled').querySelector('button:disabled')).not.toBeNull()
+    // Tarjeta.
+    expect(cell('tarjeta', 'hover').querySelector('[data-force-state="hover"]')).not.toBeNull()
+    expect(cell('tarjeta', 'loading').querySelector('[aria-busy="true"]')).not.toBeNull()
+    expect(cell('tarjeta', 'disabled').querySelector('[data-disabled]')).not.toBeNull()
+    expect(cell('tarjeta', 'disabled').querySelector('button:disabled')).not.toBeNull()
+    // Tesela.
+    expect(cell('tesela', 'loading').querySelector('[aria-busy="true"], [data-skeleton]')).not.toBeNull()
+    // Fila de entrada: play pulsado, cargando, deshabilitado y error de carga (RF-PLAY-09).
+    expect(cell('fila', 'pressed').querySelector('button[data-force-state="pressed"]')).not.toBeNull()
+    expect(cell('fila', 'loading').querySelector('button[aria-busy="true"]')).not.toBeNull()
+    expect(cell('fila', 'disabled').querySelector('button:disabled')).not.toBeNull()
+    expect(within(cell('fila', 'error')).getByText(t('ui.entryRow.loadError'))).toBeInTheDocument()
+    // Modal: foco en cerrar, cuerpo que carga y cuerpo con error.
+    expect(cell('modal', 'focus').querySelector('button[data-force-state="focus"]')).not.toBeNull()
+    expect(cell('modal', 'loading').querySelector('[aria-busy="true"] [data-skeleton]')).not.toBeNull()
+    expect(within(cell('modal', 'error')).getByText(t('dev.gallery.sample.modal.error'))).toBeInTheDocument()
+    // Aviso: botón de cerrar pulsado; éxito y error con su tono.
+    expect(cell('aviso', 'pressed').querySelector('button[data-force-state="pressed"]')).not.toBeNull()
+    expect(cell('aviso', 'success').querySelector('[data-tone="success"]')).not.toBeNull()
+    expect(cell('aviso', 'error').querySelector('[data-tone="error"]')).not.toBeNull()
+    // Barra de XP: el éxito es la subida de nivel.
+    expect(cell('xp', 'success').querySelector('[data-force-state="levelUp"]')).not.toBeNull()
   })
 
   it('RD-VIS-03: el layout del sello enseña isla, pie, titular, rótulos, rejilla y viñeta, marquee, orbes y GlassSurface', async () => {

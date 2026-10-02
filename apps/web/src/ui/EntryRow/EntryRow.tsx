@@ -3,14 +3,21 @@ import { Link, type To } from 'react-router'
 import { t } from '../../i18n'
 import { Button } from '../Button'
 import { cx, forceStateAttr } from '../forceState'
+import { Icon } from '../Icon'
 import { Waveform, type WaveformPeak } from '../Waveform'
 import styles from './EntryRow.module.css'
 
 /**
- * Estados forzables para la galería: `focus` es el del play (el primer control de la fila) y
- * `focusTitle`, el del enlace del título.
+ * Estados forzables para la galería: `focus` y `pressed` son los del play (el primer control de la
+ * fila) y `focusTitle`, el del enlace del título.
  */
-export type EntryRowState = 'rest' | 'hover' | 'focus' | 'focusTitle'
+export type EntryRowState = 'rest' | 'hover' | 'focus' | 'focusTitle' | 'pressed'
+
+/**
+ * Estado del audio de la fila (§3.3): `loading` mientras carga (el play enseña la onda de carga) y
+ * `error` si no ha cargado (`RF-PLAY-09`: «No hemos podido cargar este beat», y el play reintenta).
+ */
+export type EntryRowStatus = 'idle' | 'loading' | 'error'
 
 export interface EntryRowProps {
   title: string
@@ -26,6 +33,10 @@ export interface EntryRowProps {
   progress?: number
   /** Está sonando: play en rojo y su etiqueta pasa a «Pausar». */
   playing?: boolean
+  /** Audio cargando o que no ha cargado (el play pasa a «Reintentar»). */
+  status?: EntryRowStatus
+  /** No se puede reproducir (p. ej. la entrada aún se está procesando): play deshabilitado y fila apagada. */
+  disabled?: boolean
   coverUrl?: string
   /** Ficha de la entrada: el título enlaza ahí. */
   to?: To
@@ -46,6 +57,10 @@ export interface EntryRowProps {
  * movimiento, solo el fondo; Anexo E). El play se transforma en pausa (`Icon`, Anexo E). Con puntero
  * grueso, el enlace del título cubre toda la fila (RNF-A11Y-09).
  *
+ * Estados (§3.3): cargando (el play enseña la onda de carga), error (`RF-PLAY-09`: el aviso «No hemos
+ * podido cargar este beat» bajo el título y el play pasa a «Reintentar») y deshabilitado (no se puede
+ * reproducir: play deshabilitado y la fila apagada).
+ *
  * Solo pinta con props: el audio y el reproductor llegan en la Fase 5.
  */
 export function EntryRow({
@@ -57,6 +72,8 @@ export function EntryRow({
   peaks,
   progress = 0,
   playing = false,
+  status = 'idle',
+  disabled = false,
   coverUrl,
   to,
   onPlayToggle,
@@ -71,6 +88,8 @@ export function EntryRow({
       className={cx(styles.row, className)}
       aria-labelledby={titleId}
       data-playing={playing || undefined}
+      data-status={status === 'idle' ? undefined : status}
+      data-disabled={disabled || undefined}
       {...forceStateAttr(state === 'focusTitle' ? 'focus' : state)}
     >
       <div className={styles.thumb}>
@@ -85,9 +104,16 @@ export function EntryRow({
         variant="icon"
         size="sm"
         icon={playing ? 'pause' : 'play'}
-        aria-label={t(playing ? 'ui.entryRow.pause' : 'ui.entryRow.play', { title })}
+        aria-label={t(
+          status === 'error' ? 'ui.entryRow.retry' : playing ? 'ui.entryRow.pause' : 'ui.entryRow.play',
+          { title },
+        )}
         onClick={onPlayToggle}
-        state={state === 'focus' ? 'focus' : undefined}
+        loading={status === 'loading'}
+        loadingLabel={t('ui.entryRow.loading', { title })}
+        status={status === 'error' ? 'error' : 'idle'}
+        disabled={disabled}
+        state={state === 'focus' || state === 'pressed' ? state : undefined}
         className={styles.play}
       />
 
@@ -106,6 +132,12 @@ export function EntryRow({
               <span className={styles.titleText}>{title}</span>
             )}
           </TitleTag>
+          {status === 'error' && (
+            <p className={styles.error}>
+              <Icon name="alert" className={styles.errorIcon} />
+              {t('ui.entryRow.loadError')}
+            </p>
+          )}
           <div className={styles.meta}>
             <span className={styles.alias}>{t('ui.entryRow.by', { alias })}</span>
             {genres.length > 0 && (

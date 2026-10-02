@@ -15,13 +15,17 @@ import { Waveform } from '../Waveform'
 import { XpBar } from '../XpBar'
 import { COMPONENT_ANCHORS, type ComponentKey } from './anchors'
 import styles from './GalleryPage.module.css'
-import { GalleryBlock, GalleryRow, GallerySection, StateCell } from './parts'
+import { GalleryBlock, GalleryRow, GallerySection, StateCell, StateMatrixRow } from './parts'
 import { GALLERY_NOW, samplePeaks } from './samples'
+import type { SealState } from './stateMatrix'
 
 const title = (key: ComponentKey) => t(`dev.gallery.components.${key}`)
 const anchor = (key: ComponentKey) => COMPONENT_ANCHORS.find((item) => item.key === key)!.id
 
 const ENTRIES = ['first', 'second', 'third', 'fourth'] as const
+
+/** Nombre de un género de muestra (`GENRES`, más abajo). */
+const genreName = (key: (typeof GENRES)[number]) => t(`dev.gallery.sample.genres.${key}`)
 
 export function ComponentsSection({ surface }: { surface: CardSurface }) {
   return (
@@ -45,7 +49,7 @@ export function ComponentsSection({ surface }: { surface: CardSurface }) {
 /* ── Botón ─────────────────────────────────────────────────────────────────────────────── */
 
 type ButtonStateDemo = {
-  label: StateKey
+  label: SealState
   props: Pick<ButtonProps, 'state' | 'loading' | 'status' | 'disabled'>
 }
 
@@ -70,7 +74,7 @@ const BUTTON_STATES: readonly ButtonStateDemo[] = [
 
 /** Estados que enseña la fila del hero: los de interacción (los demás son los de `md`). */
 const HERO_STATES = BUTTON_STATES.filter((demo) =>
-  (['rest', 'hover', 'focus', 'pressed'] as StateKey[]).includes(demo.label),
+  (['rest', 'hover', 'focus', 'pressed'] as SealState[]).includes(demo.label),
 )
 
 function textFor(variant: 'cta' | 'outline', demo: ButtonStateDemo): string {
@@ -106,7 +110,7 @@ function ButtonBlock() {
       {(['cta', 'outline'] as const).map((variant) => (
         <GalleryRow key={variant} title={t(`dev.gallery.variants.${variant}`)}>
           {BUTTON_STATES.map((demo) => (
-            <StateCell key={demo.label} label={stateLabel(demo.label)}>
+            <StateCell key={demo.label} label={stateLabel(demo.label)} state={demo.label}>
               <Button variant={variant} {...demo.props}>
                 {textFor(variant, demo)}
               </Button>
@@ -116,7 +120,7 @@ function ButtonBlock() {
       ))}
       <GalleryRow title={t('dev.gallery.variants.icon')}>
         {BUTTON_STATES.map((demo) => (
-          <StateCell key={demo.label} label={stateLabel(demo.label)}>
+          <StateCell key={demo.label} label={stateLabel(demo.label)} state={demo.label}>
             <Button variant="icon" icon="play" aria-label={t('dev.gallery.demo.play')} {...demo.props} />
           </StateCell>
         ))}
@@ -160,6 +164,7 @@ function ButtonBlock() {
           </StateCell>
         ))}
       </GalleryRow>
+      <StateMatrixRow component="button" />
     </GalleryBlock>
   )
 }
@@ -181,16 +186,16 @@ function ChipBlock() {
   return (
     <GalleryBlock id={anchor('chip')} title={title('chip')}>
       <GalleryRow>
-        <StateCell label={stateLabel('rest')}>
+        <StateCell label={stateLabel('rest')} state="rest">
           <Chip>{drill}</Chip>
         </StateCell>
-        <StateCell label={stateLabel('hover')}>
+        <StateCell label={stateLabel('hover')} state="hover">
           <Chip state="hover">{drill}</Chip>
         </StateCell>
-        <StateCell label={stateLabel('focus')}>
+        <StateCell label={stateLabel('focus')} state="focus">
           <Chip state="focus">{drill}</Chip>
         </StateCell>
-        <StateCell label={stateLabel('pressed')}>
+        <StateCell label={stateLabel('pressed')} state="pressed">
           <Chip state="pressed">{drill}</Chip>
         </StateCell>
         <StateCell label={stateLabel('selected')}>
@@ -201,7 +206,7 @@ function ChipBlock() {
             {drill}
           </Chip>
         </StateCell>
-        <StateCell label={stateLabel('disabled')}>
+        <StateCell label={stateLabel('disabled')} state="disabled">
           <Chip disabled>{drill}</Chip>
         </StateCell>
       </GalleryRow>
@@ -216,6 +221,7 @@ function ChipBlock() {
           </ChipGroup>
         </StateCell>
       </GalleryRow>
+      <StateMatrixRow component="chip" />
     </GalleryBlock>
   )
 }
@@ -226,14 +232,23 @@ function SampleCard({
   surface,
   state,
   tilt = true,
+  disabled = false,
 }: {
   surface: CardSurface
   state?: CardState
   tilt?: boolean
+  disabled?: boolean
 }) {
   const id = useId()
   return (
-    <Card surface={surface} state={state} tilt={tilt} aria-labelledby={id} className={styles.sampleCard}>
+    <Card
+      surface={surface}
+      state={state}
+      tilt={tilt}
+      disabled={disabled}
+      aria-labelledby={id}
+      className={styles.sampleCard}
+    >
       <span className={styles.cardCover} aria-hidden="true" />
       <div className={styles.cardBody}>
         <h4 id={id} className={styles.cardTitle}>
@@ -243,7 +258,7 @@ function SampleCard({
           {t('ui.entryRow.by', { alias: t('dev.gallery.sample.entries.first.alias') })}
         </p>
         <p className={styles.cardMetaSoft}>{t('dev.gallery.sample.card.meta')}</p>
-        <Button size="sm" fullWidth icon="play">
+        <Button size="sm" fullWidth icon="play" disabled={disabled}>
           {t('dev.gallery.sample.card.action')}
         </Button>
       </div>
@@ -255,19 +270,32 @@ function CardBlock({ surface }: { surface: CardSurface }) {
   return (
     <GalleryBlock id={anchor('card')} title={both(title('card'), t(`dev.gallery.variants.${surface}`))} stage>
       <GalleryRow wide>
-        <StateCell label={stateLabel('rest')}>
+        <StateCell label={stateLabel('rest')} state="rest">
           <SampleCard surface={surface} />
         </StateCell>
-        <StateCell label={stateLabel('hover')}>
+        <StateCell label={stateLabel('hover')} state="hover">
           <SampleCard surface={surface} state="hover" />
         </StateCell>
-        <StateCell label={stateLabel('focus')}>
+        <StateCell label={stateLabel('focus')} state="focus">
           <SampleCard surface={surface} state="focus" />
         </StateCell>
         <StateCell label={both(stateLabel('hover'), stateLabel('static'))}>
           <SampleCard surface={surface} state="hover" tilt={false} />
         </StateCell>
+        <StateCell label={stateLabel('loading')} state="loading">
+          <Card surface={surface} aria-label={t('ui.skeleton.loading')} className={styles.sampleCard}>
+            <SkeletonGroup className={styles.skeletonCard}>
+              <Skeleton height="9rem" />
+              <Skeleton shape="text" width="60%" />
+              <Skeleton shape="text" width="40%" />
+            </SkeletonGroup>
+          </Card>
+        </StateCell>
+        <StateCell label={stateLabel('disabled')} state="disabled">
+          <SampleCard surface={surface} disabled />
+        </StateCell>
       </GalleryRow>
+      <StateMatrixRow component="card" />
     </GalleryBlock>
   )
 }
@@ -318,7 +346,7 @@ function DataTileBlock() {
   return (
     <GalleryBlock id={anchor('dataTile')} title={title('dataTile')}>
       <GalleryRow wide>
-        <StateCell label={stateLabel('rest')} span>
+        <StateCell label={stateLabel('rest')} span state="rest">
           <DataTileSection
             title={t('dev.gallery.sample.sectionLabel.info')}
             titleAs="h4"
@@ -328,10 +356,10 @@ function DataTileBlock() {
             {sampleTiles({})}
           </DataTileSection>
         </StateCell>
-        <StateCell label={stateLabel('hover')} span>
+        <StateCell label={stateLabel('hover')} span state="hover">
           <DataTileList className={styles.tileList}>{sampleTiles({ state: 'hover' })}</DataTileList>
         </StateCell>
-        <StateCell label={stateLabel('loading')} span>
+        <StateCell label={stateLabel('loading')} span state="loading">
           <DataTileList className={styles.tileList}>{sampleTiles({ loading: true })}</DataTileList>
         </StateCell>
         <StateCell label={t('dev.gallery.states.collapsedMobile')} span>
@@ -344,6 +372,7 @@ function DataTileBlock() {
           </DataTileSection>
         </StateCell>
       </GalleryRow>
+      <StateMatrixRow component="dataTile" />
     </GalleryBlock>
   )
 }
@@ -352,13 +381,14 @@ function SectionLabelBlock() {
   return (
     <GalleryBlock id={anchor('sectionLabel')} title={title('sectionLabel')}>
       <GalleryRow>
-        <StateCell label={stateLabel('rest')}>
+        <StateCell label={stateLabel('rest')} state="rest">
           <SectionLabel as="p">{t('dev.gallery.sample.sectionLabel.info')}</SectionLabel>
         </StateCell>
-        <StateCell label={stateLabel('rest')}>
+        <StateCell label={both(stateLabel('rest'), stateLabel('otherText'))}>
           <SectionLabel as="p">{t('dev.gallery.sample.sectionLabel.licenses')}</SectionLabel>
         </StateCell>
       </GalleryRow>
+      <StateMatrixRow component="sectionLabel" />
     </GalleryBlock>
   )
 }
@@ -376,7 +406,7 @@ function WaveformBlock() {
         </Button>
       </div>
       <GalleryRow wide>
-        <StateCell label={stateLabel('progressNone')} span>
+        <StateCell label={both(stateLabel('rest'), stateLabel('progressNone'))} span state="rest">
           <Waveform key={`a-${replay}`} peaks={peaks} />
         </StateCell>
         <StateCell label={stateLabel('progressHalf')} span>
@@ -389,6 +419,7 @@ function WaveformBlock() {
           <Waveform key={`d-${replay}`} peaks={peaks} progress={0.62} height={24} playhead={false} />
         </StateCell>
       </GalleryRow>
+      <StateMatrixRow component="waveform" />
     </GalleryBlock>
   )
 }
@@ -405,31 +436,76 @@ function EntryRowBlock() {
       peaks: peaks[index]!,
     }
   }
-  const rows: { label: string; props: Partial<Parameters<typeof EntryRow>[0]> }[] = [
-    { label: stateLabel('rest'), props: { genres: [t('dev.gallery.sample.genres.drill')], bpm: 142 } },
+  /** Una fila por estado de §3.3 (y «Sonando»), cada una en su celda con `data-state`. */
+  const rows: {
+    key: string
+    label: string
+    state?: SealState
+    props: Partial<Parameters<typeof EntryRow>[0]>
+  }[] = [
     {
+      key: 'rest',
+      label: stateLabel('rest'),
+      state: 'rest',
+      props: { genres: [genreName('drill')], bpm: 142 },
+    },
+    {
+      key: 'hover',
       label: stateLabel('hover'),
-      props: { state: 'hover', genres: [t('dev.gallery.sample.genres.trap')], bpm: 128 },
+      state: 'hover',
+      props: { state: 'hover', genres: [genreName('trap')], bpm: 128 },
     },
     {
-      label: stateLabel('playing'),
-      props: { playing: true, progress: 0.42, genres: [t('dev.gallery.sample.genres.boomBap')], bpm: 90 },
-    },
-    {
+      key: 'focus',
       label: stateLabel('focus'),
-      props: { state: 'focus', genres: [t('dev.gallery.sample.genres.reggaeton')], bpm: 96 },
+      state: 'focus',
+      props: { state: 'focus', genres: [genreName('reggaeton')], bpm: 96 },
+    },
+    {
+      key: 'focusTitle',
+      label: stateLabel('focusTitle'),
+      props: { state: 'focusTitle', to: '/e/galeria', genres: [genreName('club')], bpm: 124 },
+    },
+    {
+      key: 'pressed',
+      label: stateLabel('pressed'),
+      state: 'pressed',
+      props: { state: 'pressed', genres: [genreName('jerk')], bpm: 150 },
+    },
+    {
+      key: 'playing',
+      label: stateLabel('playing'),
+      props: { playing: true, progress: 0.42, genres: [genreName('boomBap')], bpm: 90 },
+    },
+    {
+      key: 'loading',
+      label: stateLabel('loading'),
+      state: 'loading',
+      props: { status: 'loading', genres: [genreName('amapiano')], bpm: 112 },
+    },
+    {
+      key: 'disabled',
+      label: stateLabel('disabled'),
+      state: 'disabled',
+      props: { disabled: true, genres: [genreName('drill')], bpm: 140 },
+    },
+    {
+      key: 'error',
+      label: stateLabel('error'),
+      state: 'error',
+      props: { status: 'error', genres: [genreName('trap')], bpm: 136 },
     },
   ]
   return (
     <GalleryBlock id={anchor('entryRow')} title={title('entryRow')}>
       <GalleryRow wide>
-        <StateCell label={rows.map((row) => row.label).reduce((all, label) => both(all, label))} span>
-          <EntryList className={styles.entryList}>
-            {rows.map((row, index) => (
-              <EntryRow key={ENTRIES[index]} titleAs="h4" {...sample(index)} {...row.props} />
-            ))}
-          </EntryList>
-        </StateCell>
+        {rows.map((row, index) => (
+          <StateCell key={row.key} label={row.label} state={row.state} span>
+            <EntryList className={styles.entryList}>
+              <EntryRow titleAs="h4" {...sample(index % ENTRIES.length)} {...row.props} />
+            </EntryList>
+          </StateCell>
+        ))}
         <StateCell label={stateLabel('interactive')} span>
           <EntryList className={styles.entryList}>
             {ENTRIES.slice(0, 2).map((entry, index) => (
@@ -448,11 +524,20 @@ function EntryRowBlock() {
           </EntryList>
         </StateCell>
       </GalleryRow>
+      <StateMatrixRow component="entryRow" />
     </GalleryBlock>
   )
 }
 
 /* ── Modal y aviso ─────────────────────────────────────────────────────────────────────── */
+
+/** Estados del modal en la galería: abierto, con el foco atrapado en cerrar, cargando y con error. */
+const MODAL_DEMOS: readonly { state: SealState }[] = [
+  { state: 'rest' },
+  { state: 'focus' },
+  { state: 'loading' },
+  { state: 'error' },
+]
 
 function ModalBlock({ surface }: { surface: CardSurface }) {
   const [open, setOpen] = useState(false)
@@ -473,26 +558,35 @@ function ModalBlock({ surface }: { surface: CardSurface }) {
       stage
     >
       <GalleryRow wide>
-        <StateCell label={stateLabel('static')} span>
-          <div className={styles.scrimDemo}>
-            <ModalSurface
-              className={styles.scrimSurface}
-              surface={surface}
-              titleAs="h4"
-              title={t('dev.gallery.sample.modal.title')}
-              description={t('dev.gallery.sample.modal.description')}
-              onClose={() => {}}
-              footer={
-                <>
-                  <Button variant="outline" size="sm">
-                    {t('dev.gallery.sample.modal.later')}
-                  </Button>
-                  <Button size="sm">{t('dev.gallery.sample.modal.signIn')}</Button>
-                </>
-              }
-            />
-          </div>
-        </StateCell>
+        {MODAL_DEMOS.map((demo) => (
+          <StateCell key={demo.state} label={stateLabel(demo.state)} state={demo.state} span>
+            <div className={styles.scrimDemo}>
+              <ModalSurface
+                className={styles.scrimSurface}
+                surface={surface}
+                titleAs="h4"
+                title={t('dev.gallery.sample.modal.title')}
+                description={t('dev.gallery.sample.modal.description')}
+                onClose={() => {}}
+                closeState={demo.state === 'focus' ? 'focus' : undefined}
+                busy={demo.state === 'loading'}
+                error={demo.state === 'error' ? t('dev.gallery.sample.modal.error') : undefined}
+                footer={
+                  <>
+                    <Button variant="outline" size="sm">
+                      {t('dev.gallery.sample.modal.later')}
+                    </Button>
+                    <Button size="sm">{t('dev.gallery.sample.modal.signIn')}</Button>
+                  </>
+                }
+              >
+                {demo.state === 'loading' || demo.state === 'error'
+                  ? t('dev.gallery.sample.modal.description')
+                  : null}
+              </ModalSurface>
+            </div>
+          </StateCell>
+        ))}
         <StateCell label={stateLabel('interactive')}>
           <div className={styles.inline}>
             <Button variant="outline" onClick={() => setOpen(true)}>
@@ -509,25 +603,33 @@ function ModalBlock({ surface }: { surface: CardSurface }) {
         description={t('dev.gallery.sample.modal.description')}
         footer={footer}
       />
+      <StateMatrixRow component="modal" />
     </GalleryBlock>
   )
 }
 
 function ToastBlock() {
+  const info = {
+    tone: 'info',
+    title: t('dev.gallery.sample.toast.info'),
+    message: t('dev.gallery.sample.toast.infoMessage'),
+  } as const
   return (
     <GalleryBlock id={anchor('toast')} title={title('toast')}>
       <GalleryRow wide>
-        <StateCell label={stateLabel('rest')}>
-          <Toast
-            toast={{
-              tone: 'info',
-              title: t('dev.gallery.sample.toast.info'),
-              message: t('dev.gallery.sample.toast.infoMessage'),
-            }}
-            onDismiss={() => {}}
-          />
+        <StateCell label={stateLabel('rest')} state="rest">
+          <Toast toast={info} onDismiss={() => {}} />
         </StateCell>
-        <StateCell label={both(stateLabel('success'), stateLabel('hover'))}>
+        <StateCell label={stateLabel('hover')} state="hover">
+          <Toast toast={info} onDismiss={() => {}} state="hover" />
+        </StateCell>
+        <StateCell label={stateLabel('focus')} state="focus">
+          <Toast toast={info} onDismiss={() => {}} state="focus" />
+        </StateCell>
+        <StateCell label={both(stateLabel('pressed'), t('ui.toast.close'))} state="pressed">
+          <Toast toast={info} onDismiss={() => {}} state="pressed" />
+        </StateCell>
+        <StateCell label={stateLabel('success')} state="success">
           <Toast
             toast={{
               tone: 'success',
@@ -535,10 +637,9 @@ function ToastBlock() {
               message: t('dev.gallery.sample.toast.successMessage'),
             }}
             onDismiss={() => {}}
-            state="hover"
           />
         </StateCell>
-        <StateCell label={both(stateLabel('error'), stateLabel('focus'))}>
+        <StateCell label={stateLabel('error')} state="error">
           <Toast
             toast={{
               tone: 'error',
@@ -546,7 +647,6 @@ function ToastBlock() {
               message: t('dev.gallery.sample.toast.errorMessage'),
             }}
             onDismiss={() => {}}
-            state="focus"
           />
         </StateCell>
         <StateCell label={stateLabel('interactive')}>
@@ -587,6 +687,7 @@ function ToastBlock() {
           </div>
         </StateCell>
       </GalleryRow>
+      <StateMatrixRow component="toast" />
     </GalleryBlock>
   )
 }
@@ -620,13 +721,13 @@ function XpBarBlock() {
   return (
     <GalleryBlock id={anchor('xpBar')} title={title('xpBar')}>
       <GalleryRow wide>
-        <StateCell label={stateLabel('rest')}>
+        <StateCell label={stateLabel('rest')} state="rest">
           <XpBar value={120} max={300} level={4} />
         </StateCell>
         <StateCell label={stateLabel('gain')}>
           <XpBar value={180} max={300} level={4} state="gain" />
         </StateCell>
-        <StateCell label={stateLabel('levelUp')}>
+        <StateCell label={both(stateLabel('success'), stateLabel('levelUp'))} state="success">
           <XpBar value={300} max={300} level={4} state="levelUp" />
         </StateCell>
         <StateCell label={stateLabel('hud')}>
@@ -636,6 +737,7 @@ function XpBarBlock() {
           <LiveXpBar />
         </StateCell>
       </GalleryRow>
+      <StateMatrixRow component="xpBar" />
     </GalleryBlock>
   )
 }
@@ -646,14 +748,14 @@ function SkeletonBlock() {
   return (
     <GalleryBlock id={anchor('skeleton')} title={title('skeleton')}>
       <GalleryRow wide>
-        <StateCell label={stateLabel('text')}>
+        <StateCell label={both(stateLabel('loading'), stateLabel('text'))} state="loading">
           <SkeletonGroup>
             <Skeleton shape="text" width="70%" />
             <Skeleton shape="text" />
             <Skeleton shape="text" width="45%" />
           </SkeletonGroup>
         </StateCell>
-        <StateCell label={stateLabel('row')}>
+        <StateCell label={both(stateLabel('loading'), stateLabel('row'))} state="loading">
           <SkeletonGroup className={styles.skeletonRow}>
             <Skeleton width="3rem" height="3rem" />
             <Skeleton shape="circle" width="2.25rem" />
@@ -664,7 +766,7 @@ function SkeletonBlock() {
             </div>
           </SkeletonGroup>
         </StateCell>
-        <StateCell label={stateLabel('card')}>
+        <StateCell label={both(stateLabel('loading'), stateLabel('card'))} state="loading">
           <SkeletonGroup className={styles.skeletonCard}>
             <Skeleton height="9rem" />
             <Skeleton shape="text" width="60%" />
@@ -672,6 +774,7 @@ function SkeletonBlock() {
           </SkeletonGroup>
         </StateCell>
       </GalleryRow>
+      <StateMatrixRow component="skeleton" />
     </GalleryBlock>
   )
 }
@@ -687,7 +790,7 @@ function CountdownBlock() {
   return (
     <GalleryBlock id={anchor('countdown')} title={title('countdown')}>
       <GalleryRow wide>
-        <StateCell label={stateLabel('normal')}>
+        <StateCell label={both(stateLabel('rest'), stateLabel('normal'))} state="rest">
           <Countdown
             target={GALLERY_NOW + 2 * DAY_MS + 14 * HOUR_MS + 5 * MINUTE_MS + 33_000}
             now={galleryNow}
@@ -718,6 +821,7 @@ function CountdownBlock() {
           <Countdown target={liveTarget} label={label} />
         </StateCell>
       </GalleryRow>
+      <StateMatrixRow component="countdown" />
     </GalleryBlock>
   )
 }

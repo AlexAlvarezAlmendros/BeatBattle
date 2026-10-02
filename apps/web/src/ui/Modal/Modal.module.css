@@ -69,6 +69,21 @@
   min-width: 0;
 }
 
+/* Cuerpo que no ha cargado: mensaje con el icono de peligro (nunca solo el color). */
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--bb-space-2);
+  margin: 0;
+  color: var(--bb-text-2);
+}
+
+.errorIcon {
+  flex-shrink: 0;
+  margin-top: var(--bb-space-1);
+  color: var(--bb-danger);
+}
+
 .footer {
   display: flex;
   flex-wrap: wrap;

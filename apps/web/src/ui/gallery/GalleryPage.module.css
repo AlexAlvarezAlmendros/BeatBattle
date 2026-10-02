@@ -254,6 +254,18 @@
   font-size: var(--bb-font-size-xs);
 }
 
+/* Celdas de la matriz de §3.3 que dicen por qué un estado no se enseña: texto, sin pieza. */
+.matrixStage {
+  max-width: 17rem;
+  border-style: dashed;
+}
+
+.matrixReason {
+  color: var(--bb-text-3);
+  font-size: var(--bb-font-size-xs);
+  line-height: var(--bb-leading-body);
+}
+
 .inline {
   display: flex;
   flex-wrap: wrap;

@@ -132,3 +132,21 @@ describe('Card', () => {
     expect(screen.getByTestId('focus')).toHaveAttribute('data-force-state', 'focus')
   })
 })
+
+describe('Card: deshabilitada (RD-VIS-03)', () => {
+  it('sin inclinación ni estado forzado, marcada con data-disabled', () => {
+    media = mockMatchMedia()
+    render(
+      <Card data-testid="card" disabled state="hover">
+        Retirada
+      </Card>,
+    )
+    const card = screen.getByTestId('card')
+    expect(card).toHaveAttribute('data-disabled')
+    expect(card).toHaveAttribute('data-tilt', 'off')
+    expect(card).not.toHaveAttribute('data-force-state')
+    // La tarjeta no es un control: nada de aria-disabled en un <article>.
+    expect(card).not.toHaveAttribute('aria-disabled')
+    expect(cardCss).toMatch(/\.card\[data-disabled\]:focus-within \{[^}]*filter: grayscale\(1\)/)
+  })
+})
