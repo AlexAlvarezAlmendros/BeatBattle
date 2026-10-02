@@ -2,7 +2,8 @@
 
 > Fase: 0 de 10 | Estado: 🔄 En curso | Iniciado: 2026-10-02 | Cerrado: —
 > Hito del roadmap: CI verde; la galería de componentes (`/dev/galeria`) muestra los tokens y los
-> componentes base con la estética del sello y pasa la «prueba del sello» (`RD-VIS-02`).
+> componentes base con la estética del sello y pasa la «prueba del sello» (`RD-VIS-02`) sin diferencias
+> sin justificar, salvo el fondo Silk, que llega con la tarea 1.1 (decisión del 2026-10-02).
 
 Deja montado el monorepo con el stack de Orchard, la calidad automática, el **sistema de diseño
 heredado de Other People** (tokens, fuentes de verdad, isla de navegación, componentes base) y las
@@ -135,6 +136,7 @@ todas las bases transversales probadas.
 | 2026-10-02 | 0.7 | CTA del hero sobre el `Button` base: tamaño `hero` (15,2 px, relleno 15,2 × 32, 13,6 px y 0,08 em en móvil, `--bb-shadow-cta`) y contorno `glass` sobre `GlassSurface`, también en la galería; se borra `HeroCta`. Medidas del hero sin cambios (`getBoundingClientRect`/`getComputedStyle` a 1440 × 900 y 390 × 844). El trozo de la home pasa de 1,9 a 8,8 kB gz (el `animate` de Motion del muelle del botón y los iconos). |
 | 2026-10-02 | — | Plan creado. 0.3 hecha junto con la planificación. |
 | 2026-10-02 | 0.13 | Playwright + axe hecho: humo, navegación (escritorio y menú móvil), 404, galería, axe WCAG 2.2 AA, teclado y «reducir movimiento». Sin violaciones de axe; arreglado el 404 del icono de la pestaña. `tsconfig.json` raíz con `playwright.config.ts` y `tests/` dentro de `pnpm typecheck`. Pasos de Playwright en la CI (su primera ejecución, con la 0.2). |
+| 2026-10-02 | Ola 3 | Consolidación (CTA del hero sobre `Button`, avisos en el marco con parte diferida, troceado del bundle), prueba del sello con jurado de tres lentes (5 diferencias corregidas; el Silk queda para la 1.1), revisión adversarial de toda la fase (50 hallazgos, 24 confirmados por dos verificadores y arreglados con test que fallaba antes) y README (0.15). Guía v0.5 con todas las desviaciones. Calidad: web 346 tests, server 144, rules 178, E2E 51 (con el proyecto `perf`), build con la API empaquetada y su prueba de humo. Pendiente para cerrar: primera ejecución de la CI en GitHub (0.2, 0.13), Mailpit con Docker (0.19), Dependabot (0.20, confirmación). |
 | 2026-10-02 | Ola 2 | Layout del sello (0.7) y componentes + galería (0.8, 0.9) en paralelo con revisión y arreglos; fusión con integración (un solo `useReducedMotion`, GlassSurface en modal y tarjeta, layout en la galería) y Playwright + axe (0.13). Calidad: web 288 tests, E2E 28, axe sin violaciones, JS inicial 166 kB gz. Quedan: CTA del hero sobre el `Button` base, visor de avisos en el marco, tokens nuevos a la guía, comparación A/B formal (`RD-VIS-02`), README y primera ejecución de la CI. |
 | 2026-10-02 | Ola 1 | Cuatro líneas en paralelo (worktrees) con revisión independiente y arreglos, fusionadas en `feat/f0-fundaciones` sin conflictos de texto: 0.4, 0.5, 0.6, 0.10, 0.11, 0.12, 0.14, 0.16, 0.17 y 0.18 hechas; 0.2 y 0.19 parciales. Calidad tras fusionar: Biome, `lint:tokens`, `lint:purity`, tipos, ~525 tests y build en verde. Desviaciones llevadas a la guía v0.4 (medidas reales del sello incluidas). Se añade 0.20 (Dependabot, pendiente de confirmación). Desbloquea 0.7 y 0.8. |
 | 2026-10-02 | 0.1 | Scaffold del monorepo hecho y verificado. Desbloquea 0.2, 0.4–0.6, 0.10–0.12, 0.14–0.16 y 0.19. |

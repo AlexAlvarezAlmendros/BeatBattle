@@ -28,8 +28,8 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 
 | # | Fase | Estado | Plan | Hito |
 |---|------|--------|------|------|
-| 0 | Fundaciones | 🔄 En curso | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes con la estética del sello |
-| 1 | Spike de sensación y audio | ⬜ Pendiente | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio; efectos < 30 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
+| 0 | Fundaciones | 🔄 Hito cumplido en local; falta la primera CI en GitHub (al subir la rama) | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes con la estética del sello; prueba del sello sin diferencias sin justificar salvo el Silk (1.1) |
+| 1 | Spike de sensación y audio | ⬜ Lista (1.1, 1.4 y 1.9 se pueden empezar) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio; efectos < 30 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
 | 2 | Cuentas y base de email | 🔒 Bloqueada (F0, GO de F1) | — (se crea al llegar) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, preferencias, consentimientos y bajas |
 | 3 | Semanas y samples | 🔒 Bloqueada (F2) | — | 3 semanas programadas; cambio de semana en la frontera con reloj simulado; email del drop (también sin cuenta) |
 | 4 | Participar | 🔒 Bloqueada (F3) | — | WAV de 60 MB por trozos con BPM, tonalidad y sonoridad medida; recibo por email |
@@ -43,9 +43,10 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 
 ## Foco actual
 
-**Arranque: tarea 0.1 (scaffold) y, en cuanto exista, la Fase 1 en paralelo con el resto de la
-Fase 0.** Antes de las tareas 1.6 y 1.7 (recursos en la nube) hay que cerrar la decisión de la
-cuenta de Cloudinary.
+**Fase 0 cerrada en local** (rama `feat/f0-fundaciones`): falta la primera ejecución de la CI en GitHub,
+que llega al abrir la PR. **Siguiente: Fase 1** (spike GO/NO-GO): 1.1 Silk y Escenario, 1.4 motor de
+audio y 1.9 port del análisis se pueden empezar ya. Antes de 1.7 y 1.8 (recursos en la nube) hay que
+cerrar la decisión de la cuenta de Cloudinary.
 
 ## Grafo de dependencias
 
@@ -114,6 +115,12 @@ cuenta de Cloudinary.
   remitente coherente con la cuenta, 1 mensaje por segundo, cupo diario en ventana móvil de 24 h con
   el 25 % reservado para servicio y aplazamiento por prioridad, y rebotes leídos por IMAP. Todo
   detrás de la interfaz `Mailer` y de la cola *outbox*. Guía §4.19 (v0.3).
+- 2026-10-02 — **Hito de la Fase 0 sin el Silk**: la prueba del sello (`RD-VIS-02`) se da por buena en la
+  Fase 0 sin diferencias sin justificar salvo el fondo, porque el Silk en WebGL es la tarea 1.1 (canvas
+  único del Escenario). Se repite la A/B con el Silk en la 1.12, junto con las propuestas del jurado
+  (guía §7). Evidencia en `docs/planning/evidence/f0/ab/`.
+- 2026-10-02 — **Estructura de `apps/web/src`** por recurso (`features/<recurso>`), con el marco y las
+  páginas sin recurso en `app/` y el sistema de diseño en `ui/` (guía v0.5 §4.4).
 - 2026-10-02 — **Motor de BPM y tonalidad**: se porta a TS el de `ReactOtpWeb` con su batería de
   validación como oráculo. Guía §4.6.
 
@@ -138,6 +145,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-02 | F0 | Fase 0 implementada en tres olas de agentes en paralelo con revisión independiente, jurado de la prueba del sello y revisión adversarial; guía v0.4 y v0.5 con las desviaciones. Pendiente: primera CI en GitHub. |
 | 2026-10-02 | — | Guía maestra v0.3: email con nodemailer + Gmail (decisión del usuario). |
 | 2026-10-02 | — | Guía maestra v0.2: sistema de emails (recibos, avisos y marketing) y fases ajustadas. |
 | 2026-10-02 | — | Guía maestra v0.1, roadmap, planes 00 y 01, `CLAUDE.md`, hooks y skill `beatbattle-plan`. Repo local vacío con remoto en GitHub sin commits. |

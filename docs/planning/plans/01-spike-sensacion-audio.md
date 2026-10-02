@@ -27,7 +27,7 @@ ya dentro del monorepo (`apps/web/src/stage`, `apps/web/src/audio`, `packages/au
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 1.1 | Canvas R3F único detrás del contenido (`eventSource` en `body`) con la capa Silk portada de `ReactOtpWeb/frontend/src/components/SilkBackground` (mismos parámetros: `#4A0D1C`, velocidad 2,5, escala 1,1, ruido 1,2, 30 fps, dpr 0,75) y los orbes CSS como respaldo y como *placeholder* mientras carga el trozo | 🔒 Bloqueado | 0.1, 0.4 | §3.5 · `RNF-PERF-04` |
+| 1.1 | Canvas R3F único detrás del contenido (`eventSource` en `body`) con la capa Silk portada de `ReactOtpWeb/frontend/src/components/SilkBackground` (mismos parámetros: `#4A0D1C`, velocidad 2,5, escala 1,1, ruido 1,2, 30 fps, dpr 0,75) y los orbes CSS como respaldo y como *placeholder* mientras carga el trozo | ⬜ Listo | 0.1, 0.4 | §3.5 · `RNF-PERF-04` |
 | 1.2 | Sonda de rendimiento de 2 s y niveles de calidad (alta, media, baja, apagada), con `prefers-reduced-motion`, sin WebGL y ahorro de datos → apagada; pausa con `visibilitychange` | 🔒 Bloqueado | 1.1 | §3.5 · `RNF-PERF-05`, `RNF-A11Y-03` |
 | 1.3 | Vista anclada (`View` de drei) con un vinilo 3D provisional pegado a un elemento del DOM + sistema de partículas (chispas y confeti) con presupuesto por nivel | 🔒 Bloqueado | 1.1 | §3.5, §4.17 |
 
@@ -35,7 +35,7 @@ ya dentro del monorepo (`apps/web/src/stage`, `apps/web/src/audio`, `packages/au
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 1.4 | Motor de audio: `AudioContext` en la primera interacción (puerta mínima), buses (música, efectos, ambiente), compresor y limitador, síntesis de `SfxDef` (modelo de Orchard) y los efectos `ui.enter`, `ui.hover`, `ui.press`, `star.hover.1–5`, `star.vote.1–5`, `vote.locked`, `xp.gain`, `level.up` | 🔒 Bloqueado | 0.1 | §3.7 · Anexo D · `RD-SND-01..03` |
+| 1.4 | Motor de audio: `AudioContext` en la primera interacción (puerta mínima), buses (música, efectos, ambiente), compresor y limitador, síntesis de `SfxDef` (modelo de Orchard) y los efectos `ui.enter`, `ui.hover`, `ui.press`, `star.hover.1–5`, `star.vote.1–5`, `vote.locked`, `xp.gain`, `level.up` | ⬜ Listo | 0.1 | §3.7 · Anexo D · `RD-SND-01..03` |
 | 1.5 | Componente de estrellas completo (§3.8.4): dormidas con anillo, despertar, hover sonoro en pentatónica, voto con *squish*, chispas, vibración y variante sin movimiento; accesible como grupo de radio. Con su bloque en la galería (`/dev/galeria`) y sus estados de §3.3 en la matriz de la galería (`ui/gallery/stateMatrix.ts`) | 🔒 Bloqueado | 1.3, 1.4 | `RD-SND-04`, `RNF-A11Y-06`, `RF-VOTE-10`, `RD-VIS-03` (las Estrellas son el único componente de §3.3 que falta en la galería de la Fase 0) |
 | 1.6 | Reactividad: analizador (FFT 1024) → bandas y RMS suavizados → uniformes del Silk; limitador de luminancia (≤ 15 %, paso bajo 3 Hz) y medición de destellos con un beat a 160 BPM | 🔒 Bloqueado | 1.1, 1.4 | §3.5 · `RNF-A11Y-04` |
 
@@ -50,7 +50,7 @@ ya dentro del monorepo (`apps/web/src/stage`, `apps/web/src/audio`, `packages/au
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 1.9 | Port a TS de `audioEngine`, `tempoEngine`, `keyEngine`, `dsp`, `musicTheory` y `engineConfig` del sello en `packages/audio`, con su worker; la batería `validate-audio-engine.mjs` + `synth-tracks.mjs` pasa como tests de Vitest con las mismas tolerancias | 🔒 Bloqueado | 0.1 | §4.6 · `RF-ENT-06` |
+| 1.9 | Port a TS de `audioEngine`, `tempoEngine`, `keyEngine`, `dsp`, `musicTheory` y `engineConfig` del sello en `packages/audio`, con su worker; la batería `validate-audio-engine.mjs` + `synth-tracks.mjs` pasa como tests de Vitest con las mismas tolerancias | ⬜ Listo | 0.1 | §4.6 · `RF-ENT-06` |
 | 1.10 | Forma de onda (1000 bins mín/máx `Int8`), sonoridad aproximada (filtro K) y «momento más enérgico» en `packages/audio`, con tests contra señales sintéticas | 🔒 Bloqueado | 1.9 | §4.6 |
 
 ### Medición y decisión
@@ -58,7 +58,7 @@ ya dentro del monorepo (`apps/web/src/stage`, `apps/web/src/audio`, `packages/au
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
 | 1.11 | Banco: `tools/shot/bench.mjs` en escritorio (GPU integrada AMD del portátil) con Silk + vista + 4.000 partículas; en Android de gama media (dispositivo real del usuario o, si no hay, emulación con limitación de CPU, dejándolo marcado como evidencia parcial). Latencia de efectos medida | 🔒 Bloqueado | 1.3, 1.5, 1.6 | §4.17 · `RNF-PERF-03`, `RD-SND-05` |
-| 1.12 | Informe GO/NO-GO en este plan con evidencia (capturas, GIF y números en `docs/planning/evidence/f1/`); desviaciones llevadas a la guía con registro de cambios; decisión anotada en el roadmap | 🔒 Bloqueado | 1.7, 1.8, 1.10, 1.11 | — |
+| 1.12 | Informe GO/NO-GO en este plan con evidencia (capturas, GIF y números en `docs/planning/evidence/f1/`); desviaciones llevadas a la guía con registro de cambios; decisión anotada en el roadmap | 🔒 Bloqueado | 1.7, 1.8, 1.10, 1.11 | — · Incluye repetir la prueba del sello con el Silk (`node tools/shot/ab.mjs`) para cerrar `RD-VIS-02` y decidir las propuestas del jurado de la Fase 0 (guía §7) |
 
 ---
 

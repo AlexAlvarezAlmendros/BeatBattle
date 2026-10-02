@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.4 · 2026-10-02 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.5 · 2026-10-02 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con la estética de Other People Records y
 > alma de videojuego.
@@ -947,6 +947,11 @@ el 2026-10-02. Lo que define su estética y BeatBattle **hereda tal cual**:
 > el 2026-10-02 con `tools/shot/otp.mjs`) están en `docs/planning/evidence/f0/otp/` (`README.md` y
 > `otp-metrics.json`) y son la referencia de la «prueba del sello» (`RD-VIS-02`).
 >
+> **Prueba del sello hecha (Fase 0).** La comparación A/B pieza a pieza (380 propiedades, hojas lado a
+> lado y veredicto de un jurado de tres lentes) está en `docs/planning/evidence/f0/ab/` y se regenera con
+> `node tools/shot/ab.mjs`. Toda diferencia tiene un motivo registrado. La que más se nota es el fondo:
+> el Silk en WebGL es la tarea 1.1, así que `RD-VIS-02` se cierra al repetir la A/B con el Silk.
+>
 > **Accesibilidad antes que copia exacta.** Donde el sello no cumple AA, BeatBattle se aparta lo justo y
 > lo documenta: blanco sobre `#ff003c` da 3,9:1 (botones y chips activos usan `--bb-red-cta`, 4,7:1); la
 > etiqueta de las teselas (`#666` sobre `#111`, 3,3:1) y el BPM de las filas (`#444`) pasan a
@@ -975,6 +980,25 @@ Motion no las detecta: en Motion se usan siempre los valores de `@beatbattle/sha
 recoge los tokens semánticos; `tokens.css` añade los derivados (rarezas, pesos, interlineados,
 interletrajes, foco, capas, medidas de la isla) con un comentario que cita su origen.
 
+**Medidas del sello fuera de la escala.** Cuando una medida del sello no cae en la escala de 4 px se
+guarda como token con su origen (no se redondea a mano en el componente): `--bb-space-cta-y` (0,95 rem;
+0,9 en tableta), `--bb-space-cta-gap` (0,7 rem), `--bb-space-nav-link-y` (0,95 rem),
+`--bb-space-nav-toggle` (7 px), `--bb-space-chip` (0,45 em 1,15 em), `--bb-space-tile-y` (0,625 rem),
+`--bb-space-row-y` (0,65 rem), `--bb-space-row-lines` (0,15 rem), `--bb-space-tag` (0,2 rem 0,6 rem),
+`--bb-space-marquee-y` (0,9 rem; 0,7 en móvil) y `--bb-chip-row-gap-touch` (1,25 rem). Los
+desplazamientos de movimiento son `--bb-shift-*` (hover 1 px, sacudida 4 y 2 px, enlace 6 px, elevación
+3 px, persiana 0,35 em) y siempre se multiplican por `--bb-motion` (0 con «reducir movimiento»).
+`--nav-obscured` (128 px; 124 en ≤ 992) es lo que tapa la isla con el logo colgando, y se usa como
+`scroll-margin-top` de controles y anclas.
+
+**Derivados de color, sombra y desenfoque** (todos en `tokens.css` con su origen): `--bb-line-lit`,
+`--bb-glare`, `--bb-shine` (brillos de tarjeta), `--bb-glass-band` (banda del marquee), `--bb-red-line`
+y `--bb-red-rule` (filetes rojos), sombras `--bb-shadow-cta` (`0 4px 20px` rojo al 45 %, la del sello),
+`-cta-hover`, `-glass`, `-chip`, `-playhead`, `-dot` y `-hero-*`; desenfoques `--bb-glass-blur-card`
+(3 px), `--bb-glass-blur-band` (10 px), `--bb-scrim-blur` (4 px) y `--bb-blur-orb` (100 px); escalas
+`--bb-radius-xs` (2 px), `--bb-space-20`, `--bb-font-size-2xs` (0,7 rem), `--bb-font-size-tile-key`
+(13 px) y `--bb-font-size-page-title` (2 rem).
+
 **Color**
 
 | Token | Valor | Uso |
@@ -986,8 +1010,8 @@ interletrajes, foco, capas, medidas de la isla) con un comentario que cita su or
 | `--bb-ink-700` | `#1e1e1e` | Hover de tarjeta |
 | `--bb-ink-600` | `#2a2a2a` | Bordes fuertes, separadores |
 | `--bb-glass` | `#2b2b2bce` | Isla de navegación sin cristal (con `blur(8px)`); con cristal, `--bb-glass-card` + `blur(3px)` + desplazamiento SVG |
-| `--bb-line` | `rgba(255,255,255,.08)` | Bordes de tarjeta |
-| `--bb-line-strong` | `rgba(255,255,255,.18)` | Bordes de tarjetas de cristal |
+| `--bb-line` | `rgba(255,255,255,.08)` | Bordes de tarjeta maciza y de las tarjetas de cristal del pie (como el `.glass` del pie del sello) |
+| `--bb-line-strong` | `rgba(255,255,255,.18)` | Bordes de las tarjetas de cristal de contenido (lanzamientos, beats) |
 | `--bb-line-button` | `rgba(255,255,255,.3)` | Borde del botón de contorno (medido en el sello) |
 | `--bb-glass-card` | `rgba(0,0,0,.58)` | Fondo de tarjetas e isla en modo cristal (con desenfoque) |
 | `--bb-fill-hover` | `rgba(255,255,255,.06)` | Hover del botón de contorno |
@@ -1043,7 +1067,20 @@ Escala (rem, base 16 px): `xs .75` · `sm .875` · `md 1` · `lg 1.25` fijos; `x
 `-webkit-text-stroke: 2px var(--bb-red)` (1,5 px en tableta y 1 px en móvil) con **relleno negro**
 (`--bb-black`, como el sello) y halo `0 0 30px var(--bb-red-glow)`; el titular lleva además
 `0 4px 24px` negro al 60 %. Interletraje del titular −0,03 em (0 en móvil), del subtítulo 0,15 em y de
-los botones 0,1 em (0,08 em en móvil).
+los botones 0,1 em (0,08 em en móvil). Con Montserrat variable, `-webkit-text-stroke` dibuja los
+contornos solapados del interior de las letras: el trazo se pinta con `paint-order: stroke fill` y el
+doble de ancho, de modo que por fuera se ven los 2/1,5/1 px y el relleno negro tapa las líneas
+internas.
+
+**Jerarquía de títulos.** `--bb-font-display` (800–900, mayúsculas, −0,02 em) es **solo** para los
+titulares del hero. El título de una página interior y los `h1`–`h6` sin clase van a 700, sin
+mayúsculas ni interletraje; el de página, a 32 px (`--bb-font-size-page-title`) y centrado, como
+`/beats` del sello. El contenido usa el relleno del `.container` del sello (32 px, sin ancho máximo):
+el ancho máximo de 1320 px es solo de la isla.
+
+**Signos musicales.** El subconjunto latino de JetBrains Mono no trae `♯` (U+266F): la notación de
+tonalidades se decide en la Fase 4 (`packages/audio`), con `#`/`b` en mono o el glifo en la fuente de
+texto.
 
 **Espaciado** en múltiplos de 4 px expresados en rem (`--bb-space-1` = 0,25 rem … `--bb-space-16` =
 4 rem), para que escale con el tamaño de texto. **Radios**: `sm 8` (teselas) · `md 12` (campos,
@@ -1061,20 +1098,42 @@ Cada componente tiene definidos sus estados **reposo, hover, foco, pulsado, carg
 | Componente | Anatomía y comportamiento |
 |---|---|
 | **Botón CTA** | Píldora en `--bb-red-cta` con texto blanco, mayúsculas, peso 700, `letter-spacing .1em`, halo `--bb-red-glow`. Hover: sube 1 px y el halo crece. Pulsado: escala 0,97 (*squish*) + `ui.press`. Cargando: el texto se sustituye por una onda de 5 barras animadas. Éxito: destello blanco y check. |
-| **Botón contorno** | Píldora transparente con borde `--bb-line-button`; hover con `--bb-fill-hover`. |
-| **Botón icono** | Círculo de 36–44 px (como el play de la lista del sello). |
+| **Botón contorno** | Píldora transparente con borde `--bb-line-button`; hover con `--bb-fill-hover`. Opción `glass`: el contorno sobre GlassSurface con velo `--bb-glass-card` (el secundario del hero del sello); en hover el borde pasa a `--bb-text` y al pulsar sale `--bb-fill-active`. |
+| **Tamaños de botón** | `sm`, `md`, `lg` y `hero` (el CTA del hero del sello: 15,2 px, relleno 15,2×32, 14,4×24 en tableta, 13,6 px y 0,08 em en móvil, interlineado normal, puede partir línea). El CTA lleva un borde de 1 px del color del fondo. **Estado de error**: icono de alerta, borde `--bb-danger`, fondo `--bb-ink-800` (blanco sobre `--bb-danger` no cumple AA) y una sacudida corta (`--bb-shift-shake` × `--bb-motion`); éxito y error se anuncian en una región viva. |
+| **Botón icono** | Círculo de 36–40 px (como el play de la lista del sello); con puntero grueso, el objetivo de 44 px (`RNF-A11Y-09`) lo da un pseudoelemento invisible, sin agrandar el círculo. |
 | **Chip** | Píldora con borde fino; activo en `--bb-red-cta` macizo con texto blanco y sombra roja (como los chips de género del sello). |
 | **Tarjeta** | Cristal como las del sello: `--bb-glass-card` con desenfoque, borde `--bb-line-strong`, radio `lg` (16) y sombra interior; variante maciza `--bb-ink-800` sin desenfoque para listas largas y calidad baja. Inclinación 3D en hover (máx. 6°) con brillo especular que sigue al cursor. |
-| **Tesela de dato** | Fondo `--bb-ink-850`, radio `sm`, icono rojo, etiqueta en mayúsculas de 0,7 rem en `--bb-text-3` (el sello usa `#666`, que no cumple AA), valor en negrita. |
+| **Tesela de dato** | Fondo `--bb-ink-850`, radio `sm`, icono rojo, etiqueta en mayúsculas de 0,7 rem en `--bb-text-3` (el sello usa `#666`, que no cumple AA), valor en negrita. Por debajo de 768 px, como la ficha del sello: lista de clave y valor sin fondo, borde ni icono, con filete `--bb-ink-800`, etiqueta de 13 px y valor de 14 px; el bloque (`DataTileSection`) se pliega bajo su rótulo, que es un botón con `aria-expanded` y chevron (sin girar con «reducir movimiento»). |
 | **Rótulo de sección** | Barra roja de 3×12 px + mayúsculas pequeñas espaciadas. |
-| **Fila de entrada** | La de la lista de beats del sello; la mini onda sustituye a la barra de progreso. |
-| **Forma de onda** | Barras de 2 px con 1 px de hueco, gris `#3a3a3a` → rojo en lo reproducido, cabeza de lectura blanca con halo, previsualización del punto al pasar el ratón. |
+| **Fila de entrada** | La de la lista de beats del sello; la mini onda (sin animación de entrada) sustituye a la barra de progreso y a los tiempos. BPM y tonalidad en mono; por debajo de 768 px se ocultan chips y datos, como en el sello; la portada mide 48 px en todos los tamaños. |
+| **Forma de onda** | Barras de 2 px con 1 px de hueco, `--bb-wave-idle` → rojo en lo reproducido, cabeza de lectura blanca con halo. La previsualización del punto al pasar el ratón llega con el salto por clic y teclado (Fase 5). La entrada es **una** animación por onda (escala vertical del SVG y barrido de recorte de n × 2 ms), no una por barra. |
 | **Estrellas** | Ver §3.8.4. |
-| **Cuenta atrás** | Mono, dígitos con animación de persiana al cambiar, separadores que parpadean a 1 Hz; < 24 h en rojo; última hora con latido. |
-| **Modal** | Cristal (GlassSurface) sobre fondo oscurecido al 70 % con desenfoque, entra con escala 0,96 → 1 y `ui.open`. |
-| **Aviso (toast)** | Esquina inferior derecha (arriba en móvil), entra desde la derecha con muelle; los de logro tienen su propia pieza (§3.8.8). |
+| **Cuenta atrás** | Mono, siempre `DD:HH:MM:SS` (no salta de formato al bajar de un día), dígitos con persiana al cambiar, separadores que parpadean a 1 Hz; ≤ 24 h en rojo; ≤ 1 h con latido; agotada en `--bb-text-4`. |
+| **Modal** | Cristal (GlassSurface, con la alternativa en CSS) sobre `--bb-scrim` con desenfoque, entra con escala 0,96 → 1 y `ui.open`. Al abrir, el foco va al propio diálogo (se lee su título) salvo que se indique otro. |
+| **Aviso (toast)** | Esquina inferior derecha (arriba en móvil), entra desde la derecha con muelle; acento por tono (información en rojo, éxito en `--bb-success`, error en `--bb-danger`, siempre con icono con nombre); cierre a los 4 s con pausa por ratón o foco (también los errores; `duration: null` lo mantiene); como mucho 4 a la vez. La zona y sus regiones vivas están en el marco desde la primera pintura y la parte animada llega en diferido: si no llega, los avisos salen igual, sin animar. Los de logro tienen su propia pieza (§3.8.8). |
 | **Barra de XP** | Pista `--bb-ink-600`, relleno rojo con brillo que la recorre al subir; al llenarse, destello y vuelta a cero con el siguiente nivel. |
-| **Esqueleto de carga** | Barrido de brillo diagonal como el del sello; nunca *spinners* genéricos salvo en el sellado (vinilo girando). |
+| **Esqueleto de carga** | Barrido de brillo diagonal como el del sello, animado con `transform` en un pseudoelemento (nunca `background-position`); nunca *spinners* genéricos salvo en el sellado (vinilo girando). |
+| **Título de página interior** | Montserrat 700 a `--bb-font-size-page-title`, centrado, sin mayúsculas, con el relleno del `.container` del sello. |
+| **Pie** | Bloque de marca y dos tarjetas de cristal (Other People y Síguenos) con borde `--bb-line`, títulos y entradilla centrados y la misma altura; la newsletter y la alerta llegan en las Fases 3 y 9. Enlaces externos en pestaña nueva con aviso para lectores. |
+| **Teletipo (marquee)** | `role="marquee"` con nombre; la primera copia es accesible y las demás `aria-hidden`. Lleva un **botón de pausa** (WCAG 2.2.2) con `aria-pressed`. Con «reducir movimiento», lista estática que rota cada 5 s. |
+
+**Matriz de estados** (`ui/gallery/stateMatrix.ts`; S = se enseña, NA = no aplica, AP = aplazado):
+
+| Componente | Reposo | Hover | Foco | Pulsado | Cargando | Deshab. | Éxito | Error |
+|---|---|---|---|---|---|---|---|---|
+| Botón | S | S | S | S | S | S | S | S |
+| Chip | S | S | S | S | NA | S | NA | NA |
+| Tarjeta | S | S | S | NA | S | S | NA | NA |
+| Tesela | S | S | NA | NA | S | NA | NA | NA |
+| Rótulo | S | NA | NA | NA | NA | NA | NA | NA |
+| Forma de onda | S | AP F5 | AP F5 | AP F5 | NA | AP F5 | NA | NA |
+| Fila de entrada | S | S | S | S | S | S | NA («Sonando») | S (`RF-PLAY-09`) |
+| Modal | S | NA | S | NA | S | NA | NA | S |
+| Aviso | S | S | S | S | NA | NA | S | S |
+| Barra de XP | S | NA | NA | NA | NA | NA | S (subida de nivel) | NA |
+| Esqueleto | NA | NA | NA | NA | S | NA | NA | NA |
+| Cuenta atrás | S | NA | NA | NA | NA | NA | NA | NA |
+| Estrellas | Tarea 1.5 | | | | | | | |
 
 ### 3.4 Capa de juego visual
 
@@ -1176,6 +1235,15 @@ como mucho un 15 % y con filtrado paso bajo a 3 Hz.
 (recompensas) · muelle de interacción `{ stiffness: 400, damping: 28 }` · muelle de recompensa
 `{ stiffness: 220, damping: 12 }`.
 
+**Periodos de bucle** (`--bb-loop-*`, espejados en `@beatbattle/shared/tokens`; **no** se acortan con
+«reducir movimiento», sino que se paran; ninguno pasa de 3 Hz): parpadeo 1.000 ms, latido 1.000 ms,
+brillo 1.500 ms, cargador 1.000 ms, respiración 2.400 ms, marquee 35 s, paso del teletipo 5 s y los
+periodos de deriva y pulso de los orbes. Escalonado de la onda `--bb-stagger-wave` (2 ms).
+
+**Entrada del hero**: cada pieza en `--bb-dur-slow` con escalonado `--bb-dur-fast` y retraso
+`--bb-dur-base`, subiendo 30 px; **el titular no se funde ni espera** (es el LCP de la home,
+`RNF-PERF-02`).
+
 **Transición de página**: una línea roja horizontal barre la pantalla como un cabezal de cinta
 (240 ms) mientras el contenido sale hacia arriba con desenfoque y entra el nuevo. Con «reducir
 movimiento», fundido de 150 ms.
@@ -1276,6 +1344,9 @@ De arriba abajo:
    que se marcan como completadas para el usuario con sesión. Para visitantes, debajo, el formulario
    «Avísame del próximo drop» (§2.12.3).
 6. **Temporada**: top 5 de la temporada en curso.
+
+Bajo el hero va la sección **«Avísame del próximo drop»** (`#alerta`, `features/drop`), a la que lleva
+el CTA del hero cuando el calendario está vacío; su formulario llega en la Fase 3 (§2.12.3).
 7. Pie del sello.
 
 #### 3.8.4 Estrellas
@@ -1499,25 +1570,30 @@ beatbattle/
 ├─ apps/
 │  ├─ web/                    Vite + React + R3F
 │  │  └─ src/
-│  │     ├─ app/              rutas, layouts, proveedores, puerta de entrada
-│  │     ├─ features/         week · drop · entries · upload · player · vote · jury · results ·
-│  │     │                    archive · profile · game · settings · auth · admin
+│  │     ├─ app/              router, proveedores, marco (layout: isla, pie, hero, orbes), puerta de
+│  │     │                    entrada y páginas sin recurso (404, error de ruta, provisional, legales)
+│  │     ├─ features/         una carpeta por recurso con sus pantallas: week (home, «Cómo funciona»)
+│  │     │                    · drop · entries · upload · player · vote · jury · results · archive ·
+│  │     │                    profile · game · settings · auth · admin
 │  │     ├─ stage/            canvas único, capas, vistas, partículas, calidad, shaders/
 │  │     ├─ audio/            grafo y buses, síntesis de efectos, kit de la semana, música, analizador
-│  │     ├─ ui/               componentes base (§3.3) y galería /dev/galeria
+│  │     ├─ ui/               componentes base (§3.3), GlassSurface y cristal, hooks del sistema de
+│  │     │                    diseño (ui/hooks) y galería /dev/galeria (ui/gallery)
 │  │     ├─ eggs/             sorpresas (Anexo F), carga diferida
 │  │     ├─ styles/           tokens.css, fuentes, globales
 │  │     ├─ net/              cliente de API tipado, claves de Query
 │  │     └─ i18n/             es.json + t() con Intl.PluralRules
 │  └─ server/                 Fastify + Better Auth + Drizzle
 │     └─ src/
-│        ├─ modules/<recurso>/{routes,service,repo,schema}.ts
+│        ├─ modules/<recurso>/{routes,service,repo,schema}.ts   createXService(deps), repo (db, …),
+│        │                    xRoutes(app, service); el instante entra como argumento
 │        ├─ auth/             configuración de Better Auth, emails de cuenta
 │        ├─ db/               esquema Drizzle, migraciones, cliente
 │        ├─ storage/          AudioStorage (Cloudinary), firma, verificación, medición (ffmpeg)
 │        ├─ jobs/             tick: sellado, emails, limpieza, alertas
 │        ├─ share/            inyección de metadatos y OG
-│        └─ lib/              reloj, errores, rate limit, auditoría
+│        └─ lib/              reloj, errores (AppError con estado por código), createRateLimiter,
+│                             ids, auditoría; lo transversal sin rutas con la misma fábrica
 ├─ api/                       funciones de Vercel: index.ts (Fastify), og.tsx, share.ts
 ├─ packages/
 │  ├─ rules/                  núcleo puro y determinista (§4.5)
@@ -1581,7 +1657,12 @@ tests de propiedades.
   aparte tras la primera pintura (`requestIdleCallback`), con los orbes CSS mientras tanto (como el
   sello).
 - Trozos diferidos: Escenario, Rapier (solo en el perfil), Tone.js (solo al encender la música),
-  sorpresas, panel de admin, editor de chops.
+  sorpresas, panel de admin, editor de chops y la parte animada de los avisos (con las funciones
+  `domMax` de Motion). «Tras la primera pintura» significa tras la FCP (Paint Timing) y después en
+  `requestIdleCallback` (`whenIdleAfterFirstPaint`).
+- Proveedores en dos grupos (`framework`: React, Router y Motion; `data`: Query, Zustand y Zod), solo
+  con los módulos de la carga inicial, y precarga (`modulepreload`) del trozo de la home y del
+  `Button` (`routePreload`). Las alternativas medidas están en `apps/web/vite.config.ts`.
 
 #### 4.7.2 Estado y datos
 
@@ -2092,7 +2173,10 @@ Referencias: OWASP ASVS nivel 2 y las chuletas de autenticación, sesiones y sub
 ### 4.15 Despliegue e infraestructura
 
 - **Vercel**: `apps/web/dist` estático + funciones `api/index.ts` (Fastify), `api/share.ts` y
-  `api/og.tsx`, región `fra1`. *Preview* por PR con su base de datos (rama de Turso) y su prefijo de
+  `api/og.tsx`, región `fra1`. `api/index.ts` importa `apps/server/dist/vercel.mjs`, un ESM con los
+  paquetes `@beatbattle/*` dentro que `pnpm build` genera con Vite SSR (`apps/server/build.config.mjs`)
+  y comprueba cargándolo con `node` puro y pidiendo `/api/health` (`scripts/smoke-bundle.mjs`). Se
+  valida en la primera preview (tarea 1.8). *Preview* por PR con su base de datos (rama de Turso) y su prefijo de
   Cloudinary.
 - **Turso** (UE), copias del proveedor + exportación semanal propia.
 - **Dominio**: `battle.otherpeople.es` (CNAME a Vercel). Email desde una cuenta de Gmail propia de
@@ -2138,7 +2222,7 @@ negocio en el panel de admin (participantes, votos, escuchas por semana) y Verce
 | LCP (home, 4G, móvil medio) | < 2,5 s |
 | INP | < 200 ms |
 | CLS | < 0,05 |
-| JS inicial (sin Escenario) | < 200 kB gz |
+| JS inicial (sin Escenario) | < 200 kB gz, contando la entrada con sus importaciones estáticas y también la primera pintura de la home (175 y 185 kB gz al cerrar la Fase 0) |
 | Escenario (trozo diferido) | < 250 kB gz |
 | FPS | 60 en escritorio con GPU integrada; ≥ 45 en un Android de gama media con calidad automática |
 | Inicio de reproducción tras el clic | < 600 ms en 4G |
@@ -2149,7 +2233,7 @@ negocio en el panel de admin (participantes, votos, escuchas por semana) y Verce
 | Id | Requisito | Aceptación |
 |---|---|---|
 | `RNF-PERF-01` | Presupuestos de la tabla en la home y en la ficha de entrada | Lighthouse CI en móvil simulado |
-| `RNF-PERF-02` | LCP < 2,5 s | Lighthouse CI |
+| `RNF-PERF-02` | LCP < 2,5 s | Lighthouse CI (Fase 10); hasta entonces, proyecto `perf` de Playwright sobre la build (4G lento, CPU ×4, 412×823): en local exige LCP < 2,5 s y en la CI que el LCP sea el titular y salga con la primera pintura |
 | `RNF-PERF-03` | FPS del Escenario según la tabla | `tools/shot/bench.mjs` en escritorio y en un Android real (Fase 1) |
 | `RNF-PERF-04` | El Escenario no se descarga antes de la primera pintura | Traza de red: el trozo del Escenario empieza después de FCP |
 | `RNF-PERF-05` | Render pausado con la pestaña oculta | Test: `visibilitychange` detiene el bucle |
@@ -2410,6 +2494,7 @@ Valores por defecto que la guía ya asume; se confirman o se cambian (y se regis
 | Nombre de marca | «Beat Battle by Other People» | Fase 0 (afecta al logo y a los textos) |
 | Modelo de semana | Envíos y votos a la vez (§2.1) | Revisable tras la beta |
 | Fecha de lanzamiento y primera temporada | Primera semana completa tras cerrar la Fase 10 | Fase 10 |
+| Ajustes visuales propuestos por el jurado de la prueba del sello | Se revisan al repetir la A/B con el Silk (1.1), porque el contraste sobre el granate cambia: CTA del hero en cristal rojo (`rgba(255,0,60,.62)` sobre GlassSurface, ~8,4:1 medido en el sello) en lugar de `--bb-red-cta` macizo; títulos del pie en `--bb-red` sobre cristal (5,0–5,3:1); fundido del marquee antes del botón de pausa; interletraje de «BATTLE» −0,015 em; desenfoque de las tarjetas de cristal (0 px en el sello frente a 3 px); borde de 1 px del CTA | Tarea 1.12 |
 
 ---
 
@@ -2450,7 +2535,7 @@ Valores por defecto que la guía ya asume; se confirman o se cambian (y se regis
 | Constante | Valor |
 |---|---|
 | Cierre de envíos | Domingo 20:00 (Madrid) |
-| Cierre de votos | Domingo 23:59:59 (Madrid); se guarda como el instante exclusivo del lunes 00:00:00.000, así la ventana de solo votación dura 4 h justas |
+| Cierre de votos | Domingo 23:59:59 (Madrid); se guarda como el instante exclusivo del lunes 00:00:00.000 (`VOTING_CLOSE_EXCLUSIVE_AT`), así la ventana de solo votación dura 4 h justas; `VOTING_CLOSE_DISPLAY_AT` es solo para mostrar |
 | Umbral de escucha | `min(45 s, 50 % de la duración)` |
 | Peso del previo bayesiano `C` | 5 |
 | Votos mínimos para el podio | 3 |
@@ -2595,7 +2680,7 @@ efectos al 100 %; variación = desafinación aleatoria por disparo.
 | Tarjeta / portada | Inclinación 3D hasta 6° y brillo que sigue al cursor | Borde que se ilumina |
 | Fila de entrada | Hover: fondo `--bb-ink-700` y mini onda que «respira» | Fondo |
 | Play | El icono se transforma en pausa (morfología de trazado) | Cambio de icono |
-| Forma de onda | Barras que crecen desde el centro al cargar (escalonado 2 ms) | Aparece entera |
+| Forma de onda | Crece desde el centro al cargar con un barrido de n × 2 ms (una sola animación por onda) | Aparece entera |
 | Cuenta atrás | Persiana por dígito; separadores a 1 Hz; latido en la última hora | Cambio de texto |
 | Estrellas | §3.8.4 | Relleno sin salto ni chispas |
 | XP flotante | Sube con muelle y vuela al HUD | Texto «+5 XP» en el HUD con fundido |
@@ -2604,7 +2689,8 @@ efectos al 100 %; variación = desafinación aleatoria por disparo.
 | Subir de nivel | Destello desde el HUD, número que cae con rebote | Fundido del número |
 | Modal | Escala 0,96 → 1 + fundido de fondo con desenfoque | Fundido |
 | Transición de página | Línea roja de cabezal + salida hacia arriba con desenfoque | Fundido 150 ms |
-| Teletipo | Desplazamiento continuo; pausa con hover | Lista estática que rota cada 5 s |
+| Teletipo | Desplazamiento continuo; pausa con hover, con foco y con su botón de pausa | Lista estática que rota cada 5 s |
+| Orbes del fondo | Deriva y pulso lentos | Quietos con la opacidad media de su pulso |
 | Vinilo del sample | Gira a 33⅓ rpm reproduciendo, se frena con inercia al pausar | Estático |
 | Chips de filtro | Activar: relleno que crece desde el punto del clic | Cambio de color |
 | Zona de subida | §3.8.5 | Borde punteado que se ilumina |
@@ -2717,6 +2803,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-02 | 0.5 | Cierre de la Fase 0 (olas 2 y 3, jurado de la prueba del sello y revisión adversarial). §3.1: evidencia A/B y `RD-VIS-02` pendiente del Silk. §3.2: medidas del sello fuera de escala como tokens, `--bb-shift-*` × `--bb-motion`, `--nav-obscured`, derivados de color, sombra y desenfoque, `paint-order` del contorno, jerarquía de títulos (display solo en el hero; interiores a 700 y 32 px), bordes `--bb-line` en el pie, nota sobre `♯`. §3.3: tamaño `hero` y opción `glass` del botón, estado de error, botón icono con objetivo por pseudoelemento, teselas en lista plegable en móvil, fila de entrada, onda, cuenta atrás, modal, avisos en el marco con parte diferida, esqueleto con `transform`, título interior, pie, teletipo con botón de pausa y **matriz de estados**. §3.6: periodos de bucle y entrada del hero sin retrasar el LCP. §3.8.3: sección `#alerta`. §4.4: estructura real (`features/`, `ui/hooks`, `ui/gallery`, patrón de módulo y `createRateLimiter`). §4.7.1: diferidos, grupos de proveedores y precarga. §4.15: API empaquetada con Vite SSR y prueba de humo. §4.17: definición del JS inicial y comprobación previa del LCP. Anexos B y E. §7: propuestas del jurado. |
 | 2026-10-02 | 0.4 | Desviaciones razonadas de la primera ola de la Fase 0 llevadas a la guía (spec first). **Diseño** (§3.1–3.3) ajustado a las medidas reales del sello (`docs/planning/evidence/f0/otp/`): titular `clamp(2.8rem, 8vw, 6rem)` con relleno negro y halo de 30 px, interletrajes 0,15 / 0,1 em, botón de contorno al 30 %, tarjetas de cristal con radio 16, chip activo macizo, rótulo de 3×12; tokens nuevos (`--bb-red-cta` por accesibilidad, `--bb-line-button`, `--bb-glass-card`, `--bb-fill-*`, `--bb-scrim`, `--bb-ink-850`, `--bb-wave-idle`, `--bb-gold-glow`); excepciones AA documentadas; alcance del lint de tokens; espejo en `@beatbattle/shared/tokens`; fuentes con latino extendido. **Técnica**: módulos `levels`, `prng`, `loudness` y `listen` en §4.5, `rankTitle` devuelve ids; i18n con `_zero`; `health` con 503; 415 solo con cuerpo, `Origin` en todas las escrituras y excepciones por ruta (baja en un clic); orígenes y previews (§4.15); aceptación de `RNF-SEC-01`. **Anexos**: cierre de votos como instante exclusivo del lunes, 100 MiB, «primera entrada de la semana», constantes extra, ritmo del nivel 20 y casos de Spearman. §2.18: «emails» en lugar de «notificaciones». |
 | 2026-10-02 | 0.3 | **Email con nodemailer + Gmail** (decisión del usuario, como el sello) en lugar de un proveedor de envío: cuenta propia de BeatBattle, TLS verificado, remitente coherente, *pool* a 1 mensaje/s, cupo diario en ventana móvil con 25 % reservado para servicio y aplazamiento por prioridad (`RF-NOTIF-17`), rebotes leídos por IMAP (`bounceScan`, `RF-NOTIF-10`), sin webhooks ni informes de quejas, campañas fuera del lunes y con estimación de días; requisitos `RF-NOTIF-17/18`. |
 | 2026-10-02 | 0.2 | **Emails**: §2.12 reescrita (tres familias con base legal, catálogo de 22 emails, recibo de entrada con informe técnico, Lunes de batalla combinado, alerta de drop sin cuenta con doble confirmación, preferencias, horas de silencio, tope semanal, campañas con editor y segmentos); diseño de emails (§3.8.12); sistema de email (§4.19: proveedor detrás de `Mailer`, subdominio autenticado, cola *outbox*, webhooks, bajas RFC 8058, imágenes dinámicas); alta opcional en la newsletter del sello (`RF-OTP-06`); requisitos `RF-NOTIF-01..16`; fases 2–9 ajustadas. Se descarta el Gmail SMTP del sello. |
