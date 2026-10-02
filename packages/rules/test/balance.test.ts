@@ -9,13 +9,38 @@ describe('balance: semana y voto (Anexo B)', () => {
     expect(balance.WEEK_TIME_ZONE).toBe('Europe/Madrid')
     expect(balance.WEEK_OPENS_AT).toEqual({ isoWeekday: 1, hour: 0, minute: 0, second: 0 })
     expect(balance.SUBMISSIONS_CLOSE_AT).toEqual({ isoWeekday: 7, hour: 20, minute: 0, second: 0 })
-    expect(balance.VOTING_CLOSE_AT).toEqual({ isoWeekday: 7, hour: 23, minute: 59, second: 59 })
+    expect(balance.VOTING_CLOSE_EXCLUSIVE_AT).toEqual({
+      isoWeekday: 1,
+      hour: 0,
+      minute: 0,
+      second: 0,
+      weekOffset: 1,
+    })
+    expect(balance.VOTING_CLOSE_DISPLAY_AT).toEqual({ isoWeekday: 7, hour: 23, minute: 59, second: 59 })
   })
 
-  // Sin decidir: la guía promete «al menos 4 h» de solo votación (§2.1), pero de 20:00 a 23:59:59 van
-  // 3 h 59 min 59 s. Que el cierre sea el lunes 00:00 exclusivo (4 h justas) o el domingo 23:59:59
-  // incluido lo fijan la guía y `calendar`/`phase` en la Fase 3; aquí solo hay datos de calendario.
-  it.todo('RF-DROP-01: frontera del cierre de votos (domingo 23:59:59 incluido o lunes 00:00 exclusivo)')
+  // Anexo B: el cierre de votos se guarda como el instante exclusivo del lunes 00:00:00.000, así la
+  // ventana de solo votación dura 4 h justas (§2.1, «al menos 4 h»). En una semana sin cambio de
+  // hora el tiempo de pared y el real coinciden, así que la cuenta con horas de pared basta.
+  it('RF-DROP-01: el cierre de votos es el lunes 00:00 exclusivo, 4 h justas tras el cierre de envíos', () => {
+    const HOUR_MS = 3_600_000
+    const DAY_MS = 24 * HOUR_MS
+    const offsetMs = (at: balance.WeeklyWallTime & { readonly weekOffset?: number }) =>
+      ((at.weekOffset ?? 0) * 7 + at.isoWeekday - 1) * DAY_MS +
+      at.hour * HOUR_MS +
+      at.minute * 60_000 +
+      at.second * 1_000
+
+    expect(offsetMs(balance.VOTING_CLOSE_EXCLUSIVE_AT) - offsetMs(balance.SUBMISSIONS_CLOSE_AT)).toBe(
+      14_400_000,
+    )
+    // Es la apertura de la semana siguiente: no queda ningún instante entre una semana y otra.
+    expect(offsetMs(balance.VOTING_CLOSE_EXCLUSIVE_AT)).toBe(offsetMs(balance.WEEK_OPENS_AT) + 7 * DAY_MS)
+    // La hora que se muestra es el último segundo antes de la frontera.
+    expect(offsetMs(balance.VOTING_CLOSE_EXCLUSIVE_AT) - offsetMs(balance.VOTING_CLOSE_DISPLAY_AT)).toBe(
+      1_000,
+    )
+  })
 
   it('constantes de voto', () => {
     expect(balance.STARS_MIN).toBe(1)
@@ -109,7 +134,8 @@ describe('balance: inmutabilidad', () => {
     const frozen = [
       balance.WEEK_OPENS_AT,
       balance.SUBMISSIONS_CLOSE_AT,
-      balance.VOTING_CLOSE_AT,
+      balance.VOTING_CLOSE_EXCLUSIVE_AT,
+      balance.VOTING_CLOSE_DISPLAY_AT,
       balance.XP_PODIUM_BY_POSITION,
       balance.ACHIEVEMENT_RARITIES,
       balance.XP_ACHIEVEMENT_BY_RARITY,
@@ -125,10 +151,10 @@ describe('balance: inmutabilidad', () => {
       ;(balance.SEASON_POINTS_BY_POSITION as unknown as number[])[0] = 99
     }).toThrow(TypeError)
     expect(() => {
-      ;(balance.VOTING_CLOSE_AT as { hour: number }).hour = 22
+      ;(balance.VOTING_CLOSE_EXCLUSIVE_AT as { hour: number }).hour = 22
     }).toThrow(TypeError)
     expect(balance.SEASON_POINTS_BY_POSITION[0]).toBe(25)
-    expect(balance.VOTING_CLOSE_AT.hour).toBe(23)
+    expect(balance.VOTING_CLOSE_EXCLUSIVE_AT.hour).toBe(0)
   })
 
   it('solo exporta números, cadenas y datos congelados (sin funciones ni estado)', () => {

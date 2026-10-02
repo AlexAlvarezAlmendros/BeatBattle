@@ -46,10 +46,32 @@ export const SUBMISSIONS_CLOSE_AT = Object.freeze({
 } as const satisfies WeeklyWallTime)
 
 /**
- * Cierre de votos: domingo 23:59:59 (Anexo B). Cómo se trata el último segundo (frontera
- * inclusiva o exclusiva) lo fija `calendar`/`phase` en la Fase 3 (`RF-DROP-01`).
+ * Frontera de la semana: hora de pared en `WEEK_TIME_ZONE` más la semana en la que cae, contada
+ * desde la del drop (`0` = la misma semana, `1` = la siguiente).
  */
-export const VOTING_CLOSE_AT = Object.freeze({
+export interface WeeklyBoundary extends WeeklyWallTime {
+  readonly weekOffset: 0 | 1
+}
+
+/**
+ * Cierre de votos como frontera exclusiva (Anexo B): el instante del lunes 00:00:00.000 de la
+ * semana siguiente, igual que `WEEK_OPENS_AT` de esa semana. Un voto vale si llega antes de este
+ * instante; así la ventana de solo votación (desde `SUBMISSIONS_CLOSE_AT`) dura 4 h justas (§2.1).
+ * Es el valor que usan `calendar`/`phase` (Fase 3, `RF-DROP-01`).
+ */
+export const VOTING_CLOSE_EXCLUSIVE_AT = Object.freeze({
+  isoWeekday: 1,
+  hour: 0,
+  minute: 0,
+  second: 0,
+  weekOffset: 1,
+} as const satisfies WeeklyBoundary)
+
+/**
+ * Cierre de votos tal y como se muestra a la gente: «domingo 23:59:59» (Anexo B). Solo es texto
+ * para la interfaz y los emails: ninguna regla compara instantes con esta hora.
+ */
+export const VOTING_CLOSE_DISPLAY_AT = Object.freeze({
   isoWeekday: 7,
   hour: 23,
   minute: 59,
