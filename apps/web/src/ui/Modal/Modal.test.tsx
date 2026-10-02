@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -29,6 +29,21 @@ function Harness({ dismissible = true }: { dismissible?: boolean }) {
           </>
         }
       />
+    </>
+  )
+}
+
+/** Un modal que abre otro encima (el de arriba es hijo del de abajo en el árbol de React). */
+function StackHarness() {
+  const [base, setBase] = useState(false)
+  const [top, setTop] = useState(false)
+  return (
+    <>
+      <Button onClick={() => setBase(true)}>Abrir</Button>
+      <Modal open={base} onClose={() => setBase(false)} title="Base">
+        <Button onClick={() => setTop(true)}>Abrir encima</Button>
+        <Modal open={top} onClose={() => setTop(false)} title="Encima" footer={<Button>Vale</Button>} />
+      </Modal>
     </>
   )
 }
@@ -85,8 +100,11 @@ describe('Modal', () => {
     const { user } = await openModal()
     expect(document.body.style.overflow).toBe('hidden')
     await user.click(screen.getByRole('button', { name: t('ui.modal.close') }))
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    // El bloqueo se quita en el mismo commit en el que empieza a cerrarse (efecto de diseño), no
+    // en un efecto pasivo posterior a la retirada del DOM.
     expect(document.body.style.overflow).toBe('')
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    await waitFor(() => expect(document.body.style.overflow).toBe(''))
 
     await user.click(screen.getByRole('button', { name: 'Abrir' }))
     const dialog = await screen.findByRole('dialog')
@@ -109,6 +127,39 @@ describe('Modal', () => {
     const frame = dialog.parentElement!
     await waitFor(() => expect(frame.style.opacity).toBe('1'))
     expect(frame.style.transform).not.toMatch(/scale\(0\.96\)/)
+  })
+
+  it('RNF-A11Y-01: modales apilados — solo el de arriba atrapa el foco y Esc; al cerrarlo manda el de abajo', async () => {
+    const user = userEvent.setup()
+    render(<StackHarness />)
+    await user.click(screen.getByRole('button', { name: 'Abrir' }))
+    const base = await screen.findByRole('dialog', { name: 'Base' })
+    const openTop = within(base).getByRole('button', { name: 'Abrir encima' })
+    await user.click(openTop)
+    const top = await screen.findByRole('dialog', { name: 'Encima' })
+    expect(top).toHaveFocus()
+
+    // Tab da la vuelta dentro del de arriba sin que el de abajo se lleve el foco.
+    const topButtons = within(top).getAllByRole('button')
+    for (let i = 0; i < topButtons.length + 1; i++) {
+      await user.tab()
+      expect(top.contains(document.activeElement)).toBe(true)
+    }
+    // Un foco que se escapa vuelve al de arriba, no al de abajo (y no hay un tira y afloja infinito).
+    openTop.focus()
+    expect(top).toHaveFocus()
+
+    // Esc cierra solo el de arriba; el foco vuelve a su botón y el de abajo recupera el control.
+    await user.keyboard('{Escape}')
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Encima' })).toBeNull())
+    expect(screen.getByRole('dialog', { name: 'Base' })).toBeInTheDocument()
+    expect(openTop).toHaveFocus()
+    expect(document.body.style.overflow).toBe('hidden')
+    await user.tab()
+    expect(base.contains(document.activeElement)).toBe(true)
+    await user.keyboard('{Escape}')
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(document.body.style.overflow).toBe('')
   })
 
   it('ModalSurface se pinta quieta (galería), sin rol de diálogo', () => {

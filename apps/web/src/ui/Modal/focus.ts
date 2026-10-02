@@ -73,3 +73,25 @@ export function lockScroll(): () => void {
     }
   }
 }
+
+/**
+ * Pila de modales abiertos (el último es el de arriba). Solo la capa superior atiende Tab, Esc y la
+ * vuelta del foco: con dos modales a la vez, dos trampas que se roban el foco entre sí acabarían en
+ * una recursión que el navegador corta con el foco en el de abajo. Al cerrar la de arriba, la
+ * anterior recupera el control.
+ */
+const modalStack: object[] = []
+
+/** Apila una capa; devuelve la función que la quita (idempotente). */
+export function pushModalLayer(layer: object): () => void {
+  modalStack.push(layer)
+  return () => {
+    const index = modalStack.lastIndexOf(layer)
+    if (index !== -1) modalStack.splice(index, 1)
+  }
+}
+
+/** ¿Es `layer` la capa de arriba? */
+export function isTopModalLayer(layer: object): boolean {
+  return modalStack.at(-1) === layer
+}

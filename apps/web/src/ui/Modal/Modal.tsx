@@ -9,13 +9,14 @@ import {
   useId,
   useLayoutEffect,
   useRef,
+  useState,
 } from 'react'
 import { createPortal } from 'react-dom'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 import { t } from '../../i18n'
 import { Button } from '../Button'
 import { cx } from '../forceState'
-import { lockScroll, trapTab } from './focus'
+import { isTopModalLayer, lockScroll, pushModalLayer, trapTab } from './focus'
 import styles from './Modal.module.css'
 
 export type ModalSurfaceKind = 'glass' | 'solid'
@@ -109,7 +110,8 @@ export interface ModalProps {
  *
  * - `role="dialog"` + `aria-modal` + `aria-labelledby` (y `aria-describedby` con descripción).
  * - Trampa de foco, Esc para cerrar, el foco vuelve a donde estaba al cerrar y la página no hace
- *   scroll mientras está abierto.
+ *   scroll mientras está abierto (el bloqueo se quita en cuanto empieza a cerrarse).
+ * - Se pueden apilar (un modal abierto desde otro): solo el de arriba atiende Tab, Esc y el foco.
  * - Entra con escala 0,96 → 1 y fundido del fondo; con «reducir movimiento», solo fundido (Anexo E).
  * - El sonido (`ui.open`) lo cablea la Fase 1.
  */
@@ -124,18 +126,27 @@ export function Modal({
   dismissible = true,
   initialFocus,
 }: ModalProps) {
+  // Dónde estaba el foco antes de abrir (lo anota la capa justo antes de mover el foco al diálogo).
   const returnFocus = useRef<HTMLElement | null>(null)
 
-  // Al abrir se recuerda el foco; al cerrar vuelve allí en el acto (sin esperar a la salida).
+  // Al cerrar, el foco vuelve en el acto, sin esperar a la animación de salida. Tiene que ser en la
+  // fase de diseño: en la limpieza de un efecto (fase de mutación), React devolvería el foco al
+  // diálogo, que sigue en el DOM mientras sale, al restaurar la selección tras el commit.
   useLayoutEffect(() => {
-    if (open) {
-      returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
-      return
-    }
+    if (open) return
     const target = returnFocus.current
     returnFocus.current = null
     if (target?.isConnected) target.focus({ preventScroll: true })
   }, [open])
+
+  // Si el modal entero desaparece abierto (p. ej. al cambiar de ruta), el foco también vuelve.
+  useLayoutEffect(
+    () => () => {
+      const target = returnFocus.current
+      if (target?.isConnected) target.focus({ preventScroll: true })
+    },
+    [],
+  )
 
   if (typeof document === 'undefined') return null
   return createPortal(
@@ -143,6 +154,7 @@ export function Modal({
       {open && (
         <ModalLayer
           key="modal"
+          returnFocus={returnFocus}
           onClose={onClose}
           title={title}
           description={description}
@@ -159,9 +171,10 @@ export function Modal({
   )
 }
 
-type ModalLayerProps = Omit<ModalProps, 'open'>
+type ModalLayerProps = Omit<ModalProps, 'open'> & { returnFocus: RefObject<HTMLElement | null> }
 
 function ModalLayer({
+  returnFocus,
   onClose,
   title,
   description,
@@ -175,32 +188,47 @@ function ModalLayer({
   const dialogRef = useRef<HTMLDivElement>(null)
   const titleId = useId()
   const descriptionId = useId()
+  // Identidad de esta capa en la pila de modales (solo la de arriba atiende el teclado y el foco).
+  const [layer] = useState(() => ({}))
   // Mientras sale (animación de cierre), el foco ya ha vuelto fuera y no hay que retenerlo.
   const isPresent = useIsPresent()
-  const presentRef = useRef(isPresent)
-  useLayoutEffect(() => {
-    presentRef.current = isPresent
-  }, [isPresent])
 
-  useEffect(() => {
-    const release = lockScroll()
+  // Bloqueo del scroll, capa en la pila y foco inicial (anotando antes dónde estaba, para `Modal`).
+  // En un efecto de diseño y no pasivo: la limpieza corre en el mismo commit en el que el modal
+  // empieza a salir o desaparece, nunca después, así que en cuanto se cierra la página vuelve a hacer
+  // scroll y la capa de abajo manda.
+  useLayoutEffect(() => {
+    if (!isPresent) return
+    if (document.activeElement instanceof HTMLElement) returnFocus.current = document.activeElement
+    const releaseScroll = lockScroll()
+    const releaseLayer = pushModalLayer(layer)
     const target = initialFocus?.current ?? dialogRef.current
     target?.focus({ preventScroll: true })
-    return release
-  }, [initialFocus])
+    return () => {
+      releaseLayer()
+      releaseScroll()
+    }
+  }, [isPresent, initialFocus, layer, returnFocus])
 
-  // Si el foco se escapa (un clic fuera de la ventana y vuelta), regresa al diálogo.
+  // Si el foco se escapa (un clic fuera de la ventana y vuelta), regresa al diálogo de arriba. No
+  // cuenta el foco que cae en un modal que está saliendo (React lo devuelve allí un instante al
+  // cerrarse, antes de que vuelva a su sitio).
   useEffect(() => {
     const onFocusIn = (event: FocusEvent) => {
       const dialog = dialogRef.current
-      if (!presentRef.current || !dialog) return
-      if (event.target instanceof Node && !dialog.contains(event.target)) dialog.focus()
+      if (!dialog || !isTopModalLayer(layer)) return
+      if (!(event.target instanceof Element) || dialog.contains(event.target)) return
+      if (event.target.closest('[data-modal-exiting]')) return
+      dialog.focus()
     }
     document.addEventListener('focusin', onFocusIn)
     return () => document.removeEventListener('focusin', onFocusIn)
-  }, [])
+  }, [layer])
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    // Con modales apilados (un modal abierto desde otro), el evento de React sube por el árbol de
+    // componentes hasta el de abajo: solo responde la capa de arriba.
+    if (!isTopModalLayer(layer)) return
     if (event.key === 'Escape') {
       event.stopPropagation()
       onClose()
@@ -229,6 +257,7 @@ function ModalLayer({
         if (dismissible && event.target === event.currentTarget) onClose()
       }}
       data-modal-scrim=""
+      data-modal-exiting={isPresent ? undefined : ''}
     >
       <motion.div
         className={styles.frame}
