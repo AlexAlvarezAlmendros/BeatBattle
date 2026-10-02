@@ -23,14 +23,21 @@ export const API_SECURITY_HEADERS: Readonly<Record<string, string>> = {
 declare module 'fastify' {
   interface FastifyContextConfig {
     /**
-     * Exime la ruta de la comprobación de `Origin` (nunca del «solo JSON» ni del tamaño). Solo para
-     * rutas que se autentican con otro secreto y no las llama un navegador. Ninguna ruta lo usa en la
-     * Fase 0.
+     * Exime la ruta de la comprobación de `Origin` (no del «solo JSON» ni del tamaño). Solo para
+     * rutas que se autentican con su propio secreto o token y que no llama una página de un
+     * navegador. Ninguna ruta lo usa en la Fase 0.
      *
-     * Hueco previsto: `/api/cron/tick` (Fase 3, §4.12). Vercel Cron llama por GET, que no se
-     * comprueba, pero si el flujo de GitHub Actions la llama con un método de escritura no traerá
-     * `Origin`: esa ruta se declarará con `config: { skipOriginCheck: true }` y comprobará
-     * `CRON_SECRET` (en tiempo constante) en su propio `preHandler`.
+     * Exenciones previstas:
+     * - `GET /api/cron/tick` (Fase 3, §4.10 y §4.12) **no la necesita**: es GET, y las lecturas no
+     *   se comprueban. La autentica `CRON_SECRET` (en tiempo constante) en su `preHandler`, también
+     *   cuando la llama el flujo programado de GitHub Actions, que debe usar GET.
+     * - `POST /api/unsubscribe/one-click?token=` (Fase 2, §4.10, §4.19.1 y §4.19.6, RFC 8058) sí:
+     *   la llama el proveedor de correo, sin `Origin`, con el cuerpo `List-Unsubscribe=One-Click` en
+     *   `application/x-www-form-urlencoded` o `multipart/form-data`. Con el «solo JSON» de abajo
+     *   daría 415, así que esa fase añadirá una segunda exención por ruta (p. ej.
+     *   `config: { skipOriginCheck: true, acceptForm: true }`) con la que el hook deje pasar esos
+     *   dos tipos solo en esa ruta, con el mismo tope de tamaño y sin registrar parsers globales (la
+     *   ruta descarta el cuerpo). La autentica el token HMAC de la URL (`UNSUBSCRIBE_SECRET`).
      */
     skipOriginCheck?: boolean
   }
