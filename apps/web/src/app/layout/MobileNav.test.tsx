@@ -1,8 +1,10 @@
-import { act, screen, waitFor, within } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, describe, expect, it } from 'vitest'
+import { createMemoryRouter, RouterProvider } from 'react-router'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
 import { OTHER_PEOPLE_SOCIAL } from './navigation'
+import { MAIN_ID, RootLayout } from './RootLayout'
 import { SiteHeader } from './SiteHeader'
 import { renderInRouter } from './testing'
 
@@ -155,5 +157,34 @@ describe('MobileNav: menú móvil del sello (0.7, guía §2.17)', () => {
     await act(() => router.navigate('/semanas'))
     await waitClosed()
     expect(document.body.style.overflow).toBe('')
+  })
+
+  it('RNF-A11Y-01: con el marco entero, Atrás deja el foco en el <main> nuevo, que ya no está inert al recibirlo', async () => {
+    const user = userEvent.setup()
+    const router = createMemoryRouter(
+      [{ element: <RootLayout />, children: [{ path: '*', element: <p>x</p> }] }],
+      {
+        initialEntries: ['/', '/jurado'],
+        initialIndex: 1,
+      },
+    )
+    render(<RouterProvider router={router} />)
+    const main = document.getElementById(MAIN_ID) as HTMLElement
+    // jsdom no aplica `inert` al foco: se mira si el <main> lo llevaba cuando se le dio.
+    const focusedWhileInert: boolean[] = []
+    const focus = vi.spyOn(main, 'focus').mockImplementation(function (this: HTMLElement, options) {
+      focusedWhileInert.push(main.hasAttribute('inert'))
+      HTMLElement.prototype.focus.call(this, options)
+    })
+
+    await user.click(toggle())
+    expect(main).toHaveAttribute('inert')
+    await act(() => router.navigate(-1))
+    await waitClosed()
+    expect(focus).toHaveBeenCalled()
+    expect(focusedWhileInert).toEqual([false])
+    expect(main).toHaveFocus()
+    expect(document.querySelectorAll('[inert]')).toHaveLength(0)
+    focus.mockRestore()
   })
 })

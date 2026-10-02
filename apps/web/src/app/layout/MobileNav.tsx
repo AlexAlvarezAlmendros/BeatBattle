@@ -49,21 +49,23 @@ function makeBackgroundInert(panel: HTMLElement | null): Element[] {
  * y al cambiar de ruta (Atrás del navegador o el gesto atrás de Android): ahí no devuelve el foco al
  * botón, porque `RootLayout` ya lo lleva al `<main>` de la página nueva.
  *
- * El foco se devuelve al botón en la limpieza del efecto, después de quitar `inert`: un elemento
- * `inert` no acepta el foco.
+ * `close` libera la página (quita `inert` y el bloqueo del scroll) en el acto, sin esperar al render
+ * siguiente: un elemento `inert` no acepta el foco, y justo después se mueve (al botón, o al `<main>`
+ * desde el efecto de `RootLayout`, que corre después de este porque es su padre).
  */
 export function useMobileNav(): MobileNavState {
   const [open, setOpen] = useState(false)
   const toggleRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
-  const restoreFocusRef = useRef(false)
+  const releaseRef = useRef<(() => void) | null>(null)
   const panelId = `mobile-nav-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`
   const { pathname } = useLocation()
   const previousPathname = useRef(pathname)
 
   const close = useCallback((options: { restoreFocus?: boolean } = {}) => {
-    restoreFocusRef.current = options.restoreFocus ?? false
+    releaseRef.current?.()
     setOpen(false)
+    if (options.restoreFocus) toggleRef.current?.focus()
   }, [])
   const toggle = useCallback(() => setOpen((value) => !value), [])
 
@@ -75,11 +77,18 @@ export function useMobileNav(): MobileNavState {
 
   useEffect(() => {
     if (!open) return
-    restoreFocusRef.current = false
     const { body } = document
     const previousOverflow = body.style.overflow
     body.style.overflow = 'hidden'
     const background = makeBackgroundInert(panelRef.current)
+    let released = false
+    const release = () => {
+      if (released) return
+      released = true
+      body.style.overflow = previousOverflow
+      for (const element of background) element.removeAttribute('inert')
+    }
+    releaseRef.current = release
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault()
@@ -93,14 +102,10 @@ export function useMobileNav(): MobileNavState {
     }
     desktop?.addEventListener('change', onDesktop)
     return () => {
-      body.style.overflow = previousOverflow
-      for (const element of background) element.removeAttribute('inert')
+      release()
+      releaseRef.current = null
       document.removeEventListener('keydown', onKeyDown)
       desktop?.removeEventListener('change', onDesktop)
-      if (restoreFocusRef.current) {
-        restoreFocusRef.current = false
-        toggleRef.current?.focus()
-      }
     }
   }, [open, close])
 

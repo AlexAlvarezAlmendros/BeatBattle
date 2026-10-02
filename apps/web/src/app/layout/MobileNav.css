@@ -196,6 +196,12 @@
   opacity: 1;
 }
 
+/* Los enlaces ocupan todo el ancho del panel, que recorta lo que sale por los lados (`overflow-y`): el
+   anillo de foco va por dentro para verse entero. */
+.mobile-nav__link:focus-visible {
+  outline-offset: calc(-1 * var(--bb-focus-width));
+}
+
 /* ── Pie del panel: redes del sello y «Entrar» ────────────────────────────────────────────── */
 .mobile-nav__footer {
   display: flex;
