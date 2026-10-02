@@ -1,3 +1,4 @@
+import { Readable } from 'node:stream'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { z } from 'zod'
 import { BODY_LIMIT_BYTES } from '../src/plugins/security'
@@ -126,6 +127,34 @@ describe('tamaño del cuerpo', () => {
   it('el tope de Fastify es el mismo (cuerpos sin Content-Length)', () => {
     expect(BODY_LIMIT_BYTES).toBe(64 * 1024)
     expect(t.app.initialConfig.bodyLimit).toBe(BODY_LIMIT_BYTES)
+  })
+
+  it('cuerpo troceado (chunked, sin Content-Length) > 64 kB → 413 PAYLOAD_TOO_LARGE', async () => {
+    // por trozos de 8 kB, como llega un envío en streaming: lo corta el bodyLimit de Fastify
+    const seen: Array<string | undefined> = []
+    const s = await makeApp({
+      routes: (app) => {
+        // comprueba que la petición llega sin Content-Length: el 413 no lo da el hook de seguridad
+        app.addHook('onRequest', async (req) => {
+          seen.push(req.headers['content-length'])
+        })
+        app.post('/api/test/echo', async (req) => ({ data: req.body }))
+      },
+    })
+    const chunk = 'x'.repeat(8 * 1024)
+    const chunks = ['{"n":1,"pad":"', ...Array.from({ length: 9 }, () => chunk), '"}']
+    const res = await s.app.inject({
+      method: 'POST',
+      url: '/api/test/echo',
+      headers: { origin: ORIGIN, 'content-type': 'application/json', 'transfer-encoding': 'chunked' },
+      payload: Readable.from(chunks),
+    })
+    expect(seen).toEqual([undefined])
+    expect(res.statusCode).toBe(413)
+    expect(res.json()).toEqual({
+      error: { code: 'PAYLOAD_TOO_LARGE', message: 'La petición es demasiado grande.' },
+    })
+    await s.app.close()
   })
 
   it('un cuerpo justo por debajo del tope pasa', async () => {
