@@ -109,9 +109,14 @@ pre {
   outline: none;
 }
 
-/* Destinos de foco programático (p. ej. <main tabindex="-1"> al navegar): no son tabulables y no
-   llevan anillo, aunque el navegador los marque como `:focus-visible` tras usar el teclado. */
-[tabindex="-1"]:focus-visible {
+/*
+ * Destinos de foco programático del marco, marcados con `data-focus-target` (el <main> que recibe el
+ * foco al navegar o con «Saltar al contenido»): no son tabulables y no llevan anillo, aunque el
+ * navegador los marque como `:focus-visible` tras usar el teclado. Solo esos: los widgets ARIA
+ * (menús, pestañas, listbox, rejillas) mueven el foco con flechas a elementos con tabindex="-1", y
+ * esos sí necesitan el anillo (RNF-A11Y-01).
+ */
+[data-focus-target]:focus-visible {
   outline: none;
   box-shadow: none;
 }

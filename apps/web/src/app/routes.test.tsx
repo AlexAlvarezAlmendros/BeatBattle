@@ -91,6 +91,8 @@ describe('router (0.10, guía §2.18)', () => {
     expect(skip).toHaveAttribute('href', '#contenido')
     expect(screen.getByRole('banner')).toBeInTheDocument()
     expect(screen.getByRole('main')).toHaveAttribute('id', 'contenido')
+    // Destino de foco programático: global.css le quita el anillo solo a lo que lleva esta marca.
+    expect(screen.getByRole('main')).toHaveAttribute('data-focus-target')
     expect(screen.getByRole('contentinfo')).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: t('nav.label') })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: t('nav.weeks') })).toHaveAttribute('aria-current', 'page')

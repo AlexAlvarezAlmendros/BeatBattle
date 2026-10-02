@@ -13,7 +13,8 @@ export const MAIN_ID = 'contenido'
  *
  * - Vuelta arriba al navegar (y posición recuperada al volver atrás) con `ScrollRestoration`.
  * - Al cambiar de página, el foco pasa al `<main>` para que teclado y lector de pantalla empiecen
- *   por el contenido nuevo y no por donde estaba el enlace pulsado (§2.17).
+ *   por el contenido nuevo y no por donde estaba el enlace pulsado (§2.17). Lleva `data-focus-target`
+ *   para que `global.css` no le pinte el anillo de foco: es un destino, no un control.
  * - `aria-busy` mientras se carga el trozo diferido de la página siguiente.
  */
 export function RootLayout() {
@@ -43,6 +44,7 @@ export function RootLayout() {
         id={MAIN_ID}
         ref={mainRef}
         tabIndex={-1}
+        data-focus-target
         className="site-main"
         aria-busy={navigation.state === 'loading'}
       >
