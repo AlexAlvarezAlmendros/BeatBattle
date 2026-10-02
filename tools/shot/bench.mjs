@@ -107,7 +107,8 @@ const res = await page.evaluate(async (secs) => {
   return {
     frames: times.length,
     fps: Math.round((1000 / avg) * 10) / 10,
-    p99ms: Math.round(sorted[Math.floor(sorted.length * 0.99)] * 10) / 10,
+    // percentil por rango más cercano: con 100 fotogramas es el 99.º, no el máximo
+    p99ms: Math.round(sorted[Math.max(0, Math.ceil(sorted.length * 0.99) - 1)] * 10) / 10,
     worstMs: Math.round(sorted.at(-1) * 10) / 10,
     longFrames: times.filter((t) => t > 33.4).length,
     drawCallsMax: Math.max(0, ...draws),

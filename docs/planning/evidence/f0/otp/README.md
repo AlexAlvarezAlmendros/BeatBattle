@@ -38,7 +38,7 @@ habían cargado.
 
 Medidas con `getComputedStyle` y `getBoundingClientRect`; la fuente real, con
 `CSS.getPlatformFontsForNode` del protocolo de DevTools. Escritorio / móvil cuando difieren. Todo el
-detalle (más de 60 piezas por tamaño) está en `otp-metrics.json`.
+detalle (67 medidas en escritorio y 51 en móvil, donde algunas piezas están ocultas) está en `otp-metrics.json`.
 
 ### Tipografía: Montserrat no carga
 

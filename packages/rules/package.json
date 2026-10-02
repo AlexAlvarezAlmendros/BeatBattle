@@ -11,8 +11,8 @@
     "test": "vitest run",
     "lint:purity": "vitest run test/purity.test.ts"
   },
-  "dependencies": {},
   "devDependencies": {
+    "@types/node": "22.20.4",
     "fast-check": "4.10.2",
     "typescript": "7.0.2",
     "vitest": "5.0.3"

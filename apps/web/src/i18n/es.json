@@ -146,5 +146,17 @@
       "title": "Galería de componentes",
       "summary": "Aquí irán los tokens, la tipografía y los componentes base con todos sus estados, con y sin movimiento (solo en desarrollo)."
     }
+  },
+  "rank": {
+    "crateDigger": "Excavador de cajones",
+    "looper": "Loopero",
+    "sampler": "Sampleador",
+    "beatmaker": "Beatmaker",
+    "producer": "Productor",
+    "grooveArchitect": "Arquitecto del groove",
+    "bounceMaster": "Maestro del bounce",
+    "studioBoss": "Jefe de estudio",
+    "blockLegend": "Leyenda del barrio",
+    "otherPeople": "Other People"
   }
 }

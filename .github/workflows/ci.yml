@@ -13,7 +13,8 @@ permissions:
 # Un push nuevo a la misma rama o PR cancela la ejecución anterior.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # solo se cancelan las de una PR que recibe otro push; cada commit de main conserva su resultado
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   quality:

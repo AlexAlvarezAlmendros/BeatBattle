@@ -24,7 +24,7 @@
 //   escritorio pesa ~1,5 MB. Si hay `python3` con Pillow, se reducen a paleta de 256 colores con
 //   tramado (menos de la mitad). Los colores exactos están en `otp-metrics.json`, no en los PNG.
 import { spawnSync } from 'node:child_process'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from '@playwright/test'
@@ -354,90 +354,98 @@ const browser = await chromium.launch({
   headless: !opt.headed,
   args: ['--ignore-gpu-blocklist', '--use-angle=vulkan', '--enable-features=Vulkan'],
 })
+// Con --only se conserva el otro tamaño del otp-metrics.json existente en lugar de pisarlo.
+const previous = opt.only
+  ? await readFile(join(outDir, 'otp-metrics.json'), 'utf8').then(JSON.parse, () => null)
+  : null
 const metrics = {
   capturedAt: new Date().toISOString(),
   base,
   browser: `Chrome ${browser.version()}`,
   platform: process.platform,
   beatPath: null,
-  viewports: {},
+  viewports: { ...(previous?.viewports ?? {}) },
 }
 
-for (const vp of VIEWPORTS) {
-  console.log(`${vp.name} ${vp.viewport.width}×${vp.viewport.height}`)
-  const context = await browser.newContext({
-    viewport: vp.viewport,
-    deviceScaleFactor: 1,
-    isMobile: vp.isMobile,
-    hasTouch: vp.isMobile,
-    locale: 'es-ES',
-    timezoneId: 'Europe/Madrid',
-  })
-  await context.addInitScript(() => {
+try {
+  for (const vp of VIEWPORTS) {
+    console.log(`${vp.name} ${vp.viewport.width}×${vp.viewport.height}`)
+    const context = await browser.newContext({
+      viewport: vp.viewport,
+      deviceScaleFactor: 1,
+      isMobile: vp.isMobile,
+      hasTouch: vp.isMobile,
+      locale: 'es-ES',
+      timezoneId: 'Europe/Madrid',
+    })
+    await context.addInitScript(() => {
+      try {
+        localStorage.setItem('newsletter_popup_seen', 'true')
+      } catch {}
+    })
+    await context.route(
+      (url) => BLOCKED.some((re) => re.test(url.href)),
+      (route) => route.abort(),
+    )
+    const page = await context.newPage()
+    const m = { viewport: vp.viewport }
+
+    // Home: arriba (isla, logo, hero), lanzamientos y últimos beats.
+    await open(page, '/', '.ultimos-beats-list')
+    m.home = { ...(await page.evaluate(measureInPage, HOME_TOP)) }
+    m.home.fonts = await platformFonts(page, FONT_PROBES.home)
+    m.home.fontInventory = await page.evaluate(fontInventoryInPage)
+    m.home.htmlBackground = await page.evaluate(
+      () => getComputedStyle(document.documentElement).backgroundColor,
+    )
+    await shoot(page, `home-top-${vp.name}.png`)
+    await scrollBelowIsland(page, '.ultimos-lanzamientos-title')
+    Object.assign(m.home, await page.evaluate(measureInPage, HOME_SECTIONS))
+    await shoot(page, `home-releases-${vp.name}.png`)
+    await scrollBelowIsland(page, '.ultimos-beats-title')
+    await shoot(page, `home-beats-${vp.name}.png`)
+
+    // /beats en lista (la vista por defecto).
+    await open(page, '/beats', '.beat-list-row')
+    if (!(await page.$('.beats-view-btn.active[aria-label*="lista"]'))) {
+      await page.click('.beats-view-btn[aria-label*="lista"]').catch(() => {})
+      await page.waitForTimeout(800)
+    }
+    m.beats = await page.evaluate(measureInPage, BEATS)
+    m.beats.fonts = await platformFonts(page, FONT_PROBES.beats)
+    m.beats.rowCount = await page.$$eval('.beat-list-row', (rows) => rows.length)
+    await shoot(page, `beats-list-${vp.name}.png`)
+    const beatPath = String(
+      opt.beat ?? (await page.$eval('.beat-list-row__title-link', (a) => a.getAttribute('href'))),
+    )
+    metrics.beatPath ??= beatPath
+    // Chip de género activo (después de la captura: filtrar cambia la lista).
     try {
-      localStorage.setItem('newsletter_popup_seen', 'true')
-    } catch {}
-  })
-  await context.route(
-    (url) => BLOCKED.some((re) => re.test(url.href)),
-    (route) => route.abort(),
-  )
-  const page = await context.newPage()
-  const m = { viewport: vp.viewport }
+      await page.click('.genre-chip', { timeout: 5000 })
+      await page.waitForTimeout(600)
+      m.beats.genreChipActive = (
+        await page.evaluate(measureInPage, {
+          chip: { selector: '.genre-chip.active', groups: ['box', 'text'] },
+        })
+      ).chip
+    } catch (e) {
+      console.warn(`  aviso: no se pudo medir el chip activo (${e.message.split('\n')[0]})`)
+    }
 
-  // Home: arriba (isla, logo, hero), lanzamientos y últimos beats.
-  await open(page, '/', '.ultimos-beats-list')
-  m.home = { ...(await page.evaluate(measureInPage, HOME_TOP)) }
-  m.home.fonts = await platformFonts(page, FONT_PROBES.home)
-  m.home.fontInventory = await page.evaluate(fontInventoryInPage)
-  m.home.htmlBackground = await page.evaluate(
-    () => getComputedStyle(document.documentElement).backgroundColor,
-  )
-  await shoot(page, `home-top-${vp.name}.png`)
-  await scrollBelowIsland(page, '.ultimos-lanzamientos-title')
-  Object.assign(m.home, await page.evaluate(measureInPage, HOME_SECTIONS))
-  await shoot(page, `home-releases-${vp.name}.png`)
-  await scrollBelowIsland(page, '.ultimos-beats-title')
-  await shoot(page, `home-beats-${vp.name}.png`)
+    // Ficha de un beat (siempre la misma en los dos tamaños).
+    await open(page, metrics.beatPath, '.beat-detail__title')
+    m.beatDetail = await page.evaluate(measureInPage, BEAT_DETAIL)
+    m.beatDetail.fonts = await platformFonts(page, FONT_PROBES.beatDetail)
+    await shoot(page, `beat-detail-${vp.name}.png`)
 
-  // /beats en lista (la vista por defecto).
-  await open(page, '/beats', '.beat-list-row')
-  if (!(await page.$('.beats-view-btn.active[aria-label*="lista"]'))) {
-    await page.click('.beats-view-btn[aria-label*="lista"]').catch(() => {})
-    await page.waitForTimeout(800)
-  }
-  m.beats = await page.evaluate(measureInPage, BEATS)
-  m.beats.fonts = await platformFonts(page, FONT_PROBES.beats)
-  m.beats.rowCount = await page.$$eval('.beat-list-row', (rows) => rows.length)
-  await shoot(page, `beats-list-${vp.name}.png`)
-  const beatPath = String(
-    opt.beat ?? (await page.$eval('.beat-list-row__title-link', (a) => a.getAttribute('href'))),
-  )
-  metrics.beatPath ??= beatPath
-  // Chip de género activo (después de la captura: filtrar cambia la lista).
-  try {
-    await page.click('.genre-chip', { timeout: 5000 })
-    await page.waitForTimeout(600)
-    m.beats.genreChipActive = (
-      await page.evaluate(measureInPage, {
-        chip: { selector: '.genre-chip.active', groups: ['box', 'text'] },
-      })
-    ).chip
-  } catch (e) {
-    console.warn(`  aviso: no se pudo medir el chip activo (${e.message.split('\n')[0]})`)
+    metrics.viewports[vp.name] = m
+    await context.close()
   }
 
-  // Ficha de un beat (siempre la misma en los dos tamaños).
-  await open(page, metrics.beatPath, '.beat-detail__title')
-  m.beatDetail = await page.evaluate(measureInPage, BEAT_DETAIL)
-  m.beatDetail.fonts = await platformFonts(page, FONT_PROBES.beatDetail)
-  await shoot(page, `beat-detail-${vp.name}.png`)
-
-  metrics.viewports[vp.name] = m
-  await context.close()
+  await writeFile(join(outDir, 'otp-metrics.json'), `${JSON.stringify(metrics, null, 2)}\n`)
+  console.log(`otp-metrics.json → ${outDir}`)
+} finally {
+  // Si el sello no responde o cambia un selector, Chrome no se queda vivo.
+  await browser.close()
 }
-
-await writeFile(join(outDir, 'otp-metrics.json'), `${JSON.stringify(metrics, null, 2)}\n`)
-console.log(`otp-metrics.json → ${outDir}`)
-await browser.close()
 if (!opt['no-lite']) lighten(shots)
