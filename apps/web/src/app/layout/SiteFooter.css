@@ -224,11 +224,33 @@
   }
 }
 
-/* Objetivos táctiles de 44 px en móvil (RNF-A11Y-09). */
+/*
+ * Objetivos táctiles de 44 × 44 px en móvil (RNF-A11Y-09). «Beats» es más estrecho que 44 px: se
+ * ensancha la caja. El crédito lleva su filete rojo debajo del texto, así que no crece: un
+ * pseudoelemento invisible amplía su área hasta 44 px de alto sin mover nada (como el play de la fila).
+ */
 @media (max-width: 992px) {
   .site-footer__link,
   .site-footer__legal-link {
     min-height: var(--bb-space-11);
+  }
+
+  .site-footer__link {
+    min-width: var(--bb-space-11);
+  }
+
+  .site-footer__credit-link {
+    position: relative;
+  }
+
+  .site-footer__credit-link::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+    height: max(100%, var(--bb-space-11));
+    translate: 0 -50%;
   }
 }
 

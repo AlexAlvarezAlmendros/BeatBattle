@@ -23,3 +23,15 @@
   margin-inline: auto;
   color: var(--bb-text-2);
 }
+
+/*
+ * Enlaces de las páginas provisionales (p. ej. «Bases de la competición», «Volver al inicio»): con
+ * puntero grueso, 44 px de alto como mínimo (RNF-A11Y-09). Con ratón se quedan en su línea de texto.
+ */
+@media (hover: none), (pointer: coarse) {
+  .placeholder-page a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--bb-space-11);
+  }
+}
