@@ -68,12 +68,16 @@ describe('createRng y rngFor', () => {
   // actualizan sin decidirlo (y anotarlo en la guía).
   it('fija la secuencia de referencia', () => {
     expect(seedState('beatbattle')).toEqual([197807361, 1186084135, 4234181195, 1589487065])
+    expect(seedKey('beatbattle')).toBe('10:beatbattle')
+    expect(seedState('10:beatbattle')).toEqual([1959096902, 2259811218, 1423117228, 2940796167])
     const rng = createRng('beatbattle')
-    expect(take(() => rng.nextUint32(), 5)).toEqual([695169511, 464791653, 80609602, 3468774368, 2952987718])
+    expect(take(() => rng.nextUint32(), 5)).toEqual([
+      1515471754, 3375959352, 3961152789, 2335660845, 1000796243,
+    ])
     const fair = rngFor('fair', 'user-1', 'week-1')
     expect(take(() => fair.nextUint32(), 3)).toEqual([3246221223, 2744428561, 3444118745])
     expect(hashOf('user-1', 'week-1', 'entry-1')).toBe(2108093989)
-    expect(createRng('shuffle').shuffle([1, 2, 3, 4, 5, 6, 7, 8])).toEqual([5, 4, 8, 6, 3, 1, 2, 7])
+    expect(createRng('shuffle').shuffle([1, 2, 3, 4, 5, 6, 7, 8])).toEqual([7, 1, 4, 5, 8, 3, 2, 6])
   })
 
   it('misma semilla, misma secuencia', () => {
@@ -93,6 +97,16 @@ describe('createRng y rngFor', () => {
         const a = createRng(s1)
         const b = createRng(s2)
         expect(take(() => a.nextUint32(), 4)).not.toEqual(take(() => b.nextUint32(), 4))
+      }),
+    )
+  })
+
+  it('createRng(semilla) es rngFor(semilla): un único camino de siembra', () => {
+    fc.assert(
+      fc.property(seedPart, (seed) => {
+        const a = createRng(seed)
+        const b = rngFor(seed)
+        expect(take(() => a.nextUint32(), 16)).toEqual(take(() => b.nextUint32(), 16))
       }),
     )
   })
@@ -120,6 +134,9 @@ describe('createRng y rngFor', () => {
   it('rechaza semillas imposibles', () => {
     expect(() => createRng(Number.NaN)).toThrow(RangeError)
     expect(() => rngFor()).toThrow(RangeError)
+    expect(() => hashOf()).toThrow(RangeError)
+    expect(() => hashOf(...([] as SeedPart[]))).toThrow(RangeError)
+    expect(() => seedKey()).toThrow(RangeError)
     expect(() => rngFor('x', Number.POSITIVE_INFINITY)).toThrow(RangeError)
     expect(() => seedKey(Number.NaN as SeedPart)).toThrow(RangeError)
   })

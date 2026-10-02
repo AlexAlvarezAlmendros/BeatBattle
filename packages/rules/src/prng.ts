@@ -4,7 +4,9 @@
 //   versiones: trabajan sobre unidades UTF-16 con aritmética entera de 32 bits (`Math.imul`).
 // - `sfc32` (Chris Doty-Humphrey, PractRand) es rápido, tiene 128 bits de estado y pasa PractRand.
 // - `rngFor(...partes)` crea flujos con nombre: el barajado de una semana no depende del orden en
-//   que se consumen otros flujos (`rngFor('fair', userId, weekId)`).
+//   que se consumen otros flujos (`rngFor('fair', userId, weekId)`). `createRng(semilla)` es
+//   `rngFor(semilla)`: hay un único camino de siembra, `seedKey` → cyrb128 → sfc32, para que
+//   cliente y servidor no puedan mezclar dos derivaciones de la misma semilla.
 //
 // Cambiar cualquiera de estos algoritmos cambia órdenes y alias ya publicados: los tests fijan
 // valores de referencia para que un cambio así no pase desapercibido.
@@ -93,9 +95,11 @@ export function sfc32(state: SfcState): () => number {
 /**
  * Codifica partes de semilla sin ambigüedad (cada parte lleva delante su longitud), de modo que
  * `('ab', 'c')` y `('a', 'bc')` dan claves distintas. Los números se escriben con `String(n)`:
- * `1` y `'1'` son la misma parte.
+ * `1` y `'1'` son la misma parte. Necesita al menos una parte: una lista vacía (`hashOf(...ids)`
+ * con `ids = []`) daría la misma clave a todo el mundo sin que nadie lo notara.
  */
 export function seedKey(...parts: readonly SeedPart[]): string {
+  if (parts.length === 0) throw new RangeError('Una semilla necesita al menos una parte')
   return parts
     .map((part) => {
       if (typeof part === 'number' && !Number.isFinite(part)) {
@@ -107,7 +111,10 @@ export function seedKey(...parts: readonly SeedPart[]): string {
     .join('|')
 }
 
-/** Hash estable de 32 bits de varias partes, p. ej. `hashOf(userId, weekId, entryId)` (guía §2.6). */
+/**
+ * Hash estable de 32 bits de varias partes, p. ej. `hashOf(userId, weekId, entryId)` (guía §2.6).
+ * Necesita al menos una parte.
+ */
 export function hashOf(...parts: readonly SeedPart[]): number {
   return hash32(seedKey(...parts))
 }
@@ -167,19 +174,15 @@ function rngFromState(state: SfcState): Rng {
   }
 }
 
-/** Crea un generador a partir de una semilla (`String(semilla)` → cyrb128 → sfc32). */
-export function createRng(seed: SeedPart): Rng {
-  if (typeof seed === 'number' && !Number.isFinite(seed)) {
-    throw new RangeError(`La semilla numérica debe ser finita (recibido: ${seed})`)
-  }
-  return rngFromState(seedState(String(seed)))
-}
-
 /**
  * Flujo con nombre: un generador independiente por cada combinación de partes, p. ej.
  * `rngFor('alias', weekId)` o `rngFor('fair', userId, weekId)`. Necesita al menos una parte.
  */
 export function rngFor(...parts: readonly SeedPart[]): Rng {
-  if (parts.length === 0) throw new RangeError('rngFor() necesita al menos una parte de semilla')
   return rngFromState(seedState(seedKey(...parts)))
+}
+
+/** Generador de una sola semilla. Es exactamente `rngFor(seed)` (un único camino de siembra). */
+export function createRng(seed: SeedPart): Rng {
+  return rngFor(seed)
 }
