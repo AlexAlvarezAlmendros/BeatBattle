@@ -25,8 +25,16 @@ export type SettingsSectionKey = (typeof SETTINGS_SECTIONS)[SettingsSection]
 
 const segment = (value: string) => encodeURIComponent(value)
 
+/**
+ * Id de la sección «Avísame del próximo drop» de la home (§2.12.3, §3.8.3 punto 5). El formulario llega
+ * con la alerta de drop sin cuenta (Fase 3); la sección y su ancla existen desde ya para que el CTA del
+ * hero lleve a un sitio real.
+ */
+export const DROP_ALERT_ID = 'alerta'
+
 export const paths = {
   home: () => '/',
+  dropAlert: () => `/#${DROP_ALERT_ID}`,
   week: (slug: string) => `/semana/${segment(slug)}`,
   weekResults: (slug: string) => `/semana/${segment(slug)}/resultados`,
   weeks: () => '/semanas',

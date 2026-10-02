@@ -3,6 +3,7 @@ import { DocumentTitle } from '../../app/DocumentTitle'
 import { paths } from '../../app/paths'
 import { type SimpleMessageKey, t } from '../../i18n'
 import { Button } from '../../ui/Button'
+import { DropAlertSection } from '../drop/DropAlertSection'
 import {
   HeroActions,
   HeroDivider,
@@ -25,14 +26,13 @@ export const IDLE_TICKER: readonly SimpleMessageKey[] = [
   'home.ticker.idle.brand',
 ]
 
-/** Ancla del formulario «Avísame del próximo drop» en «Cómo funciona» (§2.12.3; llega en la Fase 3). */
-export const DROP_ALERT_HASH = 'alerta'
-
 /**
  * `/` — home de la semana (guía §3.8.3), de momento en el estado «calendario vacío» (§2.19: aún no hay
  * semanas): el hero del sello con «BEAT / BATTLE», sin cuenta atrás, con «El próximo drop está en el
  * horno.» y la banda de marquee debajo. Los botones son el `Button` base en su tamaño `hero` (el
- * contorno, sobre cristal). Las demás secciones de §3.8.3 llegan con sus fases.
+ * contorno, sobre cristal); el rojo lleva a la sección «Avísame del próximo drop» de esta misma página
+ * (§2.12.3), que de momento solo anuncia el formulario. Las demás secciones de §3.8.3 llegan con sus
+ * fases.
  */
 export function HomePage() {
   const titleId = useId()
@@ -58,7 +58,7 @@ export function HomePage() {
         <HeroDivider />
         <HeroSubtitle>{t('home.hero.subtitle')}</HeroSubtitle>
         <HeroActions>
-          <Button size="hero" to={`${paths.howItWorks()}#${DROP_ALERT_HASH}`}>
+          <Button size="hero" to={paths.dropAlert()}>
             {t('home.hero.notify')}
           </Button>
           <Button size="hero" variant="outline" glass to={paths.howItWorks()}>
@@ -67,6 +67,7 @@ export function HomePage() {
         </HeroActions>
         <HeroNote>{t('home.hero.emptyCalendar')}</HeroNote>
       </HeroSection>
+      <DropAlertSection />
     </>
   )
 }

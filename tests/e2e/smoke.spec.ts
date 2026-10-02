@@ -31,7 +31,7 @@ test('humo: la home pinta la isla, el titular «Beat Battle» y el pie, sin erro
   await expect(main.getByText('El próximo drop está en el horno.')).toBeVisible()
   await expect(main.getByRole('link', { name: 'Avísame del próximo drop' })).toHaveAttribute(
     'href',
-    '/como-funciona#alerta',
+    '/#alerta',
   )
   await expect(page.getByRole('marquee', { name: 'Teletipo de la batalla' })).toBeVisible()
 
@@ -45,6 +45,23 @@ test('humo: la home pinta la isla, el titular «Beat Battle» y el pie, sin erro
   )
   await expect(footer.getByRole('navigation', { name: 'Legal' }).getByRole('link')).toHaveCount(4)
 
+  expect(errors).toEqual([])
+})
+
+test('§2.12.3: el CTA «Avísame del próximo drop» lleva a su sección de la home, a la vista bajo la isla', async ({
+  page,
+}) => {
+  const errors = collectErrors(page)
+  await page.goto('/')
+  const main = page.getByRole('main')
+  await main.getByRole('link', { name: 'Avísame del próximo drop' }).click()
+  await expect(page).toHaveURL('/#alerta')
+  const section = main.getByRole('region', { name: 'Avísame del próximo drop' })
+  await expect(section).toHaveAttribute('id', 'alerta')
+  const heading = section.getByRole('heading', { level: 2, name: 'Avísame del próximo drop' })
+  await expect(heading).toBeInViewport()
+  // El título no queda bajo la isla ni bajo el logo que cuelga de ella (`--nav-obscured`).
+  await expect.poll(async () => (await heading.boundingBox())?.y ?? 0).toBeGreaterThanOrEqual(119)
   expect(errors).toEqual([])
 })
 

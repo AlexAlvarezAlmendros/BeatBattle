@@ -66,6 +66,10 @@
       "howItWorks": "Cómo funciona",
       "emptyCalendar": "El próximo drop está en el horno."
     },
+    "dropAlert": {
+      "title": "Avísame del próximo drop",
+      "summary": "Muy pronto podrás dejar aquí tu email para que te avisemos de cada drop, sin crear cuenta."
+    },
     "ticker": {
       "label": "Teletipo de la batalla",
       "pause": "Pausar el teletipo",
