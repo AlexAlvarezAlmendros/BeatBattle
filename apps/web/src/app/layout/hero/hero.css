@@ -229,6 +229,9 @@
   font-size: var(--bb-font-size-label);
   font-weight: var(--bb-weight-semibold);
   letter-spacing: var(--bb-tracking-label);
+  /* `normal`, como en el sello (no el 1,5 del cuerpo): en escritura vertical, el interlineado es el ancho
+     del rótulo. */
+  line-height: normal;
   text-transform: uppercase;
   pointer-events: none;
   user-select: none;
