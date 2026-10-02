@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
 import { t } from '../../i18n'
+import { Trans } from '../../i18n/Trans'
 import { LEGAL_DOCS, OTHER_PEOPLE_URL, paths } from '../paths'
 
 /**
@@ -10,7 +11,13 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <p>
-        {t('app.brand')} · <a href={OTHER_PEOPLE_URL}>{t('footer.otherPeople')}</a>
+        <Trans
+          k="footer.credit"
+          values={{
+            brand: t('app.brand'),
+            otherPeople: <a href={OTHER_PEOPLE_URL}>{t('footer.otherPeople')}</a>,
+          }}
+        />
       </p>
       <p>{t('footer.tagline')}</p>
       <nav aria-label={t('footer.legalLabel')}>

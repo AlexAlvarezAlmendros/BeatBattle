@@ -24,6 +24,7 @@
     "signIn": "Entrar"
   },
   "footer": {
+    "credit": "{brand} · {otherPeople}",
     "legalLabel": "Legal",
     "otherPeople": "Other People Records",
     "tagline": "La batalla semanal de productores de Other People Records."
@@ -104,6 +105,7 @@
   },
   "settings": {
     "title": "Ajustes",
+    "pageTitle": "{section} · Ajustes",
     "navLabel": "Secciones de ajustes",
     "account": {
       "title": "Cuenta",

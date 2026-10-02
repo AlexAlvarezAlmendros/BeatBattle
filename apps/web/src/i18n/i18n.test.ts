@@ -65,6 +65,17 @@ describe('i18n: t()', () => {
     expect(lenient('week.entries')).toBe('week.entries')
   })
 
+  it('parts() devuelve los trozos en orden, con las variables tal cual (para meter elementos)', () => {
+    const link = { element: 'a' }
+    expect(strict.parts('greeting', { name: link })).toEqual(['Hola, ', link])
+    expect(strict.parts('week.votes', { count: 12345 })).toEqual(['12.345', ' votos'])
+    expect(t.parts('footer.credit', { brand: 'B', otherPeople: link })).toEqual(['B', ' · ', link])
+    expect(() => strict.parts('greeting', {})).toThrow(/Falta la variable «name»/)
+    expect(lenient.parts('greeting', {})).toEqual(['Hola, ', '{name}'])
+    // @ts-expect-error: clave inexistente a propósito
+    expect(() => strict.parts('nope', {})).toThrow(/No existe la clave «nope»/)
+  })
+
   it('has() valida claves compuestas en tiempo de ejecución', () => {
     expect(strict.has('greeting')).toBe(true)
     expect(strict.has('week.entries')).toBe(true)

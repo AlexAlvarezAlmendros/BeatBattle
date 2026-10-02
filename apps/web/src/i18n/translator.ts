@@ -10,6 +10,8 @@ import { formatNumber } from './format'
  *   opcionalmente, `entries.count_zero` (para un texto propio con 0; las reglas del castellano lo
  *   tratarían como `other`). Se llaman sin sufijo y con `count`: `t('entries.count', { count: 3 })`.
  * - Variables entre llaves: `"{page} · Beat Battle"`. Los números se formatean en castellano.
+ * - Si una variable es un elemento (un enlace dentro de una frase), se usa `t.parts()` o el componente
+ *   `<Trans>`: el orden y los separadores siguen en el JSON, no en el JSX.
  */
 
 export type PluralCategory = Intl.LDMLPluralRule
@@ -42,6 +44,12 @@ export interface Translator<T> {
   (key: SimpleKeys<T>, vars?: MessageVars): string
   /** ¿Existe la clave? Para claves compuestas en tiempo de ejecución (`legal.docs.${doc}`). */
   has(key: string): key is MessageKeys<T>
+  /**
+   * Como `t()`, pero las variables pueden ser cualquier cosa (p. ej. elementos de React) y devuelve
+   * los trozos en orden: `t.parts('footer.credit', { brand: 'Beat Battle', otherPeople: <a … /> })`
+   * → `['Beat Battle', ' · ', <a … />]`. Los textos vacíos no salen.
+   */
+  parts<V>(key: MessageKeys<T>, vars: Readonly<Record<string, V | string | number>>): (string | V)[]
 }
 
 export interface TranslatorOptions {
@@ -83,18 +91,28 @@ export function createTranslator<T extends MessageTree>(
     return flat.get(`${key}_${rules.select(count)}`) ?? flat.get(`${key}_other`)
   }
 
-  const translate = (key: string, vars?: MessageVars): string => {
-    const message = resolve(key, vars)
-    if (message === undefined) return fail(`No existe la clave «${key}»`, key)
-    return message.replace(/\{(\w+)\}/g, (placeholder, name: string) => {
+  /** Trozos del mensaje: textos y valores de las variables, en orden. */
+  const split = <V>(key: string, vars: Readonly<Record<string, V | string | number>> | undefined) => {
+    const message = resolve(key, vars as MessageVars | undefined)
+    if (message === undefined) return [fail(`No existe la clave «${key}»`, key)]
+    const out: (string | V)[] = []
+    let last = 0
+    for (const match of message.matchAll(/\{(\w+)\}/g)) {
+      const [placeholder, name] = match as unknown as [string, string]
+      out.push(message.slice(last, match.index))
+      last = match.index + placeholder.length
       const value = vars?.[name]
-      if (value === undefined) return fail(`Falta la variable «${name}» en «${key}»`, placeholder)
-      return typeof value === 'number' ? formatNumber(value) : value
-    })
+      if (value === undefined) out.push(fail(`Falta la variable «${name}» en «${key}»`, placeholder))
+      else out.push(typeof value === 'number' ? formatNumber(value) : value)
+    }
+    out.push(message.slice(last))
+    return out.filter((part) => part !== '')
   }
 
+  const translate = (key: string, vars?: MessageVars): string => split(key, vars).join('')
+  const parts = <V>(key: string, vars: Readonly<Record<string, V | string | number>>) => split(key, vars)
   const has = (key: string): boolean => flat.has(key) || pluralBases.has(key)
-  return Object.assign(translate, { has }) as unknown as Translator<T>
+  return Object.assign(translate, { has, parts }) as unknown as Translator<T>
 }
 
 /** Aplana el árbol a `clave.con.puntos → texto`, y falla si una hoja no es texto. */

@@ -48,7 +48,7 @@ const PAGES: { path: string; heading: string; title: string }[] = [
   ...(['account', 'profile', 'sound', 'emails', 'sessions', 'privacy'] as const).map((section, i) => ({
     path: `/ajustes/${['cuenta', 'perfil', 'sonido', 'emails', 'sesiones', 'privacidad'][i]}`,
     heading: `settings.${section}.title`,
-    title: documentTitle(`${tk(`settings.${section}.title`)} · ${t('settings.title')}`),
+    title: documentTitle(t('settings.pageTitle', { section: tk(`settings.${section}.title`) })),
   })),
   { path: '/entrar', heading: 'pages.signIn.title', title: documentTitle(tk('pages.signIn.title')) },
   { path: '/registro', heading: 'pages.signUp.title', title: documentTitle(tk('pages.signUp.title')) },

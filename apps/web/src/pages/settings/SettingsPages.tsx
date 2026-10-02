@@ -13,7 +13,7 @@ function SettingsSectionPlaceholder({ section }: { section: SettingsSectionKey }
     <PlaceholderPage
       title={title}
       summary={t(`settings.${section}.summary`)}
-      documentTitle={`${title} · ${t('settings.title')}`}
+      documentTitle={t('settings.pageTitle', { section: title })}
     />
   )
 }
