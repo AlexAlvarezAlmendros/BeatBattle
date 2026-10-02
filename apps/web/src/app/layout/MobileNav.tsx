@@ -21,29 +21,65 @@ export interface MobileNavState {
   /** Cierra el panel; con `restoreFocus`, el foco vuelve al botón que lo abrió. */
   close: (options?: { restoreFocus?: boolean }) => void
   toggleRef: RefObject<HTMLButtonElement | null>
+  /** Panel del menú: mientras está abierto, todo lo que no es él ni su fondo queda `inert`. */
+  panelRef: RefObject<HTMLDivElement | null>
   panelId: string
 }
 
+/** Marca de las capas del menú (panel y fondo), que no se vuelven `inert` al abrirlo. */
+const LAYER_ATTRIBUTE = 'data-mobile-nav-layer'
+
 /**
- * Estado del menú móvil (portado de `useMobileNav` del sello): bloquea el scroll de la página con el
- * panel abierto, lo cierra con Esc (devolviendo el foco al botón) y al pasar a escritorio.
+ * Deja `inert` a los hermanos del panel (fondo de orbes, «Saltar al contenido», isla, `<main>`, pie):
+ * así ni el lector de pantalla al deslizar ni un foco movido por código llegan detrás del diálogo.
+ * Devuelve los que ha tocado, para devolverlos a su estado al cerrar.
+ */
+function makeBackgroundInert(panel: HTMLElement | null): Element[] {
+  const siblings = panel?.parentElement ? [...panel.parentElement.children] : []
+  const touched = siblings.filter(
+    (element) => !element.hasAttribute(LAYER_ATTRIBUTE) && !element.hasAttribute('inert'),
+  )
+  for (const element of touched) element.setAttribute('inert', '')
+  return touched
+}
+
+/**
+ * Estado del menú móvil (portado de `useMobileNav` del sello). Con el panel abierto: bloquea el scroll
+ * de la página, deja `inert` lo de detrás y lo cierra con Esc. Se cierra también al pasar a escritorio
+ * y al cambiar de ruta (Atrás del navegador o el gesto atrás de Android): ahí no devuelve el foco al
+ * botón, porque `RootLayout` ya lo lleva al `<main>` de la página nueva.
+ *
+ * El foco se devuelve al botón en la limpieza del efecto, después de quitar `inert`: un elemento
+ * `inert` no acepta el foco.
  */
 export function useMobileNav(): MobileNavState {
   const [open, setOpen] = useState(false)
   const toggleRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const restoreFocusRef = useRef(false)
   const panelId = `mobile-nav-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`
+  const { pathname } = useLocation()
+  const previousPathname = useRef(pathname)
 
   const close = useCallback((options: { restoreFocus?: boolean } = {}) => {
+    restoreFocusRef.current = options.restoreFocus ?? false
     setOpen(false)
-    if (options.restoreFocus) toggleRef.current?.focus()
   }, [])
   const toggle = useCallback(() => setOpen((value) => !value), [])
 
   useEffect(() => {
+    if (previousPathname.current === pathname) return
+    previousPathname.current = pathname
+    close()
+  }, [pathname, close])
+
+  useEffect(() => {
     if (!open) return
+    restoreFocusRef.current = false
     const { body } = document
     const previousOverflow = body.style.overflow
     body.style.overflow = 'hidden'
+    const background = makeBackgroundInert(panelRef.current)
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault()
@@ -58,12 +94,17 @@ export function useMobileNav(): MobileNavState {
     desktop?.addEventListener('change', onDesktop)
     return () => {
       body.style.overflow = previousOverflow
+      for (const element of background) element.removeAttribute('inert')
       document.removeEventListener('keydown', onKeyDown)
       desktop?.removeEventListener('change', onDesktop)
+      if (restoreFocusRef.current) {
+        restoreFocusRef.current = false
+        toggleRef.current?.focus()
+      }
     }
   }, [open, close])
 
-  return { open, toggle, close, toggleRef, panelId }
+  return { open, toggle, close, toggleRef, panelRef, panelId }
 }
 
 /** Botón hamburguesa de la isla (≤ 992 px): tres líneas que se cruzan en aspa al abrir. */
@@ -133,6 +174,7 @@ export function MobileNavPanel({ nav }: { nav: MobileNavState }) {
             key="overlay"
             className="mobile-nav__overlay"
             aria-hidden="true"
+            data-mobile-nav-layer=""
             onClick={() => nav.close({ restoreFocus: true })}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -143,7 +185,9 @@ export function MobileNavPanel({ nav }: { nav: MobileNavState }) {
         {nav.open && (
           <m.div
             key="panel"
+            ref={nav.panelRef}
             id={nav.panelId}
+            data-mobile-nav-layer=""
             role="dialog"
             aria-modal="true"
             aria-labelledby={titleId}

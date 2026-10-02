@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
 import { t } from '../../i18n'
@@ -113,5 +113,47 @@ describe('MobileNav: menú móvil del sello (0.7, guía §2.17)', () => {
     await user.click(within(dialog()).getByRole('link', { name: t('layout.nav.jury') }))
     await waitClosed()
     expect(toggle()).toHaveFocus()
+  })
+
+  it('RNF-A11Y-01: con el panel abierto, lo de detrás (la isla) queda inert; al cerrar, vuelve', async () => {
+    const user = userEvent.setup()
+    renderInRouter(<SiteHeader />)
+    const header = screen.getByRole('banner')
+    await user.click(toggle())
+    expect(header).toHaveAttribute('inert')
+    expect(dialog()).not.toHaveAttribute('inert')
+    expect(document.querySelector('.mobile-nav__overlay')).not.toHaveAttribute('inert')
+
+    await user.keyboard('{Escape}')
+    await waitClosed()
+    expect(header).not.toHaveAttribute('inert')
+    // El foco vuelve al botón después de quitar `inert` (un elemento inert no lo acepta).
+    expect(toggle()).toHaveFocus()
+  })
+
+  it('RNF-A11Y-01: Atrás del navegador (cambio de ruta sin pulsar el panel) lo cierra y libera la página', async () => {
+    const user = userEvent.setup()
+    const { router } = renderInRouter(<SiteHeader />)
+    await act(() => router.navigate('/jurado'))
+    await user.click(toggle())
+    expect(dialog()).toBeInTheDocument()
+
+    await act(() => router.navigate(-1))
+    expect(router.state.location.pathname).toBe('/')
+    await waitClosed()
+    expect(toggle()).toHaveAttribute('aria-expanded', 'false')
+    expect(document.body.style.overflow).toBe('')
+    expect(screen.getByRole('banner')).not.toHaveAttribute('inert')
+    // Sin devolver el foco al botón: RootLayout lo lleva al <main> de la página nueva.
+    expect(toggle()).not.toHaveFocus()
+  })
+
+  it('RNF-A11Y-01: también se cierra si la ruta cambia por código (p. ej. una redirección)', async () => {
+    const user = userEvent.setup()
+    const { router } = renderInRouter(<SiteHeader />)
+    await user.click(toggle())
+    await act(() => router.navigate('/semanas'))
+    await waitClosed()
+    expect(document.body.style.overflow).toBe('')
   })
 })
