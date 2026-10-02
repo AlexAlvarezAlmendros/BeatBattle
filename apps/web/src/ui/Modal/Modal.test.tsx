@@ -2,11 +2,11 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StrictMode, useState } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { type MatchMediaController, mockMatchMedia } from '../../hooks/mockMatchMedia'
-import { REDUCED_MOTION_QUERY } from '../../hooks/useReducedMotion'
 import { t } from '../../i18n'
 import { Button } from '../Button'
 import { GlassProvider, resetGlassCapabilityCache } from '../glass'
+import { type MatchMediaController, mockMatchMedia } from '../hooks/mockMatchMedia'
+import { REDUCED_MOTION_QUERY } from '../hooks/useReducedMotion'
 import { Modal, ModalSurface } from './Modal'
 
 function Harness({ dismissible = true }: { dismissible?: boolean }) {

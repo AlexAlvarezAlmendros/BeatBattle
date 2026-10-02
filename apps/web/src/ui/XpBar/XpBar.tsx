@@ -1,8 +1,8 @@
 import { duration } from '@beatbattle/shared/tokens'
 import { type CSSProperties, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useReducedMotion } from '../../hooks/useReducedMotion'
 import { t } from '../../i18n'
 import { cx, forceStateAttr } from '../forceState'
+import { useReducedMotion } from '../hooks/useReducedMotion'
 import styles from './XpBar.module.css'
 
 export type XpBarState = 'rest' | 'gain' | 'levelUp'

@@ -12,11 +12,11 @@ import {
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { useReducedMotion } from '../../hooks/useReducedMotion'
 import { t } from '../../i18n'
 import { Button } from '../Button'
 import { cx } from '../forceState'
 import { GlassSurface } from '../GlassSurface'
+import { useReducedMotion } from '../hooks/useReducedMotion'
 import { isTopModalLayer, lockScroll, pushModalLayer, trapTab } from './focus'
 import styles from './Modal.module.css'
 

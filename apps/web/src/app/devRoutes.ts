@@ -8,7 +8,7 @@ export const devRoutes: RouteObject[] = import.meta.env.DEV
   ? [
       {
         path: 'dev/galeria',
-        lazy: async () => ({ Component: (await import('../dev/gallery/GalleryPage')).GalleryPage }),
+        lazy: async () => ({ Component: (await import('../ui/gallery/GalleryPage')).GalleryPage }),
       },
     ]
   : []

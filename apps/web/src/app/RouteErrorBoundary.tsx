@@ -1,10 +1,10 @@
 import { lazy, Suspense } from 'react'
 import { isRouteErrorResponse, Link, useRouteError } from 'react-router'
 import { t } from '../i18n'
-import { PlaceholderPage } from '../pages/PlaceholderPage'
+import { PlaceholderPage } from './PlaceholderPage'
 import { paths } from './paths'
 
-const NotFoundPage = lazy(() => import('../pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })))
+const NotFoundPage = lazy(() => import('./NotFoundPage').then((m) => ({ default: m.NotFoundPage })))
 
 /**
  * Límite de errores de las páginas: se pinta dentro del marco (cabecera y pie siguen ahí).

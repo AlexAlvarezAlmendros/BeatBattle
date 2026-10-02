@@ -13,11 +13,11 @@ import {
   useRef,
 } from 'react'
 import { Link, type To } from 'react-router'
-import { useReducedMotion } from '../../hooks/useReducedMotion'
 import { t } from '../../i18n'
 import { announce, ensureAnnouncer } from '../announce'
 import { cx, forceStateAttr, type InteractionState } from '../forceState'
 import { GlassSurface } from '../GlassSurface'
+import { useReducedMotion } from '../hooks/useReducedMotion'
 import { Icon, type IconName } from '../Icon'
 import styles from './Button.module.css'
 import { WaveLoader } from './WaveLoader'

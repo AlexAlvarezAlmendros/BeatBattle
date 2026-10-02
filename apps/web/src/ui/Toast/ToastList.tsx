@@ -1,7 +1,7 @@
 import { duration, ease, reducedDuration, spring } from '@beatbattle/shared/tokens'
 import { AnimatePresence, domAnimation, type FeatureBundle, LazyMotion, m, useIsPresent } from 'motion/react'
 import { type FocusEvent, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useReducedMotion } from '../../hooks/useReducedMotion'
+import { useReducedMotion } from '../hooks/useReducedMotion'
 import { Toast } from './Toast'
 import styles from './Toast.module.css'
 import type { ToastData } from './useToasts'

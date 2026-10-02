@@ -1,7 +1,7 @@
 import type { HTMLAttributes, ReactNode } from 'react'
-import { useTilt } from '../../hooks/useTilt'
 import { cx, forceStateAttr } from '../forceState'
 import { GlassSurface } from '../GlassSurface'
+import { useTilt } from '../hooks/useTilt'
 import styles from './Card.module.css'
 
 export type CardSurface = 'glass' | 'solid'

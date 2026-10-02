@@ -1,5 +1,5 @@
 import { useContext, useSyncExternalStore } from 'react'
-import { useReducedMotion } from '../../hooks/useReducedMotion'
+import { useReducedMotion } from '../hooks/useReducedMotion'
 import { GlassAllowedContext } from './GlassProvider'
 
 /**

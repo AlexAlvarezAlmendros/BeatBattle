@@ -1,7 +1,7 @@
 import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it } from 'vitest'
-import { type MatchMediaController, mockMatchMedia } from '../../hooks/mockMatchMedia'
+import { type MatchMediaController, mockMatchMedia } from '../hooks/mockMatchMedia'
 import { DataTile } from './DataTile'
 import tileCss from './DataTile.module.css?raw'
 import { DATA_TILE_COMPACT_QUERY, DataTileSection } from './DataTileSection'

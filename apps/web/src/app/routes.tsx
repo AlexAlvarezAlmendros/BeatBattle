@@ -39,8 +39,8 @@ function Redirecting() {
   return null
 }
 
-const settings = () => import('../pages/settings/SettingsPages')
-const auth = () => import('../pages/auth/AuthPages')
+const settings = () => import('../features/settings/SettingsPages')
+const auth = () => import('../features/auth/AuthPages')
 
 export interface CreateRoutesOptions {
   /** Rutas solo de desarrollo (la galería). Por defecto, las de `devRoutes.ts`. */
@@ -64,7 +64,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               index: true,
               handle: access('public'),
               lazy: page(
-                () => import('../pages/HomePage'),
+                () => import('../features/week/HomePage'),
                 (m) => m.HomePage,
               ),
             },
@@ -72,7 +72,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               path: 'semana/:slug',
               handle: access('public'),
               lazy: page(
-                () => import('../pages/week/WeekPage'),
+                () => import('../features/week/WeekPage'),
                 (m) => m.WeekPage,
               ),
             },
@@ -80,7 +80,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               path: 'semana/:slug/resultados',
               handle: access('public'),
               lazy: page(
-                () => import('../pages/week/WeekResultsPage'),
+                () => import('../features/results/WeekResultsPage'),
                 (m) => m.WeekResultsPage,
               ),
             },
@@ -88,7 +88,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               path: 'semanas',
               handle: access('public'),
               lazy: page(
-                () => import('../pages/week/WeeksPage'),
+                () => import('../features/archive/WeeksPage'),
                 (m) => m.WeeksPage,
               ),
             },
@@ -96,7 +96,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               path: 'e/:id',
               handle: access('public'),
               lazy: page(
-                () => import('../pages/EntryPage'),
+                () => import('../features/entries/EntryPage'),
                 (m) => m.EntryPage,
               ),
             },
@@ -104,7 +104,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               path: 'jurado',
               handle: access('verified'),
               lazy: page(
-                () => import('../pages/JuryPage'),
+                () => import('../features/jury/JuryPage'),
                 (m) => m.JuryPage,
               ),
             },
@@ -112,7 +112,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               path: 'subir',
               handle: access('verified'),
               lazy: page(
-                () => import('../pages/UploadPage'),
+                () => import('../features/upload/UploadPage'),
                 (m) => m.UploadPage,
               ),
             },
@@ -120,7 +120,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               path: 'p/:username',
               handle: access('public'),
               lazy: page(
-                () => import('../pages/ProfilePage'),
+                () => import('../features/profile/ProfilePage'),
                 (m) => m.ProfilePage,
               ),
             },
@@ -128,7 +128,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               path: 'salon-de-la-fama',
               handle: access('public'),
               lazy: page(
-                () => import('../pages/HallOfFamePage'),
+                () => import('../features/archive/HallOfFamePage'),
                 (m) => m.HallOfFamePage,
               ),
             },
@@ -136,7 +136,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               path: 'temporada/:id',
               handle: access('public'),
               lazy: page(
-                () => import('../pages/SeasonPage'),
+                () => import('../features/game/SeasonPage'),
                 (m) => m.SeasonPage,
               ),
             },
@@ -144,7 +144,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               path: 'como-funciona',
               handle: access('public'),
               lazy: page(
-                () => import('../pages/HowItWorksPage'),
+                () => import('../features/week/HowItWorksPage'),
                 (m) => m.HowItWorksPage,
               ),
             },
@@ -152,7 +152,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               path: 'ajustes',
               handle: access('session'),
               lazy: page(
-                () => import('../pages/settings/SettingsLayout'),
+                () => import('../features/settings/SettingsLayout'),
                 (m) => m.SettingsLayout,
               ),
               children: [
@@ -178,7 +178,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
                 {
                   index: true,
                   lazy: page(
-                    () => import('../pages/admin/AdminPage'),
+                    () => import('../features/admin/AdminPage'),
                     (m) => m.AdminPage,
                   ),
                 },
@@ -189,7 +189,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               handle: access('public'),
               loader: legalLoader,
               lazy: page(
-                () => import('../pages/legal/LegalPage'),
+                () => import('./LegalPage'),
                 (m) => m.LegalPage,
               ),
             },
@@ -198,7 +198,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               path: '*',
               handle: access('public'),
               lazy: page(
-                () => import('../pages/NotFoundPage'),
+                () => import('./NotFoundPage'),
                 (m) => m.NotFoundPage,
               ),
             },

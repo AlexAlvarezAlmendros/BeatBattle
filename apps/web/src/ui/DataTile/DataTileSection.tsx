@@ -1,6 +1,6 @@
 import { type ReactNode, useId, useState } from 'react'
-import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { cx } from '../forceState'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 import { Icon } from '../Icon'
 import { SectionLabel } from '../SectionLabel'
 import { DataTileList } from './DataTile'

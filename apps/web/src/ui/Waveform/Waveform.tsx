@@ -1,7 +1,7 @@
 import { type CSSProperties, useMemo, useRef } from 'react'
-import { useElementWidth } from '../../hooks/useElementWidth'
 import { t } from '../../i18n'
 import { cx } from '../forceState'
+import { useElementWidth } from '../hooks/useElementWidth'
 import {
   barsForWidth,
   clamp01,

@@ -1,9 +1,9 @@
 import { duration } from '@beatbattle/shared/tokens'
 import { act, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { type MatchMediaController, mockMatchMedia } from '../../hooks/mockMatchMedia'
-import { REDUCED_MOTION_QUERY } from '../../hooks/useReducedMotion'
 import { t } from '../../i18n'
+import { type MatchMediaController, mockMatchMedia } from '../hooks/mockMatchMedia'
+import { REDUCED_MOTION_QUERY } from '../hooks/useReducedMotion'
 import { XpBar } from './XpBar'
 
 let media: MatchMediaController | undefined
