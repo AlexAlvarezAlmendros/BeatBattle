@@ -15,10 +15,19 @@ const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
  * se añadirá aquí y se autenticará con `CRON_SECRET` (comparación en tiempo constante) en su propio
  * `preHandler`. Nada más debe entrar en esta lista sin otra autenticación equivalente.
  */
-export const ORIGIN_CHECK_EXEMPT_PREFIXES: readonly string[] = []
-
-function isApiPath(url: string): boolean {
-  return url === '/api' || url.startsWith('/api/') || url.startsWith('/api?')
+declare module 'fastify' {
+  interface FastifyContextConfig {
+    /**
+     * Exime la ruta de la comprobación de `Origin` (nunca del «solo JSON» ni del tamaño). Solo para
+     * rutas que se autentican con otro secreto y no las llama un navegador. Vacío en la Fase 0.
+     *
+     * Hueco previsto: `/api/cron/tick` (Fase 3, §4.12). Vercel Cron llama por GET, que no se
+     * comprueba, pero si el flujo de GitHub Actions la llama con un método de escritura no traerá
+     * `Origin`: esa ruta se declarará con `config: { skipOriginCheck: true }` y comprobará
+     * `CRON_SECRET` (en tiempo constante) en su propio `preHandler`.
+     */
+    skipOriginCheck?: boolean
+  }
 }
 
 /** Tipo de medio sin parámetros (`application/json; charset=utf-8` → `application/json`). */
@@ -34,9 +43,12 @@ function hasBody(headers: Record<string, string | string[] | undefined>): boolea
 
 /**
  * Seguridad transversal de la API (guía §4.10, §4.13):
- * - **CSRF** (`RNF-SEC-05`): toda escritura (método distinto de GET/HEAD/OPTIONS) bajo `/api` debe
- *   traer un `Origin` de `ALLOWED_ORIGINS` (o el de `BB_PUBLIC_URL`); ajeno o ausente → 403
- *   `FORBIDDEN_ORIGIN`. Los navegadores envían `Origin` siempre en POST/PUT/PATCH/DELETE.
+ * - **CSRF** (`RNF-SEC-05`): toda escritura (método distinto de GET/HEAD/OPTIONS) debe traer un
+ *   `Origin` de `ALLOWED_ORIGINS` (o el de `BB_PUBLIC_URL`); ajeno o ausente → 403
+ *   `FORBIDDEN_ORIGIN`. Los navegadores envían `Origin` siempre en POST/PUT/PATCH/DELETE. Todo lo
+ *   que sirve este servidor vive bajo `/api`, pero la comprobación no mira la ruta: así ninguna
+ *   variante (mayúsculas, barras dobles, rutas inexistentes) se la salta. Las excepciones se
+ *   declaran por ruta con `skipOriginCheck`.
  * - **Solo JSON** (`RNF-SEC-05`): una escritura con cuerpo debe ser `application/json` → si no, 415
  *   `UNSUPPORTED_MEDIA_TYPE`. Se quita además el parser de `text/plain` de Fastify, así un formulario
  *   de otro sitio no puede mandar un cuerpo que la API entienda.
@@ -50,10 +62,9 @@ export function registerSecurity(app: FastifyInstance, config: AppConfig): void 
   const allowed = new Set(config.allowedOrigins)
 
   app.addHook('onRequest', async (req) => {
-    if (SAFE_METHODS.has(req.method) || !isApiPath(req.url)) return
+    if (SAFE_METHODS.has(req.method)) return
 
-    const exempt = ORIGIN_CHECK_EXEMPT_PREFIXES.some((p) => req.url.startsWith(p))
-    if (!exempt) {
+    if (req.routeOptions.config.skipOriginCheck !== true) {
       const origin = req.headers.origin
       if (!origin || !allowed.has(origin))
         throw appError('FORBIDDEN_ORIGIN', 'Petición rechazada: origen no permitido.')

@@ -25,8 +25,12 @@ const EnvSchema = z.object({
     .default(3000),
   /** URL pública de la web (`https://battle.otherpeople.es`); su origen se permite siempre. */
   BB_PUBLIC_URL: z.string().optional(),
-  /** Orígenes permitidos en escrituras, separados por comas (comprobación de `Origin`, §4.13). */
-  ALLOWED_ORIGINS: z.string().default('http://localhost:5173'),
+  /**
+   * Orígenes extra permitidos en escrituras, separados por comas (comprobación de `Origin`, §4.13).
+   * Por defecto `http://localhost:5173` fuera de producción; en producción, ninguno además del de
+   * `BB_PUBLIC_URL` (un `localhost` permitido en producción no tiene sentido).
+   */
+  ALLOWED_ORIGINS: z.string().optional(),
   /** libSQL: `file:./data/local.db` en local, `libsql://…` en Turso, `:memory:` en tests. */
   DATABASE_URL: z.string().min(1).default('file:./data/local.db'),
   DATABASE_AUTH_TOKEN: z.string().optional(),
@@ -126,7 +130,7 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
   }
 
   const allowedOrigins = new Set<string>()
-  for (const raw of (cleaned.ALLOWED_ORIGINS ?? DEV_PUBLIC_URL).split(',')) {
+  for (const raw of (cleaned.ALLOWED_ORIGINS ?? (production ? '' : DEV_PUBLIC_URL)).split(',')) {
     const item = raw.trim()
     if (!item) continue
     const origin = parseOrigin(item)

@@ -59,6 +59,30 @@ describe('comprobación de Origin en escrituras', () => {
     expect(del.statusCode).toBe(200)
   })
 
+  it('RNF-SEC-05: la comprobación no depende de cómo se escriba la ruta', async () => {
+    for (const url of ['/API/test/echo', '//api/test/echo', '/otra/cosa'])
+      expect(
+        (await t.app.inject({ method: 'POST', url, headers: { origin: 'https://malo.example' } })).statusCode,
+      ).toBe(403)
+  })
+
+  it('una ruta declarada con skipOriginCheck no pide Origin, pero sí JSON', async () => {
+    const s = await makeApp({
+      routes: (app) =>
+        app.post('/api/test/cron', { config: { skipOriginCheck: true } }, async () => ({ data: 'ok' })),
+    })
+    const ok = await s.app.inject({ method: 'POST', url: '/api/test/cron' })
+    expect(ok.statusCode).toBe(200)
+    const plain = await s.app.inject({
+      method: 'POST',
+      url: '/api/test/cron',
+      headers: { 'content-type': 'text/plain' },
+      payload: 'x',
+    })
+    expect(plain.statusCode).toBe(415)
+    await s.app.close()
+  })
+
   it('las lecturas no necesitan Origin', async () => {
     const res = await t.app.inject({
       method: 'GET',

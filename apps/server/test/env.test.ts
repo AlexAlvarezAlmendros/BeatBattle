@@ -116,6 +116,13 @@ describe('loadEnv', () => {
     ])
     const c = loadEnv({ NODE_ENV: 'production', BB_PUBLIC_URL: 'https://b.example', BB_TEST_CLOCK: '0' })
     expect(c.testClock).toBe(false)
-    expect(c.allowedOrigins).toContain('https://b.example')
+    // en producción, sin ALLOWED_ORIGINS solo vale el origen público (nada de localhost)
+    expect(c.allowedOrigins).toEqual(['https://b.example'])
+    const extra = loadEnv({
+      NODE_ENV: 'production',
+      BB_PUBLIC_URL: 'https://b.example',
+      ALLOWED_ORIGINS: 'https://www.b.example',
+    })
+    expect(extra.allowedOrigins).toEqual(['https://www.b.example', 'https://b.example'])
   })
 })
