@@ -199,7 +199,10 @@ function ModalLayer({
   // scroll y la capa de abajo manda.
   useLayoutEffect(() => {
     if (!isPresent) return
-    if (document.activeElement instanceof HTMLElement) returnFocus.current = document.activeElement
+    // Lo que ya está dentro del diálogo no cuenta: en modo estricto el efecto se repite al montar y
+    // para entonces el foco ya está en el diálogo.
+    const active = document.activeElement
+    if (active instanceof HTMLElement && !dialogRef.current?.contains(active)) returnFocus.current = active
     const releaseScroll = lockScroll()
     const releaseLayer = pushModalLayer(layer)
     const target = initialFocus?.current ?? dialogRef.current
@@ -254,7 +257,10 @@ function ModalLayer({
       transition={fade}
       // El fondo solo cierra con el puntero; con teclado se cierra con Esc (el foco está atrapado dentro).
       onPointerDown={(event) => {
-        if (dismissible && event.target === event.currentTarget) onClose()
+        if (!dismissible || event.target !== event.currentTarget) return
+        // Sin el mousedown que sigue: haría caer el foco en <body>, recién devuelto al botón.
+        event.preventDefault()
+        onClose()
       }}
       data-modal-scrim=""
       data-modal-exiting={isPresent ? undefined : ''}

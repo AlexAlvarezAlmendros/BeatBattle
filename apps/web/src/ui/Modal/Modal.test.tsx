@@ -1,6 +1,6 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { useState } from 'react'
+import { StrictMode, useState } from 'react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { type MatchMediaController, mockMatchMedia } from '../../hooks/mockMatchMedia'
 import { REDUCED_MOTION_QUERY } from '../../hooks/useReducedMotion'
@@ -96,6 +96,22 @@ describe('Modal', () => {
     expect(trigger).toHaveFocus()
   })
 
+  it('RNF-A11Y-01: también en modo estricto (efectos repetidos al montar) el foco vuelve al botón', async () => {
+    const user = userEvent.setup()
+    render(
+      <StrictMode>
+        <Harness />
+      </StrictMode>,
+    )
+    const trigger = screen.getByRole('button', { name: 'Abrir' })
+    await user.click(trigger)
+    expect(await screen.findByRole('dialog')).toHaveFocus()
+    await user.keyboard('{Escape}')
+    expect(trigger).toHaveFocus()
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    expect(trigger).toHaveFocus()
+  })
+
   it('el botón de cerrar y el fondo cierran; el scroll de la página se bloquea mientras tanto', async () => {
     const { user } = await openModal()
     expect(document.body.style.overflow).toBe('hidden')
@@ -106,10 +122,13 @@ describe('Modal', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
     await waitFor(() => expect(document.body.style.overflow).toBe(''))
 
-    await user.click(screen.getByRole('button', { name: 'Abrir' }))
+    const trigger = screen.getByRole('button', { name: 'Abrir' })
+    await user.click(trigger)
     const dialog = await screen.findByRole('dialog')
     await user.pointer({ keys: '[MouseLeft]', target: dialog.closest('[data-modal-scrim]')! })
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull())
+    // El clic en el fondo no se lleva el foco a <body>: vuelve al botón que lo abrió.
+    expect(trigger).toHaveFocus()
   })
 
   it('con dismissible={false} el fondo no cierra', async () => {
