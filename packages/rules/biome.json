@@ -1,0 +1,84 @@
+{
+  "root": false,
+  "extends": "//",
+  "overrides": [
+    {
+      "includes": ["src/**"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noNodejsModules": {
+              "level": "error",
+              "options": {}
+            }
+          },
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "react": "packages/rules es puro: nada de UI (guía §4.5).",
+                  "react-dom": "packages/rules es puro: nada de UI (guía §4.5).",
+                  "react-router": "packages/rules es puro: nada de UI (guía §4.5).",
+                  "three": "packages/rules es puro: nada de render (guía §4.5).",
+                  "zustand": "packages/rules es puro: el estado de UI vive en el cliente (guía §4.5).",
+                  "tone": "packages/rules es puro: nada de audio (guía §4.5).",
+                  "motion": "packages/rules es puro: nada de animación (guía §4.5).",
+                  "fastify": "packages/rules es puro: nada de servidor (guía §4.5).",
+                  "better-auth": "packages/rules es puro: nada de servidor (guía §4.5).",
+                  "drizzle-orm": "packages/rules es puro: nada de base de datos (guía §4.5).",
+                  "@libsql/client": "packages/rules es puro: nada de base de datos (guía §4.5).",
+                  "cloudinary": "packages/rules es puro: nada de almacenamiento (guía §4.5).",
+                  "nodemailer": "packages/rules es puro: nada de email (guía §4.5)."
+                },
+                "patterns": [
+                  {
+                    "group": [
+                      "react/**",
+                      "react-dom/**",
+                      "react-router/**",
+                      "three/**",
+                      "@react-three/**",
+                      "@tanstack/**",
+                      "motion/**",
+                      "fastify/**",
+                      "@fastify/**",
+                      "better-auth/**",
+                      "drizzle-orm/**",
+                      "@libsql/**",
+                      "cloudinary/**",
+                      "node:*"
+                    ],
+                    "message": "packages/rules es puro y portable: sin UI, render, audio, servidor, BD ni APIs de Node (guía §4.5)."
+                  }
+                ]
+              }
+            },
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": {
+                "deniedGlobals": {
+                  "window": "Sin DOM en las reglas (guía §4.5).",
+                  "document": "Sin DOM en las reglas (guía §4.5).",
+                  "navigator": "Sin DOM en las reglas (guía §4.5).",
+                  "localStorage": "Sin almacenamiento en las reglas (guía §4.5).",
+                  "sessionStorage": "Sin almacenamiento en las reglas (guía §4.5).",
+                  "performance": "El instante entra como argumento; nada de relojes reales (guía §4.5).",
+                  "process": "Sin APIs de Node en las reglas (guía §4.5).",
+                  "Buffer": "Sin APIs de Node en las reglas (guía §4.5).",
+                  "fetch": "Sin red en las reglas (guía §4.5).",
+                  "crypto": "El azar sale del PRNG con semilla (prng.ts), no de crypto (guía §4.5).",
+                  "setTimeout": "Sin temporizadores: las reglas son funciones puras (guía §4.5).",
+                  "setInterval": "Sin temporizadores: las reglas son funciones puras (guía §4.5).",
+                  "setImmediate": "Sin temporizadores: las reglas son funciones puras (guía §4.5).",
+                  "requestAnimationFrame": "Sin temporizadores: las reglas son funciones puras (guía §4.5).",
+                  "globalThis": "Sin acceso al entorno global: las reglas son funciones puras (guía §4.5)."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
