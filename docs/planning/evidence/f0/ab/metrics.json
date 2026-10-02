@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-02T16:31:13.234Z",
+  "generatedAt": "2026-10-02T17:05:19.656Z",
   "beatbattle": {
     "base": "http://127.0.0.1:5520",
-    "commit": "717a778",
+    "commit": "a5b7850",
     "browser": "Chrome 154.0.8037.57",
     "dpr": 1
   },
@@ -14,7 +14,7 @@
     },
     "extra": {
       "dir": "docs/planning/evidence/f0/ab/otp-extra",
-      "capturedAt": "2026-10-02T16:13:44.108Z"
+      "capturedAt": "2026-10-02T17:00:47.802Z"
     }
   },
   "expected": {
@@ -180,7 +180,7 @@
                 },
                 "rect.height": {
                   "otp": 3076.34,
-                  "bb": 1411.23,
+                  "bb": 1375.05,
                   "delta": "≠"
                 },
                 "size.width": {
@@ -190,7 +190,7 @@
                 },
                 "size.height": {
                   "otp": 3076.34,
-                  "bb": 1411.23,
+                  "bb": 1375.05,
                   "delta": "≠"
                 },
                 "borderRadius": {
@@ -272,6 +272,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
                 }
               }
             },
@@ -395,6 +400,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -533,6 +543,11 @@
                   "otp": "rgba(0, 0, 0, 0.6) 0px 4px 24px",
                   "bb": "rgba(0, 0, 0, 0.6) 0px 4px 24px",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -671,6 +686,11 @@
                   "otp": "rgba(255, 0, 60, 0.4) 0px 0px 30px",
                   "bb": "rgba(255, 0, 60, 0.4) 0px 0px 30px",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -880,6 +900,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -1053,6 +1078,16 @@
                   "otp": "vertical-rl",
                   "bb": "vertical-rl",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
+                },
+                "alignItems": {
+                  "otp": null,
+                  "bb": "normal",
+                  "delta": "≠"
                 }
               }
             },
@@ -1194,6 +1229,11 @@
                   "otp": "radial-gradient(rgb(0, 0, 0) 30%, rgba(0, 0, 0, 0) 75%)",
                   "bb": "radial-gradient(rgb(0, 0, 0) 30%, rgba(0, 0, 0, 0) 75%)",
                   "delta": "="
+                },
+                "alignItems": {
+                  "otp": null,
+                  "bb": "normal",
+                  "delta": "≠"
                 }
               }
             },
@@ -1477,6 +1517,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -1600,6 +1645,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -1694,8 +1744,8 @@
               "props": {
                 "rect.x": {
                   "otp": -269.41,
-                  "bb": -170.31,
-                  "delta": 99.1
+                  "bb": -175.73,
+                  "delta": 93.68
                 },
                 "rect.y": {
                   "otp": 799.61,
@@ -1766,6 +1816,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
                 }
               }
             },
@@ -1780,8 +1835,8 @@
               "props": {
                 "rect.x": {
                   "otp": -269.41,
-                  "bb": -170.31,
-                  "delta": 99.1
+                  "bb": -175.73,
+                  "delta": 93.68
                 },
                 "rect.y": {
                   "otp": 804.11,
@@ -1968,6 +2023,11 @@
                   "otp": "horizontal-tb",
                   "bb": "horizontal-tb",
                   "delta": "="
+                },
+                "alignItems": {
+                  "otp": null,
+                  "bb": "normal",
+                  "delta": "≠"
                 }
               }
             }
@@ -2184,6 +2244,11 @@
                   "otp": "horizontal-tb",
                   "bb": "horizontal-tb",
                   "delta": "="
+                },
+                "alignItems": {
+                  "otp": null,
+                  "bb": "normal",
+                  "delta": "≠"
                 }
               }
             },
@@ -2311,6 +2376,11 @@
                   "otp": "horizontal-tb",
                   "bb": "horizontal-tb",
                   "delta": "="
+                },
+                "alignItems": {
+                  "otp": null,
+                  "bb": "normal",
+                  "delta": "≠"
                 }
               }
             },
@@ -2439,6 +2509,11 @@
                   "otp": "horizontal-tb",
                   "bb": "horizontal-tb",
                   "delta": "="
+                },
+                "alignItems": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -2562,6 +2637,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
                 }
               }
             },
@@ -2685,6 +2765,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
                 }
               }
             },
@@ -2808,6 +2893,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
                 }
               }
             },
@@ -2907,33 +2997,33 @@
               "props": {
                 "rect.x": {
                   "otp": 32,
-                  "bb": 60,
-                  "delta": 28
+                  "bb": 32,
+                  "delta": "="
                 },
                 "rect.y": {
                   "otp": 117,
-                  "bb": 133,
-                  "delta": 16
+                  "bb": 117,
+                  "delta": "="
                 },
                 "rect.width": {
                   "otp": 1376,
-                  "bb": 635.52,
-                  "delta": "≠"
+                  "bb": 1376,
+                  "delta": "="
                 },
                 "rect.height": {
                   "otp": 37,
-                  "bb": 55.19,
-                  "delta": 18.19
+                  "bb": 36.8,
+                  "delta": -0.2
                 },
                 "size.width": {
                   "otp": 1376,
-                  "bb": 635.52,
-                  "delta": "≠"
+                  "bb": 1376,
+                  "delta": "="
                 },
                 "size.height": {
                   "otp": 37,
-                  "bb": 55.19,
-                  "delta": 18.19
+                  "bb": 36.8,
+                  "delta": -0.2
                 },
                 "fontFamily": {
                   "otp": "Montserrat, sans-serif",
@@ -2942,33 +3032,38 @@
                 },
                 "fontSize": {
                   "otp": 32,
-                  "bb": 48,
-                  "delta": 16
+                  "bb": 32,
+                  "delta": "="
                 },
                 "fontWeight": {
                   "otp": "700",
-                  "bb": "900",
-                  "delta": "≠"
+                  "bb": "700",
+                  "delta": "="
                 },
                 "letterSpacing": {
                   "otp": "normal",
-                  "bb": "-0.96px",
-                  "delta": "≠"
+                  "bb": "normal",
+                  "delta": "="
                 },
                 "letterSpacingEm": {
                   "otp": 0,
-                  "bb": -0.02,
+                  "bb": 0,
                   "delta": "="
                 },
                 "lineHeight": {
                   "otp": "normal",
-                  "bb": "55.2px",
+                  "bb": "36.8px",
                   "delta": "≠"
+                },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "center",
+                  "delta": "="
                 },
                 "textTransform": {
                   "otp": "none",
-                  "bb": "uppercase",
-                  "delta": "≠"
+                  "bb": "none",
+                  "delta": "="
                 },
                 "color": {
                   "otp": "rgb(255, 255, 255)",
@@ -3084,13 +3179,13 @@
               "props": {
                 "rect.x": {
                   "otp": 496.84,
-                  "bb": 77,
-                  "delta": -419.84
+                  "bb": 49,
+                  "delta": -447.84
                 },
                 "rect.y": {
                   "otp": 697.8,
-                  "bb": 168.23,
-                  "delta": -529.57
+                  "bb": 167.67,
+                  "delta": -530.13
                 },
                 "rect.width": {
                   "otp": 256.59,
@@ -3191,6 +3286,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -3207,13 +3307,13 @@
               "props": {
                 "rect.x": {
                   "otp": 769.44,
-                  "bb": 77,
-                  "delta": -692.44
+                  "bb": 49,
+                  "delta": -720.44
                 },
                 "rect.y": {
                   "otp": 697.8,
-                  "bb": 231.61,
-                  "delta": -466.19
+                  "bb": 231.05,
+                  "delta": -466.75
                 },
                 "rect.width": {
                   "otp": 173.69,
@@ -3314,6 +3414,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             }
@@ -3407,13 +3512,13 @@
               "props": {
                 "rect.x": {
                   "otp": 180.81,
-                  "bb": 77,
-                  "delta": -103.81
+                  "bb": 49,
+                  "delta": -131.81
                 },
                 "rect.y": {
                   "otp": 178,
-                  "bb": 143.69,
-                  "delta": -34.31
+                  "bb": 144.13,
+                  "delta": -33.87
                 },
                 "rect.width": {
                   "otp": 57.14,
@@ -3493,12 +3598,17 @@
                 "letterSpacingEm": {
                   "otp": 0.01,
                   "bb": 0,
-                  "delta": "="
+                  "delta": -0.01
                 },
                 "lineHeight": {
                   "otp": "normal",
                   "bb": "13.8px",
                   "delta": "≠"
+                },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "center",
+                  "delta": "="
                 },
                 "textTransform": {
                   "otp": "none",
@@ -3595,13 +3705,13 @@
               "props": {
                 "rect.x": {
                   "otp": 180.81,
-                  "bb": 717,
-                  "delta": 536.19
+                  "bb": 689,
+                  "delta": 508.19
                 },
                 "rect.y": {
                   "otp": 178,
-                  "bb": 143.69,
-                  "delta": -34.31
+                  "bb": 144.13,
+                  "delta": -33.87
                 },
                 "rect.width": {
                   "otp": 57.14,
@@ -3681,12 +3791,17 @@
                 "letterSpacingEm": {
                   "otp": 0.01,
                   "bb": 0,
-                  "delta": "="
+                  "delta": -0.01
                 },
                 "lineHeight": {
                   "otp": "normal",
                   "bb": "13.8px",
                   "delta": "≠"
+                },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "center",
+                  "delta": "="
                 },
                 "textTransform": {
                   "otp": "none",
@@ -3860,17 +3975,17 @@
               "props": {
                 "rect.x": {
                   "otp": 32,
-                  "bb": 77,
-                  "delta": 45
+                  "bb": 49,
+                  "delta": 17
                 },
                 "rect.y": {
                   "otp": 281.56,
-                  "bb": 142.28,
-                  "delta": -139.28
+                  "bb": 142.11,
+                  "delta": -139.45
                 },
                 "rect.width": {
                   "otp": 1376,
-                  "bb": 1286,
+                  "bb": 1342,
                   "delta": "≠"
                 },
                 "rect.height": {
@@ -3880,7 +3995,7 @@
                 },
                 "size.width": {
                   "otp": 1350,
-                  "bb": 1286,
+                  "bb": 1342,
                   "delta": "≠"
                 },
                 "size.height": {
@@ -3972,6 +4087,11 @@
                   "otp": "horizontal-tb",
                   "bb": "horizontal-tb",
                   "delta": "="
+                },
+                "alignItems": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -3986,13 +4106,13 @@
               "props": {
                 "rect.x": {
                   "otp": 45,
-                  "bb": 90,
-                  "delta": 45
+                  "bb": 62,
+                  "delta": 17
                 },
                 "rect.y": {
                   "otp": 298.92,
-                  "bb": 165.53,
-                  "delta": -133.39
+                  "bb": 165.36,
+                  "delta": -133.56
                 },
                 "rect.width": {
                   "otp": 48,
@@ -4062,13 +4182,13 @@
               "props": {
                 "rect.x": {
                   "otp": 109,
-                  "bb": 154,
-                  "delta": 45
+                  "bb": 126,
+                  "delta": 17
                 },
                 "rect.y": {
                   "otp": 306.92,
-                  "bb": 171.53,
-                  "delta": -135.39
+                  "bb": 171.36,
+                  "delta": -135.56
                 },
                 "rect.width": {
                   "otp": 32,
@@ -4140,17 +4260,17 @@
               "props": {
                 "rect.x": {
                   "otp": 157,
-                  "bb": 206,
-                  "delta": 49
+                  "bb": 178,
+                  "delta": 21
                 },
                 "rect.y": {
                   "otp": 293.95,
-                  "bb": 153.67,
-                  "delta": -140.28
+                  "bb": 153.5,
+                  "delta": -140.45
                 },
                 "rect.width": {
                   "otp": 74.38,
-                  "bb": 1144,
+                  "bb": 1200,
                   "delta": "≠"
                 },
                 "rect.height": {
@@ -4160,7 +4280,7 @@
                 },
                 "size.width": {
                   "otp": "auto",
-                  "bb": 1144,
+                  "bb": 1200,
                   "delta": "≠"
                 },
                 "size.height": {
@@ -4212,6 +4332,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
                 }
               }
             },
@@ -4228,13 +4353,13 @@
               "props": {
                 "rect.x": {
                   "otp": 157,
-                  "bb": 206,
-                  "delta": 49
+                  "bb": 178,
+                  "delta": 21
                 },
                 "rect.y": {
                   "otp": 316.53,
-                  "bb": 173.78,
-                  "delta": -142.75
+                  "bb": 173.61,
+                  "delta": -142.92
                 },
                 "rect.width": {
                   "otp": 152.5,
@@ -4300,6 +4425,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
                 }
               }
             },
@@ -4316,13 +4446,13 @@
               "props": {
                 "rect.x": {
                   "otp": 317.5,
-                  "bb": 296.67,
-                  "delta": -20.83
+                  "bb": 268.67,
+                  "delta": -48.83
                 },
                 "rect.y": {
                   "otp": 313.34,
-                  "bb": 172.16,
-                  "delta": -141.18
+                  "bb": 171.98,
+                  "delta": -141.36
                 },
                 "rect.width": {
                   "otp": 77.55,
@@ -4423,6 +4553,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
                 }
               }
             },
@@ -4439,13 +4574,13 @@
               "props": {
                 "rect.x": {
                   "otp": 403.05,
-                  "bb": 348.53,
-                  "delta": -54.52
+                  "bb": 320.53,
+                  "delta": -82.52
                 },
                 "rect.y": {
                   "otp": 316.53,
-                  "bb": 173.78,
-                  "delta": -142.75
+                  "bb": 173.61,
+                  "delta": -142.92
                 },
                 "rect.width": {
                   "otp": 52.3,
@@ -4510,6 +4645,11 @@
                 "fontVariantNumeric": {
                   "otp": "normal",
                   "bb": "tabular-nums",
+                  "delta": "≠"
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
                   "delta": "≠"
                 }
               }
@@ -4610,17 +4750,17 @@
               "props": {
                 "rect.x": {
                   "otp": 194.59,
-                  "bb": 206,
-                  "delta": 11.41
+                  "bb": 178,
+                  "delta": -16.59
                 },
                 "rect.y": {
                   "otp": 344.91,
-                  "bb": 201.41,
-                  "delta": -143.5
+                  "bb": 201.23,
+                  "delta": -143.68
                 },
                 "rect.width": {
                   "otp": 939.5,
-                  "bb": 1144,
+                  "bb": 1200,
                   "delta": "≠"
                 },
                 "rect.height": {
@@ -4630,7 +4770,7 @@
                 },
                 "size.width": {
                   "otp": 939.5,
-                  "bb": 1144,
+                  "bb": 1200,
                   "delta": "≠"
                 },
                 "size.height": {
@@ -5033,17 +5173,17 @@
               "props": {
                 "rect.x": {
                   "otp": 120,
-                  "bb": 77,
-                  "delta": -43
+                  "bb": 49,
+                  "delta": -71
                 },
                 "rect.y": {
                   "otp": 706,
-                  "bb": 141.58,
-                  "delta": -564.42
+                  "bb": 142.02,
+                  "delta": -563.98
                 },
                 "rect.width": {
                   "otp": 101.94,
-                  "bb": 1286,
+                  "bb": 1342,
                   "delta": "≠"
                 },
                 "rect.height": {
@@ -5053,7 +5193,7 @@
                 },
                 "size.width": {
                   "otp": 101.94,
-                  "bb": 1286,
+                  "bb": 1342,
                   "delta": "≠"
                 },
                 "size.height": {
@@ -5089,6 +5229,11 @@
                 "lineHeight": {
                   "otp": "normal",
                   "bb": "13.8px",
+                  "delta": "≠"
+                },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "start",
                   "delta": "≠"
                 },
                 "textTransform": {
@@ -5177,13 +5322,13 @@
               "props": {
                 "rect.x": {
                   "otp": 120,
-                  "bb": 77,
-                  "delta": -43
+                  "bb": 49,
+                  "delta": -71
                 },
                 "rect.y": {
                   "otp": 732,
-                  "bb": 167.38,
-                  "delta": -564.62
+                  "bb": 167.81,
+                  "delta": -564.19
                 },
                 "rect.width": {
                   "otp": 136,
@@ -5192,8 +5337,8 @@
                 },
                 "rect.height": {
                   "otp": 75,
-                  "bb": 77.98,
-                  "delta": 2.98
+                  "bb": 74.06,
+                  "delta": -0.94
                 },
                 "size.width": {
                   "otp": 110,
@@ -5202,8 +5347,8 @@
                 },
                 "size.height": {
                   "otp": 53,
-                  "bb": 77.98,
-                  "delta": 24.98
+                  "bb": 74.06,
+                  "delta": 21.06
                 },
                 "borderRadius": {
                   "otp": "8px",
@@ -5289,6 +5434,11 @@
                   "otp": "horizontal-tb",
                   "bb": "horizontal-tb",
                   "delta": "="
+                },
+                "alignItems": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -5303,13 +5453,13 @@
               "props": {
                 "rect.x": {
                   "otp": 182.75,
-                  "bb": 148.98,
-                  "delta": -33.77
+                  "bb": 120.98,
+                  "delta": -61.77
                 },
                 "rect.y": {
                   "otp": 743,
-                  "bb": 178.38,
-                  "delta": -564.62
+                  "bb": 178.81,
+                  "delta": -564.19
                 },
                 "rect.width": {
                   "otp": 10.5,
@@ -5410,6 +5560,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -5426,13 +5581,13 @@
               "props": {
                 "rect.x": {
                   "otp": 153.14,
-                  "bb": 117.66,
-                  "delta": -35.48
+                  "bb": 89.66,
+                  "delta": -63.48
                 },
                 "rect.y": {
                   "otp": 763,
-                  "bb": 194.38,
-                  "delta": -568.62
+                  "bb": 194.81,
+                  "delta": -568.19
                 },
                 "rect.width": {
                   "otp": 69.7,
@@ -5441,8 +5596,8 @@
                 },
                 "rect.height": {
                   "otp": 12,
-                  "bb": 16.8,
-                  "delta": 4.8
+                  "bb": 12.88,
+                  "delta": 0.88
                 },
                 "size.width": {
                   "otp": 69.7,
@@ -5451,8 +5606,8 @@
                 },
                 "size.height": {
                   "otp": 12,
-                  "bb": 16.8,
-                  "delta": 4.8
+                  "bb": 12.88,
+                  "delta": 0.88
                 },
                 "fontFamily": {
                   "otp": "Montserrat, sans-serif",
@@ -5481,7 +5636,7 @@
                 },
                 "lineHeight": {
                   "otp": "normal",
-                  "bb": "16.8px",
+                  "bb": "12.88px",
                   "delta": "≠"
                 },
                 "textTransform": {
@@ -5498,6 +5653,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -5514,13 +5674,13 @@
               "props": {
                 "rect.x": {
                   "otp": 143.38,
-                  "bb": 102.42,
-                  "delta": -40.96
+                  "bb": 74.42,
+                  "delta": -68.96
                 },
                 "rect.y": {
                   "otp": 779,
-                  "bb": 215.17,
-                  "delta": -563.83
+                  "bb": 211.69,
+                  "delta": -567.31
                 },
                 "rect.width": {
                   "otp": 89.23,
@@ -5586,6 +5746,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             }
@@ -5690,13 +5855,13 @@
               "props": {
                 "rect.x": {
                   "otp": 171.5,
-                  "bb": 101,
-                  "delta": -70.5
+                  "bb": 73,
+                  "delta": -98.5
                 },
                 "rect.y": {
                   "otp": 178,
-                  "bb": 141.78,
-                  "delta": -36.22
+                  "bb": 142.22,
+                  "delta": -35.78
                 },
                 "rect.width": {
                   "otp": 349,
@@ -5802,6 +5967,11 @@
                   "otp": "horizontal-tb",
                   "bb": "horizontal-tb",
                   "delta": "="
+                },
+                "alignItems": {
+                  "otp": null,
+                  "bb": "normal",
+                  "delta": "≠"
                 }
               }
             },
@@ -5816,13 +5986,13 @@
               "props": {
                 "rect.x": {
                   "otp": 172.5,
-                  "bb": 102,
-                  "delta": -70.5
+                  "bb": 74,
+                  "delta": -98.5
                 },
                 "rect.y": {
                   "otp": 179,
-                  "bb": 142.78,
-                  "delta": -36.22
+                  "bb": 143.22,
+                  "delta": -35.78
                 },
                 "rect.width": {
                   "otp": 347,
@@ -5904,13 +6074,13 @@
               "props": {
                 "rect.x": {
                   "otp": 188.5,
-                  "bb": 118,
-                  "delta": -70.5
+                  "bb": 90,
+                  "delta": -98.5
                 },
                 "rect.y": {
                   "otp": 542,
-                  "bb": 428.78,
-                  "delta": -113.22
+                  "bb": 429.22,
+                  "delta": -112.78
                 },
                 "rect.width": {
                   "otp": 315,
@@ -5976,6 +6146,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
                 }
               }
             },
@@ -5992,13 +6167,13 @@
               "props": {
                 "rect.x": {
                   "otp": 188.5,
-                  "bb": 118,
-                  "delta": -70.5
+                  "bb": 90,
+                  "delta": -98.5
                 },
                 "rect.y": {
                   "otp": 579,
-                  "bb": 469.58,
-                  "delta": -109.42
+                  "bb": 470.02,
+                  "delta": -108.98
                 },
                 "rect.width": {
                   "otp": 315,
@@ -6064,6 +6239,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
                 }
               }
             },
@@ -6080,12 +6260,12 @@
               "props": {
                 "rect.x": {
                   "otp": 188.5,
-                  "bb": 118,
-                  "delta": -70.5
+                  "bb": 90,
+                  "delta": -98.5
                 },
                 "rect.y": {
                   "otp": 1234.94,
-                  "bb": 527.58,
+                  "bb": 528.02,
                   "delta": "≠"
                 },
                 "rect.width": {
@@ -6187,6 +6367,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             }
@@ -6252,8 +6437,8 @@
                 },
                 "rect.y": {
                   "otp": -48.06,
-                  "bb": 485,
-                  "delta": 533.06
+                  "bb": 505,
+                  "delta": 553.06
                 },
                 "rect.width": {
                   "otp": 1440,
@@ -6262,8 +6447,8 @@
                 },
                 "rect.height": {
                   "otp": 948.41,
-                  "bb": 415.23,
-                  "delta": -533.18
+                  "bb": 395.05,
+                  "delta": -553.36
                 },
                 "size.width": {
                   "otp": 1376,
@@ -6272,8 +6457,8 @@
                 },
                 "size.height": {
                   "otp": 840.41,
-                  "bb": 415.23,
-                  "delta": -425.18
+                  "bb": 395.05,
+                  "delta": -445.36
                 },
                 "borderRadius": {
                   "otp": "0px",
@@ -6340,6 +6525,11 @@
                   "bb": "normal",
                   "delta": "="
                 },
+                "alignItems": {
+                  "otp": "normal",
+                  "bb": "normal",
+                  "delta": "="
+                },
                 "transform": {
                   "otp": "none",
                   "bb": "none",
@@ -6378,8 +6568,8 @@
                 },
                 "rect.y": {
                   "otp": 31.94,
-                  "bb": 565,
-                  "delta": 533.06
+                  "bb": 585,
+                  "delta": 553.06
                 },
                 "rect.width": {
                   "otp": 64,
@@ -6456,8 +6646,8 @@
                 },
                 "rect.y": {
                   "otp": 89.31,
-                  "bb": 622.42,
-                  "delta": 533.11
+                  "bb": 642.42,
+                  "delta": 553.11
                 },
                 "rect.width": {
                   "otp": 486.47,
@@ -6509,6 +6699,11 @@
                   "bb": "37.8px",
                   "delta": "="
                 },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "start",
+                  "delta": "≠"
+                },
                 "textTransform": {
                   "otp": "uppercase",
                   "bb": "uppercase",
@@ -6542,8 +6737,8 @@
                 },
                 "rect.y": {
                   "otp": 139.11,
-                  "bb": 672.22,
-                  "delta": 533.11
+                  "bb": 692.22,
+                  "delta": 553.11
                 },
                 "rect.width": {
                   "otp": 56,
@@ -6620,8 +6815,8 @@
                 },
                 "rect.y": {
                   "otp": 158.11,
-                  "bb": 691.22,
-                  "delta": 533.11
+                  "bb": 711.22,
+                  "delta": 553.11
                 },
                 "rect.width": {
                   "otp": 560,
@@ -6673,6 +6868,11 @@
                   "bb": "24.32px",
                   "delta": "="
                 },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "center",
+                  "delta": "="
+                },
                 "textTransform": {
                   "otp": "none",
                   "bb": "none",
@@ -6686,6 +6886,104 @@
                 "fontVariantNumeric": {
                   "otp": "normal",
                   "bb": "normal",
+                  "delta": "="
+                }
+              }
+            },
+            "footerGrid": {
+              "otp": {
+                "selector": ".footer-grid",
+                "text": "ExplorarInicioArtistasEventosDiscografíaBeatsPluginsNewslett"
+              },
+              "bb": {
+                "selector": ".site-footer__content",
+                "text": "Beat BattleLa batalla semanal de productores de Other People"
+              },
+              "missing": null,
+              "props": {
+                "rect.x": {
+                  "otp": 80,
+                  "bb": 80,
+                  "delta": "="
+                },
+                "rect.y": {
+                  "otp": 456.34,
+                  "bb": 585,
+                  "delta": 128.66
+                },
+                "rect.width": {
+                  "otp": 1280,
+                  "bb": 1280,
+                  "delta": "="
+                },
+                "rect.height": {
+                  "otp": 328,
+                  "bb": 287.05,
+                  "delta": -40.95
+                },
+                "size.width": {
+                  "otp": 1280,
+                  "bb": 1280,
+                  "delta": "="
+                },
+                "size.height": {
+                  "otp": 328,
+                  "bb": 287.05,
+                  "delta": -40.95
+                },
+                "position": {
+                  "otp": "static",
+                  "bb": "static",
+                  "delta": "="
+                },
+                "top": {
+                  "otp": "auto",
+                  "bb": "auto",
+                  "delta": "="
+                },
+                "left": {
+                  "otp": "auto",
+                  "bb": "auto",
+                  "delta": "="
+                },
+                "zIndex": {
+                  "otp": "auto",
+                  "bb": "auto",
+                  "delta": "="
+                },
+                "display": {
+                  "otp": "grid",
+                  "bb": "grid",
+                  "delta": "="
+                },
+                "gap": {
+                  "otp": "16px",
+                  "bb": "48px 16px",
+                  "delta": "≠"
+                },
+                "alignItems": {
+                  "otp": "normal",
+                  "bb": "normal",
+                  "delta": "="
+                },
+                "transform": {
+                  "otp": "none",
+                  "bb": "none",
+                  "delta": "="
+                },
+                "rotate": {
+                  "otp": "none",
+                  "bb": "none",
+                  "delta": "="
+                },
+                "rotateDeg": {
+                  "otp": 0,
+                  "bb": 0,
+                  "delta": "="
+                },
+                "writingMode": {
+                  "otp": "horizontal-tb",
+                  "bb": "horizontal-tb",
                   "delta": "="
                 }
               }
@@ -6708,8 +7006,8 @@
                 },
                 "rect.y": {
                   "otp": 456.34,
-                  "bb": 565,
-                  "delta": 108.66
+                  "bb": 585,
+                  "delta": 128.66
                 },
                 "rect.width": {
                   "otp": 308,
@@ -6718,8 +7016,8 @@
                 },
                 "rect.height": {
                   "otp": 328,
-                  "bb": 210.23,
-                  "delta": -117.77
+                  "bb": 190.05,
+                  "delta": -137.95
                 },
                 "size.width": {
                   "otp": 308,
@@ -6728,8 +7026,8 @@
                 },
                 "size.height": {
                   "otp": 328,
-                  "bb": 210.23,
-                  "delta": -117.77
+                  "bb": 190.05,
+                  "delta": -137.95
                 },
                 "borderRadius": {
                   "otp": "16px",
@@ -6743,8 +7041,8 @@
                 },
                 "border": {
                   "otp": "1px solid rgba(255, 255, 255, 0.08)",
-                  "bb": "1px solid rgba(255, 255, 255, 0.18)",
-                  "delta": "≠"
+                  "bb": "1px solid rgba(255, 255, 255, 0.08)",
+                  "delta": "="
                 },
                 "boxShadow": {
                   "otp": "none",
@@ -6796,6 +7094,11 @@
                   "bb": "16px",
                   "delta": "="
                 },
+                "alignItems": {
+                  "otp": "normal",
+                  "bb": "normal",
+                  "delta": "="
+                },
                 "transform": {
                   "otp": "none",
                   "bb": "none",
@@ -6818,6 +7121,84 @@
                 }
               }
             },
+            "footerCardLast": {
+              "otp": {
+                "selector": ".footer-grid > :last-child",
+                "text": "Síguenos"
+              },
+              "bb": {
+                "selector": "section.site-footer__card:last-of-type",
+                "text": "SíguenosInstagram (se abre en una pestaña nueva)YouTube (se "
+              },
+              "missing": null,
+              "props": {
+                "rect.x": {
+                  "otp": 1052,
+                  "bb": 1048,
+                  "delta": "≠"
+                },
+                "rect.y": {
+                  "otp": 456.34,
+                  "bb": 585,
+                  "delta": 128.66
+                },
+                "rect.width": {
+                  "otp": 308,
+                  "bb": 312,
+                  "delta": 4
+                },
+                "rect.height": {
+                  "otp": 328,
+                  "bb": 190.05,
+                  "delta": -137.95
+                },
+                "size.width": {
+                  "otp": 308,
+                  "bb": 312,
+                  "delta": 4
+                },
+                "size.height": {
+                  "otp": 328,
+                  "bb": 190.05,
+                  "delta": -137.95
+                },
+                "borderRadius": {
+                  "otp": "16px",
+                  "bb": "16px",
+                  "delta": "="
+                },
+                "backgroundColor": {
+                  "otp": "rgba(0, 0, 0, 0.58)",
+                  "bb": "rgba(0, 0, 0, 0.58)",
+                  "delta": "="
+                },
+                "border": {
+                  "otp": "1px solid rgba(255, 255, 255, 0.08)",
+                  "bb": "1px solid rgba(255, 255, 255, 0.08)",
+                  "delta": "="
+                },
+                "boxShadow": {
+                  "otp": "none",
+                  "bb": "none",
+                  "delta": "="
+                },
+                "backdropFilter": {
+                  "otp": "url(\"#glass-filter-_r_7_\") saturate(1) blur(0px)",
+                  "bb": "url(\"#bb-glass-filter-_r_7_\") saturate(1) blur(0px)",
+                  "delta": "="
+                },
+                "padding": {
+                  "otp": "24px",
+                  "bb": "24px",
+                  "delta": "="
+                },
+                "opacity": {
+                  "otp": "1",
+                  "bb": "1",
+                  "delta": "="
+                }
+              }
+            },
             "footerCardTitle": {
               "otp": {
                 "selector": ".footer-card__title",
@@ -6836,8 +7217,8 @@
                 },
                 "rect.y": {
                   "otp": 481.34,
-                  "bb": 590,
-                  "delta": 108.66
+                  "bb": 610,
+                  "delta": 128.66
                 },
                 "rect.width": {
                   "otp": 258,
@@ -6889,6 +7270,11 @@
                   "bb": "13.8px",
                   "delta": "≠"
                 },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "center",
+                  "delta": "="
+                },
                 "textTransform": {
                   "otp": "uppercase",
                   "bb": "uppercase",
@@ -6924,8 +7310,8 @@
                 },
                 "rect.y": {
                   "otp": 511.34,
-                  "bb": 619.8,
-                  "delta": 108.46
+                  "bb": 639.8,
+                  "delta": 128.46
                 },
                 "rect.width": {
                   "otp": 33.61,
@@ -6934,8 +7320,8 @@
                 },
                 "rect.height": {
                   "otp": 24,
-                  "bb": 29.61,
-                  "delta": 5.61
+                  "bb": 24.56,
+                  "delta": 0.56
                 },
                 "size.width": {
                   "otp": 33.61,
@@ -6944,8 +7330,8 @@
                 },
                 "size.height": {
                   "otp": 24,
-                  "bb": 29.61,
-                  "delta": 5.61
+                  "bb": 24.56,
+                  "delta": 0.56
                 },
                 "fontFamily": {
                   "otp": "Montserrat, sans-serif",
@@ -6974,7 +7360,12 @@
                 },
                 "lineHeight": {
                   "otp": "normal",
-                  "bb": "21.6px",
+                  "bb": "16.56px",
+                  "delta": "≠"
+                },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "start",
                   "delta": "≠"
                 },
                 "textTransform": {
@@ -7011,8 +7402,8 @@
                 },
                 "rect.y": {
                   "otp": 511.34,
-                  "bb": 619.8,
-                  "delta": 108.46
+                  "bb": 639.8,
+                  "delta": 128.46
                 },
                 "rect.width": {
                   "otp": 42,
@@ -7089,8 +7480,8 @@
                 },
                 "rect.y": {
                   "otp": 832.34,
-                  "bb": 823.23,
-                  "delta": -9.11
+                  "bb": 823.05,
+                  "delta": -9.29
                 },
                 "rect.width": {
                   "otp": 1280,
@@ -7177,6 +7568,11 @@
                   "bb": "19.2px",
                   "delta": "≠"
                 },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "start",
+                  "delta": "≠"
+                },
                 "textTransform": {
                   "otp": "none",
                   "bb": "none",
@@ -7212,8 +7608,8 @@
                 },
                 "rect.y": {
                   "otp": 857.34,
-                  "bb": 848.23,
-                  "delta": -9.11
+                  "bb": 848.05,
+                  "delta": -9.29
                 },
                 "rect.width": {
                   "otp": 59.75,
@@ -7263,6 +7659,11 @@
                 "lineHeight": {
                   "otp": "normal",
                   "bb": "19.2px",
+                  "delta": "≠"
+                },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "start",
                   "delta": "≠"
                 },
                 "textTransform": {
@@ -7430,7 +7831,7 @@
                 },
                 "rect.height": {
                   "otp": 5795.52,
-                  "bb": 1810.39,
+                  "bb": 1794.39,
                   "delta": "≠"
                 },
                 "size.width": {
@@ -7440,7 +7841,7 @@
                 },
                 "size.height": {
                   "otp": 5795.52,
-                  "bb": 1810.39,
+                  "bb": 1794.39,
                   "delta": "≠"
                 },
                 "borderRadius": {
@@ -7522,6 +7923,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
                 }
               }
             },
@@ -7645,6 +8051,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -7783,6 +8194,11 @@
                   "otp": "rgba(0, 0, 0, 0.6) 0px 4px 24px",
                   "bb": "rgba(0, 0, 0, 0.6) 0px 4px 24px",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -7921,6 +8337,11 @@
                   "otp": "rgba(255, 0, 60, 0.4) 0px 0px 30px",
                   "bb": "rgba(255, 0, 60, 0.4) 0px 0px 30px",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -8130,6 +8551,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -8277,6 +8703,11 @@
                   "otp": "radial-gradient(rgb(0, 0, 0) 30%, rgba(0, 0, 0, 0) 75%)",
                   "bb": "radial-gradient(rgb(0, 0, 0) 30%, rgba(0, 0, 0, 0) 75%)",
                   "delta": "="
+                },
+                "alignItems": {
+                  "otp": null,
+                  "bb": "normal",
+                  "delta": "≠"
                 }
               }
             },
@@ -8560,6 +8991,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -8683,6 +9119,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -8777,8 +9218,8 @@
               "props": {
                 "rect.x": {
                   "otp": -171.23,
-                  "bb": -145.34,
-                  "delta": 25.89
+                  "bb": -143.5,
+                  "delta": 27.73
                 },
                 "rect.y": {
                   "otp": 757.81,
@@ -8849,6 +9290,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
                 }
               }
             },
@@ -8863,8 +9309,8 @@
               "props": {
                 "rect.x": {
                   "otp": -171.23,
-                  "bb": -145.34,
-                  "delta": 25.89
+                  "bb": -143.5,
+                  "delta": 27.73
                 },
                 "rect.y": {
                   "otp": 761.81,
@@ -9051,6 +9497,11 @@
                   "otp": "horizontal-tb",
                   "bb": "horizontal-tb",
                   "delta": "="
+                },
+                "alignItems": {
+                  "otp": null,
+                  "bb": "normal",
+                  "delta": "≠"
                 }
               }
             }
@@ -9253,6 +9704,11 @@
                   "otp": "horizontal-tb",
                   "bb": "horizontal-tb",
                   "delta": "="
+                },
+                "alignItems": {
+                  "otp": null,
+                  "bb": "normal",
+                  "delta": "≠"
                 }
               }
             },
@@ -9380,6 +9836,11 @@
                   "otp": "horizontal-tb",
                   "bb": "horizontal-tb",
                   "delta": "="
+                },
+                "alignItems": {
+                  "otp": null,
+                  "bb": "normal",
+                  "delta": "≠"
                 }
               }
             },
@@ -9530,6 +9991,11 @@
                   "otp": "horizontal-tb",
                   "bb": "horizontal-tb",
                   "delta": "="
+                },
+                "alignItems": {
+                  "otp": null,
+                  "bb": "normal",
+                  "delta": "≠"
                 }
               }
             }
@@ -9616,33 +10082,33 @@
               "props": {
                 "rect.x": {
                   "otp": 32,
-                  "bb": 16,
-                  "delta": -16
+                  "bb": 32,
+                  "delta": "="
                 },
                 "rect.y": {
                   "otp": 102,
-                  "bb": 118,
-                  "delta": 16
+                  "bb": 102,
+                  "delta": "="
                 },
                 "rect.width": {
                   "otp": 326,
-                  "bb": 358,
-                  "delta": 32
+                  "bb": 326,
+                  "delta": "="
                 },
                 "rect.height": {
                   "otp": 74,
-                  "bb": 41.83,
-                  "delta": -32.17
+                  "bb": 36.8,
+                  "delta": -37.2
                 },
                 "size.width": {
                   "otp": 326,
-                  "bb": 358,
-                  "delta": 32
+                  "bb": 326,
+                  "delta": "="
                 },
                 "size.height": {
                   "otp": 74,
-                  "bb": 41.83,
-                  "delta": -32.17
+                  "bb": 36.8,
+                  "delta": -37.2
                 },
                 "fontFamily": {
                   "otp": "Montserrat, sans-serif",
@@ -9651,33 +10117,38 @@
                 },
                 "fontSize": {
                   "otp": 32,
-                  "bb": 36.38,
-                  "delta": 4.38
+                  "bb": 32,
+                  "delta": "="
                 },
                 "fontWeight": {
                   "otp": "700",
-                  "bb": "900",
-                  "delta": "≠"
+                  "bb": "700",
+                  "delta": "="
                 },
                 "letterSpacing": {
                   "otp": "normal",
-                  "bb": "-0.727632px",
-                  "delta": "≠"
+                  "bb": "normal",
+                  "delta": "="
                 },
                 "letterSpacingEm": {
                   "otp": 0,
-                  "bb": -0.02,
+                  "bb": 0,
                   "delta": "="
                 },
                 "lineHeight": {
                   "otp": "normal",
-                  "bb": "41.8388px",
+                  "bb": "36.8px",
                   "delta": "≠"
+                },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "center",
+                  "delta": "="
                 },
                 "textTransform": {
                   "otp": "none",
-                  "bb": "uppercase",
-                  "delta": "≠"
+                  "bb": "none",
+                  "delta": "="
                 },
                 "color": {
                   "otp": "rgb(255, 255, 255)",
@@ -9786,8 +10257,8 @@
               "props": {
                 "rect.x": {
                   "otp": 35,
-                  "bb": 33,
-                  "delta": -2
+                  "bb": 49,
+                  "delta": 14
                 },
                 "rect.y": {
                   "otp": 566.63,
@@ -9893,6 +10364,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -9909,8 +10385,8 @@
               "props": {
                 "rect.x": {
                   "otp": 35,
-                  "bb": 33,
-                  "delta": -2
+                  "bb": 49,
+                  "delta": 14
                 },
                 "rect.y": {
                   "otp": 626.41,
@@ -10016,6 +10492,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             }
@@ -10102,8 +10583,8 @@
               "props": {
                 "rect.x": {
                   "otp": 71.27,
-                  "bb": 33,
-                  "delta": -38.27
+                  "bb": 49,
+                  "delta": -22.27
                 },
                 "rect.y": {
                   "otp": 200,
@@ -10188,12 +10669,17 @@
                 "letterSpacingEm": {
                   "otp": 0.01,
                   "bb": 0,
-                  "delta": "="
+                  "delta": -0.01
                 },
                 "lineHeight": {
                   "otp": "normal",
                   "bb": "13.8px",
                   "delta": "≠"
+                },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "center",
+                  "delta": "="
                 },
                 "textTransform": {
                   "otp": "none",
@@ -10283,8 +10769,8 @@
               "props": {
                 "rect.x": {
                   "otp": 71.27,
-                  "bb": 33,
-                  "delta": -38.27
+                  "bb": 49,
+                  "delta": -22.27
                 },
                 "rect.y": {
                   "otp": 200,
@@ -10369,12 +10855,17 @@
                 "letterSpacingEm": {
                   "otp": 0.01,
                   "bb": 0,
-                  "delta": "="
+                  "delta": -0.01
                 },
                 "lineHeight": {
                   "otp": "normal",
                   "bb": "13.8px",
                   "delta": "≠"
+                },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "center",
+                  "delta": "="
                 },
                 "textTransform": {
                   "otp": "none",
@@ -10534,18 +11025,18 @@
               "props": {
                 "rect.x": {
                   "otp": 32,
-                  "bb": 33,
-                  "delta": 1
+                  "bb": 49,
+                  "delta": 17
                 },
                 "rect.y": {
                   "otp": 516.88,
-                  "bb": 127.2,
-                  "delta": -389.68
+                  "bb": 127.25,
+                  "delta": -389.63
                 },
                 "rect.width": {
                   "otp": 326,
-                  "bb": 324,
-                  "delta": -2
+                  "bb": 292,
+                  "delta": -34
                 },
                 "rect.height": {
                   "otp": 71.58,
@@ -10554,8 +11045,8 @@
                 },
                 "size.width": {
                   "otp": 308,
-                  "bb": 324,
-                  "delta": 16
+                  "bb": 292,
+                  "delta": -16
                 },
                 "size.height": {
                   "otp": 53.58,
@@ -10646,6 +11137,11 @@
                   "otp": "horizontal-tb",
                   "bb": "horizontal-tb",
                   "delta": "="
+                },
+                "alignItems": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             },
@@ -10660,33 +11156,33 @@
               "props": {
                 "rect.x": {
                   "otp": 41,
-                  "bb": 42,
-                  "delta": 1
+                  "bb": 58,
+                  "delta": 17
                 },
                 "rect.y": {
                   "otp": 528.66,
-                  "bb": 150.44,
-                  "delta": -378.22
+                  "bb": 146.48,
+                  "delta": -382.18
                 },
                 "rect.width": {
                   "otp": 48,
-                  "bb": 40,
-                  "delta": -8
+                  "bb": 48,
+                  "delta": "="
                 },
                 "rect.height": {
                   "otp": 48,
-                  "bb": 40,
-                  "delta": -8
+                  "bb": 48,
+                  "delta": "="
                 },
                 "size.width": {
                   "otp": 48,
-                  "bb": 40,
-                  "delta": -8
+                  "bb": 48,
+                  "delta": "="
                 },
                 "size.height": {
                   "otp": 48,
-                  "bb": 40,
-                  "delta": -8
+                  "bb": 48,
+                  "delta": "="
                 },
                 "borderRadius": {
                   "otp": "6px",
@@ -10736,33 +11232,33 @@
               "props": {
                 "rect.x": {
                   "otp": 98.59,
-                  "bb": 94,
-                  "delta": -4.59
+                  "bb": 118,
+                  "delta": 19.41
                 },
                 "rect.y": {
                   "otp": 536.66,
-                  "bb": 148.44,
-                  "delta": -388.22
+                  "bb": 152.48,
+                  "delta": -384.18
                 },
                 "rect.width": {
                   "otp": 32,
-                  "bb": 44,
-                  "delta": 12
+                  "bb": 36,
+                  "delta": 4
                 },
                 "rect.height": {
                   "otp": 32,
-                  "bb": 44,
-                  "delta": 12
+                  "bb": 36,
+                  "delta": 4
                 },
                 "size.width": {
                   "otp": 32,
-                  "bb": 44,
-                  "delta": 12
+                  "bb": 36,
+                  "delta": 4
                 },
                 "size.height": {
                   "otp": 32,
-                  "bb": 44,
-                  "delta": 12
+                  "bb": 36,
+                  "delta": 4
                 },
                 "borderRadius": {
                   "otp": "50%",
@@ -10814,18 +11310,18 @@
               "props": {
                 "rect.x": {
                   "otp": 140.19,
-                  "bb": 150,
-                  "delta": 9.81
+                  "bb": 166,
+                  "delta": 25.81
                 },
                 "rect.y": {
                   "otp": 526.88,
-                  "bb": 136.2,
-                  "delta": -390.68
+                  "bb": 136.25,
+                  "delta": -390.63
                 },
                 "rect.width": {
                   "otp": 74.38,
-                  "bb": 198,
-                  "delta": 123.62
+                  "bb": 166,
+                  "delta": 91.62
                 },
                 "rect.height": {
                   "otp": 16,
@@ -10834,7 +11330,7 @@
                 },
                 "size.width": {
                   "otp": "auto",
-                  "bb": 198,
+                  "bb": 166,
                   "delta": "≠"
                 },
                 "size.height": {
@@ -10886,6 +11382,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
                 }
               }
             },
@@ -10902,13 +11403,13 @@
               "props": {
                 "rect.x": {
                   "otp": 140.19,
-                  "bb": 150,
-                  "delta": 9.81
+                  "bb": 166,
+                  "delta": 25.81
                 },
                 "rect.y": {
                   "otp": 546.27,
-                  "bb": 154.69,
-                  "delta": -391.58
+                  "bb": 154.73,
+                  "delta": -391.54
                 },
                 "rect.width": {
                   "otp": 119.64,
@@ -10974,6 +11475,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
                 }
               }
             },
@@ -11085,18 +11591,18 @@
               "props": {
                 "rect.x": {
                   "otp": 177.78,
-                  "bb": 150,
-                  "delta": -27.78
+                  "bb": 166,
+                  "delta": -11.78
                 },
                 "rect.y": {
                   "otp": 571.45,
-                  "bb": 180.69,
-                  "delta": -390.76
+                  "bb": 180.73,
+                  "delta": -390.72
                 },
                 "rect.width": {
                   "otp": 82.05,
-                  "bb": 198,
-                  "delta": 115.95
+                  "bb": 166,
+                  "delta": 83.95
                 },
                 "rect.height": {
                   "otp": 4,
@@ -11105,8 +11611,8 @@
                 },
                 "size.width": {
                   "otp": 82.05,
-                  "bb": 198,
-                  "delta": 115.95
+                  "bb": 166,
+                  "delta": 83.95
                 },
                 "size.height": {
                   "otp": 4,
@@ -11393,14 +11899,7 @@
             "bb": {
               "infoLabel": {
                 "selector": "#tesela figure:first-of-type h4",
-                "fonts": [
-                  {
-                    "familyName": "Montserrat Thin",
-                    "postScriptName": "Montserrat-Thin",
-                    "isCustomFont": true,
-                    "glyphCount": 11
-                  }
-                ]
+                "fonts": []
               },
               "dataTileValue": {
                 "selector": "#tesela figure:first-of-type dl > div dd",
@@ -11429,18 +11928,18 @@
               "props": {
                 "rect.x": {
                   "otp": 16,
-                  "bb": 33,
-                  "delta": 17
+                  "bb": 49,
+                  "delta": 33
                 },
                 "rect.y": {
                   "otp": 573,
-                  "bb": 126.5,
-                  "delta": -446.5
+                  "bb": 126.89,
+                  "delta": -446.11
                 },
                 "rect.width": {
                   "otp": 101.94,
-                  "bb": 324,
-                  "delta": 222.06
+                  "bb": 292,
+                  "delta": 190.06
                 },
                 "rect.height": {
                   "otp": 12,
@@ -11449,8 +11948,8 @@
                 },
                 "size.width": {
                   "otp": 101.94,
-                  "bb": 324,
-                  "delta": 222.06
+                  "bb": 292,
+                  "delta": 190.06
                 },
                 "size.height": {
                   "otp": 12,
@@ -11485,6 +11984,11 @@
                 "lineHeight": {
                   "otp": "normal",
                   "bb": "13.8px",
+                  "delta": "≠"
+                },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "start",
                   "delta": "≠"
                 },
                 "textTransform": {
@@ -11573,48 +12077,48 @@
               "props": {
                 "rect.x": {
                   "otp": 16,
-                  "bb": 33,
-                  "delta": 17
+                  "bb": 49,
+                  "delta": 33
                 },
                 "rect.y": {
                   "otp": 145,
-                  "bb": 152.3,
-                  "delta": 7.3
+                  "bb": 152.69,
+                  "delta": 7.69
                 },
                 "rect.width": {
                   "otp": 358,
-                  "bb": 156,
-                  "delta": -202
+                  "bb": 292,
+                  "delta": -66
                 },
                 "rect.height": {
                   "otp": 37,
-                  "bb": 77.98,
-                  "delta": 40.98
+                  "bb": 37.8,
+                  "delta": 0.8
                 },
                 "size.width": {
                   "otp": 358,
-                  "bb": 156,
-                  "delta": -202
+                  "bb": 292,
+                  "delta": -66
                 },
                 "size.height": {
                   "otp": 16,
-                  "bb": 77.98,
-                  "delta": 61.98
+                  "bb": 37.8,
+                  "delta": 21.8
                 },
                 "borderRadius": {
                   "otp": "0px",
-                  "bb": "8px",
-                  "delta": 8
+                  "bb": "0px",
+                  "delta": "="
                 },
                 "backgroundColor": {
                   "otp": "rgba(0, 0, 0, 0)",
-                  "bb": "rgb(17, 17, 17)",
-                  "delta": "≠"
+                  "bb": "rgba(0, 0, 0, 0)",
+                  "delta": "="
                 },
                 "border": {
                   "otp": "0px none rgb(255, 255, 255)",
-                  "bb": "1px solid rgb(30, 30, 30)",
-                  "delta": "≠"
+                  "bb": "0px none rgb(255, 255, 255)",
+                  "delta": "="
                 },
                 "boxShadow": {
                   "otp": "none",
@@ -11628,8 +12132,8 @@
                 },
                 "padding": {
                   "otp": "10px 0px",
-                  "bb": "10px 12px",
-                  "delta": "≠"
+                  "bb": "10px 0px",
+                  "delta": "="
                 },
                 "opacity": {
                   "otp": "1",
@@ -11663,8 +12167,13 @@
                 },
                 "gap": {
                   "otp": "8px",
-                  "bb": "4px",
-                  "delta": -4
+                  "bb": "8px",
+                  "delta": "="
+                },
+                "alignItems": {
+                  "otp": "center",
+                  "bb": "center",
+                  "delta": "="
                 },
                 "transform": {
                   "otp": "none",
@@ -11690,122 +12199,9 @@
             },
             "dataTileIcon": {
               "otp": null,
-              "bb": {
-                "selector": "#tesela figure:first-of-type dl > div svg"
-              },
-              "missing": "otp",
-              "props": {
-                "rect.x": {
-                  "otp": null,
-                  "bb": 104.98,
-                  "delta": "≠"
-                },
-                "rect.y": {
-                  "otp": null,
-                  "bb": 163.3,
-                  "delta": "≠"
-                },
-                "rect.width": {
-                  "otp": null,
-                  "bb": 12,
-                  "delta": "≠"
-                },
-                "rect.height": {
-                  "otp": null,
-                  "bb": 12,
-                  "delta": "≠"
-                },
-                "size.width": {
-                  "otp": null,
-                  "bb": 12,
-                  "delta": "≠"
-                },
-                "size.height": {
-                  "otp": null,
-                  "bb": 12,
-                  "delta": "≠"
-                },
-                "borderRadius": {
-                  "otp": null,
-                  "bb": "0px",
-                  "delta": "≠"
-                },
-                "backgroundColor": {
-                  "otp": null,
-                  "bb": "rgba(0, 0, 0, 0)",
-                  "delta": "≠"
-                },
-                "border": {
-                  "otp": null,
-                  "bb": "0px none rgb(255, 0, 60)",
-                  "delta": "≠"
-                },
-                "boxShadow": {
-                  "otp": null,
-                  "bb": "none",
-                  "delta": "≠"
-                },
-                "backdropFilter": {
-                  "otp": null,
-                  "bb": "none",
-                  "delta": "≠"
-                },
-                "padding": {
-                  "otp": null,
-                  "bb": "0px",
-                  "delta": "≠"
-                },
-                "opacity": {
-                  "otp": null,
-                  "bb": "1",
-                  "delta": "≠"
-                },
-                "fontFamily": {
-                  "otp": null,
-                  "bb": "Montserrat, system-ui, -apple-system, \"Segoe UI\", Arial, sans-serif",
-                  "delta": "≠"
-                },
-                "fontSize": {
-                  "otp": null,
-                  "bb": 12,
-                  "delta": "≠"
-                },
-                "fontWeight": {
-                  "otp": null,
-                  "bb": "400",
-                  "delta": "≠"
-                },
-                "letterSpacing": {
-                  "otp": null,
-                  "bb": "normal",
-                  "delta": "≠"
-                },
-                "letterSpacingEm": {
-                  "otp": null,
-                  "bb": 0,
-                  "delta": "≠"
-                },
-                "lineHeight": {
-                  "otp": null,
-                  "bb": "18px",
-                  "delta": "≠"
-                },
-                "textTransform": {
-                  "otp": null,
-                  "bb": "none",
-                  "delta": "≠"
-                },
-                "color": {
-                  "otp": null,
-                  "bb": "rgb(255, 0, 60)",
-                  "delta": "≠"
-                },
-                "fontVariantNumeric": {
-                  "otp": null,
-                  "bb": "normal",
-                  "delta": "≠"
-                }
-              }
+              "bb": null,
+              "missing": "both",
+              "props": {}
             },
             "dataTileLabel": {
               "otp": {
@@ -11820,33 +12216,33 @@
               "props": {
                 "rect.x": {
                   "otp": 16,
-                  "bb": 73.66,
-                  "delta": 57.66
+                  "bb": 49,
+                  "delta": 33
                 },
                 "rect.y": {
                   "otp": 155.5,
-                  "bb": 179.3,
-                  "delta": 23.8
+                  "bb": 163.61,
+                  "delta": 8.11
                 },
                 "rect.width": {
                   "otp": 80.98,
-                  "bb": 74.67,
-                  "delta": -6.31
+                  "bb": 86.77,
+                  "delta": 5.79
                 },
                 "rect.height": {
                   "otp": 15,
-                  "bb": 16.8,
-                  "delta": 1.8
+                  "bb": 14.94,
+                  "delta": -0.06
                 },
                 "size.width": {
                   "otp": 80.98,
-                  "bb": 74.67,
-                  "delta": -6.31
+                  "bb": 86.77,
+                  "delta": 5.79
                 },
                 "size.height": {
                   "otp": 15,
-                  "bb": 16.8,
-                  "delta": 1.8
+                  "bb": 14.94,
+                  "delta": -0.06
                 },
                 "fontFamily": {
                   "otp": "Montserrat, sans-serif",
@@ -11855,8 +12251,8 @@
                 },
                 "fontSize": {
                   "otp": 13,
-                  "bb": 11.2,
-                  "delta": -1.8
+                  "bb": 13,
+                  "delta": "="
                 },
                 "fontWeight": {
                   "otp": "400",
@@ -11865,8 +12261,8 @@
                 },
                 "letterSpacing": {
                   "otp": "0.65px",
-                  "bb": "0.56px",
-                  "delta": -0.09
+                  "bb": "0.65px",
+                  "delta": "="
                 },
                 "letterSpacingEm": {
                   "otp": 0.05,
@@ -11875,7 +12271,12 @@
                 },
                 "lineHeight": {
                   "otp": "normal",
-                  "bb": "16.8px",
+                  "bb": "14.95px",
+                  "delta": "≠"
+                },
+                "textAlign": {
+                  "otp": "left",
+                  "bb": "start",
                   "delta": "≠"
                 },
                 "textTransform": {
@@ -11908,33 +12309,33 @@
               "props": {
                 "rect.x": {
                   "otp": 290.7,
-                  "bb": 58.42,
-                  "delta": -232.28
+                  "bb": 248.98,
+                  "delta": -41.72
                 },
                 "rect.y": {
                   "otp": 155,
-                  "bb": 200.09,
-                  "delta": 45.09
+                  "bb": 162.69,
+                  "delta": 7.69
                 },
                 "rect.width": {
                   "otp": 83.3,
-                  "bb": 105.16,
-                  "delta": 21.86
+                  "bb": 92.02,
+                  "delta": 8.72
                 },
                 "rect.height": {
                   "otp": 16,
-                  "bb": 19.19,
-                  "delta": 3.19
+                  "bb": 16.8,
+                  "delta": 0.8
                 },
                 "size.width": {
                   "otp": 83.3,
-                  "bb": 105.16,
-                  "delta": 21.86
+                  "bb": 92.02,
+                  "delta": 8.72
                 },
                 "size.height": {
                   "otp": 16,
-                  "bb": 19.19,
-                  "delta": 3.19
+                  "bb": 16.8,
+                  "delta": 0.8
                 },
                 "fontFamily": {
                   "otp": "Montserrat, sans-serif",
@@ -11943,8 +12344,8 @@
                 },
                 "fontSize": {
                   "otp": 14,
-                  "bb": 16,
-                  "delta": 2
+                  "bb": 14,
+                  "delta": "="
                 },
                 "fontWeight": {
                   "otp": "600",
@@ -11963,7 +12364,12 @@
                 },
                 "lineHeight": {
                   "otp": "normal",
-                  "bb": "18.4px",
+                  "bb": "16.1px",
+                  "delta": "≠"
+                },
+                "textAlign": {
+                  "otp": "left",
+                  "bb": "end",
                   "delta": "≠"
                 },
                 "textTransform": {
@@ -12077,33 +12483,33 @@
               "props": {
                 "rect.x": {
                   "otp": 20.5,
-                  "bb": 45,
-                  "delta": 24.5
+                  "bb": 61,
+                  "delta": 40.5
                 },
                 "rect.y": {
                   "otp": 192,
-                  "bb": 127,
-                  "delta": -65
+                  "bb": 127.39,
+                  "delta": -64.61
                 },
                 "rect.width": {
                   "otp": 349,
-                  "bb": 272,
-                  "delta": -77
+                  "bb": 268,
+                  "delta": -81
                 },
                 "rect.height": {
                   "otp": 503.38,
-                  "bb": 437.88,
-                  "delta": -65.5
+                  "bb": 433.88,
+                  "delta": -69.5
                 },
                 "size.width": {
                   "otp": 315,
-                  "bb": 272,
-                  "delta": -43
+                  "bb": 268,
+                  "delta": -47
                 },
                 "size.height": {
                   "otp": 469.38,
-                  "bb": 437.88,
-                  "delta": -31.5
+                  "bb": 433.88,
+                  "delta": -35.5
                 },
                 "borderRadius": {
                   "otp": "16px",
@@ -12189,6 +12595,11 @@
                   "otp": "horizontal-tb",
                   "bb": "horizontal-tb",
                   "delta": "="
+                },
+                "alignItems": {
+                  "otp": null,
+                  "bb": "normal",
+                  "delta": "≠"
                 }
               }
             },
@@ -12203,33 +12614,33 @@
               "props": {
                 "rect.x": {
                   "otp": 21.5,
-                  "bb": 46,
-                  "delta": 24.5
+                  "bb": 62,
+                  "delta": 40.5
                 },
                 "rect.y": {
                   "otp": 193,
-                  "bb": 128,
-                  "delta": -65
+                  "bb": 128.39,
+                  "delta": -64.61
                 },
                 "rect.width": {
                   "otp": 347,
-                  "bb": 270,
-                  "delta": -77
+                  "bb": 266,
+                  "delta": -81
                 },
                 "rect.height": {
                   "otp": 347,
-                  "bb": 270,
-                  "delta": -77
+                  "bb": 266,
+                  "delta": -81
                 },
                 "size.width": {
                   "otp": 347,
-                  "bb": 270,
-                  "delta": -77
+                  "bb": 266,
+                  "delta": -81
                 },
                 "size.height": {
                   "otp": 347,
-                  "bb": 270,
-                  "delta": -77
+                  "bb": 266,
+                  "delta": -81
                 },
                 "borderRadius": {
                   "otp": "12px 12px 0px 0px",
@@ -12291,18 +12702,18 @@
               "props": {
                 "rect.x": {
                   "otp": 37.5,
-                  "bb": 62,
-                  "delta": 24.5
+                  "bb": 78,
+                  "delta": 40.5
                 },
                 "rect.y": {
                   "otp": 556,
-                  "bb": 414,
-                  "delta": -142
+                  "bb": 410.39,
+                  "delta": -145.61
                 },
                 "rect.width": {
                   "otp": 315,
-                  "bb": 238,
-                  "delta": -77
+                  "bb": 234,
+                  "delta": -81
                 },
                 "rect.height": {
                   "otp": 37,
@@ -12311,8 +12722,8 @@
                 },
                 "size.width": {
                   "otp": 315,
-                  "bb": 238,
-                  "delta": -77
+                  "bb": 234,
+                  "delta": -81
                 },
                 "size.height": {
                   "otp": 37,
@@ -12363,6 +12774,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
                 }
               }
             },
@@ -12379,18 +12795,18 @@
               "props": {
                 "rect.x": {
                   "otp": 37.5,
-                  "bb": 62,
-                  "delta": 24.5
+                  "bb": 78,
+                  "delta": 40.5
                 },
                 "rect.y": {
                   "otp": 593,
-                  "bb": 445.88,
-                  "delta": -147.12
+                  "bb": 442.27,
+                  "delta": -150.73
                 },
                 "rect.width": {
                   "otp": 315,
-                  "bb": 238,
-                  "delta": -77
+                  "bb": 234,
+                  "delta": -81
                 },
                 "rect.height": {
                   "otp": 18,
@@ -12399,8 +12815,8 @@
                 },
                 "size.width": {
                   "otp": 315,
-                  "bb": 238,
-                  "delta": -77
+                  "bb": 234,
+                  "delta": -81
                 },
                 "size.height": {
                   "otp": 18,
@@ -12451,6 +12867,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "start",
+                  "delta": "≠"
                 }
               }
             },
@@ -12467,18 +12888,18 @@
               "props": {
                 "rect.x": {
                   "otp": 37.5,
-                  "bb": 62,
-                  "delta": 24.5
+                  "bb": 78,
+                  "delta": 40.5
                 },
                 "rect.y": {
                   "otp": 2289.05,
-                  "bb": 503.88,
+                  "bb": 500.27,
                   "delta": "≠"
                 },
                 "rect.width": {
                   "otp": 315,
-                  "bb": 238,
-                  "delta": -77
+                  "bb": 234,
+                  "delta": -81
                 },
                 "rect.height": {
                   "otp": 37,
@@ -12487,8 +12908,8 @@
                 },
                 "size.width": {
                   "otp": 315,
-                  "bb": 238,
-                  "delta": -77
+                  "bb": 234,
+                  "delta": -81
                 },
                 "size.height": {
                   "otp": 37,
@@ -12574,6 +12995,11 @@
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
+                },
+                "textAlign": {
+                  "otp": null,
+                  "bb": "center",
+                  "delta": "≠"
                 }
               }
             }
@@ -12723,6 +13149,11 @@
                   "delta": "="
                 },
                 "gap": {
+                  "otp": "normal",
+                  "bb": "normal",
+                  "delta": "="
+                },
+                "alignItems": {
                   "otp": "normal",
                   "bb": "normal",
                   "delta": "="
@@ -12896,6 +13327,11 @@
                   "bb": "25.2px",
                   "delta": "="
                 },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "start",
+                  "delta": "≠"
+                },
                 "textTransform": {
                   "otp": "uppercase",
                   "bb": "uppercase",
@@ -13060,6 +13496,11 @@
                   "bb": "24.32px",
                   "delta": "="
                 },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "center",
+                  "delta": "="
+                },
                 "textTransform": {
                   "otp": "none",
                   "bb": "none",
@@ -13073,6 +13514,104 @@
                 "fontVariantNumeric": {
                   "otp": "normal",
                   "bb": "normal",
+                  "delta": "="
+                }
+              }
+            },
+            "footerGrid": {
+              "otp": {
+                "selector": ".footer-grid",
+                "text": "ExplorarInicioArtistasEventosDiscografíaBeatsPluginsNewslett"
+              },
+              "bb": {
+                "selector": ".site-footer__content",
+                "text": "Beat BattleLa batalla semanal de productores de Other People"
+              },
+              "missing": null,
+              "props": {
+                "rect.x": {
+                  "otp": 20,
+                  "bb": 20,
+                  "delta": "="
+                },
+                "rect.y": {
+                  "otp": -205.48,
+                  "bb": -2,
+                  "delta": 203.48
+                },
+                "rect.width": {
+                  "otp": 350,
+                  "bb": 350,
+                  "delta": "="
+                },
+                "rect.height": {
+                  "otp": 907,
+                  "bb": 826.39,
+                  "delta": -80.61
+                },
+                "size.width": {
+                  "otp": 350,
+                  "bb": 350,
+                  "delta": "="
+                },
+                "size.height": {
+                  "otp": 907,
+                  "bb": 826.39,
+                  "delta": -80.61
+                },
+                "position": {
+                  "otp": "static",
+                  "bb": "static",
+                  "delta": "="
+                },
+                "top": {
+                  "otp": "auto",
+                  "bb": "auto",
+                  "delta": "="
+                },
+                "left": {
+                  "otp": "auto",
+                  "bb": "auto",
+                  "delta": "="
+                },
+                "zIndex": {
+                  "otp": "auto",
+                  "bb": "auto",
+                  "delta": "="
+                },
+                "display": {
+                  "otp": "grid",
+                  "bb": "grid",
+                  "delta": "="
+                },
+                "gap": {
+                  "otp": "16px",
+                  "bb": "32px 16px",
+                  "delta": "≠"
+                },
+                "alignItems": {
+                  "otp": "normal",
+                  "bb": "normal",
+                  "delta": "="
+                },
+                "transform": {
+                  "otp": "none",
+                  "bb": "none",
+                  "delta": "="
+                },
+                "rotate": {
+                  "otp": "none",
+                  "bb": "none",
+                  "delta": "="
+                },
+                "rotateDeg": {
+                  "otp": 0,
+                  "bb": 0,
+                  "delta": "="
+                },
+                "writingMode": {
+                  "otp": "horizontal-tb",
+                  "bb": "horizontal-tb",
                   "delta": "="
                 }
               }
@@ -13130,8 +13669,8 @@
                 },
                 "border": {
                   "otp": "1px solid rgba(255, 255, 255, 0.08)",
-                  "bb": "1px solid rgba(255, 255, 255, 0.18)",
-                  "delta": "≠"
+                  "bb": "1px solid rgba(255, 255, 255, 0.08)",
+                  "delta": "="
                 },
                 "boxShadow": {
                   "otp": "none",
@@ -13183,6 +13722,11 @@
                   "bb": "16px",
                   "delta": "="
                 },
+                "alignItems": {
+                  "otp": "normal",
+                  "bb": "normal",
+                  "delta": "="
+                },
                 "transform": {
                   "otp": "none",
                   "bb": "none",
@@ -13201,6 +13745,84 @@
                 "writingMode": {
                   "otp": "horizontal-tb",
                   "bb": "horizontal-tb",
+                  "delta": "="
+                }
+              }
+            },
+            "footerCardLast": {
+              "otp": {
+                "selector": ".footer-grid > :last-child",
+                "text": "Síguenos"
+              },
+              "bb": {
+                "selector": "section.site-footer__card:last-of-type",
+                "text": "SíguenosInstagram (se abre en una pestaña nueva)YouTube (se "
+              },
+              "missing": null,
+              "props": {
+                "rect.x": {
+                  "otp": 20,
+                  "bb": 20,
+                  "delta": "="
+                },
+                "rect.y": {
+                  "otp": 587.52,
+                  "bb": 484.03,
+                  "delta": -103.49
+                },
+                "rect.width": {
+                  "otp": 350,
+                  "bb": 350,
+                  "delta": "="
+                },
+                "rect.height": {
+                  "otp": 114,
+                  "bb": 115.8,
+                  "delta": 1.8
+                },
+                "size.width": {
+                  "otp": 350,
+                  "bb": 350,
+                  "delta": "="
+                },
+                "size.height": {
+                  "otp": 114,
+                  "bb": 115.8,
+                  "delta": 1.8
+                },
+                "borderRadius": {
+                  "otp": "16px",
+                  "bb": "16px",
+                  "delta": "="
+                },
+                "backgroundColor": {
+                  "otp": "rgba(0, 0, 0, 0.58)",
+                  "bb": "rgba(0, 0, 0, 0.58)",
+                  "delta": "="
+                },
+                "border": {
+                  "otp": "1px solid rgba(255, 255, 255, 0.08)",
+                  "bb": "1px solid rgba(255, 255, 255, 0.08)",
+                  "delta": "="
+                },
+                "boxShadow": {
+                  "otp": "none",
+                  "bb": "none",
+                  "delta": "="
+                },
+                "backdropFilter": {
+                  "otp": "url(\"#glass-filter-_r_7_\") saturate(1) blur(0px)",
+                  "bb": "url(\"#bb-glass-filter-_r_7_\") saturate(1) blur(0px)",
+                  "delta": "="
+                },
+                "padding": {
+                  "otp": "20px",
+                  "bb": "20px",
+                  "delta": "="
+                },
+                "opacity": {
+                  "otp": "1",
+                  "bb": "1",
                   "delta": "="
                 }
               }
@@ -13275,6 +13897,11 @@
                   "otp": "normal",
                   "bb": "13.8px",
                   "delta": "≠"
+                },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "center",
+                  "delta": "="
                 },
                 "textTransform": {
                   "otp": "uppercase",
@@ -13361,7 +13988,12 @@
                 },
                 "lineHeight": {
                   "otp": "normal",
-                  "bb": "21.6px",
+                  "bb": "16.56px",
+                  "delta": "≠"
+                },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "start",
                   "delta": "≠"
                 },
                 "textTransform": {
@@ -13564,6 +14196,11 @@
                   "bb": "19.2px",
                   "delta": "≠"
                 },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "start",
+                  "delta": "≠"
+                },
                 "textTransform": {
                   "otp": "none",
                   "bb": "none",
@@ -13650,6 +14287,11 @@
                 "lineHeight": {
                   "otp": "normal",
                   "bb": "19.2px",
+                  "delta": "≠"
+                },
+                "textAlign": {
+                  "otp": "center",
+                  "bb": "start",
                   "delta": "≠"
                 },
                 "textTransform": {
@@ -14181,9 +14823,9 @@
       "part": "pageTitle",
       "property": "fontSize",
       "otp": 32,
-      "bb": 48,
-      "delta": 16,
-      "why": "review"
+      "bb": 32,
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "desktop",
@@ -14191,9 +14833,9 @@
       "part": "pageTitle",
       "property": "fontWeight",
       "otp": "700",
-      "bb": "900",
-      "delta": "≠",
-      "why": "review"
+      "bb": "700",
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "desktop",
@@ -14201,9 +14843,9 @@
       "part": "pageTitle",
       "property": "textTransform",
       "otp": "none",
-      "bb": "uppercase",
-      "delta": "≠",
-      "why": "review"
+      "bb": "none",
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "desktop",
@@ -14211,9 +14853,29 @@
       "part": "pageTitle",
       "property": "letterSpacing",
       "otp": "normal",
-      "bb": "-0.96px",
-      "delta": "≠",
-      "why": "review"
+      "bb": "normal",
+      "delta": "=",
+      "why": null
+    },
+    {
+      "viewport": "desktop",
+      "piece": "Página interior",
+      "part": "pageTitle",
+      "property": "textAlign",
+      "otp": "center",
+      "bb": "center",
+      "delta": "=",
+      "why": null
+    },
+    {
+      "viewport": "desktop",
+      "piece": "Página interior",
+      "part": "pageTitle",
+      "property": "rect.x",
+      "otp": 32,
+      "bb": 32,
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "desktop",
@@ -14221,8 +14883,18 @@
       "part": "pageTitle",
       "property": "rect.y",
       "otp": 117,
-      "bb": 133,
-      "delta": 16,
+      "bb": 117,
+      "delta": "=",
+      "why": null
+    },
+    {
+      "viewport": "desktop",
+      "piece": "Página interior",
+      "part": "pageTitle",
+      "property": "rect.height",
+      "otp": 37,
+      "bb": 36.8,
+      "delta": -0.2,
       "why": "content"
     },
     {
@@ -14243,7 +14915,17 @@
       "otp": 49.38,
       "bb": 51.38,
       "delta": 2,
-      "why": "font"
+      "why": "review"
+    },
+    {
+      "viewport": "desktop",
+      "piece": "Botones CTA y de contorno",
+      "part": "ctaPrimary",
+      "property": "border",
+      "otp": "0px none rgb(255, 255, 255)",
+      "bb": "1px solid rgb(230, 0, 58)",
+      "delta": "≠",
+      "why": "review"
     },
     {
       "viewport": "desktop",
@@ -14403,7 +15085,7 @@
       "otp": 28.19,
       "bb": 26.58,
       "delta": -1.61,
-      "why": "font"
+      "why": "tokens"
     },
     {
       "viewport": "desktop",
@@ -14472,8 +15154,8 @@
       "property": "letterSpacingEm",
       "otp": 0.01,
       "bb": 0,
-      "delta": "=",
-      "why": null
+      "delta": -0.01,
+      "why": "tokens"
     },
     {
       "viewport": "desktop",
@@ -14931,8 +15613,8 @@
       "part": "dataTile",
       "property": "rect.height",
       "otp": 75,
-      "bb": 77.98,
-      "delta": 2.98,
+      "bb": 74.06,
+      "delta": -0.94,
       "why": "font"
     },
     {
@@ -15004,6 +15686,16 @@
       "bb": 0.05,
       "delta": "=",
       "why": null
+    },
+    {
+      "viewport": "desktop",
+      "piece": "Teselas de dato con rótulo de sección",
+      "part": "dataTileLabel",
+      "property": "lineHeight",
+      "otp": "normal",
+      "bb": "12.88px",
+      "delta": "≠",
+      "why": "tokens"
     },
     {
       "viewport": "desktop",
@@ -15237,6 +15929,16 @@
     },
     {
       "viewport": "desktop",
+      "piece": "Tarjeta de cristal",
+      "part": "beatCardBuy",
+      "property": "boxShadow",
+      "otp": "none",
+      "bb": "rgba(255, 0, 60, 0.45) 0px 4px 20px 0px",
+      "delta": "≠",
+      "why": "own"
+    },
+    {
+      "viewport": "desktop",
       "piece": "Pie",
       "part": "footer",
       "property": "padding",
@@ -15358,6 +16060,46 @@
     {
       "viewport": "desktop",
       "piece": "Pie",
+      "part": "footerDesc",
+      "property": "textAlign",
+      "otp": "center",
+      "bb": "center",
+      "delta": "=",
+      "why": null
+    },
+    {
+      "viewport": "desktop",
+      "piece": "Pie",
+      "part": "footerGrid",
+      "property": "alignItems",
+      "otp": "normal",
+      "bb": "normal",
+      "delta": "=",
+      "why": null
+    },
+    {
+      "viewport": "desktop",
+      "piece": "Pie",
+      "part": "footerCard",
+      "property": "rect.height",
+      "otp": 328,
+      "bb": 190.05,
+      "delta": -137.95,
+      "why": "content"
+    },
+    {
+      "viewport": "desktop",
+      "piece": "Pie",
+      "part": "footerCardLast",
+      "property": "rect.height",
+      "otp": 328,
+      "bb": 190.05,
+      "delta": -137.95,
+      "why": "content"
+    },
+    {
+      "viewport": "desktop",
+      "piece": "Pie",
       "part": "footerCard",
       "property": "borderRadius",
       "otp": "16px",
@@ -15381,9 +16123,9 @@
       "part": "footerCard",
       "property": "border",
       "otp": "1px solid rgba(255, 255, 255, 0.08)",
-      "bb": "1px solid rgba(255, 255, 255, 0.18)",
-      "delta": "≠",
-      "why": "review"
+      "bb": "1px solid rgba(255, 255, 255, 0.08)",
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "desktop",
@@ -15449,6 +16191,16 @@
       "viewport": "desktop",
       "piece": "Pie",
       "part": "footerCardTitle",
+      "property": "textAlign",
+      "otp": "center",
+      "bb": "center",
+      "delta": "=",
+      "why": null
+    },
+    {
+      "viewport": "desktop",
+      "piece": "Pie",
+      "part": "footerCardTitle",
       "property": "color",
       "otp": "rgb(255, 0, 60)",
       "bb": "rgb(255, 77, 109)",
@@ -15464,6 +16216,26 @@
       "bb": 14.4,
       "delta": "=",
       "why": null
+    },
+    {
+      "viewport": "desktop",
+      "piece": "Pie",
+      "part": "footerCardLink",
+      "property": "lineHeight",
+      "otp": "normal",
+      "bb": "16.56px",
+      "delta": "≠",
+      "why": "tokens"
+    },
+    {
+      "viewport": "desktop",
+      "piece": "Pie",
+      "part": "footerCardLink",
+      "property": "rect.height",
+      "otp": 24,
+      "bb": 24.56,
+      "delta": 0.56,
+      "why": "font"
     },
     {
       "viewport": "desktop",
@@ -15941,9 +16713,9 @@
       "part": "pageTitle",
       "property": "fontSize",
       "otp": 32,
-      "bb": 36.38,
-      "delta": 4.38,
-      "why": "review"
+      "bb": 32,
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "mobile",
@@ -15951,9 +16723,9 @@
       "part": "pageTitle",
       "property": "fontWeight",
       "otp": "700",
-      "bb": "900",
-      "delta": "≠",
-      "why": "review"
+      "bb": "700",
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "mobile",
@@ -15961,9 +16733,9 @@
       "part": "pageTitle",
       "property": "textTransform",
       "otp": "none",
-      "bb": "uppercase",
-      "delta": "≠",
-      "why": "review"
+      "bb": "none",
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "mobile",
@@ -15971,9 +16743,29 @@
       "part": "pageTitle",
       "property": "letterSpacing",
       "otp": "normal",
-      "bb": "-0.727632px",
-      "delta": "≠",
-      "why": "review"
+      "bb": "normal",
+      "delta": "=",
+      "why": null
+    },
+    {
+      "viewport": "mobile",
+      "piece": "Página interior",
+      "part": "pageTitle",
+      "property": "textAlign",
+      "otp": "center",
+      "bb": "center",
+      "delta": "=",
+      "why": null
+    },
+    {
+      "viewport": "mobile",
+      "piece": "Página interior",
+      "part": "pageTitle",
+      "property": "rect.x",
+      "otp": 32,
+      "bb": 32,
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "mobile",
@@ -15981,8 +16773,18 @@
       "part": "pageTitle",
       "property": "rect.y",
       "otp": 102,
-      "bb": 118,
-      "delta": 16,
+      "bb": 102,
+      "delta": "=",
+      "why": null
+    },
+    {
+      "viewport": "mobile",
+      "piece": "Página interior",
+      "part": "pageTitle",
+      "property": "rect.height",
+      "otp": 74,
+      "bb": 36.8,
+      "delta": -37.2,
       "why": "content"
     },
     {
@@ -16003,7 +16805,17 @@
       "otp": 43.78,
       "bb": 46.78,
       "delta": 3,
-      "why": "font"
+      "why": "review"
+    },
+    {
+      "viewport": "mobile",
+      "piece": "Botones CTA y de contorno",
+      "part": "ctaPrimary",
+      "property": "border",
+      "otp": "0px none rgb(255, 255, 255)",
+      "bb": "1px solid rgb(230, 0, 58)",
+      "delta": "≠",
+      "why": "review"
     },
     {
       "viewport": "mobile",
@@ -16232,8 +17044,8 @@
       "property": "letterSpacingEm",
       "otp": 0.01,
       "bb": 0,
-      "delta": "=",
-      "why": null
+      "delta": -0.01,
+      "why": "tokens"
     },
     {
       "viewport": "mobile",
@@ -16351,9 +17163,9 @@
       "part": "rowThumb",
       "property": "size.width",
       "otp": 48,
-      "bb": 40,
-      "delta": -8,
-      "why": "review"
+      "bb": 48,
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "mobile",
@@ -16381,8 +17193,8 @@
       "part": "rowPlay",
       "property": "size.width",
       "otp": 32,
-      "bb": 44,
-      "delta": 12,
+      "bb": 36,
+      "delta": 4,
       "why": "own"
     },
     {
@@ -16538,16 +17350,6 @@
     {
       "viewport": "mobile",
       "piece": "Teselas de dato con rótulo de sección",
-      "part": "infoLabel",
-      "property": "font",
-      "otp": null,
-      "bb": "Montserrat (variable), web",
-      "delta": "≠",
-      "why": "font"
-    },
-    {
-      "viewport": "mobile",
-      "piece": "Teselas de dato con rótulo de sección",
       "part": "infoLabelBar",
       "property": "size.width",
       "otp": 3,
@@ -16591,9 +17393,9 @@
       "part": "dataTile",
       "property": "rect.width",
       "otp": 358,
-      "bb": 156,
-      "delta": -202,
-      "why": "review"
+      "bb": 292,
+      "delta": -66,
+      "why": "gallery"
     },
     {
       "viewport": "mobile",
@@ -16601,9 +17403,9 @@
       "part": "dataTile",
       "property": "rect.height",
       "otp": 37,
-      "bb": 77.98,
-      "delta": 40.98,
-      "why": "review"
+      "bb": 37.8,
+      "delta": 0.8,
+      "why": "font"
     },
     {
       "viewport": "mobile",
@@ -16611,9 +17413,9 @@
       "part": "dataTile",
       "property": "borderRadius",
       "otp": "0px",
-      "bb": "8px",
-      "delta": 8,
-      "why": "review"
+      "bb": "0px",
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "mobile",
@@ -16621,9 +17423,9 @@
       "part": "dataTile",
       "property": "backgroundColor",
       "otp": "rgba(0, 0, 0, 0)",
-      "bb": "rgb(17, 17, 17)",
-      "delta": "≠",
-      "why": "review"
+      "bb": "rgba(0, 0, 0, 0)",
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "mobile",
@@ -16631,9 +17433,9 @@
       "part": "dataTile",
       "property": "border",
       "otp": "0px none rgb(255, 255, 255)",
-      "bb": "1px solid rgb(30, 30, 30)",
-      "delta": "≠",
-      "why": "review"
+      "bb": "0px none rgb(255, 255, 255)",
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "mobile",
@@ -16641,19 +17443,9 @@
       "part": "dataTile",
       "property": "padding",
       "otp": "10px 0px",
-      "bb": "10px 12px",
-      "delta": "≠",
-      "why": "review"
-    },
-    {
-      "viewport": "mobile",
-      "piece": "Teselas de dato con rótulo de sección",
-      "part": "dataTileIcon",
-      "property": "color",
-      "otp": null,
-      "bb": "rgb(255, 0, 60)",
-      "delta": "≠",
-      "why": "review"
+      "bb": "10px 0px",
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "mobile",
@@ -16661,9 +17453,9 @@
       "part": "dataTileLabel",
       "property": "fontSize",
       "otp": 13,
-      "bb": 11.2,
-      "delta": -1.8,
-      "why": "review"
+      "bb": 13,
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "mobile",
@@ -16674,6 +17466,16 @@
       "bb": 0.05,
       "delta": "=",
       "why": null
+    },
+    {
+      "viewport": "mobile",
+      "piece": "Teselas de dato con rótulo de sección",
+      "part": "dataTileLabel",
+      "property": "lineHeight",
+      "otp": "normal",
+      "bb": "14.95px",
+      "delta": "≠",
+      "why": "tokens"
     },
     {
       "viewport": "mobile",
@@ -16693,7 +17495,7 @@
       "otp": "rgb(136, 136, 136)",
       "bb": "rgb(153, 153, 153)",
       "delta": "≠",
-      "why": "review"
+      "why": "aa"
     },
     {
       "viewport": "mobile",
@@ -16701,9 +17503,9 @@
       "part": "dataTileValue",
       "property": "fontSize",
       "otp": 14,
-      "bb": 16,
-      "delta": 2,
-      "why": "review"
+      "bb": 14,
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "mobile",
@@ -16713,7 +17515,7 @@
       "otp": "600",
       "bb": "700",
       "delta": "≠",
-      "why": "review"
+      "why": "tokens"
     },
     {
       "viewport": "mobile",
@@ -16731,8 +17533,8 @@
       "part": "releaseCard",
       "property": "rect.width",
       "otp": 349,
-      "bb": 272,
-      "delta": -77,
+      "bb": 268,
+      "delta": -81,
       "why": "gallery"
     },
     {
@@ -16741,8 +17543,8 @@
       "part": "releaseCard",
       "property": "rect.height",
       "otp": 503.38,
-      "bb": 437.88,
-      "delta": -65.5,
+      "bb": 433.88,
+      "delta": -69.5,
       "why": "gallery"
     },
     {
@@ -16907,6 +17709,16 @@
     },
     {
       "viewport": "mobile",
+      "piece": "Tarjeta de cristal",
+      "part": "beatCardBuy",
+      "property": "boxShadow",
+      "otp": "none",
+      "bb": "rgba(255, 0, 60, 0.45) 0px 4px 20px 0px",
+      "delta": "≠",
+      "why": "own"
+    },
+    {
+      "viewport": "mobile",
       "piece": "Pie",
       "part": "footer",
       "property": "padding",
@@ -17028,6 +17840,46 @@
     {
       "viewport": "mobile",
       "piece": "Pie",
+      "part": "footerDesc",
+      "property": "textAlign",
+      "otp": "center",
+      "bb": "center",
+      "delta": "=",
+      "why": null
+    },
+    {
+      "viewport": "mobile",
+      "piece": "Pie",
+      "part": "footerGrid",
+      "property": "alignItems",
+      "otp": "normal",
+      "bb": "normal",
+      "delta": "=",
+      "why": null
+    },
+    {
+      "viewport": "mobile",
+      "piece": "Pie",
+      "part": "footerCard",
+      "property": "rect.height",
+      "otp": 320,
+      "bb": 259.8,
+      "delta": -60.2,
+      "why": "content"
+    },
+    {
+      "viewport": "mobile",
+      "piece": "Pie",
+      "part": "footerCardLast",
+      "property": "rect.height",
+      "otp": 114,
+      "bb": 115.8,
+      "delta": 1.8,
+      "why": "content"
+    },
+    {
+      "viewport": "mobile",
+      "piece": "Pie",
       "part": "footerCard",
       "property": "borderRadius",
       "otp": "16px",
@@ -17051,9 +17903,9 @@
       "part": "footerCard",
       "property": "border",
       "otp": "1px solid rgba(255, 255, 255, 0.08)",
-      "bb": "1px solid rgba(255, 255, 255, 0.18)",
-      "delta": "≠",
-      "why": "review"
+      "bb": "1px solid rgba(255, 255, 255, 0.08)",
+      "delta": "=",
+      "why": null
     },
     {
       "viewport": "mobile",
@@ -17119,6 +17971,16 @@
       "viewport": "mobile",
       "piece": "Pie",
       "part": "footerCardTitle",
+      "property": "textAlign",
+      "otp": "center",
+      "bb": "center",
+      "delta": "=",
+      "why": null
+    },
+    {
+      "viewport": "mobile",
+      "piece": "Pie",
+      "part": "footerCardTitle",
       "property": "color",
       "otp": "rgb(255, 0, 60)",
       "bb": "rgb(255, 77, 109)",
@@ -17134,6 +17996,26 @@
       "bb": 14.4,
       "delta": "=",
       "why": null
+    },
+    {
+      "viewport": "mobile",
+      "piece": "Pie",
+      "part": "footerCardLink",
+      "property": "lineHeight",
+      "otp": "normal",
+      "bb": "16.56px",
+      "delta": "≠",
+      "why": "tokens"
+    },
+    {
+      "viewport": "mobile",
+      "piece": "Pie",
+      "part": "footerCardLink",
+      "property": "rect.height",
+      "otp": 24,
+      "bb": 44,
+      "delta": 20,
+      "why": "aa"
     },
     {
       "viewport": "mobile",

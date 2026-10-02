@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-02T16:13:44.108Z",
+  "capturedAt": "2026-10-02T17:00:47.802Z",
   "base": "https://www.otherpeople.es",
   "browser": "Chrome 154.0.8037.57",
   "why": "Piezas del sello que la referencia (../otp) no tiene: chip activo, pie y teselas en móvil",
@@ -36,6 +36,7 @@
           "letterSpacing": "0.128px",
           "letterSpacingEm": 0.01,
           "lineHeight": "normal",
+          "textAlign": "center",
           "textTransform": "none",
           "color": "rgb(255, 255, 255)",
           "fontVariantNumeric": "normal"
@@ -66,8 +67,33 @@
           "letterSpacing": "0.128px",
           "letterSpacingEm": 0.01,
           "lineHeight": "normal",
+          "textAlign": "center",
           "textTransform": "none",
           "color": "rgb(153, 153, 153)",
+          "fontVariantNumeric": "normal"
+        },
+        "pageTitle": {
+          "selector": ".beats-page-header h1",
+          "rect": {
+            "x": 32,
+            "y": 117,
+            "width": 1376,
+            "height": 37
+          },
+          "size": {
+            "width": 1376,
+            "height": 37
+          },
+          "text": "Beats de nuestros productores",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 32,
+          "fontWeight": "700",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textAlign": "center",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
           "fontVariantNumeric": "normal"
         },
         "fonts": {
@@ -111,6 +137,7 @@
           "zIndex": "auto",
           "display": "block",
           "gap": "normal",
+          "alignItems": "normal",
           "transform": "none",
           "rotate": "none",
           "rotateDeg": 0,
@@ -155,6 +182,7 @@
           "letterSpacing": "0.72px",
           "letterSpacingEm": 0.02,
           "lineHeight": "37.8px",
+          "textAlign": "center",
           "textTransform": "uppercase",
           "color": "rgb(255, 255, 255)",
           "fontVariantNumeric": "normal"
@@ -198,9 +226,35 @@
           "letterSpacing": "normal",
           "letterSpacingEm": 0,
           "lineHeight": "24.32px",
+          "textAlign": "center",
           "textTransform": "none",
           "color": "rgb(170, 170, 170)",
           "fontVariantNumeric": "normal"
+        },
+        "footerGrid": {
+          "selector": ".footer-grid",
+          "rect": {
+            "x": 80,
+            "y": 456.34,
+            "width": 1280,
+            "height": 328
+          },
+          "size": {
+            "width": 1280,
+            "height": 328
+          },
+          "text": "ExplorarInicioArtistasEventosDiscografíaBeatsPluginsNewslett",
+          "position": "static",
+          "top": "auto",
+          "left": "auto",
+          "zIndex": "auto",
+          "display": "grid",
+          "gap": "16px",
+          "alignItems": "normal",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb"
         },
         "footerCard": {
           "selector": ".footer-card",
@@ -228,11 +282,33 @@
           "zIndex": "auto",
           "display": "flex",
           "gap": "16px",
+          "alignItems": "normal",
           "transform": "none",
           "rotate": "none",
           "rotateDeg": 0,
           "writingMode": "horizontal-tb",
           "style": "border-radius: 16px; --glass-bg: hsl(0 0% 0% / 0.58); --glass-saturation: 1; --glass-backdrop-blur: 0px; --filter-id: url(…);"
+        },
+        "footerCardLast": {
+          "selector": ".footer-grid > :last-child",
+          "rect": {
+            "x": 1052,
+            "y": 456.34,
+            "width": 308,
+            "height": 328
+          },
+          "size": {
+            "width": 308,
+            "height": 328
+          },
+          "text": "Síguenos",
+          "borderRadius": "16px",
+          "backgroundColor": "rgba(0, 0, 0, 0.58)",
+          "border": "1px solid rgba(255, 255, 255, 0.08)",
+          "boxShadow": "none",
+          "backdropFilter": "url(\"#glass-filter-_r_7_\") saturate(1) blur(0px)",
+          "padding": "24px",
+          "opacity": "1"
         },
         "footerCardTitle": {
           "selector": ".footer-card__title",
@@ -253,6 +329,7 @@
           "letterSpacing": "1.92px",
           "letterSpacingEm": 0.16,
           "lineHeight": "normal",
+          "textAlign": "center",
           "textTransform": "uppercase",
           "color": "rgb(255, 0, 60)",
           "fontVariantNumeric": "normal"
@@ -276,6 +353,7 @@
           "letterSpacing": "normal",
           "letterSpacingEm": 0,
           "lineHeight": "normal",
+          "textAlign": "center",
           "textTransform": "none",
           "color": "rgb(204, 204, 204)",
           "fontVariantNumeric": "normal"
@@ -326,6 +404,7 @@
           "letterSpacing": "normal",
           "letterSpacingEm": 0,
           "lineHeight": "normal",
+          "textAlign": "center",
           "textTransform": "none",
           "color": "rgb(119, 119, 119)",
           "fontVariantNumeric": "normal"
@@ -349,6 +428,7 @@
           "letterSpacing": "normal",
           "letterSpacingEm": 0,
           "lineHeight": "normal",
+          "textAlign": "center",
           "textTransform": "none",
           "color": "rgb(153, 153, 153)",
           "fontVariantNumeric": "normal"
@@ -387,6 +467,7 @@
           "letterSpacing": "1.1px",
           "letterSpacingEm": 0.1,
           "lineHeight": "normal",
+          "textAlign": "center",
           "textTransform": "uppercase",
           "color": "rgb(119, 119, 119)",
           "fontVariantNumeric": "normal"
@@ -417,6 +498,7 @@
           "zIndex": "auto",
           "display": "grid",
           "gap": "8px",
+          "alignItems": "normal",
           "transform": "none",
           "rotate": "none",
           "rotateDeg": 0,
@@ -456,6 +538,7 @@
           "letterSpacing": "0.12px",
           "letterSpacingEm": 0.01,
           "lineHeight": "normal",
+          "textAlign": "center",
           "textTransform": "none",
           "color": "rgb(255, 255, 255)",
           "fontVariantNumeric": "normal"
@@ -486,8 +569,33 @@
           "letterSpacing": "0.12px",
           "letterSpacingEm": 0.01,
           "lineHeight": "normal",
+          "textAlign": "center",
           "textTransform": "none",
           "color": "rgb(153, 153, 153)",
+          "fontVariantNumeric": "normal"
+        },
+        "pageTitle": {
+          "selector": ".beats-page-header h1",
+          "rect": {
+            "x": 32,
+            "y": 102,
+            "width": 326,
+            "height": 74
+          },
+          "size": {
+            "width": 326,
+            "height": 74
+          },
+          "text": "Beats de nuestros productores",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 32,
+          "fontWeight": "700",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textAlign": "center",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
           "fontVariantNumeric": "normal"
         },
         "fonts": {
@@ -531,6 +639,7 @@
           "zIndex": "auto",
           "display": "block",
           "gap": "normal",
+          "alignItems": "normal",
           "transform": "none",
           "rotate": "none",
           "rotateDeg": 0,
@@ -575,6 +684,7 @@
           "letterSpacing": "0.48px",
           "letterSpacingEm": 0.02,
           "lineHeight": "25.2px",
+          "textAlign": "center",
           "textTransform": "uppercase",
           "color": "rgb(255, 255, 255)",
           "fontVariantNumeric": "normal"
@@ -618,9 +728,35 @@
           "letterSpacing": "normal",
           "letterSpacingEm": 0,
           "lineHeight": "24.32px",
+          "textAlign": "center",
           "textTransform": "none",
           "color": "rgb(170, 170, 170)",
           "fontVariantNumeric": "normal"
+        },
+        "footerGrid": {
+          "selector": ".footer-grid",
+          "rect": {
+            "x": 20,
+            "y": -205.48,
+            "width": 350,
+            "height": 907
+          },
+          "size": {
+            "width": 350,
+            "height": 907
+          },
+          "text": "ExplorarInicioArtistasEventosDiscografíaBeatsPluginsNewslett",
+          "position": "static",
+          "top": "auto",
+          "left": "auto",
+          "zIndex": "auto",
+          "display": "grid",
+          "gap": "16px",
+          "alignItems": "normal",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb"
         },
         "footerCard": {
           "selector": ".footer-card",
@@ -648,11 +784,33 @@
           "zIndex": "auto",
           "display": "flex",
           "gap": "16px",
+          "alignItems": "normal",
           "transform": "none",
           "rotate": "none",
           "rotateDeg": 0,
           "writingMode": "horizontal-tb",
           "style": "border-radius: 16px; --glass-bg: hsl(0 0% 0% / 0.58); --glass-saturation: 1; --glass-backdrop-blur: 0px; --filter-id: url(…);"
+        },
+        "footerCardLast": {
+          "selector": ".footer-grid > :last-child",
+          "rect": {
+            "x": 20,
+            "y": 587.52,
+            "width": 350,
+            "height": 114
+          },
+          "size": {
+            "width": 350,
+            "height": 114
+          },
+          "text": "Síguenos",
+          "borderRadius": "16px",
+          "backgroundColor": "rgba(0, 0, 0, 0.58)",
+          "border": "1px solid rgba(255, 255, 255, 0.08)",
+          "boxShadow": "none",
+          "backdropFilter": "url(\"#glass-filter-_r_7_\") saturate(1) blur(0px)",
+          "padding": "20px",
+          "opacity": "1"
         },
         "footerCardTitle": {
           "selector": ".footer-card__title",
@@ -673,6 +831,7 @@
           "letterSpacing": "1.92px",
           "letterSpacingEm": 0.16,
           "lineHeight": "normal",
+          "textAlign": "center",
           "textTransform": "uppercase",
           "color": "rgb(255, 0, 60)",
           "fontVariantNumeric": "normal"
@@ -696,6 +855,7 @@
           "letterSpacing": "normal",
           "letterSpacingEm": 0,
           "lineHeight": "normal",
+          "textAlign": "center",
           "textTransform": "none",
           "color": "rgb(204, 204, 204)",
           "fontVariantNumeric": "normal"
@@ -746,6 +906,7 @@
           "letterSpacing": "normal",
           "letterSpacingEm": 0,
           "lineHeight": "normal",
+          "textAlign": "center",
           "textTransform": "none",
           "color": "rgb(119, 119, 119)",
           "fontVariantNumeric": "normal"
@@ -769,6 +930,7 @@
           "letterSpacing": "normal",
           "letterSpacingEm": 0,
           "lineHeight": "normal",
+          "textAlign": "center",
           "textTransform": "none",
           "color": "rgb(153, 153, 153)",
           "fontVariantNumeric": "normal"
@@ -807,6 +969,7 @@
           "letterSpacing": "1.1px",
           "letterSpacingEm": 0.1,
           "lineHeight": "normal",
+          "textAlign": "center",
           "textTransform": "uppercase",
           "color": "rgb(119, 119, 119)",
           "fontVariantNumeric": "normal"
@@ -851,6 +1014,7 @@
           "zIndex": "auto",
           "display": "flex",
           "gap": "8px",
+          "alignItems": "center",
           "transform": "none",
           "rotate": "none",
           "rotateDeg": 0,
@@ -876,6 +1040,7 @@
           "letterSpacing": "0.65px",
           "letterSpacingEm": 0.05,
           "lineHeight": "normal",
+          "textAlign": "left",
           "textTransform": "uppercase",
           "color": "rgb(136, 136, 136)",
           "fontVariantNumeric": "normal"
@@ -899,6 +1064,7 @@
           "letterSpacing": "normal",
           "letterSpacingEm": 0,
           "lineHeight": "normal",
+          "textAlign": "left",
           "textTransform": "none",
           "color": "rgb(255, 255, 255)",
           "fontVariantNumeric": "normal"
@@ -929,6 +1095,7 @@
           "zIndex": "auto",
           "display": "grid",
           "gap": "0px",
+          "alignItems": "normal",
           "transform": "none",
           "rotate": "none",
           "rotateDeg": 0,
