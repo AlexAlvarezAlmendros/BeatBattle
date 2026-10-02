@@ -1,6 +1,6 @@
 import { ease, loop, reducedDuration, toCssCubicBezier } from '@beatbattle/shared/tokens'
 import { type Ref, useEffect, useRef, useState } from 'react'
-import { useReducedMotion } from '../../../ui/glass'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 import { PauseIcon, PlayIcon } from '../icons'
 
 interface MarqueeBandProps {

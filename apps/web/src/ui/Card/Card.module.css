@@ -18,6 +18,7 @@
     box-shadow var(--bb-dur-fast) var(--bb-ease-out);
 }
 
+/* Alternativa sin capacidad de cristal; con ella, GlassSurface pinta fondo y `backdrop-filter`. */
 .glass {
   background-color: var(--bb-glass-card);
   box-shadow: var(--bb-shadow-glass);

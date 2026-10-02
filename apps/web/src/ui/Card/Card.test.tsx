@@ -1,9 +1,10 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { type MatchMediaController, mockMatchMedia } from '../../hooks/mockMatchMedia'
 import { COARSE_POINTER_QUERY } from '../../hooks/useMediaQuery'
 import { REDUCED_MOTION_QUERY } from '../../hooks/useReducedMotion'
 import { GLARE_X_VAR } from '../../hooks/useTilt'
+import { GlassProvider, resetGlassCapabilityCache } from '../glass'
 import { Card } from './Card'
 import cardCss from './Card.module.css?raw'
 
@@ -12,6 +13,8 @@ afterEach(() => {
   media?.restore()
   media = undefined
   document.documentElement.removeAttribute('data-motion')
+  vi.unstubAllGlobals()
+  resetGlassCapabilityCache()
 })
 
 describe('Card', () => {
@@ -35,6 +38,31 @@ describe('Card', () => {
     expect(card).toHaveAttribute('data-tilt', 'on')
     expect(getComputedStyle(card).getPropertyValue('will-change')).not.toBe('transform')
     expect(cardCss).toMatch(/\.card\[data-tilt="on"\]:hover \{\s*will-change: transform;/)
+  })
+
+  it('RD-VIS-01: el cristal es GlassSurface (con su alternativa sin capacidad); la maciza no lleva filtro', () => {
+    media = mockMatchMedia()
+    vi.stubGlobal('CSS', { supports: () => true })
+    resetGlassCapabilityCache()
+    render(
+      <>
+        <Card data-testid="glass">Cristal</Card>
+        <GlassProvider enabled={false}>
+          <Card data-testid="fallback">Alternativa</Card>
+        </GlassProvider>
+        <Card data-testid="solid" surface="solid">
+          Maciza
+        </Card>
+      </>,
+    )
+    const glass = screen.getByTestId('glass')
+    expect(glass).toHaveAttribute('data-glass', 'on')
+    expect(glass).toHaveAttribute('data-tilt', 'on')
+    expect(glass.querySelector('svg[aria-hidden="true"]')).not.toBeNull()
+    expect(screen.getByTestId('fallback')).not.toHaveAttribute('data-glass')
+    expect(screen.getByTestId('fallback')).toHaveAttribute('data-surface', 'glass')
+    expect(screen.getByTestId('solid')).not.toHaveAttribute('data-glass')
+    expect(screen.getByTestId('solid').querySelector('svg')).toBeNull()
   })
 
   it('variante maciza y otros elementos raíz', () => {

@@ -1,13 +1,13 @@
 import { act, renderHook } from '@testing-library/react'
+import type { ReactNode } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   detectGlassCapability,
   type GlassEnvironment,
+  GlassProvider,
   isLowEndDevice,
-  prefersReducedMotion,
   resetGlassCapabilityCache,
   useGlassCapability,
-  useReducedMotion,
 } from './index'
 
 const CHROME =
@@ -24,19 +24,6 @@ const capable: GlassEnvironment = {
   reducedTransparency: false,
   userAgent: CHROME,
   supportsSvgBackdrop: true,
-}
-
-/** `matchMedia` falso: jsdom no lo trae. `matching` son las consultas que casan. */
-function stubMatchMedia(matching: string[]) {
-  vi.stubGlobal(
-    'matchMedia',
-    vi.fn((query: string) => ({
-      matches: matching.includes(query),
-      media: query,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    })),
-  )
 }
 
 describe('glass: detección de capacidad (useGlassCapability del sello)', () => {
@@ -93,33 +80,29 @@ describe('glass: detección de capacidad (useGlassCapability del sello)', () => 
   })
 })
 
-describe('glass: «reducir movimiento» (sistema o ajuste de la app)', () => {
+describe('glass: GlassProvider (calidad baja y galería)', () => {
   afterEach(() => {
-    delete document.documentElement.dataset.motion
     vi.unstubAllGlobals()
+    resetGlassCapabilityCache()
   })
 
-  it('RNF-A11Y-08: el ajuste de la app (html[data-motion="reduced"]) cuenta igual que el del sistema', () => {
-    expect(prefersReducedMotion()).toBe(false)
-    document.documentElement.dataset.motion = 'reduced'
-    expect(prefersReducedMotion()).toBe(true)
+  it('RNF-A11Y-03: un proveedor apagado fuerza la alternativa aunque el equipo sea capaz', () => {
+    vi.stubGlobal('CSS', { supports: () => true })
+    const off = ({ children }: { children: ReactNode }) => (
+      <GlassProvider enabled={false}>{children}</GlassProvider>
+    )
+    const on = ({ children }: { children: ReactNode }) => <GlassProvider enabled>{children}</GlassProvider>
+    expect(renderHook(() => useGlassCapability(), { wrapper: on }).result.current).toBe(true)
+    expect(renderHook(() => useGlassCapability(), { wrapper: off }).result.current).toBe(false)
   })
 
-  it('RNF-A11Y-03: la preferencia del sistema (prefers-reduced-motion) también', () => {
-    stubMatchMedia(['(prefers-reduced-motion: reduce)'])
-    expect(prefersReducedMotion()).toBe(true)
-  })
-
-  it('el hook se actualiza en caliente al cambiar el ajuste de la app', async () => {
-    const { result } = renderHook(() => useReducedMotion())
-    expect(result.current).toBe(false)
-    await act(async () => {
-      document.documentElement.dataset.motion = 'reduced'
-    })
-    await vi.waitFor(() => expect(result.current).toBe(true))
-    await act(async () => {
-      delete document.documentElement.dataset.motion
-    })
-    await vi.waitFor(() => expect(result.current).toBe(false))
+  it('un proveedor encendido dentro de uno apagado no vuelve a encender el cristal', () => {
+    vi.stubGlobal('CSS', { supports: () => true })
+    const nested = ({ children }: { children: ReactNode }) => (
+      <GlassProvider enabled={false}>
+        <GlassProvider enabled>{children}</GlassProvider>
+      </GlassProvider>
+    )
+    expect(renderHook(() => useGlassCapability(), { wrapper: nested }).result.current).toBe(false)
   })
 })

@@ -1,11 +1,12 @@
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StrictMode, useState } from 'react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { type MatchMediaController, mockMatchMedia } from '../../hooks/mockMatchMedia'
 import { REDUCED_MOTION_QUERY } from '../../hooks/useReducedMotion'
 import { t } from '../../i18n'
 import { Button } from '../Button'
+import { GlassProvider, resetGlassCapabilityCache } from '../glass'
 import { Modal, ModalSurface } from './Modal'
 
 function Harness({ dismissible = true }: { dismissible?: boolean }) {
@@ -52,6 +53,8 @@ let media: MatchMediaController | undefined
 afterEach(() => {
   media?.restore()
   media = undefined
+  vi.unstubAllGlobals()
+  resetGlassCapabilityCache()
 })
 
 async function openModal() {
@@ -87,6 +90,33 @@ describe('Modal', () => {
     expect(close).toHaveFocus()
     await user.tab({ shift: true })
     expect(enter).toHaveFocus()
+  })
+
+  it('RNF-A11Y-01: con cristal (GlassSurface) la trampa de foco no cambia; sin capacidad, la alternativa', async () => {
+    vi.stubGlobal('CSS', { supports: () => true })
+    resetGlassCapabilityCache()
+    const { user, dialog } = await openModal()
+    expect(dialog).toHaveAttribute('data-glass', 'on')
+    // El filtro SVG del cristal va dentro del diálogo, pero ni se enfoca ni se lee.
+    const filter = dialog.querySelector('svg')
+    expect(filter).toHaveAttribute('aria-hidden', 'true')
+    expect(filter).toHaveAttribute('focusable', 'false')
+    const close = screen.getByRole('button', { name: t('ui.modal.close') })
+    const enter = screen.getByRole('button', { name: 'Entrar' })
+    await user.tab()
+    expect(close).toHaveFocus()
+    await user.tab({ shift: true })
+    expect(enter).toHaveFocus()
+
+    render(
+      <GlassProvider enabled={false}>
+        <ModalSurface title="Sin cristal" data-testid="fallback" />
+      </GlassProvider>,
+    )
+    const fallback = screen.getByTestId('fallback')
+    expect(fallback).toHaveAttribute('data-surface', 'glass')
+    expect(fallback).not.toHaveAttribute('data-glass')
+    expect(fallback.querySelector('svg')).toBeNull()
   })
 
   it('RNF-A11Y-01: Esc cierra y el foco vuelve al botón que lo abrió', async () => {

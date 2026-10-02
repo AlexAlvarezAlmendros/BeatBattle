@@ -1,5 +1,6 @@
-import { useSyncExternalStore } from 'react'
-import { useReducedMotion } from './useReducedMotion'
+import { useContext, useSyncExternalStore } from 'react'
+import { useReducedMotion } from '../../hooks/useReducedMotion'
+import { GlassAllowedContext } from './GlassProvider'
 
 /**
  * Detección de capacidad para el cristal de `GlassSurface` (guía §3.1 y §3.3), portada de
@@ -87,16 +88,17 @@ function subscribeTransparency(onChange: () => void): () => void {
 
 /**
  * Hook: ¿pinta esta sesión el cristal con desplazamiento? Reacciona en caliente a «reducir
- * movimiento» y «reducir transparencia».
+ * movimiento» y «reducir transparencia», y respeta un `GlassProvider` apagado por encima.
  */
 export function useGlassCapability(): boolean {
+  const allowed = useContext(GlassAllowedContext)
   const reducedMotion = useReducedMotion()
   const reducedTransparency = useSyncExternalStore(
     subscribeTransparency,
     () => matches(TRANSPARENCY_QUERY),
     () => false,
   )
-  return !reducedMotion && !reducedTransparency && readStaticCapability()
+  return allowed && !reducedMotion && !reducedTransparency && readStaticCapability()
 }
 
 /** Solo para tests: olvida la detección cacheada. */

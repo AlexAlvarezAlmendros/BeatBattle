@@ -1,3 +1,4 @@
+export { GlassAllowedContext, GlassProvider } from './GlassProvider'
 export {
   detectGlassCapability,
   type GlassEnvironment,
@@ -5,4 +6,3 @@ export {
   resetGlassCapabilityCache,
   useGlassCapability,
 } from './glassCapability'
-export { prefersReducedMotion, useReducedMotion } from './useReducedMotion'

@@ -30,6 +30,7 @@
   color: var(--bb-text);
 }
 
+/* Alternativa sin capacidad de cristal; con ella, GlassSurface pinta fondo y `backdrop-filter`. */
 .glass {
   background-color: var(--bb-glass-card);
   backdrop-filter: blur(var(--bb-glass-blur));

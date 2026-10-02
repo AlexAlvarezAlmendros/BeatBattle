@@ -1,6 +1,6 @@
 import { duration, ease, reducedDuration } from '@beatbattle/shared/tokens'
 import type { Variants } from 'motion/react'
-import { useReducedMotion } from '../../../ui/glass'
+import { useReducedMotion } from '../../../hooks/useReducedMotion'
 
 /**
  * Entrada del hero con Motion (guía §3.6; en el sello, `fadeInUp` escalonado de Hero.css): cada pieza

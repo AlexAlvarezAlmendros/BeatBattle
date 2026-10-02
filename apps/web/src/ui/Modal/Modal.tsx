@@ -16,6 +16,7 @@ import { useReducedMotion } from '../../hooks/useReducedMotion'
 import { t } from '../../i18n'
 import { Button } from '../Button'
 import { cx } from '../forceState'
+import { GlassSurface } from '../GlassSurface'
 import { isTopModalLayer, lockScroll, pushModalLayer, trapTab } from './focus'
 import styles from './Modal.module.css'
 
@@ -41,9 +42,13 @@ export interface ModalSurfaceProps extends Omit<HTMLAttributes<HTMLDivElement>, 
 }
 
 /**
- * La pieza visible del modal, sin comportamiento: cristal (`--bb-glass-card` + desenfoque, borde
- * `--bb-line-strong`, radio `md`), título, descripción, cuerpo y pie. `Modal` la usa dentro del
- * diálogo; la galería la enseña quieta.
+ * La pieza visible del modal, sin comportamiento: título, descripción, cuerpo y pie sobre cristal
+ * (borde `--bb-line-strong`, radio `md`) o maciza. `Modal` la usa dentro del diálogo; la galería la
+ * enseña quieta.
+ *
+ * El cristal es `GlassSurface` (§3.3), como la isla: `--bb-glass-card` + refracción SVG + `blur(3px)`.
+ * Sin capacidad (equipo modesto, «reducir movimiento», Safari/Firefox) se queda en la alternativa de
+ * `Modal.module.css`: `--bb-glass-card` + `blur(8px)`.
  */
 export function ModalSurface({
   title,
@@ -58,12 +63,8 @@ export function ModalSurface({
   children,
   ...rest
 }: ModalSurfaceProps) {
-  return (
-    <div
-      {...rest}
-      className={cx(styles.surface, surface === 'glass' ? styles.glass : styles.solid, className)}
-      data-surface={surface}
-    >
+  const content = (
+    <>
       <header className={styles.header}>
         <TitleTag id={titleId} className={styles.title}>
           {title}
@@ -86,7 +87,19 @@ export function ModalSurface({
       )}
       {children && <div className={styles.body}>{children}</div>}
       {footer && <footer className={styles.footer}>{footer}</footer>}
-    </div>
+    </>
+  )
+  const surfaceProps = {
+    ...rest,
+    className: cx(styles.surface, surface === 'glass' ? styles.glass : styles.solid, className),
+    'data-surface': surface,
+  }
+  return surface === 'glass' ? (
+    <GlassSurface {...surfaceProps} backdropBlur="var(--bb-glass-blur-card)">
+      {content}
+    </GlassSurface>
+  ) : (
+    <div {...surfaceProps}>{content}</div>
   )
 }
 
