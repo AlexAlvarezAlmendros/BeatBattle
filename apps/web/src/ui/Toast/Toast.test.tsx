@@ -99,6 +99,49 @@ describe('ToastViewport', () => {
     await waitFor(() => expect(assertiveRegion()).toBeEmptyDOMElement())
   })
 
+  it('RNF-A11Y-01: al cerrar un aviso con el teclado, el foco pasa al siguiente y, sin más, vuelve a donde estaba', async () => {
+    const user = userEvent.setup()
+    render(
+      <>
+        <button type="button">Antes</button>
+        <ToastViewport />
+      </>,
+    )
+    act(() => {
+      toast.info('Primero', { duration: null })
+      toast.error('Segundo', { duration: null })
+    })
+    const before = screen.getByRole('button', { name: 'Antes' })
+    await user.tab()
+    expect(before).toHaveFocus()
+    await user.tab()
+    const [first, second] = screen.getAllByRole('button', { name: t('ui.toast.close') })
+    expect(first).toHaveFocus()
+    await user.keyboard('{Enter}')
+    expect(second).toHaveFocus()
+    await user.keyboard('{Enter}')
+    expect(useToasts.getState().toasts).toHaveLength(0)
+    expect(before).toHaveFocus()
+  })
+
+  it('RNF-A11Y-01: si el tope expulsa el aviso con el foco, el foco pasa al siguiente', async () => {
+    const user = userEvent.setup()
+    render(<ToastViewport />)
+    act(() => {
+      for (let i = 0; i < TOAST_LIMIT; i++) toast.info(`Aviso ${i}`, { duration: null })
+    })
+    await user.tab()
+    const oldest = within(politeRegion()).getAllByRole('listitem')[0]!
+    expect(within(oldest).getByRole('button')).toHaveFocus()
+    act(() => {
+      toast.info('Uno más', { duration: null })
+    })
+    const next = within(politeRegion())
+      .getAllByRole('listitem')
+      .find((item) => item.textContent?.includes('Aviso 1'))!
+    expect(within(next).getByRole('button')).toHaveFocus()
+  })
+
   it('con duration: null no se cierra solo', () => {
     vi.useFakeTimers()
     render(<ToastViewport />)
