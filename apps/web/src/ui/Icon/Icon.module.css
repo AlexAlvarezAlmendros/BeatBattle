@@ -17,3 +17,21 @@
   fill: currentcolor;
   stroke: none;
 }
+
+/*
+ * Play ↔ pausa (Anexo E): el trazado se transforma (mismas órdenes en los dos, ver `PLAY_PATH`). Sin
+ * movimiento, cambio de icono directo. Donde el navegador no anima `d`, también cambia sin más.
+ */
+.morph {
+  transition: d var(--bb-dur-base) var(--bb-ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .morph {
+    transition: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .morph {
+  transition: none;
+}

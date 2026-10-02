@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
 import type { WaveformPeak } from '../Waveform'
 import { EntryList, EntryRow } from './EntryRow'
+import rowCss from './EntryRow.module.css?raw'
 
 const PEAKS: WaveformPeak[] = Array.from({ length: 40 }, (_, i) => [-((i % 7) / 7), (i % 5) / 5])
 
@@ -71,6 +72,15 @@ describe('EntryRow', () => {
       screen.getByRole('button', { name: t('ui.entryRow.pause', { title: 'Tigre púrpura' }) }),
     ).toBeInTheDocument()
     expect(screen.getByRole('article')).toHaveAttribute('data-playing', 'true')
+  })
+
+  it('RNF-A11Y-09: con puntero grueso el enlace del título se estira a toda la fila y el play queda encima', () => {
+    // jsdom no evalúa @media: se comprueba la regla (en Chrome, a 390 px táctil, un toque en el hueco
+    // de la fila abre la ficha y el play sigue siendo el play).
+    const coarse = /@media \(hover: none\), \(pointer: coarse\) \{([\s\S]*?)\n\}/.exec(rowCss)?.[1] ?? ''
+    expect(coarse).toMatch(/\.titleLink::after \{[^}]*position: absolute;[^}]*inset: 0;/)
+    expect(coarse).toMatch(/\.row \{[^}]*position: relative;/)
+    expect(coarse).toMatch(/\.play,\s*\.actions \{[^}]*z-index: 1;/)
   })
 
   it('la mini onda es decorativa y la portada sin imagen también', () => {

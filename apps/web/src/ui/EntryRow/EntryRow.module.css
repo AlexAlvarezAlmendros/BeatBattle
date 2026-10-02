@@ -206,6 +206,29 @@
   }
 }
 
+/*
+ * Puntero grueso (RNF-A11Y-09, objetivos de 44 px): el título mide unos 17 px de alto, así que su
+ * enlace se estira a toda la fila (≥ 48 px) con un pseudoelemento; el play y las acciones quedan
+ * encima. Con ratón se queda como en el sello: solo el título enlaza.
+ */
+@media (hover: none), (pointer: coarse) {
+  .row {
+    position: relative;
+  }
+
+  .titleLink::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  .play,
+  .actions {
+    position: relative;
+    z-index: 1;
+  }
+}
+
 /* Sin movimiento (Anexo E): solo el fondo. */
 @media (prefers-reduced-motion: reduce) {
   .row:hover .wave,

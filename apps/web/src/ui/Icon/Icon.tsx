@@ -7,9 +7,17 @@ import styles from './Icon.module.css'
  * pocos que necesitan los componentes base. Pintan con `currentColor`, así que toman el color del
  * texto de su pieza (rojo en las teselas, blanco en los botones…).
  */
+/**
+ * Play y pausa con la misma estructura de trazado (dos cuadriláteros: el triángulo partido en dos
+ * mitades y las dos barras), para que el navegador interpole `d` y el play se transforme en pausa
+ * (Anexo E, «morfología de trazado»). Sin movimiento, el cambio es directo.
+ */
+export const PLAY_PATH = 'M8 5.5L13.25 8.75L13.25 15.25L8 18.5ZM13.25 8.75L18.5 12L18.5 12L13.25 15.25Z'
+export const PAUSE_PATH = 'M7 5L10.5 5L10.5 19L7 19ZM13.5 5L17 5L17 19L13.5 19Z'
+
 const PATHS = {
-  play: <path d="M8 5.5v13l10.5-6.5z" className={styles.solid} />,
-  pause: <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" className={styles.solid} />,
+  play: <path d={PLAY_PATH} className={cx(styles.solid, styles.morph)} />,
+  pause: <path d={PAUSE_PATH} className={cx(styles.solid, styles.morph)} />,
   check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
   close: <path d="M6 6l12 12M18 6L6 18" />,
   alert: (

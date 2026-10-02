@@ -39,7 +39,8 @@ export interface EntryRowProps {
  * Fila de entrada (§3.3): la anatomía de la lista de beats del sello (`BeatListRow`): portada, play
  * redondo, título, «Prod. by», chips de género, BPM y tonalidad en gris con cifras tabulares; la mini
  * onda sustituye a la barra de progreso. Hover: fondo `--bb-ink-700` y la mini onda «respira» (sin
- * movimiento, solo el fondo; Anexo E).
+ * movimiento, solo el fondo; Anexo E). El play se transforma en pausa (`Icon`, Anexo E). Con puntero
+ * grueso, el enlace del título cubre toda la fila (RNF-A11Y-09).
  *
  * Solo pinta con props: el audio y el reproductor llegan en la Fase 5.
  */
