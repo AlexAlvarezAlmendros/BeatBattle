@@ -24,9 +24,9 @@ aleje del sello: por eso la fase termina con una comparación A/B contra captura
 |----|----------|--------------|
 | `RD-VIS-01` | 0.4 | ✅ `pnpm lint:tokens` dentro de `pnpm check`, con 87 tests del propio lint |
 | `RD-VIS-02` | 0.7, 0.8, 0.14 | Comparación A/B con capturas del sello registrada en `docs/planning/evidence/f0/` |
-| `RD-VIS-03` | 0.9 | Galería `/dev/galeria` con todos los estados de §3.3 |
-| `RD-MOT-03` | 0.8, 0.9 | Cada componente con variante sin movimiento, visible en la galería |
-| `RF-OTP-01` | 0.7 | Logo del sello enlazado y pie compartido, revisión visual |
+| `RD-VIS-03` | 0.9 | ✅ E2E: la galería pinta todas sus secciones, componentes y piezas del layout |
+| `RD-MOT-03` | 0.8, 0.9 | ✅ Variantes sin movimiento en cada componente; E2E del interruptor de la galería |
+| `RF-OTP-01` | 0.7 | ✅ Tests del logo (enlace, `rel`, `alt`) y del pie; posición del logo igual a la del sello al píxel |
 | `RNF-SEC-01` | 0.12, 0.16 | ✅ Test estático de `vercel.json` + cabeceras de la API con `inject` (humo en despliegue real: Fase 10, guía v0.4) |
 | `RNF-SEC-05` | 0.16 | ✅ Tests: `Origin` ajeno → 403; `text/plain` → 415 |
 | `RNF-SEC-06` | 0.3 | ✅ Hook `guard-secrets` probado |
@@ -57,9 +57,9 @@ contratos compartidos y cliente de API tipado (§4.7.2, §4.10–4.13).
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 0.7 | Layout del sello: isla de navegación flotante (medidas de `Header.css`), logo *OTP.* fijo a −10° enlazado a `otherpeople.es`, pie compartido, rótulos verticales laterales, banda de marquee, rejilla roja y viñeta del hero; titular «BEAT / BATTLE» (macizo + contorno rojo con halo). Nombre de marca por defecto: «Beat Battle by Other People» | ⬜ Listo | 0.4, 0.5, 0.10 | §3.1, §3.8.3 · `RF-OTP-01` |
-| 0.8 | Componentes base con todos sus estados (reposo, hover, foco, pulsado, cargando, deshabilitado, éxito, error): botón CTA, contorno, icono; chip; tarjeta con inclinación 3D; tesela de dato; rótulo de sección; fila de entrada (sin audio); modal de cristal; aviso; barra de XP; esqueleto; cuenta atrás (visual) | ⬜ Listo | 0.4, 0.5 | §3.3 · Anexo E |
-| 0.9 | Galería `/dev/galeria` (solo en desarrollo) con tokens, tipografía, componentes y cada estado, en calidad normal y con «reducir movimiento» | 🔒 Bloqueado | 0.8 | `RD-VIS-03`, `RD-MOT-03` |
+| 0.7 | Layout del sello: isla de navegación flotante (medidas de `Header.css`), logo *OTP.* fijo a −10° enlazado a `otherpeople.es`, pie compartido, rótulos verticales laterales, banda de marquee, rejilla roja y viñeta del hero; titular «BEAT / BATTLE» (macizo + contorno rojo con halo). Nombre de marca por defecto: «Beat Battle by Other People» | ✅ Hecho | 0.4, 0.5, 0.10 | §3.1, §3.8.3 · `RF-OTP-01` · Verificado (ola 2): isla con GlassSurface portado y alternativa, menú móvil accesible, logo y pie del sello, orbes, piezas del hero y home en «calendario vacío»; medidas comparadas con `otp-metrics.json` a 1440 y 390 (isla, logo, titular, subtítulo y botones coinciden; la tipografía es la diferencia esperada); 40 tests nuevos; axe sin violaciones. Teletipo con botón de pausa (WCAG 2.2.2) |
+| 0.8 | Componentes base con todos sus estados (reposo, hover, foco, pulsado, cargando, deshabilitado, éxito, error): botón CTA, contorno, icono; chip; tarjeta con inclinación 3D; tesela de dato; rótulo de sección; fila de entrada (sin audio); modal de cristal; aviso; barra de XP; esqueleto; cuenta atrás (visual) | ✅ Hecho | 0.4, 0.5 | §3.3 · Anexo E · Verificado (ola 2): 12 componentes con estados forzables, `useReducedMotion` único, GlassSurface en modal y tarjeta de cristal; revisión independiente con 16 arreglos (rendimiento de la onda y la cuenta atrás, foco al cerrar avisos, anuncio de éxito y error, interletraje). Pendiente fuera de la fase: revisión con lector de pantalla de las regiones vivas (`RNF-A11Y-07`, auditoría de la Fase 10) |
+| 0.9 | Galería `/dev/galeria` (solo en desarrollo) con tokens, tipografía, componentes y cada estado, en calidad normal y con «reducir movimiento» | ✅ Hecho | 0.8 | `RD-VIS-03`, `RD-MOT-03` · Verificado: galería con tokens, tipografía, movimiento, todos los componentes y estados, sección «Layout del sello», interruptores de movimiento y cristal; E2E `RD-VIS-03` y `RD-MOT-03` y axe en verde |
 | 0.10 | Router y layouts de todas las rutas de §2.18 como páginas vacías con su título; 404 provisional; proveedores (Query) | ✅ Hecho | 0.1 | §2.18 · Verificado: 43 tests de rutas con `createMemoryRouter` (27 URLs, 404 dentro del marco, títulos, foco y vuelta arriba); la galería no entra en la build de producción |
 | 0.11 | i18n mínimo: `t()` con `Intl.PluralRules`, `es.json`, formato de fechas en `Europe/Madrid` | ✅ Hecho | 0.1 | §4.7.8 · Verificado: 16 tests (plurales, modo estricto, fechas en Madrid con los dos cambios de hora) |
 
@@ -111,6 +111,7 @@ todas las bases transversales probadas.
 |-------|-------|-------|
 | 2026-10-02 | — | Plan creado. 0.3 hecha junto con la planificación. |
 | 2026-10-02 | 0.13 | Playwright + axe hecho: humo, navegación (escritorio y menú móvil), 404, galería, axe WCAG 2.2 AA, teclado y «reducir movimiento». Sin violaciones de axe; arreglado el 404 del icono de la pestaña. `tsconfig.json` raíz con `playwright.config.ts` y `tests/` dentro de `pnpm typecheck`. Pasos de Playwright en la CI (su primera ejecución, con la 0.2). |
+| 2026-10-02 | Ola 2 | Layout del sello (0.7) y componentes + galería (0.8, 0.9) en paralelo con revisión y arreglos; fusión con integración (un solo `useReducedMotion`, GlassSurface en modal y tarjeta, layout en la galería) y Playwright + axe (0.13). Calidad: web 288 tests, E2E 28, axe sin violaciones, JS inicial 166 kB gz. Quedan: CTA del hero sobre el `Button` base, visor de avisos en el marco, tokens nuevos a la guía, comparación A/B formal (`RD-VIS-02`), README y primera ejecución de la CI. |
 | 2026-10-02 | Ola 1 | Cuatro líneas en paralelo (worktrees) con revisión independiente y arreglos, fusionadas en `feat/f0-fundaciones` sin conflictos de texto: 0.4, 0.5, 0.6, 0.10, 0.11, 0.12, 0.14, 0.16, 0.17 y 0.18 hechas; 0.2 y 0.19 parciales. Calidad tras fusionar: Biome, `lint:tokens`, `lint:purity`, tipos, ~525 tests y build en verde. Desviaciones llevadas a la guía v0.4 (medidas reales del sello incluidas). Se añade 0.20 (Dependabot, pendiente de confirmación). Desbloquea 0.7 y 0.8. |
 | 2026-10-02 | 0.1 | Scaffold del monorepo hecho y verificado. Desbloquea 0.2, 0.4–0.6, 0.10–0.12, 0.14–0.16 y 0.19. |
 | 2026-10-02 | — | Se añaden 0.16–0.19 (bases del servidor, datos, contratos y servicios locales) y la tabla de cobertura. Empieza la fase en la rama `feat/f0-fundaciones`. |
