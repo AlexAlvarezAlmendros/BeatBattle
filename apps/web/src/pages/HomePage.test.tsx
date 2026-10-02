@@ -57,6 +57,15 @@ describe('HomePage: hero en «calendario vacío» (0.7, guía §3.8.3 y §2.19)'
     expect(words).toEqual(IDLE_TICKER.map((key) => t(key)))
   })
 
+  it('RNF-A11Y-01 (WCAG 2.2.2): la banda lleva su botón de pausa, con nombre por i18n', () => {
+    renderInRouter(<HomePage />)
+    const band = within(hero()).getByRole('marquee', { name: t('home.ticker.label') })
+    expect(within(band).getByRole('button', { name: t('home.ticker.pause') })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    )
+  })
+
   it('RNF-A11Y-03: con «reducir movimiento», el teletipo es la lista estática', () => {
     document.documentElement.dataset.motion = 'reduced'
     renderInRouter(<HomePage />)

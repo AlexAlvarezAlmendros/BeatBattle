@@ -2,7 +2,7 @@ import type { SocialNetwork } from './navigation'
 
 /**
  * Iconos del marco, dibujados a trazo con `currentColor` (sin librería de iconos): las redes del sello,
- * la flecha de los enlaces del menú y el aspa de cerrar. Son decorativos: el nombre lo pone el texto
+ * la flecha de los enlaces del menú, el aspa de cerrar y la pausa y el play del marquee. Son decorativos: el nombre lo pone el texto
  * (visible u oculto) del enlace o del botón.
  */
 
@@ -56,6 +56,22 @@ export function CloseIcon({ className }: { className?: string }) {
   return (
     <svg {...SVG_PROPS} className={className} aria-hidden="true">
       <path d="M6 6l12 12M18 6 6 18" />
+    </svg>
+  )
+}
+
+export function PauseIcon({ className }: { className?: string }) {
+  return (
+    <svg {...SVG_PROPS} className={className} aria-hidden="true">
+      <path d="M8 5v14M16 5v14" strokeWidth={3} />
+    </svg>
+  )
+}
+
+export function PlayIcon({ className }: { className?: string }) {
+  return (
+    <svg {...SVG_PROPS} className={className} aria-hidden="true">
+      <path d="M7 4.5v15l12.5-7.5z" fill="currentColor" />
     </svg>
   )
 }

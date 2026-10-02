@@ -244,7 +244,13 @@
 }
 
 /* ── Banda de marquee ─────────────────────────────────────────────────────────────────────── */
+/* La banda (filetes, cristal y fundido de los bordes) va en `__viewport`; fuera de ella, sin el
+   fundido, el botón de pausa. */
 .marquee {
+  position: relative;
+}
+
+.marquee__viewport {
   overflow: hidden;
   padding: 0.9rem 0;
   border-block: 1px solid var(--bb-red-line);
@@ -276,9 +282,55 @@
   animation: marquee-scroll var(--bb-loop-marquee) linear infinite;
 }
 
+/* Pausa con el ratón encima (Anexo E) o con el botón (WCAG 2.2.2): la del botón es del usuario. */
 .marquee:hover .marquee__track,
-.marquee:focus-within .marquee__track {
+.marquee[data-paused] .marquee__track {
   animation-play-state: paused;
+}
+
+/* Botón de pausa: objetivo de 44 × 44 px (RNF-A11Y-09) con una cara visible de 32 px, a la derecha de
+   la banda, sobre su fundido. */
+.marquee__toggle {
+  position: absolute;
+  top: 50%;
+  right: var(--bb-space-4);
+  display: grid;
+  place-items: center;
+  width: var(--bb-space-11);
+  height: var(--bb-space-11);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--bb-text);
+  translate: 0 -50%;
+}
+
+.marquee__toggle-face {
+  display: grid;
+  place-items: center;
+  width: var(--bb-space-8);
+  height: var(--bb-space-8);
+  border: 1px solid var(--bb-line-button);
+  border-radius: 50%;
+  background-color: var(--bb-ink-950);
+  transition:
+    border-color var(--bb-dur-fast) var(--bb-ease-out),
+    background-color var(--bb-dur-fast) var(--bb-ease-out);
+}
+
+.marquee__toggle:hover .marquee__toggle-face {
+  border-color: var(--bb-text);
+  background-color: var(--bb-ink-800);
+}
+
+.marquee__toggle[aria-pressed="true"] .marquee__toggle-face {
+  border-color: var(--bb-red);
+}
+
+.marquee__toggle-icon {
+  width: var(--bb-space-3);
+  height: var(--bb-space-3);
 }
 
 .marquee__group {
@@ -323,8 +375,9 @@
   }
 }
 
-/* Sin movimiento: lista quieta que rota cada 5 s con un fundido. Centrada si cabe; si no, desde la
-   izquierda (pasado el fundido del borde), para que se vea la primera palabra y cómo rota. */
+/* Sin movimiento: lista quieta que rota cada 5 s (`order`, desde MarqueeBand) con un fundido de la
+   lista, y que aparece con otro al montarse. Centrada si cabe; si no, desde la izquierda (pasado el
+   fundido del borde), para que se vea la primera palabra y cómo rota. */
 .marquee__track--static {
   justify-content: safe center;
   width: auto;
@@ -398,8 +451,12 @@
     bottom: 60px;
   }
 
-  .marquee {
+  .marquee__viewport {
     padding: 0.7rem 0;
+  }
+
+  .marquee__toggle {
+    right: var(--bb-space-2);
   }
 
   .marquee__group {

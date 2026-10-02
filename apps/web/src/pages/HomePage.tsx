@@ -47,6 +47,7 @@ export function HomePage() {
             <MarqueeBand
               className="hero__band"
               label={t('home.ticker.label')}
+              pauseLabel={t('home.ticker.pause')}
               items={IDLE_TICKER.map((key) => t(key))}
             />
           </>

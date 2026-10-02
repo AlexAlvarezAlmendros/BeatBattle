@@ -68,6 +68,7 @@
     },
     "ticker": {
       "label": "Teletipo de la batalla",
+      "pause": "Pausar el teletipo",
       "idle": {
         "nextDrop": "Próximo drop en el horno",
         "everyMonday": "Un sample cada lunes",
