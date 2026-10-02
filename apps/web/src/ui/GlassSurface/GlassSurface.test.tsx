@@ -1,8 +1,13 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createRef } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { buildDisplacementMap } from './displacementMap'
+import {
+  buildDisplacementMap,
+  clearDisplacementMapCache,
+  displacementMapFor,
+  MAP_CACHE_SIZE,
+} from './displacementMap'
 
 const capability = vi.hoisted(() => ({ value: false }))
 
@@ -11,7 +16,7 @@ vi.mock('../glass', async (importOriginal) => ({
   useGlassCapability: () => capability.value,
 }))
 
-const { GlassSurface } = await import('./GlassSurface')
+const { GlassSurface, MAP_RESIZE_DEBOUNCE_MS } = await import('./GlassSurface')
 
 describe('GlassSurface (portado del sello)', () => {
   afterEach(() => {
@@ -115,27 +120,135 @@ describe('GlassSurface (portado del sello)', () => {
   })
 })
 
+const MAP_OPTIONS = {
+  width: 200,
+  height: 60,
+  radius: 20,
+  borderWidth: 0.07,
+  brightness: 50,
+  opacity: 0.91,
+  blur: 11,
+  mixBlendMode: 'difference',
+}
+
 describe('buildDisplacementMap', () => {
   it('genera un SVG con los dos degradados, el centro neutro y el radio de la pieza', () => {
-    const uri = buildDisplacementMap({
-      width: 200,
-      height: 60,
-      radius: 20,
-      borderWidth: 0.07,
-      brightness: 50,
-      opacity: 0.91,
-      blur: 11,
-      mixBlendMode: 'difference',
-      redGradientId: 'r',
-      blueGradientId: 'b',
-    })
+    const uri = buildDisplacementMap(MAP_OPTIONS)
     const svg = decodeURIComponent(uri.replace('data:image/svg+xml,', ''))
     expect(svg).toContain('viewBox="0 0 200 60"')
-    expect(svg).toContain('fill="url(#r)"')
-    expect(svg).toContain('fill="url(#b)"')
+    expect(svg).toContain('fill="url(#map-x)"')
+    expect(svg).toContain('fill="url(#map-y)"')
     expect(svg).toContain('rx="20"')
     expect(svg).toContain('mix-blend-mode: difference')
     // Borde de refracción: 7 % del lado menor, a cada lado.
     expect(svg).toContain('x="2.1" y="2.1" width="195.8" height="55.8"')
+  })
+})
+
+describe('displacementMapFor: caché de mapas (memoria del renderer)', () => {
+  afterEach(() => clearDisplacementMapCache())
+
+  it('el mismo tamaño redondeado devuelve la misma cadena; otro tamaño, otra', () => {
+    const a = displacementMapFor(MAP_OPTIONS)
+    expect(displacementMapFor({ ...MAP_OPTIONS, width: 202.4, height: 61 })).toBe(a)
+    expect(displacementMapFor({ ...MAP_OPTIONS, width: 260 })).not.toBe(a)
+    // Redondeado a la rejilla de 8 px.
+    expect(decodeURIComponent(a)).toContain('viewBox="0 0 200 64"')
+  })
+
+  it('guarda como mucho MAP_CACHE_SIZE mapas y suelta primero el más antiguo', () => {
+    const first = displacementMapFor(MAP_OPTIONS)
+    for (let i = 1; i <= MAP_CACHE_SIZE; i++) displacementMapFor({ ...MAP_OPTIONS, width: 200 + i * 8 })
+    // El primero ya salió: se vuelve a generar (misma cadena, pero otra entrada).
+    expect(displacementMapFor(MAP_OPTIONS)).toBe(first)
+  })
+})
+
+describe('GlassSurface: mapa al cambiar de tamaño', () => {
+  let resize: (() => void) | undefined
+  let size = { width: 300, height: 100 }
+
+  class FakeResizeObserver {
+    constructor(callback: () => void) {
+      resize = callback
+    }
+    observe() {}
+    disconnect() {
+      resize = undefined
+    }
+  }
+
+  afterEach(() => {
+    capability.value = false
+    resize = undefined
+    size = { width: 300, height: 100 }
+    vi.unstubAllGlobals()
+    vi.useRealTimers()
+    clearDisplacementMapCache()
+  })
+
+  function renderSized(testId: string) {
+    const view = render(<GlassSurface data-testid={testId}>cristal</GlassSurface>)
+    return view
+  }
+
+  it('redimensionar sin parar escribe el mapa una vez al final, y no si el tamaño redondeado no cambia', () => {
+    capability.value = true
+    vi.useFakeTimers()
+    vi.stubGlobal('ResizeObserver', FakeResizeObserver)
+    const rect = () =>
+      ({ ...size, left: 0, top: 0, right: size.width, bottom: size.height, x: 0, y: 0 }) as DOMRect
+    const original = Element.prototype.getBoundingClientRect
+    Element.prototype.getBoundingClientRect = rect
+    const writes: string[] = []
+    const setAttribute = SVGElement.prototype.setAttribute
+    SVGElement.prototype.setAttribute = function (name: string, value: string) {
+      if (name === 'href' && this.tagName.toLowerCase() === 'feimage') writes.push(value)
+      return setAttribute.call(this, name, value)
+    }
+    try {
+      const { unmount } = renderSized('pieza')
+      expect(writes).toHaveLength(1)
+
+      // Veinte avisos seguidos mientras se arrastra la ventana: ninguno escribe hasta que para.
+      for (let i = 0; i < 20; i++) {
+        size = { width: 300 + i * 10, height: 100 }
+        act(() => resize?.())
+        act(() => vi.advanceTimersByTime(MAP_RESIZE_DEBOUNCE_MS / 3))
+      }
+      expect(writes).toHaveLength(1)
+      act(() => vi.advanceTimersByTime(MAP_RESIZE_DEBOUNCE_MS))
+      expect(writes).toHaveLength(2)
+
+      // Un cambio dentro de la misma celda de 8 px: misma cadena, no se vuelve a escribir.
+      size = { width: size.width + 1, height: 101 }
+      act(() => resize?.())
+      act(() => vi.advanceTimersByTime(MAP_RESIZE_DEBOUNCE_MS))
+      expect(writes).toHaveLength(2)
+      unmount()
+    } finally {
+      Element.prototype.getBoundingClientRect = original
+      SVGElement.prototype.setAttribute = setAttribute
+    }
+  })
+
+  it('dos piezas del mismo tamaño comparten el mismo mapa', () => {
+    capability.value = true
+    const original = Element.prototype.getBoundingClientRect
+    Element.prototype.getBoundingClientRect = () =>
+      ({ width: 320, height: 120, left: 0, top: 0, right: 320, bottom: 120, x: 0, y: 0 }) as DOMRect
+    try {
+      render(
+        <>
+          <GlassSurface data-testid="a">a</GlassSurface>
+          <GlassSurface data-testid="b">b</GlassSurface>
+        </>,
+      )
+      const href = (id: string) => screen.getByTestId(id).querySelector('feImage')?.getAttribute('href')
+      expect(href('a')).toBeTruthy()
+      expect(href('a')).toBe(href('b'))
+    } finally {
+      Element.prototype.getBoundingClientRect = original
+    }
   })
 })

@@ -10,7 +10,7 @@ import {
   useRef,
 } from 'react'
 import { useGlassCapability } from '../glass'
-import { buildDisplacementMap } from './displacementMap'
+import { displacementMapFor } from './displacementMap'
 import './GlassSurface.css'
 
 /** Canal de color que lee el `feDisplacementMap`. */
@@ -49,6 +49,12 @@ interface GlassOwnProps<T extends ElementType> {
 
 export type GlassSurfaceProps<T extends ElementType = 'div'> = GlassOwnProps<T> &
   Omit<ComponentPropsWithRef<T>, keyof GlassOwnProps<T>>
+
+/**
+ * Espera tras el último cambio de tamaño antes de rehacer el mapa: al redimensionar la ventana o girar
+ * una tableta llegan decenas de avisos del `ResizeObserver` y basta con el del final.
+ */
+export const MAP_RESIZE_DEBOUNCE_MS = 150
 
 /** Matrices que aíslan un canal tras desplazarlo (aberración cromática). */
 const CHANNEL_MATRIX = {
@@ -100,8 +106,6 @@ export function GlassSurface<T extends ElementType = 'div'>(props: GlassSurfaceP
 
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '')
   const filterId = `bb-glass-filter-${uid}`
-  const redGradientId = `bb-glass-red-${uid}`
-  const blueGradientId = `bb-glass-blue-${uid}`
 
   const containerRef = useRef<Element | null>(null)
   const feImageRef = useRef<SVGFEImageElement>(null)
@@ -123,36 +127,33 @@ export function GlassSurface<T extends ElementType = 'div'>(props: GlassSurfaceP
     const width = rect.width || 400
     const height = rect.height || 200
     const radius = Number.parseFloat(getComputedStyle(node).borderTopLeftRadius) || 0
-    image.setAttribute(
-      'href',
-      buildDisplacementMap({
-        width,
-        height,
-        radius: Math.min(radius, width / 2, height / 2),
-        borderWidth,
-        brightness,
-        opacity,
-        blur,
-        mixBlendMode,
-        redGradientId,
-        blueGradientId,
-      }),
-    )
-  }, [borderWidth, brightness, opacity, blur, mixBlendMode, redGradientId, blueGradientId])
+    // De la caché, por tamaño redondeado: el mismo mapa es la misma cadena y no se vuelve a escribir.
+    const href = displacementMapFor({
+      width,
+      height,
+      radius,
+      borderWidth,
+      brightness,
+      opacity,
+      blur,
+      mixBlendMode,
+    })
+    if (image.getAttribute('href') !== href) image.setAttribute('href', href)
+  }, [borderWidth, brightness, opacity, blur, mixBlendMode])
 
   useEffect(() => {
     if (!glass) return
     updateMap()
     const node = containerRef.current
     if (!node || typeof ResizeObserver === 'undefined') return
-    let frame = 0
+    let timer: ReturnType<typeof setTimeout> | undefined
     const observer = new ResizeObserver(() => {
-      cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(updateMap)
+      clearTimeout(timer)
+      timer = setTimeout(updateMap, MAP_RESIZE_DEBOUNCE_MS)
     })
     observer.observe(node)
     return () => {
-      cancelAnimationFrame(frame)
+      clearTimeout(timer)
       observer.disconnect()
     }
   }, [glass, updateMap])
