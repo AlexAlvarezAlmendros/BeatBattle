@@ -148,7 +148,7 @@
   color: var(--bb-text-3);
   font-size: var(--bb-font-size-md);
   font-weight: var(--bb-weight-semibold);
-  letter-spacing: 0.04em;
+  letter-spacing: var(--bb-tracking-nav);
   text-decoration: none;
   text-transform: uppercase;
   transition:

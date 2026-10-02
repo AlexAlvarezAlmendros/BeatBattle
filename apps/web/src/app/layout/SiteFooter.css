@@ -6,7 +6,7 @@
  */
 
 .site-footer {
-  padding: 80px var(--bb-space-8) 28px;
+  padding: var(--bb-space-20) var(--bb-space-8) var(--bb-space-7);
   overflow: hidden;
   color: var(--bb-text);
 }
@@ -47,10 +47,10 @@
 }
 
 .site-footer__name {
-  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-size: var(--bb-font-size-footer-name);
   font-weight: var(--bb-weight-extrabold);
-  letter-spacing: 0.02em;
-  line-height: 1.05;
+  letter-spacing: var(--bb-tracking-wide);
+  line-height: var(--bb-leading-compact);
   text-transform: uppercase;
 }
 
@@ -64,8 +64,8 @@
 .site-footer__tagline {
   margin-top: var(--bb-space-1);
   color: var(--bb-text-3);
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: var(--bb-font-size-footer-tagline);
+  line-height: var(--bb-leading-relaxed);
 }
 
 /* ── Tarjetas de cristal ──────────────────────────────────────────────────────────────────── */
@@ -87,7 +87,7 @@
   font-family: var(--bb-font-body);
   font-size: var(--bb-font-size-xs);
   font-weight: var(--bb-weight-bold);
-  letter-spacing: 0.16em;
+  letter-spacing: var(--bb-tracking-eyebrow);
   text-transform: uppercase;
 }
 
@@ -102,7 +102,7 @@
   align-items: center;
   padding: var(--bb-space-1) 0;
   color: var(--bb-text-2);
-  font-size: 0.9rem;
+  font-size: var(--bb-font-size-footer-link);
   text-decoration: none;
   transition:
     color var(--bb-dur-fast) var(--bb-ease-out),
@@ -161,13 +161,13 @@
   padding-top: var(--bb-space-6);
   border-top: 1px solid var(--bb-line);
   color: var(--bb-text-3);
-  font-size: 0.8rem;
+  font-size: var(--bb-font-size-footer-legal);
 }
 
 .site-footer__credit {
   color: var(--bb-text-2);
   font-weight: var(--bb-weight-semibold);
-  letter-spacing: 0.02em;
+  letter-spacing: var(--bb-tracking-wide);
 }
 
 .site-footer__credit-link {
@@ -223,7 +223,7 @@
 
 @media (max-width: 720px) {
   .site-footer {
-    padding: 56px var(--bb-space-5) var(--bb-space-5);
+    padding: var(--bb-space-14) var(--bb-space-5) var(--bb-space-5);
   }
 
   .site-footer__content {

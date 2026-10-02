@@ -116,16 +116,36 @@
   --bb-font-size-3xl: clamp(2.25rem, 1.956rem + 1.304vw, 3rem); /* 36 → 48 px */
   --bb-font-size-hero: clamp(2.8rem, 8vw, 6rem); /* El del sello: 96 px a 1440, 44,8 px a 390 (§3.2) */
 
-  --bb-leading-tight: 0.95; /* Titular del hero (Hero.css) */
+  /*
+   * Medidas del sello que no caen en la escala (Hero.css, Footer.css, MobileNavPanel.css): se conservan
+   * para clavar sus proporciones. Las que cambian por tramos se redefinen en las media queries del final.
+   */
+  --bb-font-size-label: 0.7rem; /* 11,2 px: rótulos verticales del hero (Hero.css `.hero-side`) */
+  --bb-font-size-cta: 0.95rem; /* 15,2 px: botones píldora del hero (Hero.css); 13,6 px en móvil */
+  --bb-font-size-subtitle: clamp(0.95rem, 1.6vw, 1.15rem); /* Subtítulo del hero; 12,8 px en tableta */
+  --bb-font-size-marquee: 0.85rem; /* 13,6 px: palabras del marquee (Hero.css); 12 px en tableta */
+  --bb-font-size-footer-name: clamp(1.5rem, 3vw, 2.25rem); /* Nombre del sello en el pie (Footer.css) */
+  --bb-font-size-footer-tagline: 0.95rem; /* 15,2 px: entradilla del pie (Footer.css) */
+  --bb-font-size-footer-link: 0.9rem; /* 14,4 px: enlaces del pie (Footer.css) */
+  --bb-font-size-footer-legal: 0.8rem; /* 12,8 px: franja inferior del pie (Footer.css) */
+
+  --bb-leading-tight: 0.95; /* Titulares macizos muy grandes */
+  --bb-leading-compact: 1.05; /* Titular del hero en tableta y nombre del pie (Hero.css, Footer.css) */
+  --bb-leading-hero: var(--bb-leading-tight); /* Titular del hero (Hero.css); compact en tableta */
   --bb-leading-snug: 1.15; /* Titulares */
   --bb-leading-body: 1.5; /* Texto */
+  --bb-leading-relaxed: 1.6; /* Entradilla del pie (Footer.css) */
 
   --bb-tracking-display: -0.02em; /* Titulares en mayúsculas */
   --bb-tracking-hero: -0.03em; /* Titular del hero (Hero.css); 0 en móvil, ver media queries al final */
+  --bb-tracking-hero-outline: var(--bb-tracking-hero); /* Contorno: 0,01 em en tableta, 0,02 en móvil */
+  --bb-tracking-wide: 0.02em; /* Nombre y crédito del pie (Footer.css) */
+  --bb-tracking-nav: 0.04em; /* Enlaces del menú móvil (MobileNavPanel.css) */
   --bb-tracking-cta: 0.1em; /* Botones (§3.2, medido en el sello); 0,08 em en móvil, ver al final */
   --bb-tracking-caps: 0.15em; /* Subtítulos en mayúsculas espaciadas («SAMPLE · FLIP · VOTA · REPITE») */
   --bb-tracking-marquee: 0.3em; /* Palabras del marquee (Hero.css `.hero-marquee__item`) */
   --bb-tracking-label: 0.4em; /* Rótulos verticales laterales (`.hero-side`) */
+  --bb-tracking-eyebrow: 0.16em; /* Títulos de las tarjetas del pie (Footer.css) */
 
   /*
    * Contorno rojo de los titulares: `-webkit-text-stroke` + relleno negro (`--bb-black`, como el sello)
@@ -152,6 +172,7 @@
   --bb-space-14: 3.5rem; /* 56 px */
   --bb-space-15: 3.75rem; /* 60 px */
   --bb-space-16: 4rem; /* 64 px */
+  --bb-space-20: 5rem; /* 80 px: relleno superior del pie (Footer.css) */
 
   /* ── Radios ─────────────────────────────────────────────────────────────────────────────── */
   --bb-radius-sm: 8px;
@@ -276,11 +297,18 @@
   }
 }
 
-/* Titular del hero en tableta (Hero.css ≤ 768 px): sin interletraje negativo y trazo de 1,5 px. */
+/*
+ * Hero en tableta (Hero.css ≤ 768 px): titular sin interletraje negativo, más interlineado y trazo de
+ * 1,5 px; subtítulo y marquee más pequeños.
+ */
 @media (max-width: 768px) {
   :root {
     --bb-tracking-hero: 0em;
+    --bb-tracking-hero-outline: 0.01em;
+    --bb-leading-hero: var(--bb-leading-compact);
     --bb-text-stroke-width: 1.5px;
+    --bb-font-size-subtitle: 0.8rem;
+    --bb-font-size-marquee: var(--bb-font-size-xs);
   }
 }
 
@@ -290,11 +318,13 @@
   }
 }
 
-/* Móvil (Hero.css ≤ 480 px): trazo de 1 px y botones con interletraje 0,08 em. */
+/* Móvil (Hero.css ≤ 480 px): trazo de 1 px y botones con letra de 13,6 px e interletraje 0,08 em. */
 @media (max-width: 480px) {
   :root {
     --bb-text-stroke-width: 1px;
+    --bb-tracking-hero-outline: 0.02em;
     --bb-tracking-cta: 0.08em;
+    --bb-font-size-cta: 0.85rem;
   }
 }
 
