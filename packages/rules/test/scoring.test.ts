@@ -11,6 +11,13 @@ const repeat = (stars: number, count: number) => new Array<number>(count).fill(s
 
 const vote = fc.integer({ min: 1, max: 5 })
 const votes = fc.array(vote, { maxLength: 200 })
+/** Votos y una permutación cualquiera de ellos (no solo rotaciones o la inversa). */
+const votesAndPermutation = votes.chain((stars) =>
+  fc.tuple(
+    fc.constant(stars),
+    fc.shuffledSubarray(stars, { minLength: stars.length, maxLength: stars.length }),
+  ),
+)
 const weekMean = fc.double({ min: 1, max: 5, noNaN: true })
 const EPSILON = 1e-12
 
@@ -77,16 +84,6 @@ describe('bayes', () => {
     )
   })
 
-  it('RF-RES-04: el orden de los votos no cambia la puntuación', () => {
-    fc.assert(
-      fc.property(votes, weekMean, fc.integer(), (stars, m, seed) => {
-        const rotated = stars.map((_, i) => stars[(i + Math.abs(seed)) % stars.length] as number)
-        expect(bayes(rotated, m)).toBe(bayes(stars, m))
-        expect(bayes(stars.slice().reverse(), m)).toBe(bayes(stars, m))
-      }),
-    )
-  })
-
   it('un voto nuevo de v estrellas acerca la puntuación a v sin pasarse', () => {
     fc.assert(
       fc.property(votes, vote, weekMean, (stars, v, m) => {
@@ -137,11 +134,10 @@ describe('votos, media, mediana e histograma', () => {
     expect(median([2])).toBe(2)
   })
 
-  it('la mediana no depende del orden y queda entre el mínimo y el máximo', () => {
+  it('la mediana queda entre el mínimo y el máximo', () => {
     fc.assert(
       fc.property(fc.array(vote, { minLength: 1 }), (stars) => {
         const value = median(stars) as number
-        expect(median(stars.slice().reverse())).toBe(value)
         expect(value).toBeGreaterThanOrEqual(Math.min(...stars))
         expect(value).toBeLessThanOrEqual(Math.max(...stars))
       }),
@@ -167,5 +163,20 @@ describe('votos, media, mediana e histograma', () => {
     expect(() => mean([0])).toThrow(RangeError)
     expect(() => median([6])).toThrow(RangeError)
     expect(() => histogram([2.5])).toThrow(RangeError)
+  })
+})
+
+describe('orden de los votos', () => {
+  it('RF-RES-04 (parcial: puntuación, media, mediana e histograma; el snapshot llega con el sellado): barajar los votos no cambia nada', () => {
+    fc.assert(
+      fc.property(votesAndPermutation, weekMean, ([stars, shuffled], m) => {
+        expect(shuffled.slice().sort()).toEqual(stars.slice().sort())
+        expect(bayes(shuffled, m)).toBe(bayes(stars, m))
+        expect(voteTotals(shuffled)).toEqual(voteTotals(stars))
+        expect(mean(shuffled)).toBe(mean(stars))
+        expect(median(shuffled)).toBe(median(stars))
+        expect(histogram(shuffled)).toEqual(histogram(stars))
+      }),
+    )
   })
 })
