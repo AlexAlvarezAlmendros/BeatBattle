@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import { matchesMedia } from './useMediaQuery'
+import { matchesMedia, subscribeMedia } from './useMediaQuery'
 
 /**
  * «Reducir movimiento» (RNF-A11Y-03, RNF-A11Y-08): `true` si lo pide el sistema
@@ -10,7 +10,7 @@ import { matchesMedia } from './useMediaQuery'
  * `useReducedMotion` de Motion porque solo mira la preferencia del sistema.
  */
 export function useReducedMotion(): boolean {
-  return useSyncExternalStore(subscribe, isReducedMotion, () => false)
+  return useSyncExternalStore(subscribeReducedMotion, isReducedMotion, () => false)
 }
 
 /** Consulta de medios de la preferencia del sistema. */
@@ -44,16 +44,36 @@ export function hasReducedMotionSetting(): boolean {
   return document.documentElement.getAttribute(MOTION_ATTRIBUTE) === MOTION_REDUCED
 }
 
-function subscribe(onChange: () => void): () => void {
-  const list =
-    typeof window !== 'undefined' && typeof window.matchMedia === 'function'
-      ? window.matchMedia(REDUCED_MOTION_QUERY)
-      : null
-  list?.addEventListener('change', onChange)
-  const observer = typeof MutationObserver === 'function' ? new MutationObserver(onChange) : null
+/** Oyentes de «reducir movimiento»: un solo observador del atributo y un solo `change` de la consulta. */
+const listeners = new Set<() => void>()
+let disconnect: (() => void) | null = null
+
+function notify() {
+  for (const listener of [...listeners]) listener()
+}
+
+/**
+ * Avisa a `onChange` cuando cambie la preferencia del sistema o el ajuste propio. Todas las
+ * instancias del hook comparten un `MutationObserver` sobre `<html>` y un oyente de la consulta, que
+ * se conectan con el primer suscriptor y se quitan con el último.
+ */
+export function subscribeReducedMotion(onChange: () => void): () => void {
+  listeners.add(onChange)
+  if (listeners.size === 1) disconnect = connect()
+  return () => {
+    listeners.delete(onChange)
+    if (listeners.size > 0) return
+    disconnect?.()
+    disconnect = null
+  }
+}
+
+function connect(): () => void {
+  const releaseMedia = subscribeMedia(REDUCED_MOTION_QUERY, notify)
+  const observer = typeof MutationObserver === 'function' ? new MutationObserver(notify) : null
   observer?.observe(document.documentElement, { attributes: true, attributeFilter: [MOTION_ATTRIBUTE] })
   return () => {
-    list?.removeEventListener('change', onChange)
+    releaseMedia()
     observer?.disconnect()
   }
 }
