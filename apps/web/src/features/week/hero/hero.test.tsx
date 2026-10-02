@@ -67,8 +67,35 @@ describe('HeroSection: hero a sangre bajo la isla', () => {
       expect(shown.transition.duration).toBeLessThanOrEqual(0.2)
     }
     expect(reduced.container.shown).toEqual({})
+    // El titular, quieto: ni fundido ni desplazamiento.
+    expect(reduced.title.hidden).toEqual({ opacity: 1, y: 0 })
+    expect(reduced.title.shown).toEqual({ opacity: 1, y: 0 })
     const normal = heroRevealVariants(false)
     expect((normal.item.hidden as { y: number }).y).toBeGreaterThan(0)
+  })
+
+  it('RNF-PERF-02: el titular (LCP de la home) se pinta opaco desde su primer fotograma, sin retardo', () => {
+    for (const reduced of [false, true]) {
+      const { title } = heroRevealVariants(reduced)
+      const hidden = title.hidden as Record<string, unknown>
+      const shown = title.shown as Record<string, unknown> & { transition?: { delay?: number } }
+      // Chrome no cuenta como LCP un elemento con opacidad 0: el titular nunca la tiene.
+      expect(hidden.opacity).toBe(1)
+      expect(shown.opacity).toBe(1)
+      // Sin el retardo escalonado del contenedor.
+      expect(shown.transition?.delay ?? 0).toBe(0)
+    }
+  })
+
+  it('RNF-PERF-02: el titular pinta sus dos líneas opacas desde el montaje', () => {
+    render(
+      <HeroSection labelledBy="t">
+        <HeroTitle id="t" solid="Beat" outline="Battle" />
+      </HeroSection>,
+    )
+    const lines = document.querySelectorAll<HTMLElement>('.hero-title__line')
+    expect(lines).toHaveLength(2)
+    for (const line of lines) expect(line.style.opacity === '' || line.style.opacity === '1').toBe(true)
   })
 })
 

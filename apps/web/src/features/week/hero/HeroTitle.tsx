@@ -19,13 +19,14 @@ interface HeroTitleProps {
  * Battle» y no lo deletree. Un espacio entre líneas mantiene el nombre accesible en dos palabras.
  */
 export function HeroTitle({ id, solid, outline }: HeroTitleProps) {
-  const { item } = useHeroReveal()
+  // `title` y no `item`: el titular es el LCP de la home y se pinta opaco desde el primer fotograma.
+  const { title } = useHeroReveal()
   return (
     <h1 id={id} className="hero-title">
-      <m.span className="hero-title__line" variants={item}>
+      <m.span className="hero-title__line" variants={title}>
         {solid}
       </m.span>{' '}
-      <m.span className="hero-title__line hero-title__line--outline" variants={item}>
+      <m.span className="hero-title__line hero-title__line--outline" variants={title}>
         {outline}
       </m.span>
     </h1>

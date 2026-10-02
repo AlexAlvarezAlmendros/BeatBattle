@@ -7,6 +7,10 @@ import { useReducedMotion } from '../../../ui/hooks/useReducedMotion'
  * sube 30 px y aparece, una tras otra. Con «reducir movimiento» (RNF-A11Y-03, Anexo E), todas a la vez
  * con un fundido de 200 ms y sin desplazamiento.
  *
+ * El titular es la excepción: es el elemento LCP de la home y Chrome no cuenta uno con opacidad 0, así
+ * que con el fundido escalonado el LCP llegaba ~650 ms después de la primera pintura (RNF-PERF-02,
+ * §4.17). Se pinta opaco desde su primer fotograma: solo sube, sin retardo; sin movimiento, quieto.
+ *
  * `HeroSection` es el contenedor (`initial="hidden"`, `animate="shown"`); las piezas solo declaran sus
  * variantes y Motion las hereda por contexto. Fuera de un `HeroSection` se pintan quietas.
  */
@@ -15,7 +19,9 @@ const RISE_PX = 30
 
 export interface HeroRevealVariants {
   container: Variants
-  /** Sube y aparece (titular, subtítulo, botones…). */
+  /** Titular (LCP): visible desde el primer fotograma; solo sube, sin fundido ni retardo. */
+  title: Variants
+  /** Sube y aparece (subtítulo, botones, nota…). */
   item: Variants
   /** Solo aparece (rótulos laterales, que ya llevan su propia transformación en CSS). */
   fade: Variants
@@ -34,7 +40,13 @@ export function heroRevealVariants(reduced: boolean): HeroRevealVariants {
       hidden: { opacity: 0, ...rest },
       shown: { opacity: 1, ...rest, transition: fadeIn },
     })
-    return { container: { hidden: {}, shown: {} }, item: at({ y: 0 }), fade: at({}), grow: at({ scaleX: 1 }) }
+    return {
+      container: { hidden: {}, shown: {} },
+      title: { hidden: { opacity: 1, y: 0 }, shown: { opacity: 1, y: 0 } },
+      item: at({ y: 0 }),
+      fade: at({}),
+      grow: at({ scaleX: 1 }),
+    }
   }
   const enter = { duration: seconds(duration.slow), ease: ease.out }
   return {
@@ -43,6 +55,11 @@ export function heroRevealVariants(reduced: boolean): HeroRevealVariants {
       shown: {
         transition: { delayChildren: seconds(duration.base), staggerChildren: seconds(duration.fast) },
       },
+    },
+    // `delay: 0` propio: gana al retardo escalonado del contenedor, así que sube desde el primer fotograma.
+    title: {
+      hidden: { opacity: 1, y: RISE_PX },
+      shown: { opacity: 1, y: 0, transition: { ...enter, delay: 0 } },
     },
     item: { hidden: { opacity: 0, y: RISE_PX }, shown: { opacity: 1, y: 0, transition: enter } },
     fade: { hidden: { opacity: 0 }, shown: { opacity: 1, transition: enter } },

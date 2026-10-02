@@ -1,5 +1,6 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import { routePreload } from './src/app/routePreload.ts'
 import { fontPreload } from './src/styles/fontPreload.ts'
 
 /** API a la que el proxy de desarrollo reenvía `/api` (mismo origen, como en producción). */
@@ -49,7 +50,7 @@ function vendor(name: string, packages: readonly string[]) {
  * vuelve a pasar de ahí, hay que mirarlo.
  */
 export default defineConfig({
-  plugins: [react(), fontPreload()],
+  plugins: [react(), fontPreload(), routePreload()],
   server: { port: 5173, proxy: { '/api': { target: apiTarget } } },
   build: {
     target: 'es2023',
