@@ -1,0 +1,26 @@
+node_modules/
+dist/
+.vercel/
+.turbo/
+coverage/
+test-results/
+playwright-report/
+*.tsbuildinfo
+
+# Secretos y bases de datos
+.env
+.env.*
+!.env.example
+*.db
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+*.backup
+
+# Claude Code
+.claude/worktrees/
+.claude/settings.local.json
+
+.DS_Store
+__pycache__/
