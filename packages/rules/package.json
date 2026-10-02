@@ -8,7 +8,8 @@
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json && tsc -p test/tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint:purity": "vitest run test/purity.test.ts"
   },
   "dependencies": {},
   "devDependencies": {
