@@ -45,7 +45,11 @@
   transition: opacity var(--bb-dur-fast) var(--bb-ease-out);
 }
 
-.card[data-tilt="on"] {
+/*
+ * Capa compuesta solo mientras el ratón está encima (cuando se inclina): fija, cada tarjeta de una
+ * lista larga ocuparía memoria de GPU aunque estuviera quieta.
+ */
+.card[data-tilt="on"]:hover {
   will-change: transform;
 }
 

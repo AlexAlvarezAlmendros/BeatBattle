@@ -5,6 +5,7 @@ import { COARSE_POINTER_QUERY } from '../../hooks/useMediaQuery'
 import { REDUCED_MOTION_QUERY } from '../../hooks/useReducedMotion'
 import { GLARE_X_VAR } from '../../hooks/useTilt'
 import { Card } from './Card'
+import cardCss from './Card.module.css?raw'
 
 let media: MatchMediaController | undefined
 afterEach(() => {
@@ -25,6 +26,15 @@ describe('Card', () => {
     expect(card).toHaveAttribute('data-surface', 'glass')
     expect(card).toHaveAttribute('data-tilt', 'on')
     expect(card.querySelector('[aria-hidden="true"]')).not.toBeNull()
+  })
+
+  it('RNF-PERF-03: sin el ratón encima no reserva una capa compuesta (will-change solo en hover)', () => {
+    media = mockMatchMedia()
+    render(<Card data-testid="card">Carta</Card>)
+    const card = screen.getByTestId('card')
+    expect(card).toHaveAttribute('data-tilt', 'on')
+    expect(getComputedStyle(card).getPropertyValue('will-change')).not.toBe('transform')
+    expect(cardCss).toMatch(/\.card\[data-tilt="on"\]:hover \{\s*will-change: transform;/)
   })
 
   it('variante maciza y otros elementos raíz', () => {
