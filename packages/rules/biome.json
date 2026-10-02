@@ -40,6 +40,8 @@
                       "three/**",
                       "@react-three/**",
                       "@tanstack/**",
+                      "zustand/**",
+                      "tone/**",
                       "motion/**",
                       "fastify/**",
                       "@fastify/**",
@@ -47,6 +49,7 @@
                       "drizzle-orm/**",
                       "@libsql/**",
                       "cloudinary/**",
+                      "nodemailer/**",
                       "node:*"
                     ],
                     "message": "packages/rules es puro y portable: sin UI, render, audio, servidor, BD ni APIs de Node (guía §4.5)."
@@ -72,7 +75,9 @@
                   "setInterval": "Sin temporizadores: las reglas son funciones puras (guía §4.5).",
                   "setImmediate": "Sin temporizadores: las reglas son funciones puras (guía §4.5).",
                   "requestAnimationFrame": "Sin temporizadores: las reglas son funciones puras (guía §4.5).",
-                  "globalThis": "Sin acceso al entorno global: las reglas son funciones puras (guía §4.5)."
+                  "globalThis": "Sin acceso al entorno global: las reglas son funciones puras (guía §4.5).",
+                  "self": "Sin acceso al entorno global: las reglas son funciones puras (guía §4.5).",
+                  "global": "Sin acceso al entorno global: las reglas son funciones puras (guía §4.5)."
                 }
               }
             }
