@@ -64,9 +64,11 @@ describe('loadEnv', () => {
   })
 
   it('las variables vacías (VAR= en un .env) cuentan como ausentes', () => {
-    const c = loadEnv({ PORT: '', DATABASE_AUTH_TOKEN: '', BB_TEST_CLOCK: '  ' })
+    const c = loadEnv({ PORT: '', DATABASE_AUTH_TOKEN: '', BB_TEST_CLOCK: '  ', MIGRATIONS_DIR: '' })
     expect(c.port).toBe(3000)
     expect(c.databaseAuthToken).toBeUndefined()
+    expect(c.migrationsDir).toBeUndefined()
+    expect(loadEnv({ MIGRATIONS_DIR: ' /var/task/drizzle ' }).migrationsDir).toBe('/var/task/drizzle')
     expect(c.testClock).toBe(false)
   })
 

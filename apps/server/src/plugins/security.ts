@@ -7,6 +7,19 @@ export const BODY_LIMIT_BYTES = 64 * 1024
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 
+/**
+ * Cabeceras de seguridad de toda respuesta de la API (`RNF-SEC-01`, parte de la API). Además, si la
+ * ruta no fija otro, `Cache-Control: no-store`. Las usa también la respuesta 503 de la función de
+ * Vercel cuando la app no llega a arrancar (`serverless.ts`).
+ */
+export const API_SECURITY_HEADERS: Readonly<Record<string, string>> = {
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'X-Frame-Options': 'DENY',
+  // la API solo sirve JSON: no hay nada que cargar ni que enmarcar
+  'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'",
+}
+
 declare module 'fastify' {
   interface FastifyContextConfig {
     /**
@@ -72,11 +85,7 @@ export function registerSecurity(app: FastifyInstance, config: AppConfig): void 
   })
 
   app.addHook('onSend', async (_req, reply, payload) => {
-    reply.header('X-Content-Type-Options', 'nosniff')
-    reply.header('Referrer-Policy', 'strict-origin-when-cross-origin')
-    reply.header('X-Frame-Options', 'DENY')
-    // la API solo sirve JSON: no hay nada que cargar ni que enmarcar
-    reply.header('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'")
+    reply.headers(API_SECURITY_HEADERS)
     if (!reply.hasHeader('Cache-Control')) reply.header('Cache-Control', 'no-store')
     return payload
   })

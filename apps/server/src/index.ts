@@ -10,7 +10,7 @@ import { runMigrations } from './db/migrate'
 async function main(): Promise<void> {
   const config = loadEnv(process.env)
   const db = await createDb(config.databaseUrl, config.databaseAuthToken)
-  await runMigrations(db)
+  await runMigrations(db, config.migrationsDir)
   const app = buildApp({ config, db })
   // cierre ordenado (Ctrl+C, `tsx watch`, Docker): termina las peticiones en curso y suelta la BD
   for (const signal of ['SIGINT', 'SIGTERM'] as const)

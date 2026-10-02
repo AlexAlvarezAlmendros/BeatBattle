@@ -34,6 +34,11 @@ const EnvSchema = z.object({
   /** libSQL: `file:./data/local.db` en local, `libsql://…` en Turso, `:memory:` en tests. */
   DATABASE_URL: z.string().min(1).default('file:./data/local.db'),
   DATABASE_AUTH_TOKEN: z.string().optional(),
+  /**
+   * Carpeta de migraciones, si no es la de por defecto. Solo hace falta en la función de Vercel,
+   * donde el código va empaquetado (ver `src/serverless.ts`).
+   */
+  MIGRATIONS_DIR: z.string().optional(),
   /** Reloj de prueba (`x-bb-test-now`, §4.12). Prohibido en producción. */
   BB_TEST_CLOCK: bool.default('0'),
   LOG_LEVEL: z.enum(LOG_LEVELS, { error: `debe ser uno de: ${LOG_LEVELS.join(', ')}` }).default('info'),
@@ -51,6 +56,8 @@ export interface AppConfig {
   allowedOrigins: readonly string[]
   databaseUrl: string
   databaseAuthToken?: string
+  /** Carpeta de migraciones forzada con `MIGRATIONS_DIR`; sin definir, la de por defecto. */
+  migrationsDir?: string
   /** Activa la cabecera `x-bb-test-now`. Nunca en producción (lo impide `loadEnv`). */
   testClock: boolean
   logLevel: LogLevel
@@ -160,6 +167,7 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
     allowedOrigins: [...allowedOrigins],
     databaseUrl: e.DATABASE_URL,
     databaseAuthToken: e.DATABASE_AUTH_TOKEN,
+    migrationsDir: e.MIGRATIONS_DIR,
     testClock,
     logLevel: e.LOG_LEVEL,
     trustProxy: truthy(e.TRUST_PROXY),
