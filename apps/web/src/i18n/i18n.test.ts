@@ -145,6 +145,8 @@ describe('i18n: fechas y números', () => {
   it('formatDate no acepta la zona por opciones ni instantes no válidos', () => {
     // @ts-expect-error: la zona es siempre Europe/Madrid
     formatDate(sundayClose, { timeZone: 'UTC' })
+    // Y aunque se cuele saltándose el tipo, en ejecución manda Madrid (18:00 UTC = 20:00 en Madrid).
+    expect(formatDate(sundayClose, { ...DATE_FORMATS.time, timeZone: 'UTC' } as never)).toBe('20:00')
     expect(() => formatDate(Number.NaN)).toThrow(RangeError)
   })
 
