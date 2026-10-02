@@ -1,5 +1,5 @@
 import { type ErrorCode, errorEnvelopeSchema } from '@beatbattle/shared'
-import { z } from 'zod'
+import type { z } from 'zod'
 
 /**
  * Cliente de la API tipado (guía §4.7.2). Mismo origen (`/api`; en desarrollo lo reenvía el proxy
@@ -40,7 +40,9 @@ export interface ApiFetchOptions<T> {
   signal?: AbortSignal
 }
 
-const anyEnvelopeSchema = z.union([z.object({ data: z.unknown() }), errorEnvelopeSchema])
+function isDataEnvelope(value: unknown): value is { data: unknown } {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) && 'data' in value
+}
 
 function retryAfter(res: Response): number | undefined {
   const seconds = Number(res.headers.get('Retry-After'))
@@ -80,17 +82,17 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions<T>): Pr
     throw new ApiClientError('BAD_RESPONSE', res.status, `Respuesta no válida del servidor (${res.status}).`)
   }
 
-  const envelope = anyEnvelopeSchema.safeParse(json)
-  if (envelope.success && 'error' in envelope.data) {
-    const { code, message, details } = envelope.data.error
+  const failure = errorEnvelopeSchema.safeParse(json)
+  if (failure.success) {
+    const { code, message, details } = failure.data.error
     const error = new ApiClientError(code, res.status, message, details)
     error.retryAfterSeconds = retryAfter(res)
     throw error
   }
-  if (!res.ok || !envelope.success || !('data' in envelope.data))
+  if (!res.ok || !isDataEnvelope(json))
     throw new ApiClientError('BAD_RESPONSE', res.status, `Respuesta no válida del servidor (${res.status}).`)
 
-  const data = schema.safeParse(envelope.data.data)
+  const data = schema.safeParse(json.data)
   if (!data.success)
     throw new ApiClientError(
       'BAD_RESPONSE',

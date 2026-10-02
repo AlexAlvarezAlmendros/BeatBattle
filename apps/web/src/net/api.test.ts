@@ -82,6 +82,11 @@ describe('apiFetch', () => {
     expect(e.retryAfterSeconds).toBe(45)
   })
 
+  it('un sobre de error manda aunque el estado sea 2xx', async () => {
+    fetchMock.mockResolvedValue(json({ error: { code: 'CONFLICT', message: 'Choca.' } }, 200))
+    expect(await failure(apiFetch('/api/thing', { schema }))).toMatchObject({ code: 'CONFLICT', status: 200 })
+  })
+
   it('acepta códigos que este cliente aún no conoce', async () => {
     fetchMock.mockResolvedValue(json({ error: { code: 'VOTING_CLOSED', message: 'Cerrado.' } }, 409))
     expect((await failure(apiFetch('/api/thing', { schema }))).code).toBe('VOTING_CLOSED')
@@ -106,6 +111,11 @@ describe('apiFetch', () => {
 
   it('JSON que no es el sobre, o data que no cumple el esquema → BAD_RESPONSE', async () => {
     fetchMock.mockResolvedValueOnce(json({ ok: true }))
+    expect((await failure(apiFetch('/api/thing', { schema }))).code).toBe('BAD_RESPONSE')
+    fetchMock.mockResolvedValueOnce(json([{ data: { n: 1 } }]))
+    expect((await failure(apiFetch('/api/thing', { schema }))).code).toBe('BAD_RESPONSE')
+    // un error sin código no es un sobre de error válido
+    fetchMock.mockResolvedValueOnce(json({ error: { message: 'sin código' } }, 500))
     expect((await failure(apiFetch('/api/thing', { schema }))).code).toBe('BAD_RESPONSE')
     fetchMock.mockResolvedValueOnce(json({ data: { n: 'siete' } }))
     const e = await failure(apiFetch('/api/thing', { schema }))
