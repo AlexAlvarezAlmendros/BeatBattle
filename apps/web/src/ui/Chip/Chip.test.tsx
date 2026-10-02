@@ -2,7 +2,8 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { describe, expect, it, vi } from 'vitest'
-import { CHIP_ORIGIN_X_VAR, CHIP_ORIGIN_Y_VAR, Chip } from './Chip'
+import { CHIP_ORIGIN_X_VAR, CHIP_ORIGIN_Y_VAR, Chip, ChipGroup } from './Chip'
+import chipCss from './Chip.module.css?raw'
 
 function Toggle() {
   const [on, setOn] = useState(false)
@@ -61,5 +62,22 @@ describe('Chip', () => {
     await user.click(screen.getByRole('button', { name: 'Jerk' }))
     expect(onSelectedChange).not.toHaveBeenCalled()
     expect(screen.getByRole('button', { name: 'Club' })).toHaveAttribute('data-force-state', 'hover')
+  })
+
+  it('ChipGroup: grupo con nombre que agrupa los chips', () => {
+    render(
+      <ChipGroup label="Géneros">
+        <Chip>Drill</Chip>
+        <Chip>Trap</Chip>
+      </ChipGroup>,
+    )
+    const group = screen.getByRole('group', { name: 'Géneros' })
+    expect(group.querySelectorAll('button')).toHaveLength(2)
+  })
+
+  it('RNF-A11Y-09: en táctil, ChipGroup separa las filas con el token del hueco (44 px − alto del chip)', () => {
+    // jsdom no evalúa media queries: se comprueba la regla tal cual está en la hoja.
+    const coarse = /@media \(pointer: coarse\) \{\s*\.group \{\s*row-gap: var\(--bb-chip-row-gap-touch\);/
+    expect(chipCss).toMatch(coarse)
   })
 })

@@ -153,3 +153,37 @@ export async function expectVisibleFocus(locator: Locator): Promise<void> {
   // La sombra tiene transición (el CTA pasa de su halo de reposo al de foco): se espera a que asiente.
   await expect.poll(async () => (await focusRing(locator)).boxShadow).toContain(FOCUS_HALO_SHADOW)
 }
+
+/**
+ * Ancestro que recorta el anillo de foco de un elemento (contorno de 2 px a 2 px de distancia: 4 px
+ * alrededor de la caja), o `null` si se ve entero. Mira `overflow`, `clip-path` y `contain: paint`.
+ */
+export function focusRingClippedBy(locator: Locator): Promise<string | null> {
+  return locator.evaluate((element) => {
+    const RING = 4
+    const box = element.getBoundingClientRect()
+    const ring = {
+      left: box.left - RING,
+      top: box.top - RING,
+      right: box.right + RING,
+      bottom: box.bottom + RING,
+    }
+    for (
+      let node = element.parentElement;
+      node && node !== document.documentElement;
+      node = node.parentElement
+    ) {
+      const style = getComputedStyle(node)
+      const clipsX = style.overflowX !== 'visible'
+      const clipsY = style.overflowY !== 'visible'
+      const clipsAll = style.clipPath !== 'none' || /paint|strict|content/.test(style.contain)
+      if (!clipsX && !clipsY && !clipsAll) continue
+      const rect = node.getBoundingClientRect()
+      const outX = ring.left < rect.left || ring.right > rect.right
+      const outY = ring.top < rect.top || ring.bottom > rect.bottom
+      if (((clipsX || clipsAll) && outX) || ((clipsY || clipsAll) && outY))
+        return `${node.tagName}.${node.className.toString()}`
+    }
+    return null
+  })
+}

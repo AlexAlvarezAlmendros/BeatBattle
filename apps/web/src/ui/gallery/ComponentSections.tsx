@@ -3,7 +3,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { type Messages, t } from '../../i18n'
 import { Button, type ButtonProps } from '../Button'
 import { Card, type CardState, type CardSurface } from '../Card'
-import { Chip } from '../Chip'
+import { Chip, ChipGroup } from '../Chip'
 import { Countdown, DAY_MS, HOUR_MS, MINUTE_MS } from '../Countdown'
 import { DataTile, DataTileList, DataTileSection } from '../DataTile'
 import { EntryList, EntryRow } from '../EntryRow'
@@ -207,13 +207,13 @@ function ChipBlock() {
       </GalleryRow>
       <GalleryRow title={stateLabel('interactive')} wide>
         <StateCell label={t('ui.entryRow.genres')} span>
-          <div className={styles.chips}>
+          <ChipGroup label={t('ui.entryRow.genres')}>
             {GENRES.map((genre) => (
               <Chip key={genre} selected={selected.has(genre)} onSelectedChange={(on) => toggle(genre, on)}>
                 {t(`dev.gallery.sample.genres.${genre}`)}
               </Chip>
             ))}
-          </div>
+          </ChipGroup>
         </StateCell>
       </GalleryRow>
     </GalleryBlock>

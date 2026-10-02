@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, PointerEvent, ReactNode, Ref } from 'react'
+import type { ButtonHTMLAttributes, HTMLAttributes, PointerEvent, ReactNode, Ref } from 'react'
 import { cx, forceStateAttr, type InteractionState } from '../forceState'
 import { Icon, type IconName } from '../Icon'
 import styles from './Chip.module.css'
@@ -68,5 +68,26 @@ export function Chip({
       {icon && <Icon name={icon} className={styles.icon} />}
       <span className={styles.label}>{children}</span>
     </button>
+  )
+}
+
+export interface ChipGroupProps extends HTMLAttributes<HTMLDivElement> {
+  /** Nombre del grupo para el lector de pantalla (p. ej. «Géneros»). */
+  label: string
+  children: ReactNode
+}
+
+/**
+ * Grupo de chips que salta de línea (p. ej. los filtros de género del sello). En táctil separa las filas
+ * lo justo para que el área de 44 px de cada chip no se solape con la de la fila de al lado: con el hueco
+ * normal de 8 px, el área de la fila de abajo se quedaba con la parte baja de la de arriba y los chips de
+ * la primera fila se quedaban en ~33 px (RNF-A11Y-09).
+ */
+export function ChipGroup({ label, children, className, ...rest }: ChipGroupProps) {
+  return (
+    // biome-ignore lint/a11y/useSemanticElements: un grupo de botones conmutables no es un formulario (<fieldset>)
+    <div {...rest} role="group" aria-label={label} className={cx(styles.group, className)}>
+      {children}
+    </div>
   )
 }

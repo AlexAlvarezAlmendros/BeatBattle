@@ -6,7 +6,11 @@ import { cx, forceStateAttr } from '../forceState'
 import { Waveform, type WaveformPeak } from '../Waveform'
 import styles from './EntryRow.module.css'
 
-export type EntryRowState = 'rest' | 'hover' | 'focus'
+/**
+ * Estados forzables para la galería: `focus` es el del play (el primer control de la fila) y
+ * `focusTitle`, el del enlace del título.
+ */
+export type EntryRowState = 'rest' | 'hover' | 'focus' | 'focusTitle'
 
 export interface EntryRowProps {
   title: string
@@ -67,7 +71,7 @@ export function EntryRow({
       className={cx(styles.row, className)}
       aria-labelledby={titleId}
       data-playing={playing || undefined}
-      {...forceStateAttr(state)}
+      {...forceStateAttr(state === 'focusTitle' ? 'focus' : state)}
     >
       <div className={styles.thumb}>
         {coverUrl ? (
@@ -91,11 +95,15 @@ export function EntryRow({
         <div className={styles.info}>
           <TitleTag id={titleId} className={styles.title}>
             {to !== undefined ? (
-              <Link to={to} className={styles.titleLink}>
+              <Link
+                to={to}
+                className={cx(styles.titleLink, styles.titleText)}
+                {...forceStateAttr(state === 'focusTitle' ? 'focus' : undefined)}
+              >
                 {title}
               </Link>
             ) : (
-              title
+              <span className={styles.titleText}>{title}</span>
             )}
           </TitleTag>
           <div className={styles.meta}>

@@ -95,16 +95,29 @@
   min-width: 0;
 }
 
+/*
+ * El título no recorta (`overflow` visible): la elipsis la pone su texto (`.titleText`), y así el anillo
+ * de foco del enlace se ve entero. Con `overflow: hidden` en el encabezado, el anillo de 2 px y el halo
+ * quedaban recortados por tres lados (RNF-A11Y-01).
+ */
 .title {
-  overflow: hidden;
+  min-width: 0;
   margin: 0;
   color: var(--bb-text);
   font-family: var(--bb-font-body);
   font-size: var(--bb-font-size-sm);
   font-weight: var(--bb-weight-semibold);
   line-height: var(--bb-leading-snug);
+}
+
+/* Ancho del texto hasta el de la columna, con elipsis: el anillo abraza el título y no toda la fila. */
+.titleText {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  vertical-align: top;
 }
 
 .titleLink {
@@ -115,6 +128,13 @@
 
 .titleLink:hover {
   color: var(--bb-red-text);
+}
+
+/* El foco real lo pinta global.css (`:focus-visible`); el forzado de la galería, igual. */
+.titleLink[data-force-state="focus"] {
+  outline: var(--bb-focus-width) solid var(--bb-focus-color);
+  outline-offset: var(--bb-focus-offset);
+  box-shadow: var(--bb-focus-halo);
 }
 
 .meta {

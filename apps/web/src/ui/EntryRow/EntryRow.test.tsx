@@ -74,6 +74,19 @@ describe('EntryRow', () => {
     expect(screen.getByRole('article')).toHaveAttribute('data-playing', 'true')
   })
 
+  it('RNF-A11Y-01: el título no recorta el anillo de foco de su enlace (la elipsis va en el texto)', () => {
+    const rule = (selector: string) => new RegExp(`\\${selector} \\{([^}]*)\\}`).exec(rowCss)?.[1] ?? ''
+    expect(rule('.title')).not.toMatch(/overflow/)
+    expect(rule('.titleText')).toMatch(/overflow: hidden/)
+    expect(rule('.titleText')).toMatch(/text-overflow: ellipsis/)
+    renderRow({ state: 'focusTitle' })
+    const link = screen.getByRole('link', { name: 'Tigre púrpura' })
+    // Foco forzado para la galería: en el enlace del título (no en el play) y la fila con su fondo.
+    expect(link).toHaveAttribute('data-force-state', 'focus')
+    expect(screen.getByRole('button', { name: /Tigre púrpura/ })).not.toHaveAttribute('data-force-state')
+    expect(screen.getByRole('article')).toHaveAttribute('data-force-state', 'focus')
+  })
+
   it('RNF-A11Y-09: con puntero grueso el enlace del título se estira a toda la fila y el play queda encima', () => {
     // jsdom no evalúa @media: se comprueba la regla (en Chrome, a 390 px táctil, un toque en el hueco
     // de la fila abre la ficha y el play sigue siendo el play).

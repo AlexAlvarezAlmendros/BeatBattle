@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { collectErrors, openGallery } from './support'
+import { collectErrors, expectVisibleFocus, focusRingClippedBy, openGallery } from './support'
 
 /**
  * Galería `/dev/galeria` (tarea 0.9, `RD-VIS-03`): solo existe en desarrollo, y por eso los E2E corren
@@ -118,4 +118,68 @@ test('RD-MOT-03: el interruptor «Reducir movimiento» de la galería pone data-
   await page.getByRole('banner').getByRole('link', { name: 'Semana', exact: true }).click()
   await expect(page).toHaveURL('/')
   await expect(html).not.toHaveAttribute('data-motion', 'reduced')
+})
+
+test('RNF-A11Y-01: el anillo de foco del título de la fila de entrada se ve entero', async ({ page }) => {
+  await openGallery(page)
+  const row = page.locator('section#fila').getByRole('article', { name: 'Tigre púrpura' }).last()
+  const link = row.getByRole('link', { name: 'Tigre púrpura' })
+  // Con el teclado: del play de la fila al enlace del título.
+  await row.getByRole('button', { name: /Reproducir/ }).focus()
+  await page.keyboard.press('Tab')
+  await expectVisibleFocus(link)
+  expect(await focusRingClippedBy(link)).toBeNull()
+})
+
+test.describe('móvil (390 × 844, táctil)', () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
+
+  test('§3.3: el botón icono sigue siendo un círculo en móvil (ancho igual al alto)', async ({ page }) => {
+    await openGallery(page)
+    const sizes = await page.locator('section#boton [data-variant="icon"]').evaluateAll((elements) =>
+      elements.map((element) => {
+        const box = element.getBoundingClientRect()
+        return { width: Math.round(box.width), height: Math.round(box.height) }
+      }),
+    )
+    expect(sizes.length).toBeGreaterThan(0)
+    for (const size of sizes) expect(size.width, JSON.stringify(sizes)).toBe(size.height)
+  })
+
+  test('RNF-A11Y-01: el anillo de foco del título de la fila de entrada se ve entero en móvil', async ({
+    page,
+  }) => {
+    await openGallery(page)
+    const row = page.locator('section#fila').getByRole('article', { name: 'Tigre púrpura' }).last()
+    const link = row.getByRole('link', { name: 'Tigre púrpura' })
+    await link.focus()
+    expect(await focusRingClippedBy(link)).toBeNull()
+  })
+
+  test('RNF-A11Y-09: los chips de un grupo de varias filas conservan su área de 44 px', async ({ page }) => {
+    await openGallery(page)
+    const group = page.locator('section#chip').getByRole('group')
+    // `elementFromPoint` solo ve lo que está en la ventana.
+    await group.evaluate((element) => element.scrollIntoView({ block: 'center' }))
+    const chips = group.getByRole('button')
+    const rows = await chips.evaluateAll(
+      (elements) => new Set(elements.map((element) => Math.round(element.getBoundingClientRect().top))).size,
+    )
+    // Que el grupo salte de línea: si no, el test no mediría nada.
+    expect(rows).toBeGreaterThan(1)
+    // Área efectiva: lo que hay 21 px por encima y por debajo del centro de cada chip es el propio chip.
+    const short = await chips.evaluateAll((elements) =>
+      elements
+        .filter((element) => {
+          const box = element.getBoundingClientRect()
+          const x = box.left + box.width / 2
+          const y = box.top + box.height / 2
+          return [y - 21, y + 21].some(
+            (at) => document.elementFromPoint(x, at)?.closest('button') !== element,
+          )
+        })
+        .map((element) => element.textContent),
+    )
+    expect(short).toEqual([])
+  })
 })

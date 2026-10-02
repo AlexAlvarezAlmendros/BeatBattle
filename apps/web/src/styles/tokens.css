@@ -182,6 +182,12 @@
   --bb-space-14: 3.5rem; /* 56 px */
   --bb-space-15: 3.75rem; /* 60 px */
   --bb-space-16: 4rem; /* 64 px */
+  /*
+   * Hueco entre filas de chips en táctil (ChipGroup): 44 px de objetivo (RNF-A11Y-09) menos el alto del
+   * chip (25,4 px en ≤ 480 px; 26,6 en el resto), redondeado arriba a 20 px. Así el área de 44 px de una
+   * fila no pisa la de la siguiente.
+   */
+  --bb-chip-row-gap-touch: 1.25rem;
   --bb-space-20: 5rem; /* 80 px: relleno superior del pie (Footer.css) */
 
   /* ── Radios ─────────────────────────────────────────────────────────────────────────────── */

@@ -261,12 +261,6 @@
   gap: var(--bb-space-3);
 }
 
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--bb-space-2);
-}
-
 /* ── Color ─────────────────────────────────────────────────────────────────────────────── */
 .swatches {
   display: grid;

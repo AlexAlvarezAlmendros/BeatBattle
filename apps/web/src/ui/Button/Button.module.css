@@ -393,7 +393,9 @@
     letter-spacing: var(--bb-tracking-cta-compact);
   }
 
-  .md {
+  /* Solo los botones con texto: el icono es un círculo sin relleno (`.iconButton`), y esta regla, con la
+     misma especificidad y más abajo, lo ensanchaba a una píldora de 50 × 40. */
+  .md:not(.iconButton) {
     padding-inline: var(--bb-space-6);
   }
 

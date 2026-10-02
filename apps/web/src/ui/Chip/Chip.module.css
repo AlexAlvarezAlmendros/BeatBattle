@@ -114,6 +114,20 @@
   }
 }
 
+/* ── Grupo que salta de línea (ChipGroup) ─────────────────────────────────────────────────── */
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-2);
+}
+
+/* Táctil: filas separadas para que las áreas de 44 px no se solapen (RNF-A11Y-09). */
+@media (pointer: coarse) {
+  .group {
+    row-gap: var(--bb-chip-row-gap-touch);
+  }
+}
+
 /* Sin movimiento (Anexo E): cambio de color, sin relleno que crece. */
 @media (prefers-reduced-motion: reduce) {
   .chip[aria-pressed="true"]::after {
