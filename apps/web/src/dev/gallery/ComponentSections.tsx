@@ -5,7 +5,7 @@ import { Button, type ButtonProps } from '../../ui/Button'
 import { Card, type CardState, type CardSurface } from '../../ui/Card'
 import { Chip } from '../../ui/Chip'
 import { Countdown, DAY_MS, HOUR_MS, MINUTE_MS } from '../../ui/Countdown'
-import { DataTile, DataTileList } from '../../ui/DataTile'
+import { DataTile, DataTileList, DataTileSection } from '../../ui/DataTile'
 import { EntryList, EntryRow } from '../../ui/EntryRow'
 import { Modal, ModalSurface } from '../../ui/Modal'
 import { SectionLabel } from '../../ui/SectionLabel'
@@ -274,9 +274,9 @@ function CardBlock({ surface }: { surface: CardSurface }) {
 
 /* ── Tesela de dato y rótulo de sección ────────────────────────────────────────────────── */
 
-function SampleTiles({ state, loading = false }: { state?: 'hover'; loading?: boolean }) {
+function sampleTiles({ state, loading = false }: { state?: 'hover'; loading?: boolean }) {
   return (
-    <DataTileList className={styles.tileList}>
+    <>
       <DataTile
         icon="calendar"
         label={t('dev.gallery.sample.tiles.published')}
@@ -306,25 +306,42 @@ function SampleTiles({ state, loading = false }: { state?: 'hover'; loading?: bo
         state={state}
         loading={loading}
       />
-    </DataTileList>
+    </>
   )
 }
 
+/**
+ * Teselas con su rótulo (`DataTileSection`): en móvil, lista de clave y valor que el rótulo pliega. La
+ * de reposo empieza desplegada para enseñar la lista; la segunda, plegada, como en la ficha del sello.
+ */
 function DataTileBlock() {
   return (
     <GalleryBlock id={anchor('dataTile')} title={title('dataTile')}>
       <GalleryRow wide>
         <StateCell label={stateLabel('rest')} span>
-          <div className={styles.tilePanel}>
-            <SectionLabel as="h4">{t('dev.gallery.sample.sectionLabel.info')}</SectionLabel>
-            <SampleTiles />
-          </div>
+          <DataTileSection
+            title={t('dev.gallery.sample.sectionLabel.info')}
+            titleAs="h4"
+            defaultExpanded
+            listClassName={styles.tileList}
+          >
+            {sampleTiles({})}
+          </DataTileSection>
         </StateCell>
         <StateCell label={stateLabel('hover')} span>
-          <SampleTiles state="hover" />
+          <DataTileList className={styles.tileList}>{sampleTiles({ state: 'hover' })}</DataTileList>
         </StateCell>
         <StateCell label={stateLabel('loading')} span>
-          <SampleTiles loading />
+          <DataTileList className={styles.tileList}>{sampleTiles({ loading: true })}</DataTileList>
+        </StateCell>
+        <StateCell label={t('dev.gallery.states.collapsedMobile')} span>
+          <DataTileSection
+            title={t('dev.gallery.sample.sectionLabel.info')}
+            titleAs="h4"
+            listClassName={styles.tileList}
+          >
+            {sampleTiles({})}
+          </DataTileSection>
         </StateCell>
       </GalleryRow>
     </GalleryBlock>

@@ -322,7 +322,8 @@
         "text": "Texto",
         "row": "Fila",
         "card": "Tarjeta",
-        "mini": "Mini (24 px)"
+        "mini": "Mini (24 px)",
+        "collapsedMobile": "Plegada en móvil"
       },
       "variants": {
         "cta": "CTA",

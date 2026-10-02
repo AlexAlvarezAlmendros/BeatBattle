@@ -10,6 +10,11 @@
   margin: 0;
 }
 
+/* Plegada por el rótulo (`DataTileSection`, en móvil). */
+.list[hidden] {
+  display: none;
+}
+
 .tile {
   display: flex;
   flex-direction: column;
@@ -44,6 +49,8 @@
 .label {
   color: var(--bb-text-3);
   font-size: var(--bb-font-size-2xs);
+  /* Interlineado de etiqueta (el `normal` del sello), no el de párrafo del cuerpo. */
+  line-height: var(--bb-leading-snug);
   letter-spacing: var(--bb-tracking-meta);
   text-transform: uppercase;
 }
@@ -63,4 +70,109 @@
 .mono {
   font-family: var(--bb-font-mono);
   font-variant-numeric: tabular-nums;
+}
+
+/* ── Rótulo de la sección (`DataTileSection`) ─────────────────────────────────────────────── */
+.section {
+  display: grid;
+  gap: var(--bb-space-3);
+}
+
+/*
+ * En móvil, el rótulo pliega la lista: el botón ocupa el resto de la fila (el chevron a la derecha,
+ * como en el sello) con el texto del rótulo tal cual. El rótulo mide unos 14 px de alto: el objetivo
+ * táctil sube a 44 px con un pseudoelemento invisible (RNF-A11Y-09), sin mover nada.
+ */
+.sectionHeading {
+  position: relative;
+}
+
+.sectionToggle {
+  position: relative;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bb-space-2);
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  letter-spacing: inherit;
+  text-align: start;
+  text-transform: inherit;
+}
+
+.sectionToggle::after {
+  content: "";
+  position: absolute;
+  inset: calc((100% - var(--bb-space-11)) / 2) 0;
+}
+
+.chevron {
+  font-size: var(--bb-font-size-2xs);
+  transition: rotate var(--bb-dur-fast) var(--bb-ease-out);
+}
+
+.sectionToggle[aria-expanded="true"] .chevron {
+  rotate: 180deg;
+}
+
+/*
+ * ── Móvil: lista de clave y valor ───────────────────────────────────────────────────────────
+ * Como la ficha del sello por debajo de 768 px (`BeatDetalle.css`): una columna, sin fondo, borde ni
+ * icono, filete `#1a1a1a` entre filas, relleno 10×0, etiqueta a la izquierda (13 px) y valor a la
+ * derecha (14 px). La etiqueta sigue en `--bb-text-3` (el `#888` del sello, sin el fondo de la tesela,
+ * da 5,9:1 sobre negro pero 4,3:1 sobre el granate del Silk).
+ */
+@media (max-width: 768px) {
+  .list {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .tile {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: var(--bb-space-2);
+    padding: 0.625rem 0;
+    border: 0;
+    border-bottom: 1px solid var(--bb-ink-800);
+    border-radius: 0;
+    background-color: transparent;
+    text-align: start;
+  }
+
+  .tile:last-child {
+    border-bottom: 0;
+  }
+
+  .term {
+    flex-direction: row;
+  }
+
+  .icon {
+    display: none;
+  }
+
+  .label {
+    font-size: var(--bb-font-size-tile-key);
+  }
+
+  .value {
+    font-size: var(--bb-font-size-sm);
+    text-align: end;
+  }
+}
+
+/* Sin movimiento (Anexo E): el chevron cambia de sentido sin girar. */
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .chevron {
+  transition: none;
 }

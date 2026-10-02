@@ -133,6 +133,7 @@
   --bb-font-size-footer-tagline: 0.95rem; /* 15,2 px: entradilla del pie (Footer.css) */
   --bb-font-size-footer-link: 0.9rem; /* 14,4 px: enlaces del pie (Footer.css) */
   --bb-font-size-footer-legal: 0.8rem; /* 12,8 px: franja inferior del pie (Footer.css) */
+  --bb-font-size-tile-key: 0.8125rem; /* 13 px: etiqueta de la tesela en lista, en móvil (BeatDetalle.css) */
   --bb-font-size-page-title: 2rem; /* 32 px fijo: título de página interior (`/beats`: el `h1` del navegador, 2em) */
 
   --bb-leading-tight: 0.95; /* Titulares macizos muy grandes */

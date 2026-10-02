@@ -612,11 +612,6 @@
   font-size: var(--bb-font-size-sm);
 }
 
-.tilePanel {
-  display: grid;
-  gap: var(--bb-space-3);
-}
-
 .tileList {
   max-width: 20rem;
 }
