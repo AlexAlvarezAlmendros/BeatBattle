@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { renderInRouter } from '../app/layout/testing'
 import { t } from '../i18n'
+import buttonStyles from '../ui/Button/Button.module.css'
 import { DROP_ALERT_HASH, HomePage, IDLE_TICKER } from './HomePage'
 
 const hero = () => screen.getByRole('region', { name: t('pages.home.title') })
@@ -35,12 +36,15 @@ describe('HomePage: hero en «calendario vacío» (0.7, guía §3.8.3 y §2.19)'
 
   it('botones: «Avísame del próximo drop» (CTA rojo, al ancla de la alerta) y «Cómo funciona» (contorno)', () => {
     renderInRouter(<HomePage />)
+    // El `Button` base en su tamaño `hero`; el contorno, sobre cristal (`glass`).
     const notify = within(hero()).getByRole('link', { name: t('home.hero.notify') })
     expect(notify).toHaveAttribute('href', `/como-funciona#${DROP_ALERT_HASH}`)
-    expect(notify).toHaveClass('hero-cta--primary')
+    expect(notify).toHaveAttribute('data-variant', 'cta')
+    expect(notify).toHaveClass(buttonStyles.hero!)
     const howItWorks = within(hero()).getByRole('link', { name: t('home.hero.howItWorks') })
     expect(howItWorks).toHaveAttribute('href', '/como-funciona')
-    expect(howItWorks).toHaveClass('hero-cta--ghost')
+    expect(howItWorks).toHaveAttribute('data-variant', 'outline')
+    expect(howItWorks).toHaveClass(buttonStyles.hero!, buttonStyles.glass!)
   })
 
   it('no hay cuenta atrás con el calendario vacío (§2.19)', () => {

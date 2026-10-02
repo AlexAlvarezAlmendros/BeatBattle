@@ -5,13 +5,23 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { type MatchMediaController, mockMatchMedia } from '../../hooks/mockMatchMedia'
 import { REDUCED_MOTION_QUERY } from '../../hooks/useReducedMotion'
 import { t } from '../../i18n'
-import { Button } from './Button'
+import styles from './Button.module.css'
 import { WAVE_LOADER_BARS } from './WaveLoader'
+
+const capability = vi.hoisted(() => ({ value: false }))
+
+vi.mock('../glass', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../glass')>()),
+  useGlassCapability: () => capability.value,
+}))
+
+const { Button } = await import('./Button')
 
 let media: MatchMediaController | undefined
 afterEach(() => {
   media?.restore()
   media = undefined
+  capability.value = false
 })
 
 describe('Button', () => {
@@ -42,6 +52,74 @@ describe('Button', () => {
       'href',
       'https://www.otherpeople.es',
     )
+  })
+
+  it('RD-VIS-02: el tamaño hero es el CTA del hero del sello (medidas en Button.module.css)', () => {
+    render(
+      <MemoryRouter>
+        <Button size="hero" to="/como-funciona#alerta">
+          Avísame del próximo drop
+        </Button>
+      </MemoryRouter>,
+    )
+    const cta = screen.getByRole('link', { name: 'Avísame del próximo drop' })
+    expect(styles.hero).toMatch(/hero/)
+    expect(cta).toHaveClass(styles.button!, styles.cta!, styles.hero!)
+    expect(cta).toHaveAttribute('data-variant', 'cta')
+    expect(cta).not.toHaveClass(styles.glass!)
+  })
+
+  it('RD-VIS-02: el contorno con `glass` pasa por GlassSurface, sin envoltorio, con y sin capacidad', () => {
+    const { rerender } = render(
+      <MemoryRouter>
+        <Button size="hero" variant="outline" glass to="/como-funciona">
+          Cómo funciona
+        </Button>
+      </MemoryRouter>,
+    )
+    const ghost = () => screen.getByRole('link', { name: 'Cómo funciona' })
+    // Sin capacidad (jsdom, equipo modesto, «reducir movimiento»): el mismo enlace con el velo oscuro.
+    expect(ghost()).toHaveClass(styles.outline!, styles.hero!, styles.glass!)
+    expect(ghost()).not.toHaveAttribute('data-glass')
+    expect(ghost().querySelector('svg')).toBeNull()
+
+    capability.value = true
+    rerender(
+      <MemoryRouter>
+        <Button size="hero" variant="outline" glass to="/como-funciona">
+          Cómo funciona
+        </Button>
+      </MemoryRouter>,
+    )
+    // Con capacidad: el enlace es la superficie de cristal (data-glass y su filtro SVG dentro).
+    expect(ghost()).toHaveAttribute('href', '/como-funciona')
+    expect(ghost()).toHaveAttribute('data-glass', 'on')
+    expect(ghost()).toHaveClass('bb-glass', styles.outline!, styles.glass!)
+    expect(ghost().querySelector(':scope > svg filter')).not.toBeNull()
+  })
+
+  it('el contorno con `glass` también como <button> y como <a>, y conserva el clic y el teclado', async () => {
+    capability.value = true
+    const user = userEvent.setup()
+    const onClick = vi.fn()
+    render(
+      <>
+        <Button variant="outline" glass onClick={onClick}>
+          Escuchar
+        </Button>
+        <Button variant="outline" glass href="https://www.otherpeople.es">
+          Other People
+        </Button>
+      </>,
+    )
+    const button = screen.getByRole('button', { name: 'Escuchar' })
+    expect(button).toHaveAttribute('type', 'button')
+    expect(button).toHaveAttribute('data-glass', 'on')
+    await user.click(button)
+    button.focus()
+    await user.keyboard('{Enter}')
+    expect(onClick).toHaveBeenCalledTimes(2)
+    expect(screen.getByRole('link', { name: 'Other People' })).toHaveAttribute('data-glass', 'on')
   })
 
   it('RNF-A11Y-01: el botón icono tiene nombre accesible y se usa con teclado', async () => {

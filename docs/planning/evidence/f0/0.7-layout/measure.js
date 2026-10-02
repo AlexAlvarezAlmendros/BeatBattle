@@ -47,8 +47,9 @@
     ]),
     divider: pick('.hero-divider'),
     subtitle: pick('.hero-subtitle', ['text-transform']),
-    ctaPrimary: pick('.hero-cta--primary'),
-    ctaGhost: pick('.hero-cta--ghost', ['border']),
+    // Los botones del hero son el `Button` base (`size="hero"`; el contorno, con `glass`).
+    ctaPrimary: pick('.hero-actions > :nth-child(1)'),
+    ctaGhost: pick('.hero-actions > :nth-child(2)', ['border']),
     note: pick('.hero-note'),
     side: pick('.side-label__text', ['writing-mode', 'border-top']),
     marquee: pick('.marquee__viewport', ['border-top']),

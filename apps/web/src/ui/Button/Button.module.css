@@ -67,8 +67,36 @@
   font-size: var(--bb-font-size-md);
 }
 
+/*
+ * Hero: el CTA del hero del sello (Hero.css `.hero-cta`, `otp-metrics.json`). 15,2 px con relleno de
+ * 15,2 × 32 px (14,4 × 24 en tableta); en móvil (≤ 480 px), 13,6 px e interletraje de 0,08 em, que
+ * cambian con los tokens (`--bb-font-size-cta`, `--bb-tracking-cta`). Interlineado `normal` y sin
+ * `nowrap`, como en el sello: si el texto no cabe, parte la línea en vez de desbordar. Aquí también el
+ * contorno sube 1 px en hover.
+ */
+.hero {
+  max-width: 100%;
+  padding: 0.95rem var(--bb-space-8);
+  overflow: hidden;
+  font-size: var(--bb-font-size-cta);
+  line-height: normal;
+  text-align: center;
+  white-space: normal;
+}
+
+.hero .content {
+  gap: 0.7rem;
+}
+
+.hero:hover,
+.hero[data-force-state="hover"] {
+  translate: 0 calc(-1px * var(--bb-motion));
+}
+
 /* ── CTA: rojo de botón accesible (blanco sobre --bb-red-cta, 4,7:1) con halo ──────────────── */
+/* El borde, del color del fondo: transparente, el suavizado del canto redondo se notaría. */
 .cta {
+  border-color: var(--bb-red-cta);
   background-color: var(--bb-red-cta);
   box-shadow: var(--bb-shadow-cta);
 }
@@ -81,6 +109,7 @@
 
 .cta:active,
 .cta[data-force-state="pressed"] {
+  border-color: var(--bb-red-press);
   background-color: var(--bb-red-press);
 }
 
@@ -97,6 +126,42 @@
 
 .outline:active,
 .outline[data-force-state="pressed"] {
+  background-color: var(--bb-fill-active);
+}
+
+/*
+ * Contorno sobre cristal (`glass`, el secundario del hero del sello): `GlassSurface` pinta
+ * `--bb-glass-card` con la refracción; sin capacidad, el mismo velo oscuro sin ella. El hover aclara el
+ * borde y, como el pulsado, rellena una capa encima: el fondo sigue siendo el cristal.
+ */
+.outline.glass,
+.outline.glass:hover,
+.outline.glass[data-force-state="hover"],
+.outline.glass:active,
+.outline.glass[data-force-state="pressed"] {
+  background-color: var(--bb-glass-card);
+}
+
+.outline.glass:hover,
+.outline.glass[data-force-state="hover"] {
+  border-color: var(--bb-text);
+}
+
+.outline.glass::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  content: "";
+  pointer-events: none;
+}
+
+.outline.glass:hover::after,
+.outline.glass[data-force-state="hover"]::after {
+  background-color: var(--bb-fill-hover);
+}
+
+.outline.glass:active::after,
+.outline.glass[data-force-state="pressed"]::after {
   background-color: var(--bb-fill-active);
 }
 
@@ -164,6 +229,10 @@
 .cta:focus-visible,
 .cta[data-force-state="focus"] {
   box-shadow: var(--bb-focus-halo), var(--bb-shadow-cta);
+}
+
+.cta:hover:focus-visible {
+  box-shadow: var(--bb-focus-halo), var(--bb-shadow-cta-hover);
 }
 
 /* ── Deshabilitado (exento de contraste, WCAG 1.4.3) ──────────────────────────────────────── */
@@ -290,6 +359,13 @@
 
   80% {
     translate: calc(2px * var(--bb-motion)) 0;
+  }
+}
+
+/* Hero en tableta (Hero.css ≤ 768 px): menos aire a los lados. */
+@media (max-width: 768px) {
+  .hero {
+    padding: 0.9rem var(--bb-space-6);
   }
 }
 

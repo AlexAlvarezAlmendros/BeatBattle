@@ -332,6 +332,7 @@
         "sizeSm": "sm",
         "sizeMd": "md",
         "sizeLg": "lg",
+        "hero": "Hero (CTA del sello; el contorno, sobre cristal)",
         "link": "Enlace",
         "glass": "Cristal",
         "solid": "Maciza"

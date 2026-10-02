@@ -68,6 +68,11 @@ const BUTTON_STATES: readonly ButtonStateDemo[] = [
   { label: 'disabled', props: { disabled: true } },
 ]
 
+/** Estados que enseña la fila del hero: los de interacción (los demás son los de `md`). */
+const HERO_STATES = BUTTON_STATES.filter((demo) =>
+  (['rest', 'hover', 'focus', 'pressed'] as StateKey[]).includes(demo.label),
+)
+
 function textFor(variant: 'cta' | 'outline', demo: ButtonStateDemo): string {
   if (demo.props.status === 'success') return t('dev.gallery.demo.uploaded')
   if (demo.props.status === 'error') return t('dev.gallery.demo.retry')
@@ -139,6 +144,21 @@ function ButtonBlock() {
         <StateCell label={stateLabel('interactive')}>
           <LiveButton />
         </StateCell>
+      </GalleryRow>
+      {/* El CTA del hero del sello (`size="hero"`): el rojo y el contorno sobre cristal (`glass`). */}
+      <GalleryRow title={t('dev.gallery.variants.hero')} wide>
+        {HERO_STATES.map((demo) => (
+          <StateCell key={demo.label} label={stateLabel(demo.label)}>
+            <div className={styles.inline}>
+              <Button size="hero" {...demo.props}>
+                {t('dev.gallery.demo.primary')}
+              </Button>
+              <Button size="hero" variant="outline" glass {...demo.props}>
+                {t('dev.gallery.demo.secondary')}
+              </Button>
+            </div>
+          </StateCell>
+        ))}
       </GalleryRow>
     </GalleryBlock>
   )

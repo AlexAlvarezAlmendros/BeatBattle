@@ -17,12 +17,17 @@ import { useReducedMotion } from '../../hooks/useReducedMotion'
 import { t } from '../../i18n'
 import { announce, ensureAnnouncer } from '../announce'
 import { cx, forceStateAttr, type InteractionState } from '../forceState'
+import { GlassSurface } from '../GlassSurface'
 import { Icon, type IconName } from '../Icon'
 import styles from './Button.module.css'
 import { WaveLoader } from './WaveLoader'
 
 export type ButtonVariant = 'cta' | 'outline' | 'icon'
-export type ButtonSize = 'sm' | 'md' | 'lg'
+/**
+ * `sm`, `md` y `lg` para la interfaz; `hero`, el CTA del hero del sello (Hero.css `.hero-cta`,
+ * `otp-metrics.json`): 15,2 px con relleno de 15,2 × 32 px y 13,6 px con 0,08 em en móvil.
+ */
+export type ButtonSize = 'sm' | 'md' | 'lg' | 'hero'
 /** Resultado de la última acción: `success` pinta destello y check; `error`, icono y sacudida. */
 export type ButtonStatus = 'idle' | 'success' | 'error'
 
@@ -52,6 +57,12 @@ interface TextVariantProps {
   icon?: IconName
   children: ReactNode
   'aria-label'?: string
+  /**
+   * Solo con `outline`: contorno sobre cristal (`GlassSurface`, `--bb-glass-card`), como el botón
+   * secundario del hero del sello. Sin capacidad de cristal, el mismo velo oscuro sin refracción. En el
+   * CTA no hace nada (su fondo es el rojo).
+   */
+  glass?: boolean
 }
 
 interface IconVariantProps {
@@ -61,6 +72,7 @@ interface IconVariantProps {
   /** Obligatorio: un botón sin texto necesita nombre accesible. */
   'aria-label': string
   children?: never
+  glass?: never
 }
 
 type Omitted = 'children' | 'aria-label' | 'className' | 'disabled' | 'ref'
@@ -108,11 +120,13 @@ const SIZE_CLASS: Record<ButtonSize, string | undefined> = {
   sm: styles.sm,
   md: styles.md,
   lg: styles.lg,
+  hero: styles.hero,
 }
 
 /**
  * Botón base (§3.3): CTA rojo, contorno e icono redondo. Pinta un `<Link>` con `to`, un `<a>` con
- * `href` y un `<button type="button">` en el resto de casos.
+ * `href` y un `<button type="button">` en el resto de casos. Con `glass` (solo el contorno), el mismo
+ * elemento pasa por `GlassSurface`, sin envoltorio.
  *
  * - Hover: sube 1 px y el halo crece (CTA). Pulsado: escala 0,97 con muelle (ratón, táctil, Espacio
  *   o Intro). Con «reducir movimiento» solo cambia el color (Anexo E).
@@ -136,6 +150,7 @@ export function Button(props: ButtonProps) {
     className,
     icon,
     children,
+    glass = false,
     ref,
     to,
     href,
@@ -145,6 +160,7 @@ export function Button(props: ButtonProps) {
     Partial<Omit<TextVariantProps, 'variant'>> & {
       variant?: ButtonVariant
       icon?: IconName
+      glass?: boolean
     } & AnyHandlers & {
       to?: To
       href?: string
@@ -158,6 +174,7 @@ export function Button(props: ButtonProps) {
   const textRef = useRef<HTMLSpanElement>(null)
   const pressAnimation = useRef<ReturnType<typeof animate> | null>(null)
   const inert = loading || disabled
+  const onGlass = glass && variant === 'outline'
   const ariaLabel = rest['aria-label'] as string | undefined
   const statusText = status === 'idle' ? undefined : t(`ui.button.${status}`)
 
@@ -271,6 +288,7 @@ export function Button(props: ButtonProps) {
       styles.button,
       VARIANT_CLASS[variant],
       SIZE_CLASS[size],
+      onGlass && styles.glass,
       fullWidth && styles.full,
       className,
     ),
@@ -289,27 +307,34 @@ export function Button(props: ButtonProps) {
       tabIndex: disabled ? -1 : (rest.tabIndex as number | undefined),
     }
     if (to !== undefined) {
-      return (
+      return onGlass ? (
+        <GlassSurface as={Link} {...linkProps} to={to} replace={replace}>
+          {content}
+        </GlassSurface>
+      ) : (
         <Link {...linkProps} to={to} replace={replace}>
           {content}
         </Link>
       )
     }
-    return (
-      <a {...linkProps} href={disabled ? undefined : href}>
+    const anchorProps = { ...linkProps, href: disabled ? undefined : href }
+    return onGlass ? (
+      <GlassSurface as="a" {...anchorProps}>
         {content}
-      </a>
+      </GlassSurface>
+    ) : (
+      <a {...anchorProps}>{content}</a>
     )
   }
 
-  return (
-    <button
-      {...shared}
-      ref={setRef}
-      type={(rest.type as 'button' | 'submit' | 'reset' | undefined) ?? 'button'}
-      disabled={disabled}
-      aria-disabled={loading || undefined}
-    >
+  const type = (rest.type as 'button' | 'submit' | 'reset' | undefined) ?? 'button'
+  const buttonProps = { ...shared, ref: setRef, disabled, 'aria-disabled': loading || undefined }
+  return onGlass ? (
+    <GlassSurface as="button" {...buttonProps} type={type}>
+      {content}
+    </GlassSurface>
+  ) : (
+    <button {...buttonProps} type={type}>
       {content}
     </button>
   )
