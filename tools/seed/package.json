@@ -1,0 +1,13 @@
+{
+  "name": "@beatbattle/seed",
+  "private": true,
+  "type": "module",
+  "description": "Datos de prueba: semanas, entradas sintéticas y votos (desde la Fase 3)",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "echo skip"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@beatbattle/shot",
+  "private": true,
+  "type": "module",
+  "description": "Capturas y bancos con el Chrome del sistema (portado de Orchard en la tarea 0.14)",
+  "scripts": {
+    "typecheck": "echo skip",
+    "test": "echo skip"
+  }
+}
