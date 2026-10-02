@@ -76,6 +76,15 @@ export class EnvError extends Error {
   }
 }
 
+/**
+ * Guarda de §4.12: el reloj de prueba no puede existir en producción. La aplica `loadEnv` y, como
+ * defensa en profundidad, también `registerClock` (`plugins/clock.ts`) con cualquier configuración.
+ */
+export const TEST_CLOCK_IN_PRODUCTION: EnvIssue = {
+  variable: 'BB_TEST_CLOCK',
+  message: 'no se puede activar con NODE_ENV=production (guía §4.12)',
+}
+
 const DEV_PUBLIC_URL = 'http://localhost:5173'
 const truthy = (v: string) => v === '1' || v === 'true'
 
@@ -113,12 +122,7 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
   const production = cleaned.NODE_ENV === 'production'
   const testClock = truthy(cleaned.BB_TEST_CLOCK ?? '0')
 
-  // Guarda de §4.12: el reloj de prueba no puede existir en producción.
-  if (production && testClock)
-    issues.push({
-      variable: 'BB_TEST_CLOCK',
-      message: 'no se puede activar con NODE_ENV=production (guía §4.12)',
-    })
+  if (production && testClock) issues.push(TEST_CLOCK_IN_PRODUCTION)
 
   let publicUrl = DEV_PUBLIC_URL
   if (cleaned.BB_PUBLIC_URL === undefined) {
@@ -159,13 +163,5 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
     testClock,
     logLevel: e.LOG_LEVEL,
     trustProxy: truthy(e.TRUST_PROXY),
-  }
-}
-
-/** Configuración de tests: BD en memoria y registro silencioso. */
-export function testConfig(overrides: Partial<AppConfig> = {}): AppConfig {
-  return {
-    ...loadEnv({ NODE_ENV: 'test', DATABASE_URL: ':memory:', LOG_LEVEL: 'silent' }),
-    ...overrides,
   }
 }

@@ -39,7 +39,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     genReqId: () => randomUUID(),
   })
 
-  registerClock(app, clock, config.testClock)
+  registerClock(app, clock, config)
   registerSecurity(app, config)
   registerErrorHandling(app)
 

@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest'
+import { buildApp } from '../src/app'
+import { EnvError } from '../src/config/env'
+import { createTestDb } from '../src/db/testDb'
 import { fixedClock, parseTestNow, systemClock, TEST_NOW_HEADER } from '../src/lib/clock'
-import { makeApp, T0, type TestApp } from './helpers'
+import { makeApp, T0, type TestApp, testConfig } from './helpers'
 
 describe('Clock', () => {
   it('el reloj del sistema da ms Unix', () => {
@@ -86,5 +89,20 @@ describe('request.now y la cabecera x-bb-test-now (guía §4.12)', () => {
     const res = await timeOf({ [TEST_NOW_HEADER]: 'el lunes' })
     expect(res.status).toBe(200)
     expect(res.body.data.time).toBe(T0)
+  })
+})
+
+describe('guarda §4.12 al montar la app', () => {
+  it('una configuración de producción con el reloj de prueba no monta la app, aunque no venga de loadEnv', async () => {
+    const db = await createTestDb()
+    const build = () =>
+      buildApp({ config: testConfig({ env: 'production', testClock: true }), db, clock: fixedClock(T0) })
+    expect(build).toThrow(EnvError)
+    expect(build).toThrow(/BB_TEST_CLOCK/)
+    // producción sin el reloj de prueba sí se monta
+    const app = buildApp({ config: testConfig({ env: 'production', testClock: false }), db })
+    await app.ready()
+    await app.close()
+    db.$client.close()
   })
 })

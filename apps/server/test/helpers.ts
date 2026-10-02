@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import { buildApp } from '../src/app'
-import { type AppConfig, type LogLevel, testConfig } from '../src/config/env'
+import { type AppConfig, type LogLevel, loadEnv } from '../src/config/env'
 import type { Db } from '../src/db/client'
 import { createTestDb } from '../src/db/testDb'
 import { type FixedClock, fixedClock } from '../src/lib/clock'
@@ -9,6 +9,19 @@ import { type FixedClock, fixedClock } from '../src/lib/clock'
 export const ORIGIN = 'http://localhost:5173'
 /** Lunes 5 de octubre de 2026, 10:00 UTC. */
 export const T0 = Date.UTC(2026, 9, 5, 10, 0, 0)
+
+/**
+ * Configuración de tests: BD en memoria y registro silencioso. Vive aquí y no en `src/`: el código de
+ * producción solo obtiene su configuración de `loadEnv`. Los `overrides` pueden fabricar
+ * combinaciones que `loadEnv` rechaza (p. ej. producción con el reloj de prueba); para eso está la
+ * segunda guarda de `registerClock`.
+ */
+export function testConfig(overrides: Partial<AppConfig> = {}): AppConfig {
+  return {
+    ...loadEnv({ NODE_ENV: 'test', DATABASE_URL: ':memory:', LOG_LEVEL: 'silent' }),
+    ...overrides,
+  }
+}
 
 export interface TestApp {
   app: FastifyInstance
