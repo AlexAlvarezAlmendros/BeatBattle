@@ -39,6 +39,7 @@ pnpm e2e                 # Playwright (almacenamiento falso, reloj de prueba, Ma
 pnpm emails:dev          # visor de plantillas de email (React Email)
 node tools/shot/shot.mjs <url> <png> [--eval=expr]   # captura con la GPU real
 node tools/shot/bench.mjs <url> [segundos]           # FPS y peor fotograma
+node tools/shot/ab.mjs [--otp-live]                  # A/B de la prueba del sello (docs/planning/evidence/f0/ab)
 ```
 
 ## Reglas

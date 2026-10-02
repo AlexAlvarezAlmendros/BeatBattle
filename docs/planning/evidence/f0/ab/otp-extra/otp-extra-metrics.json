@@ -1,0 +1,953 @@
+{
+  "capturedAt": "2026-10-02T16:13:44.108Z",
+  "base": "https://www.otherpeople.es",
+  "browser": "Chrome 154.0.8037.57",
+  "why": "Piezas del sello que la referencia (../otp) no tiene: chip activo, pie y teselas en móvil",
+  "viewports": {
+    "desktop": {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "beats": {
+        "genreChipActive": {
+          "selector": ".genre-chip.active",
+          "rect": {
+            "x": 180.81,
+            "y": 178,
+            "width": 57.14,
+            "height": 28.19
+          },
+          "size": {
+            "width": 57.14,
+            "height": 28.19
+          },
+          "text": "Trap",
+          "borderRadius": "20px",
+          "backgroundColor": "rgb(255, 0, 60)",
+          "border": "1px solid rgb(255, 0, 60)",
+          "boxShadow": "rgba(255, 0, 60, 0.35) 0px 2px 10px 0px",
+          "backdropFilter": "none",
+          "padding": "5.6px 14.4px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12.8,
+          "fontWeight": "500",
+          "letterSpacing": "0.128px",
+          "letterSpacingEm": 0.01,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "genreChip": {
+          "selector": ".genre-chip:not(.active)",
+          "rect": {
+            "x": 245.95,
+            "y": 178,
+            "width": 55.47,
+            "height": 28.19
+          },
+          "size": {
+            "width": 55.47,
+            "height": 28.19
+          },
+          "text": "Jerk",
+          "borderRadius": "20px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "1px solid rgb(42, 42, 42)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "5.6px 14.4px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12.8,
+          "fontWeight": "500",
+          "letterSpacing": "0.128px",
+          "letterSpacingEm": 0.01,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(153, 153, 153)",
+          "fontVariantNumeric": "normal"
+        },
+        "fonts": {
+          "genreChip": {
+            "selector": ".genre-chip",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans",
+                "isCustomFont": false,
+                "glyphCount": 4
+              }
+            ]
+          }
+        }
+      },
+      "footer": {
+        "footer": {
+          "selector": "footer.footer",
+          "rect": {
+            "x": 0,
+            "y": -48.06,
+            "width": 1440,
+            "height": 948.41
+          },
+          "size": {
+            "width": 1376,
+            "height": 840.41
+          },
+          "text": "Other People RecordsSello discográfico independiente de músi",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "80px 32px 28px",
+          "opacity": "1",
+          "position": "relative",
+          "top": "0px",
+          "left": "0px",
+          "zIndex": "auto",
+          "display": "block",
+          "gap": "normal",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb"
+        },
+        "footerLogo": {
+          "selector": ".footer-brand__logo",
+          "rect": {
+            "x": 80,
+            "y": 31.94,
+            "width": 64,
+            "height": 41.38
+          },
+          "size": {
+            "width": 64,
+            "height": 41.38
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "footerName": {
+          "selector": ".footer-brand__name",
+          "rect": {
+            "x": 80,
+            "y": 89.31,
+            "width": 486.47,
+            "height": 37.8
+          },
+          "size": {
+            "width": 486.47,
+            "height": 37.8
+          },
+          "text": "Other People Records",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 36,
+          "fontWeight": "800",
+          "letterSpacing": "0.72px",
+          "letterSpacingEm": 0.02,
+          "lineHeight": "37.8px",
+          "textTransform": "uppercase",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "footerAccent": {
+          "selector": ".footer-brand__accent",
+          "rect": {
+            "x": 80,
+            "y": 139.11,
+            "width": 56,
+            "height": 3
+          },
+          "size": {
+            "width": 56,
+            "height": 3
+          },
+          "borderRadius": "2px",
+          "backgroundColor": "rgb(255, 0, 60)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "footerDesc": {
+          "selector": ".footer-brand__desc",
+          "rect": {
+            "x": 80,
+            "y": 158.11,
+            "width": 560,
+            "height": 48.63
+          },
+          "size": {
+            "width": 560,
+            "height": 48.63
+          },
+          "text": "Sello discográfico independiente de música urbana en Igualad",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 15.2,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "24.32px",
+          "textTransform": "none",
+          "color": "rgb(170, 170, 170)",
+          "fontVariantNumeric": "normal"
+        },
+        "footerCard": {
+          "selector": ".footer-card",
+          "rect": {
+            "x": 80,
+            "y": 456.34,
+            "width": 308,
+            "height": 328
+          },
+          "size": {
+            "width": 308,
+            "height": 328
+          },
+          "text": "ExplorarInicioArtistasEventosDiscografíaBeatsPluginsNewslett",
+          "borderRadius": "16px",
+          "backgroundColor": "rgba(0, 0, 0, 0.58)",
+          "border": "1px solid rgba(255, 255, 255, 0.08)",
+          "boxShadow": "none",
+          "backdropFilter": "url(\"#glass-filter-_r_4_\") saturate(1) blur(0px)",
+          "padding": "24px",
+          "opacity": "1",
+          "position": "relative",
+          "top": "0px",
+          "left": "0px",
+          "zIndex": "auto",
+          "display": "flex",
+          "gap": "16px",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb",
+          "style": "border-radius: 16px; --glass-bg: hsl(0 0% 0% / 0.58); --glass-saturation: 1; --glass-backdrop-blur: 0px; --filter-id: url(…);"
+        },
+        "footerCardTitle": {
+          "selector": ".footer-card__title",
+          "rect": {
+            "x": 105,
+            "y": 481.34,
+            "width": 258,
+            "height": 14
+          },
+          "size": {
+            "width": 258,
+            "height": 14
+          },
+          "text": "Explorar",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12,
+          "fontWeight": "700",
+          "letterSpacing": "1.92px",
+          "letterSpacingEm": 0.16,
+          "lineHeight": "normal",
+          "textTransform": "uppercase",
+          "color": "rgb(255, 0, 60)",
+          "fontVariantNumeric": "normal"
+        },
+        "footerCardLink": {
+          "selector": ".footer-card__nav a",
+          "rect": {
+            "x": 105,
+            "y": 511.34,
+            "width": 33.61,
+            "height": 24
+          },
+          "size": {
+            "width": 33.61,
+            "height": 24
+          },
+          "text": "Inicio",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 14.4,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(204, 204, 204)",
+          "fontVariantNumeric": "normal"
+        },
+        "footerSocialLink": {
+          "selector": ".footer-social__link",
+          "rect": {
+            "x": 1077,
+            "y": 511.34,
+            "width": 42,
+            "height": 42
+          },
+          "size": {
+            "width": 42,
+            "height": 42
+          },
+          "borderRadius": "50%",
+          "backgroundColor": "rgba(255, 255, 255, 0.06)",
+          "border": "1px solid rgba(255, 255, 255, 0.1)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "footerBottom": {
+          "selector": ".footer-bottom",
+          "rect": {
+            "x": 80,
+            "y": 832.34,
+            "width": 1280,
+            "height": 40
+          },
+          "size": {
+            "width": 1280,
+            "height": 40
+          },
+          "text": "© 2026 Other People RecordsDiseñado y Desarrollado por alexa",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "1px solid rgba(255, 255, 255, 0.07)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "24px 0px 0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12.8,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(119, 119, 119)",
+          "fontVariantNumeric": "normal"
+        },
+        "footerLegalLink": {
+          "selector": ".footer-legal a",
+          "rect": {
+            "x": 1144.14,
+            "y": 857.34,
+            "width": 59.75,
+            "height": 15
+          },
+          "size": {
+            "width": 59.75,
+            "height": 15
+          },
+          "text": "Privacidad",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12.8,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(153, 153, 153)",
+          "fontVariantNumeric": "normal"
+        },
+        "fonts": {
+          "footerName": {
+            "selector": ".footer-brand__name",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans-Bold",
+                "isCustomFont": false,
+                "glyphCount": 20
+              }
+            ]
+          }
+        }
+      },
+      "beatDetail": {
+        "infoLabel": {
+          "selector": ".beat-detail__info-title",
+          "rect": {
+            "x": 120,
+            "y": 706,
+            "width": 101.94,
+            "height": 12
+          },
+          "size": {
+            "width": 101.94,
+            "height": 12
+          },
+          "text": "Información",
+          "fontFamily": "Arial",
+          "fontSize": 11,
+          "fontWeight": "600",
+          "letterSpacing": "1.1px",
+          "letterSpacingEm": 0.1,
+          "lineHeight": "normal",
+          "textTransform": "uppercase",
+          "color": "rgb(119, 119, 119)",
+          "fontVariantNumeric": "normal"
+        },
+        "infoGrid": {
+          "selector": ".beat-detail__info-grid",
+          "rect": {
+            "x": 120,
+            "y": 732,
+            "width": 280,
+            "height": 158
+          },
+          "size": {
+            "width": 280,
+            "height": 158
+          },
+          "text": "Publicado26 sept 2026BPM92TonalidadD# minGéneroReggaeton",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "position": "static",
+          "top": "auto",
+          "left": "auto",
+          "zIndex": "auto",
+          "display": "grid",
+          "gap": "8px",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb"
+        }
+      }
+    },
+    "mobile": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "beats": {
+        "genreChipActive": {
+          "selector": ".genre-chip.active",
+          "rect": {
+            "x": 71.27,
+            "y": 200,
+            "width": 50.72,
+            "height": 25.59
+          },
+          "size": {
+            "width": 50.72,
+            "height": 25.59
+          },
+          "text": "Trap",
+          "borderRadius": "20px",
+          "backgroundColor": "rgb(255, 0, 60)",
+          "border": "1px solid rgb(255, 0, 60)",
+          "boxShadow": "rgba(255, 0, 60, 0.35) 0px 2px 10px 0px",
+          "backdropFilter": "none",
+          "padding": "4.8px 12px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12,
+          "fontWeight": "500",
+          "letterSpacing": "0.12px",
+          "letterSpacingEm": 0.01,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "genreChip": {
+          "selector": ".genre-chip:not(.active)",
+          "rect": {
+            "x": 129.98,
+            "y": 200,
+            "width": 49.16,
+            "height": 25.59
+          },
+          "size": {
+            "width": 49.16,
+            "height": 25.59
+          },
+          "text": "Jerk",
+          "borderRadius": "20px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "1px solid rgb(42, 42, 42)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "4.8px 12px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12,
+          "fontWeight": "500",
+          "letterSpacing": "0.12px",
+          "letterSpacingEm": 0.01,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(153, 153, 153)",
+          "fontVariantNumeric": "normal"
+        },
+        "fonts": {
+          "genreChip": {
+            "selector": ".genre-chip",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans",
+                "isCustomFont": false,
+                "glyphCount": 4
+              }
+            ]
+          }
+        }
+      },
+      "footer": {
+        "footer": {
+          "selector": "footer.footer",
+          "rect": {
+            "x": 0,
+            "y": -784.2,
+            "width": 390,
+            "height": 1627.72
+          },
+          "size": {
+            "width": 350,
+            "height": 1551.72
+          },
+          "text": "Other People RecordsSello discográfico independiente de músi",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "56px 20px 20px",
+          "opacity": "1",
+          "position": "relative",
+          "top": "0px",
+          "left": "0px",
+          "zIndex": "auto",
+          "display": "block",
+          "gap": "normal",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb"
+        },
+        "footerLogo": {
+          "selector": ".footer-brand__logo",
+          "rect": {
+            "x": 20,
+            "y": -728.2,
+            "width": 64,
+            "height": 41.38
+          },
+          "size": {
+            "width": 64,
+            "height": 41.38
+          },
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "footerName": {
+          "selector": ".footer-brand__name",
+          "rect": {
+            "x": 20,
+            "y": -670.83,
+            "width": 324.31,
+            "height": 25.19
+          },
+          "size": {
+            "width": 324.31,
+            "height": 25.19
+          },
+          "text": "Other People Records",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 24,
+          "fontWeight": "800",
+          "letterSpacing": "0.48px",
+          "letterSpacingEm": 0.02,
+          "lineHeight": "25.2px",
+          "textTransform": "uppercase",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "footerAccent": {
+          "selector": ".footer-brand__accent",
+          "rect": {
+            "x": 20,
+            "y": -633.64,
+            "width": 56,
+            "height": 3
+          },
+          "size": {
+            "width": 56,
+            "height": 3
+          },
+          "borderRadius": "2px",
+          "backgroundColor": "rgb(255, 0, 60)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "footerDesc": {
+          "selector": ".footer-brand__desc",
+          "rect": {
+            "x": 20,
+            "y": -614.64,
+            "width": 350,
+            "height": 72.94
+          },
+          "size": {
+            "width": 350,
+            "height": 72.94
+          },
+          "text": "Sello discográfico independiente de música urbana en Igualad",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 15.2,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "24.32px",
+          "textTransform": "none",
+          "color": "rgb(170, 170, 170)",
+          "fontVariantNumeric": "normal"
+        },
+        "footerCard": {
+          "selector": ".footer-card",
+          "rect": {
+            "x": 20,
+            "y": -205.48,
+            "width": 350,
+            "height": 320
+          },
+          "size": {
+            "width": 350,
+            "height": 320
+          },
+          "text": "ExplorarInicioArtistasEventosDiscografíaBeatsPluginsNewslett",
+          "borderRadius": "16px",
+          "backgroundColor": "rgba(0, 0, 0, 0.58)",
+          "border": "1px solid rgba(255, 255, 255, 0.08)",
+          "boxShadow": "none",
+          "backdropFilter": "url(\"#glass-filter-_r_4_\") saturate(1) blur(0px)",
+          "padding": "20px",
+          "opacity": "1",
+          "position": "relative",
+          "top": "0px",
+          "left": "0px",
+          "zIndex": "auto",
+          "display": "flex",
+          "gap": "16px",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb",
+          "style": "border-radius: 16px; --glass-bg: hsl(0 0% 0% / 0.58); --glass-saturation: 1; --glass-backdrop-blur: 0px; --filter-id: url(…);"
+        },
+        "footerCardTitle": {
+          "selector": ".footer-card__title",
+          "rect": {
+            "x": 41,
+            "y": -184.48,
+            "width": 308,
+            "height": 14
+          },
+          "size": {
+            "width": 308,
+            "height": 14
+          },
+          "text": "Explorar",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12,
+          "fontWeight": "700",
+          "letterSpacing": "1.92px",
+          "letterSpacingEm": 0.16,
+          "lineHeight": "normal",
+          "textTransform": "uppercase",
+          "color": "rgb(255, 0, 60)",
+          "fontVariantNumeric": "normal"
+        },
+        "footerCardLink": {
+          "selector": ".footer-card__nav a",
+          "rect": {
+            "x": 41,
+            "y": -154.48,
+            "width": 33.61,
+            "height": 24
+          },
+          "size": {
+            "width": 33.61,
+            "height": 24
+          },
+          "text": "Inicio",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 14.4,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(204, 204, 204)",
+          "fontVariantNumeric": "normal"
+        },
+        "footerSocialLink": {
+          "selector": ".footer-social__link",
+          "rect": {
+            "x": 41,
+            "y": 638.52,
+            "width": 42,
+            "height": 42
+          },
+          "size": {
+            "width": 42,
+            "height": 42
+          },
+          "borderRadius": "50%",
+          "backgroundColor": "rgba(255, 255, 255, 0.06)",
+          "border": "1px solid rgba(255, 255, 255, 0.1)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "footerBottom": {
+          "selector": ".footer-bottom",
+          "rect": {
+            "x": 20,
+            "y": 733.52,
+            "width": 350,
+            "height": 90
+          },
+          "size": {
+            "width": 350,
+            "height": 90
+          },
+          "text": "© 2026 Other People RecordsDiseñado y Desarrollado por alexa",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "1px solid rgba(255, 255, 255, 0.07)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "24px 0px 0px",
+          "opacity": "1",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12.8,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(119, 119, 119)",
+          "fontVariantNumeric": "normal"
+        },
+        "footerLegalLink": {
+          "selector": ".footer-legal a",
+          "rect": {
+            "x": 20,
+            "y": 808.52,
+            "width": 59.75,
+            "height": 15
+          },
+          "size": {
+            "width": 59.75,
+            "height": 15
+          },
+          "text": "Privacidad",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 12.8,
+          "fontWeight": "400",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(153, 153, 153)",
+          "fontVariantNumeric": "normal"
+        },
+        "fonts": {
+          "footerName": {
+            "selector": ".footer-brand__name",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans-Bold",
+                "isCustomFont": false,
+                "glyphCount": 20
+              }
+            ]
+          }
+        }
+      },
+      "beatDetail": {
+        "infoLabel": {
+          "selector": ".beat-detail__info-title",
+          "rect": {
+            "x": 16,
+            "y": 119,
+            "width": 101.94,
+            "height": 12
+          },
+          "size": {
+            "width": 101.94,
+            "height": 12
+          },
+          "text": "Información",
+          "fontFamily": "Arial",
+          "fontSize": 11,
+          "fontWeight": "600",
+          "letterSpacing": "1.1px",
+          "letterSpacingEm": 0.1,
+          "lineHeight": "normal",
+          "textTransform": "uppercase",
+          "color": "rgb(119, 119, 119)",
+          "fontVariantNumeric": "normal"
+        },
+        "infoLabelBar": {
+          "selector": ".beat-detail__info-title::before",
+          "size": {
+            "width": 3,
+            "height": 12
+          },
+          "borderRadius": "2px",
+          "backgroundColor": "rgb(255, 0, 60)",
+          "border": "0px none rgb(119, 119, 119)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1"
+        },
+        "dataTile": {
+          "selector": ".beat-detail__info-item",
+          "rect": {
+            "x": 16,
+            "y": 145,
+            "width": 358,
+            "height": 37
+          },
+          "size": {
+            "width": 358,
+            "height": 16
+          },
+          "text": "Publicado26 sept 2026",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "10px 0px",
+          "opacity": "1",
+          "position": "static",
+          "top": "auto",
+          "left": "auto",
+          "zIndex": "auto",
+          "display": "flex",
+          "gap": "8px",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb"
+        },
+        "dataTileIcon": null,
+        "dataTileLabel": {
+          "selector": ".beat-detail__info-label",
+          "rect": {
+            "x": 16,
+            "y": 155.5,
+            "width": 80.98,
+            "height": 15
+          },
+          "size": {
+            "width": 80.98,
+            "height": 15
+          },
+          "text": "Publicado",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 13,
+          "fontWeight": "400",
+          "letterSpacing": "0.65px",
+          "letterSpacingEm": 0.05,
+          "lineHeight": "normal",
+          "textTransform": "uppercase",
+          "color": "rgb(136, 136, 136)",
+          "fontVariantNumeric": "normal"
+        },
+        "dataTileValue": {
+          "selector": ".beat-detail__info-value",
+          "rect": {
+            "x": 290.7,
+            "y": 155,
+            "width": 83.3,
+            "height": 16
+          },
+          "size": {
+            "width": 83.3,
+            "height": 16
+          },
+          "text": "26 sept 2026",
+          "fontFamily": "Montserrat, sans-serif",
+          "fontSize": 14,
+          "fontWeight": "600",
+          "letterSpacing": "normal",
+          "letterSpacingEm": 0,
+          "lineHeight": "normal",
+          "textTransform": "none",
+          "color": "rgb(255, 255, 255)",
+          "fontVariantNumeric": "normal"
+        },
+        "infoGrid": {
+          "selector": ".beat-detail__info-grid",
+          "rect": {
+            "x": 16,
+            "y": 145,
+            "width": 358,
+            "height": 147
+          },
+          "size": {
+            "width": 358,
+            "height": 147
+          },
+          "text": "Publicado26 sept 2026BPM92TonalidadD# minGéneroReggaeton",
+          "borderRadius": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "border": "0px none rgb(255, 255, 255)",
+          "boxShadow": "none",
+          "backdropFilter": "none",
+          "padding": "0px",
+          "opacity": "1",
+          "position": "static",
+          "top": "auto",
+          "left": "auto",
+          "zIndex": "auto",
+          "display": "grid",
+          "gap": "0px",
+          "transform": "none",
+          "rotate": "none",
+          "rotateDeg": 0,
+          "writingMode": "horizontal-tb"
+        },
+        "fonts": {
+          "dataTileValue": {
+            "selector": ".beat-detail__info-value",
+            "fonts": [
+              {
+                "familyName": "Liberation Sans",
+                "postScriptName": "LiberationSans-Bold",
+                "isCustomFont": false,
+                "glyphCount": 12
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
