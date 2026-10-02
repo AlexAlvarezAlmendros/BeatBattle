@@ -12,12 +12,10 @@ describe('balance: semana y voto (Anexo B)', () => {
     expect(balance.VOTING_CLOSE_AT).toEqual({ isoWeekday: 7, hour: 23, minute: 59, second: 59 })
   })
 
-  it('la ventana de solo votación dura 4 h contando el segundo de cierre (guía §2.1)', () => {
-    const toSeconds = (t: balance.WeeklyWallTime) =>
-      ((t.isoWeekday * 24 + t.hour) * 60 + t.minute) * 60 + t.second
-    const lastVotingSecondEnd = toSeconds(balance.VOTING_CLOSE_AT) + 1
-    expect(lastVotingSecondEnd - toSeconds(balance.SUBMISSIONS_CLOSE_AT)).toBe(4 * 3600)
-  })
+  // Sin decidir: la guía promete «al menos 4 h» de solo votación (§2.1), pero de 20:00 a 23:59:59 van
+  // 3 h 59 min 59 s. Que el cierre sea el lunes 00:00 exclusivo (4 h justas) o el domingo 23:59:59
+  // incluido lo fijan la guía y `calendar`/`phase` en la Fase 3; aquí solo hay datos de calendario.
+  it.todo('RF-DROP-01: frontera del cierre de votos (domingo 23:59:59 incluido o lunes 00:00 exclusivo)')
 
   it('constantes de voto', () => {
     expect(balance.STARS_MIN).toBe(1)
