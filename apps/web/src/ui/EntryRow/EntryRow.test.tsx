@@ -83,6 +83,13 @@ describe('EntryRow', () => {
     expect(coarse).toMatch(/\.play,\s*\.actions \{[^}]*z-index: 1;/)
   })
 
+  it('RD-VIS-02: en móvil la portada se queda en 48 px, como en el sello', () => {
+    expect(rowCss).toMatch(/\.thumb \{[^}]*width: var\(--bb-space-12\);[^}]*height: var\(--bb-space-12\);/)
+    // Ninguna media query vuelve a tocar la portada.
+    const queries = rowCss.split('@media').slice(1)
+    for (const query of queries) expect(query).not.toMatch(/\.thumb \{/)
+  })
+
   it('la mini onda es decorativa y la portada sin imagen también', () => {
     const { container } = renderRow({ progress: 0.3 })
     expect(screen.queryByRole('img')).toBeNull()

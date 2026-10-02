@@ -186,7 +186,11 @@
   gap: var(--bb-space-3);
 }
 
-/* ── Móvil: como el sello, sin chips ni datos y con la portada más pequeña ─────────────── */
+/*
+ * ── Móvil: como el sello, sin chips ni datos ───────────────────────────────────────────────
+ * La portada se queda en 48 px (el sello no la encoge) y el play, en su círculo de 36: el objetivo
+ * táctil de 44 px lo pone el botón icono sin agrandar el círculo (`Button.module.css`).
+ */
 @media (max-width: 768px) {
   .row {
     gap: var(--bb-space-3);
@@ -196,13 +200,6 @@
   .tags,
   .data {
     display: none;
-  }
-}
-
-@media (max-width: 480px) {
-  .thumb {
-    width: var(--bb-space-10);
-    height: var(--bb-space-10);
   }
 }
 

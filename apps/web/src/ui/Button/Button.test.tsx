@@ -6,6 +6,7 @@ import { type MatchMediaController, mockMatchMedia } from '../../hooks/mockMatch
 import { REDUCED_MOTION_QUERY } from '../../hooks/useReducedMotion'
 import { t } from '../../i18n'
 import styles from './Button.module.css'
+import buttonCss from './Button.module.css?raw'
 import { WAVE_LOADER_BARS } from './WaveLoader'
 
 const capability = vi.hoisted(() => ({ value: false }))
@@ -67,6 +68,17 @@ describe('Button', () => {
     expect(cta).toHaveClass(styles.button!, styles.cta!, styles.hero!)
     expect(cta).toHaveAttribute('data-variant', 'cta')
     expect(cta).not.toHaveClass(styles.glass!)
+  })
+
+  it('RNF-A11Y-09: con puntero grueso, el botón icono amplía el objetivo a 44 px sin agrandar el círculo', () => {
+    // jsdom no evalúa @media: se comprueba la regla (en Chrome, a 390 px táctil, el play de la fila
+    // mide 36 px a la vista y responde en 44 × 44).
+    const coarse = /@media \(pointer: coarse\) \{([\s\S]*?)\n\}/.exec(buttonCss)?.[1] ?? ''
+    expect(coarse).toMatch(
+      /\.iconButton::before \{[^}]*position: absolute;[^}]*inset: calc\(\(100% - var\(--bb-space-11\)\) \/ 2\);/,
+    )
+    expect(coarse).not.toMatch(/\.iconButton[^{]*\{[^}]*(?:width|height):/)
+    expect(buttonCss).toMatch(/\.button \{[^}]*position: relative;/)
   })
 
   it('RD-VIS-02: el contorno con `glass` pasa por GlassSurface, sin envoltorio, con y sin capacidad', () => {
