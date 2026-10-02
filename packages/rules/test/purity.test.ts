@@ -1,8 +1,9 @@
 // Guardia de pureza de packages/rules (guía §4.5): sin relojes reales, azar sin semilla ni hora
 // local de la máquina. Complementa packages/rules/biome.json, que prohíbe imports (UI, render,
 // audio, servidor, BD, `node:*`) y globales (DOM, `process`, `fetch`, `crypto`, temporizadores):
-// este test busca lo que Biome no ve, como `Date.now()`, `new Date()` o `Math.random()`, y además
-// comprueba que Biome aplica de verdad esas prohibiciones (lint de un fichero de prueba).
+// este test busca lo que Biome no ve, como `Date.now()`, `new Date()` o `Math.random()` (con el
+// detector por tokens de purity-scanner.ts), y además comprueba que Biome aplica de verdad esas
+// prohibiciones (lint de un fichero de prueba).
 //
 // Los tests corren en Node y leen ficheros, así que test/ tiene su propio tsconfig con tipos de
 // Node; el de src no los tiene (`types: []`), y `tsc` falla si src usa una API de Node.
@@ -21,55 +22,11 @@ import { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { findViolations } from './purity-scanner'
 
 const PACKAGE_DIR = join(import.meta.dirname, '..')
 const REPO_DIR = join(PACKAGE_DIR, '..', '..')
 const SRC_DIR = join(PACKAGE_DIR, 'src')
-
-interface ForbiddenPattern {
-  readonly pattern: RegExp
-  readonly reason: string
-}
-
-const FORBIDDEN: readonly ForbiddenPattern[] = [
-  { pattern: /\bDate\s*\.\s*now\b/g, reason: 'Date.now: el instante entra como argumento' },
-  { pattern: /\bnew\s+Date\s*\(\s*\)/g, reason: 'new Date() sin argumentos lee el reloj' },
-  { pattern: /\bnew\s+Date\b(?!\s*\()/g, reason: 'new Date sin paréntesis lee el reloj' },
-  { pattern: /(?<![\w$.]|\bnew\s+)Date\s*\(/g, reason: 'Date() como función devuelve la hora actual' },
-  { pattern: /\bMath\s*\.\s*random\b/g, reason: 'Math.random: usa el PRNG con semilla (prng.ts)' },
-  { pattern: /\bperformance\s*\./g, reason: 'performance: reloj real' },
-  { pattern: /\bcrypto\s*\./g, reason: 'crypto: azar real; usa el PRNG con semilla (prng.ts)' },
-  // La hora local depende de la zona de la máquina: las fronteras se calculan con Intl y una zona
-  // explícita (guía §4.12), y los métodos UTC (`getUTCHours`, `Date.UTC`) siguen permitidos.
-  {
-    pattern: /\.(?:get|set)(?:FullYear|Month|Date|Day|Hours|Minutes|Seconds|Milliseconds)\s*\(/g,
-    reason: 'getter/setter de hora local: usa los métodos UTC',
-  },
-  { pattern: /\.getTimezoneOffset\s*\(/g, reason: 'getTimezoneOffset depende de la zona de la máquina' },
-  { pattern: /\.toLocale(?:Date|Time)?String\s*\(/g, reason: 'toLocale*String: usa Intl con zona explícita' },
-  { pattern: /\bDate\s*\.\s*parse\b/g, reason: 'Date.parse interpreta cadenas en hora local' },
-  { pattern: /\bnew\s+Date\s*\([^()]*,/g, reason: 'new Date(año, mes, …) usa la hora local: usa Date.UTC' },
-  { pattern: /\bfrom\s+['"]node:|\bimport\s*\(\s*['"]node:/g, reason: 'import de una API de Node' },
-]
-
-/** Sustituye los comentarios por espacios conservando los saltos de línea (y así los números de línea). */
-function blankComments(code: string): string {
-  const blank = (match: string) => match.replace(/[^\n]/g, ' ')
-  return code.replace(/\/\*[\s\S]*?\*\//g, blank).replace(/\/\/.*$/gm, blank)
-}
-
-/** Usos prohibidos en un fragmento de código, como `línea: motivo`. */
-function findViolations(code: string): string[] {
-  const clean = blankComments(code)
-  const found: string[] = []
-  for (const { pattern, reason } of FORBIDDEN) {
-    for (const match of clean.matchAll(pattern)) {
-      const line = clean.slice(0, match.index).split('\n').length
-      found.push(`${line}: ${reason}`)
-    }
-  }
-  return found
-}
 
 function sourceFiles(): string[] {
   return readdirSync(SRC_DIR, { recursive: true, encoding: 'utf8' })
@@ -80,19 +37,40 @@ function sourceFiles(): string[] {
 describe('pureza: el detector', () => {
   it.each([
     'const t = Date.UTC(2026, 9, 5, 22)',
+    'const t = Date?.UTC(2026, 9, 5, 22)',
     'const d = new Date(nowMs)',
+    'const d = new Date(nowMs,)',
     'const d = new Date(Date.UTC(2026, 0, 1))',
+    'const d = new Date(Math.max(a, b))',
     'const h = d.getUTCHours() + d.getUTCDay()',
     'const label = isoDate(weekStartMs)',
     'const rng = createRng(seed); rng.next()',
+    'const x = Math.imul(a, b) + Math.floor(c)',
     '// Date.now() en un comentario de línea',
     '/* Math.random() en un comentario\n de bloque */',
+    // Lo que va dentro de un literal no es código.
+    "const s = 'Date.now() y Math.random() en un texto'",
+    'const s = `Date.now() en una plantilla`',
+    'const re = /Math\\.random\\(\\)|new Date\\(\\)/g',
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: es código de prueba con una plantilla dentro
+    'const t = `${Date.UTC(2026, 0, 1)} ms`',
+    // Una URL o un glob en un texto no abren comentarios.
+    "const url = 'https://example.com'; const t = Date.UTC(2026, 0, 1)",
+    "const glob = '**/*.ts'; const x = Math.floor(y)",
+    // La división no es una expresión regular.
+    'const half = total / 2 / count; const m = Math.min(a, b)',
+    'const r = (a + b) / 2; const n = c++ / 3',
+    // `performance` y `crypto` como nombre de propiedad.
+    'interface Stats { performance: number; crypto?: string }',
+    'const o = { performance: 1, crypto: 2 }; const p = stats.performance + o.crypto',
+    "import { hash32 } from './prng'",
   ])('acepta %j', (code) => {
     expect(findViolations(code)).toEqual([])
   })
 
   it.each([
     'const now = Date.now()',
+    'const now = Date?.now()',
     'const clock = Date.now',
     'const d = new Date()',
     'const d = new Date',
@@ -106,8 +84,26 @@ describe('pureza: el detector', () => {
     'const off = d.getTimezoneOffset()',
     "const s = d.toLocaleDateString('es-ES')",
     "const t = Date.parse('2026-10-05T00:00')",
+    "const d = new Date('2026-10-05T00:00')",
     'const d = new Date(2026, 9, 5)',
     "import { readFileSync } from 'node:fs'",
+    "import 'node:process'",
+    "export * from 'node:fs'",
+    "const fs = await import('node:fs')",
+    // Alias, acceso calculado y desestructuración.
+    "const t = Date['now']()",
+    "const r = Math['random']()",
+    'const D = Date; const t = D.now()',
+    'const { random } = Math',
+    'const p = performance',
+    'const f = (d: Date) => d.getUTCDay()',
+    // Lo que sigue a un literal con aspecto de comentario sigue siendo código.
+    "const url = 'https://example.com'; const t = Date.now()",
+    "const glob = '**/*.ts'; const x = Math.random()",
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: es código de prueba con una plantilla dentro
+    'const s = `${Date.now()}`',
+    'const re = /x\\/y/; const t = Date.now()',
+    'const half = total / 2; const x = Math.random()',
   ])('rechaza %j', (code) => {
     expect(findViolations(code)).not.toEqual([])
   })
@@ -116,6 +112,15 @@ describe('pureza: el detector', () => {
     expect(findViolations('const a = 1\n/* x\n y */\nconst b = Math.random()')).toEqual([
       '4: Math.random: usa el PRNG con semilla (prng.ts)',
     ])
+    expect(findViolations("const glob = '/*'\nconst s = `a\nb`\nconst t = Date.now()")).toEqual([
+      '4: Date.now: el instante entra como argumento',
+    ])
+  })
+
+  it('falla con un literal sin cerrar en vez de dar el fichero por bueno', () => {
+    expect(() => findViolations("const s = 'sin cerrar\nconst t = Date.now()")).toThrow(SyntaxError)
+    expect(() => findViolations('/* sin cerrar')).toThrow(SyntaxError)
+    expect(() => findViolations('const s = `sin cerrar')).toThrow(SyntaxError)
   })
 })
 
