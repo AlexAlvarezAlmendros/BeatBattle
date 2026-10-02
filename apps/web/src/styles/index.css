@@ -1,0 +1,3 @@
+/* Entrada de los estilos globales, en orden: tokens → base. La importa `main.tsx`. */
+@import "./tokens.css";
+@import "./global.css";

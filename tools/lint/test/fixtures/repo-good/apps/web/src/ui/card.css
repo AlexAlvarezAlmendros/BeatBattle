@@ -1,0 +1,41 @@
+/* Fixture: todo sale de los tokens; nada de esto debe fallar. #fff en un comentario no cuenta. */
+#contenido,
+.card {
+  color: var(--bb-text);
+  background: var(--bb-ink-800);
+  border: 1px solid var(--bb-line);
+  border-radius: var(--bb-radius-md);
+  box-shadow: var(--bb-shadow-card);
+  transition:
+    transform var(--bb-dur-fast) var(--bb-ease-out),
+    opacity var(--bb-dur-fast) linear;
+  background-image: url("./grid#a1b2c3.svg");
+}
+
+.card:hover {
+  border-color: rgb(from var(--bb-red) r g b / 50%);
+  outline-color: color-mix(in srgb, var(--bb-red) 50%, transparent);
+  box-shadow: var(--bb-focus-halo), var(--bb-shadow-glow-red);
+  animation: spin var(--bb-dur-slow) steps(4) 0s infinite;
+}
+
+.avatar {
+  border-radius: 50%;
+  fill: currentcolor;
+}
+
+.flat {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.legacy {
+  /* lint-tokens-allow: color del logo del sello, que no es de BeatBattle */
+  color: #fafafa;
+}
+
+@media (max-width: 600px) {
+  .card {
+    padding: var(--bb-space-3);
+  }
+}

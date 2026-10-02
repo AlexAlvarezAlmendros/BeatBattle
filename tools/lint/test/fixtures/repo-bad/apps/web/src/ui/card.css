@@ -1,0 +1,18 @@
+/* Fixture: cada regla de check-tokens tiene al menos un caso que debe fallar. */
+.card {
+  color: #fff;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px var(--bb-black);
+  transition: transform 150ms ease-out;
+}
+
+.card:hover {
+  animation: pulse 1.2s cubic-bezier(0.2, 0, 0, 1) infinite;
+  filter: drop-shadow(0 0 4px var(--bb-red));
+}
+
+.local {
+  --card-delay: 0.3s;
+}
