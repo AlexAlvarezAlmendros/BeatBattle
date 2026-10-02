@@ -1,8 +1,25 @@
 import { buildApp } from './app'
+import { EnvError, loadEnv } from './config/env'
+import { createDb } from './db/client'
 
-const port = Number(process.env.PORT ?? 3000)
-const host = process.env.HOST ?? '127.0.0.1'
+/** Arranque local y autoalojado: entorno → BD → app → escucha. En Vercel arranca `api/index.ts`. */
+async function main(): Promise<void> {
+  const config = loadEnv(process.env)
+  const db = await createDb(config.databaseUrl, config.databaseAuthToken)
+  const app = buildApp({ config, db })
+  // cierre ordenado (Ctrl+C, `tsx watch`, Docker): termina las peticiones en curso y suelta la BD
+  for (const signal of ['SIGINT', 'SIGTERM'] as const)
+    process.once(signal, () => {
+      app
+        .close()
+        .then(() => db.$client.close())
+        .finally(() => process.exit(0))
+    })
+  await app.listen({ port: config.port, host: config.host })
+}
 
-const app = buildApp()
-await app.listen({ port, host })
-console.log(`API en http://${host}:${port}`)
+main().catch((err: unknown) => {
+  // la configuración no válida se explica sin pila; cualquier otro fallo de arranque, con ella
+  console.error(err instanceof EnvError ? err.message : err)
+  process.exit(1)
+})
