@@ -157,21 +157,15 @@ export function GlassSurface<T extends ElementType = 'div'>(props: GlassSurfaceP
     }
   }, [glass, updateMap])
 
-  if (!glass) {
-    return (
-      <Tag ref={setRef} className={className} style={style} {...domProps}>
-        {children}
-      </Tag>
-    )
-  }
-
-  const glassStyle = {
-    ...style,
-    '--bb-glass-filter': `url(#${filterId})`,
-    '--bb-glass-saturation': String(saturation),
-    ...(tint !== undefined && { '--bb-glass-tint': tint }),
-    ...(backdropBlur !== undefined && { '--bb-glass-backdrop-blur': backdropBlur }),
-  } as CSSProperties
+  const glassStyle = glass
+    ? ({
+        ...style,
+        '--bb-glass-filter': `url(#${filterId})`,
+        '--bb-glass-saturation': String(saturation),
+        ...(tint !== undefined && { '--bb-glass-tint': tint }),
+        ...(backdropBlur !== undefined && { '--bb-glass-backdrop-blur': backdropBlur }),
+      } as CSSProperties)
+    : style
 
   const displacement = (offset: number) => ({
     scale: distortionScale + offset,
@@ -179,70 +173,75 @@ export function GlassSurface<T extends ElementType = 'div'>(props: GlassSurfaceP
     yChannelSelector: yChannel,
   })
 
+  // Una sola estructura con y sin cristal: el filtro va en la posición 0 (o `null`) y los hijos siempre
+  // en la 1. Así, si la capacidad cambia en caliente («reducir movimiento», «reducir transparencia»),
+  // React no vuelve a montar los hijos y se conservan su estado y el foco.
   return (
     <Tag
       ref={setRef}
-      className={className ? `bb-glass ${className}` : 'bb-glass'}
+      className={glass ? (className ? `bb-glass ${className}` : 'bb-glass') : className}
       style={glassStyle}
-      data-glass="on"
+      data-glass={glass ? 'on' : undefined}
       {...domProps}
     >
-      <svg
-        className="bb-glass__filter"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-        focusable="false"
-      >
-        <defs>
-          <filter id={filterId} colorInterpolationFilters="sRGB" x="0%" y="0%" width="100%" height="100%">
-            <feImage
-              ref={feImageRef}
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
-              preserveAspectRatio="none"
-              result="map"
-            />
-            {chromaticAberration ? (
-              <>
+      {glass ? (
+        <svg
+          className="bb-glass__filter"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <defs>
+            <filter id={filterId} colorInterpolationFilters="sRGB" x="0%" y="0%" width="100%" height="100%">
+              <feImage
+                ref={feImageRef}
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                preserveAspectRatio="none"
+                result="map"
+              />
+              {chromaticAberration ? (
+                <>
+                  <feDisplacementMap
+                    in="SourceGraphic"
+                    in2="map"
+                    result="dispRed"
+                    {...displacement(redOffset)}
+                  />
+                  <feColorMatrix in="dispRed" type="matrix" values={CHANNEL_MATRIX.red} result="red" />
+                  <feDisplacementMap
+                    in="SourceGraphic"
+                    in2="map"
+                    result="dispGreen"
+                    {...displacement(greenOffset)}
+                  />
+                  <feColorMatrix in="dispGreen" type="matrix" values={CHANNEL_MATRIX.green} result="green" />
+                  <feDisplacementMap
+                    in="SourceGraphic"
+                    in2="map"
+                    result="dispBlue"
+                    {...displacement(blueOffset)}
+                  />
+                  <feColorMatrix in="dispBlue" type="matrix" values={CHANNEL_MATRIX.blue} result="blue" />
+                  <feBlend in="red" in2="green" mode="screen" result="rg" />
+                  <feBlend in="rg" in2="blue" mode="screen" result="output" />
+                </>
+              ) : (
+                // Sin aberración, un solo mapa con el desplazamiento intermedio de los tres canales.
                 <feDisplacementMap
                   in="SourceGraphic"
                   in2="map"
-                  result="dispRed"
-                  {...displacement(redOffset)}
-                />
-                <feColorMatrix in="dispRed" type="matrix" values={CHANNEL_MATRIX.red} result="red" />
-                <feDisplacementMap
-                  in="SourceGraphic"
-                  in2="map"
-                  result="dispGreen"
+                  result="output"
                   {...displacement(greenOffset)}
                 />
-                <feColorMatrix in="dispGreen" type="matrix" values={CHANNEL_MATRIX.green} result="green" />
-                <feDisplacementMap
-                  in="SourceGraphic"
-                  in2="map"
-                  result="dispBlue"
-                  {...displacement(blueOffset)}
-                />
-                <feColorMatrix in="dispBlue" type="matrix" values={CHANNEL_MATRIX.blue} result="blue" />
-                <feBlend in="red" in2="green" mode="screen" result="rg" />
-                <feBlend in="rg" in2="blue" mode="screen" result="output" />
-              </>
-            ) : (
-              // Sin aberración, un solo mapa con el desplazamiento intermedio de los tres canales.
-              <feDisplacementMap
-                in="SourceGraphic"
-                in2="map"
-                result="output"
-                {...displacement(greenOffset)}
-              />
-            )}
-            <feGaussianBlur in="output" stdDeviation={displace} />
-          </filter>
-        </defs>
-      </svg>
+              )}
+              <feGaussianBlur in="output" stdDeviation={displace} />
+            </filter>
+          </defs>
+        </svg>
+      ) : null}
       {children}
     </Tag>
   )

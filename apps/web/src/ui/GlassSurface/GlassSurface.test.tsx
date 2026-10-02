@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { createRef } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { buildDisplacementMap } from './displacementMap'
@@ -88,6 +89,28 @@ describe('GlassSurface (portado del sello)', () => {
       )
       expect(ref.current?.tagName).toBe('NAV')
       unmount()
+    }
+  })
+  it('si la capacidad cambia en caliente, los hijos no se vuelven a montar: conservan el estado y el foco', async () => {
+    const user = userEvent.setup()
+    // Un elemento nuevo en cada render: con el mismo, React no volvería a pintar la pieza.
+    const ui = () => (
+      <GlassSurface as="section" data-testid="pieza">
+        <input aria-label="campo" />
+      </GlassSurface>
+    )
+    const { rerender } = render(ui())
+    const input = screen.getByRole('textbox', { name: 'campo' })
+    await user.type(input, 'hola')
+
+    // Con cristal, sin él («reducir movimiento» o «reducir transparencia» en caliente) y otra vez con él.
+    for (const value of [true, false, true]) {
+      capability.value = value
+      rerender(ui())
+      expect(screen.getByTestId('pieza').hasAttribute('data-glass')).toBe(value)
+      expect(screen.getByRole('textbox', { name: 'campo' })).toBe(input)
+      expect(input).toHaveFocus()
+      expect(input).toHaveValue('hola')
     }
   })
 })
