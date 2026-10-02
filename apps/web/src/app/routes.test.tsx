@@ -99,7 +99,7 @@ describe('router (0.10, guía §2.18)', () => {
     expect(screen.getByRole('link', { name: t('nav.weeks') })).toHaveAttribute('aria-current', 'page')
   })
 
-  it('«Saltar al contenido» lleva el foco al <main>', async () => {
+  it('RNF-A11Y-01: «Saltar al contenido» lleva el foco al <main>', async () => {
     const user = userEvent.setup()
     renderAt('/')
     await h1(t('pages.home.title'))
@@ -138,7 +138,7 @@ describe('router (0.10, guía §2.18)', () => {
     expect(router.state.location.pathname).toBe('/ajustes/cuenta')
   })
 
-  it('al navegar vuelve arriba y el foco pasa al contenido nuevo', async () => {
+  it('RNF-A11Y-01: al navegar vuelve arriba y el foco pasa al contenido nuevo', async () => {
     const user = userEvent.setup()
     renderAt('/')
     await h1(t('pages.home.title'))

@@ -15,14 +15,14 @@ const bundle: Record<string, BundleEntry> = {
   },
 }
 
-describe('precarga de la fuente principal (0.5)', () => {
-  it('encuentra el woff2 latino con su hash y no lo confunde con el latino extendido', () => {
+describe('precarga de la fuente principal (0.5, §4.7.1)', () => {
+  it('RNF-PERF-02: encuentra el woff2 latino con su hash y no lo confunde con el latino extendido', () => {
     expect(findAssetFileName(bundle, 'montserrat-latin-wght-normal.woff2')).toBe(
       'assets/montserrat-latin-wght-normal-l_AIctKy.woff2',
     )
   })
 
-  it('también lo encuentra solo por el nombre del fichero con hash', () => {
+  it('RNF-PERF-02: también lo encuentra solo por el nombre del fichero con hash', () => {
     const onlyFileName = {
       a: { type: 'asset', fileName: 'assets/montserrat-latin-wght-normal-x1-Y2.woff2' },
     } as const
@@ -31,7 +31,7 @@ describe('precarga de la fuente principal (0.5)', () => {
     )
   })
 
-  it('genera <link rel="preload" as="font" type="font/woff2" crossorigin> con la base pública', () => {
+  it('RNF-PERF-02: genera <link rel="preload" as="font" type="font/woff2" crossorigin> con la base pública', () => {
     const [tag] = fontPreloadTags(bundle, '/')
     expect(tag).toEqual({
       tag: 'link',
@@ -49,7 +49,7 @@ describe('precarga de la fuente principal (0.5)', () => {
     )
   })
 
-  it('falla si la fuente no está en el bundle, para que la precarga no desaparezca en silencio', () => {
+  it('RNF-PERF-02: falla si la fuente no está en el bundle, para que la precarga no desaparezca en silencio', () => {
     expect(() => fontPreloadTags({}, '/')).toThrow(/montserrat-latin-wght-normal\.woff2/)
   })
 })
