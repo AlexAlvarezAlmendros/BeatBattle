@@ -81,7 +81,9 @@ const OTP_FOOTER = {
   footerName: { selector: '.footer-brand__name', groups: ['text'] },
   footerAccent: { selector: '.footer-brand__accent', groups: ['box'] },
   footerDesc: { selector: '.footer-brand__desc', groups: ['text'] },
+  footerGrid: { selector: '.footer-grid', groups: ['layout'] },
   footerCard: { selector: '.footer-card', groups: ['box', 'layout'] },
+  footerCardLast: { selector: '.footer-grid > :last-child', groups: ['box'] },
   footerCardTitle: { selector: '.footer-card__title', groups: ['text'] },
   footerCardLink: { selector: '.footer-card__nav a', groups: ['text'] },
   footerSocialLink: { selector: '.footer-social__link', groups: ['box'] },
@@ -298,7 +300,9 @@ const PIECES = [
       footerName: '.site-footer__name',
       footerAccent: '.site-footer__bar',
       footerDesc: '.site-footer__tagline',
+      footerGrid: '.site-footer__content',
       footerCard: '.site-footer__card',
+      footerCardLast: 'section.site-footer__card:last-of-type',
       footerCardTitle: '.site-footer__card-title',
       footerCardLink: '.site-footer__link',
       footerSocialLink: '.site-footer__social-link',
@@ -392,15 +396,19 @@ const README_ROWS = {
     ['mobileNavToggle', 'rect.height', 'aa'],
   ],
   interior: [
-    ['pageTitle', 'fontSize', 'review'],
-    ['pageTitle', 'fontWeight', 'review'],
-    ['pageTitle', 'textTransform', 'review'],
-    ['pageTitle', 'letterSpacing', 'review'],
-    ['pageTitle', 'rect.y', 'content'],
+    ['pageTitle', 'fontSize'],
+    ['pageTitle', 'fontWeight'],
+    ['pageTitle', 'textTransform'],
+    ['pageTitle', 'letterSpacing'],
+    ['pageTitle', 'textAlign'],
+    ['pageTitle', 'rect.x'],
+    ['pageTitle', 'rect.y'],
+    ['pageTitle', 'rect.height', 'content'],
     ['pageTitle', 'font', 'font'],
   ],
   buttons: [
-    ['ctaPrimary', 'rect.height', 'font'],
+    ['ctaPrimary', 'rect.height', 'review'],
+    ['ctaPrimary', 'border', 'review'],
     ['ctaPrimary', 'borderRadius'],
     ['ctaPrimary', 'backgroundColor', 'aa'],
     ['ctaPrimary', 'backdropFilter', 'aa'],
@@ -418,7 +426,7 @@ const README_ROWS = {
     ['ctaGhost', 'padding'],
   ],
   chip: [
-    ['genreChip', 'rect.height', 'font'],
+    ['genreChip', 'rect.height', { desktop: 'tokens', mobile: 'font' }],
     ['genreChip', 'borderRadius', 'tokens'],
     ['genreChip', 'backgroundColor'],
     ['genreChip', 'border'],
@@ -441,7 +449,7 @@ const README_ROWS = {
     ['row', 'padding'],
     ['row', 'gap', 'tokens'],
     ['row', 'backgroundColor'],
-    ['rowThumb', 'size.width', 'review'],
+    ['rowThumb', 'size.width'],
     ['rowThumb', 'borderRadius', 'tokens'],
     ['rowThumb', 'backgroundColor'],
     ['rowPlay', 'size.width', 'own'],
@@ -476,19 +484,20 @@ const README_ROWS = {
     ['infoLabelBar', 'size.height'],
     ['infoLabelBar', 'borderRadius'],
     ['infoLabelBar', 'backgroundColor'],
-    ['dataTile', 'rect.width', { desktop: 'gallery', mobile: 'review' }],
-    ['dataTile', 'rect.height', { desktop: 'font', mobile: 'review' }],
-    ['dataTile', 'borderRadius', 'review'],
-    ['dataTile', 'backgroundColor', 'review'],
-    ['dataTile', 'border', 'review'],
-    ['dataTile', 'padding', 'review'],
-    ['dataTileIcon', 'color', 'review'],
-    ['dataTileLabel', 'fontSize', 'review'],
+    ['dataTile', 'rect.width', 'gallery'],
+    ['dataTile', 'rect.height', 'font'],
+    ['dataTile', 'borderRadius'],
+    ['dataTile', 'backgroundColor'],
+    ['dataTile', 'border'],
+    ['dataTile', 'padding'],
+    ['dataTileIcon', 'color'],
+    ['dataTileLabel', 'fontSize'],
     ['dataTileLabel', 'letterSpacingEm'],
+    ['dataTileLabel', 'lineHeight', 'tokens'],
     ['dataTileLabel', 'textTransform'],
-    ['dataTileLabel', 'color', { desktop: 'aa', mobile: 'review' }],
-    ['dataTileValue', 'fontSize', { desktop: 'tokens', mobile: 'review' }],
-    ['dataTileValue', 'fontWeight', { desktop: 'tokens', mobile: 'review' }],
+    ['dataTileLabel', 'color', 'aa'],
+    ['dataTileValue', 'fontSize', 'tokens'],
+    ['dataTileValue', 'fontWeight', 'tokens'],
     ['dataTileValue', 'font', 'font'],
   ],
   'glass-card': [
@@ -510,6 +519,7 @@ const README_ROWS = {
     ['beatCardBuy', 'borderRadius', 'own'],
     ['beatCardBuy', 'backgroundColor', 'aa'],
     ['beatCardBuy', 'fontSize', 'own'],
+    ['beatCardBuy', 'boxShadow', 'own'],
   ],
   footer: [
     ['footer', 'padding', 'content'],
@@ -524,17 +534,24 @@ const README_ROWS = {
     ['footerAccent', 'backgroundColor'],
     ['footerDesc', 'fontSize'],
     ['footerDesc', 'color', 'tokens'],
+    ['footerDesc', 'textAlign'],
+    ['footerGrid', 'alignItems'],
+    ['footerCard', 'rect.height', 'content'],
+    ['footerCardLast', 'rect.height', 'content'],
     ['footerCard', 'borderRadius'],
     ['footerCard', 'backgroundColor'],
-    ['footerCard', 'border', 'review'],
+    ['footerCard', 'border'],
     ['footerCard', 'backdropFilter'],
     ['footerCard', 'padding'],
     ['footerCardTitle', 'fontSize'],
     ['footerCardTitle', 'fontWeight'],
     ['footerCardTitle', 'letterSpacingEm'],
     ['footerCardTitle', 'textTransform'],
+    ['footerCardTitle', 'textAlign'],
     ['footerCardTitle', 'color', 'aa'],
     ['footerCardLink', 'fontSize'],
+    ['footerCardLink', 'lineHeight', 'tokens'],
+    ['footerCardLink', 'rect.height', { desktop: 'font', mobile: 'aa' }],
     ['footerCardLink', 'color'],
     ['footerSocialLink', 'size.width', 'aa'],
     ['footerSocialLink', 'borderRadius'],
@@ -717,6 +734,9 @@ async function captureOtpExtra(browser) {
     m.beats = await page.evaluate(measureInPage, {
       genreChipActive: OTP_SPEC.genreChipActive,
       genreChip: { selector: '.genre-chip:not(.active)', groups: ['box', 'text'] },
+      // La referencia no midió la alineación del texto: el título se vuelve a medir aquí (antes de
+      // filtrar no se mueve; el clic en el chip solo cambia la lista).
+      pageTitle: BEATS.pageTitle,
     })
     m.beats.fonts = await platformFonts(page, { genreChip: '.genre-chip' })
     await page.screenshot({ path: extraPng('beats-chip-active', vp.name) })
@@ -783,16 +803,20 @@ const round = (n) => Math.round(n * 100) / 100
 const pxNumber = (v) =>
   typeof v === 'number' ? v : /^-?[\d.]+px$/.test(v ?? '') ? Number.parseFloat(v) : null
 
-/** Δ = BeatBattle − sello en números (px), `=` si coincide y `≠` si no. */
-function delta(otp, bb) {
+/**
+ * Δ = BeatBattle − sello en números (px), `=` si coincide y `≠` si no. Con `prop`, las propiedades en em
+ * (`letterSpacingEm`) usan su propio umbral: 0,01 em no es redondeo, aunque sea menos de 0,05.
+ */
+function delta(otp, bb, prop = '') {
   if (otp === undefined || otp === null || bb === undefined || bb === null) {
     return otp === bb || (otp == null && bb == null) ? '=' : '≠'
   }
   const [a, b] = [pxNumber(otp), pxNumber(bb)]
   // Un radio de píldora (999 px) no se resta: se compara la forma.
   if (Math.max(a ?? 0, b ?? 0) >= 999) return normalize(otp) === normalize(bb) ? '=' : '≠'
-  // Menos de 0,05 px es redondeo de subpíxel, no una diferencia.
-  if (a !== null && b !== null) return Math.abs(b - a) < 0.05 ? '=' : round(b - a)
+  // Menos de 0,05 px es redondeo de subpíxel, no una diferencia; en em, menos de 0,005.
+  const epsilon = prop.endsWith('Em') ? 0.005 : 0.05
+  if (a !== null && b !== null) return Math.abs(b - a) < epsilon ? '=' : round(b - a)
   return normalize(otp) === normalize(bb) ? '=' : '≠'
 }
 
@@ -819,7 +843,7 @@ function compareParts(otpParts, bbParts) {
     const props = {}
     for (const prop of new Set([...Object.keys(a), ...Object.keys(b)])) {
       if (prop === 'selector') continue
-      props[prop] = { otp: a[prop] ?? null, bb: b[prop] ?? null, delta: delta(a[prop], b[prop]) }
+      props[prop] = { otp: a[prop] ?? null, bb: b[prop] ?? null, delta: delta(a[prop], b[prop], prop) }
     }
     parts[key] = {
       otp: otp && { selector: otp.selector, text: otp.text },
@@ -922,10 +946,12 @@ for (const vp of viewports) {
   for (const piece of PIECES) {
     const source = { ...piece.otp, ...(piece.otp[vp.name] ?? {}) }
     const pageKey = source.page
-    // Valores: la referencia manda; el complemento rellena lo que no tiene.
+    // Valores: la referencia manda; el complemento rellena lo que no tiene, también las propiedades
+    // que la referencia no midió (`textAlign`, `alignItems`) de una parte que sí tiene.
     const otpParts = {}
     for (const key of Object.keys(piece.parts)) {
-      otpParts[key] = ref[pageKey]?.[key] ?? ext[pageKey]?.[key] ?? null
+      const [fromRef, fromExtra] = [ref[pageKey]?.[key], ext[pageKey]?.[key]]
+      otpParts[key] = fromRef && fromExtra ? { ...fromExtra, ...fromRef } : (fromRef ?? fromExtra ?? null)
     }
     // Cajas para el recorte: las de la misma captura que se usa.
     const rectOf = (key) =>
@@ -994,7 +1020,11 @@ for (const vp of viewports) {
       const bbValue = cell(bbPart, bbPiece.parts[bbPart], bbPiece.fonts, prop)
       if (otpValue === null && bbValue === null) continue
       const d =
-        prop === 'font' || prop === 'selector' ? (otpValue === bbValue ? '=' : '≠') : delta(otpValue, bbValue)
+        prop === 'font' || prop === 'selector'
+          ? otpValue === bbValue
+            ? '='
+            : '≠'
+          : delta(otpValue, bbValue, prop)
       metrics.table.push({
         viewport: vp.name,
         piece: pieceOut.title,
@@ -1032,8 +1062,10 @@ const show = (value) => {
   const text = String(normalize(value)).replace(/\|/g, '\\|')
   return `\`${text.length > 70 ? `${text.slice(0, 67)}…` : text}\``
 }
-const showDelta = (d) =>
-  typeof d === 'number' ? `${d > 0 ? '+' : '−'}${Math.abs(d)} px`.replace('.', ',') : d
+const showDelta = (d, prop = '') =>
+  typeof d === 'number'
+    ? `${d > 0 ? '+' : '−'}${Math.abs(d)} ${prop.endsWith('Em') ? 'em' : 'px'}`.replace('.', ',')
+    : d
 const showWhy = (why) => (!why ? '' : why === 'REVISAR' ? '**revisar**' : `(${WHY_NUMBER[why]})`)
 
 function tableFor(viewport) {
@@ -1044,7 +1076,7 @@ function tableFor(viewport) {
     const piece = row.piece === last ? '' : row.piece
     last = row.piece
     lines.push(
-      `| ${piece} | ${row.part} · ${row.property} | ${show(row.otp)} | ${show(row.bb)} | ${showDelta(row.delta)} ${showWhy(row.why)} |`.replace(
+      `| ${piece} | ${row.part} · ${row.property} | ${show(row.otp)} | ${show(row.bb)} | ${showDelta(row.delta, row.property)} ${showWhy(row.why)} |`.replace(
         / {2}\|$/,
         ' |',
       ),
