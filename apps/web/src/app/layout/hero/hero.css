@@ -178,6 +178,16 @@
   box-shadow: var(--bb-shadow-cta-hover);
 }
 
+/* La sombra del CTA pisaría el halo del foco de global.css (misma especificidad, va después): los dos
+   juntos, para que el anillo sea el de RNF-A11Y-01 (rojo de 2 px y halo). */
+.hero-cta--primary:focus-visible {
+  box-shadow: var(--bb-focus-halo), var(--bb-shadow-cta);
+}
+
+.hero-cta--primary:hover:focus-visible {
+  box-shadow: var(--bb-focus-halo), var(--bb-shadow-cta-hover);
+}
+
 .hero-cta--primary:active {
   border-color: var(--bb-red-press);
   background-color: var(--bb-red-press);
