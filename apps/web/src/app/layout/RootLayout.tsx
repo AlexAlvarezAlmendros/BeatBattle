@@ -16,7 +16,9 @@ export const MAIN_ID = 'contenido'
  * Marco de todas las páginas, con el layout del sello (tarea 0.7, guía §3.1): fondo de orbes rojos,
  * «Saltar al contenido», isla de navegación con el logo *OTP.*, `<main id="contenido">` y pie del sello.
  *
- * - Vuelta arriba al navegar (y posición recuperada al volver atrás) con `ScrollRestoration`.
+ * - Vuelta arriba al navegar (y posición recuperada al volver atrás o al recargar) con
+ *   `ScrollRestoration`. Una carga nueva empieza arriba porque cada entrada del historial tiene su
+ *   propia clave, también la primera (`ensureHistoryEntryKey` en `router.tsx`).
  * - Al cambiar de página, el foco pasa al `<main>` para que teclado y lector de pantalla empiecen
  *   por el contenido nuevo y no por donde estaba el enlace pulsado (§2.17). Lleva `data-focus-target`
  *   para que `global.css` no le pinte el anillo de foco: es un destino, no un control.

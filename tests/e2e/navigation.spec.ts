@@ -60,6 +60,55 @@ test.describe('escritorio (1440 × 900)', () => {
   })
 })
 
+/** Desplazamiento vertical tras dos fotogramas (lo que tarde `ScrollRestoration` en aplicarse). */
+const scrollYAfterPaint = (page: Page) =>
+  page.evaluate(
+    () =>
+      new Promise<number>((done) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => done(Math.round(window.scrollY)))),
+      ),
+  )
+
+test.describe('desplazamiento al cargar (escritorio)', () => {
+  test('una carga nueva en la misma pestaña empieza arriba aunque la anterior estuviera desplazada', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    await expect(mainHeading(page)).toHaveText('Beat Battle')
+    await page.getByRole('contentinfo').scrollIntoViewIfNeeded()
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(200)
+
+    // Escrita en la barra o desde un enlace externo: documento nuevo, misma pestaña.
+    await page.goto('/como-funciona')
+    await expect(mainHeading(page)).toHaveText('Cómo funciona')
+    expect(await scrollYAfterPaint(page)).toBe(0)
+    await expect(mainHeading(page)).toBeInViewport()
+
+    // Volver a cargar la home tampoco hereda la posición de su visita anterior.
+    await page.goto('/')
+    await expect(mainHeading(page)).toHaveText('Beat Battle')
+    expect(await scrollYAfterPaint(page)).toBe(0)
+  })
+
+  test('recargar y volver atrás desde otro documento recuperan la posición', async ({ page }) => {
+    await page.goto('/')
+    await expect(mainHeading(page)).toHaveText('Beat Battle')
+    await page.getByRole('contentinfo').scrollIntoViewIfNeeded()
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(200)
+    const position = Math.round(await page.evaluate(() => window.scrollY))
+
+    await page.reload()
+    await expect(mainHeading(page)).toHaveText('Beat Battle')
+    await expect.poll(() => page.evaluate(() => Math.round(window.scrollY))).toBe(position)
+
+    await page.goto('/como-funciona')
+    await expect(mainHeading(page)).toHaveText('Cómo funciona')
+    await page.goBack()
+    await expect(mainHeading(page)).toHaveText('Beat Battle')
+    await expect.poll(() => page.evaluate(() => Math.round(window.scrollY))).toBe(position)
+  })
+})
+
 test.describe('móvil (390 × 844)', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
 
