@@ -9,11 +9,13 @@ import {
   type ReactNode,
   type Ref,
   useCallback,
+  useEffect,
   useRef,
 } from 'react'
 import { Link, type To } from 'react-router'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 import { t } from '../../i18n'
+import { announce, ensureAnnouncer } from '../announce'
 import { cx, forceStateAttr, type InteractionState } from '../forceState'
 import { Icon, type IconName } from '../Icon'
 import styles from './Button.module.css'
@@ -116,7 +118,9 @@ const SIZE_CLASS: Record<ButtonSize, string | undefined> = {
  *   o Intro). Con «reducir movimiento» solo cambia el color (Anexo E).
  * - Cargando: la onda de 5 barras sustituye al contenido sin cambiar el ancho; `aria-busy` y el foco
  *   se queda en el botón (no se desactiva), pero los clics no hacen nada.
- * - Éxito: destello blanco y check. Error: icono y una sacudida corta.
+ * - Éxito: destello blanco y check. Error: icono y una sacudida corta. Los dos se nombran (texto
+ *   oculto en el botón: «Subido (Hecho)») y, al pasar a ellos, se anuncian por la región viva
+ *   compartida (WCAG 4.1.3). En el botón icono el `aria-label` se compone con el estado o la carga.
  * - El sonido (`ui.press`) lo cablea la Fase 1.
  */
 export function Button(props: ButtonProps) {
@@ -151,8 +155,27 @@ export function Button(props: ButtonProps) {
   const handlers = rest as AnyHandlers
   const reduced = useReducedMotion()
   const elementRef = useRef<HTMLElement | null>(null)
+  const textRef = useRef<HTMLSpanElement>(null)
   const pressAnimation = useRef<ReturnType<typeof animate> | null>(null)
   const inert = loading || disabled
+  const ariaLabel = rest['aria-label'] as string | undefined
+  const statusText = status === 'idle' ? undefined : t(`ui.button.${status}`)
+
+  // Un botón con `status` puede anunciar: la región viva tiene que existir antes del mensaje.
+  const announces = props.status !== undefined
+  useEffect(() => {
+    if (announces) ensureAnnouncer()
+  }, [announces])
+
+  // Al pasar a éxito o error (no al montar ya en ese estado, como en la galería), se anuncia.
+  const lastStatus = useRef(status)
+  useEffect(() => {
+    if (status === lastStatus.current) return
+    lastStatus.current = status
+    if (!statusText) return
+    const label = ariaLabel ?? textRef.current?.textContent?.trim()
+    announce(label ? t('ui.button.withState', { label, state: statusText }) : statusText)
+  }, [status, statusText, ariaLabel])
 
   const setRef = useCallback(
     (node: HTMLButtonElement | HTMLAnchorElement | null) => {
@@ -213,7 +236,18 @@ export function Button(props: ButtonProps) {
     <>
       <span className={styles.content} aria-hidden={loading || undefined}>
         {glyph && <Icon name={glyph} className={styles.glyph} />}
-        {variant !== 'icon' && <span className={styles.text}>{children}</span>}
+        {variant !== 'icon' && (
+          <span ref={textRef} className={styles.text}>
+            {children}
+          </span>
+        )}
+        {/* El estado también con palabras (nunca solo el icono): «Subido (Hecho)». */}
+        {variant !== 'icon' && statusText && (
+          <>
+            {' '}
+            <span className="sr-only">{t('ui.button.stateHint', { state: statusText })}</span>
+          </>
+        )}
       </span>
       {loading && (
         <>
@@ -225,8 +259,13 @@ export function Button(props: ButtonProps) {
     </>
   )
 
+  // El botón icono se nombra con su `aria-label`, que tapa el contenido: el estado va dentro.
+  const iconState = loading ? (loadingLabel ?? t('ui.button.loading')) : statusText
   const shared = {
     ...rest,
+    ...(variant === 'icon' && ariaLabel && iconState
+      ? { 'aria-label': t('ui.button.withState', { label: ariaLabel, state: iconState }) }
+      : {}),
     ...eventProps,
     className: cx(
       styles.button,

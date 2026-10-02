@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -114,12 +114,53 @@ describe('Button', () => {
 
   it('éxito pinta check y destello; error, icono de alerta (nunca solo color)', () => {
     const { rerender } = render(<Button status="success">Subido</Button>)
-    const button = screen.getByRole('button', { name: 'Subido' })
+    const button = screen.getByRole('button', { name: /^Subido/ })
     expect(button).toHaveAttribute('data-status', 'success')
     expect(button.querySelector('[data-icon="check"]')).not.toBeNull()
     rerender(<Button status="error">Reintentar</Button>)
     expect(button).toHaveAttribute('data-status', 'error')
     expect(button.querySelector('[data-icon="alert"]')).not.toBeNull()
+  })
+
+  it('RNF-A11Y-01: éxito y error también con palabras en el nombre (WCAG 4.1.3)', () => {
+    const { rerender } = render(<Button status="success">Subido</Button>)
+    const hint = (state: string) => t('ui.button.stateHint', { state })
+    expect(screen.getByRole('button')).toHaveAccessibleName(`Subido ${hint(t('ui.button.success'))}`)
+    rerender(<Button status="error">Reintentar</Button>)
+    expect(screen.getByRole('button')).toHaveAccessibleName(`Reintentar ${hint(t('ui.button.error'))}`)
+    rerender(<Button status="idle">Subir</Button>)
+    expect(screen.getByRole('button')).toHaveAccessibleName('Subir')
+  })
+
+  it('RNF-A11Y-01: el botón icono compone su aria-label con la carga y con el estado', () => {
+    const name = (state: string) => t('ui.button.withState', { label: 'Reproducir', state })
+    const { rerender } = render(<Button variant="icon" icon="play" aria-label="Reproducir" loading />)
+    expect(screen.getByRole('button')).toHaveAccessibleName(name(t('ui.button.loading')))
+    rerender(<Button variant="icon" icon="play" aria-label="Reproducir" status="error" />)
+    expect(screen.getByRole('button')).toHaveAccessibleName(name(t('ui.button.error')))
+    rerender(<Button variant="icon" icon="play" aria-label="Reproducir" />)
+    expect(screen.getByRole('button')).toHaveAccessibleName('Reproducir')
+  })
+
+  it('WCAG 4.1.3: al pasar a éxito o error se anuncia por la región viva compartida (no al montar)', async () => {
+    const region = () => document.querySelector('[data-announcer]')
+    const { rerender } = render(<Button status="success">Subido</Button>)
+    // La región existe desde el montaje, vacía: montar ya en éxito (la galería) no anuncia nada.
+    expect(region()).toHaveAttribute('role', 'status')
+    expect(region()).toBeEmptyDOMElement()
+    rerender(<Button status="idle">Subir</Button>)
+    rerender(<Button status="success">Subido</Button>)
+    await waitFor(() =>
+      expect(region()).toHaveTextContent(
+        t('ui.button.withState', { label: 'Subido', state: t('ui.button.success') }),
+      ),
+    )
+    rerender(<Button status="error">Reintentar</Button>)
+    await waitFor(() =>
+      expect(region()).toHaveTextContent(
+        t('ui.button.withState', { label: 'Reintentar', state: t('ui.button.error') }),
+      ),
+    )
   })
 
   it('RD-VIS-03: los estados forzados salen en data-force-state (el reposo no lleva atributo)', () => {
