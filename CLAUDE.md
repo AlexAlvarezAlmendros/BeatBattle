@@ -2,9 +2,10 @@
 
 Competición semanal de beats: cada lunes cae un sample, los productores suben su *flip* y la
 comunidad vota de 1 a 5 estrellas; el domingo se sella la semana y se revela el podio. Vive junto a
-la web de **Other People Records** (`otherpeople.es`, repo `ReactOtpWeb`): misma estética y mismo
-sistema de audio (Cloudinary), pero **cuentas propias** con Better Auth. Encima lleva una capa de
-juego: XP, niveles, logros, temporadas, ceremonias, efectos de sonido por código y sorpresas.
+la web de **Other People Records** (`otherpeople.es`, repo `ReactOtpWeb`): sus colores y su logo, y
+el mismo sistema de audio (Cloudinary), pero **cuentas propias** con Better Auth. Se presenta como el
+menú de una recreativa de lucha (dirección de arte «Arena», guía §3) y lleva una capa de juego: XP,
+niveles, logros, temporadas, ceremonias, efectos de sonido por código y sorpresas.
 
 - **Especificación (SDD):** `docs/guia-maestra.md`. Es la fuente de verdad. Requisitos con id
   (`RF-*`, `RNF-*`, `RD-*`) y criterio de aceptación.
@@ -39,7 +40,7 @@ pnpm e2e                 # Playwright (almacenamiento falso, reloj de prueba, Ma
 pnpm emails:dev          # visor de plantillas de email (React Email)
 node tools/shot/shot.mjs <url> <png> [--eval=expr]   # captura con la GPU real
 node tools/shot/bench.mjs <url> [segundos]           # FPS y peor fotograma
-node tools/shot/ab.mjs [--otp-live]                  # A/B de la prueba del sello (docs/planning/evidence/f0/ab)
+node tools/shot/ab.mjs [--otp-live]                  # A/B de la antigua prueba del sello (histórico, docs/planning/evidence/f0/ab)
 ```
 
 ## Reglas
@@ -58,9 +59,12 @@ node tools/shot/ab.mjs [--otp-live]                  # A/B de la prueba del sell
   cliente no se aceptan.
 - **Tiempo:** instantes UTC en ms; fronteras calculadas en `Europe/Madrid` al programar la semana;
   reloj inyectable (`x-bb-test-now` solo con `BB_TEST_CLOCK=1`, nunca en producción).
-- **Diseño:** colores, medidas, duraciones y curvas solo desde tokens. Cada pantalla, con la capa de
-  juego apagada, debe parecer una sección de `otherpeople.es`. Toda animación tiene variante sin
-  movimiento; todo sonido, equivalente visual; nada destella más de 3 veces por segundo.
+- **Diseño:** colores, medidas, duraciones y curvas solo desde tokens. Del sello solo se usan la
+  paleta y el logo como firma; ninguna pantalla imita la composición de `otherpeople.es` (isla, hero en
+  contorno, marquee, orbes, cristal, Montserrat). Las pantallas son menús de juego de lucha que se
+  recorren con teclado (§3, `RD-VIS-02`); las maquetas aprobadas están en
+  `docs/planning/evidence/f0/arena/`. Toda animación tiene variante sin movimiento; todo sonido,
+  equivalente visual; nada destella más de 3 veces por segundo.
 - **Email:** todo email entra por `email_outbox` en el mismo `batch` que el hecho que lo provoca, con
   clave de idempotencia y su familia (servicio, aviso, marketing). Marketing solo con consentimiento
   registrado; baja en un clic; sin píxeles de seguimiento; ningún email revela datos sin sellar.

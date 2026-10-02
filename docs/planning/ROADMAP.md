@@ -28,7 +28,7 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 
 | # | Fase | Estado | Plan | Hito |
 |---|------|--------|------|------|
-| 0 | Fundaciones | 🔄 Reabierta por el cambio de dirección de arte (0.21–0.28) | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes con la estética del sello; prueba del sello sin diferencias sin justificar salvo el Silk (1.1) |
+| 0 | Fundaciones | 🔄 Reabierta por el cambio de dirección de arte (0.21–0.28) | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes de la arena (guía v0.6 §3); marco de juego y menú principal navegables con teclado; prueba de marca y de juego (`RD-VIS-02`) |
 | 1 | Spike de sensación y audio | ⬜ Lista (1.1, 1.4 y 1.9 se pueden empezar) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio; efectos < 30 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
 | 2 | Cuentas y base de email | 🔒 Bloqueada (F0, GO de F1) | — (se crea al llegar) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, preferencias, consentimientos y bajas |
 | 3 | Semanas y samples | 🔒 Bloqueada (F2) | — | 3 semanas programadas; cambio de semana en la frontera con reloj simulado; email del drop (también sin cuenta) |
@@ -36,15 +36,16 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 | 5 | Escuchar y votar | 🔒 Bloqueada (F4) | — | Todas las reglas `RF-VOTE-*` en verde; Modo Jurado con teclado; recordatorio y llamada al jurado |
 | 6 | Cierre, resultados y ceremonia | 🔒 Bloqueada (F5) | — | Sellado determinista, ceremonia, re-sellado idéntico; Lunes de batalla por email |
 | — | **Beta cerrada** | 🔒 | — | 15–25 productores, 3 semanas reales |
-| 7 | Capa de juego | 🔒 Bloqueada (beta) | — | XP, niveles, rachas, logros, temporadas y carta con lanyard |
+| 7 | Capa de juego | 🔒 Bloqueada (beta) | — | XP, niveles, rachas, logros, temporadas y carta con su pase de torneo |
 | 8 | Sorpresas y pulido audiovisual | 🔒 Bloqueada (F7) | — | Anexo F completo con variantes accesibles; kit de la semana |
 | 9 | Integración con Other People y email marketing | 🔒 Bloqueada (beta) | — | PR en `ReactOtpWeb` con widget y menú; campaña real a un segmento con consentimiento; alta en la newsletter del sello |
 | 10 | Moderación, legal y lanzamiento | 🔒 Bloqueada (F7–F9) | — | Legal publicado; auditorías sin hallazgos altos; presupuestos cumplidos |
 
 ## Foco actual
 
-**Rediseño de la Fase 0** con la nueva dirección de arte de **arena de lucha** (tareas 0.21–0.28): primero
-la dirección de arte en la guía (v0.6) y después el marco de juego, el menú principal y los componentes.
+**Rediseño de la Fase 0** con la nueva dirección de arte de **arena de lucha** (tareas 0.21–0.28). La
+0.21 está hecha: guía v0.6 (§3) y maquetas aprobadas en `docs/planning/evidence/f0/arena/`. Sigue la
+0.22 (tipografía y tokens) y después el marco de juego, el menú principal y los componentes.
 La Fase 1 espera a que termine, porque su Escenario (1.1) dependía del Silk del sello.
 
 ## Grafo de dependencias
@@ -79,8 +80,8 @@ La Fase 1 espera a que termine, porque su Escenario (1.1) dependía del Silk del
 - 2026-10-02 — **Stack**: el de Orchard (pnpm, TypeScript estricto, Vite, three.js con GLSL propio,
   React y Zustand, Zod, Web Audio y Tone.js, Fastify, libSQL/Turso y Drizzle, Vitest, fast-check,
   Playwright, Biome, Vercel `fra1`) + **React Three Fiber y drei** (canvas único con vistas ancladas
-  al DOM; el Silk y el Lanyard del sello ya son R3F) + **TanStack Query** + **Motion** + **React
-  Router 7**. Guía §4.1–4.2.
+  al DOM; desde la v0.6 no se porta nada visual del sello: la arena y el pase de la carta son propios)
+  + **TanStack Query** + **Motion** + **React Router 7**. Guía §4.1–4.2.
 - 2026-10-02 — **Better Auth** para las cuentas (petición del usuario), independientes de Other
   People: cookies solo del host, sin `crossSubDomainCookies`. Nota: **Orchard no usa Better Auth**
   (la descartó porque no pedía email y usa sesiones propias con Argon2id); aquí el email es
@@ -122,7 +123,11 @@ La Fase 1 espera a que termine, porque su Escenario (1.1) dependía del Silk del
   «parecer una sección de otherpeople.es» y pasa a ser una prueba de marca y de juego. El voto sigue
   siendo de 1 a 5 estrellas por entrada: el versus es escenificación, no cambia las reglas (§2.7).
   Tareas 0.21–0.28 del plan 00; la guía pasa a la v0.6.
-- 2026-10-02 — **Hito de la Fase 0 sin el Silk**: la prueba del sello (`RD-VIS-02`) se da por buena en la
+- 2026-10-03 — **Dirección de arte «Arena» aprobada** (decisión del usuario sobre las maquetas de
+  `docs/planning/evidence/f0/arena/`): menú de recreativa de lucha con la paleta del sello y su logo
+  *OTP.* como firma en todas las pantallas; tipografía Anybody + Chakra Petch + Oxanium; medallas en la
+  paleta (sin dorado salvo excepción aprobada); `RD-VIS-02` pasa a prueba de marca y de juego. Guía v0.6.
+- 2026-10-02 — *(Sustituida el 2026-10-03 por la dirección «Arena».)* **Hito de la Fase 0 sin el Silk**: la prueba del sello (`RD-VIS-02`) se da por buena en la
   Fase 0 sin diferencias sin justificar salvo el fondo, porque el Silk en WebGL es la tarea 1.1 (canvas
   único del Escenario). Se repite la A/B con el Silk en la 1.12, junto con las propuestas del jurado
   (guía §7). Evidencia en `docs/planning/evidence/f0/ab/`.
@@ -144,7 +149,9 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 | Proveedores sociales | Google y Discord | F2 | — |
 | Premios | Sin premio material; visibilidad y Elección del sello | Antes de la beta | Con premios, revisar bases y fiscalidad |
 | Origen y licencia de los samples | Del sello o de sus productores, con licencia escrita | Antes de F3 | — |
-| Nombre de marca | «Beat Battle by Other People» | F0 (0.7) | Logo y textos |
+| Nombre de marca | «Beat Battle · un juego de Other People» | F0 (0.24) | Logo, lockup «by [OTP.]» y textos |
+| Dorado como excepción | No: medallas y semana dorada en la paleta | Antes de F6 | Si se aprueba, `#f5c542` solo para el 1.º, la carta de campeón y la semana dorada (guía §3.2, §7) |
+| Pase de la carta | Cinta propia con física | F7 | Alternativa: expositor giratorio si se percibe como pieza del sello (guía §3.4.4) |
 | Modelo de semana | Envíos y votos a la vez | Tras la beta | Revisar con datos de participación |
 | Fecha de lanzamiento | Primera semana completa tras F10 | F10 | — |
 | Dependabot | Activarlo en la Fase 10 | F10 | Abre PRs en GitHub: necesita confirmación |
@@ -153,6 +160,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-03 | F0 | 0.21 hecha: guía v0.6 con la dirección «Arena» y maquetas aprobadas en `docs/planning/evidence/f0/arena/`. Lista la 0.22. |
 | 2026-10-02 | F0 | **Reabierta**: cambio de dirección de arte a arena de lucha (decisión del usuario). |
 | 2026-10-02 | F0 | **Cerrada.** CI de GitHub en verde en la PR #1 (la primera ejecución destapó una dependencia sin declarar, ya arreglada). |
 | 2026-10-02 | F0 | Fase 0 implementada en tres olas de agentes en paralelo con revisión independiente, jurado de la prueba del sello y revisión adversarial; guía v0.4 y v0.5 con las desviaciones. Pendiente: primera CI en GitHub. |

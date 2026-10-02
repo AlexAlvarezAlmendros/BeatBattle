@@ -2,15 +2,17 @@
 
 > Fase: 0 de 10 | Estado: 🔄 En curso (rediseño) | Iniciado: 2026-10-02 | Cerrado: —
 > Hito del roadmap: CI verde; la galería de componentes (`/dev/galeria`) muestra los tokens y los
-> componentes base con la estética del sello y pasa la «prueba del sello» (`RD-VIS-02`) sin diferencias
-> sin justificar, salvo el fondo Silk, que llega con la tarea 1.1 (decisión del 2026-10-02).
+> componentes base de la arena (guía v0.6, §3); marco de juego y menú principal navegables con
+> teclado; prueba de marca y de juego (`RD-VIS-02`) con jurado visual. (Hasta el 2026-10-03 el hito era
+> la «prueba del sello»; se abandonó con la v0.6.)
 
-Deja montado el monorepo con el stack de Orchard, la calidad automática, el **sistema de diseño
-heredado de Other People** (tokens, fuentes de verdad, isla de navegación, componentes base) y las
-**bases transversales del servidor** (configuración, reloj, errores, seguridad, base de datos,
-contratos de API) que usarán todas las fases. El riesgo principal es que el sistema de diseño se
-aleje del sello: por eso la fase termina con una comparación A/B contra capturas de
-`otherpeople.es`.
+Deja montado el monorepo con el stack de Orchard, la calidad automática, el **sistema de diseño de
+la arena** (guía v0.6 §3: tokens sobre la paleta del sello, fuentes propias, marco de juego, menú
+principal y componentes base) y las **bases transversales del servidor** (configuración, reloj,
+errores, seguridad, base de datos, contratos de API) que usarán todas las fases. El riesgo principal
+es que la interfaz no se reconozca como de la familia del sello o que recuerde a una saga de lucha
+concreta: por eso la fase termina con la prueba de marca y de juego (`RD-VIS-02`) y un jurado visual.
+(La primera versión, que copiaba `otherpeople.es`, y su A/B contra el sello quedan como histórico.)
 
 ---
 
@@ -24,10 +26,16 @@ aleje del sello: por eso la fase termina con una comparación A/B contra captura
 | Id | Tarea(s) | Verificación |
 |----|----------|--------------|
 | `RD-VIS-01` | 0.4 | ✅ `pnpm lint:tokens` dentro de `pnpm check`, con 87 tests del propio lint |
-| `RD-VIS-02` | 0.7, 0.8, 0.14, 1.1 | 🔄 A/B en `docs/planning/evidence/f0/ab/`: home, página interior, isla, pie y piezas de la galería contra el sello, con hojas lado a lado y `metrics.json`. El jurado de la prueba del sello (3 lentes) la suspendió; corregidas sus discrepancias medias y altas (página interior, pie, teselas y fila en móvil, medición) y E2E `RD-VIS-02` del título interior y del pie (`tests/e2e/seal.spec.ts`). Las piezas de la Fase 0 pasan; **queda abierto hasta la 1.1 (Silk)**, con la A/B repetida, y la revisión visual del usuario. Dos desviaciones bajas sin respaldo en la guía (borde del CTA, desenfoque de la tarjeta) |
+| `RD-VIS-02` | 0.23–0.28 | 🔄 **Redefinido en la v0.6** como prueba de marca y de juego (§3.10): test de capturas (paleta y negro), E2E de la firma, lint de piezas prohibidas, E2E de teclado y acta del jurado, en la 0.28. Lo que sigue es **histórico** (prueba del sello, abandonada el 2026-10-03): A/B en `docs/planning/evidence/f0/ab/`: home, página interior, isla, pie y piezas de la galería contra el sello, con hojas lado a lado y `metrics.json`. El jurado de la prueba del sello (3 lentes) la suspendió; corregidas sus discrepancias medias y altas (página interior, pie, teselas y fila en móvil, medición) y E2E `RD-VIS-02` del título interior y del pie (`tests/e2e/seal.spec.ts`). Las piezas de la Fase 0 pasan; **queda abierto hasta la 1.1 (Silk)**, con la A/B repetida, y la revisión visual del usuario. Dos desviaciones bajas sin respaldo en la guía (borde del CTA, desenfoque de la tarjeta) |
 | `RD-VIS-03` | 0.9, 1.5 | 🔄 Matriz de estados de §3.3 por componente (`ui/gallery/stateMatrix.ts`): cada bloque de la galería enseña los estados que aplican (celdas con `data-state`) y una celda «No aplica» o «Aplazado» con su motivo para los demás; test `RD-VIS-03: cada bloque enseña los estados de su matriz…` que recorre bloque a bloque (antes solo miraba el botón y los pies de figura de toda la galería) y otro que comprueba que cada estado enseñado está forzado en su pieza. **Falta Estrellas (tarea 1.5)**. La previsualización de la onda al pasar el ratón, el salto y su deshabilitado pasan a la Fase 5 (reproductor). La matriz es una desviación a llevar a §3.3 |
 | `RD-MOT-03` | 0.8, 0.9 | ✅ Variantes sin movimiento en cada componente; E2E del interruptor de la galería |
-| `RF-OTP-01` | 0.7 | ✅ Tests del logo (enlace, `rel`, `alt`) y del pie; posición del logo igual a la del sello al píxel |
+| `RF-OTP-01` | 0.23, 0.27 | 🔄 **Redefinido en la v0.6**: firma *OTP.* en todas las pantallas, E2E `[data-otp-signature]` visible en cada ruta. (Histórico: tests del logo girado y del pie del sello, que se retiran en la 0.27.) |
+| `RD-VIS-05` | 0.25, 0.28 | ⬜ Texto ≥ 12 px y nunca sobre trama: test de tamaño mínimo por ruta y máscara de zonas de texto en las capturas |
+| `RD-MOT-05` | 0.23, 0.24, 0.25 | ⬜ E2E de teclado del menú, la rejilla y las pestañas (las estrellas, con la 1.5) |
+
+`RD-VIS-04` (portadas generativas) se verifica en la Fase 4 con `packages/covers`, y `RD-MOT-04`
+(limitador de destellos) con el Escenario y las partículas de la Fase 1; las maquetas aprobadas ya
+miden las dos cosas (`docs/planning/evidence/f0/arena/`).
 | `RNF-SEC-01` | 0.12, 0.16 | ✅ Test estático de `vercel.json` + cabeceras de la API con `inject` (humo en despliegue real: Fase 10, guía v0.4) |
 | `RNF-SEC-05` | 0.16 | ✅ Tests: `Origin` ajeno → 403; `text/plain` → 415 |
 | `RNF-SEC-06` | 0.3 | ✅ Hook `guard-secrets` probado |
@@ -95,8 +103,8 @@ colores y el logo**. Estas tareas sustituyen lo visual de 0.5, 0.7, 0.8 y 0.9 (l
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 0.21 | Dirección de arte «arena» en la guía (v0.6): tres propuestas independientes con maquetas renderizadas, jurado y síntesis; reescribir §1.2, §1.7, §3 (salvo el sonido), §3.8 (pantallas), §3.9, Anexo E y `RD-VIS-02` (prueba de marca y de juego) | 🔄 En curso | — | Decisión del usuario: juego de lucha, colores y logo del sello |
-| 0.22 | Tipografía y tokens de la arena: fuentes nuevas con licencia OFL alojadas en el proyecto, tokens nuevos (ángulos, trazos, texturas, sombras de juego) sobre la paleta del sello, lint al día | 🔒 Bloqueado | 0.21 | §3.2 |
+| 0.21 | Dirección de arte «arena» en la guía (v0.6): tres propuestas independientes con maquetas renderizadas, jurado y síntesis; reescribir §1.2, §1.7, §3 (salvo el sonido), §3.8 (pantallas), §3.9, Anexo E y `RD-VIS-02` (prueba de marca y de juego) | ✅ Hecho | — | Decisión del usuario: juego de lucha, colores y logo del sello · Guía v0.6 y maquetas aprobadas (2026-10-03) en `docs/planning/evidence/f0/arena/` |
+| 0.22 | Tipografía y tokens de la arena: fuentes nuevas con licencia OFL alojadas en el proyecto, tokens nuevos (ángulos, trazos, texturas, sombras de juego) sobre la paleta del sello, lint al día | ⬜ Listo | 0.21 | §3.2 · Anybody, Chakra Petch y Oxanium; tokens y generadores de `evidence/f0/arena/src/` |
 | 0.23 | Marco de juego: HUD superior (título del juego, firma *by Other People*, ronda y reloj, hueco del jugador), barra de controles abajo, fondo de arena, transición entre pantallas y navegación de menús con teclado (y mando) | 🔒 Bloqueado | 0.22 | §3.3, §3.6, §3.8 |
 | 0.24 | Menú principal (home) como pantalla de título y selección de modo, en estado «calendario vacío» | 🔒 Bloqueado | 0.23 | §3.8 |
 | 0.25 | Componentes al estilo arena con todos sus estados y la galería al día | 🔒 Bloqueado | 0.22 | §3.3, `RD-VIS-03`, `RD-MOT-03` |
@@ -108,17 +116,18 @@ colores y el logo**. Estas tareas sustituyen lo visual de 0.5, 0.7, 0.8 y 0.9 (l
 
 ## Entregable
 
-Un monorepo que compila, pasa la CI y sirve una galería con el sistema de diseño de BeatBattle,
-indistinguible de una sección de la web del sello con la capa de juego apagada, y una API mínima con
-todas las bases transversales probadas.
+Un monorepo que compila, pasa la CI y sirve una galería con el sistema de diseño de BeatBattle en la
+dirección «Arena» (menú de recreativa de lucha con la paleta y la firma del sello, guía v0.6 §3), el
+marco de juego y el menú principal, y una API mínima con todas las bases transversales probadas.
 
 ## Criterio de aceptación
 
 1. `pnpm check`, `pnpm typecheck`, `pnpm test`, `pnpm build` y `pnpm e2e` en verde en local y en CI.
 2. La galería muestra todos los componentes de §3.3 con sus 8 estados y la variante sin movimiento.
-3. Comparación A/B con las capturas del sello (0.14): isla, tipografía, rojo, tarjetas y lista
-   coinciden en medidas y color (revisión visual registrada con capturas en
-   `docs/planning/evidence/f0/`).
+3. Prueba de marca y de juego (`RD-VIS-02`, 0.28): paleta y negro medidos en capturas, firma en cada
+   ruta, ninguna pieza de «Lo que nunca se imita», recorrido con teclado y acta del jurado visual;
+   capturas a 1440×900 y 390×844 comparadas con las maquetas de `docs/planning/evidence/f0/arena/`.
+   (La A/B contra el sello de la 0.14 queda como histórico.)
 4. axe sin errores en la home y la galería.
 5. Ningún color literal fuera de los tokens (el lint falla si se introduce uno).
 6. La API responde `GET /api/health` con el sobre, aplica las comprobaciones de seguridad y migra la
@@ -155,6 +164,7 @@ todas las bases transversales probadas.
 | 2026-10-02 | 0.7 | CTA del hero sobre el `Button` base: tamaño `hero` (15,2 px, relleno 15,2 × 32, 13,6 px y 0,08 em en móvil, `--bb-shadow-cta`) y contorno `glass` sobre `GlassSurface`, también en la galería; se borra `HeroCta`. Medidas del hero sin cambios (`getBoundingClientRect`/`getComputedStyle` a 1440 × 900 y 390 × 844). El trozo de la home pasa de 1,9 a 8,8 kB gz (el `animate` de Motion del muelle del botón y los iconos). |
 | 2026-10-02 | — | Plan creado. 0.3 hecha junto con la planificación. |
 | 2026-10-02 | 0.13 | Playwright + axe hecho: humo, navegación (escritorio y menú móvil), 404, galería, axe WCAG 2.2 AA, teclado y «reducir movimiento». Sin violaciones de axe; arreglado el 404 del icono de la pestaña. `tsconfig.json` raíz con `playwright.config.ts` y `tests/` dentro de `pnpm typecheck`. Pasos de Playwright en la CI (su primera ejecución, con la 0.2). |
+| 2026-10-03 | 0.21 | Guía **v0.6** con la dirección de arte «Arena» aprobada por el usuario: §3.1–3.6, §3.8–3.10 y Anexo E sustituidos, §3.7 con los efectos nuevos (`ui.move`, `ann.*`, `cer.tear`) y cambios colaterales en §1, §2 (con `RF-OTP-01` como firma), §4–7 y anexos D, F, I y J; restos de la dirección anterior corregidos en toda la guía; `CLAUDE.md` al día. Maquetas aprobadas, capturas (256 colores) y comprobaciones en `docs/planning/evidence/f0/arena/`; `otp/`, `ab/` y `0.7-layout/` marcadas como histórico. Ids de requisito: 179 definidos una sola vez y ninguna referencia sin definir (también en planes y código). Desbloquea la 0.22. |
 | 2026-10-02 | 0.21 | **Fase reabierta** por el cambio de dirección de arte: tareas 0.21–0.28. |
 | 2026-10-02 | Cierre | CI de GitHub en verde en la PR #1 (tras declarar `vite` en `@beatbattle/server`). 0.19 cerrada con la prueba de Docker movida a la Fase 2; 0.20 (Dependabot) pasa a la Fase 10. Criterios de aceptación 1–6 cumplidos; del 7, `RD-VIS-02` (fondo Silk) y `RD-VIS-03` (estrellas) siguen en la Fase 1 (1.1, 1.5 y 1.12) por decisión registrada en el roadmap. **Fase 0 cerrada.** |
 | 2026-10-02 | Ola 3 | Consolidación (CTA del hero sobre `Button`, avisos en el marco con parte diferida, troceado del bundle), prueba del sello con jurado de tres lentes (5 diferencias corregidas; el Silk queda para la 1.1), revisión adversarial de toda la fase (50 hallazgos, 24 confirmados por dos verificadores y arreglados con test que fallaba antes) y README (0.15). Guía v0.5 con todas las desviaciones. Calidad: web 346 tests, server 144, rules 178, E2E 51 (con el proyecto `perf`), build con la API empaquetada y su prueba de humo. Pendiente para cerrar: primera ejecución de la CI en GitHub (0.2, 0.13), Mailpit con Docker (0.19), Dependabot (0.20, confirmación). |

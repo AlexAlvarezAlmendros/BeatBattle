@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beat Battle · Pulsa para empezar</title>
+<link rel="stylesheet" href="final.css">
+<style>
+  /* Puerta de entrada (§3.8.1): «OTHER PEOPLE PRESENTA» → título → PULSA PARA EMPEZAR */
+  .disc{position:absolute;width:760px;height:760px;left:calc(50% + 10px);top:24px}
+  .disc canvas{position:absolute;inset:0;width:100%;height:100%;animation:spin calc(60s / 92 * 4) linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion: reduce){.disc canvas{animation:none}}
+  .disc__rim{position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(255,255,255,.10)}
+  .slash--r{background:var(--bb-red);clip-path:polygon(71% 0,74.4% 0,56.4% 100%,53% 100%)}
+  .slash--w{background:#fff;clip-path:polygon(75.4% 0,75.7% 0,57.7% 100%,57.4% 100%)}
+  .slash--k{background:#000;clip-path:polygon(74.4% 0,75.4% 0,57.4% 100%,56.4% 100%)}
+  .top{position:relative;z-index:var(--bb-z-content);display:flex;justify-content:space-between;align-items:center;padding:22px 48px 0}
+  .top .kicker b{font-family:var(--bb-font-num)}
+  .presents{display:flex;align-items:center;gap:12px;margin:34px 0 0 104px;position:relative;z-index:var(--bb-z-content)}
+  .presents img{width:64px;transform:rotate(var(--bb-tilt-sticker))}
+  .presents span{font:700 13px/1 var(--bb-font-ui);letter-spacing:.32em;text-transform:uppercase;color:var(--bb-text-2)}
+  .ttl{position:relative;z-index:var(--bb-z-content);padding:6px 0 0 74px;width:880px}
+  .logo .logo-svg{display:block;width:100%;height:auto;overflow:visible}
+  .lockup{display:flex;align-items:center;gap:16px;margin:-4px 0 0 30px}
+  .ribbon{white-space:nowrap;display:inline-flex;padding:9px 20px 9px 16px;background:var(--bb-white);color:var(--bb-black);font:italic 800 16px/1 var(--bb-font-display);font-stretch:125%;letter-spacing:.06em;text-transform:uppercase;clip-path:polygon(11px 0,100% 0,calc(100% - 11px) 100%,0 100%)}
+  .sig{display:flex;align-items:center;gap:6px;margin-top:-10px}
+  .sig span{font:italic 700 16px/1 var(--bb-font-ui);letter-spacing:.12em}
+  .sig .slap{width:120px}
+  .start{position:relative;z-index:var(--bb-z-content);margin:46px 0 0 104px;display:grid;justify-items:start;gap:14px}
+  .start__btn{position:relative;display:flex;align-items:center;gap:16px;font:italic 900 40px/1 var(--bb-font-display);font-stretch:118%;letter-spacing:.02em;text-transform:uppercase;color:var(--bb-white);text-shadow:5px 5px 0 var(--bb-red-cta);padding:6px 10px}
+  .start__btn .tri{width:18px;height:26px;background:var(--bb-red);clip-path:polygon(0 0,100% 50%,0 100%)}
+  .start__btn .tri--l{transform:scaleX(-1)}
+  .start__btn .cursor{inset:-8px -12px;--c:14px}
+  .start__sub{display:flex;align-items:center;gap:18px;font:600 14px/1.3 var(--bb-font-ui);color:var(--bb-text-2);margin-left:36px}
+  .start__sub a{display:inline-flex;align-items:center;gap:8px;color:var(--bb-white);font-weight:700;border-bottom:2px solid var(--bb-red);padding:6px 0;min-height:44px}
+  .bill{position:absolute;z-index:var(--bb-z-content);right:48px;bottom:96px;width:452px;--fc:var(--bb-white);--ff:rgba(4,4,6,.95);--c:20px;padding:18px 22px 18px}
+  .bill__tag{position:absolute;left:-12px;top:-15px}
+  .bill__tag .ptag{font-size:14px;padding:7px 14px 7px 11px}
+  .bill .kicker b{color:var(--bb-red)}
+  .bill h2{margin-top:10px;font-size:36px;font-stretch:130%}
+  .bill__chips{display:flex;gap:8px;margin-top:12px}
+  .bill__clock{margin-top:14px;padding-top:12px;border-top:1px solid var(--bb-line)}
+  .bill__row{display:flex;justify-content:space-between;align-items:flex-end}
+  .bill__row b{font:800 28px/1 var(--bb-font-num);letter-spacing:.01em}
+  .bill__row b i{font-style:normal;color:var(--bb-red)}
+  .bill__row span{font:600 13px/1.2 var(--bb-font-ui);color:var(--bb-text-2);text-align:right}
+  .bill__row span b{font-size:22px;display:block;color:var(--bb-white)}
+  .champ{position:absolute;z-index:var(--bb-z-content);left:104px;bottom:96px;display:flex;align-items:center;gap:14px;font:700 13px/1 var(--bb-font-ui);letter-spacing:.16em;text-transform:uppercase;color:var(--bb-text-2);background:rgba(0,0,0,.85);padding:8px 14px 8px 8px}
+  .champ b{font:italic 900 22px/1 var(--bb-font-display);font-stretch:125%;letter-spacing:.01em;color:var(--bb-white)}
+  .champ .medal{width:34px;height:34px}
+</style>
+</head>
+<body>
+<main class="screen" aria-labelledby="t">
+  <div class="bg" aria-hidden="true">
+    <div class="bg__burst" style="--bx:34%;--by:40%"></div>
+    <div class="disc"><canvas id="disc"></canvas><div class="disc__rim"></div></div>
+    <div class="slash slash--r"></div><div class="slash slash--k"></div><div class="slash slash--w"></div>
+    <div class="bg__vig"></div>
+  </div>
+  <div class="top">
+    <span class="kicker">Temporada <b>T4</b> · semana <b>41</b> · 2026-W41</span>
+    <button class="iconbtn frame" aria-label="Sonido: se activa al entrar (M)" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#fff"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+  </div>
+  <section role="dialog" aria-modal="true" aria-labelledby="t" aria-describedby="hint">
+    <p class="presents"><img src="img/otp-slap.png" alt="Other People"><span>presenta</span></p>
+    <div class="ttl">
+      <h1 id="t" class="sr">Beat Battle, un juego de Other People</h1>
+      <div class="logo" data-logo="title" aria-hidden="true"></div>
+      <div class="lockup">
+        <div class="ribbon">Torneo semanal de productores</div>
+        <a class="sig" data-otp-signature href="https://www.otherpeople.es" aria-label="by Other People (abre la web del sello)"><span aria-hidden="true">by</span><span class="slap"><img src="img/otp-slap.png" alt=""></span></a>
+      </div>
+    </div>
+    <div class="start">
+      <button class="start__btn breathe" data-cursor id="go"><span class="cursor" aria-hidden="true"></span><span class="tri tri--l" aria-hidden="true"></span>Pulsa para empezar<span class="tri" aria-hidden="true"></span></button>
+      <p class="start__sub" id="hint">Intro, cualquier tecla, clic o toque · el sonido empieza al entrar <a href="#sin-sonido">Entrar sin sonido <span class="kbd">S</span></a></p>
+    </div>
+  </section>
+  <p class="champ"><span data-medal="1" role="img" aria-label="Disco de oro"></span>Campeón vigente <b>KAIRO.WAV</b> <span>S40 · Neón en Sants · 4,62</span></p>
+  <aside class="bill frame" aria-labelledby="bw">
+    <span class="bill__tag"><span class="ptag ptag--red">En juego</span></span>
+    <span class="kicker">Semana <b>41</b> · el sample</span>
+    <h2 id="bw" class="display">Lluvia en Gràcia</h2>
+    <div class="bill__chips"><span class="dchip frame">92 <small>BPM</small></span><span class="dchip dchip--word frame">Re menor</span><span class="dchip frame">1:12</span></div>
+    <div class="bill__clock">
+      <div class="bill__row"><div role="timer" aria-label="Cierre de envíos en 4 días y 7 horas: domingo 11 a las 20:00"><span class="kicker" style="display:block;margin-bottom:6px;text-align:left">Cierre de envíos</span><b>04<i>:</i>07<i>:</i>12<i>:</i>45</b></div><span><b class="num">23</b>en la batalla</span></div>
+      <div class="week" aria-hidden="true" style="margin-top:12px">
+        <div class="week__d"><span class="week__seg week__seg--past"></span><span class="week__lab">L</span></div><div class="week__d"><span class="week__seg week__seg--past"></span><span class="week__lab">M</span></div>
+        <div class="week__d week__d--today"><span class="week__seg week__seg--today" style="--p:36%"></span><span class="week__lab">X</span></div><div class="week__d"><span class="week__seg"></span><span class="week__lab">J</span></div>
+        <div class="week__d"><span class="week__seg"></span><span class="week__lab">V</span></div><div class="week__d"><span class="week__seg"></span><span class="week__lab">S</span></div><div class="week__d"><span class="week__seg week__seg--votes"></span><span class="week__lab">D</span></div>
+      </div>
+    </div>
+  </aside>
+  <footer class="ctrl">
+    <div class="ctrl__r">Crédito <em>01</em></div>
+    <a class="firma" data-otp-signature href="https://www.otherpeople.es">Un juego de <img src="img/otp-slap.png" alt="Other People"> Other People Records</a>
+    <div class="ctrl__k">battle.otherpeople.es</div>
+  </footer>
+</main>
+<script src="final.js"></script>
+<script>
+  window.paintScreen = function () {
+    Arena.halftone(document.getElementById('disc'), { cell: 12, angle: 30, color: '#ff003c', max: .7,
+      fn: (u, v) => { const r = Math.hypot(u - 0.5, v - 0.5) * 2; if (r > 0.985 || r < 0.27) return 0; const k = (r - 0.27) / 0.715; const groove = 0.82 + 0.18 * Math.cos(r * 70); const shade = 1 - 0.55 * Math.max(0, (u - 0.5) * 1.6 + (0.5 - v) * 0.6); return Math.pow(k, 0.9) * groove * shade * 0.95; } });
+    const c = document.getElementById('disc').getContext('2d'), s = 760;
+    c.setTransform(Math.min(devicePixelRatio || 1, 2), 0, 0, Math.min(devicePixelRatio || 1, 2), 0, 0);
+    c.strokeStyle = 'rgba(255,255,255,.16)'; c.lineWidth = 2; c.beginPath(); c.arc(s / 2, s / 2, s * 0.135, 0, 7); c.stroke();
+    c.fillStyle = '#ff003c'; c.beginPath(); c.arc(s / 2, s / 2, s * 0.12, 0, 7); c.fill();
+    c.fillStyle = '#000'; c.font = 'italic 900 34px Anybody'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('S41', s / 2, s / 2 - 16);
+    c.font = '700 15px Oxanium'; c.fillText('92 BPM · RE MENOR', s / 2, s / 2 + 18);
+    c.beginPath(); c.arc(s / 2, s / 2 + 2, 4, 0, 7); c.fill();
+    document.getElementById('go').focus();
+  };
+</script>
+</body>
+</html>

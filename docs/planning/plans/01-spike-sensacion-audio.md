@@ -1,10 +1,17 @@
 # Plan 01 — Spike de sensación y audio (GO/NO-GO)
 
 > Fase: 1 de 10 | Estado: ⬜ Pendiente | Iniciado: — | Cerrado: —
-> Hito del roadmap: Silk + vista 3D + partículas a 60 fps en escritorio con GPU integrada y ≥ 45 fps
-> en un Android de gama media; efectos con < 30 ms de latencia; analizador de Web Audio funcionando
-> sobre un MP3 firmado de Cloudinary; ffmpeg mide la sonoridad de un WAV de 50 MB en Vercel en < 8 s.
-> **Puerta GO/NO-GO** para empezar la Fase 2.
+> Hito del roadmap: arena (trama en *shader*) + vista 3D + partículas a 60 fps en escritorio con GPU
+> integrada y ≥ 45 fps en un Android de gama media; efectos con < 30 ms de latencia; analizador de Web
+> Audio funcionando sobre un MP3 firmado de Cloudinary; ffmpeg mide la sonoridad de un WAV de 50 MB en
+> Vercel en < 8 s. **Puerta GO/NO-GO** para empezar la Fase 2.
+>
+> **Pendiente de replanificar (guía v0.6, 2026-10-03).** La dirección de arte «Arena» sustituye el Silk
+> del sello por la arena (§3.5: cuña granate con trama en *shader*, diagonal y rayos; la reactividad al
+> audio solo cambia el tamaño de punto) y cambia las estrellas (§3.8.4: dormidas con medidor, no con
+> anillo) y el limitador de destellos (`RD-MOT-04`). Las tareas 1.1, 1.3, 1.5, 1.6, 1.11 y 1.12, que
+> citan el Silk, los orbes o la prueba del sello, se reescriben antes de empezar la fase; la referencia
+> visual son las maquetas de `docs/planning/evidence/f0/arena/`.
 
 Valida las dos apuestas que pueden tumbar el proyecto: que la capa de juego (Escenario, partículas y
 sonido) **se sienta bien y vaya fluida en un móvil normal**, y que **Cloudinary + Web Audio +

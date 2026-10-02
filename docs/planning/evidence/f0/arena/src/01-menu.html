@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beat Battle · Menú principal</title>
+<link rel="stylesheet" href="final.css">
+<style>
+  /* ── fondo: cuña granate a la derecha, cortada por la diagonal ── */
+  .wedge{inset:0;clip-path:polygon(60% 0,100% 0,100% 100%,41% 100%)}
+  .wedge .bg__num{right:-40px;bottom:-30px}
+  .wedge .bg__scan{clip-path:inherit}
+  .slash--r{background:var(--bb-red);clip-path:polygon(58.6% 0,59.5% 0,40.5% 100%,39.6% 100%)}
+  .slash--w{background:rgba(255,255,255,.85);clip-path:polygon(57.6% 0,57.8% 0,38.8% 100%,38.6% 100%)}
+
+  .home{display:grid;grid-template-columns:minmax(0,640px) minmax(0,560px);justify-content:space-between;gap:40px;padding:22px 48px 0;position:relative;z-index:var(--bb-z-content)}
+  .logo{width:640px;margin-left:-14px}
+  .logo .logo-svg{display:block;width:100%;height:auto;overflow:visible}
+  .logo--compact{display:none}
+  .lockup{position:relative;display:flex;align-items:center;gap:14px;margin:-4px 0 0 6px}
+  .ribbon{white-space:nowrap;display:inline-block;padding:8px 18px 8px 14px;background:var(--bb-white);color:var(--bb-black);
+    font:italic 800 14px/1 var(--bb-font-display);font-stretch:125%;letter-spacing:.06em;text-transform:uppercase;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)}
+  .sig{display:flex;align-items:center;gap:6px;margin-top:-8px}
+  .sig span{font:italic 700 15px/1 var(--bb-font-ui);letter-spacing:.12em;color:var(--bb-white)}
+  .sig .slap{width:104px}
+
+  /* tarjeta del escenario de la semana */
+  .stage{margin-top:26px;width:640px;padding:18px 22px 18px;--fc:var(--bb-red);--ff:var(--bb-wine-3);--c:var(--bb-cut-lg)}
+  .stage__ht{position:absolute;inset:3px;z-index:-1;width:calc(100% - 6px);height:calc(100% - 6px);clip-path:polygon(20px 0,100% 0,100% calc(100% - 20px),calc(100% - 20px) 100%,0 100%,0 20px)}
+  .stage__top{display:grid;grid-template-columns:104px 1fr;gap:18px;align-items:center}
+  .vinyl{width:104px;height:104px;position:relative}
+  .vinyl canvas{width:104px;height:104px;display:block;animation:spin calc(60s / 92 * 4) linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion: reduce){.vinyl canvas{animation:none}}
+  .stage__k{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .stage__k .kicker{color:var(--bb-text-2)}
+  .stage__k .kicker b{color:var(--bb-red)}
+  .stage__name{font-size:38px;margin:10px 0 6px;font-stretch:132%;white-space:nowrap}
+  .stage__cred{font:600 13px/1.3 var(--bb-font-ui);color:var(--bb-text-2)}
+  .stage__chips{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .stage__play{display:flex;align-items:center;gap:14px;margin-top:14px}
+  .play{width:48px;height:48px;flex:none;display:grid;place-items:center;--fc:var(--bb-white);--ff:var(--bb-white);--c:10px;color:var(--bb-black)}
+  .stage__wave{flex:1;height:40px}
+  .stage__wave canvas{width:100%;height:40px;display:block}
+  .stage__time{font:700 13px/1 var(--bb-font-num);color:var(--bb-text-3)}
+  .stage__foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--bb-line)}
+  .bonus{display:flex;align-items:center;gap:10px;font:600 13px/1.2 var(--bb-font-ui);color:var(--bb-text-2)}
+  .rivals{font:600 13px/1 var(--bb-font-ui);color:var(--bb-text-2);display:flex;gap:8px;align-items:baseline}
+  .rivals b{font:800 22px/1 var(--bb-font-num);color:var(--bb-white)}
+
+  /* ── menú de modos ── */
+  .modes{padding-top:16px}
+  .modes__head{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 16px 26px}
+  .modes__head h2{font-size:24px;font-stretch:125%}
+  .modes__head .kicker{color:var(--bb-text-2)}
+  .modes ul{display:grid;gap:11px}
+  .plate{position:relative;isolation:isolate;display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;height:70px;padding:0 30px 0 34px;
+    --s:var(--bb-slant);--fc:rgba(255,255,255,.2);--ff:rgba(5,5,7,.92);margin-left:26px;transition:margin var(--bb-dur-tick) var(--bb-ease-snap),height var(--bb-dur-tick) var(--bb-ease-snap)}
+  .plate::before,.plate::after{content:"";position:absolute;z-index:-1}
+  .plate::before{inset:0;background:var(--fc);clip-path:polygon(var(--s) 0,100% 0,calc(100% - var(--s)) 100%,0 100%)}
+  .plate::after{inset:2px;background:var(--ff);clip-path:polygon(var(--s) 0,100% 0,calc(100% - var(--s)) 100%,0 100%)}
+  .plate__i{font:700 15px/1 var(--bb-font-num);color:var(--bb-red);letter-spacing:.06em}
+  .plate__l{white-space:nowrap;font:italic 900 25px/1 var(--bb-font-display);font-stretch:125%;text-transform:uppercase;letter-spacing:-.005em}
+  .plate__d{white-space:nowrap;font:700 12px/1 var(--bb-font-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--bb-text-3);text-align:right;display:flex;align-items:center;gap:8px}
+  .plate__d b{font:700 15px/1 var(--bb-font-num);color:var(--bb-white)}
+  .plate__go{display:none}
+  .plate__ht{position:absolute;inset:2px;z-index:-1;clip-path:polygon(var(--s) 0,100% 0,calc(100% - var(--s)) 100%,0 100%);display:none;
+    background:radial-gradient(circle,rgba(110,0,24,.55) 0 1.5px,transparent 1.8px) 0 0/7px 7px;
+    -webkit-mask:linear-gradient(100deg,transparent 35%,#000 100%);mask:linear-gradient(100deg,transparent 35%,#000 100%)}
+  /* seleccionada = enfocada (el foco ES la selección) */
+  .plate:focus,.plate:hover{margin-left:0;height:84px;--fc:var(--bb-white);--ff:var(--bb-red-cta);grid-template-columns:56px minmax(0,1fr) auto}
+  .plate:focus .plate__ht,.plate:hover .plate__ht{display:block}
+  .plate:focus .plate__i,.plate:hover .plate__i{color:var(--bb-white)}
+  .plate:focus .plate__l,.plate:hover .plate__l{font-size:31px}
+  .plate:focus .plate__d,.plate:hover .plate__d{color:var(--bb-white);font:700 14px/1 var(--bb-font-ui);letter-spacing:.03em;text-transform:none}
+  .plate:focus .plate__go,.plate:hover .plate__go{display:inline-flex}
+  .plate:active{transform:scale(.98)}
+  .plate .cursor{inset:-7px -9px}
+  .plate .cursor::before{clip-path:polygon(calc(var(--s) + 3px) 0,100% 0,calc(100% - var(--s) - 3px) 100%,0 100%)}
+  .plate .tag1p{left:-58px;top:50%;transform:translateY(-50%)}
+  .plate .arrow{position:absolute;left:-22px;top:50%;width:14px;height:20px;transform:translateY(-50%);background:var(--bb-white);clip-path:polygon(0 0,100% 50%,0 100%);display:none}
+  .plate:focus .arrow,.plate:hover .arrow{display:block}
+  .plate .ptag{margin-right:4px}
+  .help{margin:20px 0 0 26px}
+
+  /* ═════════ móvil ═════════ */
+  @media (max-width: 720px){
+    .wedge{clip-path:polygon(0 56%,100% 40%,100% 100%,0 100%)}
+    .slash--r{clip-path:polygon(0 55.3%,100% 39.3%,100% 40.1%,0 56.1%)}
+    .slash--w{clip-path:polygon(0 54.3%,100% 38.3%,100% 38.6%,0 54.6%)}
+    .bg__num{display:none}
+    .hud{grid-template-columns:1fr auto;padding:12px 16px 0;gap:10px}
+    .hud .clock,.hud .hud-r .chipbox--season,.hud .hud-r .chipbox--streak{display:none}
+    .p1__tag,.meter__lab{display:none!important}
+    .avatar{width:44px;height:44px}
+    .p1__name{font-size:15px}
+    .meter,.meter__lab{width:132px}
+    .meter__lab span:last-child{display:none}
+    .home{display:block;padding:4px 16px 0}
+    .logo{width:100%;margin:0}
+    .lockup{margin:-6px 0 0;gap:8px}
+    .ribbon{font-size:12px;letter-spacing:0;padding:7px 11px 7px 9px;font-stretch:108%}
+    .sig span{font-size:13px}
+    .sig .slap{width:62px}
+    .stage{width:100%;margin-top:12px;padding:12px 14px 12px;--c:16px}
+    .stage__top{grid-template-columns:1fr}
+    .vinyl,.stage__cred,.stage__wave,.stage__time,.stage__foot,.stage__chips .dchip--genre{display:none}
+    .stage__name{font-size:25px;margin:8px 0 0;font-stretch:125%}
+    .stage__k .kicker:last-child{display:none}
+    .stage__chips{margin-top:10px;gap:6px;flex-wrap:nowrap}
+    .dchip{height:30px;padding:0 9px;font-size:13px}
+    .stage__play{margin-top:10px;gap:12px;align-items:center}
+    .mclock{display:grid!important;flex:1;gap:5px}
+    .mclock__row{display:flex;justify-content:space-between;align-items:baseline}
+    .mclock__row b{font:800 20px/1 var(--bb-font-num);letter-spacing:.01em}
+    .mclock__row b i{font-style:normal;color:var(--bb-red)}
+    .mclock .week{margin-top:0}
+    .mclock .week__lab{display:none}
+    .modes{padding-top:14px}
+    .modes__head{margin:0 0 10px 0}
+    .modes__head h2{font-size:20px}
+    .modes ul{gap:6px}
+    .plate{height:48px;margin-left:12px;padding:0 18px 0 24px;grid-template-columns:30px minmax(0,1fr) auto;--s:12px}
+    .plate__d .dl{display:none}
+    .plate__l{font-size:19px}
+    .plate__i{font-size:13px}
+    .plate:focus,.plate:hover{height:56px;margin-left:0;grid-template-columns:32px minmax(0,1fr) auto}
+    .plate:focus .plate__d .dl,.plate:hover .plate__d .dl{display:inline}
+    .plate:focus .plate__l,.plate:hover .plate__l{font-size:22px}
+    .plate:focus .plate__d,.plate:hover .plate__d{font-size:12px}
+    .plate .tag1p,.plate .arrow,.plate__go .kbd{display:none!important}
+    .plate .cursor{inset:-5px -6px}
+    .help{display:none}
+    .ctrl{position:static;height:auto;border:0;background:rgba(0,0,0,.88);margin-top:4px;padding:8px 16px 10px;justify-content:center}
+    .ctrl::before,.ctrl__keys,.ctrl__r{display:none}
+    .firma img{height:24px}
+  }
+  .mclock{display:none}
+  @media (max-width: 380px){ .ribbon .rl{display:none} .ribbon{font-size:12px} .plate__d.opt{display:none} }
+  /* móvil bajo (iPhone SE, 360×640) con sesión: logo en una línea y semana plegada */
+  @media (max-width: 720px) and (max-height: 700px){
+    .logo--full{display:none}
+    .logo--compact{display:block;margin-top:6px}
+    .lockup{margin-top:2px}
+    .stage__chips{display:none}
+    .stage{padding:10px 14px}
+    .stage__name{font-size:21px;margin-top:6px}
+    .stage__k .kicker:last-child{display:none}
+    .hud{padding-top:8px}
+    .avatar{width:40px;height:40px}
+    .plate{height:44px}
+    .plate:focus,.plate:hover{height:50px}
+    .modes ul{gap:5px}
+    .stage{margin-top:8px}
+    .stage__play{margin-top:6px}
+    .play{width:44px;height:44px}
+    .modes{padding-top:10px}
+    .modes__head{margin-bottom:8px}
+    .ctrl{padding:6px 16px 8px}
+    .modes__head h2{font-size:18px}
+    .logo--compact{margin-top:2px}
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#modos">Saltar al menú</a>
+<main class="screen" aria-labelledby="t">
+  <div class="bg" aria-hidden="true">
+    <div class="bg__burst" style="--bx:26%;--by:34%"></div>
+    <div class="bg__wedge wedge"><canvas id="ht"></canvas><div class="bg__scan"></div><div class="bg__num">41</div></div>
+    <div class="slash slash--w"></div>
+    <div class="slash slash--r"></div>
+    <div class="bg__vig"></div>
+  </div>
+
+  <header class="hud">
+    <div class="p1">
+      <span class="p1__tag" aria-hidden="true">1P</span>
+      <span class="avatar frame" aria-hidden="true">LB</span>
+      <div>
+        <div class="p1__name">LilBru</div>
+        <div class="p1__rank">Nv <b>7</b> · Beatmaker</div>
+        <div class="meter" role="meter" aria-label="Experiencia: 2.980 de 3.350 para el nivel 8" aria-valuemin="2650" aria-valuemax="3350" aria-valuenow="2980"><i style="width:47%"></i></div>
+        <div class="meter__lab"><span>XP 2.980</span><span>NV 8 · 3.350</span></div>
+      </div>
+    </div>
+
+    <div class="clock frame" role="timer" aria-label="Cierre de envíos en 4 días, 7 horas y 12 minutos: domingo 11 a las 20:00">
+      <div class="clock__lab">Tiempo <span>·</span> cierre de envíos</div>
+      <div class="clock__digits" aria-hidden="true">
+        <div class="clock__grp"><b>04</b><small>DÍAS</small></div><span class="clock__sep">:</span>
+        <div class="clock__grp"><b>07</b><small>HORAS</small></div><span class="clock__sep">:</span>
+        <div class="clock__grp"><b>12</b><small>MIN</small></div><span class="clock__sep">:</span>
+        <div class="clock__grp"><b>45</b><small>SEG</small></div>
+      </div>
+      <div class="week" aria-hidden="true">
+        <div class="week__d"><span class="week__seg week__seg--past"></span><span class="week__lab">L</span></div>
+        <div class="week__d"><span class="week__seg week__seg--past"></span><span class="week__lab">M</span></div>
+        <div class="week__d week__d--today"><span class="week__seg week__seg--today" style="--p:36%"></span><span class="week__lab">X</span></div>
+        <div class="week__d"><span class="week__seg"></span><span class="week__lab">J</span></div>
+        <div class="week__d"><span class="week__seg"></span><span class="week__lab">V</span></div>
+        <div class="week__d"><span class="week__seg"></span><span class="week__lab">S</span></div>
+        <div class="week__d"><span class="week__seg week__seg--votes"></span><span class="week__lab">D</span></div>
+      </div>
+      <div class="clock__when">Domingo 11 a las 20:00 · votos hasta las 23:59</div>
+    </div>
+
+    <div class="hud-r">
+      <div class="chipbox chipbox--season frame"><small>Temporada T4</small><b>12 PTS · 9.º</b></div>
+      <div class="chipbox chipbox--streak frame"><small>Racha</small><b>×3</b></div>
+      <button class="iconbtn frame" aria-label="Sonido de efectos (M)" aria-pressed="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#fff"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="home">
+    <div class="title">
+      <h1 id="t" class="sr">Beat Battle, un juego de Other People</h1>
+      <div class="logo logo--full" data-logo="home" aria-hidden="true"></div>
+      <div class="logo logo--compact" data-logo="homec" data-compact aria-hidden="true"></div>
+      <div class="lockup">
+        <div class="ribbon">Torneo semanal<span class="rl"> de productores</span></div>
+        <a class="sig" data-otp-signature href="https://www.otherpeople.es" aria-label="by Other People (abre la web del sello)"><span aria-hidden="true">by</span><span class="slap"><img src="img/otp-slap.png" alt=""></span></a>
+      </div>
+
+      <article class="stage frame" aria-labelledby="wk">
+        <canvas class="stage__ht" id="ht-stage" aria-hidden="true"></canvas>
+        <div class="stage__top">
+          <div class="vinyl" aria-hidden="true"><canvas data-vinyl="S41" data-sub="92 BPM"></canvas></div>
+          <div>
+            <div class="stage__k"><span class="kicker">Semana <b>41</b> · escenario</span><span class="kicker">5–11 oct · 2026-W41</span></div>
+            <h2 id="wk" class="display stage__name">Lluvia en Gràcia</h2>
+            <div class="stage__cred">Rhodes y lluvia grabados en Gràcia · Other People Sound Lab</div>
+          </div>
+        </div>
+        <div class="stage__chips">
+          <span class="dchip frame">92 <small>BPM</small></span>
+          <span class="dchip dchip--word frame">Re menor</span>
+          <span class="dchip frame">1:12 <small>min</small></span>
+          <span class="dchip dchip--genre frame"><small>Sugerido</small> Boom bap</span>
+          <span class="dchip mobile-only frame" hidden>23 <small>en liza</small></span>
+        </div>
+        <div class="stage__play">
+          <button class="play frame" aria-label="Escuchar el sample"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 1.5v15L16 9z" fill="#000"/></svg></button>
+          <div class="stage__wave"><canvas data-wave="sample-41" data-off="rgba(255,255,255,.42)" aria-hidden="true"></canvas></div>
+          <span class="stage__time">0:00 / 1:12</span>
+          <div class="mclock" aria-hidden="true">
+            <div class="mclock__row"><span class="kicker">Cierre de envíos</span><b>04<i>:</i>07<i>:</i>12<i>:</i>45</b></div>
+            <div class="week"><div class="week__d"><span class="week__seg week__seg--past"></span></div><div class="week__d"><span class="week__seg week__seg--past"></span></div><div class="week__d"><span class="week__seg week__seg--today" style="--p:36%"></span></div><div class="week__d"><span class="week__seg"></span></div><div class="week__d"><span class="week__seg"></span></div><div class="week__d"><span class="week__seg"></span></div><div class="week__d"><span class="week__seg week__seg--votes"></span></div></div>
+          </div>
+        </div>
+        <div class="stage__foot">
+          <span class="bonus"><span class="ptag ptag--white">Reto</span> Usa solo el primer compás · da logro, no puntúa</span>
+          <span class="rivals"><b>23</b> en la batalla</span>
+        </div>
+      </article>
+    </div>
+
+    <nav class="modes" id="modos" aria-labelledby="mh">
+      <div class="modes__head"><h2 id="mh" class="display">Elige modo</h2><span class="kicker">Toca para entrar</span></div>
+      <ul role="menu" aria-labelledby="mh" aria-orientation="vertical" id="menu">
+        <li role="none"><a role="menuitem" class="plate" data-cursor data-start href="#subir" data-help="Pilla el sample, cocina tu flip y súbelo antes del &lt;b&gt;domingo 11 a las 20:00&lt;/b&gt;. Una entrada por semana: te queda &lt;b&gt;1 crédito&lt;/b&gt;.">
+          <span class="plate__ht" aria-hidden="true"></span><span class="tag1p" aria-hidden="true">1P</span><span class="arrow" aria-hidden="true"></span><span class="cursor" aria-hidden="true"></span>
+          <span class="plate__i" aria-hidden="true">01</span><span class="plate__l">Jugar</span><span class="plate__d"><span class="dl">Subir mi beat</span> <span class="plate__go"><span class="kbd kbd--light" aria-hidden="true">INTRO</span></span></span></a></li>
+        <li role="none"><a role="menuitem" class="plate" data-cursor href="#jurado" data-help="&lt;b&gt;16 beats&lt;/b&gt; sin votar. Escucha 45 s de cada uno y puntúalo de 1 a 5. Sin nombres hasta el domingo a las 23:59.">
+          <span class="plate__ht" aria-hidden="true"></span><span class="tag1p" aria-hidden="true">1P</span><span class="arrow" aria-hidden="true"></span><span class="cursor" aria-hidden="true"></span>
+          <span class="plate__i" aria-hidden="true">02</span><span class="plate__l">Jurado</span><span class="plate__d"><b>16</b> sin votar <span class="plate__go"><span class="kbd kbd--light" aria-hidden="true">INTRO</span></span></span></a></li>
+        <li role="none"><a role="menuitem" class="plate" data-cursor href="#resultados" data-help="La &lt;b&gt;semana 40&lt;/b&gt; ya está sellada. Mira la ceremonia y descubre quién estaba detrás de cada beat.">
+          <span class="plate__ht" aria-hidden="true"></span><span class="tag1p" aria-hidden="true">1P</span><span class="arrow" aria-hidden="true"></span><span class="cursor" aria-hidden="true"></span>
+          <span class="plate__i" aria-hidden="true">03</span><span class="plate__l">Resultados</span><span class="plate__d"><span class="ptag ptag--white">Nuevo</span><span class="dl">Semana 40</span> <span class="plate__go"><span class="kbd kbd--light" aria-hidden="true">INTRO</span></span></span></a></li>
+        <li role="none"><a role="menuitem" class="plate" data-cursor href="#salon" data-help="Campeones de cada semana, campeones de temporada y récords de la batalla.">
+          <span class="plate__ht" aria-hidden="true"></span><span class="tag1p" aria-hidden="true">1P</span><span class="arrow" aria-hidden="true"></span><span class="cursor" aria-hidden="true"></span>
+          <span class="plate__i" aria-hidden="true">04</span><span class="plate__l">Salón de la fama</span><span class="plate__d"><span class="plate__go"><span class="kbd kbd--light" aria-hidden="true">INTRO</span></span></span></a></li>
+        <li role="none"><a role="menuitem" class="plate" data-cursor href="#como" data-help="Las reglas en un minuto: sample, flip, voto ciego, escucha mínima y Ronda justa.">
+          <span class="plate__ht" aria-hidden="true"></span><span class="tag1p" aria-hidden="true">1P</span><span class="arrow" aria-hidden="true"></span><span class="cursor" aria-hidden="true"></span>
+          <span class="plate__i" aria-hidden="true">05</span><span class="plate__l">Cómo se juega</span><span class="plate__d opt"><b>1</b> min <span class="plate__go"><span class="kbd kbd--light" aria-hidden="true">INTRO</span></span></span></a></li>
+        <li role="none"><a role="menuitem" class="plate" data-cursor href="#ajustes" data-help="Sonido, movimiento, modo serio y tamaño de texto; también cuenta, emails y sesiones.">
+          <span class="plate__ht" aria-hidden="true"></span><span class="tag1p" aria-hidden="true">1P</span><span class="arrow" aria-hidden="true"></span><span class="cursor" aria-hidden="true"></span>
+          <span class="plate__i" aria-hidden="true">06</span><span class="plate__l">Ajustes</span><span class="plate__d"><span class="dl">Sonido · movimiento</span> <span class="plate__go"><span class="kbd kbd--light" aria-hidden="true">INTRO</span></span></span></a></li>
+      </ul>
+      <div class="help frame"><span class="kicker" id="help-k">Jugar</span><p id="help-p" aria-live="polite"></p></div>
+    </nav>
+  </section>
+
+  <footer class="ctrl">
+    <div class="ctrl__keys" aria-label="Controles">
+      <span class="ctrl__k"><span class="kbd">↑</span><span class="kbd">↓</span> Elegir</span>
+      <span class="ctrl__k"><span class="kbd">INTRO</span> Entrar</span>
+      <span class="ctrl__k"><span class="kbd">ESC</span> Volver</span>
+      <span class="ctrl__k"><span class="kbd">M</span> Sonido</span>
+    </div>
+    <a class="firma" data-otp-signature href="https://www.otherpeople.es">Un juego de <img src="img/otp-slap.png" alt="Other People"> Other People Records</a>
+    <div class="ctrl__r"><span class="breathe">Inserta tu beat</span> · Crédito <em>01</em></div>
+  </footer>
+  <div id="anunciador" class="sr" role="status" aria-live="polite"></div>
+</main>
+<script src="final.js"></script>
+<script>
+  window.paintScreen = function () {
+    const mobile = innerWidth <= 720;
+    Arena.halftone(document.getElementById('ht'), {
+      cell: mobile ? 9 : 11, angle: 30, color: '#ff003c', bg: '#2b0711', max: .74,
+      fn: mobile ? (u, v) => Math.pow(Math.max(0, (v * 1.2 + u * 0.25) - 0.95) / 0.5, 1.3)
+                 : (u, v) => Math.pow(Math.max(0, (u * 1.05 + v * 0.45) - 0.95) / 0.55, 1.3) * (1 - Math.min(1, Math.max(0, (v - 0.78) / 0.14)))
+    });
+    Arena.halftone(document.getElementById('ht-stage'), { cell: 8, angle: 45, color: '#5c0f22', bg: '#170409', max: .72, fn: (u) => Math.pow(Math.max(0, u - 0.35) / 0.65, 1.4) * 0.95 });
+    const help = document.getElementById('help-p'), hk = document.getElementById('help-k');
+    Arena.roving(document.getElementById('menu'), {
+      items: '[role=menuitem]', autofocus: true,
+      onMove: (el) => { help.innerHTML = el.dataset.help; hk.textContent = el.querySelector('.plate__l').textContent; },
+      onActivate: (el) => Arena.say('Entrando en ' + el.querySelector('.plate__l').textContent),
+    });
+    if (mobile) document.querySelector('.stage__chips [hidden]').hidden = false;
+    Arena.keys({ m: () => { const b = document.querySelector('.iconbtn'); b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true')); } });
+  };
+</script>
+</body>
+</html>

@@ -1,3 +1,6 @@
+> **Histórico: la dirección de copiar el sello se abandonó el 2026-10-03 (guía v0.6).** Esta carpeta
+> se conserva como registro; la referencia vigente de diseño son las maquetas de `../arena/`.
+
 # Prueba del sello: A/B de BeatBattle frente a otherpeople.es
 
 > Evidencia de `RD-VIS-02` (guía §3.1) y del criterio 3 del plan 00: isla, tipografía, rojo,

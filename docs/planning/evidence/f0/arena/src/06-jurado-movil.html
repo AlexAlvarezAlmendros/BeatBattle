@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beat Battle · Modo Jurado (móvil)</title>
+<link rel="stylesheet" href="final.css">
+<style>
+  .wedge{inset:0;clip-path:polygon(0 30%,100% 18%,100% 56%,0 64%)}
+  .slash--r{background:var(--bb-red);clip-path:polygon(0 29.4%,100% 17.4%,100% 18%,0 30%)}
+  .wrap{position:relative;z-index:var(--bb-z-content);padding:10px 16px 8px;display:grid;gap:9px}
+  .top{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:stretch}
+  .rbox{--fc:var(--bb-white);--ff:rgba(6,6,8,.95);--c:10px;padding:7px 10px;display:grid;align-content:center;gap:3px;min-height:52px}
+  .rbox small{font:700 12px/1 var(--bb-font-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--bb-text-2)}
+  .rbox b{font:800 20px/1 var(--bb-font-num)}
+  .rbox b i{font-style:normal;color:var(--bb-text-3);font-size:14px}
+  .rbox--ya b{font:italic 900 20px/1 var(--bb-font-display);font-stretch:125%;color:var(--bb-red);text-transform:uppercase}
+  .combo{--ff:rgba(6,6,8,.95);--c:10px;padding:7px 10px;display:grid;align-content:center;justify-items:end;gap:3px;min-height:52px}
+  .combo b{font:italic 900 22px/1 var(--bb-font-display);font-stretch:120%;text-shadow:2px 2px 0 var(--bb-red-cta)}
+  .combo small{font:700 12px/1 var(--bb-font-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--bb-text-2)}
+  .close{width:44px;min-height:52px;display:grid;place-items:center;--ff:rgba(6,6,8,.95);--c:10px}
+  .vsrow{display:grid;grid-template-columns:62px auto 1fr;gap:10px;align-items:center}
+  .you{width:62px;height:62px;overflow:hidden;position:relative;--fc:var(--bb-white);--ff:var(--bb-black);--c:10px}
+  .you .jr{position:absolute;left:-14px;top:-2px;width:90px}
+  .vsrow .vs{font:italic 900 30px/1 var(--bb-font-display);font-stretch:130%;color:var(--bb-white);text-shadow:3px 3px 0 var(--bb-red-cta)}
+  .vsrow .who{display:grid;gap:4px;justify-items:end;text-align:right}
+  .vsrow .who b{font:italic 900 22px/1 var(--bb-font-display);font-stretch:118%;text-transform:uppercase;white-space:nowrap;text-shadow:3px 3px 0 var(--bb-red-cta)}
+  .art{position:relative;width:258px;height:258px;margin:2px auto 0;--fc:var(--bb-white);--ff:var(--bb-black);--c:16px;padding:5px}
+  .art canvas{width:248px;height:248px;display:block;clip-path:polygon(13px 0,100% 0,100% calc(100% - 13px),calc(100% - 13px) 100%,0 100%,0 13px)}
+  .art .stamp{position:absolute;left:-12px;top:16px;transform:rotate(-7deg);background:var(--bb-black);font-size:12px}
+  .meta{display:flex;justify-content:center;gap:6px}
+  .meta .dchip{height:30px;padding:0 9px;font-size:13px}
+  .note{font:500 13px/1.35 var(--bb-font-ui);color:var(--bb-text-2);text-align:center}
+  .note b{color:var(--bb-white)}
+  .panel{--ff:rgba(6,6,8,.96);--fc:var(--bb-line-strong);--c:var(--bb-cut);padding:12px 12px 12px;display:grid;gap:10px}
+  .wv canvas{width:100%;height:44px;display:block}
+  .wv__m{display:flex;justify-content:space-between;font:700 12px/1 var(--bb-font-num);color:var(--bb-text-3)}
+  .wv__m b{color:var(--bb-white)}
+  .listen{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+  .listen i{height:12px;background:var(--bb-red);clip-path:polygon(5px 0,100% 0,calc(100% - 5px) 100%,0 100%)}
+  .stars{gap:8px;justify-content:space-between}
+  .star{width:62px;padding:6px 0 6px;gap:5px}
+  .star svg{width:46px;height:46px}
+  .star .kbd{display:none}
+  .star small{font:700 12px/1 var(--bb-font-ui);text-transform:uppercase;color:var(--bb-text-2)}
+  .prompt{display:flex;justify-content:space-between;align-items:center;font:700 12px/1 var(--bb-font-ui);letter-spacing:.12em;text-transform:uppercase}
+  .prompt .ptag{font-size:13px}
+  .btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .btns .btn{height:48px;padding:0 8px;font-size:13px}
+</style>
+</head>
+<body>
+<main class="screen" aria-labelledby="t">
+  <h1 id="t" class="sr">Modo Jurado · ronda 7 de 23 · Tigre Púrpura · ya puedes puntuar</h1>
+  <div class="bg" aria-hidden="true">
+    <div class="bg__burst" style="--bx:50%;--by:36%"></div>
+    <div class="bg__wedge wedge"><canvas id="ht"></canvas></div>
+    <div class="slash slash--r"></div>
+    <div class="bg__vig"></div>
+  </div>
+  <div class="wrap">
+    <div class="top">
+      <div class="rbox frame"><small>Ronda</small><b>07 <i>/ 23</i></b></div>
+      <div class="rbox rbox--ya frame" role="timer"><small>Escucha mínima ✓</small><b>Ya puedes puntuar</b></div>
+      <button class="close frame" aria-label="Salir del Modo Jurado"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 2 16 16M16 2 2 16" stroke="#fff" stroke-width="2.6"/></svg></button>
+    </div>
+    <div class="vsrow">
+      <div class="you frame" aria-hidden="true"><div class="jr" data-juror="jrm"></div></div>
+      <span class="vs" aria-hidden="true">VS</span>
+      <div class="who"><span class="kicker">Voto ciego · este beat</span><b>Tigre Púrpura</b></div>
+    </div>
+    <div class="art frame"><canvas id="big" aria-hidden="true"></canvas><span class="stamp stamp--white">Autoría oculta</span></div>
+    <div class="meta"><span class="dchip frame">94 <small>BPM</small></span><span class="dchip dchip--word frame">Re menor</span><span class="dchip frame">2:51</span><span class="dchip dchip--word frame">Boom bap</span></div>
+    <p class="note">«Charcos en Verdi» · puntúas <b>este beat por sí solo</b>, de 1 a 5.</p>
+    <section class="panel frame" aria-label="Tu nota">
+      <div class="wv"><canvas data-wave="e3" data-played=".3" aria-hidden="true"></canvas></div>
+      <div class="wv__m"><span><b>0:51</b> / 2:51</span><span>−14 LUFS</span></div>
+      <div class="listen" role="meter" aria-label="Escucha mínima" aria-valuemin="0" aria-valuemax="45" aria-valuenow="45" aria-valuetext="Cumplida: 45 de 45 segundos"><i></i><i></i><i></i></div>
+      <div class="prompt"><span>Toca una estrella</span><span class="ptag ptag--red">¡Voto listo!</span></div>
+      <div class="stars" role="radiogroup" aria-label="Tu nota para Tigre Púrpura, de 1 a 5" id="stars">
+        <button class="star" role="radio" aria-checked="false" aria-label="1 de 5 estrellas: Flojo" data-cursor><span class="cursor" aria-hidden="true"></span><svg viewBox="-34 -33 68 66" aria-hidden="true"><path class="s-fill s-line" d="M0-30 8.8-11.9 28.5-9.3 14.2 4.6 17.6 24.3 0 15 -17.6 24.3 -14.2 4.6 -28.5-9.3 -8.8-11.9Z"/></svg><small aria-hidden="true">1</small></button>
+        <button class="star" role="radio" aria-checked="false" aria-label="2 de 5 estrellas: Regular" data-cursor><span class="cursor" aria-hidden="true"></span><svg viewBox="-34 -33 68 66" aria-hidden="true"><path class="s-fill s-line" d="M0-30 8.8-11.9 28.5-9.3 14.2 4.6 17.6 24.3 0 15 -17.6 24.3 -14.2 4.6 -28.5-9.3 -8.8-11.9Z"/></svg><small aria-hidden="true">2</small></button>
+        <button class="star" role="radio" aria-checked="false" aria-label="3 de 5 estrellas: Bien" data-cursor><span class="cursor" aria-hidden="true"></span><svg viewBox="-34 -33 68 66" aria-hidden="true"><path class="s-fill s-line" d="M0-30 8.8-11.9 28.5-9.3 14.2 4.6 17.6 24.3 0 15 -17.6 24.3 -14.2 4.6 -28.5-9.3 -8.8-11.9Z"/></svg><small aria-hidden="true">3</small></button>
+        <button class="star" role="radio" aria-checked="false" aria-label="4 de 5 estrellas: Muy bien" data-cursor><span class="cursor" aria-hidden="true"></span><svg viewBox="-34 -33 68 66" aria-hidden="true"><path class="s-fill s-line" d="M0-30 8.8-11.9 28.5-9.3 14.2 4.6 17.6 24.3 0 15 -17.6 24.3 -14.2 4.6 -28.5-9.3 -8.8-11.9Z"/></svg><small aria-hidden="true">4</small></button>
+        <button class="star" role="radio" aria-checked="false" aria-label="5 de 5 estrellas: Brutal" data-cursor><span class="cursor" aria-hidden="true"></span><svg viewBox="-34 -33 68 66" aria-hidden="true"><path class="s-fill s-line" d="M0-30 8.8-11.9 28.5-9.3 14.2 4.6 17.6 24.3 0 15 -17.6 24.3 -14.2 4.6 -28.5-9.3 -8.8-11.9Z"/></svg><small aria-hidden="true">5</small></button>
+      </div>
+      <div class="btns"><button class="btn frame" type="button">❚❚ Pausa</button><button class="btn frame" type="button">Saltar</button><button class="btn frame" type="button">Denunciar</button></div>
+    </section>
+    <a class="firma" data-otp-signature href="https://www.otherpeople.es" style="margin-top:4px">Un juego de <img src="img/otp-slap.png" alt="Other People"> Other People Records</a>
+  </div>
+  <div id="anunciador" class="sr" role="status" aria-live="polite"></div>
+</main>
+<script src="final.js"></script>
+<script>
+  window.paintScreen = function () {
+    Arena.halftone(document.getElementById('ht'), { cell: 9, angle: 30, color: '#ff003c', bg: '#2b0711', max: .7, fn: (u, v) => Math.pow(Math.max(0, u - 0.35) / 0.65, 1.2) * Math.sin(Math.PI * Math.min(1, Math.max(0, (v - 0.18) / 0.46))) });
+    Arena.cover(document.getElementById('big'), 'e3', { bpm: 94, key: 2, size: 248 });
+    const list = [...document.querySelectorAll('#stars .star')];
+    Arena.roving(document.getElementById('stars'), { items: '[role=radio]', mode: 'h', wrap: false, autofocus: false, initMove: false, onMove: (el, i) => list.forEach((b, j) => b.classList.toggle('is-on', j <= i)) });
+  };
+</script>
+</body>
+</html>
