@@ -133,8 +133,15 @@ export function focusRing(locator: Locator) {
 }
 
 /**
+ * Parte interior del halo de foco (`--bb-focus-halo`: 6 px de `--bb-red-wash`) tal y como la serializa
+ * `getComputedStyle`. Ninguna sombra de reposo la lleva (el CTA ya tiene `--bb-shadow-cta`), así que
+ * comprobar que aparece demuestra que el foco pinta el halo, no que haya una sombra cualquiera.
+ */
+export const FOCUS_HALO_SHADOW = 'rgba(255, 0, 60, 0.1) 0px 0px 0px 6px'
+
+/**
  * Comprueba el foco visible de §2.17 (`RNF-A11Y-01`): el elemento tiene el foco, es `:focus-visible` y
- * pinta el anillo rojo de 2 px (`--bb-focus-color`, `#ff003c`) con su halo.
+ * pinta el anillo rojo de 2 px (`--bb-focus-color`, `#ff003c`) con su halo (`--bb-focus-halo`).
  */
 export async function expectVisibleFocus(locator: Locator): Promise<void> {
   await expect(locator).toBeFocused()
@@ -143,5 +150,6 @@ export async function expectVisibleFocus(locator: Locator): Promise<void> {
   expect(ring.outlineStyle).toBe('solid')
   expect(ring.outlineWidth).toBe('2px')
   expect(ring.outlineColor).toBe('rgb(255, 0, 60)')
-  expect(ring.boxShadow).not.toBe('none')
+  // La sombra tiene transición (el CTA pasa de su halo de reposo al de foco): se espera a que asiente.
+  await expect.poll(async () => (await focusRing(locator)).boxShadow).toContain(FOCUS_HALO_SHADOW)
 }

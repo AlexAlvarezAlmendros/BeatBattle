@@ -76,6 +76,22 @@ function recordAnimations() {
   )
 }
 
+/**
+ * Espera a la última carga diferida de la página: la parte animada de la zona de avisos (`ToastList`), que
+ * se pide tras la primera pintura con el navegador libre. Lo que arranque con ella ya está registrado al
+ * volver (dos fotogramas después de que llegue el trozo).
+ */
+async function deferredLoaded(page: Page, loading: Promise<unknown>): Promise<void> {
+  await loading
+  await page.evaluate(
+    () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(() => done(null)))),
+  )
+}
+
+/** Respuesta del trozo diferido de los avisos (en desarrollo, el módulo `ToastList.tsx`). */
+const toastListResponse = (page: Page) =>
+  page.waitForResponse((response) => response.url().includes('ToastList'))
+
 /** Animaciones en marcha que no terminan nunca (bucles). */
 function runningLoops(page: Page) {
   return page.evaluate(() =>
@@ -94,10 +110,11 @@ test.describe('con «reducir movimiento» del sistema', () => {
 
   test('RNF-A11Y-03: la home no deja bucles en marcha y solo hace fundidos de ≤ 200 ms', async ({ page }) => {
     await page.addInitScript(recordAnimations)
+    const deferred = toastListResponse(page)
     await open(page, '/', 'Beat Battle')
+    // Lo último que carga la home es la zona de avisos diferida: cualquier bucle ya ha arrancado.
+    await deferredLoaded(page, deferred)
     await settle(page)
-    // margen para que arranque cualquier bucle que esperase a la entrada
-    await page.waitForTimeout(500)
 
     expect(await runningLoops(page)).toEqual([])
     const recorded = await page.evaluate(() => window.__bbAnimations)
@@ -124,9 +141,18 @@ test.describe('con «reducir movimiento» del sistema', () => {
 test('RNF-A11Y-03 (control): sin la preferencia, la home sí tiene bucles (orbes y marquee)', async ({
   page,
 }) => {
-  // Garantiza que el test de arriba mide algo: el mismo recuento sin «reducir movimiento» no sale vacío.
+  // Garantiza que el test de arriba mide algo: con el mismo registrador y las mismas esperas, sin
+  // «reducir movimiento» salen bucles, desplazamientos y animaciones de más de 200 ms. Si el registro
+  // dejara de ver algo (p. ej. Motion sin Web Animations), este control caería y lo delataría.
   await page.emulateMedia({ reducedMotion: 'no-preference' })
+  await page.addInitScript(recordAnimations)
+  const deferred = toastListResponse(page)
   await open(page, '/', 'Beat Battle')
+  await deferredLoaded(page, deferred)
   const loops = await runningLoops(page)
   expect(loops).toEqual(expect.arrayContaining(['ambient-orb-drift-1', 'marquee-scroll']))
+  const recorded = await page.evaluate(() => window.__bbAnimations)
+  expect(recorded.some((a) => a.iterations === Infinity)).toBe(true)
+  expect(recorded.some((a) => a.moves)).toBe(true)
+  expect(recorded.some((a) => a.duration > 200)).toBe(true)
 })

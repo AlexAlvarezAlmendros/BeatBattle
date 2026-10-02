@@ -90,15 +90,16 @@ describe('Card', () => {
     expect(card.style.transform).toMatch(/^perspective\(800px\)/)
   })
 
-  it('RNF-A11Y-03 / RD-MOT-03: sin movimiento no hay 3D, solo el borde que se ilumina', async () => {
+  it('RNF-A11Y-03 / RD-MOT-03: sin movimiento no hay 3D, solo el borde que se ilumina', () => {
     media = mockMatchMedia({ [REDUCED_MOTION_QUERY]: true })
     render(<Card data-testid="card">Carta</Card>)
     const card = screen.getByTestId('card')
     expect(card).toHaveAttribute('data-tilt', 'off')
     card.getBoundingClientRect = () => ({ left: 0, top: 0, width: 300, height: 400 }) as DOMRect
     fireEvent.pointerMove(card, { clientX: 300, clientY: 0, pointerType: 'mouse' })
-    // Varios fotogramas: con inclinación, el muelle ya habría escrito la rotación (caso de arriba).
-    await new Promise((resolve) => setTimeout(resolve, 120))
+    // El manejador de inclinación no existe: el mismo que mueve el muelle escribe el brillo en el acto
+    // (caso de arriba), así que sin brillo tampoco hay giro, sin depender de cuántos fotogramas pasen.
+    expect(card.style.getPropertyValue(GLARE_X_VAR)).toBe('')
     expect(card.style.transform).toBe('')
   })
 

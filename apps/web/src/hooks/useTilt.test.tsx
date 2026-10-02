@@ -29,11 +29,14 @@ function stubRect(element: HTMLElement) {
 
 describe('useTilt', () => {
   it('ángulos: 0° en el centro y ±6° como mucho en los bordes (§3.3)', () => {
+    // El 6 es el de la guía (§3.3, «máx. 6°»), escrito aquí a mano: si alguien sube la constante
+    // (el sello usa 10°), este test lo delata.
+    expect(TILT_MAX_DEG).toBe(6)
     expect(tiltAngles(0.5, 0.5)).toEqual({ rotateX: 0, rotateY: 0 })
-    expect(tiltAngles(1, 0)).toEqual({ rotateX: TILT_MAX_DEG, rotateY: TILT_MAX_DEG })
-    expect(tiltAngles(0, 1)).toEqual({ rotateX: -TILT_MAX_DEG, rotateY: -TILT_MAX_DEG })
+    expect(tiltAngles(1, 0)).toEqual({ rotateX: 6, rotateY: 6 })
+    expect(tiltAngles(0, 1)).toEqual({ rotateX: -6, rotateY: -6 })
     // Fuera de la pieza no pasa del máximo.
-    expect(tiltAngles(2, -1)).toEqual({ rotateX: TILT_MAX_DEG, rotateY: TILT_MAX_DEG })
+    expect(tiltAngles(2, -1)).toEqual({ rotateX: 6, rotateY: 6 })
     expect(tiltTransform(3, -4.5)).toBe('perspective(800px) rotateX(3deg) rotateY(-4.5deg)')
   })
 

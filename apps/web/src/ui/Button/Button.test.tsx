@@ -10,6 +10,15 @@ import buttonCss from './Button.module.css?raw'
 import { WAVE_LOADER_BARS } from './WaveLoader'
 
 const capability = vi.hoisted(() => ({ value: false }))
+// Espía del `animate` de Motion (el muelle del pulsado), con la implementación real detrás: así los
+// tests sin movimiento comprueban que ni se llama, sin depender de cuántos fotogramas pasen.
+const motion = vi.hoisted(() => ({ animate: undefined as unknown as ReturnType<typeof vi.fn> }))
+
+vi.mock('motion/react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('motion/react')>()
+  motion.animate = vi.fn(actual.animate)
+  return { ...actual, animate: motion.animate }
+})
 
 vi.mock('../glass', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../glass')>()),
@@ -23,6 +32,7 @@ afterEach(() => {
   media?.restore()
   media = undefined
   capability.value = false
+  motion.animate.mockClear()
 })
 
 describe('Button', () => {
@@ -274,6 +284,7 @@ describe('Button', () => {
     render(<Button>Votar</Button>)
     const button = screen.getByRole('button', { name: 'Votar' })
     await user.pointer({ keys: '[MouseLeft>]', target: button })
+    expect(motion.animate).toHaveBeenCalledWith(button, { scale: expect.any(Number) }, expect.anything())
     await waitFor(() => expect(button.style.transform).toMatch(/scale\(0\.9\d*\)/))
     await user.pointer({ keys: '[/MouseLeft]', target: button })
   })
@@ -284,10 +295,10 @@ describe('Button', () => {
     render(<Button>Votar</Button>)
     const button = screen.getByRole('button', { name: 'Votar' })
     await user.pointer({ keys: '[MouseLeft>]', target: button })
-    // Varios fotogramas: sin la guarda, Motion ya habría escrito el transform (caso de arriba).
-    await new Promise((resolve) => setTimeout(resolve, 120))
-    expect(button.style.transform).toBe('')
     await user.pointer({ keys: '[/MouseLeft]', target: button })
+    // El muelle ni arranca (sin la guarda, el caso de arriba llama a `animate` al pulsar).
+    expect(motion.animate).not.toHaveBeenCalled()
+    expect(button.style.transform).toBe('')
   })
 
   it('pulsar con el muelle llama a Motion sin romper el clic', async () => {
