@@ -175,13 +175,21 @@ pre {
  *
  * «Reducir movimiento» (RNF-A11Y-03): las duraciones y curvas ya se recortan en `tokens.css`
  * (`--bb-dur-*` ≤ 200 ms, `--bb-ease-back` sin rebote, `--bb-motion: 0`) y cada componente trae su
- * variante (RD-MOT-03), que quita desplazamientos, 3D y bucles y deja un fundido. La red global solo
- * anula el desplazamiento suave que alguna pieza haya pedido.
+ * variante (RD-MOT-03), que quita desplazamientos, 3D y bucles y deja un fundido.
+ *
+ * La red global, por si una pieza se olvida de su variante:
+ * - Ningún bucle: toda animación da una sola pasada. Un latido, un parpadeo o un marquee que usara
+ *   un `--bb-dur-*` irían de 3 a 6 veces más rápido al recortarse la duración, justo lo contrario de
+ *   lo que se pide, y por encima de 3 destellos por segundo (RNF-A11Y-04). Un indicador de carga
+ *   que gire en bucle necesita su variante estática.
+ * - Sin desplazamiento suave, aunque alguna pieza lo haya pedido.
  */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: la preferencia del usuario manda sobre cualquier pieza */
+    animation-iteration-count: 1 !important;
     /* biome-ignore lint/complexity/noImportantStyles: la preferencia del usuario manda sobre cualquier pieza */
     scroll-behavior: auto !important;
   }
@@ -190,6 +198,8 @@ pre {
 :root[data-motion="reduced"] *,
 :root[data-motion="reduced"] *::before,
 :root[data-motion="reduced"] *::after {
+  /* biome-ignore lint/complexity/noImportantStyles: la preferencia del usuario manda sobre cualquier pieza */
+  animation-iteration-count: 1 !important;
   /* biome-ignore lint/complexity/noImportantStyles: la preferencia del usuario manda sobre cualquier pieza */
   scroll-behavior: auto !important;
 }

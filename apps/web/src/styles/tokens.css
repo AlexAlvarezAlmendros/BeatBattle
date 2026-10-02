@@ -171,7 +171,15 @@
   --bb-focus-color: var(--bb-red);
   --bb-focus-halo: 0 0 0 6px var(--bb-red-wash), 0 0 18px var(--bb-red-glow);
 
-  /* ── Movimiento (§3.6): duraciones ──────────────────────────────────────────────────────── */
+  /*
+   * ── Movimiento (§3.6): duraciones ────────────────────────────────────────────────────────
+   * Son para transiciones y animaciones de una pasada. Las animaciones en bucle (separadores de la
+   * cuenta atrás a 1 Hz, latido de la última hora, marquee; §3.3 y Anexo E) NO usan `--bb-dur-*`:
+   * con «reducir movimiento» se recortan (ver abajo) y el bucle iría más rápido, con riesgo de pasar
+   * de 3 destellos por segundo (RNF-A11Y-04). Su periodo va en un token de bucle propio, que no cambia
+   * con la preferencia, y se añade (aquí y en §3.6) con la primera pieza que lo necesite. Además,
+   * `global.css` deja cualquier bucle en una sola pasada con «reducir movimiento».
+   */
   --bb-dur-instant: 80ms; /* Pulsado, cambio de color */
   --bb-dur-fast: 150ms; /* Hover, chips, tooltips */
   --bb-dur-base: 240ms; /* Modales, cambios de panel, barrido de la transición de página */

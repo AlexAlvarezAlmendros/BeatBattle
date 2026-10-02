@@ -72,3 +72,55 @@ describe('global.css: foco visible', () => {
     ).toBe(true)
   })
 })
+
+describe('global.css: red de «reducir movimiento»', () => {
+  const NET = ['animation-iteration-count', 'scroll-behavior'] as const
+  const NET_VALUES: Record<(typeof NET)[number], string> = {
+    'animation-iteration-count': '1',
+    'scroll-behavior': 'auto',
+  }
+
+  /** ¿La regla impone la red (bucles en una pasada, sin desplazamiento suave) con !important? */
+  const imposesNet = (rule: CSSStyleRule) =>
+    NET.every(
+      (property) =>
+        rule.style.getPropertyValue(property) === NET_VALUES[property] &&
+        rule.style.getPropertyPriority(property) === 'important',
+    )
+
+  /** Selectores de la regla, sin espacios sobrantes. */
+  const selectors = (rule: CSSStyleRule) => rule.selectorText.split(',').map((s) => s.trim())
+
+  afterEach(() => {
+    delete document.documentElement.dataset.motion
+    document.body.innerHTML = ''
+  })
+
+  it('RNF-A11Y-03: con la preferencia del sistema, ningún bucle (también en ::before y ::after)', () => {
+    const media = [...document.styleSheets]
+      .flatMap((sheet) => [...sheet.cssRules])
+      .filter((rule): rule is CSSMediaRule => rule instanceof CSSMediaRule)
+      .filter((rule) => rule.conditionText.includes('prefers-reduced-motion: reduce'))
+    const net = media
+      .flatMap((rule) => [...rule.cssRules])
+      .filter((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule)
+      .find(imposesNet)
+    expect(net).toBeDefined()
+    expect(selectors(net!)).toEqual(['*', '*::before', '*::after'])
+  })
+
+  it('RNF-A11Y-03: con el ajuste propio de la app (data-motion="reduced"), lo mismo', () => {
+    document.body.innerHTML = '<span class="countdown__separator">:</span>'
+    const separator = document.body.firstElementChild!
+    expect(matchingRules(separator).some(imposesNet)).toBe(false)
+
+    document.documentElement.dataset.motion = 'reduced'
+    const net = matchingRules(separator).find(imposesNet)
+    expect(net).toBeDefined()
+    expect(selectors(net!)).toEqual([
+      ':root[data-motion="reduced"] *',
+      ':root[data-motion="reduced"] *::before',
+      ':root[data-motion="reduced"] *::after',
+    ])
+  })
+})
