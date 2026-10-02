@@ -154,6 +154,18 @@ describe('ToastViewport', () => {
 })
 
 describe('Toast (pieza)', () => {
+  it('información con acento neutro: el rojo se queda para el error', () => {
+    const { container } = render(
+      <>
+        <Toast toast={{ tone: 'info', title: 'Aviso' }} />
+        <Toast toast={{ tone: 'error', title: 'Fallo' }} />
+      </>,
+    )
+    const [info, error] = [...container.querySelectorAll<HTMLElement>('[data-tone]')]
+    expect(getComputedStyle(info!).getPropertyValue('--toast-accent')).toBe('var(--bb-text-2)')
+    expect(getComputedStyle(error!).getPropertyValue('--toast-accent')).toBe('var(--bb-danger)')
+  })
+
   it('RD-VIS-03: estados forzados y sin botón de cerrar si no se puede cerrar', () => {
     const { container } = render(<Toast toast={{ tone: 'info', title: 'Aviso' }} state="hover" />)
     expect(container.querySelector('[data-force-state="hover"]')).not.toBeNull()

@@ -57,8 +57,9 @@
   background-color: var(--toast-accent);
 }
 
+/* Información en neutro: el rojo queda para el error (§3.2 distingue el peligro del rojo de marca). */
 .toast[data-tone="info"] {
-  --toast-accent: var(--bb-red);
+  --toast-accent: var(--bb-text-2);
 }
 
 .toast[data-tone="success"] {
