@@ -4,7 +4,8 @@
   "type": "module",
   "description": "Esquemas Zod de la API, tipos y tokens compartidos (guía §4.4)",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./tokens": "./src/tokens.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",

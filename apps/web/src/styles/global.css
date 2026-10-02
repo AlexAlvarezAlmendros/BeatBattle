@@ -1,0 +1,205 @@
+/*
+ * Base global de la app: reset mínimo, fondo y texto del sello, foco visible, selección, enlace
+ * «Saltar al contenido», utilidad `.sr-only` y reglas de «reducir movimiento». Solo usa tokens
+ * (`tokens.css`); el estilo de cada pieza vive junto a su componente.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/*
+ * El negro va en <html>, como en el sello (`index.html` lo pinta incluso antes de cargar este CSS):
+ * así el fondo no parpadea y el Escenario, fijo detrás del contenido, no queda tapado por <body>.
+ */
+html {
+  background-color: var(--bb-black);
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: var(--nav-flow);
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  overflow-x: clip; /* Sin scroll horizontal y sin crear contenedor de scroll (la isla es sticky) */
+  color: var(--bb-text);
+  font-family: var(--bb-font-body);
+  font-size: var(--bb-font-size-md);
+  font-weight: var(--bb-weight-regular);
+  line-height: var(--bb-leading-body);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-family: var(--bb-font-display);
+  font-weight: var(--bb-weight-extrabold);
+  line-height: var(--bb-leading-snug);
+}
+
+p,
+figure,
+blockquote,
+dl,
+dd {
+  margin: 0;
+}
+
+ul[role="list"],
+ol[role="list"] {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+img,
+picture,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--bb-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Foco (RNF-A11Y-01): anillo rojo de 2 px y halo, solo con teclado ─────────────────────── */
+:focus-visible {
+  outline: var(--bb-focus-width) solid var(--bb-focus-color);
+  outline-offset: var(--bb-focus-offset);
+  box-shadow: var(--bb-focus-halo);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/*
+ * Destinos de foco programático del marco, marcados con `data-focus-target` (el <main> que recibe el
+ * foco al navegar o con «Saltar al contenido»): no son tabulables y no llevan anillo, aunque el
+ * navegador los marque como `:focus-visible` tras usar el teclado. Solo esos: los widgets ARIA
+ * (menús, pestañas, listbox, rejillas) mueven el foco con flechas a elementos con tabindex="-1", y
+ * esos sí necesitan el anillo (RNF-A11Y-01).
+ */
+[data-focus-target]:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Negro sobre rojo: 5,3:1 (el blanco sobre rojo no llega a 4,5:1 en texto normal). */
+::selection {
+  background-color: var(--bb-red);
+  color: var(--bb-black);
+}
+
+/* ── Saltar al contenido: primer elemento enfocable, visible solo con foco ────────────────── */
+.skip-link {
+  position: fixed;
+  top: var(--nav-gap);
+  left: var(--nav-gap);
+  z-index: calc(var(--bb-z-gate) + 1);
+  padding: var(--bb-space-3) var(--bb-space-5);
+  border: 1px solid var(--bb-line-strong);
+  border-radius: var(--bb-radius-pill);
+  background-color: var(--bb-ink-800);
+  color: var(--bb-text);
+  font-size: var(--bb-font-size-sm);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-cta);
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.skip-link:not(:focus) {
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Solo para lectores de pantalla ───────────────────────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Movimiento ───────────────────────────────────────────────────────────────────────────── */
+/*
+ * Sin `scroll-behavior: smooth` global: la vuelta arriba al cambiar de página (ScrollRestoration)
+ * tiene que ser un salto, no un desplazamiento animado. Quien quiera suavidad la pone en su pieza.
+ *
+ * «Reducir movimiento» (RNF-A11Y-03): las duraciones y curvas ya se recortan en `tokens.css`
+ * (`--bb-dur-*` ≤ 200 ms, `--bb-ease-back` sin rebote, `--bb-motion: 0`) y cada componente trae su
+ * variante (RD-MOT-03), que quita desplazamientos, 3D y bucles y deja un fundido.
+ *
+ * La red global, por si una pieza se olvida de su variante:
+ * - Ningún bucle: toda animación da una sola pasada. Un latido, un parpadeo o un marquee que usara
+ *   un `--bb-dur-*` irían de 3 a 6 veces más rápido al recortarse la duración, justo lo contrario de
+ *   lo que se pide, y por encima de 3 destellos por segundo (RNF-A11Y-04). Un indicador de carga
+ *   que gire en bucle necesita su variante estática.
+ * - Sin desplazamiento suave, aunque alguna pieza lo haya pedido.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: la preferencia del usuario manda sobre cualquier pieza */
+    animation-iteration-count: 1 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: la preferencia del usuario manda sobre cualquier pieza */
+    scroll-behavior: auto !important;
+  }
+}
+
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after {
+  /* biome-ignore lint/complexity/noImportantStyles: la preferencia del usuario manda sobre cualquier pieza */
+  animation-iteration-count: 1 !important;
+  /* biome-ignore lint/complexity/noImportantStyles: la preferencia del usuario manda sobre cualquier pieza */
+  scroll-behavior: auto !important;
+}

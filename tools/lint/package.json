@@ -1,0 +1,11 @@
+{
+  "name": "@beatbattle/lint",
+  "private": true,
+  "type": "module",
+  "description": "Lints propios del monorepo: tokens de diseño (RD-VIS-01). Sin dependencias: Node y su test runner",
+  "scripts": {
+    "lint:tokens": "node check-tokens.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "node --test --test-reporter=spec test/*.test.mjs"
+  }
+}

@@ -1,0 +1,18 @@
+/* Páginas provisionales (0.10): solo jerarquía tipográfica con tokens, sin piezas de marca. */
+.placeholder-page {
+  display: grid;
+  gap: var(--bb-space-4);
+  max-width: 60ch;
+}
+
+.placeholder-page h1 {
+  font-size: var(--bb-font-size-3xl);
+  font-weight: var(--bb-weight-display);
+  letter-spacing: var(--bb-tracking-display);
+  line-height: var(--bb-leading-snug);
+  text-transform: uppercase;
+}
+
+.placeholder-page p {
+  color: var(--bb-text-2);
+}

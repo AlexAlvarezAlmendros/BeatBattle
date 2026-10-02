@@ -1,0 +1,67 @@
+/*
+ * Marco provisional (0.10): solo disposición y legibilidad con tokens. La isla flotante, el logo y el
+ * pie del sello llegan con la tarea 0.7.
+ */
+.site-header,
+.site-main,
+.site-footer {
+  width: var(--bb-layout-width);
+  margin-inline: auto;
+}
+
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bb-space-2) var(--bb-space-6);
+  margin-top: var(--nav-gap);
+  padding-block: var(--bb-space-2);
+}
+
+.site-header__brand {
+  font-family: var(--bb-font-display);
+  font-weight: var(--bb-weight-display);
+  letter-spacing: var(--bb-tracking-display);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.site-header__links,
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--bb-space-4);
+}
+
+/* Objetivos táctiles de 44 px (RNF-A11Y-09). */
+.site-header__links a,
+.site-footer__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bb-space-11);
+}
+
+.site-header__links a {
+  color: var(--bb-text-2);
+  text-decoration: none;
+}
+
+.site-header__links a[aria-current="page"] {
+  color: var(--bb-text);
+  font-weight: var(--bb-weight-semibold);
+}
+
+.site-main {
+  min-height: 60vh;
+  padding-block: var(--bb-space-12);
+}
+
+.site-footer {
+  display: grid;
+  gap: var(--bb-space-2);
+  padding-block: var(--bb-space-8) var(--bb-space-12);
+  border-top: 1px solid var(--bb-line);
+  color: var(--bb-text-3);
+  font-size: var(--bb-font-size-sm);
+}

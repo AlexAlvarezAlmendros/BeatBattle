@@ -1,0 +1,150 @@
+{
+  "app": {
+    "name": "Beat Battle",
+    "brand": "Beat Battle by Other People",
+    "documentTitle": "Beat Battle · Other People",
+    "pageTitle": "{page} · Beat Battle",
+    "skipToContent": "Saltar al contenido"
+  },
+  "common": {
+    "loading": "Cargando…",
+    "backHome": "Volver al inicio"
+  },
+  "entries": {
+    "count_zero": "Pista libre",
+    "count_one": "{count} entrada",
+    "count_other": "{count} entradas"
+  },
+  "nav": {
+    "label": "Principal",
+    "home": "Inicio",
+    "weeks": "Semanas",
+    "hallOfFame": "Salón de la fama",
+    "howItWorks": "Cómo funciona",
+    "signIn": "Entrar"
+  },
+  "footer": {
+    "credit": "{brand} · {otherPeople}",
+    "legalLabel": "Legal",
+    "otherPeople": "Other People Records",
+    "tagline": "La batalla semanal de productores de Other People Records."
+  },
+  "pages": {
+    "home": {
+      "title": "Beat Battle",
+      "summary": "Aquí irá la semana en curso: el drop, la cuenta atrás, las entradas, el campeón anterior y cómo funciona."
+    },
+    "week": {
+      "title": "Semana",
+      "summary": "Aquí irá la semana «{slug}», en curso o pasada: su sample y sus entradas."
+    },
+    "weekResults": {
+      "title": "Resultados",
+      "summary": "Aquí irán los resultados y la ceremonia de la semana «{slug}», una vez sellada."
+    },
+    "weeks": {
+      "title": "Semanas",
+      "summary": "Aquí irá el archivo con todas las semanas."
+    },
+    "entry": {
+      "title": "Entrada",
+      "summary": "Aquí irá la ficha de la entrada {id}: reproductor, datos y voto."
+    },
+    "jury": {
+      "title": "Modo Jurado",
+      "summary": "Aquí irá el Modo Jurado: escuchar y votar las entradas de la semana en curso, una tras otra."
+    },
+    "upload": {
+      "title": "Subir mi beat",
+      "summary": "Aquí irá la subida o la edición de tu entrada de la semana."
+    },
+    "profile": {
+      "title": "Perfil",
+      "summary": "Aquí irá el perfil público de @{username} y su carta de productor."
+    },
+    "hallOfFame": {
+      "title": "Salón de la fama",
+      "summary": "Aquí irán los ganadores, los campeones y los récords."
+    },
+    "season": {
+      "title": "Temporada",
+      "summary": "Aquí irá la clasificación de la temporada {id}."
+    },
+    "howItWorks": {
+      "title": "Cómo funciona",
+      "summary": "Aquí irán las reglas en corto, las preguntas frecuentes y el enlace a las bases."
+    },
+    "signIn": {
+      "title": "Entrar",
+      "summary": "Aquí irá el acceso a tu cuenta."
+    },
+    "signUp": {
+      "title": "Crear cuenta",
+      "summary": "Aquí irá el registro para subir beats y votar."
+    },
+    "verify": {
+      "title": "Verificar el email",
+      "summary": "Aquí irá la verificación del email, necesaria para votar y participar."
+    },
+    "recover": {
+      "title": "Recuperar la contraseña",
+      "summary": "Aquí irá la recuperación de la contraseña por email."
+    },
+    "admin": {
+      "title": "Administración",
+      "summary": "Aquí irá el panel de administración: samples, semanas, moderación, campañas y uso."
+    },
+    "notFound": {
+      "title": "Página no encontrada",
+      "summary": "Aquí no hay nada. En su lugar habrá un beat pad para que no te vayas con las manos vacías."
+    },
+    "error": {
+      "title": "Se ha rayado el disco",
+      "summary": "Ya estamos en ello."
+    }
+  },
+  "settings": {
+    "title": "Ajustes",
+    "pageTitle": "{section} · Ajustes",
+    "navLabel": "Secciones de ajustes",
+    "account": {
+      "title": "Cuenta",
+      "summary": "Aquí irán el email, la contraseña y los accesos con Google o Discord."
+    },
+    "profile": {
+      "title": "Perfil",
+      "summary": "Aquí irá la edición de tu perfil público: nombre, avatar, enlaces y acento."
+    },
+    "sound": {
+      "title": "Sonido y efectos",
+      "summary": "Aquí irán los volúmenes por bus, el silencio, la calidad visual y el movimiento reducido."
+    },
+    "emails": {
+      "title": "Emails",
+      "summary": "Aquí irán los avisos de la batalla, el marketing y las horas de silencio."
+    },
+    "sessions": {
+      "title": "Sesiones",
+      "summary": "Aquí irán tus sesiones activas y el cierre de las que no reconozcas."
+    },
+    "privacy": {
+      "title": "Privacidad",
+      "summary": "Aquí irán la exportación de tus datos y el borrado de la cuenta."
+    }
+  },
+  "legal": {
+    "summary": "Aquí irá el texto de este documento legal.",
+    "docs": {
+      "bases": "Bases de la competición",
+      "terminos": "Términos de uso",
+      "privacidad": "Política de privacidad",
+      "cookies": "Política de cookies"
+    }
+  },
+  "dev": {
+    "gallery": {
+      "title": "Galería de componentes",
+      "summary": "Aquí irán los tokens, la tipografía y los componentes base con todos sus estados, con y sin movimiento (solo en desarrollo)."
+    }
+  }
+}

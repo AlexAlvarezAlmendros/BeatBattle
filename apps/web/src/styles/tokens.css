@@ -1,0 +1,254 @@
+/*
+ * Tokens de diseño de BeatBattle — guía §3.2 (color, tipo, espacio, radios, sombras, capas) y §3.6
+ * (duraciones y curvas). Es la ÚNICA fuente de verdad: fuera de este fichero no se escribe ningún
+ * color, radio, sombra ni duración literal (`RD-VIS-01`, lo vigila `pnpm lint:tokens`).
+ *
+ * - Los valores salen de la web del sello (`ReactOtpWeb/frontend`: `index.html`, `Header.css`,
+ *   `Hero.css`) tal como los recoge §3.1.
+ * - Espejo tipado para el canvas y los shaders: `packages/shared/src/tokens.ts`. El test
+ *   `packages/shared/test/tokens.test.ts` lee este fichero y falla si los dos divergen: si cambias un
+ *   color, una duración o una curva aquí, cámbialo también allí.
+ * - Nombres: prefijo `--bb-`, salvo las medidas de la isla, que conservan los nombres del sello
+ *   (`--nav-gap`, `--nav-h`, `--nav-flow`) para que el CSS portado de `Header.css` funcione tal cual.
+ */
+
+:root {
+  /* ── Color: superficies ─────────────────────────────────────────────────────────────────── */
+  --bb-black: #000000; /* Fondo base */
+  --bb-ink-950: #0a0a0a; /* Paneles hundidos, reproductor */
+  --bb-ink-900: #0e0e0e; /* Tarjetas sobre fondo */
+  --bb-ink-800: #1a1a1a; /* Tarjetas, inputs */
+  --bb-ink-700: #1e1e1e; /* Hover de tarjeta */
+  --bb-ink-600: #2a2a2a; /* Bordes fuertes, separadores, pista de la barra de XP */
+  --bb-glass: #2b2b2bce; /* Isla de navegación (con `--bb-glass-blur`) */
+
+  /* ── Color: líneas y velos ──────────────────────────────────────────────────────────────── */
+  --bb-line: rgba(255, 255, 255, 0.08); /* Bordes de tarjeta */
+  --bb-line-strong: rgba(255, 255, 255, 0.18); /* Bordes de botón de contorno, rareza común */
+  --bb-fill-hover: rgba(255, 255, 255, 0.06); /* §3.3: el botón de contorno «rellena de blanco al 6 %» */
+  --bb-fill-active: rgba(255, 255, 255, 0.1); /* Enlace activo o en hover de la isla (Header.css) */
+  --bb-scrim: rgba(0, 0, 0, 0.7); /* §3.3: fondo de modal «oscurecido al 70 %» */
+
+  /* ── Color: texto ───────────────────────────────────────────────────────────────────────── */
+  --bb-text: #ffffff; /* Texto principal */
+  --bb-text-2: #cccccc; /* Texto secundario */
+  --bb-text-3: #999999; /* Metadatos (BPM, tonalidad) */
+  --bb-text-4: #666666; /* Deshabilitado */
+
+  /* ── Color: marca ───────────────────────────────────────────────────────────────────────── */
+  --bb-red: #ff003c; /* Marca, CTA, progreso, foco. 5,3:1 sobre negro: vale para cualquier texto */
+  --bb-red-hover: #e6003a; /* Hover de CTA */
+  --bb-red-press: #cc0030; /* Pulsado */
+  --bb-red-text: #ff4d6d; /* Texto rojo pequeño sobre tarjetas (5,4:1 sobre --bb-ink-800), RNF-A11Y-02 */
+  --bb-red-glow: rgba(255, 0, 60, 0.4); /* Halos de CTA y de contorno */
+  --bb-red-wash: rgba(255, 0, 60, 0.1); /* Fondos de chip activo, filas seleccionadas */
+  --bb-wine: #4a0d1c; /* Color del Silk (fondo ambiental) */
+  --bb-wave-idle: #3a3a3a; /* §3.3: barras de la forma de onda aún no reproducidas */
+
+  /* ── Color: estado ──────────────────────────────────────────────────────────────────────── */
+  --bb-success: #22c55e; /* Confirmaciones */
+  --bb-danger: #ef4444; /* Errores: distinto del rojo de marca y siempre con icono */
+
+  /* ── Color: metales (medallas de vinilo; el 1.º es dorado a propósito, ver §3.2) ─────────── */
+  --bb-gold: #f5c542; /* 1.º, nivel máximo, semana dorada */
+  --bb-gold-glow: rgba(245, 197, 66, 0.4); /* Halo dorado (rareza legendaria), como --bb-red-glow */
+  --bb-platinum: #d9dee5; /* 2.º */
+  --bb-diamond: #8fe3ff; /* 3.º */
+
+  /* ── Rareza de logros (§3.2): tratamiento hecho con los tokens de arriba ────────────────── */
+  --bb-rarity-common-border: var(--bb-line-strong); /* Común: borde fino… */
+  --bb-rarity-common-icon: var(--bb-text); /* …e icono blanco */
+  --bb-rarity-rare-border: var(--bb-red); /* Rara: borde y halo rojos */
+  --bb-rarity-rare-glow: 0 0 24px var(--bb-red-glow);
+  /*
+   * Épica: borde holográfico (gradiente cónico que gira, §3.5). El token lleva solo las paradas de
+   * color; el gradiente lo monta la pieza, que es quien anima el ángulo:
+   *   background-image: conic-gradient(from var(--bb-holo-angle), var(--bb-rarity-epic-stops));
+   * No puede ser un token con el gradiente entero: una variable resuelve sus `var()` en el elemento
+   * que la declara (aquí, :root), así que heredaría el gradiente con el ángulo ya fijado en 0deg.
+   * `--bb-holo-angle` está registrada con `@property` (al final) para que se pueda animar.
+   */
+  --bb-rarity-epic-stops: var(--bb-red), var(--bb-diamond), var(--bb-platinum), var(--bb-gold), var(--bb-red);
+  --bb-rarity-legendary-border: var(--bb-gold); /* Legendaria: dorado con brillo que la recorre */
+  --bb-rarity-legendary-glow: 0 0 24px var(--bb-gold-glow);
+
+  /* ── Tipografía (fuentes alojadas en el proyecto: styles/fonts.css, tarea 0.5) ───────────── */
+  --bb-font-display: "Montserrat", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --bb-font-body: "Montserrat", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --bb-font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --bb-weight-regular: 400;
+  --bb-weight-medium: 500;
+  --bb-weight-semibold: 600;
+  --bb-weight-bold: 700;
+  --bb-weight-extrabold: 800;
+  --bb-weight-black: 900;
+  --bb-weight-display: var(--bb-weight-black); /* Display: 800–900 */
+  --bb-weight-mono: var(--bb-weight-medium); /* Mono: 500–700, con cifras tabulares */
+
+  /*
+   * Escala en rem (base 16 px). De `xl` hacia arriba es fluida: el valor de la guía es el máximo
+   * (escritorio, ≥ 1280 px) y se encoge de forma lineal hasta 360 px. `hero` es el clamp de §3.2.
+   */
+  --bb-font-size-xs: 0.75rem; /* 12 px */
+  --bb-font-size-sm: 0.875rem; /* 14 px */
+  --bb-font-size-md: 1rem; /* 16 px */
+  --bb-font-size-lg: 1.25rem; /* 20 px */
+  --bb-font-size-xl: clamp(1.25rem, 1.152rem + 0.435vw, 1.5rem); /* 20 → 24 px */
+  --bb-font-size-2xl: clamp(1.5rem, 1.304rem + 0.87vw, 2rem); /* 24 → 32 px */
+  --bb-font-size-3xl: clamp(2.25rem, 1.956rem + 1.304vw, 3rem); /* 36 → 48 px */
+  --bb-font-size-hero: clamp(3.5rem, 11vw, 8.5rem);
+
+  --bb-leading-tight: 0.95; /* Titular del hero (Hero.css) */
+  --bb-leading-snug: 1.15; /* Titulares */
+  --bb-leading-body: 1.5; /* Texto */
+
+  --bb-tracking-display: -0.02em; /* Titulares en mayúsculas */
+  --bb-tracking-cta: 0.12em; /* Botón CTA (§3.3) */
+  --bb-tracking-caps: 0.2em; /* Subtítulos en mayúsculas espaciadas («SAMPLE · FLIP · VOTA · REPITE») */
+  --bb-tracking-label: 0.4em; /* Rótulos verticales laterales (`.hero-side`) */
+
+  /* Contorno rojo de los titulares: `-webkit-text-stroke` + color transparente + halo */
+  --bb-text-stroke-width: 2px;
+  --bb-text-stroke: var(--bb-text-stroke-width) var(--bb-red);
+  --bb-text-glow: 0 0 24px var(--bb-red-glow);
+
+  /* ── Espaciado: múltiplos de 4 px, en rem para que escale con el tamaño de texto ─────────── */
+  --bb-space-1: 0.25rem; /* 4 px */
+  --bb-space-2: 0.5rem; /* 8 px */
+  --bb-space-3: 0.75rem; /* 12 px */
+  --bb-space-4: 1rem; /* 16 px */
+  --bb-space-5: 1.25rem; /* 20 px */
+  --bb-space-6: 1.5rem; /* 24 px */
+  --bb-space-7: 1.75rem; /* 28 px */
+  --bb-space-8: 2rem; /* 32 px */
+  --bb-space-9: 2.25rem; /* 36 px */
+  --bb-space-10: 2.5rem; /* 40 px */
+  --bb-space-11: 2.75rem; /* 44 px: objetivo táctil mínimo (RNF-A11Y-09) */
+  --bb-space-12: 3rem; /* 48 px */
+  --bb-space-13: 3.25rem; /* 52 px */
+  --bb-space-14: 3.5rem; /* 56 px */
+  --bb-space-15: 3.75rem; /* 60 px */
+  --bb-space-16: 4rem; /* 64 px */
+
+  /* ── Radios ─────────────────────────────────────────────────────────────────────────────── */
+  --bb-radius-sm: 8px;
+  --bb-radius-md: 12px; /* Tarjetas */
+  --bb-radius-lg: 16px; /* Paneles */
+  --bb-radius-xl: 20px; /* Isla de navegación */
+  --bb-radius-pill: 999px; /* Botones, chips */
+
+  /* ── Sombras ────────────────────────────────────────────────────────────────────────────── */
+  --bb-shadow-card: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --bb-shadow-float: 0 8px 32px rgba(0, 0, 0, 0.55); /* Isla (Header.css) */
+  --bb-shadow-glow-red: 0 0 24px var(--bb-red-glow);
+
+  /* ── Desenfoques de cristal ─────────────────────────────────────────────────────────────── */
+  --bb-glass-blur: 8px; /* Isla: `backdrop-filter: blur(8px)` */
+
+  /* ── Capas (z-index) ────────────────────────────────────────────────────────────────────── */
+  --bb-z-stage: 0; /* Escenario (canvas único) */
+  --bb-z-content: 10;
+  --bb-z-island: 15; /* Isla de navegación (Header.css) */
+  --bb-z-player: 20;
+  --bb-z-hud: 30; /* HUD flotante */
+  --bb-z-modal: 40;
+  --bb-z-toast: 50;
+  --bb-z-ceremony: 60;
+  --bb-z-gate: 70; /* Puerta de entrada «Pulsa para entrar» */
+
+  /* ── Layout del sello (Header.css) ──────────────────────────────────────────────────────── */
+  --nav-gap: 16px; /* Separación de la isla con el borde */
+  --nav-h: 69px; /* Alto de la isla; baja en móvil (ver media queries al final) */
+  --nav-flow: calc(var(--nav-gap) + var(--nav-h)); /* Espacio que la isla ocupa en el flujo */
+  --bb-layout-max: 1320px; /* Ancho máximo de la isla y del contenido */
+  --bb-layout-gutter: 1rem; /* Margen lateral mínimo: `min(1320px, 100% − 2rem)` */
+  --bb-layout-width: min(var(--bb-layout-max), calc(100% - 2 * var(--bb-layout-gutter)));
+
+  /* ── Anillo de foco (RNF-A11Y-01): rojo de 2 px y halo ──────────────────────────────────── */
+  --bb-focus-width: 2px;
+  --bb-focus-offset: 2px;
+  --bb-focus-color: var(--bb-red);
+  --bb-focus-halo: 0 0 0 6px var(--bb-red-wash), 0 0 18px var(--bb-red-glow);
+
+  /*
+   * ── Movimiento (§3.6): duraciones ────────────────────────────────────────────────────────
+   * Son para transiciones y animaciones de una pasada. Las animaciones en bucle (separadores de la
+   * cuenta atrás a 1 Hz, latido de la última hora, marquee; §3.3 y Anexo E) NO usan `--bb-dur-*`:
+   * con «reducir movimiento» se recortan (ver abajo) y el bucle iría más rápido, con riesgo de pasar
+   * de 3 destellos por segundo (RNF-A11Y-04). Su periodo va en un token de bucle propio, que no cambia
+   * con la preferencia, y se añade (aquí y en §3.6) con la primera pieza que lo necesite. Además,
+   * `global.css` deja cualquier bucle en una sola pasada con «reducir movimiento».
+   */
+  --bb-dur-instant: 80ms; /* Pulsado, cambio de color */
+  --bb-dur-fast: 150ms; /* Hover, chips, tooltips */
+  --bb-dur-base: 240ms; /* Modales, cambios de panel, barrido de la transición de página */
+  --bb-dur-slow: 420ms; /* Transición de página, entrada de secciones */
+  --bb-dur-reward: 900ms; /* XP, logro, voto de 5 */
+
+  /* ── Movimiento (§3.6): curvas ──────────────────────────────────────────────────────────── */
+  --bb-ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* Por defecto */
+  --bb-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* Transiciones de página */
+  --bb-ease-back: cubic-bezier(0.34, 1.56, 0.64, 1); /* Recompensas */
+
+  /*
+   * Muelles (§3.6), solo como referencia: CSS no los expresa. Los usa Motion desde
+   * `@beatbattle/shared/tokens` (`spring.interaction`, `spring.reward`):
+   *   interacción  { stiffness: 400, damping: 28 }
+   *   recompensa   { stiffness: 220, damping: 12 }
+   */
+
+  /*
+   * Multiplicador de desplazamiento: 1 normalmente, 0 con «reducir movimiento». Las piezas que se
+   * mueven lo usan en sus transformaciones, p. ej. `translateY(calc(-1px * var(--bb-motion)))`.
+   */
+  --bb-motion: 1;
+}
+
+/*
+ * Ángulo del borde holográfico de la rareza épica (§3.2, §3.5). Registrado para que una animación
+ * lo pueda interpolar (sin registro, una variable salta de valor a valor). No se hereda: cada pieza
+ * holográfica gira por su cuenta.
+ */
+@property --bb-holo-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* La isla es más baja sin enlaces (≤ 992 px) y con menos padding (≤ 600 px), como en Header.css. */
+@media (max-width: 992px) {
+  :root {
+    --nav-h: 62px;
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --nav-h: 54px;
+  }
+}
+
+/*
+ * «Reducir movimiento» (§2.17 RNF-A11Y-03, §3.6): sin 3D, sin partículas ni desplazamientos; solo
+ * fundidos de 200 ms como mucho (la transición de página queda en un fundido de 150 ms). Se activa con
+ * la preferencia del sistema o con el ajuste propio de la app (`<html data-motion="reduced">`,
+ * RNF-A11Y-08). Los dos bloques son idénticos a propósito: CSS no permite compartirlos.
+ */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --bb-dur-base: 150ms;
+    --bb-dur-slow: 200ms;
+    --bb-dur-reward: 200ms;
+    --bb-ease-back: var(--bb-ease-out);
+    --bb-motion: 0;
+  }
+}
+
+:root[data-motion="reduced"] {
+  --bb-dur-base: 150ms;
+  --bb-dur-slow: 200ms;
+  --bb-dur-reward: 200ms;
+  --bb-ease-back: var(--bb-ease-out);
+  --bb-motion: 0;
+}
