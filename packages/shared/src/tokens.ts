@@ -19,9 +19,12 @@ export const color = {
   ink700: '#1e1e1e',
   ink600: '#2a2a2a',
   glass: '#2b2b2bce',
+  glassCard: 'rgba(0, 0, 0, 0.58)',
+  glassBand: 'rgba(0, 0, 0, 0.4)',
 
   line: 'rgba(255, 255, 255, 0.08)',
   lineStrong: 'rgba(255, 255, 255, 0.18)',
+  lineButton: 'rgba(255, 255, 255, 0.3)',
   fillHover: 'rgba(255, 255, 255, 0.06)',
   fillActive: 'rgba(255, 255, 255, 0.1)',
   scrim: 'rgba(0, 0, 0, 0.7)',
@@ -34,9 +37,12 @@ export const color = {
   red: '#ff003c',
   redHover: '#e6003a',
   redPress: '#cc0030',
+  redCta: '#e6003a',
   redText: '#ff4d6d',
   redGlow: 'rgba(255, 0, 60, 0.4)',
   redWash: 'rgba(255, 0, 60, 0.1)',
+  redLine: 'rgba(255, 0, 60, 0.25)',
+  redRule: 'rgba(255, 0, 60, 0.5)',
   wine: '#4a0d1c',
   waveIdle: '#3a3a3a',
 
@@ -91,6 +97,26 @@ export const ease = {
 
 export type EaseToken = keyof typeof ease
 
+/**
+ * Periodos de los bucles en milisegundos (`--bb-loop-*`). No se recortan con «reducir movimiento»:
+ * con la preferencia, la pieza en bucle pasa a su variante estática (Anexo E).
+ */
+export const loop = {
+  /** Una vuelta del marquee del hero. */
+  marquee: 35_000,
+  /** Marquee sin movimiento: la lista estática rota cada 5 s. */
+  tickerStep: 5_000,
+  /** Orbes del fondo: deriva y pulso de cada uno. */
+  orbDrift1: 14_000,
+  orbDrift2: 18_000,
+  orbDrift3: 22_000,
+  orbPulse1: 11_000,
+  orbPulse2: 14_000,
+  orbPulse3: 9_000,
+} as const
+
+export type LoopToken = keyof typeof loop
+
 /** Muelles de §3.6 para Motion (`transition={{ type: 'spring', ...spring.interaction }}`). */
 export const spring = {
   /** Lo que se mueve por interacción. */
@@ -113,8 +139,14 @@ export const zIndex = {
 } as const
 
 /** Nombre de la variable CSS de un token: `cssVarName('color', 'ink950')` → `--bb-ink-950`. */
-export function cssVarName(group: 'color' | 'duration' | 'ease' | 'zIndex', key: string): string {
-  const prefix = { color: '--bb-', duration: '--bb-dur-', ease: '--bb-ease-', zIndex: '--bb-z-' }[group]
+export function cssVarName(group: 'color' | 'duration' | 'ease' | 'loop' | 'zIndex', key: string): string {
+  const prefix = {
+    color: '--bb-',
+    duration: '--bb-dur-',
+    ease: '--bb-ease-',
+    loop: '--bb-loop-',
+    zIndex: '--bb-z-',
+  }[group]
   return prefix + toKebab(key)
 }
 
