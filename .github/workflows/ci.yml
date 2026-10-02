@@ -1,5 +1,6 @@
-# Calidad en cada PR y en cada push a main (guía §4.16). Los pasos de Playwright (E2E, axe y capturas)
-# llegan con la tarea 0.13.
+# Calidad en cada PR y en cada push a main (guía §4.16): auditoría → Biome y lints propios → tipos →
+# Vitest → build → Playwright (E2E, axe y «reducir movimiento», tarea 0.13). Las capturas de referencia
+# por pantalla (§4.16 «Visual») llegan con las pantallas reales.
 name: CI
 
 on:
@@ -37,3 +38,16 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+      # E2E con el Chromium de Playwright y sus dependencias del sistema. playwright.config.ts arranca la
+      # web (Vite en desarrollo: la galería solo existe ahí) y la API con una BD temporal nueva.
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e
+        env:
+          CI: '1'
+      # Si algo falla, las trazas del reintento (test-results/) para abrirlas con `playwright show-trace`.
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-test-results
+          path: test-results/
+          retention-days: 7
