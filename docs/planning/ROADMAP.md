@@ -51,8 +51,8 @@ por secciones. Del 0.23 al 0.27 también (guía v0.6.3): marco de juego, compone
 estados, menú principal como pantalla de título, pantallas interiores y retirada de lo copiado del sello
 (lista de excepciones del lint vacía, E2E de marca y de juego en verde). La 0.28 está en curso: el
 jurado visual ya pasó (acta en `docs/planning/evidence/f0/arena/jurado.md`, guía v0.6.4) y sus
-discrepancias altas y medias están corregidas; quedan la revisión adversarial, el README y un segundo
-pase del jurado.
+discrepancias altas y medias están corregidas; la revisión adversarial también (16 hallazgos confirmados
+y arreglados, guía v0.6.5); quedan el README y un segundo pase del jurado.
 La Fase 1 espera a que termine, porque su Escenario (1.1) dependía del Silk del sello.
 
 ## Grafo de dependencias
@@ -167,6 +167,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-03 | F0 | 0.28: revisión adversarial de la Arena hecha (16 hallazgos confirmados de accesibilidad, rendimiento, código e integridad, arreglados en 14 commits `fix(0.22)`…`fix(0.27)` con su test); guía v0.6.5; LCP de la home 1,75 s; `check`, `typecheck`, `test`, `build` y `e2e` 170/170 en verde. Quedan el README y el segundo pase del jurado. |
 | 2026-10-03 | F0 | 0.28 en curso: jurado visual de la Arena (juego ❌, marca ✅, accesibilidad ❌) y sus 24 problemas corregidos o aplazados con motivo (`fix(0.23)`, `fix(0.24)`, `fix(0.26)`, `fix(0.25)`); guía v0.6.4; `check`, `typecheck`, `test`, `build` y `e2e` 155/155 en verde. Nueva tarea 1.13 (puerta de entrada completa) en el plan 01. |
 | 2026-10-03 | F0 | 0.22–0.27 hechas: base de la arena, marco de juego, componentes, menú principal, pantallas interiores y retirada de lo copiado del sello (guía v0.6.3; `check`, `typecheck`, `test`, `build` y `e2e` en verde). Lista la 0.28. |
 | 2026-10-03 | F0 | 0.21 hecha: guía v0.6 con la dirección «Arena» y maquetas aprobadas en `docs/planning/evidence/f0/arena/`. Lista la 0.22. |
