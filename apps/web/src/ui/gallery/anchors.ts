@@ -20,17 +20,3 @@ export const COMPONENT_ANCHORS = [
 ] as const
 
 export type ComponentKey = (typeof COMPONENT_ANCHORS)[number]['key']
-
-/** Piezas del layout del sello (tarea 0.7): marco de la página y hero. */
-export const LAYOUT_ANCHORS = [
-  { id: 'isla', key: 'island' },
-  { id: 'pie', key: 'footer' },
-  { id: 'titular', key: 'heroTitle' },
-  { id: 'rotulos', key: 'sideLabel' },
-  { id: 'rejilla', key: 'backdrop' },
-  { id: 'marquee', key: 'marquee' },
-  { id: 'orbes', key: 'orbs' },
-  { id: 'cristal', key: 'glassSurface' },
-] as const
-
-export type LayoutKey = (typeof LAYOUT_ANCHORS)[number]['key']

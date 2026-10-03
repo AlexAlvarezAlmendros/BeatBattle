@@ -85,7 +85,7 @@ describe('router (0.10, guía §2.18)', () => {
     expect(await screen.findByText(/«2026-41»/)).toBeInTheDocument()
   })
 
-  it('todas las páginas están dentro del marco: saltar al contenido, cabecera, <main id="contenido"> y pie', async () => {
+  it('todas las páginas están dentro del marco: saltar al contenido, HUD, <main id="contenido"> y barra con la firma', async () => {
     renderAt('/semanas')
     await h1(t('pages.weeks.title'))
     const skip = screen.getByRole('link', { name: t('app.skipToContent') })
@@ -94,12 +94,32 @@ describe('router (0.10, guía §2.18)', () => {
     expect(screen.getByRole('main')).toHaveAttribute('id', 'contenido')
     // Destino de foco programático: global.css le quita el anillo solo a lo que lleva esta marca.
     expect(screen.getByRole('main')).toHaveAttribute('data-focus-target')
-    expect(screen.getByRole('contentinfo')).toBeInTheDocument()
-    const nav = screen.getByRole('navigation', { name: t('layout.nav.label') })
-    expect(within(nav).getByRole('link', { name: t('layout.nav.results') })).toHaveAttribute(
-      'aria-current',
-      'page',
+    const bar = screen.getByRole('contentinfo')
+    expect(within(bar).getByRole('link', { name: t('frame.controls.signatureLabel') })).toHaveAttribute(
+      'data-otp-signature',
     )
+  })
+
+  it('RD-VIS-02: cada ruta declara su pantalla del marco de juego (cuña, teclas y placa)', () => {
+    const leaves: string[] = []
+    const walk = (list: RouteObject[], prefix: string) => {
+      for (const route of list) {
+        const path = route.index ? prefix : `${prefix}/${route.path ?? ''}`.replace(/\/+/g, '/')
+        if (route.children) walk(route.children, path)
+        else leaves.push(path.replace(/:[a-z]+/gi, 'x') || '/')
+      }
+    }
+    walk(routes, '')
+    expect(leaves.length).toBeGreaterThan(20)
+    for (const path of leaves) {
+      const handles = (matchRoutes(routes, path) ?? [])
+        .map((m) => m.route.handle as RouteHandle | undefined)
+        .filter((h): h is RouteHandle => Boolean(h?.screen))
+      const screenConfig = handles.at(-1)?.screen
+      expect(screenConfig, path).toBeDefined()
+      expect(screenConfig?.keys.length, path).toBeGreaterThan(0)
+      expect(screenConfig?.keys, path).toContain('sound')
+    }
   })
 
   it('RNF-A11Y-01: «Saltar al contenido» lleva el foco al <main>', async () => {
@@ -147,9 +167,8 @@ describe('router (0.10, guía §2.18)', () => {
     await h1(t('pages.home.title'))
     const scrollTo = vi.mocked(window.scrollTo)
     scrollTo.mockClear()
-    const nav = screen.getByRole('navigation', { name: t('layout.nav.label') })
-    await user.click(within(nav).getByRole('link', { name: t('layout.nav.howItWorks') }))
-    expect(await h1(t('pages.howItWorks.title'))).toBeInTheDocument()
+    await user.click(screen.getByRole('link', { name: t('frame.hud.joinLabel') }))
+    expect(await h1(t('pages.signIn.title'))).toBeInTheDocument()
     expect(scrollTo).toHaveBeenCalledWith(0, 0)
     expect(screen.getByRole('main')).toHaveFocus()
   })

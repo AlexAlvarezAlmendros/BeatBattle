@@ -1,68 +1,98 @@
 /*
- * Marco de todas las páginas (tarea 0.7): capas y medidas del contenido. La isla, el pie y el fondo
- * llevan su propio CSS junto a su componente.
- *
- * Capas (§3.2): fondo (orbes, y el Escenario en la Fase 1) en `--bb-z-stage`, contenido y pie en
- * `--bb-z-content` y la isla por encima, en `--bb-z-hud`.
+ * Marco de juego (guía §3.4.1, §3.6; tarea 0.23): la pantalla es una rejilla de HUD, contenido y barra
+ * de controles sobre la arena fija. Capas (§3.2): arena en `--bb-z-stage`, contenido en
+ * `--bb-z-content`, HUD en `--bb-z-hud` y barra en `--bb-z-controls`.
  */
+.game-frame {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100dvh;
+}
 
-.site-main,
-.site-footer {
+.game-main {
   position: relative;
   z-index: var(--bb-z-content);
+  min-width: 0;
+  padding: var(--bb-space-6) var(--bb-gutter) var(--bb-space-8);
 }
 
-.site-main {
-  /*
-   * Relleno del contenido: el del `.container` del sello (`index.css`: `padding: 2rem`, sin ancho
-   * máximo), a 32 px de los bordes en escritorio y en móvil; el título de `/beats` queda a 32 px bajo
-   * la isla y a 32 px del borde. Cada página pone su ancho máximo si lo necesita. Lo leen también los
-   * bloques que suben hasta el borde (`.bleed-top`).
-   */
-  --site-main-pad: var(--bb-space-8);
-  min-height: 60vh;
-  padding: var(--site-main-pad);
+/* Ningún control enfocado queda tapado por el HUD al desplazarse para enseñarlo (§3.3). */
+.game-main :is(a[href], button, input, select, textarea, summary, [tabindex], [id]) {
+  scroll-margin-top: var(--bb-space-6);
 }
 
 /*
- * Bloque a sangre que sube hasta el borde superior, por debajo de la isla (el hero, como en el sello:
- * Hero.css niega el espacio en flujo de la isla, `--nav-flow`, y el relleno del contenido). Ocupa todo
- * el ancho de la ventana aunque esté dentro del contenido centrado.
+ * ── Transición de pantalla (§3.6) ─────────────────────────────────────────────────────────
+ * El contenido nuevo entra deslizándose desde la diagonal (`--bb-dur-slam`) mientras la diagonal barre
+ * la pantalla (`--bb-dur-base`, `--bb-ease-in-out`). Con «reducir movimiento»: fundido de 150 ms, sin
+ * desplazamiento ni barrido. Navegar no destella nunca: la diagonal es una banda de 12 px.
  */
-.bleed-top {
-  width: 100vw;
-  margin-top: calc(-1 * (var(--nav-flow) + var(--site-main-pad, 0px)));
-  margin-inline: calc(50% - 50vw);
+.game-screen[data-entering] {
+  animation: bb-screen-in var(--bb-dur-slam) var(--bb-ease-out);
 }
 
-/*
- * Medidas de la isla del sello (eran tokens hasta la v0.6, que los retira: §3.2). Viven aquí, con la
- * isla, hasta que el marco de juego (0.23) la sustituya y la 0.27 borre este fichero:
- * - `--nav-gap`, `--nav-h`, `--nav-flow`: separación, alto (baja en ≤ 992 y ≤ 600 px) y espacio en flujo.
- * - `--nav-obscured`: lo que la isla sticky (y el logo que cuelga de ella) taparía al desplazarse para
- *   enseñar un control enfocado o un ancla (estaba en global.css). 128 px en escritorio y 124 en ≤ 992 px:
- *   el logo de 120 px girado −10° baja hasta y = 119 (117); con el anillo de foco y un poco de aire.
- */
-:root {
-  --nav-gap: 16px;
-  --nav-h: 69px;
-  --nav-flow: calc(var(--nav-gap) + var(--nav-h));
-  --nav-obscured: 128px;
-}
-
-@media (max-width: 992px) {
-  :root {
-    --nav-h: 62px;
-    --nav-obscured: 124px;
+@keyframes bb-screen-in {
+  from {
+    opacity: 0;
+    translate: calc(-1 * var(--bb-space-10)) 0;
   }
 }
 
-@media (max-width: 600px) {
-  :root {
-    --nav-h: 54px;
+@keyframes bb-screen-fade {
+  from {
+    opacity: 0;
   }
 }
 
-:where(.site-main, .site-footer) :is(a[href], button, input, select, textarea, summary, [tabindex], [id]) {
-  scroll-margin-top: var(--nav-obscured);
+.screen-sweep {
+  position: fixed;
+  inset-block: 0;
+  left: 0;
+  z-index: var(--bb-z-player);
+  width: var(--bb-split-band);
+  background: var(--bb-red);
+  pointer-events: none;
+  transform: skewX(calc(-1 * var(--bb-split-angle)));
+  transform-origin: 0 100%;
+  animation: bb-screen-sweep var(--bb-dur-base) var(--bb-ease-in-out) forwards;
+}
+
+/* El filete blanco que acompaña a la banda roja de la diagonal. */
+.screen-sweep::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  right: calc(100% + var(--bb-split-gap));
+  width: var(--bb-split-rule);
+  background: var(--bb-white);
+}
+
+@keyframes bb-screen-sweep {
+  from {
+    translate: -30vw 0;
+  }
+
+  to {
+    translate: 130vw 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-screen[data-entering] {
+    animation-name: bb-screen-fade;
+  }
+
+  .screen-sweep {
+    display: none;
+  }
+}
+
+:root[data-motion="reduced"] .game-screen[data-entering] {
+  animation-name: bb-screen-fade;
+}
+
+:root[data-motion="reduced"] .screen-sweep {
+  display: none;
 }

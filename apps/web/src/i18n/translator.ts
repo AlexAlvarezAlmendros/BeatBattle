@@ -46,8 +46,8 @@ export interface Translator<T> {
   has(key: string): key is MessageKeys<T>
   /**
    * Como `t()`, pero las variables pueden ser cualquier cosa (p. ej. elementos de React) y devuelve
-   * los trozos en orden: `t.parts('footer.credit', { brand: 'Beat Battle', otherPeople: <a … /> })`
-   * → `['Beat Battle', ' · ', <a … />]`. Los textos vacíos no salen.
+   * los trozos en orden: `t.parts('app.pageTitle', { page: <a … /> })` → `[<a … />, ' · Beat Battle']`.
+   * Los textos vacíos no salen.
    */
   parts<V>(key: MessageKeys<T>, vars: Readonly<Record<string, V | string | number>>): (string | V)[]
 }

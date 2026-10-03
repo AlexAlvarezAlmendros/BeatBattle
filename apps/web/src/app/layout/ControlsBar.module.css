@@ -1,0 +1,140 @@
+/*
+ * Barra de controles inferior (guía §3.4.1; maquetas `final.css` `.ctrl`): 58 px, negra, filete rojo de
+ * 2 px y línea discontinua encima. Pegada al pie de la ventana mientras se desplaza la pantalla
+ * (`sticky`), con su alto como margen del foco (`--bb-controls-h`, global.css). Tres columnas: teclas,
+ * firma centrada y dato.
+ */
+.bar {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--bb-z-controls);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--bb-space-5);
+  height: var(--bb-controls-h);
+  padding: 0 var(--bb-gutter);
+  border-top: var(--bb-stroke) solid var(--bb-red);
+  background: var(--bb-black);
+}
+
+/* Línea discontinua roja por encima del filete. */
+.bar::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: calc(-1 * var(--bb-space-2));
+  height: var(--bb-space-1);
+  background: repeating-linear-gradient(
+    90deg,
+    var(--bb-red) 0 var(--bb-space-6),
+    transparent var(--bb-space-6) var(--bb-space-8)
+  );
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.keys {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-4);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-1);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.control > span:last-child {
+  margin-left: var(--bb-space-1);
+}
+
+/* ── La firma ───────────────────────────────────────────────────────────────────────────── */
+.signature {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bb-space-3);
+  min-height: var(--bb-target);
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-semibold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.signature:hover {
+  color: var(--bb-white);
+}
+
+/* ── Dato de la derecha ─────────────────────────────────────────────────────────────────── */
+.right {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  white-space: nowrap;
+}
+
+.legal {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bb-target);
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-xs);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.legal:hover {
+  color: var(--bb-white);
+}
+
+/* Táctil: sin teclas (no hay teclado); queda la firma (§3.4.1). */
+@media (hover: none), (pointer: coarse) {
+  .keys {
+    visibility: hidden;
+  }
+}
+
+/*
+ * Móvil: la barra deja de ir pegada y lleva la firma centrada (maquetas, `01-menu.html`); el dato de la
+ * pantalla (la crónica del menú) se va, y el enlace «Legal» de las interiores se queda al lado.
+ */
+@media (max-width: 720px) {
+  .bar {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 var(--bb-space-5);
+    height: auto;
+    padding: var(--bb-space-2) var(--bb-gutter) var(--bb-space-3);
+    border-top: 0;
+  }
+
+  .bar::before,
+  .keys,
+  .right[data-claimed] {
+    display: none;
+  }
+}

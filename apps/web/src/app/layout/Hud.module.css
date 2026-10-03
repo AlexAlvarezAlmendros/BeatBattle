@@ -1,0 +1,116 @@
+/*
+ * HUD superior (guía §3.4.1): rejilla de tres columnas con el medianil de pantalla, como en las
+ * maquetas (`final.css` `.hud`, `.p1`, `.iconbtn`). En móvil se compacta en una fila (jugador y
+ * sonido) y el centro baja a la pantalla (el reloj, a la tarjeta de la semana).
+ */
+.hud {
+  position: relative;
+  z-index: var(--bb-z-hud);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--bb-space-6);
+  padding: var(--bb-space-5) var(--bb-gutter) 0;
+}
+
+.player {
+  justify-self: start;
+  min-width: 0;
+}
+
+.center {
+  justify-self: center;
+}
+
+.right {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+}
+
+.extras {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+}
+
+/* ── «1P · PULSA PARA UNIRTE» ───────────────────────────────────────────────────────────── */
+.join {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-3);
+  min-height: var(--bb-target);
+  color: var(--bb-text);
+  text-decoration: none;
+}
+
+.p1 {
+  color: var(--bb-red);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-xl);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-display);
+  line-height: 1;
+}
+
+.joinAvatar {
+  --frame-border: var(--bb-red);
+  --frame-fill: var(--bb-wine);
+  display: grid;
+  place-items: center;
+  width: var(--bb-target);
+  height: var(--bb-target);
+  font-size: var(--bb-fs-lg);
+}
+
+.joinText {
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label-wide);
+  text-transform: uppercase;
+}
+
+/* Hover: el avatar se enciende (como la placa elegida del menú). */
+.join:hover .joinAvatar {
+  --frame-fill: var(--bb-red-cta);
+}
+
+/* ── Botón de sonido ────────────────────────────────────────────────────────────────────── */
+.sound {
+  --frame-fill: var(--bb-panel-veil);
+  display: grid;
+  place-items: center;
+  width: var(--bb-target);
+  height: var(--bb-target);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bb-white);
+  font-size: var(--bb-fs-lg);
+}
+
+.sound:hover {
+  --frame-border: var(--bb-white);
+}
+
+.sound[aria-pressed="false"] {
+  color: var(--bb-text-3);
+}
+
+@media (max-width: 720px) {
+  .hud {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--bb-space-3);
+    padding: var(--bb-space-3) var(--bb-gutter) 0;
+  }
+
+  .center {
+    display: none;
+  }
+
+  .p1 {
+    display: none;
+  }
+}

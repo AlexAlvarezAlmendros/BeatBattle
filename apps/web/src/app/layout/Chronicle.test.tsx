@@ -1,0 +1,38 @@
+import { loop } from '@beatbattle/shared/tokens'
+import { act, render, screen } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { Chronicle } from './Chronicle'
+
+const MESSAGES = ['Próximo drop en el horno', 'Un sample cada lunes', 'La comunidad vota'] as const
+
+beforeEach(() => vi.useFakeTimers())
+afterEach(() => {
+  vi.useRealTimers()
+  document.documentElement.removeAttribute('data-motion')
+})
+
+describe('crónica de la arena (§3.8.3)', () => {
+  it('cambia de mensaje cada 5 s (--bb-loop-chronicle) y vuelve al primero', () => {
+    render(<Chronicle messages={MESSAGES} label="Crónica de la arena" />)
+    expect(screen.getByText(MESSAGES[0])).toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(loop.chronicle))
+    expect(screen.getByText(MESSAGES[1])).toBeInTheDocument()
+    act(() => vi.advanceTimersByTime(loop.chronicle * 2))
+    expect(screen.getByText(MESSAGES[0])).toBeInTheDocument()
+  })
+
+  it('no es una región viva y lleva su nombre para los lectores de pantalla', () => {
+    render(<Chronicle messages={MESSAGES} label="Crónica de la arena" />)
+    const line = screen.getByText(MESSAGES[0]).closest('p')!
+    expect(line).toHaveAttribute('aria-live', 'off')
+    expect(line).toHaveTextContent('Crónica de la arena:')
+  })
+
+  it('RNF-A11Y-03: con «reducir movimiento» se queda quieta en el primer mensaje', () => {
+    document.documentElement.setAttribute('data-motion', 'reduced')
+    render(<Chronicle messages={MESSAGES} label="Crónica de la arena" />)
+    act(() => vi.advanceTimersByTime(loop.chronicle * 3))
+    expect(screen.getByText(MESSAGES[0])).toBeInTheDocument()
+    expect(screen.getByText(MESSAGES[0]).closest('p')).toHaveAttribute('data-static', 'true')
+  })
+})

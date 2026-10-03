@@ -1,4 +1,4 @@
-import { COMPONENT_ANCHORS, LAYOUT_ANCHORS } from '../anchors'
+import { COMPONENT_ANCHORS } from '../anchors'
 import type { GallerySectionEntry } from '../registry'
 
 /**
@@ -29,14 +29,5 @@ export const GALLERY_SECTIONS: readonly GallerySectionEntry[] = [
       label: `dev.gallery.components.${key}` as const,
     })),
     load: () => import('./LegacyComponentsSection'),
-  },
-  {
-    id: 'layout',
-    title: 'dev.gallery.sections.layout',
-    anchors: LAYOUT_ANCHORS.map(({ id, key }) => ({
-      id,
-      label: `dev.gallery.layout.pieces.${key}` as const,
-    })),
-    load: () => import('./LegacyLayoutSection'),
   },
 ]

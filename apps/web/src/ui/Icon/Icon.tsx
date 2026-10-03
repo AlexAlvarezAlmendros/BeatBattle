@@ -68,6 +68,28 @@ const PATHS = {
       <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
     </>
   ),
+  /* Botón de sonido del HUD (§3.4.1): altavoz con ondas, o tachado. */
+  soundOn: (
+    <>
+      <path d="M4 9h4l5-4v14l-5-4H4z" className={styles.solid} />
+      <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" />
+    </>
+  ),
+  soundOff: (
+    <>
+      <path d="M4 9h4l5-4v14l-5-4H4z" className={styles.solid} />
+      <path d="M16 9l5 6M21 9l-5 6" />
+    </>
+  ),
+  /* Opción de menú deshabilitada (§3.3 «Opción de menú»): candado. */
+  lock: (
+    <>
+      <path d="M5 11h14v10H5z" />
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </>
+  ),
+  /* Flecha maciza del cursor de las placas del menú y del botón «Escuchar». */
+  triangleRight: <path d="M7 4.5v15L19 12z" className={styles.solid} />,
 } satisfies Record<string, ReactNode>
 
 export type IconName = keyof typeof PATHS

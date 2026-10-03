@@ -69,7 +69,7 @@ describe('i18n: t()', () => {
     const link = { element: 'a' }
     expect(strict.parts('greeting', { name: link })).toEqual(['Hola, ', link])
     expect(strict.parts('week.votes', { count: 12345 })).toEqual(['12.345', ' votos'])
-    expect(t.parts('footer.credit', { brand: 'B', otherPeople: link })).toEqual(['B', ' · ', link])
+    expect(t.parts('app.pageTitle', { page: link })).toEqual([link, ' · Beat Battle'])
     expect(() => strict.parts('greeting', {})).toThrow(/Falta la variable «name»/)
     expect(lenient.parts('greeting', {})).toEqual(['Hola, ', '{name}'])
     // @ts-expect-error: clave inexistente a propósito

@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
 import { resetGlassCapabilityCache } from '../glass'
 import { useToasts } from '../Toast'
-import { COMPONENT_ANCHORS, LAYOUT_ANCHORS } from './anchors'
+import { COMPONENT_ANCHORS } from './anchors'
 import { CONTRAST_RULES } from './contrast'
 import { GalleryPage } from './GalleryPage'
 import { GALLERY_SECTIONS } from './sections'
@@ -240,64 +240,6 @@ describe('galería /dev/galeria (0.9)', { timeout: 15_000 }, () => {
     expect(cell('aviso', 'error').querySelector('[data-tone="error"]')).not.toBeNull()
     // Barra de XP: el éxito es la subida de nivel.
     expect(cell('xp', 'success').querySelector('[data-force-state="levelUp"]')).not.toBeNull()
-  })
-
-  it('RD-VIS-03: el layout del sello enseña isla, pie, titular, rótulos, rejilla y viñeta, marquee, orbes y GlassSurface', async () => {
-    vi.stubGlobal('CSS', { supports: () => true })
-    resetGlassCapabilityCache()
-    await renderGallery()
-    for (const { id, key } of LAYOUT_ANCHORS) {
-      const block = document.getElementById(id)
-      expect(block, id).not.toBeNull()
-      expect(within(block!).getAllByRole('heading', { level: 3 })[0]!.textContent).toBe(
-        t(`dev.gallery.layout.pieces.${key}`),
-      )
-    }
-    const byId = (id: string) => document.getElementById(id)!
-    // Isla con cristal y sin él (alternativa), como muestras inertes: no duplican la navegación.
-    const islands = byId('isla').querySelectorAll('.site-header')
-    expect(islands).toHaveLength(2)
-    expect(islands[0]).toHaveAttribute('data-glass', 'on')
-    expect(islands[1]).not.toHaveAttribute('data-glass')
-    for (const island of islands) expect(island.closest('[inert][aria-hidden="true"]')).not.toBeNull()
-    expect(within(byId('isla')).queryByRole('navigation')).toBeNull()
-    expect(byId('pie').querySelector('.site-footer')?.closest('[inert]')).not.toBeNull()
-    expect(byId('titular').querySelector('.hero-title')).not.toBeNull()
-    expect(byId('rotulos').querySelectorAll('.side-label')).toHaveLength(2)
-    expect(byId('rejilla').querySelectorAll('.hero-grid')).toHaveLength(2)
-    expect(byId('rejilla').querySelectorAll('.hero-vignette')).toHaveLength(2)
-    expect(within(byId('marquee')).getByRole('marquee', { name: t('home.ticker.label') })).toBeInTheDocument()
-    expect(byId('orbes').querySelectorAll('.ambient-orbs__orb')).toHaveLength(3)
-    const panels = byId('cristal').querySelectorAll('[data-glass="on"]')
-    expect(panels).toHaveLength(3)
-    expect(byId('cristal').querySelectorAll('[data-glass="on"] feColorMatrix')).toHaveLength(3)
-  })
-
-  it('RNF-A11Y-03 / RD-MOT-03: con «reducir movimiento» el layout pasa a su variante (marquee quieto, sin cristal)', async () => {
-    vi.stubGlobal('CSS', { supports: () => true })
-    resetGlassCapabilityCache()
-    const user = userEvent.setup()
-    await renderGallery()
-    const layout = document.getElementById('layout')!
-    const marquee = within(layout).getByRole('marquee')
-    expect(marquee).not.toHaveAttribute('data-static')
-    expect(layout.querySelectorAll('[data-glass="on"]').length).toBeGreaterThan(0)
-    await user.click(screen.getByRole('switch', { name: t('dev.gallery.controls.reducedMotion') }))
-    await act(async () => {})
-    expect(marquee).toHaveAttribute('data-static', 'true')
-    expect(layout.querySelectorAll('[data-glass="on"]')).toHaveLength(0)
-    expect(layout.querySelector('[data-glass-capability]')).toHaveAttribute('data-glass-capability', 'off')
-  })
-
-  it('el interruptor de cristal apaga también las GlassSurface del layout (calidad baja)', async () => {
-    vi.stubGlobal('CSS', { supports: () => true })
-    resetGlassCapabilityCache()
-    const user = userEvent.setup()
-    await renderGallery()
-    const layout = document.getElementById('layout')!
-    expect(layout.querySelectorAll('[data-glass="on"]').length).toBeGreaterThan(0)
-    await user.click(screen.getByRole('switch', { name: t('dev.gallery.controls.glassLayout') }))
-    expect(layout.querySelectorAll('[data-glass="on"]')).toHaveLength(0)
   })
 
   it('RNF-A11Y-03 / RD-MOT-03: el interruptor «Reducir movimiento» pone data-motion="reduced" en <html>', async () => {

@@ -1,7 +1,7 @@
 import { ease, loop, reducedDuration, toCssCubicBezier } from '@beatbattle/shared/tokens'
 import { type Ref, useEffect, useRef, useState } from 'react'
-import { PauseIcon, PlayIcon } from '../../../app/layout/icons'
 import { useReducedMotion } from '../../../ui/hooks/useReducedMotion'
+import { Icon } from '../../../ui/Icon'
 
 interface MarqueeBandProps {
   /** Palabras de la banda, ya traducidas. */
@@ -132,9 +132,9 @@ export function MarqueeBand({ items, label, pauseLabel, className }: MarqueeBand
       >
         <span className="marquee__toggle-face" aria-hidden="true">
           {paused ? (
-            <PlayIcon className="marquee__toggle-icon" />
+            <Icon name="play" className="marquee__toggle-icon" />
           ) : (
-            <PauseIcon className="marquee__toggle-icon" />
+            <Icon name="pause" className="marquee__toggle-icon" />
           )}
         </span>
       </button>

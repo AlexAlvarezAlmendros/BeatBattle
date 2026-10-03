@@ -1,0 +1,156 @@
+/*
+ * La arena estática (guía §3.5 capa 0, §3.2 «Texturas» y «Forma»; maquetas `01-menu.html`,
+ * `02-seleccion.html`, `05-perfil.html`). Fija a la ventana, detrás de todo (`--bb-z-stage`).
+ *
+ * `--split-x` es dónde corta la diagonal el pie de la ventana (en `vw`: la cuña y su interior lo leen
+ * desde cajas de distinto ancho). Con `skewX(-17°)` y el origen abajo, la diagonal sube hacia la derecha
+ * en cualquier proporción de ventana (a 1440 × 900, del 40 % abajo al 59 % arriba, como la maqueta).
+ * El `skewX` no depende del origen horizontal, solo del vertical: con el mismo origen abajo, el giro
+ * contrario del interior (`.straight`) lo endereza del todo.
+ */
+.arena {
+  --split-x: 40vw;
+  --burst-x: 26%;
+  --burst-y: 34%;
+  --skew: calc(-1 * var(--bb-split-angle));
+  position: fixed;
+  inset: 0;
+  z-index: var(--bb-z-stage);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.arena[data-wedge="left"] {
+  --split-x: 30vw;
+  --burst-x: 18%;
+  --burst-y: 46%;
+}
+
+/* ── Estallido de rayos (§3.2): blanco al 4,5 %, rayo de 1,2° cada 6°, con máscara radial ───── */
+.burst {
+  position: absolute;
+  inset: -20%;
+  background: repeating-conic-gradient(
+    from 0deg at var(--burst-x) var(--burst-y),
+    var(--bb-tex-ray-ink) 0 var(--bb-tex-ray-width),
+    transparent var(--bb-tex-ray-width) var(--bb-tex-ray-step)
+  );
+  mask: radial-gradient(circle at var(--burst-x) var(--burst-y), var(--bb-black) 18%, transparent 55%);
+}
+
+/* ── Cuña granate con su trama ──────────────────────────────────────────────────────────── */
+.wedge {
+  position: absolute;
+  inset-block: 0;
+  overflow: hidden;
+  background: var(--bb-wine-2);
+  transform: skewX(var(--skew));
+  transform-origin: 0 100%;
+}
+
+.straight {
+  position: absolute;
+  inset-block: 0;
+  width: 100vw;
+  transform: skewX(var(--bb-split-angle));
+  transform-origin: 0 100%;
+}
+
+.arena[data-wedge="right"] .wedge {
+  left: var(--split-x);
+  width: 200vw;
+}
+
+.arena[data-wedge="right"] .straight {
+  left: calc(-1 * var(--split-x));
+}
+
+.arena[data-wedge="left"] .wedge {
+  left: -100vw;
+  width: calc(100vw + var(--split-x));
+}
+
+.arena[data-wedge="left"] .straight {
+  left: 100vw;
+}
+
+.halftone {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.extras {
+  position: absolute;
+  inset: 0;
+}
+
+/* ── Diagonal: banda roja de 12 px junto a la cuña y filete blanco de 3 px a 14 px ──────────── */
+.band,
+.rule {
+  position: absolute;
+  inset-block: 0;
+  transform: skewX(var(--skew));
+  transform-origin: 0 100%;
+}
+
+.band {
+  width: var(--bb-split-band);
+  background: var(--bb-red);
+}
+
+.rule {
+  width: var(--bb-split-rule);
+  background: var(--bb-white);
+}
+
+.arena[data-wedge="right"] .band {
+  left: calc(var(--split-x) - var(--bb-split-band));
+}
+
+.arena[data-wedge="right"] .rule {
+  left: calc(var(--split-x) - var(--bb-split-band) - var(--bb-split-gap) - var(--bb-split-rule));
+}
+
+.arena[data-wedge="left"] .band {
+  left: var(--split-x);
+}
+
+.arena[data-wedge="left"] .rule {
+  left: calc(var(--split-x) + var(--bb-split-band) + var(--bb-split-gap));
+}
+
+/* ── Viñeta: radial negra al 75 % en el borde ───────────────────────────────────────────── */
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, var(--bb-tex-vignette-ink) 100%);
+}
+
+/*
+ * Móvil (≤ 720 px): la diagonal pasa a horizontal inclinada y la cuña va abajo (maqueta móvil del
+ * menú). Las medidas son porcentajes de la ventana, como en la maqueta.
+ */
+@media (max-width: 720px) {
+  .arena[data-wedge] .wedge,
+  .arena[data-wedge] .straight,
+  .arena[data-wedge] .band,
+  .arena[data-wedge] .rule {
+    left: 0;
+    width: 100%;
+    transform: none;
+  }
+
+  .arena[data-wedge] .wedge {
+    clip-path: polygon(0 56%, 100% 40%, 100% 100%, 0 100%);
+  }
+
+  .arena[data-wedge] .band {
+    clip-path: polygon(0 55.3%, 100% 39.3%, 100% 40.1%, 0 56.1%);
+  }
+
+  .arena[data-wedge] .rule {
+    clip-path: polygon(0 54.3%, 100% 38.3%, 100% 38.6%, 0 54.6%);
+  }
+}

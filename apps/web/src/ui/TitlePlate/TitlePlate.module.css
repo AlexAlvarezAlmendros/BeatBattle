@@ -1,0 +1,34 @@
+/*
+ * Placa de título (§3.3): marco blanco de chaflán `--bb-cut` con el rótulo de 12 px y el título en
+ * display, centrados. Como la del perfil de las maquetas (`05-perfil.html`).
+ */
+.plate {
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-2);
+  min-width: min(100%, 17.5rem);
+  padding: var(--bb-space-3) var(--bb-space-7) var(--bb-space-3);
+  text-align: center;
+}
+
+.kicker {
+  color: var(--bb-text-2);
+  letter-spacing: var(--bb-tracking-label-wide);
+}
+
+.title {
+  font-size: var(--bb-fs-2xl);
+  font-stretch: var(--bb-stretch-plate);
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .plate {
+    min-width: 0;
+    padding: var(--bb-space-2) var(--bb-space-4);
+  }
+
+  .title {
+    font-size: var(--bb-fs-lg);
+  }
+}

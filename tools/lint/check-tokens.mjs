@@ -126,46 +126,6 @@ const FORBIDDEN_FONT = /montserrat|jetbrains[\s_-]?mono/i
  */
 export const TEMPORARY_EXCEPTIONS = [
   {
-    file: 'apps/web/src/app/layout/AmbientOrbs.css',
-    rules: ['token-unknown'],
-    reason: 'Orbes del sello (pieza prohibida, §3.1): la 0.27 la borra.',
-  },
-  {
-    file: 'apps/web/src/app/layout/AmbientOrbs.tsx',
-    rules: ['forbidden-component'],
-    reason: 'Orbes del sello (pieza prohibida, §3.1): la 0.27 la borra.',
-  },
-  {
-    file: 'apps/web/src/app/layout/MobileNav.css',
-    rules: ['radius-literal', 'stroke-literal', 'tilt-literal', 'token-unknown'],
-    reason: 'Menú móvil de la isla: lo sustituye el marco de juego (0.23).',
-  },
-  {
-    file: 'apps/web/src/app/layout/RootLayout.tsx',
-    rules: ['forbidden-component'],
-    reason: 'Monta la isla y los orbes del sello: lo rehace el marco de juego (0.23).',
-  },
-  {
-    file: 'apps/web/src/app/layout/SiteFooter.css',
-    rules: ['radius-literal', 'stroke-literal', 'token-unknown'],
-    reason: 'Pie del sello: lo sustituye la barra de controles (0.23).',
-  },
-  {
-    file: 'apps/web/src/app/layout/SiteFooter.tsx',
-    rules: ['forbidden-component'],
-    reason: 'Pie del sello con cristal: lo sustituye la barra de controles (0.23).',
-  },
-  {
-    file: 'apps/web/src/app/layout/SiteHeader.css',
-    rules: ['radius-literal', 'stroke-literal', 'tilt-literal', 'token-unknown'],
-    reason: 'Isla del sello (pieza prohibida, §3.1): la sustituye el HUD (0.23).',
-  },
-  {
-    file: 'apps/web/src/app/layout/SiteHeader.tsx',
-    rules: ['forbidden-component', 'token-unknown'],
-    reason: 'Isla del sello (pieza prohibida, §3.1): la sustituye el HUD (0.23).',
-  },
-  {
     file: 'apps/web/src/app/placeholder.css',
     rules: ['token-unknown'],
     reason: 'Página provisional con medidas del sello: la rehace la 0.26.',
@@ -229,11 +189,6 @@ export const TEMPORARY_EXCEPTIONS = [
     file: 'apps/web/src/ui/gallery/GalleryPage.module.css',
     rules: ['radius-literal', 'stroke-literal', 'token-unknown'],
     reason: 'Estilos de las secciones viejas de la galería: se van con ellas (0.25 y 0.27).',
-  },
-  {
-    file: 'apps/web/src/ui/gallery/LayoutSection.tsx',
-    rules: ['forbidden-component', 'token-unknown'],
-    reason: 'Sección «Layout del sello» de la galería: la 0.27 la borra.',
   },
   {
     file: 'apps/web/src/ui/GlassSurface/GlassSurface.css',

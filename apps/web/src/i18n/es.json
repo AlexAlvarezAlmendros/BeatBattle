@@ -15,46 +15,6 @@
     "count_one": "{count} entrada",
     "count_other": "{count} entradas"
   },
-  "footer": {
-    "credit": "{brand} · {otherPeople}",
-    "legalLabel": "Legal",
-    "otherPeople": "Other People Records",
-    "tagline": "La batalla semanal de productores de Other People Records."
-  },
-  "layout": {
-    "newTab": "(se abre en una pestaña nueva)",
-    "nav": {
-      "label": "Principal",
-      "week": "Semana",
-      "jury": "Jurado",
-      "results": "Resultados",
-      "hallOfFame": "Salón de la fama",
-      "howItWorks": "Cómo funciona",
-      "signIn": "Entrar"
-    },
-    "logo": {
-      "alt": "Other People Records"
-    },
-    "mobileNav": {
-      "toggle": "Menú",
-      "title": "Menú",
-      "close": "Cerrar el menú"
-    },
-    "footer": {
-      "labelTitle": "Other People",
-      "labelNav": "Web de Other People Records",
-      "artists": "Artistas",
-      "beats": "Beats",
-      "events": "Eventos",
-      "contact": "Contacto",
-      "socialTitle": "Síguenos",
-      "socialNav": "Redes de Other People Records",
-      "instagram": "Instagram",
-      "youtube": "YouTube",
-      "threads": "Threads",
-      "copyright": "© {year} Other People Records"
-    }
-  },
   "home": {
     "hero": {
       "sideWeek": "Próximo drop",
@@ -150,7 +110,8 @@
     },
     "notFound": {
       "title": "Página no encontrada",
-      "summary": "Aquí no hay nada. En su lugar habrá un beat pad para que no te vayas con las manos vacías."
+      "summary": "Aquí no hay nada. En su lugar habrá un beat pad para que no te vayas con las manos vacías.",
+      "plate": "Bonus stage"
     },
     "error": {
       "title": "Se ha rayado el disco",
@@ -310,14 +271,12 @@
         "glassHint": "Apagado: tarjetas y modales macizos y el layout sin cristal, como en calidad baja.",
         "serious": "Modo serio",
         "seriousHint": "Pone data-serious en la página: sin anunciador, estampas, rayos, barrido ni partículas (§3.6).",
-        "glassLayout": "Cristal en el layout del sello",
         "yes": "Sí",
         "no": "No"
       },
       "sections": {
         "base": "Base de la arena",
-        "components": "Componentes",
-        "layout": "Layout del sello"
+        "components": "Componentes"
       },
       "components": {
         "button": "Botón",
@@ -459,40 +418,6 @@
           "errorMessage": "Tu ficha sigue aquí: reintenta."
         },
         "countdownLabel": "Cierre de votos"
-      },
-      "layout": {
-        "intro": "Las piezas del marco y del hero de la línea 0.7, en sus variantes. Con «Reducir movimiento» pasan a la suya: isla y cristal sin refracción, titular con un fundido, marquee quieto que rota cada 5 s y orbes quietos.",
-        "specimen": "Muestra: la de verdad está arriba (isla) o abajo (pie) de esta página.",
-        "pieces": {
-          "island": "Isla de navegación",
-          "footer": "Pie del sello",
-          "heroTitle": "Titular del hero",
-          "sideLabel": "Rótulos laterales",
-          "backdrop": "Rejilla y viñeta",
-          "marquee": "Banda de marquee",
-          "orbs": "Orbes del fondo",
-          "glassSurface": "GlassSurface"
-        },
-        "capability": {
-          "on": "Este navegador pinta el cristal con refracción.",
-          "off": "Este navegador no pinta el cristal ahora (equipo modesto, «reducir movimiento» o «reducir transparencia», Safari o Firefox, o el interruptor de cristal apagado): se ve la alternativa."
-        },
-        "variants": {
-          "glassOn": "Con cristal",
-          "glassOff": "Sin cristal (alternativa)",
-          "default": "Cristal",
-          "aberration": "Con aberración cromática",
-          "island": "Como la isla (blur de 3 px)",
-          "grid": "Rejilla",
-          "vignette": "Viñeta",
-          "both": "Rejilla y viñeta",
-          "entrance": "Entrada (sube y aparece; sin movimiento, fundido de 200 ms)",
-          "labels": "Izquierda y derecha (en la página, solo por encima de 1024 px)",
-          "live": "En marcha (se pausa con el ratón o con el botón)",
-          "orbs": "Deriva y pulso lentos; sin movimiento, quietos"
-        },
-        "replay": "Repetir la entrada",
-        "glassSample": "Cristal"
       },
       "kicker": "Beat Battle · banco de pruebas de la arena",
       "base": {
@@ -720,5 +645,64 @@
     "studioBoss": "Jefe de estudio",
     "blockLegend": "Leyenda del barrio",
     "otherPeople": "Other People"
+  },
+  "frame": {
+    "hud": {
+      "join": "Pulsa para unirte",
+      "joinLabel": "1P · Pulsa para unirte: entra o crea tu cuenta",
+      "sound": "Sonido de efectos (M)"
+    },
+    "keys": {
+      "label": "Controles",
+      "choose": "Elegir",
+      "move": "Mover",
+      "section": "Sección",
+      "enter": "Entrar",
+      "back": "Volver",
+      "sound": "Sonido",
+      "glyph": {
+        "up": "↑",
+        "upLabel": "Flecha arriba",
+        "down": "↓",
+        "downLabel": "Flecha abajo",
+        "left": "←",
+        "leftLabel": "Flecha izquierda",
+        "right": "→",
+        "rightLabel": "Flecha derecha",
+        "q": "Q",
+        "e": "E",
+        "enter": "Intro",
+        "escape": "Esc",
+        "m": "M"
+      }
+    },
+    "controls": {
+      "legal": "Legal",
+      "signatureBefore": "Un juego de",
+      "signatureAfter": "Other People Records",
+      "signatureLabel": "Un juego de Other People Records (abre la web del sello en una pestaña nueva)",
+      "chronicle": "Crónica de la arena"
+    },
+    "plates": {
+      "week": "Escenario",
+      "weekResults": "Ceremonia",
+      "weeks": "Selección de escenario",
+      "entry": "Ficha de luchador",
+      "jury": "Ronda",
+      "upload": "Inserta tu beat",
+      "profile": "Carta de productor",
+      "hallOfFame": "Tabla de récords",
+      "season": "Clasificación",
+      "howItWorks": "Lista de movimientos",
+      "settings": "Opciones",
+      "signIn": "Continuar partida",
+      "signUp": "Nuevo jugador",
+      "account": "Cuenta",
+      "admin": "Panel",
+      "legal": "Legal",
+      "legalTitle": "Letra pequeña",
+      "notFound": "Error 404",
+      "dev": "Desarrollo"
+    }
   }
 }
