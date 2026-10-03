@@ -1,5 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
-import { open, openGallery } from './support'
+import { open, openGallery, settle } from './support'
 
 /**
  * Que nada se corte (tarea 0.28, jurado visual; `RD-VIS-02`, `RD-VIS-05`, guía §3.3 «Opción de menú»
@@ -115,6 +115,134 @@ for (const viewport of [
         await page.evaluate(() => document.fonts.ready)
         expect(await clippedAccents(page, DISPLAY_TEXTS)).toEqual([])
       })
+    }
+  })
+}
+
+interface LockupOverLogo {
+  /** Píxeles de la pegatina OTP girada que caen sobre la zona opaca del logo. */
+  sticker: number
+  /** Píxeles de la caja de la cinta que caen sobre la zona opaca del logo. */
+  ribbon: number
+}
+
+/**
+ * Cuánto pisa el lockup del título al logo del juego (guía §3.1 «La firma»: margen alrededor de la
+ * pegatina; §3.8.3). La zona opaca del logo es la de su canvas (alfa ≥ ½), y la de la pegatina, la de su
+ * imagen girada −7° (alfa ≥ ½: no cuentan las esquinas transparentes de la caja); la cinta cuenta entera.
+ */
+async function lockupOverLogo(page: Page): Promise<LockupOverLogo> {
+  // El logo se pinta cuando la fuente del display está lista: hasta entonces el canvas está vacío.
+  await page.waitForFunction(() => {
+    const canvas = [...document.querySelectorAll<HTMLCanvasElement>('main [data-game-logo] canvas')].find(
+      (element) => element.getBoundingClientRect().width > 0,
+    )
+    const pixels = canvas?.getContext('2d')?.getImageData(0, 0, canvas.width, canvas.height).data
+    return pixels?.some((value, index) => index % 4 === 3 && value > 0) ?? false
+  })
+  return page.evaluate(async () => {
+    const OPAQUE = 128
+    const canvas = [...document.querySelectorAll<HTMLCanvasElement>('main [data-game-logo] canvas')].find(
+      (element) => element.getBoundingClientRect().width > 0,
+    )!
+    const logoBox = canvas.getBoundingClientRect()
+    const density = canvas.width / logoBox.width
+    const logo = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data
+    const logoOpaque = (x: number, y: number) => {
+      const px = Math.floor((x - logoBox.left) * density)
+      const py = Math.floor((y - logoBox.top) * density)
+      if (px < 0 || py < 0 || px >= canvas.width || py >= canvas.height) return false
+      return logo[(py * canvas.width + px) * 4 + 3]! >= OPAQUE
+    }
+    /** Recorre, a la resolución del canvas, la parte de una caja de la ventana que cae sobre el logo. */
+    const countOver = (box: DOMRect, covers: (x: number, y: number) => boolean) => {
+      let count = 0
+      const top = Math.max(box.top, logoBox.top)
+      const bottom = Math.min(box.bottom, logoBox.bottom)
+      const left = Math.max(box.left, logoBox.left)
+      const right = Math.min(box.right, logoBox.right)
+      for (let y = top; y < bottom; y += 1 / density)
+        for (let x = left; x < right; x += 1 / density) if (logoOpaque(x, y) && covers(x, y)) count++
+      return count
+    }
+
+    // La pegatina: su imagen, en sus coordenadas sin girar (el giro va en un antepasado, alrededor del centro).
+    const img = document.querySelector<HTMLImageElement>('main [class*=lockup] img')!
+    await img.decode()
+    const sticker = document.createElement('canvas')
+    sticker.width = img.naturalWidth
+    sticker.height = img.naturalHeight
+    const stickerContext = sticker.getContext('2d')!
+    stickerContext.drawImage(img, 0, 0, sticker.width, sticker.height)
+    const stickerAlpha = stickerContext.getImageData(0, 0, sticker.width, sticker.height).data
+    let angle = 0
+    for (let node: HTMLElement | null = img; node; node = node.parentElement) {
+      const transform = getComputedStyle(node).transform
+      if (transform !== 'none') {
+        const matrix = new DOMMatrix(transform)
+        angle += Math.atan2(matrix.b, matrix.a)
+      }
+    }
+    const stickerBox = img.getBoundingClientRect()
+    const centerX = stickerBox.left + stickerBox.width / 2
+    const centerY = stickerBox.top + stickerBox.height / 2
+    const [width, height] = [img.offsetWidth, img.offsetHeight]
+    const [cos, sin] = [Math.cos(-angle), Math.sin(-angle)]
+    const stickerOpaque = (x: number, y: number) => {
+      const dx = x - centerX
+      const dy = y - centerY
+      const u = ((dx * cos - dy * sin + width / 2) / width) * sticker.width
+      const v = ((dx * sin + dy * cos + height / 2) / height) * sticker.height
+      if (u < 0 || v < 0 || u >= sticker.width || v >= sticker.height) return false
+      return stickerAlpha[(Math.floor(v) * sticker.width + Math.floor(u)) * 4 + 3]! >= OPAQUE
+    }
+
+    const ribbon = document.querySelector<HTMLElement>('main [class*=lockup] p')!
+    return {
+      sticker: countOver(stickerBox, stickerOpaque),
+      ribbon: countOver(ribbon.getBoundingClientRect(), () => true),
+    }
+  })
+}
+
+/**
+ * El lockup no pisa el logo (jurado visual de la 0.28, segundo pase; guía §3.1 y §3.8.3): con el logo en
+ * una línea (móvil bajo, 360 × 640 y 375 × 667) la cinta y la pegatina quedaban sobre la extrusión de
+ * «BEAT» y de «BATTLE». A 390 × 844 y en escritorio, con el logo en dos líneas, tampoco. Y el menú sigue
+ * cabiendo sin desplazar en los móviles de la guía.
+ */
+for (const viewport of [
+  { width: 360, height: 640, touch: true },
+  { width: 375, height: 667, touch: true },
+  { width: 390, height: 844, touch: true },
+  { width: 1440, height: 900, touch: false },
+]) {
+  test.describe(`lockup a ${viewport.width} × ${viewport.height}`, () => {
+    test.use({
+      viewport: { width: viewport.width, height: viewport.height },
+      isMobile: viewport.touch,
+      hasTouch: viewport.touch,
+    })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`RD-VIS-02 e / §3.1: ni la pegatina OTP ni la cinta del lockup pisan el logo de ${path}`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        expect(await lockupOverLogo(page)).toEqual({ sticker: 0, ribbon: 0 })
+      })
+
+      if (viewport.touch)
+        test(`§3.8.3: el menú de ${path} cabe sin desplazar`, async ({ page }) => {
+          await open(page, path, 'Beat Battle')
+          await settle(page)
+          const { scroll, view } = await page.evaluate(() => ({
+            scroll: document.scrollingElement!.scrollHeight,
+            view: window.innerHeight,
+          }))
+          expect(scroll).toBeLessThanOrEqual(view)
+        })
     }
   })
 }
