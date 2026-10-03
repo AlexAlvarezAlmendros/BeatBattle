@@ -116,3 +116,20 @@
 :where([data-frame-cut="lg"]) {
   --frame-cut: var(--bb-cut-lg);
 }
+
+/*
+ * Contraste alto (`forced-colors: active`): el modo quita los fondos de color, y el borde del marco es una
+ * capa de fondo recortada en chaflán, así que desaparecería. El borde se pinta con `CanvasText` y el
+ * relleno con `Canvas` (el texto de encima lo adapta el navegador), sin dejar que el modo los toque.
+ */
+@media (forced-colors: active) {
+  :where([data-frame])::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  :where([data-frame])::after {
+    forced-color-adjust: none;
+    background: Canvas;
+  }
+}

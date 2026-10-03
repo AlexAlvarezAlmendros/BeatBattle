@@ -222,7 +222,7 @@ export function MainMenu({ model }: { model: MenuModel }) {
       </FrameSlot>
       {week && (
         <FrameSlot name="arena">
-          <span className={cx('bb-display', styles.giant)} data-fx="">
+          <span className={cx('bb-display', styles.giant)} data-fx="" data-giant-number="">
             {week.number}
           </span>
         </FrameSlot>

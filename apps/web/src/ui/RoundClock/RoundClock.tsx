@@ -154,6 +154,7 @@ function WeekSegments({ week, labels }: { week: WeekBar; labels: boolean }) {
           <span key={day} className={styles.day} data-day={kind}>
             <span
               className={styles.segment}
+              data-week-segment=""
               style={
                 kind === 'today'
                   ? ({ '--day-progress': `${Math.round(week.progress * 100)}%` } as CSSProperties)

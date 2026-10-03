@@ -114,3 +114,30 @@
     flex: none;
   }
 }
+
+/*
+ * Contraste alto (`forced-colors: active`): borde `CanvasText` y relleno `Canvas`; la pestaña activa, en
+ * `Highlight` con su texto en `HighlightText` (en reposo es blanca con texto negro).
+ */
+@media (forced-colors: active) {
+  .tab::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .tab::after {
+    forced-color-adjust: none;
+    background: Canvas;
+  }
+
+  .tab[aria-selected="true"],
+  .tab[aria-current="page"] {
+    forced-color-adjust: none;
+    color: HighlightText;
+  }
+
+  .tab[aria-selected="true"]::after,
+  .tab[aria-current="page"]::after {
+    background: Highlight;
+  }
+}

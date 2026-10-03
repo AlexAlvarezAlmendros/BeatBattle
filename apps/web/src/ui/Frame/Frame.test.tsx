@@ -71,7 +71,11 @@ describe('Frame (§3.3 «Marco»)', () => {
   })
 
   it('las reglas del marco no pesan (`:where`): la pieza que lo usa cambia sus variables desde su clase', () => {
-    const selectors = [...css.matchAll(/([^{}]+)\{/g)].map((m) => m[1]!.trim())
+    // Las reglas at (`@media (forced-colors: active)`) no son selectores: se mira lo que llevan dentro.
+    const selectors = [...css.matchAll(/([^{}]+)\{/g)]
+      .map((m) => m[1]!.trim())
+      .filter((selector) => !selector.startsWith('@'))
+    expect(selectors.length).toBeGreaterThan(0)
     for (const selector of selectors) expect(selector, selector).toMatch(/^:where\(/)
   })
 })

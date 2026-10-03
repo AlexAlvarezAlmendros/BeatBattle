@@ -73,7 +73,7 @@ export function Meter({
       data-force-state={state === 'gain' ? 'gain' : undefined}
     >
       <div className={styles.track} {...a11y}>
-        <div className={styles.fill}>
+        <div className={styles.fill} data-meter-fill="">
           {(shine > 0 || state === 'gain') && <span key={shine} className={styles.shine} />}
         </div>
       </div>

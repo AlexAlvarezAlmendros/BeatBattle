@@ -231,3 +231,13 @@
     margin-top: var(--bb-space-2);
   }
 }
+
+/*
+ * Contraste alto (`forced-colors: active`): el número gigante es texto transparente con contorno, y el modo
+ * lo volvería un bloque macizo detrás de las placas. Es decoración (`data-fx`): se quita.
+ */
+@media (forced-colors: active) {
+  .giant {
+    display: none;
+  }
+}

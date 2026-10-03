@@ -342,3 +342,23 @@
 :global(:root[data-motion="reduced"]) .plate {
   transition: none;
 }
+
+/*
+ * Contraste alto (`forced-colors: active`): borde `CanvasText` y relleno `Canvas` (las dos capas son
+ * fondos recortados que el modo quitaría) y sin la trama; la elegida se ve por el cursor (`Highlight`).
+ */
+@media (forced-colors: active) {
+  .plate::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .plate::after {
+    forced-color-adjust: none;
+    background: Canvas;
+  }
+
+  .texture {
+    display: none;
+  }
+}

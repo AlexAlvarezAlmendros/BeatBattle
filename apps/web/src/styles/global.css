@@ -140,6 +140,18 @@ pre {
   box-shadow: none;
 }
 
+/*
+ * Contraste alto (`forced-colors: active`): en los menús de juego el foco es el cursor (`cursor.css`, que
+ * en este modo se pinta con `Highlight`); por si una pieza lo recorta o lo tapa, el contorno vuelve como
+ * red de seguridad, a la misma distancia que el anillo.
+ */
+@media (forced-colors: active) {
+  [data-cursor]:focus-visible {
+    outline: var(--bb-stroke-cursor) solid Highlight;
+    outline-offset: var(--bb-cursor-gap);
+  }
+}
+
 /* Negro sobre rojo de marca: 5,32:1 (§3.2). */
 ::selection {
   background-color: var(--bb-red);

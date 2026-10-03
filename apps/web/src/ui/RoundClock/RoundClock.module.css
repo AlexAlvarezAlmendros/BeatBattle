@@ -208,3 +208,26 @@
 :global(:root[data-motion="reduced"]) .clock[data-phase="final"] {
   animation: none;
 }
+
+/*
+ * Contraste alto (`forced-colors: active`): la barra de la semana son fondos, que el modo quitaría. Lo que
+ * queda de semana, en `Highlight`; lo gastado, en `GrayText` (también la parte gastada de hoy).
+ */
+@media (forced-colors: active) {
+  .segment {
+    forced-color-adjust: none;
+    background: Highlight;
+  }
+
+  .day[data-day="past"] .segment {
+    background: GrayText;
+  }
+
+  .day[data-day="today"] .segment {
+    background: linear-gradient(90deg, GrayText 0 var(--day-progress), Highlight var(--day-progress));
+  }
+
+  .day[data-day="votes"] .segment {
+    background: Highlight;
+  }
+}

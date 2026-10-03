@@ -166,3 +166,23 @@
 :where(:root[data-motion="reduced"] [data-cursor]) > :is([data-cursor-ring], [data-cursor-player]) {
   animation: none;
 }
+
+/*
+ * Contraste alto (`forced-colors: active`, RNF-A11Y-01): el navegador cambia los fondos por `Canvas`, y el
+ * anillo, pintado con `background`, desaparecería (negro sobre negro). Se pinta con `Highlight` sin dejar
+ * que el modo lo adapte; la etiqueta 1P, igual, con su texto en `HighlightText`. El contorno de
+ * `global.css` hace de red de seguridad.
+ */
+@media (forced-colors: active) {
+  :where([data-cursor-ring]) {
+    forced-color-adjust: none;
+    background: Highlight;
+  }
+
+  /* Con especificidad: la etiqueta es también una `Tag` (`tag.css`, que va después). */
+  [data-cursor-player] {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+  }
+}

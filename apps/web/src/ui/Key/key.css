@@ -77,3 +77,16 @@
 :where([data-key="marked"]) {
   --key-fill: var(--bb-red-press);
 }
+
+/* Contraste alto: borde `CanvasText` y relleno `Canvas`, como el marco (`frame.css`). */
+@media (forced-colors: active) {
+  :where([data-key])::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  :where([data-key])::after {
+    forced-color-adjust: none;
+    background: Canvas;
+  }
+}

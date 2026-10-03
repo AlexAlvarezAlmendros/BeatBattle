@@ -98,3 +98,16 @@
 :global(:root[data-motion="reduced"]) .shine {
   display: none;
 }
+
+/* Contraste alto (`forced-colors: active`): pista `GrayText` y relleno `Highlight` (son fondos). */
+@media (forced-colors: active) {
+  .track {
+    forced-color-adjust: none;
+    background: GrayText;
+  }
+
+  .fill {
+    forced-color-adjust: none;
+    background: Highlight;
+  }
+}
