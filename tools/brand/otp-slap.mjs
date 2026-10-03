@@ -8,7 +8,10 @@
  *
  * Se pinta en un canvas 2D del Chrome del sistema (Playwright, como `tools/shot`): el borde es la
  * silueta del logo dilatada un disco de 4 px (unión de la silueta desplazada a todos los puntos del
- * disco), y la sombra, esa misma silueta desplazada (3, 3) px y en negro.
+ * disco) y repintada con el rojo exacto, y la sombra, esa misma silueta desplazada (3, 3) px y en
+ * negro. La WebP es sin pérdida (VP8L): con pérdida, el submuestreo de croma corre el rojo. Antes de
+ * guardar, el script decodifica cada fichero y comprueba que da los píxeles del lienzo y que todo rojo
+ * opaco del borde es `--bb-red` (rgb(255, 0, 60)); si no, falla.
  *
  * Las imágenes y su manifiesto (`apps/web/src/ui/OtpSlap/otp-slap.json`, con el tamaño a 1× que usa
  * el componente para reservar el hueco) se commitean: la build y la CI no necesitan Chrome. Si cambia
@@ -16,8 +19,9 @@
  *
  *   node tools/brand/otp-slap.mjs        (o `pnpm brand:slap`)
  *
- * El test `OtpSlap.test.tsx` comprueba que los ficheros existen, que su tamaño es el del manifiesto y
- * que el borde es rojo de marca.
+ * El test `OtpSlap.test.tsx` comprueba que los ficheros existen, que su tamaño es el del manifiesto,
+ * que las WebP son sin pérdida y que en las PNG todo rojo opaco del borde es `--bb-red` exacto
+ * (`RD-VIS-02` a); el E2E `tests/e2e/otp-slap.spec.ts`, lo mismo con lo que decodifica el navegador.
  */
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
@@ -91,6 +95,12 @@ try {
           const a = (angle * Math.PI) / 180
           c.drawImage(silhouette, r * Math.cos(a), r * Math.sin(a))
         }
+        // Más de cien pasadas de la silueta semitransparente sobre sí misma derivan el color (el
+        // canvas guarda el color premultiplicado en 8 bits: el azul bajaba de 60 a 45–59). Se repinta
+        // con el rojo exacto conservando el alfa de la dilatación: el borde opaco es --bb-red, sin más.
+        c.globalCompositeOperation = 'source-in'
+        c.fillStyle = slap.cutInk
+        c.fillRect(0, 0, W, H)
         // 3. Sombra dura: la misma silueta dilatada, en negro y desplazada.
         const shadow = canvasOf(W, H)
         const h = shadow.getContext('2d')
@@ -104,12 +114,42 @@ try {
         k.drawImage(shadow, slap.shadowX * scale, slap.shadowY * scale)
         k.drawImage(cut, 0, 0)
         k.drawImage(image, r, r, logoW * scale, logoH * scale)
-        out[scale] = {
-          png: sticker.toDataURL('image/png'),
-          webp: sticker.toDataURL('image/webp', 0.92),
-          width: W,
-          height: H,
+        // 5. Exportación. Con calidad 1, Chrome guarda la WebP sin pérdida (VP8L): con pérdida, el
+        // submuestreo de croma corría el rojo del borde (azul entre 40 y 67, algo de verde).
+        const files = { png: sticker.toDataURL('image/png'), webp: sticker.toDataURL('image/webp', 1) }
+        // 6. Comprobación: cada fichero, decodificado, da los mismos píxeles opacos que el lienzo, y
+        // todo rojo opaco sin blanco (r = 255, g = 0) es el de marca exacto.
+        const expected = k.getImageData(0, 0, W, H).data
+        const [red, green, blue] = [1, 3, 5].map((i) => Number.parseInt(slap.cutInk.slice(i, i + 2), 16))
+        for (const [format, url] of Object.entries(files)) {
+          const decoded = new Image()
+          decoded.src = url
+          await decoded.decode()
+          const check = canvasOf(W, H).getContext('2d', { willReadFrequently: true })
+          check.drawImage(decoded, 0, 0)
+          const got = check.getImageData(0, 0, W, H).data
+          let different = 0
+          let offRed = 0
+          for (let i = 0; i < got.length; i += 4) {
+            if (got[i + 3] !== expected[i + 3]) different += 1
+            else if (got[i + 3] === 255) {
+              if (
+                got[i] !== expected[i] ||
+                got[i + 1] !== expected[i + 1] ||
+                got[i + 2] !== expected[i + 2]
+              ) {
+                different += 1
+              }
+              if (got[i] === red && got[i + 1] === green && got[i + 2] !== blue) offRed += 1
+            }
+          }
+          if (different || offRed) {
+            throw new Error(
+              `otp-slap ${scale}× ${format}: ${different} píxeles distintos del lienzo, ${offRed} rojos fuera de ${slap.cutInk}`,
+            )
+          }
         }
+        out[scale] = { ...files, width: W, height: H }
       }
       return { width, height, out }
     },
@@ -135,7 +175,12 @@ try {
     shadow: [SLAP.shadowX, SLAP.shadowY],
     files,
   }
-  await writeFile(MANIFEST, `${JSON.stringify(manifest, null, 2)}\n`)
+  // Las listas cortas en una línea, como las deja Biome: si no, `pnpm check` falla tras regenerar.
+  const json = JSON.stringify(manifest, null, 2).replace(
+    /\[\n\s+([^\]]*?)\n\s*\]/g,
+    (_, items) => `[${items.split(/,\n\s+/).join(', ')}]`,
+  )
+  await writeFile(MANIFEST, `${json}\n`)
   console.log(`otp-slap.json  ${result.width}×${result.height} a 1×`)
 } finally {
   await browser.close()
