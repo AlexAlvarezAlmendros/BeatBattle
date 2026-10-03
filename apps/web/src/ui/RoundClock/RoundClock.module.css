@@ -87,6 +87,15 @@
   animation: bb-clock-heartbeat var(--bb-loop-heartbeat) var(--bb-ease-in-out) infinite;
 }
 
+/*
+ * En línea (la tarjeta de la semana en móvil) no hay marco que lata: el borde es transparente y el
+ * latido lo hacía aparecer y desaparecer en blanco cada segundo, sin nada que lo parara en táctil (la
+ * barra no enseña allí la crónica ni su botón de pausa; WCAG 2.2.2). Quedan los dígitos rojos.
+ */
+.clock.inline[data-phase="final"] {
+  animation: none;
+}
+
 @keyframes bb-clock-heartbeat {
   50% {
     --frame-border: var(--bb-white);
@@ -216,7 +225,9 @@
   }
 }
 
-:global(:root[data-motion="reduced"]) .clock[data-phase="final"] {
+/* Con la pausa de la barra (WCAG 2.2.2, `ui/loops.ts`), tampoco late. */
+:global(:root[data-motion="reduced"]) .clock[data-phase="final"],
+:global(:root[data-loops="paused"]) .clock[data-phase="final"] {
   animation: none;
 }
 

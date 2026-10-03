@@ -1,7 +1,7 @@
 /*
  * Crónica de la arena (§3.8.3): una línea en mayúsculas en el hueco derecho de la barra de controles.
  * Cada mensaje entra con un fundido (sin desplazamiento: es un cambio de texto, no movimiento). A su
- * derecha, el botón que la pausa (WCAG 2.2.2).
+ * derecha, el botón que la pausa a ella y a los bucles de la pantalla (WCAG 2.2.2).
  */
 .wrap {
   display: flex;
@@ -10,7 +10,7 @@
   min-width: 0;
 }
 
-/* Pausar la crónica: 44 px, marco de chaflán pequeño, icono de pausa o de play (si está pausada). */
+/* «Pausar las animaciones»: 44 px, marco de chaflán pequeño, icono de pausa o de play (si está en pausa). */
 .pause {
   --frame-fill: var(--bb-black);
   display: inline-grid;
@@ -72,7 +72,10 @@
   font-style: normal;
 }
 
-/* «Inserta tu beat» respira (2 s, 1 ↔ 0,55; §3.6 «Bucles»); sin movimiento, quieto. */
+/*
+ * «Inserta tu beat» respira (2 s, 1 ↔ 0,55; §3.6 «Bucles»); sin movimiento o con la pausa de la barra
+ * (`data-loops="paused"`, WCAG 2.2.2), quieto y entero (opacidad 1: a medias bajaría el contraste).
+ */
 .breathe {
   animation: bb-credit-breathe var(--bb-loop-breathe) var(--bb-ease-in-out) infinite;
 }
@@ -89,6 +92,7 @@
   }
 }
 
-:global(:root[data-motion="reduced"]) .breathe {
+:global(:root[data-motion="reduced"]) .breathe,
+:global(:root[data-loops="paused"]) .breathe {
   animation: none;
 }

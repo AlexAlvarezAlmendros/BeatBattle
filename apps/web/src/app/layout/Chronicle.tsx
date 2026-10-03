@@ -5,6 +5,7 @@ import { Trans } from '../../i18n/Trans'
 import { frameAttributes } from '../../ui/Frame'
 import { useReducedMotion } from '../../ui/hooks/useReducedMotion'
 import { Icon } from '../../ui/Icon'
+import { useLoops } from '../../ui/loops'
 import styles from './Chronicle.module.css'
 
 /**
@@ -12,21 +13,35 @@ import styles from './Chronicle.module.css'
  * línea en el hueco derecho de la barra de controles que cambia de mensaje cada 5 s por fundido
  * (`--bb-loop-chronicle`). En voto ciego nunca dice quién ha subido (§1.3): solo hechos de la semana.
  *
- * - **Pausa** (WCAG 2.2.2, contenido que se actualiza solo): un botón de 44 px con `aria-pressed`
- *   («Pausar la crónica») la deja quieta hasta que se vuelve a pulsar; además se para sola con el ratón
- *   encima y con el foco dentro (teclado). Con «reducir movimiento» los bucles se paran (§3.6): se queda
- *   el primer mensaje y no hay botón.
+ * - **Pausa** (WCAG 2.2.2, contenido que se mueve o se actualiza solo): un botón de 44 px con
+ *   `aria-pressed` («Pausar las animaciones») deja quietos la crónica y todos los bucles decorativos de
+ *   la pantalla (el vinilo-sol, el respiro de «Inserta tu beat», el latido del reloj; `ui/loops.ts`)
+ *   hasta que se vuelve a pulsar. La crónica se para además sola con el ratón encima y con el foco
+ *   dentro (teclado). El botón está si hay algo que pausar: más de un mensaje o, con `loops`, otros
+ *   bucles en la pantalla. Con «reducir movimiento» los bucles ya están parados (§3.6): se queda el
+ *   primer mensaje y no hay botón.
  * - No es una región viva (`aria-live="off"`): cambiar cada 5 s no se anuncia; quien lo recorre lee el
  *   mensaje del momento.
  */
-export function Chronicle({ messages, label }: { messages: readonly ReactNode[]; label: string }) {
+export function Chronicle({
+  messages,
+  label,
+  loops = false,
+}: {
+  messages: readonly ReactNode[]
+  label: string
+  /** La pantalla tiene otros bucles decorativos (el vinilo, el respiro, el reloj) que el botón para. */
+  loops?: boolean
+}) {
   const reduced = useReducedMotion()
+  const paused = useLoops((state) => state.paused)
+  const togglePaused = useLoops((state) => state.toggle)
   const [index, setIndex] = useState(0)
   const [hovered, setHovered] = useState(false)
   const [focused, setFocused] = useState(false)
-  const [held, setHeld] = useState(false)
   const canRotate = !reduced && messages.length > 1
-  const rotates = canRotate && !hovered && !focused && !held
+  const rotates = canRotate && !hovered && !focused && !paused
+  const canPause = !reduced && (messages.length > 1 || loops)
 
   useEffect(() => {
     if (!rotates) return
@@ -55,17 +70,17 @@ export function Chronicle({ messages, label }: { messages: readonly ReactNode[];
           {current}
         </span>
       </p>
-      {canRotate && (
+      {canPause && (
         <button
           type="button"
           {...frameAttributes({ cut: 'sm' })}
           className={styles.pause}
-          aria-pressed={held}
-          aria-label={t('frame.controls.chroniclePause')}
-          onClick={() => setHeld((value) => !value)}
+          aria-pressed={paused}
+          aria-label={t('frame.controls.loopsPause')}
+          onClick={togglePaused}
           data-chronicle-pause=""
         >
-          <Icon name={held ? 'play' : 'pause'} />
+          <Icon name={paused ? 'play' : 'pause'} />
         </button>
       )}
     </div>

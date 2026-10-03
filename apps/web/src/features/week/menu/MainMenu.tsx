@@ -218,7 +218,8 @@ export function MainMenu({ model }: { model: MenuModel }) {
         </FrameSlot>
       )}
       <FrameSlot name="controlsRight">
-        <Chronicle messages={chronicle} label={t('frame.controls.chronicle')} />
+        {/* Con semana, la pantalla tiene más bucles (vinilo, respiro, reloj) que para el botón de pausa. */}
+        <Chronicle messages={chronicle} label={t('frame.controls.chronicle')} loops={Boolean(week)} />
       </FrameSlot>
       {week && (
         <FrameSlot name="arena">

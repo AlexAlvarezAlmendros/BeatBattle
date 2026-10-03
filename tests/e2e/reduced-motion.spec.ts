@@ -169,3 +169,62 @@ test('RNF-A11Y-03 (control): sin la preferencia, el menú con semana sí tiene b
   expect(recorded.some((a) => a.moves)).toBe(true)
   expect(recorded.some((a) => a.duration > 200)).toBe(true)
 })
+
+/**
+ * Pausa de la página (WCAG 2.2.2, nivel A; guía §3.6 «Bucles» y §3.8.3): los bucles decorativos (el
+ * vinilo-sol, el respiro de «Inserta tu beat», el latido del reloj en la última hora y la rotación de la
+ * crónica) se paran con el botón de pausa de la barra, sin depender de «reducir movimiento» del sistema.
+ */
+test.describe('pausa de los bucles (WCAG 2.2.2)', () => {
+  test.use({ reducedMotion: 'no-preference' })
+
+  test('WCAG 2.2.2: el botón de pausa de la barra para todos los bucles del menú, no solo la crónica', async ({
+    page,
+  }) => {
+    await open(page, '/dev/menu', 'Beat Battle')
+    await settle(page)
+    // En marcha: el vinilo-sol y el respiro de «Inserta tu beat».
+    expect((await runningLoops(page)).length).toBeGreaterThanOrEqual(2)
+    const pause = page.getByRole('contentinfo').getByRole('button', { name: 'Pausar las animaciones' })
+    await expect(pause).toHaveAttribute('aria-pressed', 'false')
+    await pause.click()
+    await expect(pause).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.locator('html')).toHaveAttribute('data-loops', 'paused')
+    await expect.poll(() => runningLoops(page)).toEqual([])
+    // La crónica tampoco cambia (también con el ratón fuera).
+    await page.mouse.move(0, 0)
+    const chronicle = page.locator('[data-chronicle]')
+    const before = await chronicle.textContent()
+    await page.waitForTimeout(5_500)
+    await expect(chronicle).toHaveText(before ?? '')
+    // Al reanudar, el vinilo sigue girando.
+    await pause.click()
+    await expect(page.locator('html')).not.toHaveAttribute('data-loops', 'paused')
+    await expect.poll(async () => (await runningLoops(page)).length).toBeGreaterThanOrEqual(2)
+  })
+
+  test('WCAG 2.2.2: la pausa también para el latido del reloj de ronda en la última hora', async ({
+    page,
+  }) => {
+    await openGallery(page)
+    const clock = page.locator('[data-phase="final"]').first()
+    await clock.scrollIntoViewIfNeeded()
+    const heartbeats = () => clock.evaluate((element) => element.getAnimations().length)
+    await expect.poll(heartbeats).toBe(1)
+    await page.evaluate(() => document.documentElement.setAttribute('data-loops', 'paused'))
+    await expect.poll(heartbeats).toBe(0)
+  })
+
+  test.describe('móvil táctil (390 × 844)', () => {
+    test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
+
+    test('WCAG 2.2.2: sin la crónica a la vista no queda ningún bucle en marcha (el vinilo oculto no gira)', async ({
+      page,
+    }) => {
+      await open(page, '/dev/menu', 'Beat Battle')
+      await settle(page)
+      await expect(page.locator('[data-chronicle]')).toBeHidden()
+      expect(await runningLoops(page)).toEqual([])
+    })
+  })
+})

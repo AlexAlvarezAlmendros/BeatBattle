@@ -1,7 +1,8 @@
 import { color, font, loopVinylMs } from '@beatbattle/shared/tokens'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { cx } from '../forceState'
 import { useReducedMotion } from '../hooks/useReducedMotion'
+import { useLoops } from '../loops'
 import styles from './VinylSun.module.css'
 
 const MAX_DPR = 2
@@ -73,17 +74,24 @@ export interface VinylSunProps {
  * Vinilo-sol de la semana (guía §3.5 capa 1, §3.8.1, §3.8.3): el sample como un disco de trama roja
  * que gira **una vuelta por compás** al BPM del sample (92 BPM = 2,6 s). Se pinta una vez por tamaño y
  * DPR en un canvas 2D; el giro es una animación de Web Animations sobre el propio lienzo (compuesta,
- * sin repintar). Sin movimiento, quieto (Anexo E). Decorativo (`aria-hidden`).
+ * sin repintar). Sin movimiento, quieto (Anexo E). Con la pausa de la barra (WCAG 2.2.2, `ui/loops.ts`)
+ * se para donde esté y sigue desde ahí al reanudar. Mientras no se pinta (oculto en móvil), no gira.
+ * Decorativo (`aria-hidden`).
  */
 export function VinylSun({ label, sub, bpm, className }: VinylSunProps) {
   const ref = useRef<HTMLCanvasElement>(null)
   const reduced = useReducedMotion()
+  const paused = useLoops((state) => state.paused)
+  const spinRef = useRef<Animation | null>(null)
+  // ¿Se pinta? En móvil el vinilo va oculto (`display: none`): ahí no tiene que girar.
+  const [shown, setShown] = useState(false)
 
   useEffect(() => {
     const canvas = ref.current
     if (!canvas || typeof ResizeObserver === 'undefined') return
     let painted = ''
     const paint = () => {
+      setShown(canvas.clientWidth > 0)
       const size = canvas.clientWidth
       const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
       const key = `${size}@${dpr}`
@@ -109,13 +117,26 @@ export function VinylSun({ label, sub, bpm, className }: VinylSunProps) {
 
   useEffect(() => {
     const canvas = ref.current
-    if (!canvas || reduced || typeof canvas.animate !== 'function') return
+    if (!canvas || reduced || !shown || typeof canvas.animate !== 'function') return
     const spin = canvas.animate([{ rotate: '0turn' }, { rotate: '1turn' }], {
       duration: loopVinylMs(bpm),
       iterations: Number.POSITIVE_INFINITY,
     })
-    return () => spin.cancel()
-  }, [bpm, reduced])
+    spinRef.current = spin
+    return () => {
+      spin.cancel()
+      spinRef.current = null
+    }
+  }, [bpm, reduced, shown])
+
+  // La pausa para el giro donde esté; al reanudar, sigue desde ahí.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: también cuando se crea un giro nuevo (bpm, shown)
+  useEffect(() => {
+    const spin = spinRef.current
+    if (!spin) return
+    if (paused) spin.pause()
+    else spin.play()
+  }, [paused, bpm, reduced, shown])
 
   return (
     <span className={cx(styles.vinyl, className)} aria-hidden="true">
