@@ -1,6 +1,7 @@
 import { loop } from '@beatbattle/shared/tokens'
-import { act, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { t } from '../../i18n'
 import { Chronicle } from './Chronicle'
 
 const MESSAGES = ['Próximo drop en el horno', 'Un sample cada lunes', 'La comunidad vota'] as const
@@ -34,5 +35,39 @@ describe('crónica de la arena (§3.8.3)', () => {
     act(() => vi.advanceTimersByTime(loop.chronicle * 3))
     expect(screen.getByText(MESSAGES[0])).toBeInTheDocument()
     expect(screen.getByText(MESSAGES[0]).closest('p')).toHaveAttribute('data-static', 'true')
+  })
+
+  it('WCAG 2.2.2: un botón de 44 px con aria-pressed la pausa y la reanuda', () => {
+    render(<Chronicle messages={MESSAGES} label="Crónica de la arena" />)
+    const pause = screen.getByRole('button', { name: t('frame.controls.chroniclePause') })
+    expect(pause).toHaveAttribute('aria-pressed', 'false')
+    fireEvent.click(pause)
+    expect(pause).toHaveAttribute('aria-pressed', 'true')
+    act(() => vi.advanceTimersByTime(loop.chronicle * 3))
+    expect(screen.getByText(MESSAGES[0])).toBeInTheDocument()
+    fireEvent.click(pause)
+    act(() => vi.advanceTimersByTime(loop.chronicle))
+    expect(screen.getByText(MESSAGES[1])).toBeInTheDocument()
+  })
+
+  it('WCAG 2.2.2: con el foco dentro (teclado) no cambia; al salir, sigue', () => {
+    render(
+      <>
+        <Chronicle messages={MESSAGES} label="Crónica de la arena" />
+        <button type="button">Fuera</button>
+      </>,
+    )
+    const pause = screen.getByRole('button', { name: t('frame.controls.chroniclePause') })
+    act(() => pause.focus())
+    act(() => vi.advanceTimersByTime(loop.chronicle * 2))
+    expect(screen.getByText(MESSAGES[0])).toBeInTheDocument()
+    act(() => screen.getByRole('button', { name: 'Fuera' }).focus())
+    act(() => vi.advanceTimersByTime(loop.chronicle))
+    expect(screen.getByText(MESSAGES[1])).toBeInTheDocument()
+  })
+
+  it('con un solo mensaje no hay nada que pausar: sin botón', () => {
+    render(<Chronicle messages={[MESSAGES[0]]} label="Crónica de la arena" />)
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 })

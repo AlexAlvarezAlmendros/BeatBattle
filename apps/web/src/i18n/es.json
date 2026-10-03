@@ -925,7 +925,8 @@
       "signatureBefore": "Un juego de",
       "signatureAfter": "Other People Records",
       "signatureLabel": "Un juego de Other People Records (abre la web del sello en una pestaña nueva)",
-      "chronicle": "Crónica de la arena"
+      "chronicle": "Crónica de la arena",
+      "chroniclePause": "Pausar la crónica"
     },
     "plates": {
       "week": "Escenario",

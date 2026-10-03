@@ -1,7 +1,36 @@
 /*
  * Crónica de la arena (§3.8.3): una línea en mayúsculas en el hueco derecho de la barra de controles.
- * Cada mensaje entra con un fundido (sin desplazamiento: es un cambio de texto, no movimiento).
+ * Cada mensaje entra con un fundido (sin desplazamiento: es un cambio de texto, no movimiento). A su
+ * derecha, el botón que la pausa (WCAG 2.2.2).
  */
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+  min-width: 0;
+}
+
+/* Pausar la crónica: 44 px, marco de chaflán pequeño, icono de pausa o de play (si está pausada). */
+.pause {
+  --frame-fill: var(--bb-black);
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--bb-target);
+  height: var(--bb-target);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-lg);
+}
+
+.pause:hover,
+.pause[aria-pressed="true"] {
+  --frame-border: var(--bb-white);
+  color: var(--bb-white);
+}
+
 .chronicle {
   margin: 0;
   overflow: hidden;
