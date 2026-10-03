@@ -94,6 +94,7 @@
   white-space: nowrap;
 }
 
+/* «Legal»: un rótulo más de la barra (no un enlace subrayado de web); el foco es el genérico. */
 .legal {
   display: inline-flex;
   align-items: center;
@@ -103,7 +104,9 @@
   color: var(--bb-text-2);
   font-family: var(--bb-font-ui);
   font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
   letter-spacing: var(--bb-tracking-label);
+  text-decoration: none;
   text-transform: uppercase;
 }
 
@@ -111,7 +114,10 @@
   color: var(--bb-white);
 }
 
-/* Táctil: sin teclas (no hay teclado); queda la firma (§3.4.1). */
+/*
+ * Táctil: sin teclas (no hay teclado); queda la firma (§3.4.1). Las teclas dependen del tipo de entrada,
+ * no del ancho: con teclado y ratón se ven también en una ventana estrecha (o ampliada al 200 %).
+ */
 @media (hover: none), (pointer: coarse) {
   .keys {
     visibility: hidden;
@@ -119,25 +125,57 @@
 }
 
 /*
- * Móvil: la barra deja de ir pegada y lleva la firma centrada (maquetas, `01-menu.html`); el dato de la
- * pantalla (la crónica del menú) se va, y el enlace «Legal» de las interiores se queda al lado.
+ * Móvil (≤ 720 px): la barra sigue pegada al pie de la ventana (la firma se ve siempre, también en una
+ * pantalla más alta que la ventana) y lleva la firma centrada con «Legal» al lado, en una fila
+ * (maqueta `01-menu-390x844`). El dato de la pantalla (la crónica del menú) se va. Con teclado y ratón,
+ * las teclas van en una fila de encima que parte de línea si no cabe.
  */
 @media (max-width: 720px) {
   .bar {
-    /* En el flujo (no pegada), pero posicionada: si no, la arena fija se pintaría encima. */
-    position: relative;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 0 var(--bb-space-5);
     height: auto;
-    padding: var(--bb-space-1) var(--bb-gutter) var(--bb-space-2);
-    border-top: 0;
+    min-height: calc(var(--bb-target) + var(--bb-space-2));
+    padding: var(--bb-space-1) var(--bb-gutter);
+    border-top-color: var(--bb-line);
   }
 
   .bar::before,
-  .keys,
   .right[data-claimed] {
     display: none;
+  }
+
+  .keys {
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--bb-space-1) var(--bb-space-3);
+    padding-top: var(--bb-space-1);
+  }
+
+  /* Con «Legal» al lado (pantallas interiores), la firma se aprieta para que quepan en una fila. */
+  .bar:has(.legal) {
+    gap: 0 var(--bb-space-3);
+  }
+
+  .bar:has(.legal) .signature {
+    gap: var(--bb-space-2);
+    letter-spacing: var(--bb-tracking-button);
+  }
+}
+
+@media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse) {
+  .keys {
+    display: none;
+  }
+}
+
+/* Muy estrecho (< 360 px): la firma, más apretada para que quepa en una línea. */
+@media (max-width: 359px) {
+  .signature {
+    gap: var(--bb-space-2);
+    letter-spacing: var(--bb-tracking-button);
   }
 }

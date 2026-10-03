@@ -1,5 +1,7 @@
 import { loop } from '@beatbattle/shared/tokens'
-import { useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
+import { t } from '../../i18n'
+import { Trans } from '../../i18n/Trans'
 import { useReducedMotion } from '../../ui/hooks/useReducedMotion'
 import styles from './Chronicle.module.css'
 
@@ -13,7 +15,7 @@ import styles from './Chronicle.module.css'
  * - No es una región viva (`aria-live="off"`): cambiar cada 5 s no se anuncia; quien lo recorre lee el
  *   mensaje del momento.
  */
-export function Chronicle({ messages, label }: { messages: readonly string[]; label: string }) {
+export function Chronicle({ messages, label }: { messages: readonly ReactNode[]; label: string }) {
   const reduced = useReducedMotion()
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
@@ -40,5 +42,29 @@ export function Chronicle({ messages, label }: { messages: readonly string[]; la
         {current}
       </span>
     </p>
+  )
+}
+
+/**
+ * «Inserta tu beat · Crédito 01» (§3.8.3), el guiño a «INSERT COIN / CREDIT 01» de las recreativas: en
+ * caja mixta, con el crédito en Oxanium rojo y «Inserta tu beat» respirando (2 s; quieto sin
+ * movimiento). Con la entrada ya subida, «Crédito 00 · ya estás dentro».
+ */
+export function CreditLine({ inside }: { inside: boolean }) {
+  const credit = <em>{t('home.chronicle.credit', { count: inside ? '00' : '01' })}</em>
+  return (
+    <span className={styles.credit} data-credit="">
+      {inside ? (
+        <Trans k="home.chronicle.inside" values={{ credit }} />
+      ) : (
+        <Trans
+          k="home.chronicle.insert"
+          values={{
+            action: <b className={styles.breathe}>{t('home.chronicle.insertAction')}</b>,
+            credit,
+          }}
+        />
+      )}
+    </span>
   )
 }

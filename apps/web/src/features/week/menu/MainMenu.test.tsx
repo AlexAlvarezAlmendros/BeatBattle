@@ -83,8 +83,11 @@ describe('MainMenu (0.24, §3.8.3)', () => {
     expect(within(hud).getByRole('meter', { name: t('frame.player.xp') })).toBeInTheDocument()
     expect(within(hud).getByText(t('home.hud.streakValue', { count: 3 }))).toBeInTheDocument()
     expect(document.querySelector('[data-frame-slot="arena"]')).toHaveTextContent('41')
-    // La crónica, en la barra de controles, con el crédito delante.
-    expect(within(screen.getByRole('contentinfo')).getByText(t('home.chronicle.insert'))).toBeInTheDocument()
+    // La crónica, en la barra de controles, con el crédito delante: «Inserta tu beat» (que respira) y
+    // el crédito en Oxanium rojo, en caja mixta (§3.8.3).
+    const credit = within(screen.getByRole('contentinfo')).getByText(t('home.chronicle.insertAction'))
+    expect(credit.closest('[data-credit]')).toHaveTextContent(/Inserta tu beat · Crédito 01/)
+    expect(credit.closest('[data-credit]')?.querySelector('em')).toHaveTextContent('01')
   })
 
   it('Jugar sube; Jurado dice cuántas te quedan por votar (tu dato); Resultados lleva el NUEVO', () => {

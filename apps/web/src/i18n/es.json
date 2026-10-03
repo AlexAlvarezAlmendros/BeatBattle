@@ -110,8 +110,10 @@
       "streakValue": "×{count}"
     },
     "chronicle": {
-      "insert": "Inserta tu beat · Crédito 01",
-      "inside": "Crédito 00 · ya estás dentro",
+      "insert": "{action} · Crédito {credit}",
+      "insertAction": "Inserta tu beat",
+      "inside": "Crédito {credit} · ya estás dentro",
+      "credit": "{count}",
       "idle": {
         "nextDrop": "Próximo drop en el horno",
         "everyMonday": "Un sample cada lunes",

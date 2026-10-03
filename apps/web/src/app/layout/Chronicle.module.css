@@ -28,3 +28,38 @@
 .chronicle[data-static] .message {
   animation: none;
 }
+
+/* ── «Inserta tu beat · Crédito 01» (§3.8.3): el guiño de «INSERT COIN / CREDIT 01» ────────── */
+.credit {
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: none;
+}
+
+.credit em {
+  color: var(--bb-red);
+  font-style: normal;
+}
+
+/* «Inserta tu beat» respira (2 s, 1 ↔ 0,55; §3.6 «Bucles»); sin movimiento, quieto. */
+.breathe {
+  animation: bb-credit-breathe var(--bb-loop-breathe) var(--bb-ease-in-out) infinite;
+}
+
+@keyframes bb-credit-breathe {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breathe {
+    animation: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .breathe {
+  animation: none;
+}

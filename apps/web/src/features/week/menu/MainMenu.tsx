@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useId, useRef } from 'react'
-import { Chronicle } from '../../../app/layout/Chronicle'
+import { Chronicle, CreditLine } from '../../../app/layout/Chronicle'
 import { HudStat, PlayerCard } from '../../../app/layout/PlayerCard'
 import { FrameSlot } from '../../../app/layout/slots'
 import { paths } from '../../../app/paths'
@@ -210,9 +210,9 @@ export function MainMenu({ model }: { model: MenuModel }) {
   }, [entries.length, menu])
 
   const { week, player } = model
-  const chronicle = week
-    ? [player?.uploaded ? t('home.chronicle.inside') : t('home.chronicle.insert'), ...model.chronicle]
-    : model.chronicle
+  const chronicle: ReactNode[] = week
+    ? [<CreditLine key="credit" inside={Boolean(player?.uploaded)} />, ...model.chronicle]
+    : [...model.chronicle]
 
   return (
     <div className={styles.menu} data-week={week ? week.phase : 'empty'}>

@@ -123,12 +123,17 @@ for (const { path, heading } of ROUTES) {
 test.describe('móvil (390 × 844)', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
 
-  for (const path of ['/', '/como-funciona', '/esto-no-existe']) {
-    test(`RD-VIS-02 b / RF-OTP-01: la firma del sello se ve en ${path} en móvil`, async ({ page }) => {
+  // Las pantallas más altas que la ventana (Cómo se juega, Opciones, legales) incluidas: la barra de
+  // controles va pegada al pie, así que la firma se ve al abrir la pantalla, sin bajar (§3.4.1).
+  for (const path of ['/', '/como-funciona', '/esto-no-existe', '/ajustes/cuenta', '/legal/bases']) {
+    test(`RD-VIS-02 b / RF-OTP-01: la firma del sello se ve en ${path} en móvil, dentro de la ventana`, async ({
+      page,
+    }) => {
       await page.goto(path)
       await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toBeAttached()
       const visible = page.locator('[data-otp-signature]').filter({ visible: true })
       await expect(visible.first()).toBeVisible()
+      await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport()
     })
   }
 })

@@ -7,6 +7,7 @@
   position: relative;
   isolation: isolate;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto 1fr auto;
   min-height: 100dvh;
   /*
@@ -17,11 +18,24 @@
   overflow-x: clip;
 }
 
+/*
+ * El contenido llena el alto que dejan el HUD y la barra (columna flexible): una pantalla puede anclar
+ * algo al pie (la tarjeta de la semana del menú llega a la barra de controles, como en la maqueta).
+ */
 .game-main {
   position: relative;
   z-index: var(--bb-z-content);
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   padding: var(--bb-space-6) var(--bb-gutter) var(--bb-space-8);
+}
+
+.game-screen {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  min-width: 0;
 }
 
 @media (max-width: 720px) {

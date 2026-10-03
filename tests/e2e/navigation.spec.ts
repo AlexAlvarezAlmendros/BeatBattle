@@ -106,7 +106,8 @@ test.describe('desplazamiento al cargar (móvil, donde las pantallas interiores 
   }) => {
     await page.goto('/como-funciona')
     await expect(mainHeading(page)).toHaveText('Cómo se juega')
-    await page.getByRole('contentinfo').scrollIntoViewIfNeeded()
+    // La barra de controles va pegada al pie también en móvil: se baja hasta el final de la pantalla.
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100)
 
     await page.goto('/esto-no-existe')
@@ -117,7 +118,8 @@ test.describe('desplazamiento al cargar (móvil, donde las pantallas interiores 
   test('recargar y volver atrás desde otro documento recuperan la posición', async ({ page }) => {
     await page.goto('/como-funciona')
     await expect(mainHeading(page)).toHaveText('Cómo se juega')
-    await page.getByRole('contentinfo').scrollIntoViewIfNeeded()
+    // La barra de controles va pegada al pie también en móvil: se baja hasta el final de la pantalla.
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100)
     const position = Math.round(await page.evaluate(() => window.scrollY))
 

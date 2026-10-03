@@ -1152,7 +1152,9 @@ grupo, `[data-cursor-active]` en la elegida y el componente `Cursor` dentro de l
 consume un menú llegan a los manejadores globales con `defaultPrevented`, y estos las ignoran. Con
 **mando** (Gamepad API, mapeo estándar), la cruceta y la palanca izquierda son las flechas, A acepta (el
 clic sobre lo enfocado), B es Esc y LB/RB son Q/E: el mando no tiene lógica propia, se traduce a esas
-teclas. En táctil, las teclas que enseñan los botones y la barra de controles desaparecen.
+teclas. En táctil, las teclas que enseñan los botones y la barra de controles desaparecen. Depende del
+tipo de entrada (`hover: none` o `pointer: coarse`), no del ancho: con teclado y ratón se ven también en
+una ventana estrecha o ampliada al 200 %.
 
 | Componente | Anatomía y comportamiento |
 |---|---|
@@ -1221,7 +1223,9 @@ con su propia firma, §3.1) y las de autenticación, admin y legales, que usan u
 - **Barra de controles inferior** (58 px, negra, filete rojo de 2 px y línea discontinua encima):
   las teclas de la pantalla a la izquierda (`[↑][↓] ELEGIR · [INTRO] ENTRAR · [ESC] VOLVER ·
   [M] SONIDO`), la firma en el centro y un dato a la derecha («Crédito 01», «Nv 13 · 6.480 XP», la
-  crónica de la arena). En táctil, las teclas desaparecen y queda la firma.
+  crónica de la arena). En táctil, las teclas desaparecen y queda la firma. Va pegada al pie de la
+  ventana también en móvil (firma de 24 px y «Legal» en una fila; con teclado, las teclas en una fila
+  de encima): la firma se ve al abrir cualquier pantalla, aunque sea más alta que la ventana.
 
 En móvil el HUD se compacta en una fila (avatar, nombre, nivel, XP y sonido) y el reloj baja a la
 tarjeta de la semana.
@@ -1489,7 +1493,8 @@ semana gigante, **«ELIGE MODO»** con seis placas:
 Debajo de las placas, el **panel de ayuda** describe el modo enfocado («Pilla el sample, cocina tu
 flip y súbelo antes del domingo 11 a las 20:00. Una entrada por semana: te queda 1 crédito.»). Arriba,
 el HUD con el reloj de ronda en el centro. La barra de controles enseña `↑↓ ELEGIR · INTRO ENTRAR · ESC
-VOLVER · M SONIDO`, la firma y «Inserta tu beat · Crédito 01» (o «Crédito 00 · ya estás dentro»). La
+VOLVER · M SONIDO`, la firma y «Inserta tu beat · Crédito 01» (o «Crédito 00 · ya estás dentro»), en
+caja mixta con el crédito en Oxanium rojo y «Inserta tu beat» respirando (§3.6; quieto sin movimiento). La
 **crónica de la arena** (antes, el teletipo; `/api/weeks/:slug/ticker`) rota en ese hueco cada 5 s por
 fundido: «NUEVA ENTRADA: TIGRE PÚRPURA», «QUEDAN 2 DÍAS», «340 VOTOS ESTA SEMANA». En voto ciego nunca
 dice quién ha subido.
