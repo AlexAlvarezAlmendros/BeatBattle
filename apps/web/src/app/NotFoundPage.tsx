@@ -21,9 +21,13 @@ const LEGEND = [
  * has perdido… pero ya que estás» de subtítulo. La pieza de la cuña es el beat pad de 4 × 4 (teclas de
  * chaflán `--bb-cut-md` de 72 px), quieto y decorativo hasta la Fase 8, con «Volver al menú [Esc]»
  * debajo; el panel, estirado hasta el pie del pad, lleva el subtítulo arriba y abajo cómo se toca (los
- * chops en la fila de arriba, la batería en el resto). También la pinta el límite de errores de las
- * rutas cuando un loader responde 404 (un documento legal que no existe): por eso pone su propia placa
- * en el HUD, por encima de la de la ruta. La pestaña dice «Página no encontrada».
+ * chops en la fila de arriba, la batería en el resto). El panel va antes que el pad en el orden de
+ * lectura y del foco (`panelFirst`): en móvil, el subtítulo sale con el titular, en la primera vista,
+ * y el pad debajo; en escritorio siguen el pad a la izquierda y el panel a la derecha.
+ *
+ * También la pinta el límite de errores de las rutas cuando un loader responde 404 (un documento legal
+ * que no existe): por eso pone su propia placa en el HUD, por encima de la de la ruta. La pestaña dice
+ * «Página no encontrada».
  */
 export function NotFoundPage() {
   const legendId = useId()
@@ -41,6 +45,7 @@ export function NotFoundPage() {
         documentTitle={t('pages.notFound.title')}
         kicker={t('frame.plates.notFound')}
         titleInHud
+        panelFirst
         actions={null}
         piece={
           <>

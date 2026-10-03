@@ -11,6 +11,7 @@ import { open, settle } from './support'
  *   pie, encima de la barra.
  * - **Pantallas con pieza** («Cómo se juega», la 404): el panel de la derecha llega al pie de la pieza
  *   de la cuña.
+ * - **404 en móvil**: el subtítulo va con el titular, antes del pad, y se ve sin desplazar.
  */
 
 test.use({ reducedMotion: 'reduce' })
@@ -101,5 +102,22 @@ test.describe('390 × 844', () => {
     expect(gap, `${gap} px entre el panel y la barra`).toBeLessThanOrEqual(24)
     // El logo, entre el título y el panel (no pegado arriba con el hueco debajo).
     expect(box.panel.top - box.title.bottom).toBeGreaterThanOrEqual(48)
+  })
+
+  test('§3.8.11: en móvil, el subtítulo de la 404 va con el titular, antes del pad, y se ve sin desplazar', async ({
+    page,
+  }) => {
+    await open(page, '/esto-no-existe', 'Bonus stage')
+    await settle(page)
+    const subtitle = page.getByRole('main').getByText('Te has perdido… pero ya que estás.')
+    const box = await boxes(page, {
+      head: 'main [data-screen-part="head"]',
+      pad: 'main figure',
+      subtitle: `${PANEL} p`,
+    })
+    expect(box.subtitle.top).toBeGreaterThanOrEqual(box.head.bottom)
+    expect(box.subtitle.bottom).toBeLessThanOrEqual(box.pad.top)
+    expect(box.subtitle.bottom).toBeLessThanOrEqual(box.bar.top)
+    await expect(subtitle).toBeInViewport({ ratio: 1 })
   })
 })

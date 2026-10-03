@@ -36,6 +36,12 @@ export interface ScreenPageProps {
    */
   layout?: 'interior' | 'title'
   /**
+   * El panel va antes que la pieza en el orden de lectura y del foco y, en la columna única (≤ 960 px),
+   * también en pantalla; en dos columnas siguen la pieza a la izquierda y el panel a la derecha. Para
+   * la 404, cuyo subtítulo va con el titular (§3.8.11).
+   */
+  panelFirst?: boolean
+  /**
    * ¿El título ya se ve en la placa del HUD? Entonces el `<h1>` queda solo para los lectores de
    * pantalla en escritorio (en móvil el HUD no lleva placa y el título se ve). Por defecto, si la ruta
    * declara placa (`handle.screen.plate`).
@@ -63,6 +69,7 @@ export function ScreenPage({
   piece,
   badge,
   layout = 'interior',
+  panelFirst = false,
   titleInHud,
   actions,
   children,
@@ -70,29 +77,34 @@ export function ScreenPage({
 }: ScreenPageProps) {
   const screen = useScreen()
   const inHud = titleInHud ?? Boolean(screen.plate)
+  const panel = (
+    <Frame cut="lg" className={styles.panel} data-screen-part="panel">
+      {badge}
+      {summary && <p className={styles.summary}>{summary}</p>}
+      {children}
+      {actions !== null && <div className={styles.actions}>{actions ?? <BackToMenu />}</div>}
+    </Frame>
+  )
   return (
     <div
       className={cx(styles.screen, className)}
       data-title-in-hud={inHud || undefined}
       data-piece={piece ? '' : undefined}
       data-layout={layout}
+      data-panel-first={panelFirst || undefined}
     >
       <DocumentTitle page={documentTitle ?? undefined} />
       <div className={styles.head} data-screen-part="head">
         {kicker && <p className={cx('bb-label', styles.kicker)}>{kicker}</p>}
         <h1 className={cx('bb-display', styles.title)}>{title}</h1>
       </div>
+      {panelFirst && panel}
       {piece && (
         <div className={styles.piece} data-screen-part="piece">
           {piece}
         </div>
       )}
-      <Frame cut="lg" className={styles.panel} data-screen-part="panel">
-        {badge}
-        {summary && <p className={styles.summary}>{summary}</p>}
-        {children}
-        {actions !== null && <div className={styles.actions}>{actions ?? <BackToMenu />}</div>}
-      </Frame>
+      {!panelFirst && panel}
     </div>
   )
 }

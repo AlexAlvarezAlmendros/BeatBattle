@@ -76,6 +76,23 @@ describe('plantilla de pantalla interior (0.26, §3.8.14)', () => {
     await act(async () => {})
   })
 
+  it('§3.8.11: el subtítulo de la 404 va con el titular, antes del pad, en el orden de lectura (y en móvil, en pantalla)', async () => {
+    renderAt('/legal/no-existe')
+    const main = screen.getByRole('main')
+    const heading = within(main).getByRole('heading', { level: 1 })
+    const subtitle = within(main).getByText(t('pages.notFound.subtitle'))
+    const pad = main.querySelector('figure')!
+    const back = within(main).getByRole('link', { name: t('screen.backToMenu') })
+    const follows = (a: Node, b: Node) =>
+      Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
+    // Titular → subtítulo → pad → «Volver al menú»: lo que se lee y el orden del foco, como se ve en móvil.
+    expect(follows(heading, subtitle)).toBe(true)
+    expect(follows(subtitle, pad)).toBe(true)
+    expect(follows(pad, back)).toBe(true)
+    expect(main.querySelector('[data-panel-first]')).not.toBeNull()
+    await act(async () => {})
+  })
+
   it('§3.8.11 / RD-VIS-02 e: el panel de la 404 cuenta cómo se toca el pad (chops arriba, batería debajo)', async () => {
     renderAt('/legal/no-existe')
     const main = screen.getByRole('main')

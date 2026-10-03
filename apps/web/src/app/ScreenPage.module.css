@@ -164,6 +164,14 @@
       "panel";
   }
 
+  /* El panel antes que la pieza, como en el orden de lectura (la 404: el subtítulo con el titular). */
+  .screen[data-panel-first] {
+    grid-template-areas:
+      "head"
+      "panel"
+      "piece";
+  }
+
   /* Pantalla de título en una columna: el logo en medio y el panel anclado al pie, encima de la barra. */
   .screen[data-layout="title"] {
     grid-template-rows: auto minmax(0, 1fr) auto;
