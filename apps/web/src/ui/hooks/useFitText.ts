@@ -38,9 +38,28 @@ export function useFitText<E extends HTMLElement>(ref: RefObject<E | null>, text
       }
     }
     adjust()
-    // Se observa la caja que manda en el ancho (la del padre): la del propio texto cambia al ajustarlo.
-    const observer = new ResizeObserver(adjust)
-    observer.observe(element.parentElement ?? element)
-    return () => observer.disconnect()
+    // Se observa la caja que manda en el ancho (la del padre), y solo cuenta si cambia su ancho: al
+    // ajustar el texto cambia su alto, y volver a medir en el mismo fotograma sería un bucle de
+    // `ResizeObserver` (que el navegador corta con un error). El ajuste va al fotograma siguiente.
+    const box = element.parentElement ?? element
+    let width = box.clientWidth
+    let frame = 0
+    const observer = new ResizeObserver(() => {
+      if (box.clientWidth === width) return
+      width = box.clientWidth
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(adjust)
+    })
+    observer.observe(box)
+    // Con la fuente web ya cargada (llega con `swap`) el texto mide otra cosa: se vuelve a ajustar.
+    let active = true
+    void document.fonts?.ready.then(() => {
+      if (active) adjust()
+    })
+    return () => {
+      active = false
+      cancelAnimationFrame(frame)
+      observer.disconnect()
+    }
   }, [ref, text])
 }

@@ -18,6 +18,8 @@
   z-index: var(--bb-z-stage);
   overflow: hidden;
   pointer-events: none;
+  /* Lo que se sale (los rayos, la cuña inclinada) nunca cuenta como desbordamiento de la página. */
+  contain: strict;
 }
 
 .arena[data-wedge="left"] {

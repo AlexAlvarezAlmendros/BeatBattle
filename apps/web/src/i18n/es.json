@@ -16,31 +16,109 @@
     "count_other": "{count} entradas"
   },
   "home": {
-    "hero": {
-      "sideWeek": "Próximo drop",
-      "sideSeason": "Temporada —",
-      "titleSolid": "Beat",
-      "titleOutline": "Battle",
-      "subtitle": "Sample · Flip · Vota · Repite",
-      "notify": "Avísame del próximo drop",
-      "howItWorks": "Cómo funciona",
-      "emptyCalendar": "El próximo drop está en el horno."
-    },
     "dropAlert": {
       "title": "Avísame del próximo drop",
       "summary": "Muy pronto podrás dejar aquí tu email para que te avisemos de cada drop, sin crear cuenta."
     },
-    "ticker": {
-      "label": "Teletipo de la batalla",
-      "pause": "Pausar el teletipo",
+    "title": {
+      "label": "Beat Battle, torneo semanal de productores",
+      "ribbonStart": "Torneo semanal",
+      "ribbonEnd": "de productores",
+      "by": "by"
+    },
+    "menu": {
+      "title": "Elige modo",
+      "touch": "Toca para entrar"
+    },
+    "modes": {
+      "play": {
+        "label": "Jugar",
+        "upload": "Subir mi beat",
+        "edit": "Editar mi entrada",
+        "empty": "En el horno",
+        "closed": "Envíos cerrados",
+        "credits_one": "{count} crédito",
+        "credits_other": "{count} créditos",
+        "help": "Pilla el sample, cocina tu flip y súbelo antes del {when}. Una entrada por semana: te queda {credits}.",
+        "helpVisitor": "Entra para jugar: pilla el sample, cocina tu flip y súbelo antes del {when}.",
+        "helpEdit": "Ya estás en la batalla: puedes cambiar tu entrada hasta el cierre de envíos.",
+        "helpEmpty": "Aún no hay sample esta semana: el próximo drop está en el horno. Cada lunes cae uno nuevo.",
+        "helpClosed": "Envíos cerrados · votos hasta las 23:59. Todavía puedes votar en el jurado."
+      },
+      "jury": {
+        "label": "Jurado",
+        "unvoted": "{count} sin votar",
+        "beats_one": "{count} beat",
+        "beats_other": "{count} beats",
+        "signIn": "Entra para votar",
+        "empty": "Sin beats que votar",
+        "help": "{count} sin votar. Escucha 45 s de cada uno y puntúalo de 1 a 5. Sin nombres hasta el domingo a las 23:59.",
+        "helpVisitor": "Entra para votar: escucha 45 s de cada beat y puntúalo de 1 a 5, sin saber de quién es.",
+        "helpEmpty": "Cuando caiga el sample y lleguen las primeras entradas, aquí las escucharás y votarás."
+      },
+      "results": {
+        "label": "Resultados",
+        "new": "Nuevo",
+        "week": "Semana {number}",
+        "none": "Sin semanas selladas",
+        "help": "La {week} ya está sellada. Mira la ceremonia y descubre quién estaba detrás de cada beat.",
+        "helpNone": "La primera ceremonia llega con el primer domingo de batalla: entonces se revelan notas y autores."
+      },
+      "hallOfFame": {
+        "label": "Salón de la fama",
+        "help": "Campeones de cada semana, campeones de temporada y récords de la batalla."
+      },
+      "howItWorks": {
+        "label": "Cómo se juega",
+        "detail": "{minutes} min",
+        "help": "Las reglas en un minuto: sample, flip, voto ciego, escucha mínima y Ronda justa."
+      },
+      "settings": {
+        "label": "Ajustes",
+        "detail": "Sonido · movimiento",
+        "help": "Sonido, movimiento, modo serio y tamaño de texto; también cuenta, emails y sesiones."
+      }
+    },
+    "empty": {
+      "kicker": "Próximo drop",
+      "when": "Cada lunes, un sample",
+      "title": "El próximo drop está en el horno",
+      "summary": "Cada lunes cae un sample nuevo: flipéalo, sube tu beat antes del domingo y deja que la comunidad vote a ciegas. El domingo se sella la semana.",
+      "alertTag": "Aviso"
+    },
+    "stage": {
+      "kickerBefore": "Semana",
+      "kickerAfter": "· escenario",
+      "vinylLabel": "S{number}",
+      "bpm": "{bpm} BPM",
+      "bpmUnit": "BPM",
+      "minUnit": "Min",
+      "suggested": "Sugerido",
+      "inBattle": "en la batalla",
+      "inBattleShort": "en liza",
+      "listen": "Escuchar el sample «{title}»",
+      "time": "{current} / {total}",
+      "challenge": "Reto",
+      "closesShort": "Cierre de envíos",
+      "votesShort": "Cierre de votos"
+    },
+    "clock": {
+      "closes": "Tiempo · cierre de envíos",
+      "votes": "Tiempo · cierre de votos"
+    },
+    "hud": {
+      "streak": "Racha",
+      "streakValue": "×{count}"
+    },
+    "chronicle": {
+      "insert": "Inserta tu beat · Crédito 01",
+      "inside": "Crédito 00 · ya estás dentro",
       "idle": {
         "nextDrop": "Próximo drop en el horno",
         "everyMonday": "Un sample cada lunes",
         "flip": "Flipéalo a tu manera",
-        "upload": "Sube tu beat",
-        "vote": "La comunidad vota",
-        "seal": "El domingo se sella",
-        "brand": "Beat Battle by Other People"
+        "vote": "La comunidad vota a ciegas",
+        "seal": "El domingo se sella la semana"
       }
     }
   },
@@ -282,6 +360,10 @@
         "tenMinutes": "Quedan 10 minutos",
         "ended": "Tiempo agotado"
       }
+    },
+    "gameLogo": {
+      "beat": "BEAT",
+      "battle": "BATTLE"
     }
   },
   "dev": {
@@ -748,6 +830,30 @@
           "medals": "Discos de oro, platino y diamante"
         }
       }
+    },
+    "menu": {
+      "title": "Menú (muestra)",
+      "week": {
+        "title": "Lluvia en Gràcia",
+        "credits": "Rhodes y lluvia grabados en Gràcia · Other People Sound Lab",
+        "range": "5–11 oct · 2026-W41",
+        "key": "Re menor",
+        "genre": "Boom bap",
+        "challenge": "Usa solo el primer compás · da logro, no puntúa",
+        "when": "domingo 11 a las 20:00",
+        "whenVoting": "hoy a las 23:59",
+        "clockWhen": "Domingo 11 a las 20:00 · votos hasta las 23:59",
+        "clockWhenVoting": "Envíos cerrados · votos hasta las 23:59"
+      },
+      "player": {
+        "season": "Temporada T4",
+        "seasonValue": "12 PTS · 9.º"
+      },
+      "chronicle": {
+        "entry": "Nueva entrada: Tigre Púrpura",
+        "days": "Quedan 4 días",
+        "votes": "340 votos esta semana"
+      }
     }
   },
   "rank": {
@@ -819,6 +925,13 @@
       "legalTitle": "Letra pequeña",
       "notFound": "Error 404",
       "dev": "Desarrollo"
+    },
+    "player": {
+      "levelBefore": "Nv",
+      "xp": "Experiencia",
+      "xpText": "{value} de {max} XP para el nivel {next}",
+      "xpStart": "XP {value}",
+      "xpEnd": "NV {next} · {max}"
     }
   }
 }

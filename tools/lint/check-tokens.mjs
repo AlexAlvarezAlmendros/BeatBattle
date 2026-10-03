@@ -131,21 +131,6 @@ export const TEMPORARY_EXCEPTIONS = [
     reason: 'Página provisional con medidas del sello: la rehace la 0.26.',
   },
   {
-    file: 'apps/web/src/features/week/hero/hero.css',
-    rules: ['stroke-literal', 'token-unknown'],
-    reason: 'Hero del sello (pieza prohibida, §3.1): lo sustituye el menú principal (0.24).',
-  },
-  {
-    file: 'apps/web/src/features/week/hero/index.ts',
-    rules: ['forbidden-component'],
-    reason: 'Reexporta el marquee del sello: lo retira la 0.24.',
-  },
-  {
-    file: 'apps/web/src/features/week/HomePage.tsx',
-    rules: ['forbidden-component'],
-    reason: 'Home con hero y marquee del sello: la rehace el menú principal (0.24).',
-  },
-  {
     file: 'apps/web/src/ui/GlassSurface/GlassSurface.css',
     rules: ['token-unknown'],
     reason: 'Cristal del sello (pieza prohibida, §3.1): la 0.27 lo borra.',

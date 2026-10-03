@@ -9,6 +9,12 @@
   display: grid;
   grid-template-rows: auto 1fr auto;
   min-height: 100dvh;
+  /*
+   * Nada se sale de lado: el cursor de juego de una opción pegada al borde (7 px por fuera de la pieza)
+   * ensancharía la ventana en móvil al cargar. `clip` no crea contenedor de desplazamiento (el HUD y la
+   * barra pegada siguen funcionando) y deja ver el cursor dentro del medianil.
+   */
+  overflow-x: clip;
 }
 
 .game-main {
@@ -16,6 +22,12 @@
   z-index: var(--bb-z-content);
   min-width: 0;
   padding: var(--bb-space-6) var(--bb-gutter) var(--bb-space-8);
+}
+
+@media (max-width: 720px) {
+  .game-main {
+    padding-block: var(--bb-space-3) var(--bb-space-1);
+  }
 }
 
 /* Ningún control enfocado queda tapado por el HUD al desplazarse para enseñarlo (§3.3). */

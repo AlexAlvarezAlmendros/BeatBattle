@@ -1,0 +1,253 @@
+/*
+ * Menú principal (§3.8.3; maqueta `01-menu.html`): dos columnas a los lados de la diagonal, el título
+ * con la tarjeta del escenario a la izquierda y «ELIGE MODO» a la derecha, sobre la cuña. En móvil, todo
+ * apilado sin desplazar (la cuña pasa abajo).
+ */
+.menu {
+  display: grid;
+  grid-template-columns: minmax(0, 40rem) minmax(0, 35rem);
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--bb-space-10);
+  /*
+   * Como en la maqueta, el título sube hasta el pie del reloj del HUD y la tarjeta del escenario llega a
+   * la barra de controles: a 1440 × 900 la pantalla entera cabe sin desplazar.
+   */
+  margin-top: calc(-1 * var(--bb-space-3));
+  margin-bottom: calc(-1 * var(--bb-space-8));
+}
+
+/* ── Título: logo y lockup ──────────────────────────────────────────────────────────────── */
+.title {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+}
+
+.logoFull {
+  width: min(100%, 40rem);
+  margin-left: calc(-1 * var(--bb-space-3));
+}
+
+.logoCompact {
+  display: none;
+}
+
+.lockup {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-4);
+  min-width: 0;
+  margin: calc(-1 * var(--bb-space-1)) 0 0 var(--bb-space-2);
+}
+
+.ribbon {
+  padding: var(--bb-space-2) var(--bb-space-5) var(--bb-space-2) var(--bb-space-4);
+  background: var(--bb-white);
+  color: var(--bb-black);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-sm);
+  font-style: italic;
+  font-weight: var(--bb-weight-extrabold);
+  font-stretch: var(--bb-stretch-plate);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  clip-path: polygon(var(--bb-cut-md) 0, 100% 0, calc(100% - var(--bb-cut-md)) 100%, 0 100%);
+}
+
+.signature {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+  min-height: var(--bb-target);
+  margin-top: calc(-1 * var(--bb-space-2));
+  color: var(--bb-white);
+  font-size: var(--bb-fs-md);
+  font-style: italic;
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-decoration: none;
+}
+
+.title > article {
+  margin-top: var(--bb-space-5);
+}
+
+/* ── Modos ──────────────────────────────────────────────────────────────────────────────── */
+.modes {
+  display: grid;
+  min-width: 0;
+  padding-top: var(--bb-space-2);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--bb-space-4);
+  margin: 0 var(--bb-space-3) var(--bb-space-4) var(--bb-space-7);
+}
+
+.headTitle {
+  font-size: var(--bb-fs-xl);
+  font-stretch: var(--bb-stretch-plate);
+  white-space: nowrap;
+}
+
+.touch {
+  color: var(--bb-text-2);
+  letter-spacing: var(--bb-tracking-label-wide);
+  white-space: nowrap;
+}
+
+.plates {
+  display: grid;
+  gap: var(--bb-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.help {
+  --frame-fill: var(--bb-panel-veil);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--bb-space-1) var(--bb-space-4);
+  margin: var(--bb-space-5) 0 0 var(--bb-space-7);
+  padding: var(--bb-space-3) var(--bb-space-5);
+}
+
+.helpKicker {
+  padding-top: var(--bb-space-1);
+  color: var(--bb-red);
+}
+
+.helpText {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.helpText b {
+  color: var(--bb-white);
+  font-weight: var(--bb-weight-bold);
+}
+
+/* El número de semana gigante, en contorno blanco al 7 % dentro de la cuña (§3.2 «Texturas»). */
+.giant {
+  position: absolute;
+  right: calc(-1 * var(--bb-space-10));
+  bottom: calc(-1 * var(--bb-space-8));
+  color: transparent;
+  font-size: var(--bb-tex-giant-size);
+  letter-spacing: -0.04em;
+  line-height: 0.8;
+  -webkit-text-stroke: var(--bb-stroke) var(--bb-tex-giant-ink);
+}
+
+/* ── Móvil (≤ 720 px): apilado; placas de 48 px; sin panel de ayuda ni número gigante ─────── */
+@media (max-width: 720px) {
+  .menu {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--bb-space-3);
+    margin-top: calc(-1 * var(--bb-space-3));
+    margin-bottom: 0;
+  }
+
+  .logoFull {
+    width: 100%;
+    margin: 0;
+  }
+
+  .lockup {
+    gap: var(--bb-space-2);
+    margin: calc(-1 * var(--bb-space-2)) 0 0;
+  }
+
+  .ribbon {
+    min-width: 0;
+    padding: var(--bb-space-2);
+    overflow: hidden;
+    font-size: var(--bb-fs-xs);
+    font-stretch: var(--bb-stretch-min);
+    letter-spacing: 0;
+    text-overflow: ellipsis;
+  }
+
+  .signature {
+    flex: none;
+  }
+
+  .signature {
+    gap: var(--bb-space-1);
+    font-size: var(--bb-fs-sm);
+  }
+
+  .title > article {
+    margin-top: var(--bb-space-3);
+  }
+
+  .modes {
+    padding-top: 0;
+  }
+
+  .head {
+    margin: 0 0 var(--bb-space-2);
+  }
+
+  .headTitle {
+    font-size: var(--bb-fs-lg);
+  }
+
+  .plates {
+    gap: calc(var(--bb-space-1) + var(--bb-stroke));
+  }
+
+  .help,
+  .giant,
+  .optional {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .ribbonEnd,
+  .optional {
+    display: none;
+  }
+
+  .touch {
+    letter-spacing: var(--bb-tracking-label);
+  }
+}
+
+/* Móvil bajo (≤ 700 px de alto): logo en una línea y todo más junto (§3.8.3). */
+@media (max-width: 720px) and (max-height: 700px) {
+  .logoFull {
+    display: none;
+  }
+
+  .logoCompact {
+    display: block;
+    width: 100%;
+    margin-top: var(--bb-space-1);
+  }
+
+  .plates {
+    gap: var(--bb-space-1);
+  }
+
+  .menu {
+    gap: var(--bb-space-2);
+  }
+
+  .headTitle {
+    font-size: var(--bb-fs-md);
+  }
+
+  .title > article {
+    margin-top: var(--bb-space-2);
+  }
+}

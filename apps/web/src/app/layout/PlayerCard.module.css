@@ -1,0 +1,105 @@
+/* El jugador y los datos del HUD (§3.4.1; maquetas `final.css` `.p1`, `.avatar`, `.chipbox`). */
+.player {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-3);
+}
+
+.p1 {
+  color: var(--bb-red);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-xl);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-display);
+  line-height: 1;
+}
+
+.avatar {
+  --frame-border: var(--bb-red);
+  --frame-fill: var(--bb-wine);
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: calc(var(--bb-target) + var(--bb-stroke));
+  height: calc(var(--bb-target) + var(--bb-stroke));
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-md);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-button);
+}
+
+.text {
+  display: grid;
+  gap: var(--bb-space-1);
+}
+
+.name {
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-button);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.rank {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-semibold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.rank b {
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+}
+
+.meter {
+  width: 12rem;
+  margin-top: var(--bb-space-1);
+}
+
+.stat {
+  --frame-fill: var(--bb-panel-veil);
+  display: grid;
+  align-content: center;
+  gap: var(--bb-space-1);
+  min-height: var(--bb-target);
+  padding: var(--bb-space-2) var(--bb-space-3);
+}
+
+.statLabel {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.statValue {
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-md);
+  line-height: 1;
+}
+
+@media (max-width: 720px) {
+  .p1 {
+    display: none;
+  }
+
+  .meter {
+    width: 8.25rem;
+  }
+
+  .meter :global([aria-hidden="true"]) {
+    display: none;
+  }
+
+  .stat {
+    display: none;
+  }
+}

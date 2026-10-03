@@ -122,13 +122,14 @@
  */
 @media (max-width: 720px) {
   .bar {
-    position: static;
+    /* En el flujo (no pegada), pero posicionada: si no, la arena fija se pintaría encima. */
+    position: relative;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 0 var(--bb-space-5);
     height: auto;
-    padding: var(--bb-space-2) var(--bb-gutter) var(--bb-space-3);
+    padding: var(--bb-space-1) var(--bb-gutter) var(--bb-space-2);
     border-top: 0;
   }
 

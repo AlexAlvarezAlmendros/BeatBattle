@@ -1,0 +1,77 @@
+/*
+ * Logo del juego (§3.2 «Trazos», §3.8.1): los colores del SVG por token. Los degradados de la cara de
+ * las letras son mezclas de la paleta (blanco y negro; rojo, blanco y negro), dentro del triángulo
+ * negro–rojo–blanco que mide `RD-VIS-02` a.
+ */
+.logo {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.word {
+  font-family: var(--bb-font-display);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-display);
+}
+
+.face {
+  stroke: var(--bb-black);
+  stroke-width: 5;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+
+.dotsGround {
+  fill: var(--bb-red-cta);
+}
+
+.dotsInk {
+  fill: var(--bb-red-shade);
+}
+
+.white {
+  stop-color: var(--bb-white);
+}
+
+.greyDark {
+  stop-color: color-mix(in srgb, var(--bb-white) 82%, var(--bb-black));
+}
+
+.greyLight {
+  stop-color: color-mix(in srgb, var(--bb-white) 95%, var(--bb-black));
+}
+
+.red {
+  stop-color: var(--bb-red);
+}
+
+.redLight {
+  stop-color: color-mix(in srgb, var(--bb-red) 71%, var(--bb-white));
+}
+
+.redDark {
+  stop-color: color-mix(in srgb, var(--bb-red) 83%, var(--bb-black));
+}
+
+.redMid {
+  stop-color: color-mix(in srgb, var(--bb-red) 90%, var(--bb-white));
+}
+
+.clear {
+  stop-opacity: 0;
+}
+
+.solidStop {
+  stop-opacity: 0.95;
+}
+
+.floodBlack {
+  flood-color: var(--bb-black);
+}
+
+.floodWhite {
+  flood-color: var(--bb-white);
+}

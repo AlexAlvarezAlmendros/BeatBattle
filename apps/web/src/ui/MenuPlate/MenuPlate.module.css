@@ -223,19 +223,23 @@
 @media (max-width: 720px) {
   .plate {
     --plate-shift: var(--bb-space-3);
-    grid-template-columns: var(--bb-space-8) auto minmax(0, 1fr);
-    column-gap: var(--bb-space-3);
+    grid-template-columns: var(--bb-space-7) auto minmax(0, 1fr);
+    column-gap: var(--bb-space-2);
     height: var(--bb-space-12);
-    padding: 0 var(--bb-space-5) 0 var(--bb-space-6);
+    padding: 0 var(--bb-space-4) 0 var(--bb-space-6);
   }
 
   .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
-    grid-template-columns: var(--bb-space-8) auto minmax(0, 1fr);
+    grid-template-columns: var(--bb-space-7) auto minmax(0, 1fr);
     height: var(--bb-space-14);
   }
 
   .index {
     font-size: var(--bb-fs-sm);
+  }
+
+  .label {
+    font-stretch: var(--bb-stretch-button);
   }
 
   .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])

@@ -247,8 +247,9 @@ describe('router (0.10, guía §2.18)', () => {
     }
   })
 
-  it('la galería existe en desarrollo y no existe en producción', async () => {
+  it('la galería y el menú de muestra existen en desarrollo y no en producción', async () => {
     expect(matchRoutes(routes, '/dev/galeria')?.at(-1)?.route.path).toBe('dev/galeria')
+    expect(matchRoutes(routes, '/dev/menu')?.at(-1)?.route.path).toBe('dev/menu')
 
     vi.stubEnv('DEV', false)
     vi.stubEnv('PROD', true)
@@ -257,6 +258,7 @@ describe('router (0.10, guía §2.18)', () => {
     expect(devRoutes).toEqual([])
     const production = (await import('./routes')).createRoutes()
     expect(matchRoutes(production, '/dev/galeria')?.at(-1)?.route.path).toBe('*')
+    expect(matchRoutes(production, '/dev/menu')?.at(-1)?.route.path).toBe('*')
     renderAt('/dev/galeria', production)
     expect(await h1(t('pages.notFound.title'))).toBeInTheDocument()
   })
