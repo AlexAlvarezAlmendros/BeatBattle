@@ -233,6 +233,13 @@
   }
 }
 
+/* En táctil no hay teclado: la tecla del botón sobra (como en la barra de controles, §3.4.1). */
+@media (hover: none), (pointer: coarse) {
+  .content > kbd {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .loaderBar,
   .button[data-status="error"] {

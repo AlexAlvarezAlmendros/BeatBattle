@@ -1,0 +1,35 @@
+/* La 404 «BONUS STAGE» (§3.8.11): la forma del beat pad de 4 × 4, quieta hasta la Fase 8. */
+.pad {
+  display: grid;
+  justify-items: start;
+  gap: var(--bb-space-3);
+  margin: 0;
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(4, var(--bb-space-14));
+  gap: var(--bb-space-2);
+}
+
+.key {
+  width: var(--bb-space-14);
+  height: var(--bb-space-14);
+  font-size: var(--bb-fs-md);
+}
+
+.caption {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-sm);
+}
+
+@media (max-width: 720px) {
+  .keys {
+    grid-template-columns: repeat(4, var(--bb-space-12));
+  }
+
+  .key {
+    width: var(--bb-space-12);
+    height: var(--bb-space-12);
+  }
+}

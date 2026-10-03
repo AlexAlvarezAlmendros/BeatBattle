@@ -1,0 +1,82 @@
+/*
+ * Plantilla de pantalla interior (§3.8.14; maquetas `02-seleccion.html`, `05-perfil.html`): el título
+ * en display arriba a la izquierda (donde la cuña no lleva trama, `RD-VIS-05`) y el contenido en un
+ * panel opaco a la derecha.
+ */
+.screen {
+  display: grid;
+  grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--bb-space-8) var(--bb-space-16);
+}
+
+.head {
+  display: grid;
+  justify-items: start;
+  gap: var(--bb-space-3);
+  min-width: 0;
+}
+
+.kicker {
+  color: var(--bb-text-2);
+  letter-spacing: var(--bb-tracking-label-wide);
+}
+
+.title {
+  max-width: 100%;
+  font-size: var(--bb-fs-title);
+  font-stretch: var(--bb-stretch-plate);
+  text-shadow: var(--bb-shadow-hard);
+  /* Parte por palabras; solo una palabra que no quepa entera se parte (nunca desborda). */
+  overflow-wrap: break-word;
+}
+
+.stamp {
+  margin-top: var(--bb-space-4);
+  background: var(--bb-black);
+}
+
+.panel {
+  --frame-fill: var(--bb-panel-veil);
+  display: grid;
+  gap: var(--bb-space-5);
+  min-width: 0;
+  max-width: 50rem;
+  padding: var(--bb-space-6) var(--bb-space-8);
+}
+
+.summary {
+  max-width: 62ch;
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-lg);
+  line-height: var(--bb-leading-body);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-3);
+  padding-top: var(--bb-space-4);
+  border-top: var(--bb-stroke-hair) solid var(--bb-line);
+}
+
+@media (max-width: 960px) {
+  .screen {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .head {
+    padding: var(--bb-space-3) var(--bb-space-4);
+    background: var(--bb-panel-veil);
+  }
+
+  .panel {
+    padding: var(--bb-space-5);
+  }
+
+  .summary {
+    font-size: var(--bb-fs-md);
+  }
+}

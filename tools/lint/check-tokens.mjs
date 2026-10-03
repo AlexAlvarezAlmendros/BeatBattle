@@ -126,11 +126,6 @@ const FORBIDDEN_FONT = /montserrat|jetbrains[\s_-]?mono/i
  */
 export const TEMPORARY_EXCEPTIONS = [
   {
-    file: 'apps/web/src/app/placeholder.css',
-    rules: ['token-unknown'],
-    reason: 'Página provisional con medidas del sello: la rehace la 0.26.',
-  },
-  {
     file: 'apps/web/src/ui/GlassSurface/GlassSurface.css',
     rules: ['token-unknown'],
     reason: 'Cristal del sello (pieza prohibida, §3.1): la 0.27 lo borra.',

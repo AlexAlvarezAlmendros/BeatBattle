@@ -1,0 +1,82 @@
+/* «Cómo se juega» (§3.8.14): la lista de movimientos y las reglas de juego limpio. */
+.moves {
+  display: grid;
+  gap: var(--bb-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.move {
+  --frame-fill: var(--bb-panel);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--bb-space-4);
+  padding: var(--bb-space-3) var(--bb-space-5);
+}
+
+.number {
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xl);
+  font-weight: var(--bb-weight-extrabold);
+}
+
+.moveText {
+  display: grid;
+  gap: var(--bb-space-1);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.moveTitle {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-lg);
+  font-stretch: var(--bb-stretch-plate);
+}
+
+.keys {
+  display: flex;
+  gap: var(--bb-space-1);
+}
+
+.rules {
+  display: grid;
+  gap: var(--bb-space-3);
+}
+
+.rulesTitle {
+  color: var(--bb-red);
+}
+
+.ruleList {
+  display: grid;
+  gap: var(--bb-space-2);
+  margin: 0;
+  padding-left: var(--bb-space-5);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.ruleList b {
+  color: var(--bb-white);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bb-target);
+  color: var(--bb-white);
+  font-weight: var(--bb-weight-bold);
+}
+
+@media (max-width: 720px) {
+  .move {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .keys {
+    display: none;
+  }
+}

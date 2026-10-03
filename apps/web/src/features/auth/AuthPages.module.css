@@ -1,0 +1,11 @@
+/* Pantallas de título de la autenticación (§3.8.14): el logo en una línea y la firma al lado. */
+.lockup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bb-space-4);
+}
+
+.logo {
+  width: min(100%, 26rem);
+}

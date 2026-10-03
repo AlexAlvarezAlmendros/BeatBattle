@@ -7,8 +7,7 @@
     "skipToContent": "Saltar al contenido"
   },
   "common": {
-    "loading": "Cargando…",
-    "backHome": "Volver al inicio"
+    "loading": "Cargando…"
   },
   "entries": {
     "count_zero": "Pista libre",
@@ -163,8 +162,8 @@
       "summary": "Aquí irá la clasificación de la temporada {id}."
     },
     "howItWorks": {
-      "title": "Cómo funciona",
-      "summary": "Aquí irán las reglas en corto, las preguntas frecuentes y el enlace a las bases."
+      "title": "Cómo se juega",
+      "summary": "Tres movimientos y cinco reglas: lo que hay que saber para entrar en la batalla."
     },
     "signIn": {
       "title": "Entrar",
@@ -188,8 +187,9 @@
     },
     "notFound": {
       "title": "Página no encontrada",
-      "summary": "Aquí no hay nada. En su lugar habrá un beat pad para que no te vayas con las manos vacías.",
-      "plate": "Bonus stage"
+      "summary": "Te has perdido… pero ya que estás, aquí habrá un beat pad para que no te vayas con las manos vacías.",
+      "plate": "Bonus stage",
+      "pad": "El beat pad de 4 × 4 llega pronto: arriba, los chops del sample de la semana; debajo, batería."
     },
     "error": {
       "title": "Se ha rayado el disco",
@@ -232,7 +232,8 @@
       "terminos": "Términos de uso",
       "privacidad": "Política de privacidad",
       "cookies": "Política de cookies"
-    }
+    },
+    "navLabel": "Documentos legales"
   },
   "ui": {
     "button": {
@@ -932,6 +933,54 @@
       "xpText": "{value} de {max} XP para el nivel {next}",
       "xpStart": "XP {value}",
       "xpEnd": "NV {next} · {max}"
+    }
+  },
+  "screen": {
+    "backToMenu": "Volver al menú",
+    "underConstruction": "En obras"
+  },
+  "howItWorks": {
+    "moveNumber": "{number}",
+    "keys": {
+      "one": "1",
+      "five": "5"
+    },
+    "moves": {
+      "sample": {
+        "title": "Pilla el sample",
+        "text": "Cada lunes cae uno nuevo. Descárgalo desde el menú, en Jugar."
+      },
+      "flip": {
+        "title": "Cocina tu flip",
+        "text": "Tienes hasta el domingo a las 20:00. Una entrada por semana."
+      },
+      "vote": {
+        "title": "Sube y vota",
+        "text": "Sube tu beat y entra al jurado: escucha 45 s de cada entrada y puntúala de 1 a 5."
+      }
+    },
+    "rulesTitle": "Juego limpio",
+    "rules": {
+      "blind": {
+        "title": "Voto ciego.",
+        "text": "Nadie sabe de quién es cada beat hasta el domingo a las 23:59."
+      },
+      "listen": {
+        "title": "Escucha mínima.",
+        "text": "Sin 45 s de escucha no hay voto."
+      },
+      "fairRound": {
+        "title": "Ronda justa.",
+        "text": "Primero salen las que menos votos llevan; nadie ve cuántos."
+      },
+      "bayes": {
+        "title": "Media bayesiana.",
+        "text": "La clasificación no premia a quien tiene pocos votos."
+      },
+      "xp": {
+        "title": "El XP no puntúa.",
+        "text": "El XP, los logros y las rachas nunca cambian la clasificación."
+      }
     }
   }
 }

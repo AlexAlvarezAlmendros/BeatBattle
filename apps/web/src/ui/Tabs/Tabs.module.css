@@ -18,6 +18,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--bb-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .tab {
@@ -69,7 +72,12 @@
   scale: 0.97;
 }
 
-.tab[aria-selected="true"] {
+.tab {
+  text-decoration: none;
+}
+
+.tab[aria-selected="true"],
+.tab[aria-current="page"] {
   --tab-fill: var(--bb-white);
   --tab-border: var(--bb-white);
   color: var(--bb-black);

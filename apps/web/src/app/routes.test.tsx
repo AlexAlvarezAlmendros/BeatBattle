@@ -153,7 +153,7 @@ describe('router (0.10, guía §2.18)', () => {
     expect(await h1(t('pages.error.title'))).toBeInTheDocument()
     expect(screen.getByText(t('pages.error.summary'))).toBeInTheDocument()
     expect(screen.getAllByText(new RegExp(t('pages.error.title')))).toHaveLength(1)
-    expect(screen.getByRole('link', { name: t('common.backHome') })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: t('screen.backToMenu') })).toHaveAttribute('href', '/')
   })
 
   it('/ajustes lleva a /ajustes/cuenta', async () => {

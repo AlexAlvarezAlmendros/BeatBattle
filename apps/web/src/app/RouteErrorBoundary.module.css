@@ -1,0 +1,8 @@
+/* El detalle del error, solo en desarrollo. */
+.detail {
+  max-height: 16rem;
+  overflow: auto;
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  white-space: pre-wrap;
+}
