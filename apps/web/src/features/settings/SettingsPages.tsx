@@ -32,6 +32,8 @@ function SettingsSectionPlaceholder({
   return (
     <PlaceholderPage
       title={title}
+      // En móvil, donde el HUD no lleva placa, «OPCIONES» encima del título, como las otras interiores.
+      kicker={t('frame.plates.settings')}
       summary={t(`settings.${section}.summary`)}
       documentTitle={t('settings.pageTitle', { section: title })}
     >
