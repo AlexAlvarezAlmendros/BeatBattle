@@ -19,6 +19,24 @@ describe('Opciones (§3.8.14)', () => {
     const kicker = within(head).getByText(t('frame.plates.settings'))
     expect(kicker.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
+
+  it('RD-VIS-02 e: la cuña lleva la pieza de la sección (sus placas en vista previa, quietas) y el sello pasa al panel', () => {
+    const { container } = renderInRouter(<SoundSettingsPage />, '/ajustes/sonido')
+    const piece = container.querySelector('[data-screen-part="piece"]')!
+    const preview = within(piece as HTMLElement).getByRole('figure', { name: t('settings.preview.caption') })
+    // Las placas son dibujo: lo que tendrá la sección lo dice el resumen del panel y el pie lo cuenta.
+    const plates = preview.querySelector('ul[aria-hidden="true"]')!
+    expect(plates.querySelectorAll('li')).toHaveLength(4)
+    expect(plates).toHaveTextContent(t('settings.preview.options.effects'))
+    expect(plates).toHaveTextContent(t('settings.preview.options.mute'))
+    // Nada que enfocar ni que cambiar todavía.
+    expect(preview.querySelectorAll('a, button, input, [tabindex]')).toHaveLength(0)
+    const panel = container.querySelector('[data-screen-part="panel"]')!
+    expect(within(panel as HTMLElement).getByText(t('screen.underConstruction'))).toHaveAttribute(
+      'data-stamp',
+      'red',
+    )
+  })
 })
 
 describe('Opciones → Accesibilidad (§3.8.14, RNF-A11Y-08)', () => {

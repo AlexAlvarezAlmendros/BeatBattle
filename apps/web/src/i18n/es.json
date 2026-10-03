@@ -248,6 +248,49 @@
         "label": "Atajos de una tecla",
         "help": "M (sonido), Q y E (secciones) y B (bases) funcionan desde cualquier sitio de la pantalla. Si usas control por voz o pulsas teclas sin querer, apágalos: Q, E y B solo actuarán con el foco en sus pestañas o en su lista, y el sonido se cambia con su botón."
       }
+    },
+    "preview": {
+      "caption": "Vista previa: así serán las opciones de esta sección. Todavía no hacen nada.",
+      "meterValue": "{value} de {max}",
+      "values": {
+        "yes": "Sí",
+        "no": "No",
+        "high": "Alta",
+        "change": "Cambiar",
+        "connect": "Conectar",
+        "edit": "Editar",
+        "choose": "Elegir",
+        "see": "Ver",
+        "close": "Cerrar",
+        "request": "Pedir",
+        "delete": "Borrar"
+      },
+      "options": {
+        "effects": "Efectos",
+        "music": "Música de sala",
+        "entries": "Entradas",
+        "mute": "Sin sonido",
+        "reduceMotion": "Reducir movimiento",
+        "serious": "Modo serio",
+        "quality": "Calidad visual",
+        "email": "Email",
+        "password": "Contraseña",
+        "google": "Google",
+        "discord": "Discord",
+        "name": "Nombre",
+        "avatar": "Avatar",
+        "links": "Enlaces",
+        "accent": "Acento",
+        "battleAlerts": "Avisos de la batalla",
+        "marketing": "Marketing",
+        "quietHours": "Horas de silencio",
+        "activeSessions": "Sesiones activas",
+        "closeOthers": "Cerrar las que no reconozcas",
+        "export": "Exportar mis datos",
+        "deleteAccount": "Borrar la cuenta",
+        "textSize": "Tamaño de texto",
+        "gate": "Puerta de entrada"
+      }
     }
   },
   "legal": {

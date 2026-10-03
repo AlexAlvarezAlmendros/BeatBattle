@@ -4,6 +4,7 @@ import type { SettingsSectionKey } from '../../app/paths'
 import { t } from '../../i18n'
 import { FilterChip } from '../../ui/Chip'
 import { useShortcuts } from '../../ui/shortcuts'
+import { SettingsPreview } from './SettingsPreview'
 
 /*
  * Secciones de `/ajustes/*` (Opciones, §3.8.14; §2.3, §2.12.4, RNF-A11Y-08), en el orden de sus pestañas:
@@ -35,6 +36,8 @@ function SettingsSectionPlaceholder({
       // En móvil, donde el HUD no lleva placa, «OPCIONES» encima del título, como las otras interiores.
       kicker={t('frame.plates.settings')}
       summary={t(`settings.${section}.summary`)}
+      // La pieza de la cuña: las placas de la sección en vista previa (el sello «EN OBRAS» pasa al panel).
+      piece={<SettingsPreview section={section} />}
       documentTitle={t('settings.pageTitle', { section: title })}
     >
       {children}

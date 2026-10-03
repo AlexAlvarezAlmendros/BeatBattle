@@ -17,3 +17,91 @@
   color: var(--bb-text-2);
   font-size: var(--bb-fs-sm);
 }
+
+/*
+ * La pieza de Opciones en la cuña (§3.8.14): las placas de la sección en vista previa, quietas. Placas
+ * opacas de chaflán `--bb-cut-md` (la cuña lleva trama, `RD-VIS-05`): el nombre a la izquierda y el
+ * control a la derecha, un medidor de 10 pasos, «◀ SÍ ▶» o la acción con su flecha.
+ */
+.settings-preview {
+  display: grid;
+  gap: var(--bb-space-3);
+  width: 100%;
+  margin: 0;
+}
+
+.settings-preview-list {
+  display: grid;
+  gap: var(--bb-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.settings-preview-option {
+  --frame-fill: var(--bb-panel-veil);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--bb-space-4);
+  min-height: var(--bb-space-14);
+  padding: var(--bb-space-2) var(--bb-space-5);
+}
+
+.settings-preview-label {
+  color: var(--bb-text);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: var(--bb-leading-label);
+  text-transform: uppercase;
+}
+
+.settings-preview-toggle,
+.settings-preview-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+  color: var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-sm);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-button);
+  letter-spacing: var(--bb-tracking-button);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.settings-preview-action {
+  color: var(--bb-text-2);
+}
+
+/* Las flechas del conmutador y de la acción: triángulos rojos (orientaciones, no inclinaciones). */
+.settings-preview-arrow {
+  width: var(--bb-space-2);
+  height: var(--bb-space-3);
+  background: var(--bb-red);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+.settings-preview-arrow[data-side="left"] {
+  clip-path: polygon(100% 0, 0 50%, 100% 100%);
+}
+
+/* El pie, sobre un panel como el del pad de la 404 (la cuña lleva trama). */
+.settings-preview-caption {
+  justify-self: start;
+  max-width: 100%;
+  padding: var(--bb-space-2) var(--bb-space-3);
+  background: var(--bb-panel-veil);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+@media (max-width: 720px) {
+  .settings-preview-option {
+    min-height: var(--bb-space-12);
+    padding: var(--bb-space-2) var(--bb-space-4);
+  }
+}

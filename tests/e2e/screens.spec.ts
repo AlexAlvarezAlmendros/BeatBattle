@@ -9,9 +9,12 @@ import { open, settle } from './support'
  * - **Autenticación** como pantalla de título: el logo con su lockup y el panel, centrados en vertical
  *   entre el HUD y la barra, con el pie del panel a la altura del lockup; en móvil, el panel anclado al
  *   pie, encima de la barra.
- * - **Pantallas con pieza** («Cómo se juega», la 404): el panel de la derecha llega al pie de la pieza
- *   de la cuña.
+ * - **Pantallas con pieza** («Cómo se juega», la 404, Opciones): el panel de la derecha llega al pie
+ *   de la pieza de la cuña.
  * - **404 en móvil**: el subtítulo va con el titular, antes del pad, y se ve sin desplazar.
+ * - **Granate de la cuña** en Opciones, con su pieza encima, dentro del rango de las maquetas (§3.1:
+ *   «unos 15 %»; como mucho el 24,5 % de `02-seleccion` en escritorio y el 18 % de las maquetas
+ *   móviles), con el criterio del acta del jurado (grupo 24): r 25–110, g < 0,45 r, b < 0,6 r.
  */
 
 test.use({ reducedMotion: 'reduce' })
@@ -44,6 +47,26 @@ async function boxes<K extends string>(
 
 const PANEL = 'main [data-screen-part="panel"]'
 const PIECE = 'main [data-screen-part="piece"]'
+
+/** Proporción de píxeles granate de una captura (criterio del acta, grupo 24), medida en el navegador. */
+async function wineShare(page: Page): Promise<number> {
+  const png = await page.screenshot()
+  return page.evaluate(async (data) => {
+    const image = new Image()
+    image.src = `data:image/png;base64,${data}`
+    await image.decode()
+    const canvas = new OffscreenCanvas(image.width, image.height)
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })!
+    ctx.drawImage(image, 0, 0)
+    const { data: px } = ctx.getImageData(0, 0, image.width, image.height)
+    let wine = 0
+    for (let i = 0; i < px.length; i += 4) {
+      const r = px[i]!
+      if (r >= 25 && r <= 110 && px[i + 1]! < 0.45 * r && px[i + 2]! < 0.6 * r) wine += 1
+    }
+    return wine / (px.length / 4)
+  }, png.toString('base64'))
+}
 
 test.describe('1440 × 900', () => {
   test('RD-VIS-02 e: la autenticación es una pantalla de título, con el logo y el panel centrados entre el HUD y la barra', async ({
@@ -86,6 +109,26 @@ test.describe('1440 × 900', () => {
     const box = await boxes(page, { panel: PANEL, piece: PIECE })
     expect(Math.abs(box.panel.bottom - box.piece.bottom)).toBeLessThanOrEqual(2)
   })
+
+  test('RD-VIS-02 e: Opciones lleva su pieza en la cuña y el panel llega a su pie', async ({ page }) => {
+    await open(page, '/ajustes', 'Sonido y efectos')
+    await settle(page)
+    const box = await boxes(page, { panel: PANEL, piece: PIECE })
+    expect(box.piece.bottom - box.piece.top).toBeGreaterThanOrEqual(240)
+    expect(Math.abs(box.panel.bottom - box.piece.bottom)).toBeLessThanOrEqual(2)
+  })
+
+  for (const path of ['/ajustes', '/ajustes/cuenta']) {
+    test(`§3.1 / RD-VIS-02 e: la cuña de ${path} no pasa del granate de las maquetas (≤ 24,5 %)`, async ({
+      page,
+    }) => {
+      await page.goto(path)
+      await expect(page.locator(PIECE)).toBeVisible()
+      await settle(page)
+      const share = await wineShare(page)
+      expect(share, `granate ${(share * 100).toFixed(1)} %`).toBeLessThanOrEqual(0.245)
+    })
+  }
 })
 
 test.describe('390 × 844', () => {
@@ -120,4 +163,16 @@ test.describe('390 × 844', () => {
     expect(box.subtitle.bottom).toBeLessThanOrEqual(box.bar.top)
     await expect(subtitle).toBeInViewport({ ratio: 1 })
   })
+
+  for (const path of ['/ajustes', '/ajustes/cuenta']) {
+    test(`§3.1 / RD-VIS-02 e: en móvil, la cuña de ${path} no pasa del granate de las maquetas (≤ 18 %)`, async ({
+      page,
+    }) => {
+      await page.goto(path)
+      await expect(page.locator(PIECE)).toBeVisible()
+      await settle(page)
+      const share = await wineShare(page)
+      expect(share, `granate ${(share * 100).toFixed(1)} %`).toBeLessThanOrEqual(0.18)
+    })
+  }
 })
