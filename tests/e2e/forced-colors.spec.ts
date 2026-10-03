@@ -93,3 +93,37 @@ test('RNF-A11Y-01: en contraste alto, los marcos, el medidor de XP y la barra de
   // El número de semana gigante (texto transparente con contorno) no se pinta como un bloque.
   await expect(page.locator('[data-giant-number]')).toBeHidden()
 })
+
+/** Fondos de las dos casillas «SÍ | NO» de un chip de filtro (en ese orden). */
+function yesNo(chip: Locator) {
+  return chip
+    .locator('[aria-hidden="true"] > span')
+    .evaluateAll((spans) => spans.map((span) => getComputedStyle(span).backgroundColor))
+}
+
+test('RNF-A11Y-01: en contraste alto, el conmutador «SÍ | NO» enseña su estado (Opciones → Accesibilidad y la galería)', async ({
+  page,
+}) => {
+  await open(page, '/ajustes/accesibilidad', 'Accesibilidad')
+  const canvas = await canvasColor(page)
+  const toggle = page.getByRole('main').getByRole('button', { name: /Atajos de una tecla/ })
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+  // Encendido: «SÍ» resaltada (no del color del lienzo) y «NO» no.
+  const on = await yesNo(toggle)
+  expect(on[0]).not.toBe(canvas)
+  expect(on[0]).not.toBe(on[1])
+  // Apagado: el resaltado pasa a «NO».
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+  const off = await yesNo(toggle)
+  expect(off).toEqual([on[1], on[0]])
+
+  // En la galería, el chip activo se distingue del de reposo también por el borde.
+  await openGallery(page)
+  const block = page.locator('#chip-filtro')
+  const rest = block.locator('[data-state="rest"] button[aria-pressed="false"]')
+  const active = block.locator('button[aria-pressed="true"]:not([data-force-state])')
+  expect(await yesNo(active)).toEqual(on)
+  expect(await yesNo(rest)).toEqual(off)
+  expect(await background(active, '::before')).not.toBe(await background(rest, '::before'))
+})
