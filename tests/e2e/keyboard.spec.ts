@@ -244,6 +244,43 @@ test('RNF-A11Y-08 / WCAG 2.1.4: los atajos de una tecla se apagan en Opciones �
   await expect(page).toHaveURL('/legal/bases')
 })
 
+test('RNF-A11Y-08 / WCAG 2.1.4: con los atajos apagados, Q/E recorren varias secciones seguidas con el foco en las pestañas', async ({
+  page,
+}) => {
+  await page.addInitScript(() => localStorage.setItem('bb:shortcuts', 'off'))
+  await open(page, '/ajustes/sonido', 'Sonido y efectos')
+  const nav = page.getByRole('navigation', { name: 'Secciones de ajustes' })
+  await tabTo(page, nav.getByRole('link', { name: 'Sonido y efectos' }))
+
+  // Cada Q/E cambia de sección y el foco (con su cursor) se queda en la pestaña de la sección nueva:
+  // la siguiente Q/E sigue valiendo sin volver con Tab.
+  for (const [key, slug, name] of [
+    ['e', 'movimiento', 'Movimiento'],
+    ['e', 'cuenta', 'Cuenta'],
+    ['e', 'perfil', 'Perfil'],
+    ['q', 'cuenta', 'Cuenta'],
+  ] as const) {
+    await page.keyboard.press(key)
+    await expect(page).toHaveURL(`/ajustes/${slug}`)
+    await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toHaveText(name)
+    await expectCursor(nav.getByRole('link', { name }))
+  }
+
+  // En los legales, igual.
+  await open(page, '/legal/bases', 'Bases de la competición')
+  const legal = page.getByRole('navigation', { name: 'Documentos legales' })
+  await tabTo(page, legal.getByRole('link', { name: 'Bases de la competición' }))
+  await page.keyboard.press('e')
+  await page.keyboard.press('e')
+  await expect(page).toHaveURL('/legal/privacidad')
+  await expectCursor(legal.getByRole('link', { name: 'Política de privacidad' }))
+
+  // Fuera de las pestañas, con los atajos apagados, Q/E siguen sin hacer nada.
+  await page.getByRole('main').focus()
+  await page.keyboard.press('e')
+  await expect(page).toHaveURL('/legal/privacidad')
+})
+
 test('RD-MOT-05: la rejilla y las pestañas de la galería tienen una parada y se recorren con flechas y Q/E', async ({
   page,
 }) => {
