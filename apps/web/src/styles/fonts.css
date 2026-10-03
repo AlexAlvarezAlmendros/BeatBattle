@@ -9,9 +9,9 @@
  * | Chakra Petch   | `@fontsource/chakra-petch`       | 500, 600 y 700 rectas; 600 y 700 cursivas       |
  * | Oxanium        | `@fontsource-variable/oxanium`   | variable `wght` (200–800)                       |
  *
- * - Solo los subconjuntos latino y latino extendido: el castellano cabe entero en el latino (el que se
- *   precarga, ver `fontPreload.ts`); el extendido cubre nombres de productores con ł, ő, ș…, y el
- *   navegador solo lo descarga si aparece uno de esos caracteres (`unicode-range`).
+ * - Solo los subconjuntos latino y latino extendido: el castellano cabe entero en el latino (de él se
+ *   precarga solo la Chakra Petch 700: ver `fontPreload.ts`); el extendido cubre nombres de productores
+ *   con ł, ő, ș…, y el navegador solo lo descarga si aparece uno de esos caracteres (`unicode-range`).
  * - `font-display: swap`: el texto se ve desde el primer momento con la de sistema.
  * - Las familias se declaran con su nombre corto (`Anybody`, `Chakra Petch`, `Oxanium`), el que usan
  *   los tokens `--bb-font-*` y las maquetas aprobadas (`docs/planning/evidence/f0/arena/src/`).
@@ -76,7 +76,7 @@
     U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
-/* Chakra Petch 600 — latino (se precarga) */
+/* Chakra Petch 600 — latino */
 @font-face {
   font-family: "Chakra Petch";
   font-style: normal;
@@ -100,7 +100,7 @@
     U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
-/* Chakra Petch 700 — latino */
+/* Chakra Petch 700 — latino (se precarga) */
 @font-face {
   font-family: "Chakra Petch";
   font-style: normal;

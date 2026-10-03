@@ -1,11 +1,21 @@
 import type { HtmlTagDescriptor, Plugin } from 'vite'
 
 /**
- * Precarga de las fuentes de la primera pintura (guía §3.2 «Tipografía» y §4.7.1: «HTML con el negro
- * de fondo, tokens y fuentes con `preload`»; tarea 0.22). `fonts.css` las pide, así que sin precarga el
- * navegador no las descubre hasta descargar y analizar el CSS; con `<link rel="preload">` empiezan a
- * bajar a la vez. Se precargan las dos que pinta cualquier pantalla: Anybody cursiva (títulos, placas)
- * y Chakra Petch 600 (texto), en su subconjunto latino.
+ * Precarga de las fuentes de la primera pintura (guía §3.2 «Tipografía», §4.7.1 y §4.17; tareas 0.22 y
+ * 0.28). `fonts.css` las pide, así que sin precarga el navegador no las descubre hasta descargar y
+ * analizar el CSS; con `<link rel="preload">` empiezan a bajar a la vez que el JS.
+ *
+ * Se precarga **solo Chakra Petch 700** latina (10 KB): es la cara que más se pinta en la primera vista
+ * (rótulos, HUD, barra; ×19 en la home de escritorio) y así sale ya con su fuente. **Anybody no** (62 KB):
+ * competía por el ancho de banda con el JS crítico y retrasaba el LCP (el título del escenario, que se
+ * pinta con la de reserva y cambia después; el logo ya espera a `document.fonts.load`). Medido con el
+ * perfil de `RNF-PERF-02` (4G lento, CPU ×4, 412×823, cinco cargas intercaladas, 2026-10-03):
+ *
+ * | Precarga                          | LCP (mediana) | CLS    |
+ * |-----------------------------------|---------------|--------|
+ * | Anybody cursiva + Chakra Petch 600 | 2,00 s        | 0,0002 |
+ * | Ninguna                            | 1,60 s        | 0,0036 |
+ * | Chakra Petch 700 (**esta**)        | 1,64 s        | 0,0034 |
  *
  * Es un plugin de Vite: en la construcción busca en el bundle cada woff2 con su nombre con hash y añade
  * la etiqueta al `index.html`. Si no lo encuentra, la construcción falla (que no desaparezca la
@@ -13,10 +23,7 @@ import type { HtmlTagDescriptor, Plugin } from 'vite'
  */
 
 /** Ficheros de fuente que se precargan, por su nombre original. */
-export const PRELOADED_FONTS = [
-  'anybody-latin-standard-italic.woff2',
-  'chakra-petch-latin-600-normal.woff2',
-] as const
+export const PRELOADED_FONTS = ['chakra-petch-latin-700-normal.woff2'] as const
 
 /** Lo mínimo de un elemento del bundle de salida que hace falta aquí. */
 export interface BundleEntry {
