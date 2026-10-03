@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
 import { type MatchMediaController, mockMatchMedia } from '../hooks/mockMatchMedia'
 import { REDUCED_MOTION_QUERY } from '../hooks/useReducedMotion'
-import { Button, BUTTON_VARIANTS } from './Button'
+import { BUTTON_VARIANTS, Button } from './Button'
 import buttonSource from './Button.tsx?raw'
 import { WAVE_LOADER_BARS } from './WaveLoader'
 

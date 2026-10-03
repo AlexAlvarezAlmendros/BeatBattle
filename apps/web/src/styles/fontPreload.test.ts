@@ -17,7 +17,8 @@ const bundle: Record<string, BundleEntry> = {
     type: 'asset',
     fileName: 'assets/chakra-petch-latin-600-normal-Qw3.woff2',
     names: ['chakra-petch-latin-600-normal.woff2'],
-  },  'assets/chakra-petch-latin-700-normal-Er5.woff2': {
+  },
+  'assets/chakra-petch-latin-700-normal-Er5.woff2': {
     type: 'asset',
     fileName: 'assets/chakra-petch-latin-700-normal-Er5.woff2',
     names: ['chakra-petch-latin-700-normal.woff2'],

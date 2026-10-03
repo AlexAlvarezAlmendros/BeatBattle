@@ -223,7 +223,6 @@
     gap: var(--bb-space-1);
   }
 
-
   .mobileClock {
     display: grid;
     flex: 1;

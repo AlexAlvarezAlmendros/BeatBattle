@@ -1,3 +1,4 @@
+import { listenThresholdMs } from '@beatbattle/rules'
 import { useId, useRef } from 'react'
 import { formatDuration, t } from '../../i18n'
 import { Button } from '../Button'
@@ -29,7 +30,10 @@ export interface FighterEntry {
 
 export interface FighterCardProps {
   entry?: FighterEntry
-  /** Segundos de escucha que desbloquean las estrellas (`RF-VOTE-*`, 45 s). */
+  /**
+   * Segundos de escucha que desbloquean las estrellas, si los manda el servidor. Por defecto, la regla de
+   * `RF-VOTE-04` (`listenThresholdMs` de `@beatbattle/rules`: min(45 s, 50 % de la duración)).
+   */
   listenSeconds?: number
   loading?: boolean
   /** No se ha podido cargar la entrada: aviso de papel y reintentar. */
@@ -52,7 +56,7 @@ export interface FighterCardProps {
  */
 export function FighterCard({
   entry,
-  listenSeconds = 45,
+  listenSeconds,
   loading = false,
   error = false,
   onListen,
@@ -135,7 +139,9 @@ export function FighterCard({
           <span>
             {voted
               ? t('ui.fighterCard.votedHint')
-              : t('ui.fighterCard.listenHint', { seconds: listenSeconds })}
+              : t('ui.fighterCard.listenHint', {
+                  seconds: listenSeconds ?? listenThresholdSeconds(entry.durationSeconds),
+                })}
           </span>
         </p>
         <div className={styles.preview}>
@@ -154,4 +160,9 @@ export function FighterCard({
       </Frame>
     </section>
   )
+}
+
+/** Segundos de escucha para votar una entrada (`RF-VOTE-04`), redondeados hacia arriba para no prometer de menos. */
+function listenThresholdSeconds(durationSeconds: number): number {
+  return Math.ceil(listenThresholdMs(durationSeconds * 1000) / 1000)
 }
