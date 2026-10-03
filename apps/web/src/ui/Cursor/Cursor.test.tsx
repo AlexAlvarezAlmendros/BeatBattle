@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { t } from '../../i18n'
-import { Cursor, cursorHostAttributes } from './Cursor'
+import { Cursor } from './Cursor'
 import cursorCss from './cursor.css?raw'
 
 /** CSS sin comentarios y con los espacios normalizados (el formateador parte los selectores largos). */
@@ -14,7 +14,7 @@ const css = cursorCss
 describe('Cursor (§3.3 «El foco es el cursor», RD-MOT-05)', () => {
   it('pinta el anillo con chaflán por defecto, decorativo, sin etiqueta 1P', () => {
     const { container } = render(
-      <button type="button" {...cursorHostAttributes()}>
+      <button type="button" data-cursor="">
         <Cursor />
         Jugar
       </button>,
@@ -40,11 +40,6 @@ describe('Cursor (§3.3 «El foco es el cursor», RD-MOT-05)', () => {
     rerender(<Cursor cut="md" player="top" />)
     expect(container.querySelector('[data-cursor-player]')).toHaveAttribute('data-cursor-player', 'top')
     expect(container.querySelector('[data-cursor-ring]')).toHaveAttribute('data-cursor-cut', 'md')
-  })
-
-  it('cursorHostAttributes marca la opción elegida', () => {
-    expect(cursorHostAttributes()).toEqual({ 'data-cursor': '' })
-    expect(cursorHostAttributes(true)).toEqual({ 'data-cursor': '', 'data-cursor-active': 'true' })
   })
 
   it('RNF-A11Y-01: marco blanco de 3 px separado 4 px de la pieza (tokens de trazo)', () => {

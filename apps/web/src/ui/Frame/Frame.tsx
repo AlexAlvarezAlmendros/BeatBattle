@@ -13,15 +13,6 @@ export type FrameCut = 'xs' | 'sm' | 'md' | 'base' | 'lg'
 export const FRAME_VARIANTS: readonly FrameVariant[] = ['panel', 'stage', 'title']
 export const FRAME_CUTS: readonly FrameCut[] = ['xs', 'sm', 'md', 'base', 'lg']
 
-/** Token de cada chaflán, para quien lo necesite fuera del marco (el cursor, un `calc()`). */
-export const CUT_TOKEN: Readonly<Record<FrameCut, string>> = {
-  xs: 'var(--bb-cut-xs)',
-  sm: 'var(--bb-cut-sm)',
-  md: 'var(--bb-cut-md)',
-  base: 'var(--bb-cut)',
-  lg: 'var(--bb-cut-lg)',
-}
-
 export interface FrameOptions {
   /** Por defecto, `panel`. */
   variant?: FrameVariant

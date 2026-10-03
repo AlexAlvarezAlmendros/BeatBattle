@@ -138,7 +138,7 @@ describe('useRovingTabs (§3.3 «Pestañas», §3.8.13, RD-MOT-05)', () => {
       )
     }
     render(<WithDisabled />)
-    const focusedIndex = () => tabs().findIndex((tab) => tab === document.activeElement)
+    const focusedIndex = () => tabs().indexOf(document.activeElement as HTMLElement)
     const stop = () => tabs().findIndex((tab) => tab.tabIndex === 0)
     const selected = () => tabs().findIndex((tab) => tab.getAttribute('aria-selected') === 'true')
 

@@ -23,8 +23,8 @@ export interface CursorProps {
 
 /**
  * Cursor de juego (§3.3): el marco blanco de 3 px separado 4 px que marca la opción enfocada, con la
- * etiqueta 1P opcional. Va **dentro** del elemento enfocable, que lleva los atributos de
- * `cursorHostAttributes()` (o los que ya dan `useRovingMenu`, `useRovingGrid` y `useRovingTabs`). Es
+ * etiqueta 1P opcional. Va **dentro** del elemento enfocable, que lleva `data-cursor` (los atributos que ya dan
+ * `useRovingMenu`, `useRovingGrid` y `useRovingTabs`, o el atributo a mano en una pieza suelta). Es
  * decorativo (`aria-hidden`): el foco real está en el elemento, y lo que se lee es su nombre.
  *
  * ```tsx
@@ -51,16 +51,4 @@ export function Cursor({ shape = 'cut', cut = 'base', slant = 'base', player = f
       )}
     </>
   )
-}
-
-/**
- * Atributos del elemento que lleva el cursor, para una pieza suelta que no usa los hooks de foco
- * itinerante. `active` marca la opción elegida, que enseña el cursor aunque el foco esté fuera de su
- * grupo (`data-cursor-group`).
- */
-export function cursorHostAttributes(active = false): {
-  'data-cursor': ''
-  'data-cursor-active'?: 'true'
-} {
-  return active ? { 'data-cursor': '', 'data-cursor-active': 'true' } : { 'data-cursor': '' }
 }

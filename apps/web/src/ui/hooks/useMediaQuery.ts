@@ -76,9 +76,3 @@ function getMediaQueryList(query: string): MediaQueryList | null {
   }
   return list
 }
-
-/**
- * Puntero grueso o sin hover (móviles y tabletas): ni inclinación 3D ni efectos que siguen al
- * cursor, y objetivos táctiles de 44 px (RNF-A11Y-09).
- */
-export const COARSE_POINTER_QUERY = '(hover: none), (pointer: coarse)'

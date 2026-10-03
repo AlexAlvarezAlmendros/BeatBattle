@@ -22,7 +22,6 @@ describe('i18n: t()', () => {
   it('traduce claves anidadas con puntos e interpola {variables}', () => {
     expect(strict('greeting', { name: 'Aina' })).toBe('Hola, Aina')
     expect(t('app.pageTitle', { page: 'Semanas' })).toBe('Semanas · Beat Battle')
-    expect(t('app.name')).toBe('Beat Battle')
   })
 
   it('formatea en castellano los números interpolados', () => {

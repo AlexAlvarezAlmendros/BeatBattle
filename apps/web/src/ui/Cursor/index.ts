@@ -4,5 +4,4 @@ export {
   type CursorProps,
   type CursorShape,
   type CursorSlant,
-  cursorHostAttributes,
 } from './Cursor'

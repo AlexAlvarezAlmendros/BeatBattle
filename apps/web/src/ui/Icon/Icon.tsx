@@ -32,24 +32,7 @@ const PATHS = {
       <path d="M12 11v5.5M12 7.5v.01" />
     </>
   ),
-  arrowRight: <path d="M5 12h14M13 6l6 6-6 6" />,
-  chevronDown: <path d="M6 9l6 6 6-6" />,
   plus: <path d="M12 5v14M5 12h14" />,
-  music: (
-    <>
-      <path d="M9 18V5l11-2v13" />
-      <circle cx="6" cy="18" r="3" />
-      <circle cx="17" cy="16" r="3" />
-    </>
-  ),
-  metronome: <path d="M7 21L10.5 3h3L17 21zM12 15l5-8M7 21h10" />,
-  sharp: <path d="M10 4L8 20M16 4l-2 16M5 9h15M4 15h15" />,
-  calendar: (
-    <>
-      <rect x="3" y="5" width="18" height="16" rx="2" />
-      <path d="M3 10h18M8 3v4M16 3v4" />
-    </>
-  ),
   clock: (
     <>
       <circle cx="12" cy="12" r="9" />
@@ -60,12 +43,6 @@ const PATHS = {
     <>
       <path d="M3 12V4h8l10 10-8 8z" />
       <circle cx="7.5" cy="7.5" r="1.5" />
-    </>
-  ),
-  user: (
-    <>
-      <circle cx="12" cy="8" r="4" />
-      <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
     </>
   ),
   /* Botón de sonido del HUD (§3.4.1): altavoz con ondas, o tachado. */

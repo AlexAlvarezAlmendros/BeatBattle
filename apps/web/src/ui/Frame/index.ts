@@ -1,5 +1,4 @@
 export {
-  CUT_TOKEN,
   FRAME_CUTS,
   FRAME_VARIANTS,
   Frame,

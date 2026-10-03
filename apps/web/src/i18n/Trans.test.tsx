@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { t } from './index'
 import { Trans } from './Trans'
 
 describe('i18n: <Trans>', () => {
@@ -18,7 +17,7 @@ describe('i18n: <Trans>', () => {
         />
       </p>,
     )
-    expect(container.textContent).toBe(`Other People Records · ${t('app.name')}`)
+    expect(container.textContent).toBe('Other People Records · Beat Battle')
     expect(screen.getByRole('link', { name: 'Other People Records' })).toHaveAttribute(
       'href',
       'https://otherpeople.es',

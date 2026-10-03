@@ -1,7 +1,11 @@
 import { act, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { type MatchMediaController, mockMatchMedia } from './mockMatchMedia'
-import { COARSE_POINTER_QUERY, useMediaQuery } from './useMediaQuery'
+import { useMediaQuery } from './useMediaQuery'
+
+/** Una consulta cualquiera para probar la suscripción de `useMediaQuery`: la del táctil. */
+const COARSE_POINTER_QUERY = '(hover: none), (pointer: coarse)'
+
 import {
   hasReducedMotionSetting,
   isReducedMotion,
