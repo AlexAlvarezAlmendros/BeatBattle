@@ -122,6 +122,48 @@ test('RD-VIS-02 d: una pantalla interior se recorre con teclado y enseña sus te
   await expect(page).toHaveURL('/')
 })
 
+test('RD-VIS-02 d / RD-MOT-05: las pestañas de Opciones son una parada que se recorre con flechas, Inicio y Fin, e Intro entra', async ({
+  page,
+}) => {
+  await open(page, '/ajustes/cuenta', 'Cuenta')
+  const nav = page.getByRole('navigation', { name: 'Secciones de ajustes' })
+  const tabs = nav.getByRole('link')
+  const tab = (name: string) => nav.getByRole('link', { name })
+  // Una sola parada de tabulación: la sección actual.
+  await expect(tabs.and(page.locator('[tabindex="0"]'))).toHaveCount(1)
+  await expect(tabs.and(page.locator('[tabindex="-1"]'))).toHaveCount(7)
+  await tabTo(page, tab('Cuenta'))
+  await expectCursor(tab('Cuenta'))
+
+  // Las flechas mueven el cursor (sin cambiar de sección), en bucle; Inicio y Fin van a los extremos.
+  await page.keyboard.press('ArrowRight')
+  await expectCursor(tab('Perfil'))
+  await expect(page).toHaveURL('/ajustes/cuenta')
+  await page.keyboard.press('ArrowLeft')
+  await page.keyboard.press('ArrowLeft')
+  await expectCursor(tab('Movimiento'))
+  await page.keyboard.press('End')
+  await expectCursor(tab('Accesibilidad'))
+  await page.keyboard.press('ArrowRight')
+  await expectCursor(tab('Sonido y efectos'))
+  await page.keyboard.press('Home')
+  await expectCursor(tab('Sonido y efectos'))
+
+  // Tab sale de las pestañas de una vez, y la parada vuelve a la sección actual.
+  await page.keyboard.press('Tab')
+  await expect(tabs.and(page.locator(':focus'))).toHaveCount(0)
+  await page.keyboard.press('Shift+Tab')
+  await expectCursor(tab('Cuenta'))
+
+  // Intro entra en la sección del cursor.
+  await page.keyboard.press('ArrowLeft')
+  await expectCursor(tab('Movimiento'))
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL('/ajustes/movimiento')
+  await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toHaveText('Movimiento')
+  await expect(tabs.and(page.locator('[tabindex="0"]'))).toHaveText('Movimiento')
+})
+
 test('RD-VIS-02 d: Q/E recorren las ocho secciones de Opciones en el orden de §3.8.14 y dan la vuelta', async ({
   page,
 }) => {

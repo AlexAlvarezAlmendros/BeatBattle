@@ -70,6 +70,26 @@ describe('TabLinks (secciones con su URL, §3.8.14)', () => {
     expect(document.body).toHaveFocus()
   })
 
+  it('RD-MOT-05: una sola parada (la sección actual); ←/→, Inicio y Fin mueven el foco sin cambiar de sección', () => {
+    const router = renderAt('/legal/terminos')
+    const links = screen.getAllByRole('link')
+    expect(links.map((link) => link.tabIndex)).toEqual([-1, 0, -1])
+    links[1]!.focus()
+    fireEvent.keyDown(links[1]!, { key: 'ArrowRight' })
+    expect(links[2]).toHaveFocus()
+    fireEvent.keyDown(links[2]!, { key: 'ArrowRight' })
+    expect(links[0]).toHaveFocus()
+    fireEvent.keyDown(links[0]!, { key: 'End' })
+    expect(links[2]).toHaveFocus()
+    fireEvent.keyDown(links[2]!, { key: 'Home' })
+    expect(links[0]).toHaveFocus()
+    expect(links.map((link) => link.tabIndex)).toEqual([0, -1, -1])
+    expect(router.state.location.pathname).toBe('/legal/terminos')
+    // Al salir del grupo, la parada vuelve a la sección actual.
+    fireEvent.blur(links[0]!, { relatedTarget: document.body })
+    expect(links.map((link) => link.tabIndex)).toEqual([-1, 0, -1])
+  })
+
   it('keepsTabFocus: solo en una navegación nueva con el estado de Q/E (al recargar o volver atrás, no)', () => {
     expect(keepsTabFocus({ keepTabFocus: true }, NavigationType.Push)).toBe(true)
     expect(keepsTabFocus({ keepTabFocus: true }, NavigationType.Pop)).toBe(false)

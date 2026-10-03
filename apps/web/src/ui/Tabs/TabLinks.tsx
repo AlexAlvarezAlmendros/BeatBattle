@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { type FocusEvent, useEffect, useLayoutEffect, useRef } from 'react'
 import {
   NavigationType,
   NavLink,
@@ -10,7 +10,8 @@ import {
 import { t } from '../../i18n'
 import { Cursor } from '../Cursor'
 import { cx } from '../forceState'
-import { isCharacterKey, isEditableTarget } from '../hooks/roving'
+import { isCharacterKey, isEditableTarget, listNavigation } from '../hooks/roving'
+import { useRovingCore } from '../hooks/useRoving'
 import { Key } from '../Key'
 import { singleKeyAllowed } from '../shortcuts'
 import styles from './Tabs.module.css'
@@ -46,6 +47,11 @@ export function keepsTabFocus(state: unknown, navigationType: NavigationType): b
  * pantalla (con los atajos de una tecla apagados, solo con el foco en ellas: `ui/shortcuts.ts`). Son
  * navegación (`<nav>` con `aria-current`), no un `tablist`: cada una carga su pantalla.
  *
+ * Se recorren como un menú de juego (§3.3 «El foco es el cursor», `RD-MOT-05`): una sola parada de
+ * tabulación (la sección actual), ←/→ mueven el foco y el cursor entre las pestañas (en bucle), Inicio
+ * y Fin van a la primera y a la última, e Intro (o espacio) entra en la del cursor. Las flechas no
+ * cambian de sección: cada una carga una pantalla. Al salir del grupo, la parada vuelve a la actual.
+ *
  * Si Q/E se pulsan con el foco en las pestañas, el foco (y el cursor) pasa a la pestaña de la sección
  * nueva en lugar de al `<main>`: así la siguiente Q/E sigue valiendo, también con los atajos apagados
  * (WCAG 2.1.4, `RNF-A11Y-08`).
@@ -77,7 +83,13 @@ export function TabLinks({
     requested.current = null
   }, [target])
   const navRef = useRef<HTMLElement>(null)
-  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([])
+  const roving = useRovingCore<HTMLAnchorElement>({
+    count: links.length,
+    initialIndex: Math.max(0, current),
+    hoverMoves: false,
+    navigate: (key, index) => listNavigation(key, index, links.length, { orientation: 'horizontal' }),
+  })
+  const { moveTo } = roving
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -98,29 +110,29 @@ export function TabLinks({
     return () => document.removeEventListener('keydown', onKey)
   }, [target, links, navigate])
 
-  // Tras un cambio de sección con Q/E desde las pestañas, el foco va a la pestaña de la sección nueva.
+  // En cada navegación, la parada de tabulación pasa a la sección nueva; tras Q/E desde las pestañas,
+  // también el foco. Antes de pintar (`useLayoutEffect`): con un efecto normal quedaba un instante con el
+  // foco en `<body>`, y una Q/E pulsada justo entonces, con los atajos apagados, se perdía.
   // biome-ignore lint/correctness/useExhaustiveDependencies: en cada navegación (su `key`), no en cada render
-  useEffect(() => {
-    if (!keepsTabFocus(location.state, navigationType)) return
-    linkRefs.current[current]?.focus()
+  useLayoutEffect(() => {
+    moveTo(Math.max(0, current), { focus: keepsTabFocus(location.state, navigationType) })
   }, [location.key])
+
+  // Al salir del grupo con el cursor en otra pestaña, la parada vuelve a la sección actual.
+  const onBlur = (event: FocusEvent<HTMLElement>) => {
+    const next = event.relatedTarget
+    if (next instanceof Node && event.currentTarget.contains(next)) return
+    moveTo(Math.max(0, current), { focus: false })
+  }
 
   return (
     <nav ref={navRef} aria-label={label} className={cx(styles.row, className)}>
       <Key aria-hidden="true">{t('ui.tabs.previousKey')}</Key>
       {/* biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none */}
-      <ul role="list" className={styles.list}>
+      <ul role="list" className={styles.list} onKeyDown={roving.onKeyDown} onBlur={onBlur}>
         {links.map((link, index) => (
           <li key={link.to}>
-            <NavLink
-              ref={(element) => {
-                linkRefs.current[index] = element
-              }}
-              to={link.to}
-              className={styles.tab}
-              data-cursor=""
-              end
-            >
+            <NavLink {...roving.getItemBaseProps(index)} to={link.to} className={styles.tab} end>
               <Cursor shape="slant" slant="sm" />
               {link.label}
             </NavLink>
