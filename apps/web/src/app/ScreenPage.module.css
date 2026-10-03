@@ -118,8 +118,8 @@
   }
 
   /*
-   * Pantalla de título: el logo y el panel, centrados en vertical entre el HUD y la barra (el logo a la
-   * altura del de `00-titulo`), con el pie del panel a la altura del lockup.
+   * Pantalla de título: el logo (al tamaño del de `00-titulo`) y el panel, centrados en vertical entre
+   * el HUD y la barra, con el pie del panel a la altura del lockup.
    */
   .screen[data-layout="title"] {
     align-content: center;
