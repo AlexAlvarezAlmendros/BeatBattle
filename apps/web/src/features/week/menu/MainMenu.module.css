@@ -5,6 +5,7 @@
  */
 .menu {
   display: grid;
+  flex: 1 0 auto;
   grid-template-columns: minmax(0, 40rem) minmax(0, 35rem);
   justify-content: space-between;
   align-items: start;
@@ -17,11 +18,22 @@
   margin-bottom: calc(-1 * var(--bb-space-8));
 }
 
-/* ── Título: logo y lockup ──────────────────────────────────────────────────────────────── */
+/*
+ * ── Título: logo y lockup ──────────────────────────────────────────────────────────────────
+ * La columna ocupa todo el alto y la tarjeta de la semana se ancla al pie (llega a la barra de
+ * controles, como en la maqueta), también cuando es la corta del calendario vacío.
+ */
 .title {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto auto 1fr;
+  align-self: stretch;
   min-width: 0;
+}
+
+.title > article {
+  grid-row: 4;
+  align-self: end;
 }
 
 .logoFull {
@@ -33,42 +45,9 @@
   display: none;
 }
 
+/* El lockup (`TitleLockup`), pegado al pie del logo. */
 .lockup {
-  display: flex;
-  align-items: center;
-  gap: var(--bb-space-4);
-  min-width: 0;
   margin: calc(-1 * var(--bb-space-1)) 0 0 var(--bb-space-2);
-}
-
-.ribbon {
-  padding: var(--bb-space-2) var(--bb-space-5) var(--bb-space-2) var(--bb-space-4);
-  background: var(--bb-white);
-  color: var(--bb-black);
-  font-family: var(--bb-font-display);
-  font-size: var(--bb-fs-sm);
-  font-style: italic;
-  font-weight: var(--bb-weight-extrabold);
-  font-stretch: var(--bb-stretch-plate);
-  letter-spacing: var(--bb-tracking-label);
-  line-height: 1;
-  text-transform: uppercase;
-  white-space: nowrap;
-  clip-path: polygon(var(--bb-cut-md) 0, 100% 0, calc(100% - var(--bb-cut-md)) 100%, 0 100%);
-}
-
-.signature {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--bb-space-2);
-  min-height: var(--bb-target);
-  margin-top: calc(-1 * var(--bb-space-2));
-  color: var(--bb-white);
-  font-size: var(--bb-fs-md);
-  font-style: italic;
-  font-weight: var(--bb-weight-bold);
-  letter-spacing: var(--bb-tracking-label);
-  text-decoration: none;
 }
 
 .title > article {
@@ -78,16 +57,27 @@
 /* ── Modos ──────────────────────────────────────────────────────────────────────────────── */
 .modes {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
   padding-top: var(--bb-space-2);
 }
 
+/*
+ * Cabecera «ELIGE MODO» sobre una franja `--bb-panel-veil` en paralelogramo, como las placas: va sobre la
+ * cuña, y la trama (o, en móvil, la diagonal) puede pasar por detrás a cualquier ancho y alto de
+ * ventana; nunca toca el texto (`RD-VIS-05`).
+ */
 .head {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--bb-space-4);
-  margin: 0 var(--bb-space-3) var(--bb-space-4) var(--bb-space-7);
+  gap: 0 var(--bb-space-4);
+  margin: 0 0 var(--bb-space-3) var(--bb-space-7);
+  padding: var(--bb-space-2) calc(var(--bb-slant) + var(--bb-space-3)) var(--bb-space-2)
+    calc(var(--bb-slant) + var(--bb-space-2));
+  background: var(--bb-panel-veil);
+  clip-path: polygon(var(--bb-slant) 0, 100% 0, calc(100% - var(--bb-slant)) 100%, 0 100%);
 }
 
 .headTitle {
@@ -96,14 +86,30 @@
   white-space: nowrap;
 }
 
-.touch {
+.hint {
   color: var(--bb-text-2);
   letter-spacing: var(--bb-tracking-label-wide);
   white-space: nowrap;
 }
 
+/* El rótulo de la pista, según el tipo de entrada (no según el ancho). */
+.hintTouch {
+  display: none;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .hintTouch {
+    display: inline;
+  }
+
+  .hintKeys {
+    display: none;
+  }
+}
+
 .plates {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--bb-space-3);
   margin: 0;
   padding: 0;
@@ -151,6 +157,7 @@
 @media (max-width: 720px) {
   .menu {
     grid-template-columns: minmax(0, 1fr);
+    align-content: start;
     gap: var(--bb-space-3);
     margin-top: calc(-1 * var(--bb-space-3));
     margin-bottom: 0;
@@ -162,27 +169,7 @@
   }
 
   .lockup {
-    gap: var(--bb-space-2);
     margin: calc(-1 * var(--bb-space-2)) 0 0;
-  }
-
-  .ribbon {
-    min-width: 0;
-    padding: var(--bb-space-2);
-    overflow: hidden;
-    font-size: var(--bb-fs-xs);
-    font-stretch: var(--bb-stretch-min);
-    letter-spacing: 0;
-    text-overflow: ellipsis;
-  }
-
-  .signature {
-    flex: none;
-  }
-
-  .signature {
-    gap: var(--bb-space-1);
-    font-size: var(--bb-fs-sm);
   }
 
   .title > article {
@@ -195,10 +182,15 @@
 
   .head {
     margin: 0 0 var(--bb-space-2);
+    padding: 0 calc(var(--bb-slant) + var(--bb-space-1));
   }
 
   .headTitle {
     font-size: var(--bb-fs-lg);
+  }
+
+  .hint {
+    letter-spacing: var(--bb-tracking-label);
   }
 
   .plates {
@@ -206,20 +198,8 @@
   }
 
   .help,
-  .giant,
-  .optional {
+  .giant {
     display: none;
-  }
-}
-
-@media (max-width: 380px) {
-  .ribbonEnd,
-  .optional {
-    display: none;
-  }
-
-  .touch {
-    letter-spacing: var(--bb-tracking-label);
   }
 }
 

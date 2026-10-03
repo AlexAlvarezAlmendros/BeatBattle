@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useId, useRef } from 'react'
+import { type ReactNode, useId, useRef } from 'react'
 import { Chronicle, CreditLine } from '../../../app/layout/Chronicle'
 import { HudStat, PlayerCard } from '../../../app/layout/PlayerCard'
 import { FrameSlot } from '../../../app/layout/slots'
@@ -8,11 +8,12 @@ import { Trans } from '../../../i18n/Trans'
 import { Frame } from '../../../ui/Frame'
 import { cx } from '../../../ui/forceState'
 import { GameLogo } from '../../../ui/GameLogo'
+import { useIdleMenuKeys } from '../../../ui/hooks/useIdleMenuKeys'
 import { useRovingMenu } from '../../../ui/hooks/useRovingMenu'
 import { MenuPlate } from '../../../ui/MenuPlate'
-import { OTP_SIGNATURE_HREF, OtpSlapImage } from '../../../ui/OtpSlap'
 import { RoundClock } from '../../../ui/RoundClock'
 import { Tag } from '../../../ui/Tag'
+import { TitleLockup } from '../../../ui/TitleLockup'
 import styles from './MainMenu.module.css'
 import { MENU_MODES, type MenuMode, type MenuModel } from './model'
 import { StageCard } from './StageCard'
@@ -21,7 +22,10 @@ interface ModeEntry {
   mode: MenuMode
   to?: string
   disabled: boolean
+  /** Dato corto (cifra, etiqueta o motivo): se ve siempre. */
   detail?: ReactNode
+  /** Dato largo, en texto: en móvil, solo en la elegida (`MenuPlate`). */
+  extra?: ReactNode
   help: ReactNode
 }
 
@@ -52,7 +56,7 @@ export function menuEntries({ week, player, lastSealed }: MenuModel): ModeEntry[
             mode: 'play',
             to: signIn,
             disabled: false,
-            detail: t('home.modes.play.upload'),
+            extra: t('home.modes.play.upload'),
             help: <Trans k="home.modes.play.helpVisitor" values={{ when: bold(week.when) }} />,
           }
         : player.uploaded
@@ -60,14 +64,14 @@ export function menuEntries({ week, player, lastSealed }: MenuModel): ModeEntry[
               mode: 'play',
               to: paths.upload(),
               disabled: false,
-              detail: t('home.modes.play.edit'),
+              extra: t('home.modes.play.edit'),
               help: t('home.modes.play.helpEdit'),
             }
           : {
               mode: 'play',
               to: paths.upload(),
               disabled: false,
-              detail: t('home.modes.play.upload'),
+              extra: t('home.modes.play.upload'),
               help: (
                 <Trans
                   k="home.modes.play.help"
@@ -83,7 +87,7 @@ export function menuEntries({ week, player, lastSealed }: MenuModel): ModeEntry[
         mode: 'jury',
         to: signIn,
         disabled: false,
-        detail: t('home.modes.jury.signIn'),
+        extra: t('home.modes.jury.signIn'),
         help: t('home.modes.jury.helpVisitor'),
       }
     : !week
@@ -118,14 +122,8 @@ export function menuEntries({ week, player, lastSealed }: MenuModel): ModeEntry[
         mode: 'results',
         to: paths.weekResults(String(lastSealed.number)),
         disabled: false,
-        detail: (
-          <>
-            {lastSealed.unseen && <Tag tone="white">{t('home.modes.results.new')}</Tag>}{' '}
-            <span className={styles.optional}>
-              {t('home.modes.results.week', { number: lastSealed.number })}
-            </span>
-          </>
-        ),
+        detail: lastSealed.unseen ? <Tag tone="white">{t('home.modes.results.new')}</Tag> : undefined,
+        extra: t('home.modes.results.week', { number: lastSealed.number }),
         help: (
           <Trans
             k="home.modes.results.help"
@@ -142,18 +140,14 @@ export function menuEntries({ week, player, lastSealed }: MenuModel): ModeEntry[
       mode: 'howItWorks',
       to: paths.howItWorks(),
       disabled: false,
-      detail: (
-        <span className={styles.optional}>
-          <Trans k="home.modes.howItWorks.detail" values={{ minutes: bold('1') }} />
-        </span>
-      ),
+      detail: <Trans k="home.modes.howItWorks.detail" values={{ minutes: bold('1') }} />,
       help: t('home.modes.howItWorks.help'),
     },
     {
       mode: 'settings',
       to: paths.settings(),
       disabled: false,
-      detail: <span className={styles.optional}>{t('home.modes.settings.detail')}</span>,
+      extra: t('home.modes.settings.detail'),
       help: t('home.modes.settings.help'),
     },
   ]
@@ -186,28 +180,7 @@ export function MainMenu({ model }: { model: MenuModel }) {
   const active = entries[menu.activeIndex] ?? entries[0]!
 
   // Las flechas e Intro, con el foco en ningún control (la página recién cargada), van al menú.
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return
-      const focused = document.activeElement
-      const idle = !focused || focused === document.body || focused.hasAttribute('data-focus-target')
-      if (!idle) return
-      const step = { ArrowDown: 1, ArrowUp: -1 }[event.key]
-      if (step === undefined && !['Home', 'End', 'Enter'].includes(event.key)) return
-      event.preventDefault()
-      const count = entries.length
-      const current = menu.activeIndex
-      if (event.key === 'Enter') {
-        listRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]')[current]?.click()
-        return
-      }
-      const next =
-        event.key === 'Home' ? 0 : event.key === 'End' ? count - 1 : (current + (step ?? 0) + count) % count
-      menu.moveTo(next)
-    }
-    document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [entries.length, menu])
+  useIdleMenuKeys(menu, entries.length, listRef)
 
   const { week, player } = model
   const chronicle: ReactNode[] = week
@@ -258,23 +231,7 @@ export function MainMenu({ model }: { model: MenuModel }) {
       <section className={styles.title} aria-label={t('home.title.label')}>
         <GameLogo className={styles.logoFull} />
         <GameLogo className={styles.logoCompact} compact />
-        <div className={styles.lockup}>
-          <p className={styles.ribbon}>
-            {t('home.title.ribbonStart')}
-            <span className={styles.ribbonEnd}> {t('home.title.ribbonEnd')}</span>
-          </p>
-          <a
-            className={styles.signature}
-            href={OTP_SIGNATURE_HREF}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={t('ui.otpSlap.label')}
-            data-otp-signature=""
-          >
-            <span aria-hidden="true">{t('home.title.by')}</span>
-            <OtpSlapImage size="menu" />
-          </a>
-        </div>
+        <TitleLockup className={styles.lockup} />
         <StageCard week={week} />
       </section>
 
@@ -283,7 +240,9 @@ export function MainMenu({ model }: { model: MenuModel }) {
           <h2 id={titleId} className={cx('bb-display', styles.headTitle)}>
             {t('home.menu.title')}
           </h2>
-          <span className={cx('bb-label', styles.touch)}>{t('home.menu.touch')}</span>
+          {/* Según la entrada (§3.8.3): «Toca para entrar» en táctil, «Intro para entrar» con teclado. */}
+          <span className={cx('bb-label', styles.hint, styles.hintTouch)}>{t('home.menu.touch')}</span>
+          <span className={cx('bb-label', styles.hint, styles.hintKeys)}>{t('home.menu.keys')}</span>
         </div>
         <ul
           ref={listRef}
@@ -297,6 +256,7 @@ export function MainMenu({ model }: { model: MenuModel }) {
                 index={index + 1}
                 label={t(`home.modes.${entry.mode}.label`)}
                 detail={entry.detail}
+                extra={entry.extra}
                 disabled={entry.disabled}
                 to={entry.to}
                 itemProps={menu.getItemProps(index)}

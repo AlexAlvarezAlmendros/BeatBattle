@@ -1,0 +1,70 @@
+/*
+ * Lockup del título (§3.1, §3.8.3; maqueta `01-menu.html` `.lockup`): cinta blanca en display 800 con
+ * los extremos en chaflán y la firma «by [OTP.]». En una fila siempre: la cinta se encoge (y en muy
+ * estrecho pierde «de productores»), la firma nunca.
+ */
+.lockup {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--bb-space-4);
+  min-width: 0;
+}
+
+.ribbon {
+  min-width: 0;
+  padding: var(--bb-space-2) var(--bb-space-5) var(--bb-space-2) var(--bb-space-4);
+  overflow: hidden;
+  background: var(--bb-white);
+  color: var(--bb-black);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-sm);
+  font-style: italic;
+  font-weight: var(--bb-weight-extrabold);
+  font-stretch: var(--bb-stretch-plate);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+  clip-path: polygon(var(--bb-cut-md) 0, 100% 0, calc(100% - var(--bb-cut-md)) 100%, 0 100%);
+}
+
+.signature {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--bb-space-2);
+  min-height: var(--bb-target);
+  margin-top: calc(-1 * var(--bb-space-2));
+  color: var(--bb-white);
+  font-size: var(--bb-fs-md);
+  font-style: italic;
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-decoration: none;
+}
+
+@media (max-width: 720px) {
+  .lockup {
+    gap: var(--bb-space-2);
+  }
+
+  .ribbon {
+    padding: var(--bb-space-2);
+    font-size: var(--bb-fs-xs);
+    font-stretch: var(--bb-stretch-min);
+    letter-spacing: 0;
+  }
+
+  .signature {
+    gap: var(--bb-space-1);
+    font-size: var(--bb-fs-sm);
+  }
+}
+
+@media (max-width: 380px) {
+  .ribbonEnd {
+    display: none;
+  }
+}

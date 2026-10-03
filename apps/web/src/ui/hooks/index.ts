@@ -14,6 +14,7 @@ export {
 } from './roving'
 export { useElementWidth } from './useElementWidth'
 export { FIT_MIN_FONT_PX, useFitText } from './useFitText'
+export { useIdleMenuKeys } from './useIdleMenuKeys'
 export { COARSE_POINTER_QUERY, matchesMedia, subscribeMedia, useMediaQuery } from './useMediaQuery'
 export {
   hasReducedMotionSetting,

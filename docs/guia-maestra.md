@@ -1118,7 +1118,7 @@ estallido, tamaño del número gigante, máscara y huecos del ruido) y sus tinta
 | Textura | Parámetros | Dónde |
 |---|---|---|
 | Trama *halftone* | Celda 8–12 px (7–9 en móvil), 30° en fondos y 45° en piezas, radio = celda × 0…0,74 según una función de la posición; rojo sobre `--bb-wine-2` | Cuñas, suelo del podio, retrato de la carta, panel del escenario |
-| Trama de relleno | Puntos `--bb-red-shade` de r 2,3 px cada 8 px sobre `--bb-red-cta` | Extrusiones del logo y del VS, placa elegida |
+| Trama de relleno | Puntos `--bb-red-shade` de r 2,3 px cada 8 px sobre `--bb-red-cta` | Extrusiones del logo y del VS, placa elegida (en una franja al final de la placa, fuera del texto) |
 | Líneas de barrido | 1 px negro al 30 % cada 3 px, mezcla normal (no `multiply`) | Solo en la cuña, con máscara que excluye las zonas con texto; apagadas en móvil, en calidad baja y en modo serio |
 | Estallido de rayos | `repeating-conic-gradient`, rayo de 1,2° cada 6°, blanco al 4,5 %, máscara radial | Detrás del logo, del VS y del podio |
 | Viñeta | Radial negra al 75 % en el borde | Todas las pantallas |
@@ -1160,7 +1160,7 @@ una ventana estrecha o ampliada al 200 %.
 |---|---|
 | **Marco** (`Frame`) | Base de casi todo: dos capas recortadas (borde `--frame-border` de 2 px y relleno `--frame-fill`) para que el borde siga el chaflán. Variantes: `panel` (`--bb-panel-veil`, borde `--bb-line-strong`), `stage` (borde rojo, relleno `--bb-wine-3` con trama), `title` (borde blanco). Chaflán por prop (`xs` a `lg`). Cualquier elemento puede ser un marco con `data-frame` y `data-frame-cut`. |
 | **Botón** | Rectángulo con chaflán `--bb-cut-md` (10 px), display cursiva 800 a 15 px y 118 %, mayúsculas, con su tecla a la derecha (`[INTRO]`). Variantes: `cta` (relleno `--bb-red-cta`, texto blanco), `brand` (relleno `--bb-red`, texto negro), `white` (relleno blanco, texto negro), `outline` (borde blanco, fondo negro). Alturas: `sm` 40 px (objetivo de 44 por pseudoelemento), `md` 48, `lg` 56. **Hover**: avanza 4 px. **Foco**: cursor. **Pulsado**: escala 0,97 + `ui.press`. **Cargando**: el texto se cambia por una onda de 5 barras y el botón queda `aria-busy`. **Deshabilitado**: 45 % de opacidad, `aria-disabled` y el motivo en texto al lado. **Éxito**: check y texto. **Error**: aviso de papel (§3.2 «Estados»). |
-| **Opción de menú** (`MenuPlate`) | Placa en paralelogramo (`--bb-slant`) de 70 px: índice en Oxanium rojo, etiqueta en display a 25 px y dato a la derecha (contador, «NUEVO», cierre). **Elegida/enfocada**: sale 26 px a la izquierda, crece a 84 px, se rellena de `--bb-red-cta` con trama, texto blanco a 31 px, marco blanco, flecha y etiqueta **1P**, y muestra su `[INTRO]`; el panel de ayuda de debajo describe el modo (región viva). **Pulsado**: escala 0,98 y barrido de la diagonal (transición de página). **Deshabilitado**: candado, etiqueta en `--bb-text-4` y motivo («Disponible el lunes»). En móvil: 48 px (56 la elegida), un toque entra. Semántica: `role="menu"` con `menuitem`. |
+| **Opción de menú** (`MenuPlate`) | Placa en paralelogramo (`--bb-slant`) de 70 px: índice en Oxanium rojo, etiqueta en display a 25 px y dato a la derecha (contador, «NUEVO», cierre). **Elegida/enfocada**: sale 26 px a la izquierda, crece a 84 px, se rellena de `--bb-red-cta` (la trama, en una franja al final, nunca bajo el texto), texto blanco a 31 px, marco blanco, flecha y etiqueta **1P**, y muestra su `[INTRO]`; el panel de ayuda de debajo describe el modo (región viva). **Pulsado**: escala 0,98 y barrido de la diagonal (transición de página). **Deshabilitado**: candado, etiqueta en `--bb-text-4` y motivo («Disponible el lunes»), que pasa a dos líneas antes que cortarse. **Nada se corta**: el dato y la tecla no se encogen; cede la etiqueta, que baja su anchura de 125 a 105 % y después el cuerpo (como el alias de la ficha), y la tecla queda dentro del corte del paralelogramo. El dato corto (cifra con su unidad, etiqueta, motivo) se ve siempre; el largo, en texto («Subir mi beat», «Semana 40»), en móvil solo en la elegida. Por debajo de 360 px el dato baja a una segunda línea (reflow a 320 px). En móvil: 48 px (56 la elegida), un toque entra. Semántica: `role="menu"` con `menuitem`. |
 | **Pestañas** | Paralelogramos de 44 px con `[Q]` y `[E]` a los lados; la activa en blanco con texto negro. `role="tablist"`. |
 | **Chip de dato** | Chaflán `--bb-cut-sm`, 32 px, valor en Oxanium y unidad en rótulo de 12 px («92 BPM», «Re menor», «2:51»). No es interactivo. |
 | **Chip de filtro** | Conmutador de 44 px con su estado en texto: «Solo sin votar [SÍ/NO]». Activo: relleno `--bb-red` con texto negro. `aria-pressed`. |
@@ -1506,7 +1506,10 @@ mueve el cursor al pasar.
 
 **Móvil (390×844)**: mismo HTML apilado sin desplazamiento: HUD en una fila, logo a todo el ancho con el
 lockup, tarjeta de la semana compacta (título, cuatro chips, play y reloj con la barra de la semana) y
-seis placas de 48 px (56 la elegida) con «Toca para entrar». La diagonal pasa a horizontal inclinada.
+seis placas de 48 px (56 la elegida) con «Toca para entrar» («Intro para entrar» con teclado: el rótulo
+sigue al tipo de entrada, no al ancho). «ELIGE MODO» va sobre una franja `--bb-panel-veil`: la trama y la
+diagonal pueden pasar por detrás a cualquier tamaño de ventana sin tocar el texto. La diagonal pasa a
+horizontal inclinada.
 Un toque entra. **Móvil bajo (≤ 700 px de alto, 375×667 y 360×640)**: logo en una línea, la semana
 plegada en título + reloj, placas de 44 px; cabe sin desplazar ni desbordar.
 

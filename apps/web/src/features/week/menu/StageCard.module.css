@@ -65,8 +65,16 @@
   color: var(--bb-red);
 }
 
+/*
+ * El título se ajusta a su ancho (`useFitText`) y recorta solo en horizontal: en vertical deja salir las
+ * tildes de las mayúsculas en display («GRÀCIA», «PRÓXIMO»), que con el interlineado 0,9 sobresalen
+ * por arriba de la caja. El margen de arriba les hace sitio dentro de la tarjeta.
+ */
 .title {
-  overflow: hidden;
+  min-width: 0;
+  overflow-x: clip;
+  overflow-y: visible;
+  padding-top: var(--bb-space-1);
   font-size: var(--bb-fs-title);
   white-space: nowrap;
 }

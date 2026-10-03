@@ -27,7 +27,8 @@
     },
     "menu": {
       "title": "Elige modo",
-      "touch": "Toca para entrar"
+      "touch": "Toca para entrar",
+      "keys": "Intro para entrar"
     },
     "modes": {
       "play": {
@@ -59,7 +60,7 @@
         "label": "Resultados",
         "new": "Nuevo",
         "week": "Semana {number}",
-        "none": "Sin semanas selladas",
+        "none": "Aún nada sellado",
         "help": "La {week} ya está sellada. Mira la ceremonia y descubre quién estaba detrás de cada beat.",
         "helpNone": "La primera ceremonia llega con el primer domingo de batalla: entonces se revelan notas y autores."
       },
@@ -83,7 +84,7 @@
       "when": "Cada lunes, un sample",
       "title": "El próximo drop está en el horno",
       "summary": "Cada lunes cae un sample nuevo: flipéalo, sube tu beat antes del domingo y deja que la comunidad vote a ciegas. El domingo se sella la semana.",
-      "alertTag": "Aviso"
+      "alertTag": "Pronto"
     },
     "stage": {
       "kickerBefore": "Semana",

@@ -1,22 +1,28 @@
 /*
  * Opción de menú (§3.3, §3.8.3; maqueta `01-menu.html` `.plate`): placa en paralelogramo
  * (`--bb-slant`) de dos capas, borde y relleno. Elegida = enfocada (o la elegida del grupo cuando el
- * foco está fuera, `data-cursor-active`): sale a la izquierda, crece, se rellena de rojo con trama y
- * enseña la flecha, el 1P (el cursor) y su tecla.
+ * foco está fuera, `data-cursor-active`): sale a la izquierda, crece, se rellena de rojo y enseña la
+ * flecha, el 1P (el cursor) y su tecla.
+ *
+ * Columnas: índice, etiqueta (`minmax(0, 1fr)`: la que cede, ajustada con `useFitText`) y dato con la
+ * tecla (`max-content`: nunca se encoge ni se corta). El relleno del final (`--plate-pad-end`) es al
+ * menos el desplazamiento del paralelogramo más un margen: la tecla queda siempre dentro del corte.
  */
 .plate {
   --plate-border: var(--bb-line-strong);
   --plate-fill: var(--bb-panel-veil);
   --plate-shift: var(--bb-space-7);
+  --plate-pad-end: var(--bb-space-8);
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: var(--bb-space-13) auto minmax(0, 1fr);
+  grid-template-columns: var(--bb-space-13) minmax(0, 1fr) max-content;
+  grid-template-areas: "index label detail";
   align-items: center;
   column-gap: var(--bb-space-4);
   height: calc(var(--bb-space-16) + var(--bb-space-1) + var(--bb-stroke));
   margin-left: var(--plate-shift);
-  padding: 0 var(--bb-space-8) 0 calc(var(--bb-space-8) + var(--bb-stroke));
+  padding: 0 var(--plate-pad-end) 0 calc(var(--bb-space-8) + var(--bb-stroke));
   color: var(--bb-white);
   text-decoration: none;
   cursor: pointer;
@@ -47,19 +53,23 @@
   background: var(--plate-fill);
 }
 
-/* La trama de relleno de la elegida, que crece hacia la derecha (como la maqueta). */
+/*
+ * La trama de relleno de la elegida (§3.2 «Texturas»): una franja en paralelogramo al final de la placa,
+ * dentro del relleno del final, donde no hay texto («Nunca bajo texto», `RD-VIS-05`). Su borde izquierdo
+ * es paralelo al de la placa; por debajo de la tecla queda el rojo liso.
+ */
 .texture {
-  inset: var(--bb-stroke);
+  inset: var(--bb-stroke) var(--bb-stroke) var(--bb-stroke) auto;
   z-index: 0;
   display: none;
+  width: var(--plate-pad-end);
   background:
     radial-gradient(circle, var(--bb-red-shade) 0 var(--bb-tex-fill-dot), transparent var(--bb-tex-fill-dot))
     0 0 / var(--bb-tex-fill-cell) var(--bb-tex-fill-cell);
-  opacity: 0.55;
-  mask: linear-gradient(100deg, transparent 35%, var(--bb-black) 100%);
 }
 
 .index {
+  grid-area: index;
   position: relative;
   color: var(--bb-red);
   font-family: var(--bb-font-num);
@@ -68,13 +78,19 @@
   letter-spacing: var(--bb-tracking-label);
 }
 
+/*
+ * La etiqueta recorta solo en horizontal (`overflow-x: clip`, para medirse al ajustarla): en vertical
+ * deja salir las tildes de las mayúsculas (À, Ó, Ú), que con el interlineado 1 sobresalen de la caja.
+ */
 .label {
+  grid-area: label;
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--bb-space-3);
   min-width: 0;
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
   font-family: var(--bb-font-display);
   font-size: var(--bb-fs-plate);
   font-style: italic;
@@ -92,13 +108,12 @@
 }
 
 .detail {
+  grid-area: detail;
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-self: end;
   gap: var(--bb-space-2);
-  min-width: 0;
-  max-width: 100%;
   color: var(--bb-text-3);
   font-size: var(--bb-fs-xs);
   font-weight: var(--bb-weight-bold);
@@ -109,16 +124,28 @@
   white-space: nowrap;
 }
 
-.detailText {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.detailText,
+.extra {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-2);
 }
 
-.detailText b {
+:is(.detailText, .extra) b {
   color: var(--bb-white);
   font-family: var(--bb-font-num);
   font-size: var(--bb-fs-md);
+}
+
+/*
+ * El motivo de una deshabilitada es información (§3.3): nunca se corta. Si no cabe en una línea, pasa a
+ * dos dentro de su ancho máximo.
+ */
+.plate[data-disabled] .detailText {
+  display: block;
+  max-width: var(--plate-reason-max, 10rem);
+  line-height: var(--bb-leading-label);
+  white-space: normal;
 }
 
 .key {
@@ -150,7 +177,7 @@
   --plate-border: var(--bb-white);
   --plate-fill: var(--bb-red-cta);
   --plate-shift: 0px;
-  grid-template-columns: var(--bb-space-14) auto minmax(0, 1fr);
+  grid-template-columns: var(--bb-space-14) minmax(0, 1fr) max-content;
   height: calc(var(--bb-space-16) + var(--bb-space-5));
 }
 
@@ -219,18 +246,24 @@
   color: var(--bb-text-2);
 }
 
-/* ── Móvil: 48 px (56 la elegida), sin flecha, 1P ni tecla ──────────────────────────────── */
+/*
+ * ── Móvil: 48 px (56 la elegida), sin flecha ni 1P (no caben a la izquierda) ───────────────────
+ * El dato largo solo en la elegida; el corto (cifras, etiquetas, motivos) siempre. La tecla de entrar
+ * depende del tipo de entrada, no del ancho: se oculta en táctil (más abajo).
+ */
 @media (max-width: 720px) {
   .plate {
     --plate-shift: var(--bb-space-3);
-    grid-template-columns: var(--bb-space-7) auto minmax(0, 1fr);
+    --plate-pad-end: calc(var(--bb-slant) + var(--bb-space-3));
+    --plate-reason-max: 5rem;
+    grid-template-columns: var(--bb-space-7) minmax(0, 1fr) max-content;
     column-gap: var(--bb-space-2);
     height: var(--bb-space-12);
-    padding: 0 var(--bb-space-4) 0 var(--bb-space-6);
+    padding: 0 var(--plate-pad-end) 0 var(--bb-space-6);
   }
 
   .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
-    grid-template-columns: var(--bb-space-7) auto minmax(0, 1fr);
+    grid-template-columns: var(--bb-space-7) minmax(0, 1fr) max-content;
     height: var(--bb-space-14);
   }
 
@@ -242,9 +275,50 @@
     font-stretch: var(--bb-stretch-button);
   }
 
-  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
-    :is(.arrow, .key) {
+  .extra {
     display: none;
+  }
+
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+    .extra {
+    display: inline-flex;
+  }
+
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+    .arrow {
+    display: none;
+  }
+}
+
+/* Táctil: sin teclas (no hay teclado, §3.3); con teclado y ratón se enseñan a cualquier ancho. */
+@media (hover: none), (pointer: coarse) {
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+    .key {
+    display: none;
+  }
+}
+
+/*
+ * Muy estrecho (< 360 px; reflow de WCAG 1.4.10 a 320 px): el dato baja a una segunda línea bajo la
+ * etiqueta, en vez de quitarle sitio o cortarse.
+ */
+@media (max-width: 359px) {
+  .plate,
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
+    grid-template-columns: var(--bb-space-7) minmax(0, 1fr);
+    grid-template-areas:
+      "index label"
+      "index detail";
+    align-content: center;
+    row-gap: var(--bb-space-1);
+  }
+
+  .detail {
+    justify-self: start;
+  }
+
+  .plate[data-disabled] .detailText {
+    max-width: none;
   }
 }
 
