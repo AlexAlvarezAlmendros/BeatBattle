@@ -172,6 +172,25 @@
   line-height: 1;
 }
 
+/*
+ * Escritorio: el panel se estira hasta el pie de la lista de movimientos (`ScreenPage`) y las cinco
+ * filas se reparten su alto, como un marcador, en vez de quedarse arriba con medio panel vacío.
+ */
+@media (min-width: 961px) {
+  .rules {
+    flex: 1;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .ruleList {
+    grid-auto-rows: minmax(0, 1fr);
+  }
+
+  .rule {
+    align-content: center;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .move:active,
   .option:active {

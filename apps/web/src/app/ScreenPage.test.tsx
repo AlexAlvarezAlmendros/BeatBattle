@@ -75,4 +75,21 @@ describe('plantilla de pantalla interior (0.26, §3.8.14)', () => {
     expect(within(main).getByRole('link', { name: t('screen.backToMenu') })).toHaveAttribute('href', '/')
     await act(async () => {})
   })
+
+  it('§3.8.11 / RD-VIS-02 e: el panel de la 404 cuenta cómo se toca el pad (chops arriba, batería debajo)', async () => {
+    renderAt('/legal/no-existe')
+    const main = screen.getByRole('main')
+    const legend = within(main).getByRole('region', { name: t('pages.notFound.legendTitle') })
+    const rows = within(legend).getAllByRole('listitem')
+    expect(rows).toHaveLength(2)
+    expect(rows[0]).toHaveTextContent(
+      `${t('pages.notFound.legend.chops.keysLabel')} ${t('pages.notFound.legend.chops.text')}`,
+    )
+    expect(rows[1]).toHaveTextContent(
+      `${t('pages.notFound.legend.drums.keysLabel')} ${t('pages.notFound.legend.drums.text')}`,
+    )
+    // Las teclas se ven, pero se leen en palabras («Teclas del 1 al 4:»).
+    expect(rows[0]!.querySelectorAll('[aria-hidden="true"] kbd[data-key="marked"]')).toHaveLength(4)
+    await act(async () => {})
+  })
 })

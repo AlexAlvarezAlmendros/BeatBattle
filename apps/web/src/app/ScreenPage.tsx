@@ -72,12 +72,16 @@ export function ScreenPage({
       data-wide={wide || undefined}
     >
       <DocumentTitle page={documentTitle ?? undefined} />
-      <div className={styles.head}>
+      <div className={styles.head} data-screen-part="head">
         {kicker && <p className={cx('bb-label', styles.kicker)}>{kicker}</p>}
         <h1 className={cx('bb-display', styles.title)}>{title}</h1>
       </div>
-      {piece && <div className={styles.piece}>{piece}</div>}
-      <Frame cut="lg" className={styles.panel}>
+      {piece && (
+        <div className={styles.piece} data-screen-part="piece">
+          {piece}
+        </div>
+      )}
+      <Frame cut="lg" className={styles.panel} data-screen-part="panel">
         {badge}
         {summary && <p className={styles.summary}>{summary}</p>}
         {children}

@@ -43,6 +43,49 @@
   color: var(--bb-text-2);
 }
 
+/*
+ * Cómo se toca: filas con sus teclas, como las reglas de «Cómo se juega», en el pie del panel (que en
+ * escritorio llega al pie del pad).
+ */
+.legend {
+  display: grid;
+  gap: var(--bb-space-3);
+  margin-top: auto;
+}
+
+.legendTitle {
+  color: var(--bb-red);
+}
+
+.legendList {
+  display: grid;
+  border-top: var(--bb-stroke-hair) solid var(--bb-line);
+}
+
+.legendRow {
+  display: grid;
+  grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--bb-space-3);
+  padding: var(--bb-space-3) 0;
+  border-bottom: var(--bb-stroke-hair) solid var(--bb-line);
+  color: var(--bb-white);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-bold);
+}
+
+.legendKeys,
+.keyGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-1);
+}
+
+.dash {
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-num);
+}
+
 /* Muy estrecho (< 360 px): teclas de 60 px para que el pad quepa. */
 @media (max-width: 359px) {
   .pad {

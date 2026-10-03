@@ -44,6 +44,7 @@
 .piece {
   grid-area: piece;
   display: grid;
+  align-content: start;
   justify-items: start;
   gap: var(--bb-space-5);
   min-width: 0;
@@ -60,10 +61,15 @@
   font-size: var(--bb-fs-2xl);
 }
 
+/*
+ * El panel es una columna: lo suyo arriba y las acciones en el pie, también cuando se estira hasta el
+ * pie de la pieza (escritorio, abajo).
+ */
 .panel {
   --frame-fill: var(--bb-panel-veil);
   grid-area: panel;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: var(--bb-space-5);
   min-width: 0;
   max-width: 50rem;
@@ -72,7 +78,7 @@
 
 /* El sello, a su tamaño (no estirado al ancho del panel). */
 .panel > [data-stamp] {
-  justify-self: start;
+  align-self: flex-start;
 }
 
 .summary {
@@ -86,8 +92,19 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--bb-space-3);
+  margin-top: auto;
   padding-top: var(--bb-space-4);
   border-top: var(--bb-stroke-hair) solid var(--bb-line);
+}
+
+/*
+ * Dos columnas (escritorio): el panel se estira hasta el pie de la pieza, como en las maquetas
+ * (`02-seleccion`, `05-perfil`), en vez de quedarse en media columna con la otra mitad vacía.
+ */
+@media (min-width: 961px) {
+  .screen[data-piece] .panel {
+    align-self: stretch;
+  }
 }
 
 /*

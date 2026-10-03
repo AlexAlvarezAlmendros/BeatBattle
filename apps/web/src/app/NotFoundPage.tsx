@@ -1,4 +1,6 @@
+import { useId } from 'react'
 import { t } from '../i18n'
+import { cx } from '../ui/forceState'
 import { Key } from '../ui/Key'
 import { TitlePlate } from '../ui/TitlePlate'
 import { FrameSlot } from './layout/slots'
@@ -8,15 +10,23 @@ import { BackToMenu, ScreenPage } from './ScreenPage'
 /** El pad de 4 × 4 de §3.8.11, fila a fila: los *chops* del sample arriba y la batería debajo. */
 const PAD_ROWS = ['1234', 'QWER', 'ASDF', 'ZXCV'] as const
 
+/** Cómo se toca el pad (§3.8.11), en filas como las reglas de «Cómo se juega»: sus teclas y qué suena. */
+const LEGEND = [
+  { id: 'chops', keys: ['1', '2', '3', '4'], tone: 'marked' },
+  { id: 'drums', keys: ['Q', 'V'], tone: 'dark', range: true },
+] as const
+
 /**
  * `*` — la 404 «BONUS STAGE» (guía §3.8.11): el titular es el momento de juego, «BONUS STAGE», con «Te
  * has perdido… pero ya que estás» de subtítulo. La pieza de la cuña es el beat pad de 4 × 4 (teclas de
  * chaflán `--bb-cut-md` de 72 px), quieto y decorativo hasta la Fase 8, con «Volver al menú [Esc]»
- * debajo. También la pinta el límite de errores de las rutas cuando un loader responde 404 (un
- * documento legal que no existe): por eso pone su propia placa en el HUD, por encima de la de la ruta.
- * La pestaña dice «Página no encontrada».
+ * debajo; el panel, estirado hasta el pie del pad, lleva el subtítulo arriba y abajo cómo se toca (los
+ * chops en la fila de arriba, la batería en el resto). También la pinta el límite de errores de las
+ * rutas cuando un loader responde 404 (un documento legal que no existe): por eso pone su propia placa
+ * en el HUD, por encima de la de la ruta. La pestaña dice «Página no encontrada».
  */
 export function NotFoundPage() {
+  const legendId = useId()
   return (
     <>
       <FrameSlot name="hudCenter">
@@ -52,6 +62,32 @@ export function NotFoundPage() {
       >
         <p className={styles.subtitle}>{t('pages.notFound.subtitle')}</p>
         <p className={styles.summary}>{t('pages.notFound.summary')}</p>
+        <section className={styles.legend} aria-labelledby={legendId}>
+          <h2 id={legendId} className={cx('bb-label', styles.legendTitle)}>
+            {t('pages.notFound.legendTitle')}
+          </h2>
+          {/* biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none */}
+          <ul role="list" className={styles.legendList}>
+            {LEGEND.map((row) => (
+              <li key={row.id} className={styles.legendRow}>
+                <span className={styles.legendKeys} aria-hidden="true">
+                  {row.keys.map((key, index) => (
+                    <span key={key} className={styles.keyGroup}>
+                      {'range' in row && index > 0 && (
+                        <span className={styles.dash}>{t('howItWorks.keys.dash')}</span>
+                      )}
+                      <Key tone={row.tone}>{key}</Key>
+                    </span>
+                  ))}
+                </span>
+                <span>
+                  <span className="sr-only">{t(`pages.notFound.legend.${row.id}.keysLabel`)} </span>
+                  {t(`pages.notFound.legend.${row.id}.text`)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
       </ScreenPage>
     </>
   )
