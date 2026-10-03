@@ -63,6 +63,27 @@ describe('TabLinks (secciones con su URL, §3.8.14)', () => {
     await waitFor(() => expect(screen.getByRole('link', { name: 'Cookies' })).toHaveFocus())
   })
 
+  it('§3.8.14: con otra navegación en curso fuera de las pestañas (Esc → el menú), Q/E parten de la sección actual', async () => {
+    let release = () => {}
+    const pending = new Promise<null>((resolve) => {
+      release = () => resolve(null)
+    })
+    const router = createMemoryRouter(
+      [
+        { path: '/menu', loader: () => pending, element: <p>Menú</p> },
+        { path: '*', element: <TabLinks label="Legal" links={LINKS} /> },
+      ],
+      { initialEntries: ['/legal/terminos'] },
+    )
+    render(<RouterProvider router={router} />)
+    void router.navigate('/menu')
+    await waitFor(() => expect(router.state.navigation.location?.pathname).toBe('/menu'))
+    fireEvent.keyDown(document.body, { key: 'q' })
+    // Antes partía de la primera (la ruta en curso no es una pestaña): Q llevaba a Cookies.
+    await waitFor(() => expect(router.state.location.pathname).toBe('/legal/bases'))
+    release()
+  })
+
   it('RNF-A11Y-08: Q/E con el foco fuera de las pestañas no se lo llevan a ellas', () => {
     const router = renderAt('/legal/bases')
     fireEvent.keyDown(document.body, { key: 'e' })

@@ -74,9 +74,12 @@ export function TabLinks({
   /*
    * Sección a la que se va: la de la navegación en curso si su ruta aún está cargando (los legales
    * tienen loader), y la última pedida si la tecla llega antes de que el router lo pinte. Así dos E
-   * seguidas avanzan dos secciones y no repiten la primera.
+   * seguidas avanzan dos secciones y no repiten la primera. Si la navegación en curso va a otra parte
+   * (Esc → el menú), se parte de la sección actual: antes se partía de la primera.
    */
-  const target = indexOf(useNavigation().location?.pathname ?? location.pathname)
+  const pending = useNavigation().location?.pathname
+  const pendingIndex = pending === undefined ? -1 : indexOf(pending)
+  const target = pendingIndex >= 0 ? pendingIndex : current
   const requested = useRef<number | null>(null)
   // biome-ignore lint/correctness/useExhaustiveDependencies: se olvida la pedida cuando el router la alcanza
   useEffect(() => {
