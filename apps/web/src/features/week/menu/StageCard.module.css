@@ -188,7 +188,13 @@
   font-size: var(--bb-fs-sm);
 }
 
-/* ── Móvil: compacta, con el reloj en línea en lugar de la onda ──────────────────────────── */
+/*
+ * ── Móvil: compacta, con el reloj en línea en lugar de la onda ────────────────────────────
+ * Por ancho solo cambia la composición y se van las piezas que repiten algo (el vinilo, la onda, el
+ * «0:00 / 1:12»). Lo que **informa** (créditos, género, semana, reto, entradas, aviso) solo se pliega en
+ * un móvil táctil, como en la maqueta: en escritorio con zoom (1280 × 720 al 200 % = 640 × 360) la
+ * pantalla se desplaza en vez de esconder (WCAG 1.4.4 y 1.4.10).
+ */
 @media (max-width: 720px) {
   .card {
     gap: var(--bb-space-2);
@@ -200,13 +206,8 @@
   }
 
   .vinyl,
-  .emptyKickers,
-  .credits,
   .wave,
-  .time,
-  .foot,
-  .genre,
-  .range {
+  .time {
     display: none;
   }
 
@@ -218,20 +219,10 @@
     font-size: var(--bb-fs-xl);
   }
 
-  /* El aviso, en una línea: el título del escenario sigue siendo el texto principal (y el LCP). */
-  .alertText {
-    display: none;
-  }
-
   .chips {
-    flex-wrap: nowrap;
     gap: var(--bb-space-1);
-    overflow: hidden;
   }
 
-  .mobileOnly {
-    display: inline-flex;
-  }
 
   .mobileClock {
     display: grid;
@@ -249,15 +240,44 @@
   }
 }
 
-/* Móvil bajo (≤ 700 px de alto): la semana plegada en título y reloj (§3.8.3). */
+/* Móvil táctil: la tarjeta plegada de la maqueta (las entradas pasan a un chip). */
+@media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse) {
+  .emptyKickers,
+  .credits,
+  .foot,
+  .genre,
+  .range {
+    display: none;
+  }
+
+  .mobileOnly {
+    display: inline-flex;
+  }
+
+  /* Los cuatro chips en una fila (la maqueta). */
+  .chips {
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+
+  /* El aviso, en una línea: el título del escenario sigue siendo el texto principal (y el LCP). */
+  .alertText {
+    display: none;
+  }
+}
+
+/* Móvil bajo (≤ 700 px de alto): todo más junto. */
 @media (max-width: 720px) and (max-height: 700px) {
   .card {
     gap: var(--bb-space-1);
     padding: var(--bb-space-2) var(--bb-space-4);
   }
+}
 
-  .chips,
-  .alertText {
+/* Móvil bajo táctil: la semana plegada en título y reloj (§3.8.3). */
+@media (max-width: 720px) and (max-height: 700px) and (hover: none),
+  (max-width: 720px) and (max-height: 700px) and (pointer: coarse) {
+  .chips {
     display: none;
   }
 }

@@ -199,6 +199,17 @@
   margin-top: var(--bb-space-1);
 }
 
+.inline .when {
+  margin-top: var(--bb-space-1);
+}
+
+/* En un móvil táctil, la tarjeta plegada de la maqueta: sin la línea de fecha (§3.8.3). */
+@media (hover: none), (pointer: coarse) {
+  .inline .when {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .clock[data-phase="final"] {
     animation: none;

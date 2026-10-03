@@ -36,7 +36,11 @@ export interface RoundClockProps {
   when?: ReactNode
   /** La barra de la semana; sin ella, solo los dígitos. */
   week?: WeekBar
-  /** `hud` (la caja del centro del HUD) o `inline` (una fila, dentro de la tarjeta de la semana en móvil). */
+  /**
+   * `hud` (la caja del centro del HUD) o `inline` (una fila, dentro de la tarjeta de la semana en móvil).
+   * En línea, la fecha absoluta (`when`) solo se ve con teclado y ratón: en un móvil táctil la tarjeta va
+   * plegada como en la maqueta; en una ventana estrecha o ampliada, no se pierde (WCAG 1.4.10).
+   */
   variant?: 'hud' | 'inline'
   /** Se llama una vez al llegar a cero. */
   onEnd?: () => void
@@ -129,7 +133,7 @@ export function RoundClock({
         )}
       </div>
       {week && <WeekSegments week={week} labels={variant === 'hud'} />}
-      {when && variant === 'hud' && <p className={styles.when}>{when}</p>}
+      {when && <p className={styles.when}>{when}</p>}
       <p className="sr-only" aria-live="polite" aria-atomic="true">
         {announcement}
       </p>

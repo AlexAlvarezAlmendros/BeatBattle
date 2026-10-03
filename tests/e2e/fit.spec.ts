@@ -157,3 +157,37 @@ test.describe('galería a 390 × 844', () => {
     expect(outside).toEqual([])
   })
 })
+
+/**
+ * Ampliar no quita información (WCAG 1.4.4 y 1.4.10; guía §3.8.3): los pliegues de «móvil» y «móvil bajo»
+ * son para los móviles táctiles. En escritorio con zoom (1280 × 720 al 200 % = 640 × 360, teclado y
+ * ratón) la pantalla se desplaza en vez de esconder: los chips de la semana, el plazo, el panel de ayuda
+ * del modo, la fecha absoluta del reloj y la crónica siguen ahí, visibles y en el árbol de accesibilidad.
+ */
+test.describe('menú a 640 × 360 (escritorio al 200 %)', () => {
+  test.use({ viewport: { width: 640, height: 360 } })
+
+  test('WCAG 1.4.4 / 1.4.10: ampliar no esconde los chips, el plazo, la ayuda, la fecha ni la crónica', async ({
+    page,
+  }) => {
+    await open(page, '/dev/menu', 'Beat Battle')
+    const main = page.getByRole('main')
+    const card = main.getByRole('article', { name: 'Lluvia en Gràcia' })
+    // Los chips de la semana: BPM, tonalidad, duración y género sugerido.
+    for (const chip of [/92\s*BPM/i, /Re menor/, /1:12\s*min/i, /Boom bap/]) {
+      await expect(card.getByText(chip).first()).toBeVisible()
+    }
+    // La fecha absoluta del cierre, también en el reloj de la tarjeta.
+    await expect(card.getByText('Domingo 11 a las 20:00 · votos hasta las 23:59')).toBeVisible()
+    // El reto y las entradas en la batalla.
+    await expect(card.getByText(/Usa solo el primer compás/)).toBeVisible()
+    // El panel de ayuda del modo elegido (Jugar: el plazo y los créditos), visible y leído.
+    const help = main.locator('[aria-live="polite"]').filter({ hasText: 'domingo 11 a las 20:00' })
+    await expect(help).toBeVisible()
+    await expect(main.getByRole('menu', { name: 'Elige modo' })).toHaveAccessibleDescription(
+      /domingo 11 a las 20:00/,
+    )
+    // La crónica de la barra de controles.
+    await expect(page.getByRole('contentinfo').locator('[data-chronicle]')).toBeVisible()
+  })
+})

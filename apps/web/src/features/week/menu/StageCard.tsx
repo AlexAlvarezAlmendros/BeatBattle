@@ -92,6 +92,7 @@ export function StageCard({ week }: { week: MenuWeek | null }) {
           target={week.closesAt}
           label={t(week.phase === 'open' ? 'home.stage.closesShort' : 'home.stage.votesShort')}
           variant="inline"
+          when={week.clockWhen}
           week={week.weekBar}
         />
       </div>

@@ -135,8 +135,8 @@
 /*
  * Móvil (≤ 720 px): la barra sigue pegada al pie de la ventana (la firma se ve siempre, también en una
  * pantalla más alta que la ventana) y lleva la firma centrada con «Legal» al lado, en una fila
- * (maqueta `01-menu-390x844`). El dato de la pantalla (la crónica del menú) se va. Con teclado y ratón,
- * las teclas van en una fila de encima que parte de línea si no cabe.
+ * (maqueta `01-menu-390x844`). En táctil, el dato de la pantalla (la crónica del menú) se va; con
+ * teclado y ratón, las teclas van en una fila de encima que parte de línea si no cabe y el dato, debajo.
  */
 @media (max-width: 720px) {
   .bar {
@@ -150,9 +150,15 @@
     border-top-color: var(--bb-line);
   }
 
-  .bar::before,
-  .right[data-claimed] {
+  .bar::before {
     display: none;
+  }
+
+  /* El dato de la pantalla (la crónica del menú), en su propia fila debajo de la firma. */
+  .right[data-claimed] {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: center;
   }
 
   .keys {
@@ -174,8 +180,13 @@
   }
 }
 
+/*
+ * Móvil táctil: la firma y «Legal», sin teclas ni el dato de la pantalla (maqueta `01-menu-390x844`). Con
+ * teclado y ratón en una ventana estrecha o ampliada, el dato se queda (WCAG 1.4.10).
+ */
 @media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse) {
-  .keys {
+  .keys,
+  .right[data-claimed] {
     display: none;
   }
 }
