@@ -112,6 +112,11 @@ test('RD-VIS-03: el modo serio quita el espectáculo (anunciador, rayos) y deja 
   await page.getByRole('switch', { name: /Modo serio/ }).click()
   await expect(announcer).toBeHidden()
   await expect(page.locator('section#anunciador [data-announcer]').first()).toBeAttached()
+  // La tesela no se queda en un marco vacío: dice que se calla y lo que lee la región viva.
+  const notes = page.locator('section#anunciador figure').getByText(/^Modo serio: el anunciador se calla/)
+  await expect(notes).toHaveCount(2)
+  for (const note of await notes.all()) await expect(note).toBeVisible()
+  await expect(page.locator('section#anunciador').getByText('La región viva lee: «Ronda 01»')).toBeVisible()
 })
 
 test('RNF-A11Y-01: el anillo de foco del título de una fila de entrada se ve entero', async ({ page }) => {

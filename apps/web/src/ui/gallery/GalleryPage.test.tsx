@@ -151,6 +151,29 @@ describe('galería /dev/galeria (0.9, 0.22, 0.25)', { timeout: 15_000 }, () => {
     expect(document.documentElement).not.toHaveAttribute('data-serious')
   })
 
+  it('RD-VIS-03: en modo serio, las teselas del anunciador dicen que se calla y lo que lee la región viva', async () => {
+    const user = userEvent.setup()
+    await renderGallery()
+    const block = document.getElementById('anunciador')!
+    const cells = [...block.querySelectorAll<HTMLElement>('figure')].filter((cell) =>
+      cell.querySelector('[data-announcer]'),
+    )
+    expect(cells).toHaveLength(2)
+    const note = t('dev.gallery.arena.announcer.seriousNote')
+    const live = (key: 'round' | 'voteSaved') =>
+      t('dev.gallery.arena.announcer.liveText', { text: t(`dev.gallery.arena.announcer.${key}`) })
+    // Sin modo serio, el rótulo y nada más.
+    for (const cell of cells) expect(cell).not.toHaveTextContent(note)
+    await user.click(screen.getByRole('switch', { name: t('dev.gallery.controls.serious') }))
+    // Con él, cada tesela lo explica (no es un marco vacío) y enseña el texto de su región viva.
+    for (const cell of cells) expect(cell).toHaveTextContent(note)
+    expect(cells[0]).toHaveTextContent(live('round'))
+    expect(cells[1]).toHaveTextContent(live('voteSaved'))
+    // Volver al modo normal la quita.
+    await user.click(screen.getByRole('switch', { name: t('dev.gallery.controls.serious') }))
+    for (const cell of cells) expect(cell).not.toHaveTextContent(note)
+  })
+
   it('RD-VIS-03: pinta cada componente de §3.3 en su bloque, en el orden del registro', async () => {
     await renderGallery()
     for (const { id, key } of COMPONENT_ANCHORS) {

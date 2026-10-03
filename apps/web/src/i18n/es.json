@@ -865,7 +865,9 @@
         "announcer": {
           "round": "Ronda 01",
           "voteSaved": "¡Voto guardado!",
-          "tagLabel": "Etiqueta girada"
+          "tagLabel": "Etiqueta girada",
+          "seriousNote": "Modo serio: el anunciador se calla; el texto sigue en la región viva.",
+          "liveText": "La región viva lee: «{text}»"
         },
         "toast": {
           "info": "Nuevo drop el lunes",

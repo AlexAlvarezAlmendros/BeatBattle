@@ -11,6 +11,7 @@ import { EntryList, EntryRow } from '../../EntryRow'
 import { FighterCard, type FighterEntry } from '../../FighterCard'
 import { useRovingGrid } from '../../hooks/useRovingGrid'
 import { useRovingMenu } from '../../hooks/useRovingMenu'
+import { useSeriousMode } from '../../hooks/useSeriousMode'
 import { Medal } from '../../Medal'
 import { MenuPlate } from '../../MenuPlate'
 import { Meter } from '../../Meter'
@@ -656,18 +657,37 @@ function ModalBlock() {
 /* ── Anunciador ─────────────────────────────────────────────────────────────────────────── */
 
 function AnnouncerBlock() {
+  const serious = useSeriousMode()
+  const round = t('dev.gallery.arena.announcer.round')
+  const voteSaved = t('dev.gallery.arena.announcer.voteSaved')
   return (
     <GalleryBlock id="anunciador" title={t('dev.gallery.components.announcer')}>
       <GalleryRow wide="xl">
         <StateCell label={stateLabel('rest')} state="rest">
-          <Announcer text={t('dev.gallery.arena.announcer.round')} silent />
+          <Announcer text={round} silent />
+          {serious && <AnnouncerSeriousNote text={round} />}
         </StateCell>
         <StateCell label={t('dev.gallery.arena.announcer.tagLabel')}>
-          <Announcer text={t('dev.gallery.arena.announcer.voteSaved')} variant="tag" silent />
+          <Announcer text={voteSaved} variant="tag" silent />
+          {serious && <AnnouncerSeriousNote text={voteSaved} />}
         </StateCell>
       </GalleryRow>
       <StateMatrixRow component="announcer" />
     </GalleryBlock>
+  )
+}
+
+/**
+ * Variante del modo serio (`RD-VIS-03`): el rótulo no se pinta (`data-fx`) y la tesela no se queda en un
+ * marco vacío: dice que el anunciador se calla y enseña lo que lee la región viva (en la galería, los
+ * anunciadores van sin ella: son varios a la vez).
+ */
+function AnnouncerSeriousNote({ text }: { text: string }) {
+  return (
+    <div className={styles.seriousNote}>
+      <p>{t('dev.gallery.arena.announcer.seriousNote')}</p>
+      <p className={styles.liveText}>{t('dev.gallery.arena.announcer.liveText', { text })}</p>
+    </div>
   )
 }
 
