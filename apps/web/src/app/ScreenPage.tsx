@@ -27,8 +27,14 @@ export interface ScreenPageProps {
   piece?: ReactNode
   /** Distintivo arriba del panel (el sello «EN OBRAS» cuando la pieza es otra cosa). */
   badge?: ReactNode
-  /** Pieza ancha (40 rem en vez de 28): el logo grande de la pantalla de título de la autenticación. */
-  wide?: boolean
+  /**
+   * Reparto de la pantalla. `interior` (por defecto): la pieza arriba a la izquierda y el panel a su
+   * lado, estirado hasta el pie de la pieza. `title`: la pantalla de título de la autenticación
+   * (maqueta `00-titulo`), con la pieza ancha (el logo grande con su lockup) y el bloque centrado en
+   * vertical entre el HUD y la barra, con el pie del panel a la altura del de la pieza; en móvil, la
+   * pieza en medio y el panel anclado al pie, encima de la barra.
+   */
+  layout?: 'interior' | 'title'
   /**
    * ¿El título ya se ve en la placa del HUD? Entonces el `<h1>` queda solo para los lectores de
    * pantalla en escritorio (en móvil el HUD no lleva placa y el título se ve). Por defecto, si la ruta
@@ -56,7 +62,7 @@ export function ScreenPage({
   documentTitle = title,
   piece,
   badge,
-  wide = false,
+  layout = 'interior',
   titleInHud,
   actions,
   children,
@@ -69,7 +75,7 @@ export function ScreenPage({
       className={cx(styles.screen, className)}
       data-title-in-hud={inHud || undefined}
       data-piece={piece ? '' : undefined}
-      data-wide={wide || undefined}
+      data-layout={layout}
     >
       <DocumentTitle page={documentTitle ?? undefined} />
       <div className={styles.head} data-screen-part="head">

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { ScreenPage, UnderConstruction } from './ScreenPage'
+import { ScreenPage, type ScreenPageProps, UnderConstruction } from './ScreenPage'
 
 interface PlaceholderPageProps {
   /** Encabezado `<h1>` de la pantalla (ya traducido). */
@@ -15,8 +15,8 @@ interface PlaceholderPageProps {
    * «EN OBRAS»; con ella, el sello va arriba del panel.
    */
   piece?: ReactNode
-  /** Pieza ancha (la pantalla de título de la autenticación: el logo grande). */
-  wide?: boolean
+  /** Reparto de la pantalla (`ScreenPage`): `title` en la autenticación, como la pantalla de título. */
+  layout?: ScreenPageProps['layout']
   children?: ReactNode
 }
 
@@ -31,7 +31,7 @@ export function PlaceholderPage({
   documentTitle = title,
   kicker,
   piece,
-  wide = false,
+  layout,
   children,
 }: PlaceholderPageProps) {
   return (
@@ -42,7 +42,7 @@ export function PlaceholderPage({
       documentTitle={documentTitle}
       piece={piece ?? <UnderConstruction big />}
       badge={piece ? <UnderConstruction /> : undefined}
-      wide={wide}
+      layout={layout}
     >
       {children}
     </ScreenPage>

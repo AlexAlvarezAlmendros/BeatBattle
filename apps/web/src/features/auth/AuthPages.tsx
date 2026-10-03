@@ -15,7 +15,7 @@ import styles from './AuthPages.module.css'
 /** El logo del juego con el mismo lockup que el menú (§3.1 «La firma»: autenticación). */
 function TitlePiece() {
   return (
-    <div className={styles.title}>
+    <div className={styles.title} data-title-piece="">
       <GameLogo className={styles.logo} />
       <TitleLockup className={styles.lockup} />
     </div>
@@ -30,7 +30,7 @@ export function SignInPage() {
       kicker={t('frame.plates.signIn')}
       summary={t('pages.signIn.summary')}
       piece={<TitlePiece />}
-      wide
+      layout="title"
     />
   )
 }
@@ -43,7 +43,7 @@ export function SignUpPage() {
       kicker={t('frame.plates.signUp')}
       summary={t('pages.signUp.summary')}
       piece={<TitlePiece />}
-      wide
+      layout="title"
     />
   )
 }

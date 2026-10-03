@@ -4,8 +4,11 @@ import { open, settle } from './support'
 /**
  * Composición de las pantallas interiores (guía §3.8.14, §3.8.11; `RD-VIS-02` e: segundo pase del
  * jurado visual de la tarea 0.28). La plantilla (`ScreenPage`) reparte la pantalla como las maquetas
- * (`02-seleccion`, `05-perfil`): nada de medio panel arriba y la otra mitad vacía.
+ * (`00-titulo`, `02-seleccion`, `05-perfil`): nada de medio panel arriba y la otra mitad vacía.
  *
+ * - **Autenticación** como pantalla de título: el logo con su lockup y el panel, centrados en vertical
+ *   entre el HUD y la barra, con el pie del panel a la altura del lockup; en móvil, el panel anclado al
+ *   pie, encima de la barra.
  * - **Pantallas con pieza** («Cómo se juega», la 404): el panel de la derecha llega al pie de la pieza
  *   de la cuña.
  */
@@ -42,6 +45,24 @@ const PANEL = 'main [data-screen-part="panel"]'
 const PIECE = 'main [data-screen-part="piece"]'
 
 test.describe('1440 × 900', () => {
+  test('RD-VIS-02 e: la autenticación es una pantalla de título, con el logo y el panel centrados entre el HUD y la barra', async ({
+    page,
+  }) => {
+    await open(page, '/entrar', 'Entrar')
+    await settle(page)
+    const box = await boxes(page, { title: 'main [data-title-piece]', panel: PANEL })
+    const top = Math.min(box.title.top, box.panel.top)
+    const bottom = Math.max(box.title.bottom, box.panel.bottom)
+    const above = top - box.hud.bottom
+    const below = box.bar.top - bottom
+    // Centrado entre el HUD y la barra: el hueco de arriba y el de abajo, parecidos.
+    expect(Math.abs(above - below), `arriba ${above} px · abajo ${below} px`).toBeLessThanOrEqual(64)
+    // El logo al tamaño del de `00-titulo` (unos 750 px de «BATTLE»): llena el alto, no se queda arriba.
+    expect(box.title.bottom - box.title.top).toBeGreaterThanOrEqual(330)
+    // El pie del panel, a la altura del lockup.
+    expect(Math.abs(box.panel.bottom - box.title.bottom)).toBeLessThanOrEqual(4)
+  })
+
   test('RD-VIS-02 e: «Cómo se juega» estira el panel de reglas hasta el pie de la lista de movimientos', async ({
     page,
   }) => {
@@ -63,5 +84,22 @@ test.describe('1440 × 900', () => {
     await settle(page)
     const box = await boxes(page, { panel: PANEL, piece: PIECE })
     expect(Math.abs(box.panel.bottom - box.piece.bottom)).toBeLessThanOrEqual(2)
+  })
+})
+
+test.describe('390 × 844', () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
+
+  test('RD-VIS-02 e: en móvil, el panel de la autenticación queda anclado al pie, encima de la barra', async ({
+    page,
+  }) => {
+    await open(page, '/entrar', 'Entrar')
+    await settle(page)
+    const box = await boxes(page, { title: 'main [data-title-piece]', panel: PANEL })
+    const gap = box.bar.top - box.panel.bottom
+    expect(gap, `${gap} px entre el panel y la barra`).toBeGreaterThanOrEqual(0)
+    expect(gap, `${gap} px entre el panel y la barra`).toBeLessThanOrEqual(24)
+    // El logo, entre el título y el panel (no pegado arriba con el hueco debajo).
+    expect(box.panel.top - box.title.bottom).toBeGreaterThanOrEqual(48)
   })
 })

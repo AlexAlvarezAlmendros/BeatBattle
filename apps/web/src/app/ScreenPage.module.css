@@ -15,8 +15,15 @@
   gap: var(--bb-space-6) var(--bb-space-16);
 }
 
-.screen[data-wide] {
-  grid-template-columns: minmax(0, 40rem) minmax(0, 1fr);
+/*
+ * Pantalla de título (autenticación, maqueta `00-titulo`): la pieza ancha (el logo grande con su lockup,
+ * como el de la maqueta) y la pantalla entera, del HUD a la barra, para repartirla (abajo). El panel
+ * guarda su ancho mínimo (el botón entero) y en ventanas medianas cede el logo, no el panel.
+ */
+.screen[data-layout="title"] {
+  flex: 1 0 auto;
+  grid-template-columns: minmax(0, 50rem) minmax(20rem, 1fr);
+  column-gap: var(--bb-space-10);
 }
 
 .head {
@@ -81,6 +88,10 @@
   align-self: flex-start;
 }
 
+.screen[data-layout="title"] .panel {
+  padding-inline: var(--bb-space-6);
+}
+
 .summary {
   max-width: 62ch;
   color: var(--bb-text-2);
@@ -104,6 +115,18 @@
 @media (min-width: 961px) {
   .screen[data-piece] .panel {
     align-self: stretch;
+  }
+
+  /*
+   * Pantalla de título: el logo y el panel, centrados en vertical entre el HUD y la barra (el logo a la
+   * altura del de `00-titulo`), con el pie del panel a la altura del lockup.
+   */
+  .screen[data-layout="title"] {
+    align-content: center;
+  }
+
+  .screen[data-layout="title"] .panel {
+    align-self: end;
   }
 }
 
@@ -131,7 +154,7 @@
 
 @media (max-width: 960px) {
   .screen,
-  .screen[data-wide],
+  .screen[data-layout="title"],
   .screen[data-title-in-hud] {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: none;
@@ -139,6 +162,15 @@
       "head"
       "piece"
       "panel";
+  }
+
+  /* Pantalla de título en una columna: el logo en medio y el panel anclado al pie, encima de la barra. */
+  .screen[data-layout="title"] {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  .screen[data-layout="title"] .piece {
+    align-self: center;
   }
 }
 
