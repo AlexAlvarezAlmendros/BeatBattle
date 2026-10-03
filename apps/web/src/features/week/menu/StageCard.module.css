@@ -98,6 +98,10 @@
   font-weight: var(--bb-weight-semibold);
 }
 
+/*
+ * Chips de la semana: en una fila, como la maqueta (también los cuatro del móvil); si no caben (el
+ * espaciado de texto de WCAG 1.4.12, la letra ampliada), parten en otra fila en vez de cortarse.
+ */
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -251,12 +255,6 @@
 
   .mobileOnly {
     display: inline-flex;
-  }
-
-  /* Los cuatro chips en una fila (la maqueta). */
-  .chips {
-    flex-wrap: nowrap;
-    overflow: hidden;
   }
 
   /* El aviso, en una línea: el título del escenario sigue siendo el texto principal (y el LCP). */

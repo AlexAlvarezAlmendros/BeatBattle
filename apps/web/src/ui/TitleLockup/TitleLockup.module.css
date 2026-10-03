@@ -1,7 +1,8 @@
 /*
  * Lockup del título (§3.1, §3.8.3; maqueta `01-menu.html` `.lockup`): cinta blanca en display 800 con
  * los extremos en chaflán y la firma «by [OTP.]». En una fila siempre: la cinta se encoge (y en muy
- * estrecho pierde «de productores»), la firma nunca.
+ * estrecho pierde «de productores»), la firma nunca. Si aun así no cabe (el espaciado de texto de WCAG
+ * 1.4.12, la letra ampliada), la cinta parte en dos líneas: nunca se corta con «…».
  *
  * `--lockup-signature-hang` (margen inferior de la firma; por defecto 0): con un valor negativo, la
  * firma cuelga de la fila. Su objetivo táctil de 44 px y la pegatina sobresalen por arriba y por abajo
@@ -19,7 +20,6 @@
 .ribbon {
   min-width: 0;
   padding: var(--bb-space-2) var(--bb-space-5) var(--bb-space-2) var(--bb-space-4);
-  overflow: hidden;
   background: var(--bb-white);
   color: var(--bb-black);
   font-family: var(--bb-font-display);
@@ -29,9 +29,8 @@
   font-stretch: var(--bb-stretch-plate);
   letter-spacing: var(--bb-tracking-label);
   line-height: 1;
-  text-overflow: ellipsis;
   text-transform: uppercase;
-  white-space: nowrap;
+  text-wrap: balance;
   clip-path: polygon(var(--bb-cut-md) 0, 100% 0, calc(100% - var(--bb-cut-md)) 100%, 0 100%);
 }
 

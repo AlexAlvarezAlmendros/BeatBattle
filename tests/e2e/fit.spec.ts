@@ -189,6 +189,78 @@ for (const touch of [false, true]) {
   })
 }
 
+/**
+ * Espaciado de texto de WCAG 1.4.12 (interlineado 1,5, letras 0,12 em, palabras 0,16 em, párrafos 2 em),
+ * con `!important` en todo, como lo aplica quien lo necesita (una hoja de estilo propia o un
+ * marcador).
+ */
+const TEXT_SPACING = `*, *::before, *::after { line-height: 1.5 !important; letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important; } p { margin-bottom: 2em !important; }`
+
+/**
+ * Textos y marcos (los chips) de `<main>` que recorta en horizontal un antepasado (o el propio elemento,
+ * si recorta su texto con «…»): se perderían con el espaciado de 1.4.12.
+ */
+function clippedHorizontally(page: Page): Promise<string[]> {
+  return page.evaluate(() => {
+    const clipped: string[] = []
+    for (const element of document.querySelectorAll<HTMLElement>('main *')) {
+      const ownText = [...element.childNodes].some(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
+      )
+      const frame = element.matches('[data-frame]')
+      if (!ownText && !frame) continue
+      const style = getComputedStyle(element)
+      if (style.display === 'none' || style.visibility === 'hidden') continue
+      if (element.closest('.sr-only, [hidden], [aria-hidden="true"]')) continue
+      let box = element.getBoundingClientRect()
+      if (ownText) {
+        const range = document.createRange()
+        range.selectNodeContents(element)
+        box = range.getBoundingClientRect()
+      }
+      if (box.width === 0) continue
+      for (
+        let node: HTMLElement | null = ownText ? element : element.parentElement;
+        node && node !== document.body;
+        node = node.parentElement
+      ) {
+        const clip = getComputedStyle(node)
+        if (clip.overflowX === 'visible' && clip.clipPath === 'none') continue
+        const rect = node.getBoundingClientRect()
+        if (box.right > rect.right + 1 || box.left < rect.left - 1) {
+          const text = (element.textContent ?? '').trim().slice(0, 40)
+          clipped.push(`«${text}» recortado por ${node.tagName.toLowerCase()}.${String(node.className)}`)
+          break
+        }
+      }
+    }
+    return clipped
+  })
+}
+
+test.describe('espaciado de texto (WCAG 1.4.12) a 390 × 844 táctil', () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
+
+  for (const path of ['/dev/menu', '/']) {
+    test(`WCAG 1.4.12: con el espaciado de texto aplicado desde la carga, nada de ${path} se corta (la cinta del lockup, los chips de la semana)`, async ({
+      page,
+    }) => {
+      await page.addInitScript((css) => {
+        document.addEventListener('DOMContentLoaded', () => {
+          const style = document.createElement('style')
+          style.textContent = css
+          document.head.append(style)
+        })
+      }, TEXT_SPACING)
+      await open(page, path, 'Beat Battle')
+      await settle(page)
+      expect(await page.evaluate(() => getComputedStyle(document.body).letterSpacing)).not.toBe('normal')
+      expect(await clippedHorizontally(page)).toEqual([])
+    })
+  }
+})
+
 interface LockupOverLogo {
   /** Píxeles de la pegatina OTP girada que caen sobre la zona opaca del logo. */
   sticker: number
