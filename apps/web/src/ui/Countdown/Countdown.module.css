@@ -12,7 +12,7 @@
   display: flex;
   align-items: flex-start;
   gap: var(--bb-space-2);
-  font-family: var(--bb-font-mono);
+  font-family: var(--bb-font-num);
   font-variant-numeric: tabular-nums;
   line-height: 1;
   transform-origin: center;
@@ -38,12 +38,12 @@
 
 .lg .digits,
 .lg .separator {
-  font-size: var(--bb-font-size-3xl);
+  font-size: var(--bb-fs-3xl);
 }
 
 .md .digits,
 .md .separator {
-  font-size: var(--bb-font-size-2xl);
+  font-size: var(--bb-fs-2xl);
 }
 
 /*
@@ -78,10 +78,10 @@
 
 .unit {
   color: var(--bb-text-3);
-  font-family: var(--bb-font-body);
-  font-size: var(--bb-font-size-2xs);
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-xs);
   font-weight: var(--bb-weight-semibold);
-  letter-spacing: var(--bb-tracking-section);
+  letter-spacing: var(--bb-tracking-label);
   text-transform: uppercase;
 }
 

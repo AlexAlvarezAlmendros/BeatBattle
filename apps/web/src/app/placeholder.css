@@ -11,7 +11,7 @@
 }
 
 .placeholder-page h1 {
-  font-family: var(--bb-font-body);
+  font-family: var(--bb-font-ui);
   font-size: var(--bb-font-size-page-title);
   font-weight: var(--bb-weight-bold);
   letter-spacing: normal;

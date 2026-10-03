@@ -13,9 +13,9 @@
 .settings-layout__label {
   margin-bottom: var(--bb-space-2);
   color: var(--bb-text-3);
-  font-size: var(--bb-font-size-xs);
+  font-size: var(--bb-fs-xs);
   font-weight: var(--bb-weight-bold);
-  letter-spacing: var(--bb-tracking-caps);
+  letter-spacing: var(--bb-tracking-label);
   text-transform: uppercase;
 }
 

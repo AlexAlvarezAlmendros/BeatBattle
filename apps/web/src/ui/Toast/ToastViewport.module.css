@@ -37,15 +37,15 @@
   padding: var(--bb-space-3) var(--bb-space-4);
   border: 1px solid var(--bb-line-strong);
   border-radius: var(--bb-radius-md);
-  background-color: var(--bb-ink-800);
+  background-color: var(--bb-panel-2);
   color: var(--bb-text);
-  font-size: var(--bb-font-size-sm);
+  font-size: var(--bb-fs-sm);
   pointer-events: auto;
 }
 
 .plainMessage {
   color: var(--bb-text-2);
-  font-size: var(--bb-font-size-xs);
+  font-size: var(--bb-fs-xs);
 }
 
 .plainClose {

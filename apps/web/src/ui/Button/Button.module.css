@@ -15,10 +15,10 @@
   border: 1px solid transparent;
   border-radius: var(--bb-radius-pill);
   color: var(--bb-text);
-  font-family: var(--bb-font-body);
+  font-family: var(--bb-font-ui);
   font-weight: var(--bb-weight-bold);
-  line-height: var(--bb-leading-snug);
-  letter-spacing: var(--bb-tracking-cta);
+  line-height: var(--bb-leading-label);
+  letter-spacing: var(--bb-tracking-button);
   text-transform: uppercase;
   text-decoration: none;
   white-space: nowrap;
@@ -52,25 +52,25 @@
 .sm {
   min-height: var(--bb-space-9);
   padding: var(--bb-space-2) var(--bb-space-5);
-  font-size: var(--bb-font-size-xs);
+  font-size: var(--bb-fs-xs);
 }
 
 .md {
   min-height: var(--bb-space-11);
   padding: var(--bb-space-4) var(--bb-space-8);
-  font-size: var(--bb-font-size-sm);
+  font-size: var(--bb-fs-sm);
 }
 
 .lg {
   min-height: var(--bb-space-13);
   padding: var(--bb-space-5) var(--bb-space-10);
-  font-size: var(--bb-font-size-md);
+  font-size: var(--bb-fs-md);
 }
 
 /*
  * Hero: el CTA del hero del sello (Hero.css `.hero-cta`, `otp-metrics.json`). 15,2 px con relleno de
  * 15,2 × 32 px (14,4 × 24 en tableta); en móvil (≤ 480 px), 13,6 px e interletraje de 0,08 em, que
- * cambian con los tokens (`--bb-font-size-cta`, `--bb-tracking-cta`). Interlineado `normal` y sin
+ * cambian con los tokens (`--bb-font-size-cta`, `--bb-tracking-button`). Interlineado `normal` y sin
  * `nowrap`, como en el sello: si el texto no cabe, parte la línea en vez de desbordar. Aquí también el
  * contorno sube 1 px en hover.
  */
@@ -116,7 +116,7 @@
 /* ── Contorno: píldora transparente con borde al 30 % (medido en el sello) ─────────────────── */
 .outline {
   background-color: transparent;
-  border-color: var(--bb-line-button);
+  border-color: var(--bb-line-strong);
 }
 
 .outline:hover,
@@ -168,7 +168,7 @@
 /* ── Icono: círculo de 36–44 px como el play de la lista del sello ────────────────────────── */
 .iconButton {
   padding: 0;
-  border-color: var(--bb-ink-600);
+  border-color: var(--bb-ink-4);
   background-color: transparent;
   color: var(--bb-text-2);
   letter-spacing: 0;
@@ -178,21 +178,21 @@
   width: var(--bb-space-9);
   min-height: var(--bb-space-9);
   height: var(--bb-space-9);
-  font-size: var(--bb-font-size-sm);
+  font-size: var(--bb-fs-sm);
 }
 
 .iconButton.md {
   width: var(--bb-space-10);
   min-height: var(--bb-space-10);
   height: var(--bb-space-10);
-  font-size: var(--bb-font-size-md);
+  font-size: var(--bb-fs-md);
 }
 
 .iconButton.lg {
   width: var(--bb-space-11);
   min-height: var(--bb-space-11);
   height: var(--bb-space-11);
-  font-size: var(--bb-font-size-lg);
+  font-size: var(--bb-fs-lg);
 }
 
 .iconButton .glyph {
@@ -221,8 +221,8 @@
 /* ── Foco (RNF-A11Y-01): el anillo de global.css, también forzado; el CTA conserva su halo ──── */
 .button:focus-visible,
 .button[data-force-state="focus"] {
-  outline: var(--bb-focus-width) solid var(--bb-focus-color);
-  outline-offset: var(--bb-focus-offset);
+  outline: var(--bb-stroke-cursor) solid var(--bb-white);
+  outline-offset: var(--bb-cursor-gap);
   box-shadow: var(--bb-focus-halo);
 }
 
@@ -238,8 +238,8 @@
 /* ── Deshabilitado (exento de contraste, WCAG 1.4.3) ──────────────────────────────────────── */
 .button:disabled,
 .button[aria-disabled="true"]:not([aria-busy="true"]) {
-  border-color: var(--bb-ink-600);
-  background-color: var(--bb-ink-700);
+  border-color: var(--bb-ink-4);
+  background-color: var(--bb-ink-3);
   box-shadow: none;
   color: var(--bb-text-4);
   translate: none;
@@ -336,7 +336,7 @@
 }
 
 .cta[data-status="error"] {
-  background-color: var(--bb-ink-800);
+  background-color: var(--bb-panel-2);
   box-shadow: none;
 }
 
@@ -390,7 +390,7 @@
 /* Móvil: como el CTA del sello (≤ 480 px), menos aire y menos interletraje. */
 @media (max-width: 480px) {
   .button {
-    letter-spacing: var(--bb-tracking-cta-compact);
+    letter-spacing: var(--bb-tracking-button);
   }
 
   /* Solo los botones con texto: el icono es un círculo sin relleno (`.iconButton`), y esta regla, con la

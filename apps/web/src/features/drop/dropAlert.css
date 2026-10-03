@@ -10,8 +10,8 @@
 }
 
 .drop-alert h2 {
-  font-family: var(--bb-font-body);
-  font-size: var(--bb-font-size-2xl);
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-2xl);
   font-weight: var(--bb-weight-bold);
 }
 

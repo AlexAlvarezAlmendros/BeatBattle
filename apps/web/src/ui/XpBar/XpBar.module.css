@@ -1,5 +1,5 @@
 /*
- * Barra de XP (§3.3, Anexo E): pista `--bb-ink-600`, relleno rojo que crece con la curva por defecto
+ * Barra de XP (§3.3, Anexo E): pista `--bb-ink-4`, relleno rojo que crece con la curva por defecto
  * y la duración de recompensa, brillo que lo recorre al subir y destello al subir de nivel.
  */
 .xp {
@@ -13,16 +13,16 @@
   align-items: baseline;
   justify-content: space-between;
   gap: var(--bb-space-3);
-  font-family: var(--bb-font-mono);
-  font-size: var(--bb-font-size-xs);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
   font-variant-numeric: tabular-nums;
-  font-weight: var(--bb-weight-mono);
+  font-weight: var(--bb-weight-medium);
 }
 
 .level {
   color: var(--bb-text);
   font-weight: var(--bb-weight-bold);
-  letter-spacing: var(--bb-tracking-section);
+  letter-spacing: var(--bb-tracking-label);
   text-transform: uppercase;
 }
 
@@ -34,7 +34,7 @@
   position: relative;
   overflow: hidden;
   border-radius: var(--bb-radius-pill);
-  background-color: var(--bb-ink-600);
+  background-color: var(--bb-ink-4);
 }
 
 .md .track {

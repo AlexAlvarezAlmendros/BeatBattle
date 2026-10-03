@@ -7,7 +7,7 @@
 .site-header {
   position: sticky;
   top: var(--nav-gap);
-  z-index: var(--bb-z-island);
+  z-index: var(--bb-z-hud);
   isolation: isolate;
   width: var(--bb-layout-width);
   margin: var(--nav-gap) auto 0;
@@ -66,9 +66,9 @@
   padding: var(--bb-space-2) var(--bb-space-4);
   border-radius: var(--bb-radius-sm);
   color: var(--bb-text);
-  font-size: var(--bb-font-size-md);
-  font-weight: var(--bb-weight-regular);
-  line-height: var(--bb-leading-snug);
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-medium);
+  line-height: var(--bb-leading-label);
   text-decoration: none;
   white-space: nowrap;
   transition: background-color var(--bb-dur-fast) var(--bb-ease-out);
@@ -99,12 +99,12 @@
   /* 37 px: el alto de «Iniciar Sesión» del sello, que es el que da el alto de la isla (69 px). */
   min-height: calc(var(--nav-h) - 2 * var(--bb-space-4));
   padding: 0 var(--bb-space-5);
-  border: 1px solid var(--bb-line-button);
+  border: 1px solid var(--bb-line-strong);
   border-radius: var(--bb-radius-pill);
   color: var(--bb-text);
-  font-size: var(--bb-font-size-sm);
+  font-size: var(--bb-fs-sm);
   font-weight: var(--bb-weight-bold);
-  line-height: var(--bb-leading-snug);
+  line-height: var(--bb-leading-label);
   text-decoration: none;
   white-space: nowrap;
   transition: background-color var(--bb-dur-fast) var(--bb-ease-out);
@@ -122,7 +122,7 @@
 @media (max-width: 1120px) {
   .site-nav__link {
     padding-inline: var(--bb-space-2);
-    font-size: var(--bb-font-size-sm);
+    font-size: var(--bb-fs-sm);
   }
 }
 

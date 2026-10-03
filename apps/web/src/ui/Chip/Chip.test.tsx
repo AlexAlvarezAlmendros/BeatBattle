@@ -77,7 +77,7 @@ describe('Chip', () => {
 
   it('RNF-A11Y-09: en táctil, ChipGroup separa las filas con el token del hueco (44 px − alto del chip)', () => {
     // jsdom no evalúa media queries: se comprueba la regla tal cual está en la hoja.
-    const coarse = /@media \(pointer: coarse\) \{\s*\.group \{\s*row-gap: var\(--bb-chip-row-gap-touch\);/
+    const coarse = /@media \(pointer: coarse\) \{\s*\.group \{\s*row-gap: var\(--bb-space-5\);/
     expect(chipCss).toMatch(coarse)
   })
 })

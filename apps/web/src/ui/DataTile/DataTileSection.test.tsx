@@ -90,12 +90,12 @@ describe('DataTileSection: rótulo de sección con sus teselas', () => {
     const compact = mediaBlock(DATA_TILE_COMPACT_QUERY)
     expect(compact).toMatch(/\.list \{[^}]*grid-template-columns: 1fr;[^}]*gap: 0;/)
     expect(compact).toMatch(
-      /\.tile \{[^}]*flex-direction: row;[^}]*justify-content: space-between;[^}]*border: 0;[^}]*border-bottom: 1px solid var\(--bb-ink-800\);[^}]*border-radius: 0;[^}]*background-color: transparent;/,
+      /\.tile \{[^}]*flex-direction: row;[^}]*justify-content: space-between;[^}]*border: 0;[^}]*border-bottom: 1px solid var\(--bb-panel-2\);[^}]*border-radius: 0;[^}]*background-color: transparent;/,
     )
     expect(compact).toMatch(/\.tile:last-child \{[^}]*border-bottom: 0;/)
     expect(compact).toMatch(/\.icon \{[^}]*display: none;/)
     expect(compact).toMatch(/\.label \{[^}]*font-size: var\(--bb-font-size-tile-key\);/)
-    expect(compact).toMatch(/\.value \{[^}]*font-size: var\(--bb-font-size-sm\);/)
+    expect(compact).toMatch(/\.value \{[^}]*font-size: var\(--bb-fs-sm\);/)
     // La lista plegada no se pinta aunque `.list` sea una rejilla.
     expect(tileCss).toMatch(/\.list\[hidden\] \{[^}]*display: none;/)
   })

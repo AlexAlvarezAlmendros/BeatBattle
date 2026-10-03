@@ -11,7 +11,7 @@ export interface CardProps extends HTMLAttributes<HTMLElement> {
   /** Elemento raíz (por defecto `<article>`). */
   as?: 'article' | 'div' | 'section' | 'li'
   /**
-   * `glass` (por defecto): cristal como las tarjetas de la home del sello. `solid`: `--bb-ink-800` sin
+   * `glass` (por defecto): cristal como las tarjetas de la home del sello. `solid`: `--bb-panel-2` sin
    * desenfoque, para listas largas y calidad baja (§3.3).
    */
   surface?: CardSurface

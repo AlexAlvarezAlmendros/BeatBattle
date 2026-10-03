@@ -127,40 +127,43 @@ export function focusRing(locator: Locator) {
       outlineStyle: style.outlineStyle,
       outlineWidth: style.outlineWidth,
       outlineColor: style.outlineColor,
+      outlineOffset: style.outlineOffset,
       boxShadow: style.boxShadow,
     }
   })
 }
 
 /**
- * Parte interior del halo de foco (`--bb-focus-halo`: 6 px de `--bb-red-wash`) tal y como la serializa
- * `getComputedStyle`. Ninguna sombra de reposo la lleva (el CTA ya tiene `--bb-shadow-cta`), así que
+ * Halo del foco genérico (`--bb-focus-halo`: 10 px de rojo al 35 %, §3.2) tal y como lo serializa
+ * `getComputedStyle`. Ninguna sombra de reposo lo lleva (en la arena solo hay sombras duras), así que
  * comprobar que aparece demuestra que el foco pinta el halo, no que haya una sombra cualquiera.
  */
-export const FOCUS_HALO_SHADOW = 'rgba(255, 0, 60, 0.1) 0px 0px 0px 6px'
+export const FOCUS_HALO_SHADOW = 'rgba(255, 0, 60, 0.35) 0px 0px 0px 10px'
 
 /**
- * Comprueba el foco visible de §2.17 (`RNF-A11Y-01`): el elemento tiene el foco, es `:focus-visible` y
- * pinta el anillo rojo de 2 px (`--bb-focus-color`, `#ff003c`) con su halo (`--bb-focus-halo`).
+ * Comprueba el foco genérico de §3.3 (`RNF-A11Y-01`): el elemento tiene el foco, es `:focus-visible` y
+ * pinta el contorno blanco de 3 px (`--bb-stroke-cursor`) a 4 px (`--bb-cursor-gap`) con su halo
+ * (`--bb-focus-halo`). Los menús de juego (`[data-cursor]`) usan el cursor, no este contorno.
  */
 export async function expectVisibleFocus(locator: Locator): Promise<void> {
   await expect(locator).toBeFocused()
   const ring = await focusRing(locator)
   expect(ring.focusVisible).toBe(true)
   expect(ring.outlineStyle).toBe('solid')
-  expect(ring.outlineWidth).toBe('2px')
-  expect(ring.outlineColor).toBe('rgb(255, 0, 60)')
-  // La sombra tiene transición (el CTA pasa de su halo de reposo al de foco): se espera a que asiente.
+  expect(ring.outlineWidth).toBe('3px')
+  expect(ring.outlineOffset).toBe('4px')
+  expect(ring.outlineColor).toBe('rgb(255, 255, 255)')
+  // La sombra puede tener transición: se espera a que asiente.
   await expect.poll(async () => (await focusRing(locator)).boxShadow).toContain(FOCUS_HALO_SHADOW)
 }
 
 /**
- * Ancestro que recorta el anillo de foco de un elemento (contorno de 2 px a 2 px de distancia: 4 px
+ * Ancestro que recorta el anillo de foco de un elemento (contorno de 3 px a 4 px de distancia: 7 px
  * alrededor de la caja), o `null` si se ve entero. Mira `overflow`, `clip-path` y `contain: paint`.
  */
 export function focusRingClippedBy(locator: Locator): Promise<string | null> {
   return locator.evaluate((element) => {
-    const RING = 4
+    const RING = 7
     const box = element.getBoundingClientRect()
     const ring = {
       left: box.left - RING,

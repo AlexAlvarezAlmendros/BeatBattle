@@ -10,14 +10,14 @@
   align-items: center;
   gap: var(--bb-space-1);
   padding: var(--bb-space-chip);
-  border: 1px solid var(--bb-ink-600);
+  border: 1px solid var(--bb-ink-4);
   border-radius: var(--bb-radius-pill);
   background-color: transparent;
   color: var(--bb-text-3);
-  font-family: var(--bb-font-body);
-  font-size: var(--bb-font-size-xs);
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-xs);
   font-weight: var(--bb-weight-medium);
-  line-height: var(--bb-leading-snug);
+  line-height: var(--bb-leading-label);
   white-space: nowrap;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -92,20 +92,20 @@
 
 .chip:focus-visible,
 .chip[data-force-state="focus"] {
-  outline: var(--bb-focus-width) solid var(--bb-focus-color);
-  outline-offset: var(--bb-focus-offset);
+  outline: var(--bb-stroke-cursor) solid var(--bb-white);
+  outline-offset: var(--bb-cursor-gap);
   box-shadow: var(--bb-focus-halo);
 }
 
 .chip:disabled {
-  border-color: var(--bb-ink-700);
+  border-color: var(--bb-ink-3);
   color: var(--bb-text-4);
   box-shadow: none;
   cursor: not-allowed;
 }
 
 .chip[aria-pressed="true"]:disabled::after {
-  background-color: var(--bb-ink-600);
+  background-color: var(--bb-ink-4);
 }
 
 @media (max-width: 480px) {
@@ -124,7 +124,7 @@
 /* Táctil: filas separadas para que las áreas de 44 px no se solapen (RNF-A11Y-09). */
 @media (pointer: coarse) {
   .group {
-    row-gap: var(--bb-chip-row-gap-touch);
+    row-gap: var(--bb-space-5); /* 44 px de objetivo − ~26 px del chip, redondeado a 20 px (RNF-A11Y-09) */
   }
 }
 

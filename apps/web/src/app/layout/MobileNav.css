@@ -112,7 +112,7 @@
   width: var(--bb-space-11);
   height: var(--bb-space-11);
   padding: 0;
-  border: 1px solid var(--bb-ink-600);
+  border: 1px solid var(--bb-ink-4);
   border-radius: var(--bb-radius-sm);
   background: transparent;
   color: var(--bb-text-3);
@@ -147,9 +147,9 @@
   min-height: var(--bb-space-11);
   padding: var(--bb-space-nav-link-y) var(--bb-space-6);
   color: var(--bb-text-3);
-  font-size: var(--bb-font-size-md);
+  font-size: var(--bb-fs-md);
   font-weight: var(--bb-weight-semibold);
-  letter-spacing: var(--bb-tracking-nav);
+  letter-spacing: var(--bb-tracking-label);
   text-decoration: none;
   text-transform: uppercase;
   transition:
@@ -200,7 +200,7 @@
 /* Los enlaces ocupan todo el ancho del panel, que recorta lo que sale por los lados (`overflow-y`): el
    anillo de foco va por dentro para verse entero. */
 .mobile-nav__link:focus-visible {
-  outline-offset: calc(-1 * var(--bb-focus-width));
+  outline-offset: calc(-1 * var(--bb-stroke-cursor));
 }
 
 /* ── Pie del panel: redes del sello y «Entrar» ────────────────────────────────────────────── */
@@ -224,9 +224,9 @@
   justify-content: center;
   width: var(--bb-space-11);
   height: var(--bb-space-11);
-  border: 1px solid var(--bb-ink-800);
+  border: 1px solid var(--bb-panel-2);
   border-radius: var(--bb-radius-sm);
-  background-color: var(--bb-ink-950);
+  background-color: var(--bb-panel);
   color: var(--bb-text-3);
   transition:
     color var(--bb-dur-fast) var(--bb-ease-out),
@@ -250,7 +250,7 @@
   align-items: center;
   justify-content: center;
   min-height: var(--bb-space-11);
-  border: 1px solid var(--bb-line-button);
+  border: 1px solid var(--bb-line-strong);
   border-radius: var(--bb-radius-pill);
   color: var(--bb-text);
   font-weight: var(--bb-weight-bold);

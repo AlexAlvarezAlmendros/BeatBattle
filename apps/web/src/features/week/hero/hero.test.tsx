@@ -169,11 +169,11 @@ describe('MarqueeBand: banda del sello', () => {
     expect(band.querySelector('[aria-hidden="true"].marquee__group')).toBeNull()
 
     expect(firstWord()).toBe('Uno')
-    act(() => vi.advanceTimersByTime(loop.tickerStep - 1))
+    act(() => vi.advanceTimersByTime(loop.chronicle - 1))
     expect(firstWord()).toBe('Uno')
     act(() => vi.advanceTimersByTime(1))
     expect(visibleWords()).toEqual(['Dos', 'Tres', 'Uno'])
-    act(() => vi.advanceTimersByTime(loop.tickerStep * 2))
+    act(() => vi.advanceTimersByTime(loop.chronicle * 2))
     expect(firstWord()).toBe('Uno')
     expect(within(screen.getByRole('marquee')).getAllByRole('listitem')).toHaveLength(ITEMS.length)
   })
@@ -184,7 +184,7 @@ describe('MarqueeBand: banda del sello', () => {
     render(<MarqueeBand items={ITEMS} label="Teletipo" pauseLabel="Pausar" />)
     const list = within(screen.getByRole('marquee')).getByRole('list')
     const items = within(list).getAllByRole('listitem')
-    act(() => vi.advanceTimersByTime(loop.tickerStep))
+    act(() => vi.advanceTimersByTime(loop.chronicle))
     expect(firstWord()).toBe('Dos')
     expect(within(screen.getByRole('marquee')).getByRole('list')).toBe(list)
     const after = within(list).getAllByRole('listitem')
@@ -199,10 +199,10 @@ describe('MarqueeBand: banda del sello', () => {
     render(<MarqueeBand items={ITEMS} label="Teletipo" pauseLabel="Pausar" />)
     const band = screen.getByRole('marquee')
     fireEvent.mouseEnter(band)
-    act(() => vi.advanceTimersByTime(loop.tickerStep * 3))
+    act(() => vi.advanceTimersByTime(loop.chronicle * 3))
     expect(firstWord()).toBe('Uno')
     fireEvent.mouseLeave(band)
-    act(() => vi.advanceTimersByTime(loop.tickerStep))
+    act(() => vi.advanceTimersByTime(loop.chronicle))
     expect(firstWord()).toBe('Dos')
   })
 
@@ -217,19 +217,19 @@ describe('MarqueeBand: banda del sello', () => {
     await user.click(pauseButton())
     await user.unhover(screen.getByRole('marquee'))
     expect(screen.getByRole('marquee')).toHaveAttribute('data-paused', 'true')
-    act(() => vi.advanceTimersByTime(loop.tickerStep * 3))
+    act(() => vi.advanceTimersByTime(loop.chronicle * 3))
     expect(firstWord()).toBe('Uno')
 
     // Reanudar con teclado.
     pauseButton().focus()
     await user.keyboard('{Enter}')
     expect(pauseButton()).toHaveAttribute('aria-pressed', 'false')
-    act(() => vi.advanceTimersByTime(loop.tickerStep))
+    act(() => vi.advanceTimersByTime(loop.chronicle))
     expect(firstWord()).toBe('Dos')
 
     // Y otra vez en pausa con Espacio.
     await user.keyboard(' ')
-    act(() => vi.advanceTimersByTime(loop.tickerStep * 2))
+    act(() => vi.advanceTimersByTime(loop.chronicle * 2))
     expect(firstWord()).toBe('Dos')
   })
 

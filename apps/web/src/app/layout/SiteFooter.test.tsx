@@ -103,7 +103,7 @@ describe('SiteFooter.css: maqueta del pie del sello (RD-VIS-02)', () => {
 
   it('RD-VIS-02: borde de tarjeta al 8 % (el `.glass` del pie) y enlaces con interlineado de etiqueta', () => {
     expect(rule('.site-footer__card')).toMatch(/border: 1px solid var\(--bb-line\);/)
-    expect(rule('.site-footer__link')).toMatch(/line-height: var\(--bb-leading-snug\);/)
+    expect(rule('.site-footer__link')).toMatch(/line-height: var\(--bb-leading-label\);/)
   })
 
   it('RNF-A11Y-09: en táctil los enlaces del pie siguen midiendo 44 px', () => {

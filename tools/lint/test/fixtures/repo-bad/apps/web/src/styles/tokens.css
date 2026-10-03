@@ -1,6 +1,7 @@
 /* Fixture: tokens.css es la fuente de verdad y queda fuera del lint aunque tenga literales. */
 :root {
   --bb-red: #ff003c;
+  --bb-black: #000000;
   --bb-dur-fast: 150ms;
-  --bb-radius-md: 12px;
+  --bb-cut: 14px;
 }

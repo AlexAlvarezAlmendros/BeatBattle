@@ -38,7 +38,7 @@
 }
 
 .solid {
-  background-color: var(--bb-ink-800);
+  background-color: var(--bb-panel-2);
 }
 
 .header {
@@ -51,9 +51,9 @@
 .title {
   margin: 0;
   font-family: var(--bb-font-display);
-  font-size: var(--bb-font-size-xl);
+  font-size: var(--bb-fs-xl);
   font-weight: var(--bb-weight-extrabold);
-  line-height: var(--bb-leading-snug);
+  line-height: var(--bb-leading-label);
 }
 
 .close {

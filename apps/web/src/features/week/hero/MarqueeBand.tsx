@@ -62,7 +62,7 @@ function MarqueeList({ items, hidden = false, offset, listRef }: MarqueeListProp
  * - Con movimiento: desplazamiento continuo (`--bb-loop-marquee`). Las copias del bucle llevan
  *   `aria-hidden`: el lector de pantalla lee la lista una vez.
  * - Con «reducir movimiento» (Anexo E): lista estática que rota una posición cada 5 s
- *   (`loop.tickerStep`) con un fundido de opacidad. La rotación es solo visual: no se vuelve a montar
+ *   (`loop.chronicle`) con un fundido de opacidad. La rotación es solo visual: no se vuelve a montar
  *   nada.
  * - Pausa (WCAG 2.2.2 «Pausar, detener, ocultar», §2.17): en los dos modos, con el ratón encima y con el
  *   botón de pausa (`aria-pressed`), que funciona con teclado y en táctil (44 × 44 px). La pausa del
@@ -82,7 +82,7 @@ export function MarqueeBand({ items, label, pauseLabel, className }: MarqueeBand
 
   useEffect(() => {
     if (!reduced || halted || items.length < 2) return
-    const timer = window.setInterval(() => setOffset((value) => (value + 1) % items.length), loop.tickerStep)
+    const timer = window.setInterval(() => setOffset((value) => (value + 1) % items.length), loop.chronicle)
     return () => window.clearInterval(timer)
   }, [reduced, halted, items.length])
 

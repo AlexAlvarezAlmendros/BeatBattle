@@ -22,16 +22,16 @@
   gap: var(--bb-space-1);
   min-width: 0;
   padding: var(--bb-space-tile-y) var(--bb-space-3);
-  border: 1px solid var(--bb-ink-700);
+  border: 1px solid var(--bb-ink-3);
   border-radius: var(--bb-radius-sm);
-  background-color: var(--bb-ink-850);
+  background-color: var(--bb-panel);
   text-align: center;
   transition: border-color var(--bb-dur-fast) var(--bb-ease-out);
 }
 
 .tile:hover,
 .tile[data-force-state="hover"] {
-  border-color: var(--bb-ink-600);
+  border-color: var(--bb-ink-4);
 }
 
 .term {
@@ -43,15 +43,15 @@
 
 .icon {
   color: var(--bb-red);
-  font-size: var(--bb-font-size-xs);
+  font-size: var(--bb-fs-xs);
 }
 
 .label {
   color: var(--bb-text-3);
-  font-size: var(--bb-font-size-2xs);
+  font-size: var(--bb-fs-xs);
   /* Interlineado de etiqueta (el `normal` del sello), no el de párrafo del cuerpo. */
-  line-height: var(--bb-leading-snug);
-  letter-spacing: var(--bb-tracking-meta);
+  line-height: var(--bb-leading-label);
+  letter-spacing: var(--bb-tracking-label);
   text-transform: uppercase;
 }
 
@@ -61,14 +61,14 @@
   min-height: 1.2em;
   margin: 0;
   color: var(--bb-text);
-  font-size: var(--bb-font-size-md);
+  font-size: var(--bb-fs-md);
   font-weight: var(--bb-weight-bold);
-  line-height: var(--bb-leading-snug);
+  line-height: var(--bb-leading-label);
   overflow-wrap: anywhere;
 }
 
 .mono {
-  font-family: var(--bb-font-mono);
+  font-family: var(--bb-font-num);
   font-variant-numeric: tabular-nums;
 }
 
@@ -111,7 +111,7 @@
 }
 
 .chevron {
-  font-size: var(--bb-font-size-2xs);
+  font-size: var(--bb-fs-xs);
   transition: rotate var(--bb-dur-fast) var(--bb-ease-out);
 }
 
@@ -138,7 +138,7 @@
     gap: var(--bb-space-2);
     padding: var(--bb-space-tile-y) 0;
     border: 0;
-    border-bottom: 1px solid var(--bb-ink-800);
+    border-bottom: 1px solid var(--bb-panel-2);
     border-radius: 0;
     background-color: transparent;
     text-align: start;
@@ -161,7 +161,7 @@
   }
 
   .value {
-    font-size: var(--bb-font-size-sm);
+    font-size: var(--bb-fs-sm);
     text-align: end;
   }
 }

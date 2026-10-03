@@ -27,7 +27,7 @@
 }
 
 .solid {
-  background-color: var(--bb-ink-800);
+  background-color: var(--bb-panel-2);
   box-shadow: var(--bb-shadow-card);
 }
 
@@ -70,14 +70,14 @@
 .card:hover,
 .card[data-force-state="hover"],
 .card:focus-within {
-  border-color: var(--bb-line-lit);
+  border-color: var(--bb-line-strong);
 }
 
 .card:focus-visible,
 .card[data-force-state="focus"] {
-  border-color: var(--bb-line-lit);
-  outline: var(--bb-focus-width) solid var(--bb-focus-color);
-  outline-offset: var(--bb-focus-offset);
+  border-color: var(--bb-line-strong);
+  outline: var(--bb-stroke-cursor) solid var(--bb-white);
+  outline-offset: var(--bb-cursor-gap);
 }
 
 /*

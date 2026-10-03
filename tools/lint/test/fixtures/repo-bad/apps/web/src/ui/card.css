@@ -11,10 +11,14 @@
 .card:hover {
   animation: pulse 1.2s cubic-bezier(0.2, 0, 0, 1) infinite;
   filter: drop-shadow(0 0 4px var(--bb-red));
+  clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%);
+  transform: rotate(-7deg);
+  background: var(--bb-glass-card);
 }
 
 .local {
   --card-delay: 0.3s;
   outline-color: rgb(from var(--bb-black) 255 0 0);
   mask-image: linear-gradient(black, transparent);
+  font-family: "Montserrat", sans-serif;
 }

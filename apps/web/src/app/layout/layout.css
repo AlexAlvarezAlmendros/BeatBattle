@@ -3,7 +3,7 @@
  * llevan su propio CSS junto a su componente.
  *
  * Capas (§3.2): fondo (orbes, y el Escenario en la Fase 1) en `--bb-z-stage`, contenido y pie en
- * `--bb-z-content` y la isla por encima, en `--bb-z-island`.
+ * `--bb-z-content` y la isla por encima, en `--bb-z-hud`.
  */
 
 .site-main,
@@ -33,4 +33,36 @@
   width: 100vw;
   margin-top: calc(-1 * (var(--nav-flow) + var(--site-main-pad, 0px)));
   margin-inline: calc(50% - 50vw);
+}
+
+/*
+ * Medidas de la isla del sello (eran tokens hasta la v0.6, que los retira: §3.2). Viven aquí, con la
+ * isla, hasta que el marco de juego (0.23) la sustituya y la 0.27 borre este fichero:
+ * - `--nav-gap`, `--nav-h`, `--nav-flow`: separación, alto (baja en ≤ 992 y ≤ 600 px) y espacio en flujo.
+ * - `--nav-obscured`: lo que la isla sticky (y el logo que cuelga de ella) taparía al desplazarse para
+ *   enseñar un control enfocado o un ancla (estaba en global.css). 128 px en escritorio y 124 en ≤ 992 px:
+ *   el logo de 120 px girado −10° baja hasta y = 119 (117); con el anillo de foco y un poco de aire.
+ */
+:root {
+  --nav-gap: 16px;
+  --nav-h: 69px;
+  --nav-flow: calc(var(--nav-gap) + var(--nav-h));
+  --nav-obscured: 128px;
+}
+
+@media (max-width: 992px) {
+  :root {
+    --nav-h: 62px;
+    --nav-obscured: 124px;
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --nav-h: 54px;
+  }
+}
+
+:where(.site-main, .site-footer) :is(a[href], button, input, select, textarea, summary, [tabindex], [id]) {
+  scroll-margin-top: var(--nav-obscured);
 }

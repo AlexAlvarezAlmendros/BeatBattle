@@ -5,11 +5,11 @@
   gap: var(--bb-space-2);
   margin: 0;
   color: var(--bb-text-3);
-  font-family: var(--bb-font-body);
-  font-size: var(--bb-font-size-xs);
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-xs);
   font-weight: var(--bb-weight-semibold);
-  line-height: var(--bb-leading-snug);
-  letter-spacing: var(--bb-tracking-section);
+  line-height: var(--bb-leading-label);
+  letter-spacing: var(--bb-tracking-label);
   text-transform: uppercase;
 }
 

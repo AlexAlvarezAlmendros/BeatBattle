@@ -23,7 +23,7 @@ export interface XpBarProps {
 }
 
 /**
- * Barra de XP (§3.3): pista `--bb-ink-600`, relleno rojo; al subir, un brillo recorre el relleno; al
+ * Barra de XP (§3.3): pista `--bb-ink-4`, relleno rojo; al subir, un brillo recorre el relleno; al
  * subir de nivel, se llena, destella una vez y vuelve a empezar desde cero con el nivel nuevo. Con
  * «reducir movimiento», solo el relleno (Anexo E). Es una `progressbar` con sus valores.
  */

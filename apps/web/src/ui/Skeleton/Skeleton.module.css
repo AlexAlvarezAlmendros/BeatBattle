@@ -11,13 +11,13 @@
   display: block;
   width: 100%;
   overflow: hidden;
-  background-color: var(--bb-ink-800);
+  background-color: var(--bb-panel-2);
 }
 
 .skeleton::after {
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(110deg, transparent 8%, var(--bb-ink-600) 18%, transparent 33%);
+  background-image: linear-gradient(110deg, transparent 8%, var(--bb-ink-4) 18%, transparent 33%);
   content: "";
   transform: translateX(-100%);
   animation: shimmer var(--bb-loop-shimmer) var(--bb-ease-in-out) infinite;
