@@ -1,0 +1,58 @@
+/*
+ * Pegatina OTP (§3.1 «La firma», §3.3): imagen generada en el build, girada −7° (`--bb-tilt-sticker`),
+ * nunca recoloreada ni deformada. Tamaños de §3.1: lockup de la pantalla de título 120 px de ancho,
+ * del menú 104 px (62 px en móvil); en la barra de controles y la ceremonia, 30 px de alto (24 px en
+ * móvil). Margen mínimo alrededor: la altura de su «O» (≈ un cuarto de su alto).
+ */
+.slap {
+  display: inline-block;
+  flex: none;
+  transform: rotate(var(--bb-tilt-sticker));
+  line-height: 0;
+}
+
+.slap img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.title {
+  width: 120px;
+}
+
+.menu {
+  width: 104px;
+}
+
+.bar {
+  width: auto;
+}
+
+.bar img {
+  width: auto;
+  height: 30px;
+}
+
+@media (max-width: 720px) {
+  .title,
+  .menu {
+    width: 62px;
+  }
+
+  .bar img {
+    height: 24px;
+  }
+}
+
+/* Enlace: el objetivo táctil llega a 44 px sin mover la pegatina (RNF-A11Y-09). */
+.link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--bb-target);
+  min-height: var(--bb-target);
+  color: inherit;
+  text-decoration: none;
+}
