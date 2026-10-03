@@ -1,4 +1,4 @@
-import { type KeyboardEvent, useCallback, useEffect, useId, useRef, useState } from 'react'
+import { type FocusEvent, type KeyboardEvent, useCallback, useEffect, useId, useRef, useState } from 'react'
 import { isCharacterKey, isEditableTarget, listNavigation, wrapIndex } from './roving'
 import { type GroupLabel, type ItemHandlers, type RovingItemBaseProps, useRovingCore } from './useRoving'
 
@@ -30,6 +30,7 @@ export interface RovingTabListProps extends GroupLabel {
   'aria-orientation': 'horizontal'
   'data-cursor-group': ''
   onKeyDown: (event: KeyboardEvent<HTMLElement>) => void
+  onBlur: (event: FocusEvent<HTMLElement>) => void
 }
 
 export interface RovingTabProps<E extends HTMLElement> extends RovingItemBaseProps<E> {
@@ -99,10 +100,31 @@ export function useRovingTabs(options: RovingTabsOptions): RovingTabs {
   })
   const { moveTo, elements } = core
 
-  // Si la selección cambia desde fuera (controlada), el cursor la sigue sin robar el foco.
+  /*
+   * Si la selección cambia desde fuera (controlada, o Q/E), el cursor la sigue sin robar el foco. Solo
+   * cuando **cambia**: el cursor y la selección pueden separarse a propósito, porque el cursor pasa por
+   * las deshabilitadas sin elegirlas; devolverlo a la elegida en cada render dejaba el foco real en la
+   * deshabilitada y la siguiente flecha se calculaba desde la elegida (se atascaba o se saltaba una).
+   */
+  const syncedSelection = useRef(selectedIndex)
   useEffect(() => {
-    if (core.activeIndex !== selectedIndex) moveTo(selectedIndex, { focus: false })
-  }, [selectedIndex, core.activeIndex, moveTo])
+    if (syncedSelection.current === selectedIndex) return
+    syncedSelection.current = selectedIndex
+    moveTo(selectedIndex, { focus: false })
+  }, [selectedIndex, moveTo])
+
+  /*
+   * Al salir del grupo con el cursor en una deshabilitada, la parada de tabulación (y el cursor que se ve
+   * fuera del grupo, §3.3) vuelven a la pestaña elegida.
+   */
+  const onBlur = useCallback(
+    (event: FocusEvent<HTMLElement>) => {
+      const next = event.relatedTarget
+      if (next instanceof Node && event.currentTarget.contains(next)) return
+      moveTo(selectedRef.current, { focus: false })
+    },
+    [moveTo],
+  )
 
   const select = useCallback(
     (index: number, { focus = false }: { focus?: boolean } = {}) => {
@@ -148,6 +170,7 @@ export function useRovingTabs(options: RovingTabsOptions): RovingTabs {
       'aria-orientation': 'horizontal',
       'data-cursor-group': '',
       onKeyDown: core.onKeyDown,
+      onBlur,
     }),
     getTabProps: <E extends HTMLElement = HTMLElement>(index: number, handlers?: ItemHandlers<E>) => ({
       ...(core.getItemBaseProps(index, {

@@ -93,6 +93,63 @@ describe('useRovingTabs (§3.3 «Pestañas», §3.8.13, RD-MOT-05)', () => {
     expect(tabs()[0]).toHaveAttribute('aria-selected', 'true')
   })
 
+  it('RD-MOT-05: las flechas pasan por una pestaña deshabilitada sin elegirla, en medio y al final, y dan la vuelta', async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    // 0 Ronda justa · 1 Recién subidas (deshabilitada) · 2 Aleatorio · 3 Selladas (deshabilitada)
+    const NAMES = ['Ronda justa', 'Recién subidas', 'Aleatorio', 'Selladas']
+    function WithDisabled() {
+      const t = useRovingTabs({
+        count: NAMES.length,
+        onChange,
+        globalKeys: false,
+        isDisabled: (index) => index === 1 || index === 3,
+      })
+      return (
+        <>
+          <div {...t.getTabListProps({ 'aria-label': 'Orden' })}>
+            {NAMES.map((name, index) => (
+              <button key={name} type="button" {...t.getTabProps<HTMLButtonElement>(index)}>
+                {name}
+              </button>
+            ))}
+          </div>
+          <button type="button">Rejilla</button>
+        </>
+      )
+    }
+    render(<WithDisabled />)
+    const focusedIndex = () => tabs().findIndex((tab) => tab === document.activeElement)
+    const stop = () => tabs().findIndex((tab) => tab.tabIndex === 0)
+    const selected = () => tabs().findIndex((tab) => tab.getAttribute('aria-selected') === 'true')
+
+    tabs()[0]!.focus()
+    // → entra en la deshabilitada de en medio (cursor, no selección) y sigue hasta la siguiente.
+    await user.keyboard('{ArrowRight}')
+    expect([focusedIndex(), stop(), selected()]).toEqual([1, 1, 0])
+    await user.keyboard('{ArrowRight}')
+    expect([focusedIndex(), stop(), selected()]).toEqual([2, 2, 2])
+    // → hasta la deshabilitada del final y vuelta a la primera (el bucle sigue activo).
+    await user.keyboard('{ArrowRight}')
+    expect([focusedIndex(), stop(), selected()]).toEqual([3, 3, 2])
+    await user.keyboard('{ArrowRight}')
+    expect([focusedIndex(), stop(), selected()]).toEqual([0, 0, 0])
+    // ← desde la primera va a la del final y, después, a la anterior a ella (no se la salta).
+    await user.keyboard('{ArrowLeft}')
+    expect([focusedIndex(), stop(), selected()]).toEqual([3, 3, 0])
+    await user.keyboard('{ArrowLeft}')
+    expect([focusedIndex(), stop(), selected()]).toEqual([2, 2, 2])
+    expect(onChange.mock.calls.map(([index]) => index)).toEqual([2, 0, 2])
+
+    // Si el foco sale del grupo estando en una deshabilitada, la parada vuelve a la elegida.
+    await user.keyboard('{ArrowRight}')
+    expect([focusedIndex(), stop(), selected()]).toEqual([3, 3, 2])
+    await user.tab()
+    expect(screen.getByRole('button', { name: 'Rejilla' })).toHaveFocus()
+    expect(stop()).toBe(2)
+    expect(tabs()[2]).toHaveAttribute('data-cursor-active', 'true')
+  })
+
   it('clic en una pestaña la elige; controlada, sigue al valor de fuera', async () => {
     const user = userEvent.setup()
     function Controlled() {
