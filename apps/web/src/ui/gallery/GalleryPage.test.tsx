@@ -1,7 +1,7 @@
 import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
 import { useToasts } from '../Toast'
 import { COMPONENT_ANCHORS } from './anchors'
@@ -30,8 +30,14 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-// El cuerpo de la galería (todos los componentes y el layout) se importa aparte: con todo el monorepo
-// en paralelo, la primera importación pasa de los 5 s por defecto. Mismo margen que `renderGallery`.
+// El cuerpo de la galería (todos los componentes y el layout) se importa aparte. Solo, la primera
+// importación tarda ~3 s; con todo el monorepo en paralelo (o en un runner de CI con pocos núcleos)
+// llegó a pasar de 15 s y el test fallaba por tiempo. Se precargan las secciones una vez antes de los
+// tests, con su propio margen, para que el tiempo de los tests mida la galería y no el import.
+beforeAll(async () => {
+  await Promise.all(GALLERY_SECTIONS.map((section) => section.load()))
+}, 120_000)
+
 describe('galería /dev/galeria (0.9, 0.22, 0.25)', { timeout: 15_000 }, () => {
   it('la cabecera (título, ajustes e índice) sale al momento, sin esperar a los componentes', () => {
     render(
