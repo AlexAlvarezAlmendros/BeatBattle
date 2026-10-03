@@ -1,22 +1,23 @@
 import { PlaceholderPage } from '../../app/PlaceholderPage'
 import { t } from '../../i18n'
 import { GameLogo } from '../../ui/GameLogo'
-import { OtpSlap } from '../../ui/OtpSlap'
+import { TitleLockup } from '../../ui/TitleLockup'
 import styles from './AuthPages.module.css'
 
 /*
- * Pantallas de autenticación (§2.3, §3.8.14, Fase 2): en el marco simple, como pantallas de título
- * —«CONTINUAR PARTIDA» (entrar) y «NUEVO JUGADOR» (registro)— con el logo y su firma «by [OTP.]». Van
- * juntas en un mismo trozo: quien abre una suele pasar a otra (entrar → recuperar, registro →
- * verificar). Provisionales.
+ * Pantallas de autenticación (§2.3, §3.8.14, Fase 2): en el marco simple, como la pantalla de título
+ * (maqueta `00-titulo`) —«CONTINUAR PARTIDA» (entrar) y «NUEVO JUGADOR» (registro) en la placa del
+ * HUD—, con el logo y su lockup «TORNEO SEMANAL DE PRODUCTORES by [OTP.]» a la izquierda, sobre los
+ * rayos, y el panel opaco a la derecha. Van juntas en un mismo trozo: quien abre una suele pasar a otra
+ * (entrar → recuperar, registro → verificar). Provisionales.
  */
 
-/** El logo del juego con la firma del sello (§3.1 «La firma»: autenticación). */
-function TitleLockup() {
+/** El logo del juego con el mismo lockup que el menú (§3.1 «La firma»: autenticación). */
+function TitlePiece() {
   return (
-    <div className={styles.lockup}>
-      <GameLogo compact className={styles.logo} />
-      <OtpSlap size="menu" />
+    <div className={styles.title}>
+      <GameLogo className={styles.logo} />
+      <TitleLockup className={styles.lockup} />
     </div>
   )
 }
@@ -28,9 +29,9 @@ export function SignInPage() {
       title={t('pages.signIn.title')}
       kicker={t('frame.plates.signIn')}
       summary={t('pages.signIn.summary')}
-    >
-      <TitleLockup />
-    </PlaceholderPage>
+      piece={<TitlePiece />}
+      wide
+    />
   )
 }
 
@@ -41,9 +42,9 @@ export function SignUpPage() {
       title={t('pages.signUp.title')}
       kicker={t('frame.plates.signUp')}
       summary={t('pages.signUp.summary')}
-    >
-      <TitleLockup />
-    </PlaceholderPage>
+      piece={<TitlePiece />}
+      wide
+    />
   )
 }
 

@@ -42,6 +42,9 @@ describe('plantilla de pantalla interior (0.26, §3.8.14)', () => {
     renderAt('/semanas')
     const main = screen.getByRole('main')
     expect(within(main).getByRole('heading', { level: 1, name: 'Semanas' })).toHaveClass('bb-display')
+    // Con placa de título en el HUD, el título se ve una sola vez: el <h1> queda para los lectores de
+    // pantalla en escritorio (lo oculta el CSS con `data-title-in-hud`).
+    expect(main.querySelector('[data-title-in-hud]')).not.toBeNull()
     expect(within(main).getByText('Aquí irá el archivo.')).toBeInTheDocument()
     expect(within(main).getByText(t('screen.underConstruction'))).toHaveAttribute('data-stamp', 'red')
     const back = within(main).getByRole('link', { name: t('screen.backToMenu') })
@@ -60,11 +63,16 @@ describe('plantilla de pantalla interior (0.26, §3.8.14)', () => {
     expect(plate).toHaveTextContent(t('pages.notFound.plate'))
     expect(plate).not.toHaveTextContent(t('frame.plates.legalTitle'))
     const main = screen.getByRole('main')
+    // El titular es el momento de juego, con «Te has perdido…» de subtítulo (§3.8.11).
     expect(
-      within(main).getByRole('heading', { level: 1, name: t('pages.notFound.title') }),
+      within(main).getByRole('heading', { level: 1, name: t('pages.notFound.plate') }),
     ).toBeInTheDocument()
+    expect(within(main).getByText(t('pages.notFound.subtitle'))).toBeInTheDocument()
     expect(main.querySelectorAll('figure kbd[data-key]')).toHaveLength(16)
     expect(main.querySelector('figure [aria-hidden="true"]')).not.toBeNull()
+    // El pad es la pieza de la cuña, con «Volver al menú» debajo; el título va en la placa del HUD.
+    expect(main.querySelector('[data-title-in-hud]')).not.toBeNull()
+    expect(within(main).getByRole('link', { name: t('screen.backToMenu') })).toHaveAttribute('href', '/')
     await act(async () => {})
   })
 })

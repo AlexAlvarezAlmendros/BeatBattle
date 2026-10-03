@@ -37,6 +37,12 @@ export interface ScreenConfig {
    * su firma. Autenticación, admin, legales y herramientas de desarrollo.
    */
   simple?: boolean
+  /**
+   * Estallido de rayos detrás de la pantalla (§3.2 «Texturas»: detrás del logo, del VS y del podio).
+   * Por defecto, sí; `false` en las pantallas de texto sin pieza que lo tape (la galería), para que
+   * ningún texto quede sobre los rayos (`RD-VIS-05`).
+   */
+  rays?: boolean
 }
 
 /** Menú principal (home): cuña a la derecha y las teclas del menú. */

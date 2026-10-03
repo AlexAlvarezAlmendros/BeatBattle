@@ -12,7 +12,11 @@ export const devRoutes: RouteObject[] = import.meta.env.DEV
         path: 'dev/galeria',
         handle: {
           access: 'public',
-          screen: simpleScreen({ kicker: 'frame.plates.dev', title: 'dev.gallery.title' }, ['back', 'sound']),
+          // Sin rayos: la galería es texto sobre negro de arriba abajo (`RD-VIS-05`).
+          screen: {
+            ...simpleScreen({ kicker: 'frame.plates.dev', title: 'dev.gallery.title' }, ['back', 'sound']),
+            rays: false,
+          },
         },
         lazy: async () => ({ Component: (await import('../ui/gallery/GalleryPage')).GalleryPage }),
       },

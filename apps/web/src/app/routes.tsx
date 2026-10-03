@@ -174,7 +174,10 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'como-funciona',
-              handle: handle('public', interior('howItWorks', 'pages.howItWorks.title')),
+              handle: handle(
+                'public',
+                interior('howItWorks', 'pages.howItWorks.title', ['choose', 'enter', 'back', 'sound']),
+              ),
               lazy: page(
                 () => import('../features/week/HowItWorksPage'),
                 (m) => m.HowItWorksPage,

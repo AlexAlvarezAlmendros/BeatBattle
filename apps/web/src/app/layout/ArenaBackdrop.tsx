@@ -21,17 +21,18 @@ export const MOBILE_QUERY = '(max-width: 720px)'
  * - **Estallido de rayos** detrás del logo y **viñeta** en el borde. Los rayos son espectáculo
  *   (`data-fx`): el modo serio los quita y deja la trama fija.
  * - El hueco `arena` es para lo que la pantalla pone dentro de la cuña (el número de semana gigante).
+ * - Sin rayos (`rays={false}`) en las pantallas de texto sin pieza que los tape (la galería).
  *
  * Sin líneas de barrido ni grano: son postproceso de calidad alta (§3.5 capa 3). Nunca va texto encima
  * sin panel (`RD-VIS-05`): las formas de la trama dejan sin puntos las zonas de texto.
  */
-export function ArenaBackdrop({ wedge }: { wedge: ArenaWedge }) {
+export function ArenaBackdrop({ wedge, rays = true }: { wedge: ArenaWedge; rays?: boolean }) {
   const mobile = useMediaQuery(MOBILE_QUERY)
   const cell = mobile ? textureMobile.halftoneCell : texture.halftoneCell
   const shape = mobile ? 'menuWedgeMobile' : wedge === 'right' ? 'menuWedge' : 'interiorWedge'
   return (
     <div className={styles.arena} data-wedge={wedge} aria-hidden="true">
-      <div className={styles.burst} data-fx="" />
+      {rays && <div className={styles.burst} data-fx="" />}
       {wedge !== 'none' && (
         <>
           <div className={styles.wedge}>

@@ -1,5 +1,9 @@
-/* La 404 «BONUS STAGE» (§3.8.11): la forma del beat pad de 4 × 4, quieta hasta la Fase 8. */
+/*
+ * La 404 «BONUS STAGE» (§3.8.11): el beat pad de 4 × 4 como pieza de la cuña (teclas de chaflán
+ * `--bb-cut-md` de 72 px, quietas hasta la Fase 8) y el subtítulo en el panel.
+ */
 .pad {
+  --pad-key: calc(var(--bb-space-16) + var(--bb-space-2));
   display: grid;
   justify-items: start;
   gap: var(--bb-space-3);
@@ -8,28 +12,40 @@
 
 .keys {
   display: grid;
-  grid-template-columns: repeat(4, var(--bb-space-14));
+  grid-template-columns: repeat(4, var(--pad-key));
   gap: var(--bb-space-2);
 }
 
 .key {
-  width: var(--bb-space-14);
-  height: var(--bb-space-14);
-  font-size: var(--bb-fs-md);
+  --key-cut: var(--bb-cut-md);
+  width: var(--pad-key);
+  height: var(--pad-key);
+  font-size: var(--bb-fs-xl);
 }
 
+/* El pie del pad va sobre un panel: la cuña lleva trama (`RD-VIS-05`). */
 .caption {
-  color: var(--bb-text-3);
+  max-width: calc(4 * var(--pad-key) + 3 * var(--bb-space-2));
+  padding: var(--bb-space-2) var(--bb-space-3);
+  background: var(--bb-panel-veil);
+  color: var(--bb-text-2);
   font-size: var(--bb-fs-sm);
 }
 
-@media (max-width: 720px) {
-  .keys {
-    grid-template-columns: repeat(4, var(--bb-space-12));
-  }
+.subtitle {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-xl);
+  font-weight: var(--bb-weight-bold);
+  line-height: var(--bb-leading-label);
+}
 
-  .key {
-    width: var(--bb-space-12);
-    height: var(--bb-space-12);
+.summary {
+  color: var(--bb-text-2);
+}
+
+/* Muy estrecho (< 360 px): teclas de 60 px para que el pad quepa. */
+@media (max-width: 359px) {
+  .pad {
+    --pad-key: var(--bb-space-15);
   }
 }

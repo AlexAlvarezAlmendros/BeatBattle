@@ -190,7 +190,8 @@
     },
     "notFound": {
       "title": "Página no encontrada",
-      "summary": "Te has perdido… pero ya que estás, aquí habrá un beat pad para que no te vayas con las manos vacías.",
+      "subtitle": "Te has perdido… pero ya que estás.",
+      "summary": "Esta página no existe. Aquí habrá un beat pad para que no te vayas con las manos vacías.",
       "plate": "Bonus stage",
       "pad": "El beat pad de 4 × 4 llega pronto: arriba, los chops del sample de la semana; debajo, batería."
     },
@@ -944,22 +945,30 @@
   },
   "howItWorks": {
     "moveNumber": "{number}",
+    "ruleIndex": "{index}",
     "keys": {
       "one": "1",
-      "five": "5"
+      "five": "5",
+      "dash": "–",
+      "bases": "B"
     },
     "moves": {
       "sample": {
         "title": "Pilla el sample",
-        "text": "Cada lunes cae uno nuevo. Descárgalo desde el menú, en Jugar."
+        "text": "Cada lunes cae uno nuevo. Descárgalo desde el menú, en Jugar.",
+        "gesture": "Jugar",
+        "keysLabel": "Tecla: Intro sobre Jugar."
       },
       "flip": {
         "title": "Cocina tu flip",
-        "text": "Tienes hasta el domingo a las 20:00. Una entrada por semana."
+        "text": "Tienes hasta el domingo a las 20:00. Una entrada por semana.",
+        "gesture": "En tu estudio"
       },
       "vote": {
         "title": "Sube y vota",
-        "text": "Sube tu beat y entra al jurado: escucha 45 s de cada entrada y puntúala de 1 a 5."
+        "text": "Sube tu beat y entra al jurado: escucha 45 s de cada entrada y puntúala de 1 a 5.",
+        "gesture": "Votar",
+        "keysLabel": "Teclas: del 1 al 5 para votar."
       }
     },
     "rulesTitle": "Juego limpio",

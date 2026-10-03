@@ -135,10 +135,10 @@ describe('router (0.10, guía §2.18)', () => {
   })
 
   it.each(['/no-existe', '/semana', '/semana/2026-41/otra', '/ajustes/nada', '/admin/nada', '/legal/nada'])(
-    '%s → 404 dentro del marco',
+    '%s → 404 dentro del marco: «BONUS STAGE» de titular y «Página no encontrada» en la pestaña',
     async (path) => {
       renderAt(path)
-      expect(await h1(t('pages.notFound.title'))).toBeInTheDocument()
+      expect(await h1(t('pages.notFound.plate'))).toBeInTheDocument()
       expect(screen.getByRole('banner')).toBeInTheDocument()
       await waitFor(() => expect(document.title).toBe(documentTitle(t('pages.notFound.title'))))
     },
@@ -260,6 +260,6 @@ describe('router (0.10, guía §2.18)', () => {
     expect(matchRoutes(production, '/dev/galeria')?.at(-1)?.route.path).toBe('*')
     expect(matchRoutes(production, '/dev/menu')?.at(-1)?.route.path).toBe('*')
     renderAt('/dev/galeria', production)
-    expect(await h1(t('pages.notFound.title'))).toBeInTheDocument()
+    expect(await h1(t('pages.notFound.plate'))).toBeInTheDocument()
   })
 })

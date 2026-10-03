@@ -63,7 +63,7 @@ test.describe('móvil táctil a 360 px', () => {
     { name: 'el menú con semana en juego', path: '/dev/menu', heading: 'Beat Battle' },
     { name: 'una pantalla interior (Cómo se juega)', path: '/como-funciona', heading: 'Cómo se juega' },
     { name: 'Opciones', path: '/ajustes/cuenta', heading: 'Cuenta' },
-    { name: 'la 404', path: '/esto-no-existe', heading: 'Página no encontrada' },
+    { name: 'la 404', path: '/esto-no-existe', heading: 'Bonus stage' },
   ]) {
     test(`RNF-A11Y-09: todos los controles de ${name} tienen un área efectiva de 44 × 44 px`, async ({
       page,

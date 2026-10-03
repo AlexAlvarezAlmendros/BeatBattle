@@ -80,7 +80,7 @@ export const ROUTES = [
   { path: '/recuperar', heading: 'Recuperar la contraseña' },
   { path: '/admin', heading: 'Administración' },
   { path: '/legal/bases', heading: 'Bases de la competición' },
-  { path: '/esto-no-existe', heading: 'Página no encontrada' },
+  { path: '/esto-no-existe', heading: 'Bonus stage' },
 ] as const
 
 /** Resumen legible de una violación de axe: regla, impacto, ayuda y los nodos afectados. */

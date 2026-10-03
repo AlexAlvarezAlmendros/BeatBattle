@@ -122,6 +122,49 @@ test('RD-VIS-02 d: una pantalla interior se recorre con teclado y enseña sus te
   await expect(page).toHaveURL('/')
 })
 
+test('RD-VIS-02 d / RD-MOT-05: «Cómo se juega» es una lista de movimientos que se recorre como un menú de juego', async ({
+  page,
+}) => {
+  await open(page, '/como-funciona', 'Cómo se juega')
+  const moves = page.getByRole('main').getByRole('menu', { name: 'Lista de movimientos' })
+  const items = moves.getByRole('menuitem')
+  await expect(items).toHaveCount(5)
+  await expect(items.and(page.locator('[tabindex="0"]'))).toHaveCount(1)
+  // La barra enseña las teclas del menú.
+  const keys = page.getByRole('contentinfo').getByRole('list', { name: 'Controles' })
+  await expect(keys.getByRole('listitem')).toHaveText([
+    /Elegir/i,
+    /Intro\s*Entrar/i,
+    /Esc\s*Volver/i,
+    /M\s*Sonido/i,
+  ])
+
+  // Con el foco en ningún control, las flechas van a la lista; el cursor lleva la etiqueta 1P.
+  await page.keyboard.press('ArrowDown')
+  await expectCursor(items.nth(1))
+  await expect(items.nth(1).locator('[data-cursor-player]')).toBeVisible()
+  await page.keyboard.press('ArrowUp')
+  await page.keyboard.press('ArrowUp')
+  await expectCursor(items.nth(4))
+  await expect(items.nth(4)).toHaveAccessibleName('Volver al menú')
+  await page.keyboard.press('Home')
+  await expectCursor(items.first())
+
+  // B abre las bases desde la pantalla; Esc vuelve al menú.
+  await page.keyboard.press('b')
+  await expect(page).toHaveURL('/legal/bases')
+  await page.keyboard.press('Escape')
+  await expect(page).toHaveURL('/')
+
+  // Intro entra en el movimiento elegido.
+  await open(page, '/como-funciona', 'Cómo se juega')
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('ArrowDown')
+  await expectCursor(items.nth(2))
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL('/jurado')
+})
+
 test('RNF-A11Y-01: foco genérico visible en los enlaces del marco (la firma del sello y «Legal»)', async ({
   page,
 }) => {

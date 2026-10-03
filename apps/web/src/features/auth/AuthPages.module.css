@@ -1,11 +1,27 @@
-/* Pantallas de título de la autenticación (§3.8.14): el logo en una línea y la firma al lado. */
-.lockup {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--bb-space-4);
+/*
+ * Pantalla de título de la autenticación (§3.8.14; maqueta `00-titulo`): el logo grande con su lockup
+ * en una fila (la firma nunca salta de línea) como pieza de la izquierda.
+ */
+.title {
+  display: grid;
+  width: 100%;
 }
 
 .logo {
-  width: min(100%, 26rem);
+  width: 100%;
+  margin-left: calc(-1 * var(--bb-space-3));
+}
+
+.lockup {
+  margin: calc(-1 * var(--bb-space-1)) 0 0 var(--bb-space-2);
+}
+
+@media (max-width: 720px) {
+  .logo {
+    margin-left: 0;
+  }
+
+  .lockup {
+    margin: calc(-1 * var(--bb-space-2)) 0 0;
+  }
 }

@@ -1636,9 +1636,11 @@ blanco) y los **logros** (no conseguidos en silueta, ocultos como «???», cada 
 
 #### 3.8.11 Página 404: «BONUS STAGE»
 
-«Te has perdido… pero ya que estás.» Un pad de 4×4 en teclas de chaflán (1 2 3 4 / Q W E R / A S D F
-/ Z X C V): la fila de arriba son los *chops* del sample de la semana y el resto, batería sintetizada.
-Metrónomo opcional, grabación de 4 compases y logro oculto al grabar. Botón «Volver al menú [Esc]». Hasta
+Titular «BONUS STAGE» (el `<h1>`; la pestaña dice «Página no encontrada») y de subtítulo «Te has
+perdido… pero ya que estás.» Un pad de 4×4, la pieza de la cuña, en teclas de chaflán `--bb-cut-md` de
+72 px (1 2 3 4 / Q W E R / A S D F / Z X C V): la fila de arriba son los *chops* del sample de la semana
+y el resto, batería sintetizada. Metrónomo opcional, grabación de 4 compases y logro oculto al grabar.
+Botón «Volver al menú [Esc]», debajo del pad. Hasta
 que llega el pad (Fase 8), la pantalla enseña su forma, quieta y decorativa, con la placa «ERROR 404 ·
 BONUS STAGE» en el HUD.
 
@@ -1693,15 +1695,23 @@ anuncia «Tigre Púrpura, 94 BPM, Re menor, sin votar».
 
 #### 3.8.14 Pantallas interiores
 
+**Plantilla** (maquetas `02-seleccion` y `05-perfil`): el título se ve **una sola vez**, en la placa de
+título del HUD (el `<h1>` sigue en la página para los lectores de pantalla; en móvil, donde el HUD no
+lleva placa, se ve arriba sobre un panel). La cuña de la izquierda sostiene la **pieza** de la pantalla
+(la carta, la ficha, la lista de movimientos, el pad de la 404, el logo con su lockup en la
+autenticación; en las provisionales, el sello «EN OBRAS») y la derecha son paneles de juego, no un
+artículo: filas con índice, placas, teselas. Los rayos solo van detrás de una pieza (logo, VS, podio):
+las pantallas de texto sin pieza, como la galería, no los llevan.
+
 | Pantalla | Aspecto de juego |
 |---|---|
 | **Ficha de entrada** (`/e/:id`) | La ficha de luchador a pantalla completa con estrellas; tras el sellado, posición, puntuación, votos e histograma (`RF-PLAY-08`) |
 | **Salón de la fama** | Tabla de récords de recreativa: campeones semana a semana (portada y disco de oro), campeones de temporada en placas grandes y récords (más victorias, racha más larga, mejor puntuación, más votos emitidos) con cifras en Oxanium y posición en display. Flechas en horizontal; en móvil, lista |
 | **Archivo** (`/semanas`) | «Selección de escenario»: rejilla de semanas selladas (vinilo-sol en miniatura, número de entradas y podio), con flechas y Q/E |
 | **Temporada** | Clasificación de torneo con puntos tipo F1; el top 3 en peanas pequeñas |
-| **Cómo se juega** | «Lista de movimientos»: 1 Pilla el sample · 2 Cocina tu flip · 3 Sube y vota, cada uno con sus teclas o gestos y «HECHO» para quien lo ha completado; las reglas de juego limpio en 5 líneas (voto ciego, escucha mínima, Ronda justa, media bayesiana, el XP no puntúa) y el enlace a las bases |
+| **Cómo se juega** | «Lista de movimientos», un menú de juego en la cuña (cursor con 1P, ↑↓, Intro): 1 Pilla el sample · 2 Cocina tu flip · 3 Sube y vota, cada uno con sus teclas o su gesto como ayuda («[INTRO] Jugar», «En tu estudio», «[1]–[5] Votar») y «HECHO» para quien lo ha completado (con las cuentas, Fase 2), más «Bases de la competición [B]» y «Volver al menú [Esc]»; a la derecha, las reglas de juego limpio en 5 filas con índice (voto ciego, escucha mínima, Ronda justa, media bayesiana, el XP no puntúa) |
 | **Ajustes = OPCIONES** | Pestañas Q/E (Sonido · Movimiento · Cuenta · Perfil · Emails · Sesiones · Privacidad · Accesibilidad); cada opción es una placa con «◀ SÍ ▶» o un medidor de 10 pasos que se cambia con ←/→: volumen por bus, reducir movimiento, sin sonido, **modo serio**, tamaño de texto, calidad visual, puerta de entrada |
-| **Autenticación** | «CONTINUAR PARTIDA» (entrar) y «NUEVO JUGADOR» (registro) como pantalla de título, con el logo y su lockup «by [OTP.]»; campos normales y accesibles en paneles opacos; Google y Discord como botones neutros; abajo, la barra de controles con sus teclas y la firma |
+| **Autenticación** | «CONTINUAR PARTIDA» (entrar) y «NUEVO JUGADOR» (registro) como pantalla de título (maqueta `00-titulo`): a la izquierda, sobre los rayos, el logo con el mismo lockup que el menú («TORNEO SEMANAL DE PRODUCTORES by [OTP.]», en una fila); campos normales y accesibles en paneles opacos; Google y Discord como botones neutros; abajo, la barra de controles con sus teclas y la firma |
 | **Admin y legales** | Marco simple: HUD sin capa de juego, paneles y tablas, y la barra de controles con sus teclas y la firma en el centro; sin anunciador ni puerta |
 
 ### 3.9 Tono del anunciador y copys

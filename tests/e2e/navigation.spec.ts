@@ -111,7 +111,7 @@ test.describe('desplazamiento al cargar (móvil, donde las pantallas interiores 
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100)
 
     await page.goto('/esto-no-existe')
-    await expect(mainHeading(page)).toHaveText('Página no encontrada')
+    await expect(mainHeading(page)).toHaveText('Bonus stage')
     expect(await scrollYAfterPaint(page)).toBe(0)
   })
 
@@ -147,7 +147,9 @@ test.describe('404', () => {
   }) => {
     const errors = collectErrors(page)
     await page.goto('/esto-no-existe')
-    await expect(mainHeading(page)).toHaveText('Página no encontrada')
+    // El titular es el momento de juego (§3.8.11); la pestaña dice lo que ha pasado.
+    await expect(mainHeading(page)).toHaveText('Bonus stage')
+    await expect(page.getByRole('main')).toContainText('Te has perdido… pero ya que estás.')
     await expect(page).toHaveTitle('Página no encontrada · Beat Battle')
     await expect(page.getByRole('banner').locator('[data-frame="title"]')).toContainText('Bonus stage')
     await expect(page.getByRole('contentinfo')).toBeVisible()
@@ -163,7 +165,7 @@ test.describe('404', () => {
     page,
   }) => {
     await page.goto('/legal/no-existe')
-    await expect(mainHeading(page)).toHaveText('Página no encontrada')
+    await expect(mainHeading(page)).toHaveText('Bonus stage')
     await expect(page.getByRole('banner').locator('[data-frame="title"]')).toContainText('Bonus stage')
   })
 })

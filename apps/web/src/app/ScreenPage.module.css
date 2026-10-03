@@ -1,16 +1,26 @@
 /*
- * Plantilla de pantalla interior (§3.8.14; maquetas `02-seleccion.html`, `05-perfil.html`): el título
- * en display arriba a la izquierda (donde la cuña no lleva trama, `RD-VIS-05`) y el contenido en un
- * panel opaco a la derecha.
+ * Plantilla de pantalla interior (§3.8.14; maquetas `02-seleccion.html`, `05-perfil.html`): la pieza
+ * protagonista a la izquierda, sobre la cuña, y el contenido en un panel opaco a la derecha. El título
+ * va una sola vez: en la placa del HUD (y el `<h1>` solo para lectores de pantalla) o, sin placa, en
+ * display arriba a la izquierda, donde la cuña no lleva trama (`RD-VIS-05`).
  */
 .screen {
   display: grid;
-  grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 28rem) minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "head panel"
+    "piece panel";
   align-items: start;
-  gap: var(--bb-space-8) var(--bb-space-16);
+  gap: var(--bb-space-6) var(--bb-space-16);
+}
+
+.screen[data-wide] {
+  grid-template-columns: minmax(0, 40rem) minmax(0, 1fr);
 }
 
 .head {
+  grid-area: head;
   display: grid;
   justify-items: start;
   gap: var(--bb-space-3);
@@ -31,18 +41,38 @@
   overflow-wrap: break-word;
 }
 
+.piece {
+  grid-area: piece;
+  display: grid;
+  justify-items: start;
+  gap: var(--bb-space-5);
+  min-width: 0;
+}
+
 .stamp {
-  margin-top: var(--bb-space-4);
   background: var(--bb-black);
+}
+
+/* El sello como pieza de la cuña (provisionales): a cuerpo de título, sobre negro. */
+.stampBig {
+  margin: var(--bb-space-8) 0 0 var(--bb-space-4);
+  padding: var(--bb-space-3) var(--bb-space-5) var(--bb-space-2);
+  font-size: var(--bb-fs-2xl);
 }
 
 .panel {
   --frame-fill: var(--bb-panel-veil);
+  grid-area: panel;
   display: grid;
   gap: var(--bb-space-5);
   min-width: 0;
   max-width: 50rem;
   padding: var(--bb-space-6) var(--bb-space-8);
+}
+
+/* El sello, a su tamaño (no estirado al ancho del panel). */
+.panel > [data-stamp] {
+  justify-self: start;
 }
 
 .summary {
@@ -60,9 +90,38 @@
   border-top: var(--bb-stroke-hair) solid var(--bb-line);
 }
 
+/*
+ * Escritorio con el título en la placa del HUD: el `<h1>` queda para los lectores de pantalla (como
+ * `.sr-only`) y la cuña es toda de la pieza.
+ */
+@media (min-width: 721px) {
+  .screen[data-title-in-hud] {
+    grid-template-rows: auto;
+    grid-template-areas: "piece panel";
+  }
+
+  .screen[data-title-in-hud] .head {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
 @media (max-width: 960px) {
-  .screen {
+  .screen,
+  .screen[data-wide],
+  .screen[data-title-in-hud] {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-template-areas:
+      "head"
+      "piece"
+      "panel";
   }
 }
 
@@ -78,5 +137,10 @@
 
   .summary {
     font-size: var(--bb-fs-md);
+  }
+
+  .stampBig {
+    margin: 0 0 0 var(--bb-space-2);
+    font-size: var(--bb-fs-lg);
   }
 }

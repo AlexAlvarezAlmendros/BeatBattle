@@ -72,7 +72,7 @@ function GameFrame() {
 
   return (
     <div className="game-frame" data-wedge={screen.wedge} data-simple={screen.simple || undefined}>
-      <ArenaBackdrop wedge={screen.wedge} />
+      <ArenaBackdrop wedge={screen.wedge} rays={screen.rays ?? true} />
       <a className="skip-link" href={`#${MAIN_ID}`} onClick={skipToContent}>
         {t('app.skipToContent')}
       </a>
