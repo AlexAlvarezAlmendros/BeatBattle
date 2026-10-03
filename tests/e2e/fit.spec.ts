@@ -198,13 +198,13 @@ const TEXT_SPACING = `*, *::before, *::after { line-height: 1.5 !important; lett
   word-spacing: 0.16em !important; } p { margin-bottom: 2em !important; }`
 
 /**
- * Textos y marcos (los chips) de `<main>` que recorta en horizontal un antepasado (o el propio elemento,
- * si recorta su texto con «…»): se perderían con el espaciado de 1.4.12.
+ * Textos y marcos (los chips) de `<main>` (o de `scope`) que recorta en horizontal un antepasado (o el
+ * propio elemento, si recorta su texto con «…»): se perderían con el espaciado de 1.4.12.
  */
-function clippedHorizontally(page: Page): Promise<string[]> {
-  return page.evaluate(() => {
+function clippedHorizontally(page: Page, scope = 'main'): Promise<string[]> {
+  return page.evaluate((root) => {
     const clipped: string[] = []
-    for (const element of document.querySelectorAll<HTMLElement>('main *')) {
+    for (const element of document.querySelectorAll<HTMLElement>(`${root} *`)) {
       const ownText = [...element.childNodes].some(
         (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
       )
@@ -236,7 +236,7 @@ function clippedHorizontally(page: Page): Promise<string[]> {
       }
     }
     return clipped
-  })
+  }, scope)
 }
 
 test.describe('espaciado de texto (WCAG 1.4.12) a 390 × 844 táctil', () => {
@@ -260,6 +260,56 @@ test.describe('espaciado de texto (WCAG 1.4.12) a 390 × 844 táctil', () => {
     })
   }
 })
+
+/** La cinta del lockup: su texto visible y en cuántas líneas va. */
+function ribbonLines(page: Page): Promise<{ text: string; lines: number }> {
+  return page.evaluate(() => {
+    const ribbon = document.querySelector<HTMLElement>('main [class*=lockup] p')!
+    const range = document.createRange()
+    range.selectNodeContents(ribbon)
+    const tops = [...range.getClientRects()]
+      .filter((rect) => rect.width > 1)
+      .map((rect) => Math.round(rect.top))
+    return { text: ribbon.innerText.replace(/\s+/g, ' ').trim(), lines: new Set(tops).size }
+  })
+}
+
+/**
+ * La cinta del lockup según su sitio (guía §3.1, §3.8.3; revisión de los arreglos de la 0.28): de 721 a
+ * unos 1000 px la columna del título es tan estrecha como un móvil, y la cinta partía en cuatro líneas
+ * con «PRODUCTORES» cortado por el chaflán. Ahora cada paso (estrecha, 12 px, la del móvil, sin «de
+ * productores») depende del ancho del lockup: con el espaciado normal va en una línea a cualquier ancho
+ * y ningún texto del lockup se corta.
+ */
+for (const viewport of [
+  { width: 721, height: 900, touch: false, short: true },
+  { width: 768, height: 1024, touch: true, short: true },
+  { width: 823, height: 514, touch: false, short: true },
+  { width: 900, height: 900, touch: false, short: false },
+  { width: 1024, height: 768, touch: false, short: false },
+  { width: 1100, height: 900, touch: false, short: false },
+  { width: 1280, height: 800, touch: false, short: false },
+  { width: 390, height: 844, touch: true, short: false },
+  { width: 360, height: 640, touch: true, short: true },
+]) {
+  test.describe(`cinta a ${viewport.width} × ${viewport.height}${viewport.touch ? ' táctil' : ''}`, () => {
+    test.use({
+      viewport: { width: viewport.width, height: viewport.height },
+      isMobile: viewport.touch,
+      hasTouch: viewport.touch,
+    })
+
+    test('§3.1: la cinta del lockup de /dev/menu va en una línea y no se corta', async ({ page }) => {
+      await open(page, '/dev/menu', 'Beat Battle')
+      await settle(page)
+      expect(await ribbonLines(page)).toEqual({
+        text: viewport.short ? 'TORNEO SEMANAL' : 'TORNEO SEMANAL DE PRODUCTORES',
+        lines: 1,
+      })
+      expect(await clippedHorizontally(page, 'main [class*=lockup]')).toEqual([])
+    })
+  })
+}
 
 interface LockupOverLogo {
   /** Píxeles de la pegatina OTP girada que caen sobre la zona opaca del logo. */

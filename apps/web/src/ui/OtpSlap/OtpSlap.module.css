@@ -45,6 +45,18 @@
   }
 }
 
+/*
+ * En el lockup del título (`TitleLockup`, contenedor `title-lockup`), la de móvil también cuando el
+ * lockup es tan estrecho como en un móvil (la columna del título de 721 a unos 1000 px): con 104 px no
+ * cabía la cinta ni en su versión corta.
+ */
+@container title-lockup (width < 27rem) {
+  .title,
+  .menu {
+    width: 62px;
+  }
+}
+
 /* Enlace: el objetivo táctil llega a 44 px sin mover la pegatina (RNF-A11Y-09). */
 .link {
   position: relative;
