@@ -33,7 +33,8 @@ export const MAIN_ID = 'contenido'
  *   `ScrollRestoration`. Una carga nueva empieza arriba porque cada entrada del historial tiene su
  *   propia clave, también la primera (`ensureHistoryEntryKey` en `router.tsx`).
  * - Al cambiar de pantalla, el foco pasa al `<main>` para que teclado y lector de pantalla empiecen por
- *   el contenido nuevo (§2.17). Lleva `data-focus-target`: es un destino, no un control.
+ *   el contenido nuevo (§2.17). Lleva `data-focus-target="main"`: es un destino, no un control, y con
+ *   el foco ahí la pantalla está «en reposo» (las flechas e Intro van a su menú, `isIdleFocus`).
  * - `aria-busy` mientras se carga el trozo diferido de la pantalla siguiente.
  * - La zona de avisos (`ToastViewport`), una sola para toda la app (§3.3, §4.17).
  */
@@ -81,7 +82,7 @@ function GameFrame() {
         id={MAIN_ID}
         ref={mainRef}
         tabIndex={-1}
-        data-focus-target
+        data-focus-target="main"
         className="game-main"
         aria-busy={navigation.state === 'loading'}
       >

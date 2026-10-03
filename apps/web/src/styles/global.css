@@ -131,8 +131,9 @@ pre {
 }
 
 /*
- * Destinos de foco programático del marco (`data-focus-target`: el <main> que recibe el foco al
- * navegar o con «Saltar al contenido»): no son tabulables y no llevan anillo.
+ * Destinos de foco programático (`data-focus-target`): el <main> del marco (`main`), que recibe el foco
+ * al navegar o con «Saltar al contenido», y el diálogo de una ventana de juego (`dialog`). No son
+ * tabulables y no llevan anillo.
  */
 [data-focus-target]:focus-visible {
   outline: none;

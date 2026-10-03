@@ -94,7 +94,7 @@ describe('router (0.10, guía §2.18)', () => {
     expect(screen.getByRole('banner')).toBeInTheDocument()
     expect(screen.getByRole('main')).toHaveAttribute('id', 'contenido')
     // Destino de foco programático: global.css le quita el anillo solo a lo que lleva esta marca.
-    expect(screen.getByRole('main')).toHaveAttribute('data-focus-target')
+    expect(screen.getByRole('main')).toHaveAttribute('data-focus-target', 'main')
     const bar = screen.getByRole('contentinfo')
     expect(within(bar).getByRole('link', { name: t('frame.controls.signatureLabel') })).toHaveAttribute(
       'data-otp-signature',

@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.4 · 2026-10-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.5 · 2026-10-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1151,8 +1151,8 @@ grupo, `[data-cursor-active]` en la elegida y el componente `Cursor` dentro de l
 `useRovingMenu`, `useRovingGrid` y `useRovingTabs` ponen los roles ARIA y esos atributos. Las teclas que
 consume un menú llegan a los manejadores globales con `defaultPrevented`, y estos las ignoran. Con
 **mando** (Gamepad API, mapeo estándar), la cruceta y la palanca izquierda son las flechas, A acepta (el
-clic sobre lo enfocado), B es Esc y LB/RB son Q/E: el mando no tiene lógica propia, se traduce a esas
-teclas. En táctil, las teclas que enseñan los botones y la barra de controles desaparecen. Depende del
+clic sobre lo enfocado; con el foco en ningún control, Intro, como el teclado), B es Esc y LB/RB son Q/E:
+el mando no tiene lógica propia, se traduce a esas teclas. En táctil, las teclas que enseñan los botones y la barra de controles desaparecen. Depende del
 tipo de entrada (`hover: none` o `pointer: coarse`), no del ancho: con teclado y ratón se ven también en
 una ventana estrecha o ampliada al 200 %.
 
@@ -1501,8 +1501,9 @@ fundido: «NUEVA ENTRADA: TIGRE PÚRPURA», «QUEDAN 2 DÍAS», «340 VOTOS ESTA
 dice quién ha subido.
 
 Al entrar, el cursor está en la primera opción disponible (Jugar; si ya subiste, Jurado), sin robar el
-foco: el primer Tab sigue siendo «Saltar al contenido»; con el foco en ningún control, las flechas e
-Intro van al menú. Teclado: `role="menu"`, ↑↓ en bucle, Inicio/Fin, Intro, letra inicial; el ratón
+foco: el primer Tab sigue siendo «Saltar al contenido»; con el foco en ningún control (la página recién
+cargada o el `<main>` al que va el foco al cambiar de pantalla), las flechas e Intro van al menú. Nunca
+con una ventana de juego abierta encima: el foco en su diálogo no cuenta como «ningún control». Teclado: `role="menu"`, ↑↓ en bucle, Inicio/Fin, Intro, letra inicial; el ratón
 mueve el cursor al pasar.
 
 **Móvil (390×844)**: mismo HTML apilado sin desplazamiento: HUD en una fila, logo a todo el ancho con el
@@ -3122,6 +3123,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-03 | 0.6.5 | Correcciones de la **revisión adversarial de la Arena** (tarea 0.28). **Teclado y mando**: con una ventana de juego abierta, Intro y las flechas no llegan al menú de detrás (§3.8.3); la A del mando es Intro con el foco en ningún control (§3.3). |
 | 2026-10-03 | 0.6.4 | Correcciones del **jurado visual de la Arena** (tarea 0.28; acta en `docs/planning/evidence/f0/arena/jurado.md`). **Opción de menú** (§3.3): nada se corta (el dato y la tecla no se encogen, cede la etiqueta; motivo de la deshabilitada en dos líneas; segunda línea por debajo de 360 px), dato corto siempre y largo en móvil solo en la elegida, trama en una franja al final (también en §3.2). **Teclas por tipo de entrada**, no por ancho (§3.3). **Barra de controles** pegada al pie también en móvil, con la firma dentro de la ventana (§3.4.1). **Menú** (§3.8.3): crédito en caja mixta con la cifra en Oxanium rojo, «Intro para entrar» con teclado y «ELIGE MODO» sobre una franja `--bb-panel-veil`. **Fila de entrada** con el play dentro de la portada en chaflán y posición en blanco con sombra dura; **marca del umbral** encima de la onda (§3.3); **medallas** sin cifra en la galleta (§3.4.3). **404** (§3.8.11): titular «BONUS STAGE» con subtítulo y pad en la cuña con teclas de 72 px. **Pantallas interiores** (§3.8.14): plantilla con el título una sola vez y la pieza en la cuña, «Cómo se juega» como menú de juego con «Bases [B]» y «Volver [Esc]», autenticación como la pantalla de título y rayos solo detrás de una pieza. |
 | 2026-10-03 | 0.6.3 | Marco de juego, menú principal, componentes y pantallas interiores de la arena (tareas 0.23–0.27). **Mando** (§3.3): la Gamepad API se traduce a las teclas de los menús (cruceta y palanca = flechas, A = aceptar, B = Esc, LB/RB = Q/E); en táctil se ocultan las teclas de los botones. **Menú principal** (§3.8.3): el cursor empieza en la primera opción disponible sin robar el foco, y las flechas e Intro van al menú si el foco no está en ningún control. **404** (§3.8.11): mientras llega el pad, su forma quieta con la placa «ERROR 404 · BONUS STAGE». **Rutas de desarrollo** (§2.18): `/dev/galeria` y `/dev/menu` (el menú con los datos de las maquetas). **`RD-VIS-02` c** (§3.10): la lista de excepciones temporales del lint quedó vacía en la 0.27. **Logo** (§3.5): se pinta en un canvas 2D (el `logo()` de las maquetas con la API del canvas); en SVG, su `<text>` era el LCP de la home y rompía `RNF-PERF-02`. |
 | 2026-10-03 | 0.6.2 | Base de la arena (tarea 0.22). **Tokens** (§3.2): los derivados que hacían falta para que todo salga de tokens (interlineados, interletrajes, pesos y anchuras del display; `--bb-target`, `--bb-controls-h`; trazos `--bb-stroke-hair` y de la diagonal; `--bb-tilt-stamp`; logo; parámetros y tintas de las texturas `--bb-tex-*`; `--bb-wave-halo`; `--bb-loop-loader` y `--bb-loop-chronicle`; `--bb-z-controls`), el corte de móvil a 720 px y `--bb-fx` para el modo serio (§3.6). **Cursor** (§3.3): marco cerrado que sigue también los chaflanes (las maquetas dejaban abiertas las esquinas recortadas) y visible en la opción elegida cuando el foco sale del grupo; API por atributos y hooks de foco itinerante. **Marco**: variables `--frame-*` y atributos `data-frame`. **Pegatina OTP**: 120 × 82 px a 1×, en otra pestaña y con el nombre accesible que lo dice. **`RD-VIS-01`/`RD-VIS-02` (c)**: aceptación con las reglas nuevas del lint (radios, chaflanes, inclinaciones, trazos, tokens desconocidos y piezas prohibidas, con JetBrains Mono) y la lista de excepciones temporales hasta la 0.27. |

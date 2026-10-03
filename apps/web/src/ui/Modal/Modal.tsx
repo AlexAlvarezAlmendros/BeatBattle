@@ -308,7 +308,7 @@ function ModalLayer({
           aria-labelledby={titleId}
           aria-describedby={description ? descriptionId : undefined}
           tabIndex={-1}
-          data-focus-target=""
+          data-focus-target="dialog"
           onKeyDown={onKeyDown}
           title={title}
           titleId={titleId}

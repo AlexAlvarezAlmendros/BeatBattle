@@ -145,6 +145,20 @@ export function isCharacterKey(
   )
 }
 
+/**
+ * ¿El foco está «en ningún control»? (§3.8.3): la página recién cargada (`<body>`) o el `<main>` del marco,
+ * al que va el foco al cambiar de pantalla (`data-focus-target="main"`). Entonces las flechas e Intro van
+ * al menú de la pantalla (`useIdleMenuKeys`) y la A del mando es Intro (`useGamepad`).
+ *
+ * Con una ventana de juego abierta (`[aria-modal="true"]`) nunca: el menú de detrás está tapado y no debe
+ * recibir teclas, aunque el foco esté en el diálogo (`data-focus-target="dialog"`, también un destino de
+ * foco programático) o haya caído en `<body>`.
+ */
+export function isIdleFocus(element: Element | null, doc: Document = document): boolean {
+  if (doc.querySelector('[aria-modal="true"]')) return false
+  return !element || element === doc.body || element.getAttribute('data-focus-target') === 'main'
+}
+
 /** ¿El evento viene de un campo donde se escribe? Las teclas de juego no se roban ahí. */
 export function isEditableTarget(target: EventTarget | null): boolean {
   if (!(target instanceof Element)) return false

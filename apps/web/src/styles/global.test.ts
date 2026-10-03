@@ -80,7 +80,7 @@ describe('global.css: foco visible', () => {
   })
 
   it('RNF-A11Y-01: solo el destino de foco del marco (data-focus-target) va sin anillo', () => {
-    const main = focused('<main id="contenido" tabindex="-1" data-focus-target>Contenido</main>')
+    const main = focused('<main id="contenido" tabindex="-1" data-focus-target="main">Contenido</main>')
     expect(removesOutline(main)).toBe(true)
     expect(
       matchingRules(main).some(

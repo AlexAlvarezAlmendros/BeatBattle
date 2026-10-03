@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { isIdleFocus } from '../../ui/hooks/roving'
 
 /**
  * Mando (guía §3.3 «El foco es el cursor»; tarea 0.23): los menús de juego se recorren también con un
@@ -14,7 +15,8 @@ import { useEffect } from 'react'
  * | LB / RB                       | Q / E           |
  *
  * Solo escucha mientras hay un mando conectado (`gamepadconnected`): sin mando, ni un fotograma de
- * trabajo. La A hace clic en el elemento enfocado (una tecla Intro sintética no activaría un enlace).
+ * trabajo. La A hace clic en el elemento enfocado (una tecla Intro sintética no activaría un enlace); con
+ * el foco en ningún control (`isIdleFocus`: `<body>` o el `<main>` del marco), es Intro, como el teclado.
  */
 
 /** Botones del mapeo estándar (https://w3c.github.io/gamepad/#remapping). */
@@ -63,10 +65,15 @@ function sendKey(key: string): void {
   target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))
 }
 
-function accept(): void {
+/**
+ * La A: con el foco en ningún control (la página recién cargada, o el `<main>` del marco tras Esc o al
+ * cambiar de pantalla), Intro, que el menú de la pantalla recoge como el teclado (`useIdleMenuKeys`); si
+ * no, el clic sobre lo enfocado.
+ */
+export function acceptFocused(): void {
   const target = document.activeElement
-  if (target instanceof HTMLElement && target !== document.body) target.click()
-  else sendKey('Enter')
+  if (isIdleFocus(target)) sendKey('Enter')
+  else if (target instanceof HTMLElement) target.click()
 }
 
 export function useGamepad(): void {
@@ -87,7 +94,7 @@ export function useGamepad(): void {
       // Solo el flanco de bajada: mantener pulsado no repite (el cursor salta una opción por pulsación).
       for (const input of now) {
         if (held.has(input)) continue
-        if (input === 'accept') accept()
+        if (input === 'accept') acceptFocused()
         else sendKey(input)
       }
       held = now
