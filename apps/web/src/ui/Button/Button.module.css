@@ -28,7 +28,9 @@
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  transition: translate var(--bb-dur-fast) var(--bb-ease-snap);
+  transition:
+    translate var(--bb-dur-fast) var(--bb-ease-snap),
+    scale var(--bb-dur-instant) var(--bb-ease-snap);
 }
 
 .content {
@@ -125,9 +127,14 @@
   --frame-fill: var(--bb-panel-2);
 }
 
-/* Pulsado forzado (galería): lo mismo que deja el muelle al pulsar. */
+/*
+ * Pulsado (§3.3, Anexo E): escala a 0,97 con `--bb-ease-snap`, cuyo rebote hace de muelle. `data-pressed`
+ * lo pone el componente mientras el botón está abajo (ratón, toque, Espacio o Intro); el forzado es el de
+ * la galería. Sin movimiento, `--bb-motion` es 0: no escala (y el componente ni lo marca).
+ */
+.button[data-pressed],
 .button[data-force-state="pressed"] {
-  scale: 0.97;
+  scale: calc(1 - 0.03 * var(--bb-motion));
 }
 
 .cta:active:not([aria-disabled="true"]),

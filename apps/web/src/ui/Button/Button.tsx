@@ -1,5 +1,3 @@
-import { spring } from '@beatbattle/shared/tokens'
-import { animate } from 'motion/react'
 import {
   type AnchorHTMLAttributes,
   type ButtonHTMLAttributes,
@@ -39,7 +37,10 @@ export type ButtonStatus = 'idle' | 'success' | 'error'
 export const BUTTON_VARIANTS: readonly ButtonVariant[] = ['cta', 'brand', 'white', 'outline']
 export const BUTTON_SIZES: readonly ButtonSize[] = ['sm', 'md', 'lg']
 
-/** Escala al pulsar (§3.3, Anexo E: *squish* a 0,97 con el muelle de interacción). */
+/**
+ * Escala al pulsar (§3.3, Anexo E: *squish* a 0,97). La aplica el CSS (`[data-pressed]`, transición de
+ * `--bb-dur-instant` con `--bb-ease-snap`); aquí queda como dato para los tests y la galería.
+ */
 export const PRESSED_SCALE = 0.97
 
 interface BaseProps {
@@ -111,8 +112,10 @@ type AnyHandlers = {
  * `href` y un `<button type="button">` en el resto de casos.
  *
  * - **Hover**: avanza 4 px. **Foco**: el cursor de juego (marco blanco de 3 px a 4 px que sigue el
- *   chaflán). **Pulsado**: escala 0,97 con el muelle de interacción (ratón, toque, Espacio o Intro).
- *   Con «reducir movimiento», ni avance ni escala (Anexo E).
+ *   chaflán). **Pulsado**: escala 0,97 (ratón, toque, Espacio o Intro) con una transición CSS de
+ *   `--bb-dur-instant` y `--bb-ease-snap` (el rebote de la curva hace de muelle). Sin Motion: el botón
+ *   está en la primera pintura y Motion pesaba ≈ 20 kB gz solo por esto (RNF-PERF-02). Con «reducir
+ *   movimiento», ni avance ni escala (Anexo E).
  * - **Cargando**: la onda de 5 barras sustituye al texto sin cambiar el ancho; `aria-busy` y el foco
  *   se queda en el botón, pero los clics no hacen nada.
  * - **Deshabilitado**: 45 %, `aria-disabled` y el motivo en texto al lado (`disabledReason`).
@@ -153,7 +156,6 @@ export function Button(props: ButtonProps) {
   const reasonId = useId()
   const elementRef = useRef<HTMLElement | null>(null)
   const textRef = useRef<HTMLSpanElement>(null)
-  const pressAnimation = useRef<ReturnType<typeof animate> | null>(null)
   const inert = loading || disabled
   const ariaLabel = rest['aria-label'] as string | undefined
   const statusText = status === 'idle' ? undefined : t(`ui.button.${status}`)
@@ -183,15 +185,18 @@ export function Button(props: ButtonProps) {
     [ref],
   )
 
+  /*
+   * Pulsado: `data-pressed` en el elemento (sin re-render) y el CSS escala con su transición. Soltar solo
+   * hace algo si estaba pulsado: pasar el ratón por encima y salir no toca nada.
+   */
   const squish = (down: boolean) => {
     const element = elementRef.current
-    if (!element || reduced || (down && inert)) return
-    pressAnimation.current?.stop()
-    pressAnimation.current = animate(
-      element,
-      { scale: down ? PRESSED_SCALE : 1 },
-      { type: 'spring', ...spring.interaction },
-    )
+    if (!element) return
+    if (down) {
+      if (!reduced && !inert) element.setAttribute('data-pressed', '')
+    } else if (element.hasAttribute('data-pressed')) {
+      element.removeAttribute('data-pressed')
+    }
   }
 
   const eventProps = {

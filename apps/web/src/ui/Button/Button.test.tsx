@@ -1,29 +1,18 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
 import { type MatchMediaController, mockMatchMedia } from '../hooks/mockMatchMedia'
 import { REDUCED_MOTION_QUERY } from '../hooks/useReducedMotion'
+import { Button, BUTTON_VARIANTS } from './Button'
+import buttonSource from './Button.tsx?raw'
 import { WAVE_LOADER_BARS } from './WaveLoader'
-
-// Espía del `animate` de Motion (el muelle del pulsado), con la implementación real detrás: así los
-// tests sin movimiento comprueban que ni se llama, sin depender de cuántos fotogramas pasen.
-const motion = vi.hoisted(() => ({ animate: undefined as unknown as ReturnType<typeof vi.fn> }))
-
-vi.mock('motion/react', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('motion/react')>()
-  motion.animate = vi.fn(actual.animate)
-  return { ...actual, animate: motion.animate }
-})
-
-const { Button, BUTTON_VARIANTS } = await import('./Button')
 
 let media: MatchMediaController | undefined
 afterEach(() => {
   media?.restore()
   media = undefined
-  motion.animate.mockClear()
 })
 
 describe('Button (§3.3, 0.25)', () => {
@@ -202,20 +191,46 @@ describe('Button (§3.3, 0.25)', () => {
       expect(screen.getByRole('button', { name })).toHaveAttribute('data-force-state', state)
   })
 
-  it('pulsar con el muelle llama a Motion sin romper el clic', async () => {
+  it('pulsar marca data-pressed (la escala a 0,97 la hace el CSS) y soltar lo quita, sin romper el clic', async () => {
     const user = userEvent.setup()
     const onClick = vi.fn()
     render(<Button onClick={onClick}>Jugar</Button>)
-    await user.click(screen.getByRole('button', { name: 'Jugar' }))
+    const button = screen.getByRole('button', { name: 'Jugar' })
+    fireEvent.pointerDown(button, { button: 0 })
+    expect(button).toHaveAttribute('data-pressed')
+    fireEvent.pointerUp(button)
+    expect(button).not.toHaveAttribute('data-pressed')
+    // Con el teclado: Espacio o Intro abajo, y arriba suelta.
+    fireEvent.keyDown(button, { key: ' ' })
+    expect(button).toHaveAttribute('data-pressed')
+    fireEvent.keyUp(button, { key: ' ' })
+    expect(button).not.toHaveAttribute('data-pressed')
+    await user.click(button)
     expect(onClick).toHaveBeenCalledTimes(1)
-    expect(motion.animate).toHaveBeenCalled()
   })
 
-  it('RNF-A11Y-03: con «reducir movimiento» pulsar no escala', async () => {
+  it('RNF-PERF-02: el pulsado no usa Motion (el botón está en la primera pintura y Motion pesa ≈ 20 kB gz)', () => {
+    expect(buttonSource).not.toMatch(/from ['"]motion/)
+  })
+
+  it('RNF-A11Y-03: con «reducir movimiento» pulsar no escala', () => {
     media = mockMatchMedia({ [REDUCED_MOTION_QUERY]: true })
-    const user = userEvent.setup()
     render(<Button>Jugar</Button>)
-    await user.click(screen.getByRole('button', { name: 'Jugar' }))
-    expect(motion.animate).not.toHaveBeenCalled()
+    const button = screen.getByRole('button', { name: 'Jugar' })
+    fireEvent.pointerDown(button, { button: 0 })
+    expect(button).not.toHaveAttribute('data-pressed')
+  })
+
+  it('deshabilitado o cargando, pulsar no escala', () => {
+    render(
+      <>
+        <Button disabled>Cerrado</Button>
+        <Button loading>Subiendo</Button>
+      </>,
+    )
+    for (const button of screen.getAllByRole('button')) {
+      fireEvent.pointerDown(button, { button: 0 })
+      expect(button).not.toHaveAttribute('data-pressed')
+    }
   })
 })
