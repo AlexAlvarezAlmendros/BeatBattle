@@ -1,6 +1,6 @@
 # BeatBattle — Roadmap del proyecto
 
-> Última actualización: 2026-10-02
+> Última actualización: 2026-10-03
 
 Competición semanal de beats a partir de un sample, con la estética de **Other People Records** y
 alma de videojuego: cada lunes cae un sample, los productores suben su *flip* y la comunidad vota
@@ -44,8 +44,12 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 ## Foco actual
 
 **Rediseño de la Fase 0** con la nueva dirección de arte de **arena de lucha** (tareas 0.21–0.28). La
-0.21 está hecha: guía v0.6 (§3) y maquetas aprobadas en `docs/planning/evidence/f0/arena/`. Sigue la
-0.22 (tipografía y tokens) y después el marco de juego, el menú principal y los componentes.
+0.21 está hecha: guía v0.6 (§3) y maquetas aprobadas en `docs/planning/evidence/f0/arena/`. La 0.22
+también (guía v0.6.2): fuentes, tokens, lint de tokens y piezas prohibidas, base global, primitivas
+(`Frame`, `Key`, `Tag`, `Cursor`, `OtpSlap`), foco itinerante, limitador de destellos, modo serio y galería
+por secciones. Siguen, en paralelo, el marco de juego (0.23) y los componentes (0.25); después, el menú
+principal, las páginas interiores y la retirada de lo copiado del sello, que vacía la lista de
+excepciones temporales del lint.
 La Fase 1 espera a que termine, porque su Escenario (1.1) dependía del Silk del sello.
 
 ## Grafo de dependencias
