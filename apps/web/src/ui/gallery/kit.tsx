@@ -2,11 +2,13 @@ import { type ReactNode, useId } from 'react'
 import { t } from '../../i18n'
 import { Frame } from '../Frame'
 import { cx } from '../forceState'
+import type { MatrixComponentKey } from './anchors'
 import styles from './kit.module.css'
+import { type ComponentState, uncoveredStates } from './stateMatrix'
 
 /**
- * Piezas de la galería en la arena: sección (`<h2>`), bloque (`<h3>`), fila, muestra e interruptor.
- * Las usan las secciones de `sections/`; las viejas siguen con `parts.tsx` hasta que se rehacen.
+ * Piezas de la galería en la arena: sección (`<h2>`), bloque (`<h3>`), fila, muestra, celda de estado,
+ * la fila de la matriz de §3.3 e interruptor. Las usan las secciones de `sections/`.
  */
 
 /** Sección (`<h2>` con su filete), con el `id` que la registra en el índice. */
@@ -127,5 +129,60 @@ export function GallerySwitch({
         </p>
       )}
     </div>
+  )
+}
+
+/**
+ * Una celda: la pieza en un estado y su nombre debajo. `state` la marca como el estado de §3.3 que
+ * enseña (`data-state`), para que el test compruebe la matriz bloque a bloque.
+ */
+export function StateCell({
+  label,
+  children,
+  state,
+  wide = false,
+}: {
+  label: string
+  children: ReactNode
+  state?: ComponentState
+  wide?: boolean
+}) {
+  return (
+    <figure
+      className={cx(styles.cell, wide && styles.cellWide)}
+      data-state={state}
+      data-coverage={state ? 'shown' : undefined}
+    >
+      <Frame cut="md" className={styles.cellStage}>
+        {children}
+      </Frame>
+      <figcaption className={styles.caption}>{label}</figcaption>
+    </figure>
+  )
+}
+
+/**
+ * Fila con los estados de §3.3 que el componente no enseña (`STATE_MATRIX`): una celda por estado con
+ * «No aplica» y el motivo.
+ */
+export function StateMatrixRow({ component }: { component: MatrixComponentKey }) {
+  const missing = uncoveredStates(component)
+  if (missing.length === 0) return null
+  return (
+    <GalleryRow title={t('dev.gallery.matrix.title')}>
+      {missing.map(({ state, coverage }) => (
+        <figure key={state} className={styles.cell} data-state={state} data-coverage={coverage.kind}>
+          <Frame cut="md" className={cx(styles.cellStage, styles.matrixStage)}>
+            <p className={styles.matrixReason}>{t(`dev.gallery.matrix.reasons.${coverage.reason}`)}</p>
+          </Frame>
+          <figcaption className={styles.caption}>
+            {t('dev.gallery.combined', {
+              first: t(`dev.gallery.states.${state}`),
+              second: t('dev.gallery.matrix.notApplicable'),
+            })}
+          </figcaption>
+        </figure>
+      ))}
+    </GalleryRow>
   )
 }

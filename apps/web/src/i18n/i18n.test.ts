@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import es from './es.json'
+import { formatDuration } from './format'
 import { createTranslator, DATE_FORMATS, formatDate, formatNumber, t } from './index'
 
 const messages = {
@@ -167,5 +168,15 @@ describe('i18n: fechas y números', () => {
     expect(formatNumber(10000)).toBe('10.000')
     expect(formatNumber(4.256, { maximumFractionDigits: 2 })).toBe('4,26')
     expect(formatNumber(0.42, { style: 'percent' })).toMatch(/^42\s%$/u)
+  })
+})
+
+describe('formatDuration', () => {
+  it('minutos y segundos con dos cifras, sin negativos ni NaN', () => {
+    expect(formatDuration(72)).toBe('1:12')
+    expect(formatDuration(171.9)).toBe('2:51')
+    expect(formatDuration(5)).toBe('0:05')
+    expect(formatDuration(-3)).toBe('0:00')
+    expect(formatDuration(Number.NaN)).toBe('0:00')
   })
 })

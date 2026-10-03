@@ -1,36 +1,45 @@
 /*
- * Esqueleto (§3.3): el barrido diagonal del sello (`Skeleton.css`: 110°, #1a1a1a → #2a2a2a → #1a1a1a,
- * 1,5 s), con los grises de los tokens.
- *
- * El brillo es un pseudoelemento que se desplaza con `transform`, que el navegador compone fuera del
- * hilo principal. El del sello animaba `background-position`, que no se compone: cada esqueleto
- * recalculaba el estilo y repintaba 60 veces por segundo justo mientras se cargan datos (INP, §4.17).
+ * Esqueleto (§3.3, Anexo E): una placa con la forma final (chaflán `--bb-cut-md` en los bloques) y la
+ * trama de relleno al 20 % que barre en diagonal. El barrido mueve un pseudoelemento con `transform`,
+ * que el navegador compone fuera del hilo principal (nunca `background-position`, que repinta cada
+ * fotograma justo mientras se cargan datos, §4.17). Sin movimiento: la trama queda fija.
  */
 .skeleton {
   position: relative;
   display: block;
   width: 100%;
   overflow: hidden;
-  background-color: var(--bb-panel-2);
+  background-color: var(--bb-ink-3);
 }
 
 .skeleton::after {
+  content: "";
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(110deg, transparent 8%, var(--bb-ink-4) 18%, transparent 33%);
-  content: "";
+  background:
+    radial-gradient(circle, var(--bb-red-shade) 0 var(--bb-tex-fill-dot), transparent var(--bb-tex-fill-dot))
+    0 0 / var(--bb-tex-fill-cell) var(--bb-tex-fill-cell),
+    var(--bb-red-cta);
+  opacity: 0.2;
+  mask: linear-gradient(110deg, transparent 20%, var(--bb-black) 50%, transparent 80%);
   transform: translateX(-100%);
-  animation: shimmer var(--bb-loop-shimmer) var(--bb-ease-in-out) infinite;
+  animation: bb-skeleton-sweep var(--bb-loop-shimmer) var(--bb-ease-in-out) infinite;
 }
 
 .block {
   height: var(--bb-space-12);
-  border-radius: var(--bb-radius-sm);
+  clip-path: polygon(
+    var(--bb-cut-md) 0,
+    100% 0,
+    100% calc(100% - var(--bb-cut-md)),
+    calc(100% - var(--bb-cut-md)) 100%,
+    0 100%,
+    0 var(--bb-cut-md)
+  );
 }
 
 .text {
   height: 1em;
-  border-radius: var(--bb-radius-xs);
 }
 
 .circle {
@@ -43,19 +52,23 @@
   gap: var(--bb-space-2);
 }
 
-@keyframes shimmer {
+@keyframes bb-skeleton-sweep {
   to {
     transform: translateX(100%);
   }
 }
 
-/* Sin movimiento (Anexo E): gris fijo. */
+/* Sin movimiento (Anexo E): la trama fija, sin barrido. */
 @media (prefers-reduced-motion: reduce) {
   .skeleton::after {
-    display: none;
+    mask: none;
+    transform: none;
+    animation: none;
   }
 }
 
 :global(:root[data-motion="reduced"]) .skeleton::after {
-  display: none;
+  mask: none;
+  transform: none;
+  animation: none;
 }

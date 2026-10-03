@@ -1,5 +1,6 @@
 import { t } from '../../i18n'
 import { Button } from '../Button'
+import { frameAttributes } from '../Frame'
 import { cx, forceStateAttr } from '../forceState'
 import { Icon, type IconName } from '../Icon'
 import styles from './Toast.module.css'
@@ -20,13 +21,15 @@ export interface ToastProps {
 }
 
 /**
- * La pieza visible de un aviso: icono del tono (con nombre para lectores de pantalla: el error nunca
- * es solo color), título, mensaje y botón de cerrar. `ToastList` la anima y le pone el
- * temporizador; la galería la enseña quieta.
+ * La pieza visible de un aviso (guía §3.3): panel opaco con marco de chaflán, icono del tono (con
+ * nombre: el error nunca es solo color), título, mensaje y botón de cerrar. El de error es **de papel**
+ * (blanco con texto negro, 21:1; §3.2 «Estados»). `ToastList` la anima y le pone el temporizador; la
+ * galería la enseña quieta.
  */
 export function Toast({ toast, onDismiss, state, className }: ToastProps) {
   return (
     <div
+      {...frameAttributes({ cut: 'base' })}
       className={cx(styles.toast, className)}
       data-tone={toast.tone}
       {...forceStateAttr(state === 'pressed' ? undefined : state)}
@@ -38,8 +41,9 @@ export function Toast({ toast, onDismiss, state, className }: ToastProps) {
       </div>
       {onDismiss && (
         <Button
-          variant="icon"
+          variant={toast.tone === 'error' ? 'white' : 'outline'}
           size="sm"
+          iconOnly
           icon="close"
           aria-label={t('ui.toast.close')}
           onClick={onDismiss}

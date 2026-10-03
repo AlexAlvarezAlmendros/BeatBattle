@@ -49,3 +49,12 @@ export function formatNumber(value: number, options: Intl.NumberFormatOptions = 
   }
   return formatter.format(value)
 }
+
+/**
+ * Duración de un audio en minutos y segundos, como la enseña la arena: `72` → «1:12», `171` → «2:51»
+ * (§3.3 «Chip de dato», «Forma de onda»). Redondea hacia abajo y nunca es negativa.
+ */
+export function formatDuration(seconds: number): string {
+  const total = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`
+}

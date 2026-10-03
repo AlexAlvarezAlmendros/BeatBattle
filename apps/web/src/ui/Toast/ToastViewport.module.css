@@ -1,15 +1,16 @@
 /*
- * Zona de avisos (§3.3): la posición y las dos regiones vivas, que se pintan desde el principio en el
- * marco (trozo inicial). La pieza de cada aviso está en `Toast.module.css` y llega con la parte animada.
+ * Zona de avisos (§3.3): abajo a la derecha, por encima de la barra de controles (arriba en móvil, bajo
+ * el HUD), con las dos regiones vivas que se pintan desde el principio en el marco (trozo inicial). La
+ * pieza de cada aviso está en `Toast.module.css` y llega con la parte animada.
  */
 .viewport {
   position: fixed;
-  right: var(--bb-space-6);
-  bottom: var(--bb-space-6);
+  right: var(--bb-gutter);
+  bottom: calc(var(--bb-controls-h) + var(--bb-space-5));
   z-index: var(--bb-z-toast);
   display: flex;
   flex-direction: column;
-  width: min(26rem, calc(100vw - 2 * var(--bb-space-6)));
+  width: min(26rem, calc(100vw - 2 * var(--bb-gutter)));
   pointer-events: none;
 }
 
@@ -35,9 +36,8 @@
   display: grid;
   gap: var(--bb-space-1);
   padding: var(--bb-space-3) var(--bb-space-4);
-  border: 1px solid var(--bb-line-strong);
-  border-radius: var(--bb-radius-md);
-  background-color: var(--bb-panel-2);
+  border: var(--bb-stroke) solid var(--bb-line-strong);
+  background-color: var(--bb-panel);
   color: var(--bb-text);
   font-size: var(--bb-fs-sm);
   pointer-events: auto;
@@ -50,7 +50,7 @@
 
 .plainClose {
   justify-self: end;
-  min-height: var(--bb-space-11);
+  min-height: var(--bb-target);
   padding: 0 var(--bb-space-2);
   border: 0;
   background: none;
@@ -60,13 +60,13 @@
   cursor: pointer;
 }
 
-/* Móvil: arriba, bajo la isla de navegación, de lado a lado. */
-@media (max-width: 600px) {
+/* Móvil: arriba, bajo el HUD, de lado a lado. */
+@media (max-width: 720px) {
   .viewport {
-    top: calc(var(--nav-flow) + var(--bb-space-2));
-    right: var(--bb-layout-gutter);
+    top: calc(var(--bb-target) + var(--bb-space-5));
+    right: var(--bb-gutter);
     bottom: auto;
-    left: var(--bb-layout-gutter);
+    left: var(--bb-gutter);
     width: auto;
   }
 }

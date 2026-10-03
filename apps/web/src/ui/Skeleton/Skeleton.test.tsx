@@ -31,19 +31,20 @@ describe('Skeleton', () => {
     expect(bone.style.height).toBe('48px')
   })
 
-  it('el barrido es un pseudoelemento que se mueve con transform (compuesto, sin repintar el fondo)', () => {
-    const keyframes = /@keyframes shimmer \{([\s\S]*?)\n\}/.exec(skeletonCss)?.[1] ?? ''
+  it('§3.3: la trama de relleno barre en diagonal con transform (compuesto, nunca background-position)', () => {
+    const keyframes = /@keyframes bb-skeleton-sweep \{([\s\S]*?)\n\}/.exec(skeletonCss)?.[1] ?? ''
     expect(keyframes).toMatch(/transform: translateX\(100%\)/)
     expect(keyframes).not.toMatch(/background-position/)
-    expect(skeletonCss).toMatch(/\.skeleton::after \{[^}]*animation: shimmer var\(--bb-loop-shimmer\)/)
-    expect(skeletonCss).not.toMatch(/background-size/)
+    expect(skeletonCss).toMatch(
+      /\.skeleton::after \{[^}]*var\(--bb-tex-fill-dot\)[^}]*animation: bb-skeleton-sweep var\(--bb-loop-shimmer\)/,
+    )
   })
 
-  it('RNF-A11Y-03 / RD-MOT-03: con «reducir movimiento» es gris fijo, sin barrido', () => {
+  it('RNF-A11Y-03 / RD-MOT-03: con «reducir movimiento» la trama queda fija, sin barrido', () => {
     // jsdom no calcula estilos de pseudoelementos: se comprueban las dos reglas tal cual.
     expect(skeletonCss).toMatch(
-      /@media \(prefers-reduced-motion: reduce\) \{\s*\.skeleton::after \{\s*display: none;/,
+      /@media \(prefers-reduced-motion: reduce\) \{\s*\.skeleton::after \{[^}]*animation: none;/,
     )
-    expect(skeletonCss).toMatch(/:root\[data-motion="reduced"\]\) \.skeleton::after \{\s*display: none;/)
+    expect(skeletonCss).toMatch(/:root\[data-motion="reduced"\]\) \.skeleton::after \{[^}]*animation: none;/)
   })
 })

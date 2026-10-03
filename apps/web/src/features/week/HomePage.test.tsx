@@ -37,15 +37,15 @@ describe('HomePage: hero en «calendario vacío» (0.7, guía §3.8.3 y §2.19)'
 
   it('botones: «Avísame del próximo drop» (CTA rojo, a la sección de la alerta) y «Cómo funciona» (contorno)', () => {
     renderInRouter(<HomePage />)
-    // El `Button` base en su tamaño `hero`; el contorno, sobre cristal (`glass`).
+    // El `Button` de la arena (0.25) mientras el menú principal (0.24) sustituye al hero.
     const notify = within(hero()).getByRole('link', { name: t('home.hero.notify') })
     expect(notify).toHaveAttribute('href', `/#${DROP_ALERT_ID}`)
     expect(notify).toHaveAttribute('data-variant', 'cta')
-    expect(notify).toHaveClass(buttonStyles.hero!)
+    expect(notify).toHaveClass(buttonStyles.lg!)
     const howItWorks = within(hero()).getByRole('link', { name: t('home.hero.howItWorks') })
     expect(howItWorks).toHaveAttribute('href', '/como-funciona')
     expect(howItWorks).toHaveAttribute('data-variant', 'outline')
-    expect(howItWorks).toHaveClass(buttonStyles.hero!, buttonStyles.glass!)
+    expect(howItWorks).toHaveClass(buttonStyles.lg!)
   })
 
   it('§2.12.3: el destino del CTA existe en la home, la sección «Avísame del próximo drop» con su título', () => {

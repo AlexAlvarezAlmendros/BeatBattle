@@ -56,7 +56,9 @@
   pointer-events: none;
   transform: skewX(calc(-1 * var(--bb-split-angle)));
   transform-origin: 0 100%;
-  animation: bb-screen-sweep var(--bb-dur-base) var(--bb-ease-in-out) forwards;
+  /* Su sitio natural es fuera, a la derecha: el barrido termina ahí sin quedarse «en efecto» (§4.17). */
+  translate: 130vw 0;
+  animation: bb-screen-sweep var(--bb-dur-base) var(--bb-ease-in-out);
 }
 
 /* El filete blanco que acompaña a la banda roja de la diagonal. */
@@ -72,10 +74,6 @@
 @keyframes bb-screen-sweep {
   from {
     translate: -30vw 0;
-  }
-
-  to {
-    translate: 130vw 0;
   }
 }
 

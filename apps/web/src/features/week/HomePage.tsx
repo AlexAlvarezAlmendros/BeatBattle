@@ -58,10 +58,10 @@ export function HomePage() {
         <HeroDivider />
         <HeroSubtitle>{t('home.hero.subtitle')}</HeroSubtitle>
         <HeroActions>
-          <Button size="hero" to={paths.dropAlert()}>
+          <Button size="lg" to={paths.dropAlert()}>
             {t('home.hero.notify')}
           </Button>
-          <Button size="hero" variant="outline" glass to={paths.howItWorks()}>
+          <Button size="lg" variant="outline" to={paths.howItWorks()}>
             {t('home.hero.howItWorks')}
           </Button>
         </HeroActions>

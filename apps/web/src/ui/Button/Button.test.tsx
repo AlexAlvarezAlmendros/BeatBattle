@@ -5,11 +5,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
 import { type MatchMediaController, mockMatchMedia } from '../hooks/mockMatchMedia'
 import { REDUCED_MOTION_QUERY } from '../hooks/useReducedMotion'
-import styles from './Button.module.css'
-import buttonCss from './Button.module.css?raw'
 import { WAVE_LOADER_BARS } from './WaveLoader'
 
-const capability = vi.hoisted(() => ({ value: false }))
 // Espía del `animate` de Motion (el muelle del pulsado), con la implementación real detrás: así los
 // tests sin movimiento comprueban que ni se llama, sin depender de cuántos fotogramas pasen.
 const motion = vi.hoisted(() => ({ animate: undefined as unknown as ReturnType<typeof vi.fn> }))
@@ -20,33 +17,32 @@ vi.mock('motion/react', async (importOriginal) => {
   return { ...actual, animate: motion.animate }
 })
 
-vi.mock('../glass', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../glass')>()),
-  useGlassCapability: () => capability.value,
-}))
-
-const { Button } = await import('./Button')
+const { Button, BUTTON_VARIANTS } = await import('./Button')
 
 let media: MatchMediaController | undefined
 afterEach(() => {
   media?.restore()
   media = undefined
-  capability.value = false
   motion.animate.mockClear()
 })
 
-describe('Button', () => {
-  it('pinta un <button type="button"> con su texto y sus variantes', () => {
+describe('Button (§3.3, 0.25)', () => {
+  it('pinta un <button type="button"> con su texto, su variante y el marco de chaflán --bb-cut-md', () => {
     render(
-      <>
-        <Button>Pillar el sample</Button>
-        <Button variant="outline">Escuchar</Button>
-      </>,
+      <div>
+        {BUTTON_VARIANTS.map((variant) => (
+          <Button key={variant} variant={variant}>
+            {variant}
+          </Button>
+        ))}
+      </div>,
     )
-    const cta = screen.getByRole('button', { name: 'Pillar el sample' })
-    expect(cta).toHaveAttribute('type', 'button')
-    expect(cta).toHaveAttribute('data-variant', 'cta')
-    expect(screen.getByRole('button', { name: 'Escuchar' })).toHaveAttribute('data-variant', 'outline')
+    for (const variant of BUTTON_VARIANTS) {
+      const button = screen.getByRole('button', { name: variant })
+      expect(button).toHaveAttribute('type', 'button')
+      expect(button).toHaveAttribute('data-variant', variant)
+      expect(button).toHaveAttribute('data-frame-cut', 'md')
+    }
   })
 
   it('con `to` es un enlace de React Router y con `href`, un <a>', () => {
@@ -65,92 +61,28 @@ describe('Button', () => {
     )
   })
 
-  it('RD-VIS-02: el tamaño hero es el CTA del hero del sello (medidas en Button.module.css)', () => {
-    render(
-      <MemoryRouter>
-        <Button size="hero" to="/como-funciona#alerta">
-          Avísame del próximo drop
-        </Button>
-      </MemoryRouter>,
-    )
-    const cta = screen.getByRole('link', { name: 'Avísame del próximo drop' })
-    expect(styles.hero).toMatch(/hero/)
-    expect(cta).toHaveClass(styles.button!, styles.cta!, styles.hero!)
-    expect(cta).toHaveAttribute('data-variant', 'cta')
-    expect(cta).not.toHaveClass(styles.glass!)
+  it('RD-MOT-05: el foco es el cursor de juego (el anillo va dentro, decorativo)', () => {
+    render(<Button>Jugar</Button>)
+    const button = screen.getByRole('button', { name: 'Jugar' })
+    expect(button).toHaveAttribute('data-cursor')
+    expect(button.querySelector('[data-cursor-ring="cut"]')).toHaveAttribute('data-cursor-cut', 'md')
+    expect(button.querySelector('[data-cursor-ring]')).toHaveAttribute('aria-hidden', 'true')
   })
 
-  it('RNF-A11Y-09: con puntero grueso, el botón icono amplía el objetivo a 44 px sin agrandar el círculo', () => {
-    // jsdom no evalúa @media: se comprueba la regla (en Chrome, a 390 px táctil, el play de la fila
-    // mide 36 px a la vista y responde en 44 × 44).
-    const coarse = /@media \(pointer: coarse\) \{([\s\S]*?)\n\}/.exec(buttonCss)?.[1] ?? ''
-    expect(coarse).toMatch(
-      /\.iconButton::before \{[^}]*position: absolute;[^}]*inset: calc\(\(100% - var\(--bb-space-11\)\) \/ 2\);/,
-    )
-    expect(coarse).not.toMatch(/\.iconButton[^{]*\{[^}]*(?:width|height):/)
-    expect(buttonCss).toMatch(/\.button \{[^}]*position: relative;/)
-  })
-
-  it('RD-VIS-02: el contorno con `glass` pasa por GlassSurface, sin envoltorio, con y sin capacidad', () => {
-    const { rerender } = render(
-      <MemoryRouter>
-        <Button size="hero" variant="outline" glass to="/como-funciona">
-          Cómo funciona
-        </Button>
-      </MemoryRouter>,
-    )
-    const ghost = () => screen.getByRole('link', { name: 'Cómo funciona' })
-    // Sin capacidad (jsdom, equipo modesto, «reducir movimiento»): el mismo enlace con el velo oscuro.
-    expect(ghost()).toHaveClass(styles.outline!, styles.hero!, styles.glass!)
-    expect(ghost()).not.toHaveAttribute('data-glass')
-    expect(ghost().querySelector('svg')).toBeNull()
-
-    capability.value = true
-    rerender(
-      <MemoryRouter>
-        <Button size="hero" variant="outline" glass to="/como-funciona">
-          Cómo funciona
-        </Button>
-      </MemoryRouter>,
-    )
-    // Con capacidad: el enlace es la superficie de cristal (data-glass y su filtro SVG dentro).
-    expect(ghost()).toHaveAttribute('href', '/como-funciona')
-    expect(ghost()).toHaveAttribute('data-glass', 'on')
-    expect(ghost()).toHaveClass('bb-glass', styles.outline!, styles.glass!)
-    expect(ghost().querySelector(':scope > svg filter')).not.toBeNull()
-  })
-
-  it('el contorno con `glass` también como <button> y como <a>, y conserva el clic y el teclado', async () => {
-    capability.value = true
-    const user = userEvent.setup()
-    const onClick = vi.fn()
-    render(
-      <>
-        <Button variant="outline" glass onClick={onClick}>
-          Escuchar
-        </Button>
-        <Button variant="outline" glass href="https://www.otherpeople.es">
-          Other People
-        </Button>
-      </>,
-    )
+  it('enseña su tecla a la derecha, oculta a los lectores (la acción ya la dice el texto)', () => {
+    render(<Button keyHint="INTRO">Escuchar</Button>)
     const button = screen.getByRole('button', { name: 'Escuchar' })
-    expect(button).toHaveAttribute('type', 'button')
-    expect(button).toHaveAttribute('data-glass', 'on')
-    await user.click(button)
-    button.focus()
-    await user.keyboard('{Enter}')
-    expect(onClick).toHaveBeenCalledTimes(2)
-    expect(screen.getByRole('link', { name: 'Other People' })).toHaveAttribute('data-glass', 'on')
+    const key = button.querySelector('kbd[data-key]')
+    expect(key).toHaveTextContent('INTRO')
+    expect(key).toHaveAttribute('aria-hidden', 'true')
   })
 
-  it('RNF-A11Y-01: el botón icono tiene nombre accesible y se usa con teclado', async () => {
+  it('RNF-A11Y-01: solo con icono tiene nombre accesible y se usa con teclado', async () => {
     const user = userEvent.setup()
     const onClick = vi.fn()
-    render(<Button variant="icon" icon="play" aria-label="Reproducir" onClick={onClick} />)
-    const button = screen.getByRole('button', { name: 'Reproducir' })
-    await user.tab()
-    expect(button).toHaveFocus()
+    render(<Button iconOnly icon="close" aria-label="Cerrar" onClick={onClick} />)
+    const button = screen.getByRole('button', { name: 'Cerrar' })
+    button.focus()
     await user.keyboard('{Enter}')
     await user.keyboard(' ')
     expect(onClick).toHaveBeenCalledTimes(2)
@@ -164,149 +96,126 @@ describe('Button', () => {
         Subir mi beat
       </Button>,
     )
-    const button = screen.getByRole('button', { name: t('ui.button.loading') })
+    const button = screen.getByRole('button', { name: /Cargando/ })
     expect(button).toHaveAttribute('aria-busy', 'true')
-    expect(button).toHaveAttribute('aria-disabled', 'true')
-    expect(button).not.toBeDisabled()
-    expect(button.querySelector('[data-wave-loader]')?.children).toHaveLength(WAVE_LOADER_BARS)
+    expect(button.querySelectorAll('[data-wave-loader] > span')).toHaveLength(WAVE_LOADER_BARS)
+    button.focus()
+    expect(button).toHaveFocus()
     await user.click(button)
     expect(onClick).not.toHaveBeenCalled()
-    await user.tab()
-    await user.tab({ shift: true })
-    expect(button).toHaveFocus()
   })
 
-  it('cargando con un texto propio', () => {
-    render(
-      <Button loading loadingLabel="Subiendo tu beat…">
-        Subir
-      </Button>,
-    )
-    expect(screen.getByRole('button', { name: 'Subiendo tu beat…' })).toBeInTheDocument()
-  })
-
-  it('deshabilitado: no se enfoca ni responde', async () => {
+  it('§3.3: deshabilitado es aria-disabled (enfocable), no responde y dice su motivo al lado', async () => {
     const user = userEvent.setup()
     const onClick = vi.fn()
     render(
-      <Button disabled onClick={onClick}>
-        Votar
+      <Button disabled disabledReason="Disponible el lunes" onClick={onClick}>
+        Jugar
       </Button>,
     )
-    const button = screen.getByRole('button', { name: 'Votar' })
-    expect(button).toBeDisabled()
+    const button = screen.getByRole('button', { name: 'Jugar' })
+    expect(button).toHaveAttribute('aria-disabled', 'true')
+    expect(button).toHaveAccessibleDescription('Disponible el lunes')
+    expect(screen.getByText('Disponible el lunes')).toBeVisible()
+    button.focus()
+    expect(button).toHaveFocus()
     await user.click(button)
     expect(onClick).not.toHaveBeenCalled()
   })
 
-  it('un enlace deshabilitado se anuncia como tal y no navega', () => {
+  it('un enlace deshabilitado se anuncia como tal y no navega', async () => {
+    const user = userEvent.setup()
     render(
       <MemoryRouter>
-        <Button to="/jurado" disabled>
-          Modo Jurado
+        <Button to="/subir" disabled>
+          Subir mi beat
         </Button>
       </MemoryRouter>,
     )
-    const link = screen.getByText('Modo Jurado').closest('a')!
+    const link = screen.getByRole('link', { name: 'Subir mi beat' })
     expect(link).toHaveAttribute('aria-disabled', 'true')
-    expect(link).toHaveAttribute('tabindex', '-1')
+    await user.click(link)
+    expect(window.location.pathname).not.toBe('/subir')
   })
 
-  it('éxito pinta check y destello; error, icono de alerta (nunca solo color)', () => {
-    const { rerender } = render(<Button status="success">Subido</Button>)
-    const button = screen.getByRole('button', { name: /^Subido/ })
-    expect(button).toHaveAttribute('data-status', 'success')
-    expect(button.querySelector('[data-icon="check"]')).not.toBeNull()
-    rerender(<Button status="error">Reintentar</Button>)
-    expect(button).toHaveAttribute('data-status', 'error')
-    expect(button.querySelector('[data-icon="alert"]')).not.toBeNull()
+  it('éxito pinta check; error, icono de alerta y aviso de papel (nunca solo color)', () => {
+    render(
+      <>
+        <Button status="success">Subido</Button>
+        <Button status="error">Reintentar</Button>
+      </>,
+    )
+    const success = screen.getByRole('button', { name: /Subido/ })
+    const error = screen.getByRole('button', { name: /Reintentar/ })
+    expect(success).toHaveAttribute('data-status', 'success')
+    expect(success.querySelector('[data-icon="check"]')).not.toBeNull()
+    expect(error).toHaveAttribute('data-status', 'error')
+    expect(error.querySelector('[data-icon="alert"]')).not.toBeNull()
+    expect(getComputedStyle(error).getPropertyValue('--frame-fill')).toBe('var(--bb-white)')
   })
 
   it('RNF-A11Y-01: éxito y error también con palabras en el nombre (WCAG 4.1.3)', () => {
-    const { rerender } = render(<Button status="success">Subido</Button>)
-    const hint = (state: string) => t('ui.button.stateHint', { state })
-    expect(screen.getByRole('button')).toHaveAccessibleName(`Subido ${hint(t('ui.button.success'))}`)
-    rerender(<Button status="error">Reintentar</Button>)
-    expect(screen.getByRole('button')).toHaveAccessibleName(`Reintentar ${hint(t('ui.button.error'))}`)
-    rerender(<Button status="idle">Subir</Button>)
-    expect(screen.getByRole('button')).toHaveAccessibleName('Subir')
+    render(
+      <>
+        <Button status="success">Subido</Button>
+        <Button status="error">Reintentar</Button>
+      </>,
+    )
+    expect(screen.getByRole('button', { name: `Subido (${t('ui.button.success')})` })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: `Reintentar (${t('ui.button.error')})` })).toBeInTheDocument()
   })
 
-  it('RNF-A11Y-01: el botón icono compone su aria-label con la carga y con el estado', () => {
-    const name = (state: string) => t('ui.button.withState', { label: 'Reproducir', state })
-    const { rerender } = render(<Button variant="icon" icon="play" aria-label="Reproducir" loading />)
-    expect(screen.getByRole('button')).toHaveAccessibleName(name(t('ui.button.loading')))
-    rerender(<Button variant="icon" icon="play" aria-label="Reproducir" status="error" />)
-    expect(screen.getByRole('button')).toHaveAccessibleName(name(t('ui.button.error')))
-    rerender(<Button variant="icon" icon="play" aria-label="Reproducir" />)
-    expect(screen.getByRole('button')).toHaveAccessibleName('Reproducir')
+  it('RNF-A11Y-01: solo con icono, compone su aria-label con la carga y con el estado', () => {
+    render(
+      <>
+        <Button iconOnly icon="play" aria-label="Reproducir" loading />
+        <Button iconOnly icon="play" aria-label="Pausar" status="error" />
+      </>,
+    )
+    expect(screen.getByRole('button', { name: `Reproducir (${t('ui.button.loading')})` })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: `Pausar (${t('ui.button.error')})` })).toBeInTheDocument()
   })
 
   it('WCAG 4.1.3: al pasar a éxito o error se anuncia por la región viva compartida (no al montar)', async () => {
-    const region = () => document.querySelector('[data-announcer]')
-    const { rerender } = render(<Button status="success">Subido</Button>)
-    // La región existe desde el montaje, vacía: montar ya en éxito (la galería) no anuncia nada.
-    expect(region()).toHaveAttribute('role', 'status')
-    expect(region()).toBeEmptyDOMElement()
-    rerender(<Button status="idle">Subir</Button>)
-    rerender(<Button status="success">Subido</Button>)
-    await waitFor(() =>
-      expect(region()).toHaveTextContent(
-        t('ui.button.withState', { label: 'Subido', state: t('ui.button.success') }),
-      ),
-    )
-    rerender(<Button status="error">Reintentar</Button>)
-    await waitFor(() =>
-      expect(region()).toHaveTextContent(
-        t('ui.button.withState', { label: 'Reintentar', state: t('ui.button.error') }),
-      ),
-    )
+    const { rerender } = render(<Button status="idle">Subir mi beat</Button>)
+    const region = document.querySelector('[data-announcer]')!
+    expect(region).toHaveTextContent('')
+    rerender(<Button status="success">Subir mi beat</Button>)
+    await waitFor(() => expect(region).toHaveTextContent(`Subir mi beat (${t('ui.button.success')})`))
   })
 
   it('RD-VIS-03: los estados forzados salen en data-force-state (el reposo no lleva atributo)', () => {
     render(
       <>
-        <Button state="hover">A</Button>
-        <Button state="focus">B</Button>
-        <Button state="pressed">C</Button>
-        <Button state="rest">D</Button>
+        <Button state="rest">Reposo</Button>
+        <Button state="hover">Hover</Button>
+        <Button state="focus">Foco</Button>
+        <Button state="pressed">Pulsado</Button>
       </>,
     )
-    expect(screen.getByRole('button', { name: 'A' })).toHaveAttribute('data-force-state', 'hover')
-    expect(screen.getByRole('button', { name: 'B' })).toHaveAttribute('data-force-state', 'focus')
-    expect(screen.getByRole('button', { name: 'C' })).toHaveAttribute('data-force-state', 'pressed')
-    expect(screen.getByRole('button', { name: 'D' })).not.toHaveAttribute('data-force-state')
-  })
-
-  it('pulsado: el muelle escala el botón (Motion escribe scale en el transform)', async () => {
-    media = mockMatchMedia()
-    const user = userEvent.setup()
-    render(<Button>Votar</Button>)
-    const button = screen.getByRole('button', { name: 'Votar' })
-    await user.pointer({ keys: '[MouseLeft>]', target: button })
-    expect(motion.animate).toHaveBeenCalledWith(button, { scale: expect.any(Number) }, expect.anything())
-    await waitFor(() => expect(button.style.transform).toMatch(/scale\(0\.9\d*\)/))
-    await user.pointer({ keys: '[/MouseLeft]', target: button })
-  })
-
-  it('RNF-A11Y-03: con «reducir movimiento» pulsar no escala (solo cambia el color)', async () => {
-    media = mockMatchMedia({ [REDUCED_MOTION_QUERY]: true })
-    const user = userEvent.setup()
-    render(<Button>Votar</Button>)
-    const button = screen.getByRole('button', { name: 'Votar' })
-    await user.pointer({ keys: '[MouseLeft>]', target: button })
-    await user.pointer({ keys: '[/MouseLeft]', target: button })
-    // El muelle ni arranca (sin la guarda, el caso de arriba llama a `animate` al pulsar).
-    expect(motion.animate).not.toHaveBeenCalled()
-    expect(button.style.transform).toBe('')
+    expect(screen.getByRole('button', { name: 'Reposo' })).not.toHaveAttribute('data-force-state')
+    for (const [name, state] of [
+      ['Hover', 'hover'],
+      ['Foco', 'focus'],
+      ['Pulsado', 'pressed'],
+    ])
+      expect(screen.getByRole('button', { name })).toHaveAttribute('data-force-state', state)
   })
 
   it('pulsar con el muelle llama a Motion sin romper el clic', async () => {
-    media = mockMatchMedia()
     const user = userEvent.setup()
     const onClick = vi.fn()
-    render(<Button onClick={onClick}>Votar</Button>)
-    await user.click(screen.getByRole('button', { name: 'Votar' }))
+    render(<Button onClick={onClick}>Jugar</Button>)
+    await user.click(screen.getByRole('button', { name: 'Jugar' }))
     expect(onClick).toHaveBeenCalledTimes(1)
+    expect(motion.animate).toHaveBeenCalled()
+  })
+
+  it('RNF-A11Y-03: con «reducir movimiento» pulsar no escala', async () => {
+    media = mockMatchMedia({ [REDUCED_MOTION_QUERY]: true })
+    const user = userEvent.setup()
+    render(<Button>Jugar</Button>)
+    await user.click(screen.getByRole('button', { name: 'Jugar' }))
+    expect(motion.animate).not.toHaveBeenCalled()
   })
 })

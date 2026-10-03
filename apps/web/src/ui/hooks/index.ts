@@ -13,6 +13,7 @@ export {
   wrapIndex,
 } from './roving'
 export { useElementWidth } from './useElementWidth'
+export { FIT_MIN_FONT_PX, useFitText } from './useFitText'
 export { COARSE_POINTER_QUERY, matchesMedia, subscribeMedia, useMediaQuery } from './useMediaQuery'
 export {
   hasReducedMotionSetting,

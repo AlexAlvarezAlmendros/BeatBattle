@@ -14,7 +14,8 @@ function renderAt(path: string, routeList: RouteObject[] = routes) {
   return router
 }
 
-const h1 = (name: string) => screen.findByRole('heading', { level: 1, name })
+/** Cada página llega en su trozo diferido: con toda la batería en paralelo puede tardar más de 1 s. */
+const h1 = (name: string) => screen.findByRole('heading', { level: 1, name }, { timeout: 5000 })
 /** Traduce una clave compuesta en el test; en modo estricto, una clave que no existe es un error. */
 const tk = (key: string) => {
   if (!t.has(key)) throw new Error(`Falta la clave «${key}» en es.json`)

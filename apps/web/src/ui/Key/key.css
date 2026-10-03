@@ -30,6 +30,7 @@
   font-weight: var(--bb-weight-bold);
   line-height: 1;
   letter-spacing: var(--bb-tracking-button);
+  text-transform: uppercase;
   white-space: nowrap;
 }
 

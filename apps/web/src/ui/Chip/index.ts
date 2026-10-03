@@ -1,8 +1,2 @@
-export {
-  CHIP_ORIGIN_X_VAR,
-  CHIP_ORIGIN_Y_VAR,
-  Chip,
-  ChipGroup,
-  type ChipGroupProps,
-  type ChipProps,
-} from './Chip'
+export { DataChip, type DataChipProps } from './DataChip'
+export { FilterChip, type FilterChipProps } from './FilterChip'

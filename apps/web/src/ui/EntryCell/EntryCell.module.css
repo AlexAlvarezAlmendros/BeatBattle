@@ -1,0 +1,100 @@
+/*
+ * Casilla de entrada (§3.3, §3.8.13; maqueta `02-seleccion.html`): portada en marco `--bb-cut` y alias
+ * de 12 px en dos líneas como mucho. Todas iguales: mismo tamaño, mismo marco, misma tinta.
+ */
+.cell {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-2);
+  cursor: pointer;
+}
+
+.art {
+  --frame-fill: var(--bb-black);
+  display: grid;
+  aspect-ratio: 1;
+  padding: var(--bb-stroke);
+  overflow: hidden;
+}
+
+.cover {
+  width: 100%;
+  height: 100%;
+}
+
+.skeleton {
+  height: 100%;
+}
+
+.cell:hover .art,
+.cell[data-force-state="hover"] .art {
+  --frame-border: var(--bb-white);
+}
+
+/* Enfocada: marco rojo y alias blanco (el cursor lo pinta `Cursor`). */
+.cell:focus .art,
+.cell[data-force-state="focus"] .art,
+.cell[data-force-state="pressed"] .art {
+  --frame-border: var(--bb-red);
+}
+
+.cell:active,
+.cell[data-force-state="pressed"] {
+  scale: 0.97;
+}
+
+/* Votada (es tu voto): la portada al 42 %. */
+.cell[data-voted] .cover {
+  opacity: 0.42;
+}
+
+.stamp {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  translate: -50% 0;
+  background: var(--bb-black);
+}
+
+/* Aleatorio: «?» en display sobre la trama de relleno. */
+.random {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  background:
+    radial-gradient(circle, var(--bb-red-shade) 0 var(--bb-tex-fill-dot), transparent var(--bb-tex-fill-dot))
+    0 0 / var(--bb-tex-fill-cell) var(--bb-tex-fill-cell),
+    var(--bb-red-cta);
+  color: var(--bb-white);
+  font-size: var(--bb-fs-3xl);
+  text-shadow: var(--bb-shadow-hard-sm);
+}
+
+.failed {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  background: var(--bb-white);
+  color: var(--bb-black);
+  font-size: var(--bb-fs-2xl);
+}
+
+.alias {
+  display: -webkit-box;
+  min-height: calc(2em * var(--bb-leading-label));
+  overflow: hidden;
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: var(--bb-leading-label);
+  text-transform: uppercase;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.cell:focus .alias,
+.cell[data-force-state="focus"] .alias {
+  color: var(--bb-white);
+}

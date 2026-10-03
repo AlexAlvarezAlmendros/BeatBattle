@@ -1,0 +1,210 @@
+/*
+ * Reloj de ronda (§3.3; maquetas `final.css` `.clock`, `.week`): caja de marco rojo con chaflán
+ * `--bb-cut`, rótulo, dígitos en Oxanium de 34 px con unidades y separadores rojos, y la barra de la
+ * semana de siete segmentos en paralelogramo.
+ */
+.clock {
+  --frame-border: var(--bb-red);
+  --frame-fill: var(--bb-panel-veil);
+  display: grid;
+  justify-items: center;
+  padding: var(--bb-space-3) var(--bb-space-6) var(--bb-space-3);
+  text-align: center;
+}
+
+.hud {
+  min-width: min(100%, 21.25rem);
+}
+
+.timer {
+  display: grid;
+  justify-items: center;
+}
+
+.label {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label-wide);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.digits {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--bb-space-1);
+  margin-top: var(--bb-space-2);
+}
+
+.group {
+  display: grid;
+  justify-items: center;
+}
+
+.group b {
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-clock);
+  font-weight: var(--bb-weight-extrabold);
+  letter-spacing: var(--bb-tracking-button);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.group small {
+  margin-top: var(--bb-space-1);
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.separator {
+  padding-bottom: calc(var(--bb-space-4) + var(--bb-stroke-hair));
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-2xl);
+  font-weight: var(--bb-weight-extrabold);
+  line-height: 1;
+}
+
+.out {
+  margin-top: var(--bb-space-2);
+  color: var(--bb-red);
+  font-size: var(--bb-fs-clock);
+}
+
+/* ≤ 24 h: dígitos rojos. ≤ 1 h: el marco late a 1 Hz (nunca más de 3 veces por segundo). */
+.clock[data-phase="urgent"] .group b,
+.clock[data-phase="final"] .group b {
+  color: var(--bb-red);
+}
+
+.clock[data-phase="final"] {
+  animation: bb-clock-heartbeat var(--bb-loop-heartbeat) var(--bb-ease-in-out) infinite;
+}
+
+@keyframes bb-clock-heartbeat {
+  50% {
+    --frame-border: var(--bb-white);
+  }
+}
+
+/* ── Barra de la semana ─────────────────────────────────────────────────────────────────── */
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--bb-stroke-cursor);
+  width: 100%;
+  margin-top: var(--bb-space-2);
+}
+
+.day {
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-1);
+}
+
+.segment {
+  width: 100%;
+  height: var(--bb-space-2);
+  background: var(--bb-red);
+  clip-path: polygon(var(--bb-stroke-cursor) 0, 100% 0, calc(100% - var(--bb-stroke-cursor)) 100%, 0 100%);
+}
+
+.day[data-day="past"] .segment {
+  background: repeating-linear-gradient(
+    -60deg,
+    var(--bb-ink-4) 0 var(--bb-stroke-cursor),
+    var(--bb-ink-3) var(--bb-stroke-cursor) calc(2 * var(--bb-stroke-cursor))
+  );
+}
+
+.day[data-day="today"] .segment {
+  background: linear-gradient(
+    90deg,
+    var(--bb-ink-4) 0 var(--day-progress),
+    var(--bb-red) var(--day-progress)
+  );
+}
+
+/* Domingo: el tramo de solo votos (de las 20:00 a las 23:59), rayado en rojo. */
+.day[data-day="votes"] .segment {
+  background:
+    linear-gradient(90deg, var(--bb-red) 0 83%, transparent 83%),
+    repeating-linear-gradient(
+      -60deg,
+      var(--bb-red) 0 var(--bb-stroke),
+      var(--bb-red-shade) var(--bb-stroke) calc(var(--bb-stroke) + var(--bb-stroke-cursor))
+    );
+}
+
+.dayLabel {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  line-height: 1;
+}
+
+.day[data-day="today"] .dayLabel {
+  color: var(--bb-white);
+}
+
+.when {
+  margin-top: var(--bb-space-2);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-semibold);
+  line-height: 1.2;
+}
+
+/* ── En línea (tarjeta de la semana en móvil): rótulo y dígitos en una fila, la barra debajo ── */
+.inline {
+  --frame-border: transparent;
+  --frame-fill: transparent;
+  justify-items: stretch;
+  padding: 0;
+}
+
+.inline .timer {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--bb-space-3);
+}
+
+.inline .label {
+  color: var(--bb-text-3);
+  letter-spacing: var(--bb-tracking-label);
+}
+
+.inline .digits {
+  gap: 0;
+  margin: 0;
+}
+
+.clock.inline .group b {
+  font-size: var(--bb-fs-lg);
+}
+
+.clock.inline .separator {
+  padding: 0;
+  font-size: var(--bb-fs-lg);
+}
+
+.inline .week {
+  margin-top: var(--bb-space-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clock[data-phase="final"] {
+    animation: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .clock[data-phase="final"] {
+  animation: none;
+}

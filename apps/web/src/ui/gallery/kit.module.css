@@ -1,7 +1,6 @@
 /*
- * Galería en la arena (tarea 0.22): cabecera, índice, secciones, bloques y muestras con las piezas y
- * los tokens de la v0.6 (§3.2). Las secciones viejas (`ComponentSections`, `LayoutSection`) siguen con
- * `GalleryPage.module.css` hasta que se rehacen (0.25) o se retiran (0.27).
+ * Galería en la arena (tareas 0.22 y 0.25): cabecera, índice, secciones, bloques, muestras y celdas de
+ * estado con las piezas y los tokens de la v0.6 (§3.2).
  */
 
 .page {
@@ -11,18 +10,6 @@
   max-width: 90rem;
   margin: 0 auto;
   padding: var(--bb-space-8) var(--bb-gutter) var(--bb-space-16);
-}
-
-/*
- * La galería se ve sobre negro, como las maquetas: tapa el fondo del marco viejo (orbes del sello, que
- * se retiran en la 0.23/0.27) para que lo que se mide aquí sea solo la arena.
- */
-.page::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background: var(--bb-black);
 }
 
 .header {
@@ -251,4 +238,40 @@
   font-family: var(--bb-font-num);
   font-size: var(--bb-fs-xs);
   overflow-wrap: anywhere;
+}
+
+/* ── Celdas de estado (matriz de §3.3) ────────────────────────────────────────────────────── */
+.cell {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: var(--bb-space-2);
+  min-width: 0;
+  margin: 0;
+}
+
+.cellWide {
+  grid-column: 1 / -1;
+}
+
+.cellStage {
+  --frame-fill: var(--bb-panel);
+  --frame-border: var(--bb-line);
+  display: grid;
+  place-items: center;
+  min-height: var(--bb-space-16);
+  padding: var(--bb-space-6) var(--bb-space-5);
+}
+
+.cellStage > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.matrixStage {
+  place-items: start;
+}
+
+.matrixReason {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-sm);
 }

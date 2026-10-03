@@ -1,0 +1,266 @@
+/*
+ * Opción de menú (§3.3, §3.8.3; maqueta `01-menu.html` `.plate`): placa en paralelogramo
+ * (`--bb-slant`) de dos capas, borde y relleno. Elegida = enfocada (o la elegida del grupo cuando el
+ * foco está fuera, `data-cursor-active`): sale a la izquierda, crece, se rellena de rojo con trama y
+ * enseña la flecha, el 1P (el cursor) y su tecla.
+ */
+.plate {
+  --plate-border: var(--bb-line-strong);
+  --plate-fill: var(--bb-panel-veil);
+  --plate-shift: var(--bb-space-7);
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: var(--bb-space-13) auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--bb-space-4);
+  height: calc(var(--bb-space-16) + var(--bb-space-1) + var(--bb-stroke));
+  margin-left: var(--plate-shift);
+  padding: 0 var(--bb-space-8) 0 calc(var(--bb-space-8) + var(--bb-stroke));
+  color: var(--bb-white);
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    margin-left var(--bb-dur-tick) var(--bb-ease-snap),
+    height var(--bb-dur-tick) var(--bb-ease-snap);
+}
+
+.plate::before,
+.plate::after,
+.texture {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  clip-path: polygon(var(--bb-slant) 0, 100% 0, calc(100% - var(--bb-slant)) 100%, 0 100%);
+  pointer-events: none;
+}
+
+.plate::before {
+  inset: 0;
+  background: var(--plate-border);
+}
+
+.plate::after {
+  inset: var(--bb-stroke);
+  background: var(--plate-fill);
+}
+
+/* La trama de relleno de la elegida, que crece hacia la derecha (como la maqueta). */
+.texture {
+  inset: var(--bb-stroke);
+  z-index: 0;
+  display: none;
+  background:
+    radial-gradient(circle, var(--bb-red-shade) 0 var(--bb-tex-fill-dot), transparent var(--bb-tex-fill-dot))
+    0 0 / var(--bb-tex-fill-cell) var(--bb-tex-fill-cell);
+  opacity: 0.55;
+  mask: linear-gradient(100deg, transparent 35%, var(--bb-black) 100%);
+}
+
+.index {
+  position: relative;
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+}
+
+.label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-3);
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-plate);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-plate);
+  letter-spacing: var(--bb-tracking-display);
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.lock {
+  flex: none;
+  font-size: 0.7em;
+}
+
+.detail {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  gap: var(--bb-space-2);
+  min-width: 0;
+  max-width: 100%;
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1;
+  text-align: right;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.detailText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.detailText b {
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-md);
+}
+
+.key {
+  display: none;
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  left: calc(-1 * var(--bb-space-6));
+  display: none;
+  width: var(--bb-space-4);
+  height: var(--bb-space-5);
+  background: var(--bb-white);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  translate: 0 -50%;
+}
+
+/* ── Hover forzado (galería): el marco se aclara ────────────────────────────────────────── */
+.plate[data-force-state="hover"] {
+  --plate-border: var(--bb-white);
+}
+
+/* ── Elegida (enfocada o la elegida del grupo) ───────────────────────────────────────────── */
+.plate:focus,
+.plate[data-cursor-active="true"],
+.plate[data-force-state="focus"],
+.plate[data-force-state="pressed"] {
+  --plate-border: var(--bb-white);
+  --plate-fill: var(--bb-red-cta);
+  --plate-shift: 0px;
+  grid-template-columns: var(--bb-space-14) auto minmax(0, 1fr);
+  height: calc(var(--bb-space-16) + var(--bb-space-5));
+}
+
+.plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+  :is(.texture, .arrow) {
+  display: block;
+}
+
+.plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+  .key {
+  display: inline-grid;
+}
+
+.plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+  .index {
+  color: var(--bb-white);
+}
+
+.plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+  .label {
+  font-size: var(--bb-fs-plate-on);
+}
+
+.plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+  .detail {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-sm);
+  letter-spacing: var(--bb-tracking-button);
+  text-transform: none;
+}
+
+/* El cursor de las placas: el 1P a la izquierda de la flecha. */
+.plate :global([data-cursor-player="left"]) {
+  right: calc(100% + var(--bb-space-8));
+}
+
+/* Pulsada: escala 0,98 (y la transición de pantalla barre la diagonal). */
+.plate:active,
+.plate[data-force-state="pressed"] {
+  scale: 0.98;
+}
+
+/* ── Deshabilitada: candado, etiqueta apagada y el motivo ────────────────────────────────── */
+.plate[data-disabled] {
+  cursor: not-allowed;
+}
+
+.plate[data-disabled] .label {
+  color: var(--bb-text-4);
+}
+
+.plate[data-disabled]:is(:focus, [data-cursor-active="true"], [data-force-state="focus"]) {
+  --plate-fill: var(--bb-panel-2);
+}
+
+.plate[data-disabled]:is(:focus, [data-cursor-active="true"], [data-force-state="focus"])
+  :is(.texture, .key) {
+  display: none;
+}
+
+.plate[data-disabled]:is(:focus, [data-cursor-active="true"], [data-force-state="focus"]) .label {
+  color: var(--bb-text-2);
+}
+
+.plate[data-disabled]:is(:focus, [data-cursor-active="true"], [data-force-state="focus"]) .index {
+  color: var(--bb-text-2);
+}
+
+/* ── Móvil: 48 px (56 la elegida), sin flecha, 1P ni tecla ──────────────────────────────── */
+@media (max-width: 720px) {
+  .plate {
+    --plate-shift: var(--bb-space-3);
+    grid-template-columns: var(--bb-space-8) auto minmax(0, 1fr);
+    column-gap: var(--bb-space-3);
+    height: var(--bb-space-12);
+    padding: 0 var(--bb-space-5) 0 var(--bb-space-6);
+  }
+
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
+    grid-template-columns: var(--bb-space-8) auto minmax(0, 1fr);
+    height: var(--bb-space-14);
+  }
+
+  .index {
+    font-size: var(--bb-fs-sm);
+  }
+
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+    :is(.arrow, .key) {
+    display: none;
+  }
+}
+
+/* Móvil bajo (≤ 700 px de alto): placas de 44 px (§3.8.3). */
+@media (max-width: 720px) and (max-height: 700px) {
+  .plate {
+    height: var(--bb-target);
+  }
+
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
+    height: calc(var(--bb-space-12) + var(--bb-stroke));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plate {
+    transition: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .plate {
+  transition: none;
+}

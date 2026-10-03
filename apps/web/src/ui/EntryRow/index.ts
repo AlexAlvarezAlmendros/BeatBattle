@@ -1,1 +1,8 @@
-export { EntryList, EntryRow, type EntryRowProps, type EntryRowState } from './EntryRow'
+export {
+  EntryList,
+  EntryRow,
+  type EntryRowProps,
+  type EntryRowResult,
+  type EntryRowState,
+  type EntryRowStatus,
+} from './EntryRow'

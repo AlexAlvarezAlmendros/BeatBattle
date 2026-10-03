@@ -1,0 +1,39 @@
+/*
+ * Portada del voto ciego (§3.4.5): fondo granate que se oscurece hacia el borde, puntos rojos y
+ * blancos, galleta negra con filete rojo. Solo colores de la paleta.
+ */
+.cover {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, var(--bb-wine-2) 0 40%, var(--bb-wine-3) 70%, var(--bb-black) 100%);
+}
+
+.rim {
+  fill: none;
+  stroke: var(--bb-line);
+  stroke-width: 0.6;
+}
+
+.red {
+  fill: var(--bb-red);
+}
+
+.white {
+  fill: var(--bb-white);
+}
+
+.hole {
+  fill: var(--bb-black);
+}
+
+.label {
+  fill: none;
+  stroke: var(--bb-red);
+  stroke-width: 1.1;
+}
+
+.spindle {
+  fill: var(--bb-white);
+}

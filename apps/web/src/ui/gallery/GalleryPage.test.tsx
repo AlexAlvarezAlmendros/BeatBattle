@@ -3,13 +3,12 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
-import { resetGlassCapabilityCache } from '../glass'
 import { useToasts } from '../Toast'
 import { COMPONENT_ANCHORS } from './anchors'
 import { CONTRAST_RULES } from './contrast'
 import { GalleryPage } from './GalleryPage'
 import { GALLERY_SECTIONS } from './sections'
-import { SEAL_STATES, STATE_MATRIX } from './stateMatrix'
+import { STATE_MATRIX, STATES } from './stateMatrix'
 
 /** Pinta la galería y espera a sus secciones, que se cargan aparte (`React.lazy`). */
 async function renderGallery() {
@@ -29,12 +28,11 @@ afterEach(() => {
   document.documentElement.removeAttribute('data-serious')
   act(() => useToasts.getState().clear())
   vi.unstubAllGlobals()
-  resetGlassCapabilityCache()
 })
 
 // El cuerpo de la galería (todos los componentes y el layout) se importa aparte: con todo el monorepo
 // en paralelo, la primera importación pasa de los 5 s por defecto. Mismo margen que `renderGallery`.
-describe('galería /dev/galeria (0.9)', { timeout: 15_000 }, () => {
+describe('galería /dev/galeria (0.9, 0.22, 0.25)', { timeout: 15_000 }, () => {
   it('la cabecera (título, ajustes e índice) sale al momento, sin esperar a los componentes', () => {
     render(
       <MemoryRouter initialEntries={['/dev/galeria']}>
@@ -51,7 +49,8 @@ describe('galería /dev/galeria (0.9)', { timeout: 15_000 }, () => {
     await renderGallery()
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
     expect(screen.getByRole('heading', { level: 1, name: t('dev.gallery.title') })).toBeInTheDocument()
-    const sections = screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent)
+    // Los <h2> de sección (las piezas de muestra llevan los suyos dentro de sus bloques).
+    const sections = [...document.querySelectorAll('section > h2')].map((heading) => heading.textContent)
     expect(sections).toEqual(GALLERY_SECTIONS.map((section) => t(section.title)))
     for (const section of GALLERY_SECTIONS) {
       const element = document.getElementById(section.id)
@@ -146,54 +145,53 @@ describe('galería /dev/galeria (0.9)', { timeout: 15_000 }, () => {
     expect(document.documentElement).not.toHaveAttribute('data-serious')
   })
 
-  it('RD-VIS-03: pinta cada componente base de §3.3 en su bloque', async () => {
+  it('RD-VIS-03: pinta cada componente de §3.3 en su bloque, en el orden del registro', async () => {
     await renderGallery()
     for (const { id, key } of COMPONENT_ANCHORS) {
       const block = document.getElementById(id)
       expect(block, id).not.toBeNull()
-      expect(within(block!).getAllByRole('heading', { level: 3 })[0]!.textContent).toMatch(
-        new RegExp(`^${t(`dev.gallery.components.${key}`)}`),
+      expect(within(block!).getAllByRole('heading', { level: 3 })[0]!.textContent).toBe(
+        t(`dev.gallery.components.${key}`),
       )
     }
     const byId = (id: string) => document.getElementById(id)!
-    expect(byId('boton').querySelectorAll('[data-variant="cta"]').length).toBeGreaterThan(0)
-    expect(byId('boton').querySelectorAll('[data-variant="outline"]').length).toBeGreaterThan(0)
-    expect(byId('boton').querySelectorAll('[data-variant="icon"]').length).toBeGreaterThan(0)
-    expect(within(byId('chip')).getAllByRole('button', { pressed: true }).length).toBeGreaterThan(0)
-    expect(byId('tarjeta').querySelectorAll('[data-surface][data-tilt]').length).toBeGreaterThanOrEqual(4)
-    expect(within(byId('tesela')).getAllByRole('term').length).toBeGreaterThan(0)
-    expect(within(byId('rotulo')).getByText(t('dev.gallery.sample.sectionLabel.info'))).toBeInTheDocument()
-    expect(within(byId('onda')).getAllByRole('img').length).toBeGreaterThanOrEqual(4)
+    for (const variant of ['cta', 'brand', 'white', 'outline'])
+      expect(byId('boton').querySelectorAll(`[data-variant="${variant}"]`).length, variant).toBeGreaterThan(0)
+    expect(within(byId('opcion-menu')).getAllByRole('menuitem').length).toBeGreaterThanOrEqual(4)
+    expect(within(byId('pestanas')).getAllByRole('tablist').length).toBeGreaterThan(0)
+    expect(within(byId('chip-filtro')).getAllByRole('button', { pressed: true }).length).toBeGreaterThan(0)
+    expect(byId('sello').querySelectorAll('[data-stamp]').length).toBeGreaterThanOrEqual(4)
+    expect(within(byId('ficha')).getByRole('heading', { level: 2 })).toBeInTheDocument()
+    expect(within(byId('casilla')).getAllByRole('option').length).toBeGreaterThanOrEqual(8)
     expect(within(byId('fila')).getAllByRole('article').length).toBeGreaterThanOrEqual(4)
-    expect(within(byId('modal')).getAllByText(t('dev.gallery.sample.modal.title')).length).toBeGreaterThan(0)
-    expect(within(byId('aviso')).getByText(t('dev.gallery.sample.toast.error'))).toBeInTheDocument()
-    expect(within(byId('xp')).getAllByRole('progressbar').length).toBeGreaterThanOrEqual(5)
+    expect(within(byId('tesela')).getAllByRole('term').length).toBeGreaterThan(0)
+    expect(within(byId('onda')).getAllByRole('slider').length).toBeGreaterThanOrEqual(4)
+    expect(byId('ventana').querySelectorAll('[data-frame="title"]').length).toBeGreaterThanOrEqual(4)
+    expect(byId('anunciador').querySelectorAll('[data-announcer]').length).toBeGreaterThanOrEqual(2)
+    expect(byId('aviso').querySelectorAll('[data-tone]').length).toBeGreaterThanOrEqual(4)
+    expect(within(byId('medidor')).getAllByRole('meter').length).toBeGreaterThanOrEqual(4)
     expect(byId('esqueleto').querySelectorAll('[data-skeleton]').length).toBeGreaterThan(0)
-    expect(within(byId('cuenta-atras')).getAllByRole('timer')).toHaveLength(5)
+    expect(within(byId('reloj')).getAllByRole('timer')).toHaveLength(5)
+    expect(within(byId('portada')).getAllByRole('img', { name: /Disco/ })).toHaveLength(3)
   })
 
-  it('RD-VIS-03: cada bloque enseña los estados de su matriz y dice por qué no enseña el resto', async () => {
+  it('RD-VIS-03: cada bloque enseña los estados de su matriz y dice por qué no enseña el resto (salvo Estrellas, 1.5)', async () => {
     await renderGallery()
-    // La matriz cubre todos los componentes de la galería (Estrellas llega con la tarea 1.5).
-    expect(Object.keys(STATE_MATRIX).sort()).toEqual(COMPONENT_ANCHORS.map(({ key }) => key).sort())
-    for (const { id, key } of COMPONENT_ANCHORS) {
+    // La matriz cubre los componentes de §3.3 de la galería (Estrellas llega con la tarea 1.5).
+    const inMatrix = COMPONENT_ANCHORS.filter((anchor) => anchor.matrix)
+    expect(Object.keys(STATE_MATRIX).sort()).toEqual(inMatrix.map(({ key }) => key).sort())
+    for (const { id, key } of inMatrix) {
       const block = document.getElementById(id)!
-      for (const state of SEAL_STATES) {
-        const coverage = STATE_MATRIX[key][state]
-        // Dentro de su bloque, no en la galería entera: el botón ya no tapa a los demás.
+      for (const state of STATES) {
+        const coverage = STATE_MATRIX[key as keyof typeof STATE_MATRIX][state]
         const cells = [...block.querySelectorAll<HTMLElement>(`figure[data-state="${state}"]`)]
         expect(cells.length, `${id} · ${state}`).toBeGreaterThan(0)
         for (const cell of cells) expect(cell.dataset.coverage, `${id} · ${state}`).toBe(coverage.kind)
-        if (coverage.kind === 'shown') {
-          // La celda enseña la pieza: algo más que el texto del motivo.
-          expect(cells[0]!.querySelector('figcaption')?.textContent, `${id} · ${state}`).toContain(
-            t(`dev.gallery.states.${state}`),
-          )
-        } else {
+        if (coverage.kind === 'notApplicable') {
           expect(cells[0], `${id} · ${state}`).toHaveTextContent(
             t(`dev.gallery.matrix.reasons.${coverage.reason}`),
           )
-          expect(cells[0], `${id} · ${state}`).toHaveTextContent(t(`dev.gallery.matrix.${coverage.kind}`))
+          expect(cells[0], `${id} · ${state}`).toHaveTextContent(t('dev.gallery.matrix.notApplicable'))
         }
       }
     }
@@ -203,43 +201,55 @@ describe('galería /dev/galeria (0.9)', { timeout: 15_000 }, () => {
     await renderGallery()
     const cell = (id: string, state: string) =>
       document.getElementById(id)!.querySelector<HTMLElement>(`figure[data-state="${state}"]`)!
-    // Botón: los 8 en las tres variantes.
+    // Botón: los 8 en las cuatro variantes.
     const buttons = document.getElementById('boton')!
-    for (const state of ['hover', 'focus', 'pressed']) {
-      expect(buttons.querySelectorAll(`[data-force-state="${state}"]`).length, state).toBeGreaterThanOrEqual(
-        3,
-      )
-    }
-    expect(buttons.querySelectorAll('[aria-busy="true"]').length).toBeGreaterThanOrEqual(3)
-    expect(buttons.querySelectorAll('[data-status="success"]').length).toBeGreaterThanOrEqual(3)
-    expect(buttons.querySelectorAll('[data-status="error"]').length).toBeGreaterThanOrEqual(3)
-    expect(buttons.querySelectorAll('button:disabled').length).toBeGreaterThanOrEqual(3)
-    // Chip.
     for (const state of ['hover', 'focus', 'pressed'])
-      expect(cell('chip', state).querySelector(`[data-force-state="${state}"]`), state).not.toBeNull()
-    expect(cell('chip', 'disabled').querySelector('button:disabled')).not.toBeNull()
-    // Tarjeta.
-    expect(cell('tarjeta', 'hover').querySelector('[data-force-state="hover"]')).not.toBeNull()
-    expect(cell('tarjeta', 'loading').querySelector('[aria-busy="true"]')).not.toBeNull()
-    expect(cell('tarjeta', 'disabled').querySelector('[data-disabled]')).not.toBeNull()
-    expect(cell('tarjeta', 'disabled').querySelector('button:disabled')).not.toBeNull()
-    // Tesela.
-    expect(cell('tesela', 'loading').querySelector('[aria-busy="true"], [data-skeleton]')).not.toBeNull()
-    // Fila de entrada: play pulsado, cargando, deshabilitado y error de carga (RF-PLAY-09).
+      expect(buttons.querySelectorAll(`[data-force-state="${state}"]`).length, state).toBeGreaterThanOrEqual(
+        4,
+      )
+    expect(buttons.querySelectorAll('[aria-busy="true"]').length).toBeGreaterThanOrEqual(4)
+    expect(buttons.querySelectorAll('[data-status="success"]').length).toBeGreaterThanOrEqual(4)
+    expect(buttons.querySelectorAll('[data-status="error"]').length).toBeGreaterThanOrEqual(4)
+    expect(buttons.querySelectorAll('[aria-disabled="true"]:not([aria-busy])').length).toBeGreaterThanOrEqual(
+      4,
+    )
+    // Opción de menú, pestañas, chip y casilla: los forzados y los deshabilitados.
+    for (const state of ['hover', 'focus', 'pressed']) {
+      expect(cell('opcion-menu', state).querySelector(`[data-force-state="${state}"]`), state).not.toBeNull()
+      expect(cell('pestanas', state).querySelector(`[data-force-state="${state}"]`), state).not.toBeNull()
+      expect(cell('chip-filtro', state).querySelector(`[data-force-state="${state}"]`), state).not.toBeNull()
+      expect(cell('casilla', state).querySelector(`[data-force-state="${state}"]`), state).not.toBeNull()
+      expect(cell('onda', state).querySelector(`[data-force-state="${state}"]`), state).not.toBeNull()
+    }
+    expect(cell('opcion-menu', 'disabled').querySelector('[data-disabled]')).not.toBeNull()
+    expect(cell('pestanas', 'disabled').querySelector('[aria-disabled="true"]')).not.toBeNull()
+    expect(cell('chip-filtro', 'disabled').querySelector('button:disabled')).not.toBeNull()
+    expect(cell('casilla', 'disabled').querySelector('[data-voted]')).not.toBeNull()
+    expect(cell('casilla', 'loading').querySelector('[aria-busy="true"]')).not.toBeNull()
+    expect(cell('casilla', 'error').querySelector('[data-error]')).not.toBeNull()
+    // Ficha: cargando y error.
+    expect(cell('ficha', 'loading').querySelector('[aria-busy="true"]')).not.toBeNull()
+    expect(within(cell('ficha', 'error')).getByRole('alert')).toBeInTheDocument()
+    // Fila: play pulsado, cargando, deshabilitado y error de carga (RF-PLAY-09).
     expect(cell('fila', 'pressed').querySelector('button[data-force-state="pressed"]')).not.toBeNull()
     expect(cell('fila', 'loading').querySelector('button[aria-busy="true"]')).not.toBeNull()
-    expect(cell('fila', 'disabled').querySelector('button:disabled')).not.toBeNull()
+    expect(cell('fila', 'disabled').querySelector('[data-disabled]')).not.toBeNull()
     expect(within(cell('fila', 'error')).getByText(t('ui.entryRow.loadError'))).toBeInTheDocument()
-    // Modal: foco en cerrar, cuerpo que carga y cuerpo con error.
-    expect(cell('modal', 'focus').querySelector('button[data-force-state="focus"]')).not.toBeNull()
-    expect(cell('modal', 'loading').querySelector('[aria-busy="true"] [data-skeleton]')).not.toBeNull()
-    expect(within(cell('modal', 'error')).getByText(t('dev.gallery.sample.modal.error'))).toBeInTheDocument()
+    // Onda: cargando, deshabilitada y error.
+    expect(cell('onda', 'loading').querySelector('[aria-busy="true"]')).not.toBeNull()
+    expect(cell('onda', 'disabled').querySelector('[aria-disabled="true"]')).not.toBeNull()
+    expect(within(cell('onda', 'error')).getByRole('alert')).toBeInTheDocument()
+    // Ventana: foco en cerrar, cuerpo que carga y cuerpo con error.
+    expect(cell('ventana', 'focus').querySelector('button[data-force-state="focus"]')).not.toBeNull()
+    expect(cell('ventana', 'loading').querySelector('[aria-busy="true"] [data-skeleton]')).not.toBeNull()
+    expect(cell('ventana', 'error').querySelector('[role="alert"]')).not.toBeNull()
     // Aviso: botón de cerrar pulsado; éxito y error con su tono.
     expect(cell('aviso', 'pressed').querySelector('button[data-force-state="pressed"]')).not.toBeNull()
     expect(cell('aviso', 'success').querySelector('[data-tone="success"]')).not.toBeNull()
     expect(cell('aviso', 'error').querySelector('[data-tone="error"]')).not.toBeNull()
-    // Barra de XP: el éxito es la subida de nivel.
-    expect(cell('xp', 'success').querySelector('[data-force-state="levelUp"]')).not.toBeNull()
+    // Medidor lleno y reloj agotado.
+    expect(cell('medidor', 'success').querySelector('[data-full]')).not.toBeNull()
+    expect(cell('reloj', 'error').querySelector('[data-phase="ended"]')).not.toBeNull()
   })
 
   it('RNF-A11Y-03 / RD-MOT-03: el interruptor «Reducir movimiento» pone data-motion="reduced" en <html>', async () => {
@@ -250,10 +260,8 @@ describe('galería /dev/galeria (0.9)', { timeout: 15_000 }, () => {
     await user.click(toggle)
     expect(toggle).toHaveAttribute('aria-checked', 'true')
     expect(document.documentElement).toHaveAttribute('data-motion', 'reduced')
-    // Las tarjetas dejan de inclinarse.
+    // La crónica y las piezas con bucle se quedan quietas: lo comprueban sus propios tests y el E2E.
     await act(async () => {})
-    for (const card of document.querySelectorAll('#tarjeta [data-tilt]'))
-      expect(card).toHaveAttribute('data-tilt', 'off')
     await user.click(toggle)
     expect(document.documentElement).not.toHaveAttribute('data-motion')
   })
@@ -286,23 +294,10 @@ describe('galería /dev/galeria (0.9)', { timeout: 15_000 }, () => {
     expect(document.documentElement).toHaveAttribute('data-motion', 'reduced')
   })
 
-  it('RNF-A11Y-01: los interruptores se usan con teclado; cristal o macizo cambia las superficies', async () => {
-    const user = userEvent.setup()
-    await renderGallery()
-    const glass = screen.getByRole('switch', { name: t('dev.gallery.controls.glass') })
-    expect(glass).toHaveAttribute('aria-checked', 'true')
-    expect(document.querySelectorAll('#tarjeta [data-surface="glass"]').length).toBeGreaterThan(0)
-    glass.focus()
-    await user.keyboard(' ')
-    expect(glass).toHaveAttribute('aria-checked', 'false')
-    expect(document.querySelectorAll('#tarjeta [data-surface="glass"]')).toHaveLength(0)
-    expect(document.querySelectorAll('#modal [data-surface="solid"]').length).toBeGreaterThan(0)
-  })
-
   it('los botones de la demo lanzan avisos de verdad, que pinta la zona del marco (no una propia)', async () => {
     const user = userEvent.setup()
     await renderGallery()
-    await user.click(screen.getByRole('button', { name: t('dev.gallery.demo.toastError') }))
+    await user.click(screen.getByRole('button', { name: t('dev.gallery.arena.toast.launchError') }))
     expect(useToasts.getState().toasts).toMatchObject([{ tone: 'error' }])
     // Sin el marco (`RootLayout`), la galería no tiene zona de avisos: no monta una segunda.
     expect(screen.queryByRole('region', { name: t('ui.toast.region') })).toBeNull()

@@ -10,32 +10,47 @@ import {
   type Ref,
   useCallback,
   useEffect,
+  useId,
   useRef,
 } from 'react'
 import { Link, type To } from 'react-router'
 import { t } from '../../i18n'
 import { announce, ensureAnnouncer } from '../announce'
+import { Cursor } from '../Cursor'
+import { frameAttributes } from '../Frame'
 import { cx, forceStateAttr, type InteractionState } from '../forceState'
-import { GlassSurface } from '../GlassSurface'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 import { Icon, type IconName } from '../Icon'
+import { Key } from '../Key'
 import styles from './Button.module.css'
 import { WaveLoader } from './WaveLoader'
 
-export type ButtonVariant = 'cta' | 'outline' | 'icon'
 /**
- * `sm`, `md` y `lg` para la interfaz; `hero`, el CTA del hero del sello (Hero.css `.hero-cta`,
- * `otp-metrics.json`): 15,2 px con relleno de 15,2 × 32 px y 13,6 px con 0,08 em en móvil.
+ * Variantes del botón (§3.3): `cta` (relleno `--bb-red-cta`, texto blanco: 4,75:1), `brand` (relleno
+ * `--bb-red`, texto negro: 5,32:1), `white` (relleno blanco, texto negro) y `outline` (borde blanco,
+ * fondo negro).
  */
-export type ButtonSize = 'sm' | 'md' | 'lg' | 'hero'
-/** Resultado de la última acción: `success` pinta destello y check; `error`, icono y sacudida. */
+export type ButtonVariant = 'cta' | 'brand' | 'white' | 'outline'
+/** Alturas: `sm` 40 px (objetivo de 44 por pseudoelemento), `md` 48 y `lg` 56. */
+export type ButtonSize = 'sm' | 'md' | 'lg'
+/** Resultado de la última acción: `success` (check y texto) o `error` (aviso de papel y sacudida). */
 export type ButtonStatus = 'idle' | 'success' | 'error'
+
+export const BUTTON_VARIANTS: readonly ButtonVariant[] = ['cta', 'brand', 'white', 'outline']
+export const BUTTON_SIZES: readonly ButtonSize[] = ['sm', 'md', 'lg']
 
 /** Escala al pulsar (§3.3, Anexo E: *squish* a 0,97 con el muelle de interacción). */
 export const PRESSED_SCALE = 0.97
 
 interface BaseProps {
+  variant?: ButtonVariant
   size?: ButtonSize
+  /** Icono delante del texto (o solo el icono, con `iconOnly`). */
+  icon?: IconName
+  /** Botón cuadrado solo con icono: necesita `aria-label`. */
+  iconOnly?: boolean
+  /** Tecla que lo acciona, a la derecha («INTRO», «J»): la ayuda visible del teclado. */
+  keyHint?: string
   /** Estado de interacción forzado para la galería (`data-force-state`). */
   state?: InteractionState
   /** Sustituye el contenido por la onda de 5 barras, con `aria-busy` y texto accesible. */
@@ -43,39 +58,22 @@ interface BaseProps {
   /** Texto accesible mientras carga (por defecto, «Cargando…»). */
   loadingLabel?: string
   status?: ButtonStatus
+  /**
+   * Deshabilitado: 45 % de opacidad y `aria-disabled` (sigue siendo enfocable para que se lea el
+   * motivo). Los clics no hacen nada.
+   */
   disabled?: boolean
+  /** Por qué está deshabilitado, en texto al lado del botón y en su `aria-describedby`. */
+  disabledReason?: string
   /** Ocupa todo el ancho de su contenedor. */
   fullWidth?: boolean
   className?: string
+  children?: ReactNode
+  'aria-label'?: string
   ref?: Ref<HTMLButtonElement | HTMLAnchorElement>
 }
 
-interface TextVariantProps {
-  /** `cta` (rojo, por defecto) u `outline` (contorno). */
-  variant?: 'cta' | 'outline'
-  /** Icono delante del texto. */
-  icon?: IconName
-  children: ReactNode
-  'aria-label'?: string
-  /**
-   * Solo con `outline`: contorno sobre cristal (`GlassSurface`, `--bb-glass-card`), como el botón
-   * secundario del hero del sello. Sin capacidad de cristal, el mismo velo oscuro sin refracción. En el
-   * CTA no hace nada (su fondo es el rojo).
-   */
-  glass?: boolean
-}
-
-interface IconVariantProps {
-  /** Botón redondo de 36–44 px solo con icono (como el play de la lista del sello). */
-  variant: 'icon'
-  icon: IconName
-  /** Obligatorio: un botón sin texto necesita nombre accesible. */
-  'aria-label': string
-  children?: never
-  glass?: never
-}
-
-type Omitted = 'children' | 'aria-label' | 'className' | 'disabled' | 'ref'
+type Omitted = keyof BaseProps | 'disabled'
 
 interface AsButton extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, Omitted> {
   to?: never
@@ -95,11 +93,8 @@ interface AsAnchor extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, Omitted
   to?: never
 }
 
-export type ButtonProps = BaseProps &
-  (TextVariantProps | IconVariantProps) &
-  (AsButton | AsRouterLink | AsAnchor)
+export type ButtonProps = BaseProps & (AsButton | AsRouterLink | AsAnchor)
 
-/** Todas las props a la vez, para el cuerpo del componente (los tipos de arriba garantizan las combinaciones). */
 type AnyHandlers = {
   onClick?: (event: MouseEvent<HTMLElement>) => void
   onPointerDown?: (event: PointerEvent<HTMLElement>) => void
@@ -110,71 +105,56 @@ type AnyHandlers = {
   onKeyUp?: (event: KeyboardEvent<HTMLElement>) => void
 }
 
-const VARIANT_CLASS: Record<ButtonVariant, string | undefined> = {
-  cta: styles.cta,
-  outline: styles.outline,
-  icon: styles.iconButton,
-}
-
-const SIZE_CLASS: Record<ButtonSize, string | undefined> = {
-  sm: styles.sm,
-  md: styles.md,
-  lg: styles.lg,
-  hero: styles.hero,
-}
-
 /**
- * Botón base (§3.3): CTA rojo, contorno e icono redondo. Pinta un `<Link>` con `to`, un `<a>` con
- * `href` y un `<button type="button">` en el resto de casos. Con `glass` (solo el contorno), el mismo
- * elemento pasa por `GlassSurface`, sin envoltorio.
+ * Botón de la arena (guía §3.3): rectángulo con chaflán `--bb-cut-md`, display cursiva 800 a 15 px y
+ * 118 %, mayúsculas, con su tecla a la derecha (`[INTRO]`). Pinta un `<Link>` con `to`, un `<a>` con
+ * `href` y un `<button type="button">` en el resto de casos.
  *
- * - Hover: sube 1 px y el halo crece (CTA). Pulsado: escala 0,97 con muelle (ratón, táctil, Espacio
- *   o Intro). Con «reducir movimiento» solo cambia el color (Anexo E).
- * - Cargando: la onda de 5 barras sustituye al contenido sin cambiar el ancho; `aria-busy` y el foco
- *   se queda en el botón (no se desactiva), pero los clics no hacen nada.
- * - Éxito: destello blanco y check. Error: icono y una sacudida corta. Los dos se nombran (texto
- *   oculto en el botón: «Subido (Hecho)») y, al pasar a ellos, se anuncian por la región viva
- *   compartida (WCAG 4.1.3). En el botón icono el `aria-label` se compone con el estado o la carga.
+ * - **Hover**: avanza 4 px. **Foco**: el cursor de juego (marco blanco de 3 px a 4 px que sigue el
+ *   chaflán). **Pulsado**: escala 0,97 con el muelle de interacción (ratón, toque, Espacio o Intro).
+ *   Con «reducir movimiento», ni avance ni escala (Anexo E).
+ * - **Cargando**: la onda de 5 barras sustituye al texto sin cambiar el ancho; `aria-busy` y el foco
+ *   se queda en el botón, pero los clics no hacen nada.
+ * - **Deshabilitado**: 45 %, `aria-disabled` y el motivo en texto al lado (`disabledReason`).
+ * - **Éxito**: check y texto. **Error**: aviso de papel (blanco con texto negro, 21:1), icono de alerta y
+ *   una sacudida corta. Los dos se nombran («Subido (Hecho)») y se anuncian al pasar a ellos (WCAG 4.1.3).
  * - El sonido (`ui.press`) lo cablea la Fase 1.
  */
 export function Button(props: ButtonProps) {
   const {
     variant = 'cta',
     size = 'md',
+    icon,
+    iconOnly = false,
+    keyHint,
     state,
     loading = false,
     loadingLabel,
     status = 'idle',
     disabled = false,
+    disabledReason,
     fullWidth = false,
     className,
-    icon,
     children,
-    glass = false,
     ref,
     to,
     href,
     replace,
     ...rest
   } = props as BaseProps &
-    Partial<Omit<TextVariantProps, 'variant'>> & {
-      variant?: ButtonVariant
-      icon?: IconName
-      glass?: boolean
-    } & AnyHandlers & {
+    AnyHandlers & {
       to?: To
       href?: string
       replace?: boolean
       type?: 'button' | 'submit' | 'reset'
-      tabIndex?: number
     } & Record<string, unknown>
   const handlers = rest as AnyHandlers
   const reduced = useReducedMotion()
+  const reasonId = useId()
   const elementRef = useRef<HTMLElement | null>(null)
   const textRef = useRef<HTMLSpanElement>(null)
   const pressAnimation = useRef<ReturnType<typeof animate> | null>(null)
   const inert = loading || disabled
-  const onGlass = glass && variant === 'outline'
   const ariaLabel = rest['aria-label'] as string | undefined
   const statusText = status === 'idle' ? undefined : t(`ui.button.${status}`)
 
@@ -251,19 +231,28 @@ export function Button(props: ButtonProps) {
   const glyph: IconName | undefined = status === 'success' ? 'check' : status === 'error' ? 'alert' : icon
   const content = (
     <>
+      <Cursor cut="md" />
       <span className={styles.content} aria-hidden={loading || undefined}>
         {glyph && <Icon name={glyph} className={styles.glyph} />}
-        {variant !== 'icon' && (
+        {!iconOnly && (
           <span ref={textRef} className={styles.text}>
             {children}
           </span>
         )}
         {/* El estado también con palabras (nunca solo el icono): «Subido (Hecho)». */}
-        {variant !== 'icon' && statusText && (
+        {!iconOnly && statusText && (
           <>
             {' '}
             <span className="sr-only">{t('ui.button.stateHint', { state: statusText })}</span>
           </>
+        )}
+        {keyHint && !iconOnly && (
+          <Key
+            tone={variant === 'white' || variant === 'brand' || status === 'error' ? 'light' : 'dark'}
+            aria-hidden="true"
+          >
+            {keyHint}
+          </Key>
         )}
       </span>
       {loading && (
@@ -272,70 +261,64 @@ export function Button(props: ButtonProps) {
           <span className="sr-only">{loadingLabel ?? t('ui.button.loading')}</span>
         </>
       )}
-      {status === 'success' && <span className={styles.flash} aria-hidden="true" />}
     </>
   )
 
-  // El botón icono se nombra con su `aria-label`, que tapa el contenido: el estado va dentro.
+  // El botón solo con icono se nombra con su `aria-label`, que tapa el contenido: el estado va dentro.
   const iconState = loading ? (loadingLabel ?? t('ui.button.loading')) : statusText
   const shared = {
     ...rest,
-    ...(variant === 'icon' && ariaLabel && iconState
+    ...(iconOnly && ariaLabel && iconState
       ? { 'aria-label': t('ui.button.withState', { label: ariaLabel, state: iconState }) }
       : {}),
     ...eventProps,
+    ...frameAttributes({ cut: 'md' }),
+    'data-cursor': '',
     className: cx(
       styles.button,
-      VARIANT_CLASS[variant],
-      SIZE_CLASS[size],
-      onGlass && styles.glass,
+      styles[variant],
+      styles[size],
+      iconOnly && styles.iconOnly,
       fullWidth && styles.full,
       className,
     ),
     'data-variant': variant,
     'data-status': status === 'idle' ? undefined : status,
     'aria-busy': loading || undefined,
+    'aria-disabled': inert || undefined,
+    'aria-describedby': disabled && disabledReason ? reasonId : undefined,
     ...forceStateAttr(state),
   }
 
-  if (to !== undefined || href !== undefined) {
-    // Un enlace no se puede desactivar: se anuncia como tal, sale del orden de tabulación y no navega.
-    const linkProps = {
-      ...shared,
-      ref: setRef,
-      'aria-disabled': inert || undefined,
-      tabIndex: disabled ? -1 : (rest.tabIndex as number | undefined),
-    }
-    if (to !== undefined) {
-      return onGlass ? (
-        <GlassSurface as={Link} {...linkProps} to={to} replace={replace}>
-          {content}
-        </GlassSurface>
-      ) : (
-        <Link {...linkProps} to={to} replace={replace}>
-          {content}
-        </Link>
-      )
-    }
-    const anchorProps = { ...linkProps, href: disabled ? undefined : href }
-    return onGlass ? (
-      <GlassSurface as="a" {...anchorProps}>
+  let control: ReactNode
+  if (to !== undefined) {
+    control = (
+      <Link {...shared} ref={setRef} to={to} replace={replace}>
         {content}
-      </GlassSurface>
-    ) : (
-      <a {...anchorProps}>{content}</a>
+      </Link>
+    )
+  } else if (href !== undefined) {
+    control = (
+      <a {...shared} ref={setRef} href={disabled ? undefined : href}>
+        {content}
+      </a>
+    )
+  } else {
+    const type = (rest.type as 'button' | 'submit' | 'reset' | undefined) ?? 'button'
+    control = (
+      <button {...shared} ref={setRef} type={type}>
+        {content}
+      </button>
     )
   }
 
-  const type = (rest.type as 'button' | 'submit' | 'reset' | undefined) ?? 'button'
-  const buttonProps = { ...shared, ref: setRef, disabled, 'aria-disabled': loading || undefined }
-  return onGlass ? (
-    <GlassSurface as="button" {...buttonProps} type={type}>
-      {content}
-    </GlassSurface>
-  ) : (
-    <button {...buttonProps} type={type}>
-      {content}
-    </button>
+  if (!disabled || !disabledReason) return control
+  return (
+    <span className={cx(styles.withReason, fullWidth && styles.full)}>
+      {control}
+      <span id={reasonId} className={styles.reason}>
+        {disabledReason}
+      </span>
+    </span>
   )
 }

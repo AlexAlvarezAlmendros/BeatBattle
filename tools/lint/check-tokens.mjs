@@ -146,51 +146,6 @@ export const TEMPORARY_EXCEPTIONS = [
     reason: 'Home con hero y marquee del sello: la rehace el menú principal (0.24).',
   },
   {
-    file: 'apps/web/src/ui/Button/Button.module.css',
-    rules: ['radius-literal', 'stroke-literal', 'token-unknown'],
-    reason: 'Botón del sello (píldora, cristal): lo rehace la 0.25.',
-  },
-  {
-    file: 'apps/web/src/ui/Button/Button.tsx',
-    rules: ['forbidden-component'],
-    reason: 'Botón con contorno de cristal: lo rehace la 0.25.',
-  },
-  {
-    file: 'apps/web/src/ui/Card/Card.module.css',
-    rules: ['radius-literal', 'stroke-literal', 'tilt-literal', 'token-unknown'],
-    reason: 'Tarjeta del sello: la sustituye el marco (0.25).',
-  },
-  {
-    file: 'apps/web/src/ui/Card/Card.tsx',
-    rules: ['forbidden-component', 'token-unknown'],
-    reason: 'Tarjeta de cristal: la sustituye el marco (0.25).',
-  },
-  {
-    file: 'apps/web/src/ui/Chip/Chip.module.css',
-    rules: ['radius-literal', 'stroke-literal', 'token-unknown'],
-    reason: 'Chip píldora del sello: lo rehace la 0.25.',
-  },
-  {
-    file: 'apps/web/src/ui/Countdown/Countdown.module.css',
-    rules: ['token-unknown'],
-    reason: 'Cuenta atrás del sello: la sustituye el reloj de ronda (0.25).',
-  },
-  {
-    file: 'apps/web/src/ui/DataTile/DataTile.module.css',
-    rules: ['radius-literal', 'stroke-literal', 'token-unknown'],
-    reason: 'Tesela del sello: la rehace la 0.25.',
-  },
-  {
-    file: 'apps/web/src/ui/EntryRow/EntryRow.module.css',
-    rules: ['radius-literal', 'stroke-literal', 'token-unknown'],
-    reason: 'Fila de entrada del sello: la rehace la 0.25.',
-  },
-  {
-    file: 'apps/web/src/ui/gallery/GalleryPage.module.css',
-    rules: ['radius-literal', 'stroke-literal', 'token-unknown'],
-    reason: 'Estilos de las secciones viejas de la galería: se van con ellas (0.25 y 0.27).',
-  },
-  {
     file: 'apps/web/src/ui/GlassSurface/GlassSurface.css',
     rules: ['token-unknown'],
     reason: 'Cristal del sello (pieza prohibida, §3.1): la 0.27 lo borra.',
@@ -204,46 +159,6 @@ export const TEMPORARY_EXCEPTIONS = [
     file: 'apps/web/src/ui/GlassSurface/index.ts',
     rules: ['forbidden-component'],
     reason: 'Cristal del sello (pieza prohibida, §3.1): la 0.27 lo borra.',
-  },
-  {
-    file: 'apps/web/src/ui/Modal/Modal.module.css',
-    rules: ['radius-literal', 'stroke-literal', 'token-unknown'],
-    reason: 'Modal del sello: la rehace la 0.25 (ventana de juego).',
-  },
-  {
-    file: 'apps/web/src/ui/Modal/Modal.tsx',
-    rules: ['forbidden-component', 'token-unknown'],
-    reason: 'Modal con superficie de cristal: la rehace la 0.25.',
-  },
-  {
-    file: 'apps/web/src/ui/SectionLabel/SectionLabel.module.css',
-    rules: ['radius-literal', 'token-unknown'],
-    reason: 'Rótulo de sección del sello: lo rehace la 0.25.',
-  },
-  {
-    file: 'apps/web/src/ui/Skeleton/Skeleton.module.css',
-    rules: ['radius-literal', 'token-unknown'],
-    reason: 'Esqueleto del sello: lo rehace la 0.25.',
-  },
-  {
-    file: 'apps/web/src/ui/Toast/Toast.module.css',
-    rules: ['radius-literal', 'stroke-literal', 'token-unknown'],
-    reason: 'Aviso del sello: lo rehace la 0.25.',
-  },
-  {
-    file: 'apps/web/src/ui/Toast/ToastViewport.module.css',
-    rules: ['radius-literal', 'stroke-literal', 'token-unknown'],
-    reason: 'Zona de avisos del sello: la rehace la 0.25.',
-  },
-  {
-    file: 'apps/web/src/ui/Waveform/Waveform.module.css',
-    rules: ['radius-literal', 'token-unknown'],
-    reason: 'Onda del sello: la rehace la 0.25.',
-  },
-  {
-    file: 'apps/web/src/ui/XpBar/XpBar.module.css',
-    rules: ['radius-literal', 'token-unknown'],
-    reason: 'Barra de XP del sello: la sustituye el medidor segmentado (0.25).',
   },
 ]
 

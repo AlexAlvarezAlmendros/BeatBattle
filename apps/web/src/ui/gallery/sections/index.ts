@@ -3,8 +3,7 @@ import type { GallerySectionEntry } from '../registry'
 
 /**
  * Índice de la galería: sus secciones, en orden, cada una en su fichero de esta carpeta (ver
- * `../registry.ts`). Las líneas de trabajo que añaden piezas añaden aquí su sección; las dos `Legacy…`
- * son temporales (0.25 y 0.27).
+ * `../registry.ts`). Cada tarea que añade piezas añade aquí su sección.
  */
 export const GALLERY_SECTIONS: readonly GallerySectionEntry[] = [
   {
@@ -28,6 +27,6 @@ export const GALLERY_SECTIONS: readonly GallerySectionEntry[] = [
       id,
       label: `dev.gallery.components.${key}` as const,
     })),
-    load: () => import('./LegacyComponentsSection'),
+    load: () => import('./ComponentsSection'),
   },
 ]

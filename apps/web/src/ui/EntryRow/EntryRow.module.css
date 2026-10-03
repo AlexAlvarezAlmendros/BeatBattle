@@ -1,289 +1,174 @@
 /*
- * Fila de entrada (§3.3). Medidas de la lista de `/beats` del sello (`otp-metrics.json`,
- * `BeatListRow.css`): fila de radio 8 con borde transparente, relleno 10,4×12 y hueco de 16 px;
- * portada de 48 px; play redondo; título 14,4 px 600; productor 12,5 px; chip de género con radio 12;
- * filete `#111` entre filas. Con los grises de AA (§3.1): productor, BPM y tonalidad en `--bb-text-3`.
+ * Fila de entrada (§3.3; maquetas `05-perfil.html`, «historial de combates»): marcador de 58 px en un
+ * marco de chaflán `--bb-cut-md` con portada de 44 px, play, título y subtítulo, y a la derecha la
+ * posición en display, la nota en Oxanium y la medalla (solo tras el sellado).
  */
 .list {
+  display: grid;
+  gap: var(--bb-space-2);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.item + .item {
-  border-top: 1px solid var(--bb-panel);
-}
-
 .row {
-  display: flex;
+  --frame-cut: var(--bb-cut-md);
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: var(--bb-target) var(--bb-target) minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: var(--bb-space-4);
-  min-width: 0;
-  padding: var(--bb-space-row-y) var(--bb-space-3);
-  border: 1px solid transparent;
-  border-radius: var(--bb-radius-sm);
-  transition:
-    background-color var(--bb-dur-fast) var(--bb-ease-out),
-    border-color var(--bb-dur-fast) var(--bb-ease-out);
+  gap: var(--bb-space-3);
+  min-height: calc(var(--bb-space-14) + var(--bb-stroke));
+  padding: var(--bb-space-1) var(--bb-space-4) var(--bb-space-1) var(--bb-space-2);
 }
 
-.row:hover,
-.row[data-force-state="hover"],
-.row:focus-within,
-.row[data-force-state="focus"] {
-  background-color: var(--bb-ink-3);
-}
-
-.row[data-playing] {
-  border-color: var(--bb-red-wash);
-  background-color: var(--bb-red-wash);
-}
-
-/* Error de carga (RF-PLAY-09): aviso con icono bajo el título (nunca solo el color). */
-.error {
-  display: flex;
-  align-items: center;
-  gap: var(--bb-space-1);
-  margin: 0;
-  color: var(--bb-danger);
-  font-size: var(--bb-fs-xs);
-  font-weight: var(--bb-weight-semibold);
-}
-
-.errorIcon {
-  flex-shrink: 0;
-}
-
-/* ── Portada ───────────────────────────────────────────────────────────────────────────── */
-.thumb {
-  flex-shrink: 0;
-  width: var(--bb-space-12);
-  height: var(--bb-space-12);
-  overflow: hidden;
-  border-radius: var(--bb-radius-sm);
-  background-color: var(--bb-panel-2);
-}
-
-.thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Sin portada propia (las generativas llegan con `packages/covers`): un degradado de la marca. */
-.coverFallback {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background-image: radial-gradient(
-    circle at 30% 25%,
-    var(--bb-red) 0%,
-    var(--bb-wine) 55%,
-    var(--bb-black) 100%
+/* Dos capas recortadas (borde y relleno), como el marco. */
+.row::before,
+.row::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  clip-path: polygon(
+    var(--frame-cut) 0,
+    100% 0,
+    100% calc(100% - var(--frame-cut)),
+    calc(100% - var(--frame-cut)) 100%,
+    0 100%,
+    0 var(--frame-cut)
   );
 }
 
-/* ── Play: el botón icono; sonando, en rojo ────────────────────────────────────────────── */
-.play {
-  flex-shrink: 0;
+.row::before {
+  inset: 0;
+  background: var(--bb-line-strong);
 }
 
-.row[data-playing] .play {
-  border-color: var(--bb-red);
-  background-color: var(--bb-red-wash);
-  color: var(--bb-red);
+.row::after {
+  inset: var(--bb-stroke-hair);
+  background: var(--bb-panel);
+  transition: background-color var(--bb-dur-fast) var(--bb-ease-out);
 }
 
-/* ── Centro: datos y mini onda ─────────────────────────────────────────────────────────── */
-.center {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: var(--bb-space-2);
-  min-width: 0;
+.row:hover::after,
+.row[data-force-state="hover"]::after {
+  background: var(--bb-panel-2);
+}
+
+.row[data-playing]::before {
+  background: var(--bb-red);
+}
+
+.row[data-disabled] {
+  opacity: 0.45;
+}
+
+.cover {
+  width: var(--bb-target);
+  border-radius: 50%;
 }
 
 .info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--bb-space-row-lines);
+  display: grid;
+  gap: var(--bb-space-1);
   min-width: 0;
 }
 
-/*
- * El título no recorta (`overflow` visible): la elipsis la pone su texto (`.titleText`), y así el anillo
- * de foco del enlace se ve entero. Con `overflow: hidden` en el encabezado, el anillo de 2 px y el halo
- * quedaban recortados por tres lados (RNF-A11Y-01).
- */
 .title {
-  min-width: 0;
-  margin: 0;
-  color: var(--bb-text);
-  font-family: var(--bb-font-ui);
-  font-size: var(--bb-fs-sm);
+  overflow: hidden;
+  color: var(--bb-white);
+  font-size: var(--bb-fs-md);
   font-weight: var(--bb-weight-semibold);
   line-height: var(--bb-leading-label);
-}
-
-/* Ancho del texto hasta el de la columna, con elipsis: el anillo abraza el título y no toda la fila. */
-.titleText {
-  display: inline-block;
-  max-width: 100%;
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  vertical-align: top;
 }
 
 .titleLink {
   color: inherit;
   text-decoration: none;
-  transition: color var(--bb-dur-fast) var(--bb-ease-out);
 }
 
 .titleLink:hover {
-  color: var(--bb-red-text);
+  text-decoration: underline;
 }
 
-/* El foco real lo pinta global.css (`:focus-visible`); el forzado de la galería, igual. */
 .titleLink[data-force-state="focus"] {
   outline: var(--bb-stroke-cursor) solid var(--bb-white);
   outline-offset: var(--bb-cursor-gap);
   box-shadow: var(--bb-focus-halo);
 }
 
-.meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--bb-space-2);
-  min-width: 0;
+.subtitle {
+  overflow: hidden;
   color: var(--bb-text-3);
   font-size: var(--bb-fs-xs);
-}
-
-.alias {
-  overflow: hidden;
+  font-weight: var(--bb-weight-semibold);
+  letter-spacing: var(--bb-tracking-button);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.tags {
-  display: flex;
+/* Error de audio (`RF-PLAY-09`): aviso de papel en pequeño, con icono y texto. */
+.error {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
   gap: var(--bb-space-1);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.tag {
-  padding: var(--bb-space-tag);
-  border: 1px solid var(--bb-ink-4);
-  border-radius: var(--bb-radius-md);
-  background-color: var(--bb-panel-2);
+  padding: 0 var(--bb-space-2);
+  background: var(--bb-white);
+  color: var(--bb-black);
   font-size: var(--bb-fs-xs);
-  line-height: var(--bb-leading-label);
-  white-space: nowrap;
+  font-weight: var(--bb-weight-bold);
 }
 
-.data {
+.result {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-4);
+}
+
+.position {
+  min-width: 3ch;
+  color: var(--bb-red);
+  font-size: var(--bb-fs-xl);
+  text-align: right;
+}
+
+.score {
+  color: var(--bb-white);
   font-family: var(--bb-font-num);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-bold);
 }
 
-.data::before {
-  content: "·" / "";
-  margin-right: var(--bb-space-2);
-  color: var(--bb-text-4);
-}
-
-/* Mini onda: «respira» al pasar por encima (Anexo E). */
-.wave {
-  transform-origin: center;
-}
-
-.row:hover .wave,
-.row[data-force-state="hover"] .wave {
-  animation: breathe var(--bb-loop-breathe) var(--bb-ease-in-out) infinite;
-}
-
-@keyframes breathe {
-  50% {
-    transform: scaleY(0.72);
-  }
+.medal {
+  width: var(--bb-space-8);
+  height: var(--bb-space-8);
 }
 
 .actions {
   display: flex;
-  flex-shrink: 0;
   align-items: center;
-  gap: var(--bb-space-3);
+  gap: var(--bb-space-2);
 }
 
-/*
- * Deshabilitada (no se puede reproducir): portada y onda (decorativas) apagadas y en gris; el texto
- * conserva su contraste AA (§3.1) y el play va deshabilitado.
- */
-.row[data-disabled] .thumb,
-.row[data-disabled] .wave {
-  filter: grayscale(1);
-  opacity: 0.45;
-}
-
-.row[data-disabled] .title {
-  color: var(--bb-text-2);
-}
-
-/*
- * ── Móvil: como el sello, sin chips ni datos ───────────────────────────────────────────────
- * La portada se queda en 48 px (el sello no la encoge) y el play, en su círculo de 36: el objetivo
- * táctil de 44 px lo pone el botón icono sin agrandar el círculo (`Button.module.css`).
- */
-@media (max-width: 768px) {
+@media (max-width: 720px) {
   .row {
-    gap: var(--bb-space-3);
-    padding: var(--bb-space-2);
+    grid-template-columns: var(--bb-target) minmax(0, 1fr) auto;
+    padding-inline: var(--bb-space-2);
   }
 
-  .tags,
-  .data {
+  .cover {
     display: none;
   }
-}
 
-/*
- * Puntero grueso (RNF-A11Y-09, objetivos de 44 px): el título mide unos 17 px de alto, así que su
- * enlace se estira a toda la fila (≥ 48 px) con un pseudoelemento; el play y las acciones quedan
- * encima. Con ratón se queda como en el sello: solo el título enlaza.
- */
-@media (hover: none), (pointer: coarse) {
-  .row {
-    position: relative;
+  .result {
+    gap: var(--bb-space-2);
   }
 
-  .titleLink::after {
-    content: "";
-    position: absolute;
-    inset: 0;
+  .medal {
+    display: none;
   }
-
-  .play,
-  .actions {
-    position: relative;
-    z-index: 1;
-  }
-}
-
-/* Sin movimiento (Anexo E): solo el fondo. */
-@media (prefers-reduced-motion: reduce) {
-  .row:hover .wave,
-  .row[data-force-state="hover"] .wave {
-    animation: none;
-  }
-}
-
-:global(:root[data-motion="reduced"]) .row:hover .wave,
-:global(:root[data-motion="reduced"]) .row[data-force-state="hover"] .wave {
-  animation: none;
 }

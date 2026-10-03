@@ -15,9 +15,10 @@ export interface SkeletonProps {
 }
 
 /**
- * Esqueleto de carga (§3.3): barrido de brillo diagonal como el del sello (`Skeleton.css`); con
- * «reducir movimiento», gris fijo (Anexo E). Es decorativo (`aria-hidden`): quien lo usa marca su
- * región con `aria-busy` y un texto de «Cargando…» (ver `SkeletonGroup`).
+ * Esqueleto de carga (§3.3): placa con la forma final y la trama de relleno al 20 % que barre en
+ * diagonal; con «reducir movimiento», la trama fija (Anexo E). Nunca *spinners*. Es decorativo
+ * (`aria-hidden`): quien lo usa marca su región con `aria-busy` y un texto de «Cargando…» (ver
+ * `SkeletonGroup`).
  */
 export function Skeleton({ shape = 'block', width, height, className }: SkeletonProps) {
   return (

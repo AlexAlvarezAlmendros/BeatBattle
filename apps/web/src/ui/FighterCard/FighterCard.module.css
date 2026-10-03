@@ -1,0 +1,143 @@
+/*
+ * Ficha de luchador (§3.3, §3.8.13; maqueta `02-seleccion.html`): retrato y teselas arriba, la banda
+ * del alias y el panel opaco con el estado y los botones. Todo el texto va sobre paneles (`RD-VIS-05`).
+ */
+.card {
+  display: grid;
+  gap: var(--bb-space-4);
+  max-width: 36rem;
+}
+
+.top {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: var(--bb-space-4);
+  align-items: start;
+}
+
+.portrait {
+  position: relative;
+}
+
+.cover {
+  --frame-fill: var(--bb-black);
+  padding: var(--bb-stroke-cursor);
+}
+
+.hidden {
+  position: absolute;
+  right: calc(-1 * var(--bb-space-2));
+  bottom: var(--bb-space-6);
+  background: var(--bb-black);
+}
+
+.tiles {
+  gap: var(--bb-space-2);
+}
+
+/* Banda del alias: placa negra con filetes blancos y la cuña roja a la izquierda. */
+.band {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: var(--bb-space-16);
+  padding: var(--bb-space-2) var(--bb-space-5) var(--bb-space-2) var(--bb-space-12);
+  border-block: var(--bb-stroke-cursor) solid var(--bb-white);
+  background: var(--bb-black);
+}
+
+.band::before {
+  content: "";
+  position: absolute;
+  inset-block: calc(-1 * var(--bb-stroke-cursor));
+  left: 0;
+  width: var(--bb-space-8);
+  background: var(--bb-red-cta);
+  clip-path: polygon(var(--bb-slant) 0, 100% 0, calc(100% - var(--bb-slant)) 100%, 0 100%);
+}
+
+.alias {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--bb-fs-alias);
+  text-shadow: var(--bb-shadow-hard);
+  white-space: nowrap;
+}
+
+.panel {
+  --frame-fill: var(--bb-panel-veil);
+  display: grid;
+  gap: var(--bb-space-3);
+  padding: var(--bb-space-4) var(--bb-space-5);
+}
+
+.titleLine b {
+  font-size: var(--bb-fs-lg);
+  font-weight: var(--bb-weight-semibold);
+}
+
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bb-space-3);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.preview {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--bb-space-3);
+}
+
+.time {
+  color: var(--bb-text-3);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-bold);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-3);
+}
+
+/* ── Cargando y error ───────────────────────────────────────────────────────────────────── */
+.loading .portraitSkeleton {
+  aspect-ratio: 1;
+  height: auto;
+}
+
+.tilesSkeleton {
+  display: grid;
+  gap: var(--bb-space-2);
+}
+
+.failed {
+  --frame-fill: var(--bb-panel-veil);
+  justify-items: start;
+  padding: var(--bb-space-6);
+}
+
+.paper {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+  padding: var(--bb-space-3) var(--bb-space-4);
+  background: var(--bb-white);
+  color: var(--bb-black);
+  font-weight: var(--bb-weight-semibold);
+}
+
+@media (max-width: 720px) {
+  .top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .band {
+    padding-left: var(--bb-space-10);
+  }
+}

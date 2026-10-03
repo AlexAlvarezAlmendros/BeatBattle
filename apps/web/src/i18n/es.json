@@ -177,45 +177,104 @@
       }
     },
     "entryRow": {
-      "by": "Prod. by {alias}",
-      "bpm": "{bpm} BPM",
       "play": "Reproducir «{title}»",
       "pause": "Pausar «{title}»",
-      "genres": "Géneros",
-      "cover": "Portada de «{title}»",
       "loading": "Cargando «{title}»",
       "retry": "Reintentar «{title}»",
-      "loadError": "No hemos podido cargar este beat"
+      "loadError": "No hemos podido cargar este beat",
+      "position": "{position}.º",
+      "score": "Puntuación"
     },
     "waveform": {
       "label": "Forma de onda",
-      "progress": "Forma de onda, {percent} % escuchado"
-    },
-    "xpBar": {
-      "label": "Experiencia",
-      "level": "Nivel {level}",
-      "value": "{value} / {max} XP",
-      "valueText": "{value} de {max} XP para el nivel {next}"
+      "progress": "Forma de onda, {percent} % escuchado",
+      "seek": "Posición en el beat",
+      "position": "{time} de {total}"
     },
     "skeleton": {
       "loading": "Cargando…"
     },
-    "countdown": {
-      "label": "Cuenta atrás",
+    "cursor": {
+      "player": "1P"
+    },
+    "otpSlap": {
+      "label": "by Other People (abre la web del sello en una pestaña nueva)"
+    },
+    "filterChip": {
+      "yes": "Sí",
+      "no": "No"
+    },
+    "tabs": {
+      "previousKey": "Q",
+      "nextKey": "E",
+      "disabled": "(no disponible)"
+    },
+    "menuPlate": {
+      "index": "{index}"
+    },
+    "entryCell": {
+      "label": "{alias}, {bpm} BPM, {key}, {state}",
+      "notVoted": "sin votar",
+      "votedState": "votada {vote} de 5",
+      "voted": "✓ Votada {vote}/5",
+      "error": "no ha cargado",
+      "loading": "Cargando entrada…",
+      "random": "Aleatorio",
+      "randomGlyph": "?",
+      "randomLabel": "Aleatorio: una entrada sin votar"
+    },
+    "fighterCard": {
+      "authorHidden": "Autoría oculta",
+      "tempo": "Tempo",
+      "bpm": "BPM",
+      "key": "Tonalidad",
+      "duration": "Duración",
+      "genre": "Género",
+      "titleLabel": "Título",
+      "notVoted": "Sin votar",
+      "voted": "✓ Votada {vote}/5",
+      "listenHint": "Escucha {seconds} s y desbloqueas las estrellas.",
+      "votedHint": "Puedes cambiar tu voto hasta el cierre.",
+      "preview": "Previa",
+      "listen": "Escuchar",
+      "jury": "Al jurado",
+      "juryKey": "J",
+      "loading": "Cargando la ficha…",
+      "error": "No hemos podido cargar esta entrada.",
+      "retry": "Reintentar"
+    },
+    "medal": {
+      "place1": "Disco de oro",
+      "place2": "Disco de platino",
+      "place3": "Disco de diamante"
+    },
+    "roundClock": {
+      "separator": ":",
+      "timeUp": "¡Tiempo!",
+      "ended": "Tiempo agotado",
       "units": {
         "days": "Días",
         "hours": "Horas",
         "minutes": "Min",
         "seconds": "Seg"
       },
-      "days_one": "{count} día",
-      "days_other": "{count} días",
-      "hours_one": "{count} hora",
-      "hours_other": "{count} horas",
-      "minutes_one": "{count} minuto",
-      "minutes_other": "{count} minutos",
-      "seconds_one": "{count} segundo",
-      "seconds_other": "{count} segundos",
+      "days": {
+        "mon": "L",
+        "tue": "M",
+        "wed": "X",
+        "thu": "J",
+        "fri": "V",
+        "sat": "S",
+        "sun": "D"
+      },
+      "daysCount_one": "{count} día",
+      "daysCount_other": "{count} días",
+      "hoursCount_one": "{count} hora",
+      "hoursCount_other": "{count} horas",
+      "minutesCount_one": "{count} minuto",
+      "minutesCount_other": "{count} minutos",
+      "secondsCount_one": "{count} segundo",
+      "secondsCount_other": "{count} segundos",
       "remaining": "Tiempo restante: {days}, {hours}, {minutes} y {seconds}",
       "milestone": {
         "day": "Quedan 24 horas",
@@ -223,43 +282,37 @@
         "tenMinutes": "Quedan 10 minutos",
         "ended": "Tiempo agotado"
       }
-    },
-    "cursor": {
-      "player": "1P"
-    },
-    "otpSlap": {
-      "label": "by Other People (abre la web del sello en una pestaña nueva)"
     }
   },
   "dev": {
     "gallery": {
       "title": "Galería",
-      "summary": "La base de la arena (paleta, contraste, tipografía, forma, primitivas y cursor de juego) y los componentes, con y sin movimiento y en modo serio. Solo existe en desarrollo.",
+      "summary": "La base de la arena (paleta, contraste, tipografía, forma, primitivas y cursor de juego) y sus componentes con todos sus estados, con y sin movimiento y en modo serio. Solo existe en desarrollo.",
       "indexLabel": "Índice de la galería",
       "combined": "{first} · {second}",
       "matrix": {
         "title": "Estados de §3.3 que no enseña",
         "notApplicable": "No aplica",
-        "deferred": "Aplazado",
         "reasons": {
-          "chipInstant": "Filtra al momento en el cliente: no espera, no confirma y no falla. Activarlo es su estado «Activo».",
-          "cardNotControl": "La tarjeta no es un control: se pulsa lo que lleva dentro (su botón).",
-          "cardContent": "Lo cuenta su contenido: un aviso o el botón que reintenta.",
-          "tileData": "No es interactiva: enseña un dato. El rótulo que la pliega en móvil es un botón con el foco del sistema.",
-          "tileNoResult": "Enseña un dato: no confirma nada y, si el dato falta, no se pinta.",
-          "staticText": "Es texto: no tiene interacción, carga ni resultado.",
-          "wavePlayer": "El salto con clic y teclado, la previsualización del punto al pasar el ratón y su estado deshabilitado llegan con el reproductor (Fase 5).",
-          "waveData": "Sin picos no se pinta: mientras llegan, la pantalla enseña su esqueleto. No confirma nada.",
+          "menuInstant": "Entrar es inmediato: lo que carga es la pantalla a la que lleva.",
+          "menuNoResult": "Una opción lleva a su pantalla: el resultado lo cuenta esa pantalla.",
+          "tabsInstant": "Cambiar de pestaña es inmediato: no espera, no confirma y no falla.",
+          "chipInstant": "Filtra al momento en el cliente: no espera, no confirma y no falla. Activarlo es su estado «Sí».",
+          "fighterNotControl": "La ficha no es un control: se usan sus botones (ver Botón).",
+          "fighterOwnState": "Su único estado propio es tu voto, en el sello de goma.",
+          "cellNoResult": "Elegir una casilla lleva a escucharla: no confirma nada.",
           "rowPlaying": "Reproducir no tiene confirmación: «Sonando» es su estado activo.",
+          "tileData": "Enseña un dato: no se pulsa, no confirma y no falla.",
+          "waveNoResult": "Saltar no tiene confirmación: se ve en la cabeza de lectura.",
           "modalButtons": "Se pasa el ratón y se pulsa en sus botones (ver Botón).",
-          "modalClose": "Un modal no se deshabilita: se cierra.",
-          "modalToast": "El resultado de lo que se hace en un modal lo cuenta un aviso (ver Aviso).",
+          "modalClose": "Una ventana no se deshabilita: se cierra (Esc).",
+          "modalToast": "El resultado de lo que se hace en una ventana lo cuenta un aviso.",
+          "announcerOnce": "Sale una vez por evento y se va: no es interactivo ni carga.",
           "toastPast": "Avisa de algo que ya ha pasado: lo que carga lo cuentan su botón o su esqueleto.",
           "toastDismiss": "No hay nada que deshabilitar: se cierra o se va solo.",
-          "notInteractive": "No es interactiva.",
-          "xpData": "Se pinta con el perfil ya cargado (el HUD enseña su esqueleto); sin datos, no se pinta.",
-          "skeletonOnly": "Solo existe mientras algo carga: su único estado es «Cargando».",
-          "countdownCalendar": "Con el calendario vacío no se pinta (§2.19) y al llegar a cero la semana cambia de fase: no tiene carga, éxito ni error propios."
+          "meterData": "Enseña un valor: no se pulsa, no carga y no falla.",
+          "skeletonOnly": "Solo existe mientras algo carga.",
+          "clockData": "Cuenta el tiempo: no se pulsa, no carga y no confirma."
         }
       },
       "controls": {
@@ -267,8 +320,6 @@
         "reducedMotion": "Reducir movimiento",
         "reducedMotionHint": "Pone data-motion=\"reduced\" en la página, como el ajuste de accesibilidad.",
         "reducedMotionSystem": "Tu sistema ya pide reducir el movimiento: todo va sin movimiento aunque el interruptor esté apagado.",
-        "glass": "Superficies de cristal",
-        "glassHint": "Apagado: tarjetas y modales macizos y el layout sin cristal, como en calidad baja.",
         "serious": "Modo serio",
         "seriousHint": "Pone data-serious en la página: sin anunciador, estampas, rayos, barrido ni partículas (§3.6).",
         "yes": "Sí",
@@ -277,20 +328,6 @@
       "sections": {
         "base": "Base de la arena",
         "components": "Componentes"
-      },
-      "components": {
-        "button": "Botón",
-        "chip": "Chip",
-        "card": "Tarjeta",
-        "dataTile": "Tesela de dato",
-        "sectionLabel": "Rótulo de sección",
-        "waveform": "Forma de onda",
-        "entryRow": "Fila de entrada",
-        "modal": "Modal",
-        "toast": "Aviso",
-        "xpBar": "Barra de XP",
-        "skeleton": "Esqueleto de carga",
-        "countdown": "Cuenta atrás"
       },
       "states": {
         "rest": "Reposo",
@@ -323,101 +360,6 @@
         "collapsedMobile": "Plegada en móvil",
         "focusTitle": "Foco (título)",
         "otherText": "Otro texto"
-      },
-      "variants": {
-        "cta": "CTA",
-        "outline": "Contorno",
-        "icon": "Icono",
-        "sizes": "Tamaños",
-        "sizeSm": "sm",
-        "sizeMd": "md",
-        "sizeLg": "lg",
-        "hero": "Hero (CTA del sello; el contorno, sobre cristal)",
-        "link": "Enlace",
-        "glass": "Cristal",
-        "solid": "Maciza"
-      },
-      "demo": {
-        "primary": "Pillar el sample",
-        "secondary": "Escuchar",
-        "upload": "Subir mi beat",
-        "uploaded": "Subido",
-        "retry": "Reintentar",
-        "uploading": "Subiendo tu beat…",
-        "play": "Reproducir",
-        "openModal": "Abrir modal",
-        "replay": "Repetir la entrada",
-        "toastInfo": "Lanzar aviso",
-        "toastSuccess": "Lanzar éxito",
-        "toastError": "Lanzar error",
-        "addXp": "+{xp} XP",
-        "resetXp": "Reiniciar XP",
-        "linkToWeeks": "Ver semanas"
-      },
-      "sample": {
-        "entries": {
-          "first": {
-            "title": "Tigre púrpura",
-            "alias": "lilbru",
-            "key": "Fa menor"
-          },
-          "second": {
-            "title": "Luz de freno",
-            "alias": "santamaria",
-            "key": "Re♯ menor"
-          },
-          "third": {
-            "title": "Humo en la cabina",
-            "alias": "cornho",
-            "key": "Do menor"
-          },
-          "fourth": {
-            "title": "Ruido blanco",
-            "alias": "yepes",
-            "key": "Sol menor"
-          }
-        },
-        "genres": {
-          "drill": "Drill",
-          "trap": "Trap",
-          "boomBap": "Boom Bap",
-          "reggaeton": "Reggaeton",
-          "jerk": "Jerk",
-          "amapiano": "Amapiano",
-          "club": "Club"
-        },
-        "card": {
-          "title": "Tigre púrpura",
-          "meta": "Drill · 142 BPM",
-          "action": "Escuchar"
-        },
-        "tiles": {
-          "published": "Publicado",
-          "publishedValue": "26 sept 2026",
-          "bpm": "BPM",
-          "key": "Tonalidad",
-          "genre": "Género"
-        },
-        "sectionLabel": {
-          "info": "Información",
-          "licenses": "Licencias"
-        },
-        "modal": {
-          "title": "Entra y vota",
-          "description": "Tu voto queda guardado y se aplica en cuanto entres.",
-          "later": "Ahora no",
-          "signIn": "Entrar",
-          "error": "No hemos podido cargar las bases. Reintenta en un momento."
-        },
-        "toast": {
-          "info": "Nueva entrada en la batalla",
-          "infoMessage": "Ya sois 23 productores esta semana.",
-          "success": "Beat subido",
-          "successMessage": "Te llegará el recibo por email.",
-          "error": "Se ha cortado la subida",
-          "errorMessage": "Tu ficha sigue aquí: reintenta."
-        },
-        "countdownLabel": "Cierre de votos"
       },
       "kicker": "Beat Battle · banco de pruebas de la arena",
       "base": {
@@ -630,6 +572,180 @@
           "flashGranted": "Autorizado: {count} de 3 en el último segundo (área ≤ 25 %, opacidad ≤ 40 %).",
           "flashDenied": "Denegado: ya van 3 destellos en el último segundo.",
           "flashSerious": "Modo serio: no se autoriza ningún destello."
+        }
+      },
+      "components": {
+        "button": "Botón",
+        "menuPlate": "Opción de menú",
+        "tabs": "Pestañas",
+        "dataChip": "Chip de dato",
+        "filterChip": "Chip de filtro",
+        "stamp": "Sello de goma",
+        "fighterCard": "Ficha de luchador",
+        "entryCell": "Casilla de entrada",
+        "entryRow": "Fila de entrada",
+        "tile": "Tesela",
+        "waveform": "Forma de onda",
+        "modal": "Ventana (modal)",
+        "announcer": "Anunciador",
+        "toast": "Aviso",
+        "meter": "Medidor",
+        "skeleton": "Esqueleto",
+        "roundClock": "Reloj de ronda",
+        "titlePlate": "Placa de título",
+        "cover": "Portada y medallas"
+      },
+      "variants": {
+        "cta": "CTA (rojo con texto blanco)",
+        "brand": "Marca (rojo con texto negro)",
+        "white": "Blanco",
+        "outline": "Contorno",
+        "sizes": "Tamaños",
+        "size": {
+          "sm": "sm · 40 px (objetivo de 44)",
+          "md": "md · 48 px",
+          "lg": "lg · 56 px"
+        },
+        "iconOnly": "Solo icono"
+      },
+      "arena": {
+        "intro": "Cada componente de §3.3 con los estados de su matriz (las celdas que no aplican dicen por qué) y su demo interactiva. Todo sale de los tokens; el foco es el cursor de juego.",
+        "button": {
+          "play": "Jugar",
+          "listen": "Escuchar",
+          "upload": "Subir mi beat",
+          "uploading": "Subiendo tu beat…",
+          "uploaded": "Subido",
+          "retry": "Reintentar",
+          "reason": "Disponible el lunes"
+        },
+        "menu": {
+          "label": "Menú de muestra",
+          "play": "Jugar",
+          "jury": "Jurado",
+          "results": "Resultados",
+          "settings": "Ajustes",
+          "juryDetail": "16 sin votar",
+          "playLocked": "Disponible el lunes",
+          "resultsLocked": "Aún no hay semanas selladas",
+          "help": {
+            "play": "Pilla el sample, cocina tu flip y súbelo antes del domingo a las 20:00.",
+            "jury": "Escucha 45 s de cada beat y puntúalo de 1 a 5. Sin nombres hasta el domingo.",
+            "results": "Aún no hay semanas selladas: la primera ceremonia, el domingo.",
+            "settings": "Sonido, movimiento, modo serio y tamaño de texto."
+          }
+        },
+        "tabs": {
+          "label": "Orden de la plantilla",
+          "fair": "Ronda justa",
+          "recent": "Recién subidas",
+          "random": "Aleatorio",
+          "archive": "Selladas",
+          "panels": {
+            "fair": "Primero, las que menos votos llevan (nadie ve cuántos).",
+            "recent": "Las últimas en llegar, primero.",
+            "random": "Un orden nuevo cada vez.",
+            "archive": "Disponible cuando se selle la semana."
+          }
+        },
+        "chips": {
+          "tempo": "Tempo",
+          "bpm": "BPM",
+          "keyLabel": "Tonalidad (en palabras)",
+          "key": "Re menor",
+          "durationLabel": "Duración",
+          "min": "Min",
+          "genreLabel": "Género sugerido",
+          "suggested": "Sugerido",
+          "genre": "Boom bap",
+          "onlyUnvoted": "Solo sin votar"
+        },
+        "stamps": {
+          "notVotedLabel": "Sin votar (estado propio)",
+          "votedLabel": "Tu voto",
+          "hiddenLabel": "Autoría oculta",
+          "sealedLabel": "Semana sellada",
+          "sealed": "Sellada"
+        },
+        "entries": {
+          "tiger": "Tigre Púrpura",
+          "tigerTitle": "Charcos en Verdi",
+          "cobra": "Cobra Lunar",
+          "lynx": "Lince Eléctrico",
+          "lighthouse": "Faro Nocturno",
+          "siren": "Sirena Fantasma",
+          "comet": "Cometa Rojo",
+          "thunder": "Trueno Magnético",
+          "genre": "Boom bap · Jersey",
+          "votedState": "Votada (atenuada, tu voto)",
+          "gridLabel": "Entradas de muestra"
+        },
+        "rows": {
+          "note": "Antes del sellado, la fila no enseña posición ni nota (RF-PLAY-05): las de muestra con resultado son de semanas selladas.",
+          "neon": "Neón en Sants",
+          "neonSub": "S40 · 41 votos",
+          "rain": "Lluvia en Gràcia",
+          "rainSub": "S41 · en juego"
+        },
+        "tiles": {
+          "best": "Mejor puesto",
+          "bestValue": "1.º",
+          "bestUnit": "×2",
+          "streak": "Racha",
+          "weeks": "sem.",
+          "mean": "Media final"
+        },
+        "wave": {
+          "threshold": "45 s",
+          "error": "No hemos podido cargar la onda"
+        },
+        "modal": {
+          "title": "¿Salir del Modo Jurado?",
+          "description": "Tu combo se pierde al salir; los votos ya guardados se quedan.",
+          "body": "Puedes volver cuando quieras: la cola sigue donde la dejaste.",
+          "confirm": "Salir",
+          "cancel": "Seguir",
+          "error": "No hemos podido cargar esta ventana.",
+          "open": "Abrir ventana"
+        },
+        "announcer": {
+          "round": "Ronda 01",
+          "voteSaved": "¡Voto guardado!",
+          "tagLabel": "Etiqueta girada"
+        },
+        "toast": {
+          "info": "Nuevo drop el lunes",
+          "infoMessage": "Te avisamos cuando caiga el sample.",
+          "success": "Beat subido",
+          "successMessage": "Ya estás en la batalla de esta semana.",
+          "error": "Se ha cortado la subida",
+          "errorMessage": "Revisa tu conexión y vuelve a intentarlo: no se ha perdido nada.",
+          "launchInfo": "Lanzar aviso",
+          "launchSuccess": "Lanzar éxito",
+          "launchError": "Lanzar error"
+        },
+        "meter": {
+          "xp": "Experiencia",
+          "xpText": "{value} de {max} XP para el nivel {next}",
+          "start": "XP {value}",
+          "end": "NV {next} · {max}",
+          "full": "Lleno (éxito)",
+          "add": "+40 XP"
+        },
+        "clock": {
+          "label": "Tiempo · cierre de envíos",
+          "when": "Domingo 11 a las 20:00 · votos hasta las 23:59",
+          "ended": "Agotado (error)",
+          "inline": "En línea (tarjeta de la semana en móvil)"
+        },
+        "plate": {
+          "label": "Perfil",
+          "labelHowTo": "Cómo se juega"
+        },
+        "cover": {
+          "note": "Hasta que packages/covers genere la portada de cada entrada (Fase 4, RD-VIS-04), todas llevan la misma: ninguna se distingue por su portada.",
+          "label": "Portada del voto ciego",
+          "medals": "Discos de oro, platino y diamante"
         }
       }
     }

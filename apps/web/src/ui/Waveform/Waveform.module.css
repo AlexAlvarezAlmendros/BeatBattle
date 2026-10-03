@@ -1,11 +1,12 @@
 /*
  * Forma de onda (§3.3, Anexo E): barras grises (`--bb-wave-idle`) que pasan a rojo al reproducirse y
- * cabeza de lectura blanca con halo. Al montar, la onda crece desde el centro y se descubre de
- * izquierda a derecha al ritmo del escalonado de 2 ms por barra; sin movimiento, aparece entera.
+ * cabeza de lectura blanca de 2 px con halo de 6 px. Al montar, la onda crece desde el centro y se
+ * descubre de izquierda a derecha al ritmo del escalonado de 2 ms por barra; sin movimiento, aparece
+ * entera.
  *
  * Una sola animación por onda, en el `<svg>`, y no una por barra: las animaciones de los elementos SVG
  * no se componen, y con una por `<rect>` cada fotograma recalculaba el estilo de cientos o miles de
- * barras en el hilo principal (tirones de hasta 1 s con CPU ×4 en la galería; INP, §4.17).
+ * barras en el hilo principal (INP, §4.17).
  */
 .waveform {
   position: relative;
@@ -33,25 +34,24 @@
 }
 
 /*
- * Crece desde el centro (`grow`, transform del `<svg>`: compuesto) y se descubre de izquierda a derecha
- * (`sweep`) en tantos 2 ms como barras tiene (`--wave-bars`), como el escalonado por barra del Anexo E.
- * `backwards` y no `both`: al terminar no queda ninguna animación «en efecto».
+ * Crece desde el centro (transform del `<svg>`: compuesto) y se descubre de izquierda a derecha en
+ * tantos 2 ms como barras tiene (`--wave-bars`), como el escalonado por barra del Anexo E.
  */
 .animated .svg {
   transform-origin: center;
   animation:
-    grow var(--bb-dur-slow) var(--bb-ease-out) backwards,
-    sweep calc(var(--wave-bars, 1) * var(--bb-stagger-wave)) linear backwards;
+    bb-wave-grow var(--bb-dur-slow) var(--bb-ease-out) backwards,
+    bb-wave-sweep calc(var(--wave-bars, 1) * var(--bb-stagger-wave)) linear backwards;
 }
 
-@keyframes grow {
+@keyframes bb-wave-grow {
   from {
     transform: scaleY(0);
   }
 }
 
 /* Con los dos extremos: entre `inset()` y `none` (el estilo natural) no se interpola, salta a la mitad. */
-@keyframes sweep {
+@keyframes bb-wave-sweep {
   from {
     clip-path: inset(0 100% 0 0);
   }
@@ -65,11 +65,112 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 2px;
-  border-radius: var(--bb-radius-xs);
-  background-color: var(--bb-text);
-  box-shadow: var(--bb-shadow-playhead);
+  width: var(--bb-stroke);
+  background-color: var(--bb-white);
   pointer-events: none;
+}
+
+/* El halo de 6 px (2 px a cada lado de la cabeza), sin sombra: un fondo semitransparente más ancho. */
+.playhead::before {
+  content: "";
+  position: absolute;
+  inset: 0 calc(-1 * var(--bb-stroke));
+  background: var(--bb-wave-halo);
+}
+
+/* ── Control: saltar con clic, arrastre o teclado ───────────────────────────────────────── */
+.interactive {
+  cursor: pointer;
+  touch-action: none;
+}
+
+/* Dónde caería el salto (hover). */
+.preview {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--bb-stroke-hair);
+  background: var(--bb-white);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.interactive:hover .bar,
+.interactive[data-force-state="hover"] .bar {
+  fill: var(--bb-text-4);
+}
+
+.interactive[data-force-state="focus"] {
+  outline: var(--bb-stroke-cursor) solid var(--bb-white);
+  outline-offset: var(--bb-cursor-gap);
+  box-shadow: var(--bb-focus-halo);
+}
+
+/* Pulsado: la cabeza se ensancha mientras se arrastra. */
+.pressed .playhead {
+  width: calc(var(--bb-stroke) * 2);
+}
+
+.pressed .played {
+  fill: var(--bb-red-cta);
+}
+
+/* Marca del umbral de escucha (Modo Jurado, «45 s»). */
+.threshold {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--bb-stroke);
+  background: repeating-linear-gradient(
+    180deg,
+    var(--bb-white) 0 var(--bb-space-1),
+    transparent var(--bb-space-1) var(--bb-space-2)
+  );
+  pointer-events: none;
+}
+
+.thresholdLabel {
+  position: absolute;
+  top: 0;
+  left: var(--bb-space-1);
+  padding: 0 var(--bb-space-1);
+  background: var(--bb-black);
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  line-height: 1.2;
+}
+
+/* Cargando: las barras quietas en gris oscuro (no hay audio todavía). */
+.waveform.loading .bar {
+  fill: var(--bb-ink-4);
+}
+
+.loading {
+  cursor: progress;
+}
+
+/* Deshabilitado: 45 %, sin saltar. */
+.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* No ha cargado: aviso en su lugar (§3.2 «Estados»: icono y texto, nunca solo color). */
+.failed {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+  padding: 0 var(--bb-space-3);
+  background: var(--bb-white);
+  color: var(--bb-black);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-semibold);
+}
+
+.alert {
+  font-size: var(--bb-fs-lg);
 }
 
 /* Sin movimiento (Anexo E): la onda aparece entera. */

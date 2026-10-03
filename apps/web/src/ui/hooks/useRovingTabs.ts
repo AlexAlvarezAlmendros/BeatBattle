@@ -18,6 +18,11 @@ export interface RovingTabsOptions {
    * ni con modificadores, ni si otro manejador ya ha usado la tecla (`defaultPrevented`).
    */
   globalKeys?: boolean
+  /**
+   * Pestañas deshabilitadas (§3.3: «Pestañas … deshabilitado»): el cursor puede pasar por ellas (llevan
+   * `aria-disabled` y enseñan su motivo), pero no se eligen; Q/E las saltan.
+   */
+  isDisabled?: (index: number) => boolean
 }
 
 export interface RovingTabListProps extends GroupLabel {
@@ -75,7 +80,7 @@ export function useRovingTabs(options: RovingTabsOptions): RovingTabs {
 
   const commit = useCallback(
     (index: number) => {
-      if (index === selectedRef.current) return
+      if (index === selectedRef.current || latest.current.isDisabled?.(index)) return
       selectedRef.current = index
       if (!controlled) setOwnIndex(index)
       latest.current.onChange?.(index)
@@ -88,6 +93,7 @@ export function useRovingTabs(options: RovingTabsOptions): RovingTabs {
     initialIndex: selectedIndex,
     typeahead: false,
     hoverMoves: false,
+    isDisabled: options.isDisabled,
     navigate: (key, index) => listNavigation(key, index, count, { loop, orientation: 'horizontal' }),
     onMove: commit,
   })
@@ -117,7 +123,14 @@ export function useRovingTabs(options: RovingTabsOptions): RovingTabs {
       event.preventDefault()
       const focused = document.activeElement
       const inside = elements.current.some((element) => element === focused)
-      select(selectedRef.current + (key === 'e' ? 1 : -1), { focus: inside })
+      const step = key === 'e' ? 1 : -1
+      const total = latest.current.count
+      let next = selectedRef.current
+      for (let tries = 0; tries < total; tries += 1) {
+        next = wrapIndex(next + step, total)
+        if (!latest.current.isDisabled?.(next)) break
+      }
+      select(next, { focus: inside })
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
