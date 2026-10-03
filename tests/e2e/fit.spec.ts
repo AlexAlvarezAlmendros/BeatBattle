@@ -119,6 +119,76 @@ for (const viewport of [
   })
 }
 
+/**
+ * Elige cada placa del menú y mide, en reposo y elegida, si el texto de su etiqueta, su dato y su tecla
+ * se sale por arriba o por abajo del relleno de la placa (dentro del borde, `--bb-stroke`).
+ */
+function plateOverflowY(page: Page): Promise<string[]> {
+  return page.evaluate(async () => {
+    const frame = () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
+    const problems: string[] = []
+    const plates = [...document.querySelectorAll<HTMLElement>('main [data-menu-plate]')]
+    const check = (plate: HTMLElement, state: string) => {
+      const box = plate.getBoundingClientRect()
+      const stroke = Number.parseFloat(getComputedStyle(plate, '::after').top) || 0
+      const name = plate.querySelector('[data-plate-label]')?.textContent ?? '?'
+      const pieces = plate.querySelectorAll<HTMLElement>('[data-plate-label], [data-plate-detail], kbd')
+      for (const piece of [...pieces, ...plate.querySelectorAll<HTMLElement>('[data-plate-extra]')]) {
+        if (piece.closest('[hidden]') || getComputedStyle(piece).display === 'none') continue
+        let rect = piece.getBoundingClientRect()
+        if (piece.tagName !== 'KBD') {
+          const range = document.createRange()
+          range.selectNodeContents(piece)
+          rect = range.getBoundingClientRect()
+        }
+        if (rect.height === 0) continue
+        const what =
+          piece.tagName === 'KBD' ? 'tecla' : piece.matches('[data-plate-label]') ? 'etiqueta' : 'dato'
+        if (rect.top < box.top + stroke - 0.5)
+          problems.push(
+            `${name} (${state}): ${what} ${(box.top + stroke - rect.top).toFixed(1)} px por arriba`,
+          )
+        if (rect.bottom > box.bottom - stroke + 0.5)
+          problems.push(
+            `${name} (${state}): ${what} ${(rect.bottom - box.bottom + stroke).toFixed(1)} px por abajo`,
+          )
+      }
+    }
+    for (const plate of plates) {
+      ;(document.activeElement as HTMLElement | null)?.blur()
+      await frame()
+      if (plate.getAttribute('data-cursor-active') !== 'true') check(plate, 'reposo')
+      plate.focus()
+      await frame()
+      await new Promise((done) => setTimeout(done, 250))
+      await frame()
+      check(plate, 'elegida')
+    }
+    return problems
+  })
+}
+
+/**
+ * Reflow a 320 px con la ventana baja (jurado de la 0.28, segundo pase; WCAG 1.4.10): por debajo de
+ * 360 px el dato baja a una segunda línea, y la placa tiene que crecer con él (antes la regla del móvil
+ * bajo la dejaba en 44 px y el texto se salía 1–1,5 px por arriba y la tecla por abajo).
+ */
+for (const touch of [false, true]) {
+  test.describe(`placas a 320 × 568 ${touch ? 'en táctil' : 'con teclado'}`, () => {
+    test.use({ viewport: { width: 320, height: 568 }, isMobile: touch, hasTouch: touch })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`§3.3 / WCAG 1.4.10: el texto de cada placa de ${path} (etiqueta, dato y tecla) queda dentro de la placa`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await page.evaluate(() => document.fonts.ready)
+        expect(await plateOverflowY(page)).toEqual([])
+      })
+    }
+  })
+}
+
 interface LockupOverLogo {
   /** Píxeles de la pegatina OTP girada que caen sobre la zona opaca del logo. */
   sticker: number

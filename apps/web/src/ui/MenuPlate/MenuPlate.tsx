@@ -101,7 +101,11 @@ export function MenuPlate({
             {detail}
           </span>
         )}
-        {extra !== undefined && <span className={styles.extra}>{extra}</span>}
+        {extra !== undefined && (
+          <span className={styles.extra} data-plate-extra="">
+            {extra}
+          </span>
+        )}
         {!disabled && (
           <Key tone="light" className={styles.key} aria-hidden="true">
             {keyHint ?? t('frame.keys.glyph.enter')}
