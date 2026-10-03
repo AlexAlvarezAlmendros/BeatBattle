@@ -35,13 +35,14 @@ const anchor = (key: LayoutKey) => LAYOUT_ANCHORS.find((item) => item.key === ke
  * muestra inerte (`inert` + `aria-hidden`), fuera del orden de tabulación y del árbol accesible, para
  * no duplicar la navegación ni el titular de la página.
  */
-export function LayoutSection() {
+export function LayoutSection({ controls }: { controls?: ReactNode }) {
   return (
     <GallerySection
       id="layout"
       title={t('dev.gallery.sections.layout')}
       intro={t('dev.gallery.layout.intro')}
     >
+      {controls}
       <GlassStatus />
       <IslandBlock />
       <FooterBlock />

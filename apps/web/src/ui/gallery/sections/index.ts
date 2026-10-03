@@ -1,0 +1,42 @@
+import { COMPONENT_ANCHORS, LAYOUT_ANCHORS } from '../anchors'
+import type { GallerySectionEntry } from '../registry'
+
+/**
+ * Índice de la galería: sus secciones, en orden, cada una en su fichero de esta carpeta (ver
+ * `../registry.ts`). Las líneas de trabajo que añaden piezas añaden aquí su sección; las dos `Legacy…`
+ * son temporales (0.25 y 0.27).
+ */
+export const GALLERY_SECTIONS: readonly GallerySectionEntry[] = [
+  {
+    id: 'base',
+    title: 'dev.gallery.sections.base',
+    anchors: [
+      { id: 'base-paleta', label: 'dev.gallery.base.blocks.palette' },
+      { id: 'base-contraste', label: 'dev.gallery.base.blocks.contrast' },
+      { id: 'base-tipografia', label: 'dev.gallery.base.blocks.typography' },
+      { id: 'base-escala', label: 'dev.gallery.base.blocks.scale' },
+      { id: 'base-forma', label: 'dev.gallery.base.blocks.shape' },
+      { id: 'base-primitivas', label: 'dev.gallery.base.blocks.primitives' },
+      { id: 'base-cursor', label: 'dev.gallery.base.blocks.cursor' },
+    ],
+    load: () => import('./BaseSection'),
+  },
+  {
+    id: 'componentes',
+    title: 'dev.gallery.sections.components',
+    anchors: COMPONENT_ANCHORS.map(({ id, key }) => ({
+      id,
+      label: `dev.gallery.components.${key}` as const,
+    })),
+    load: () => import('./LegacyComponentsSection'),
+  },
+  {
+    id: 'layout',
+    title: 'dev.gallery.sections.layout',
+    anchors: LAYOUT_ANCHORS.map(({ id, key }) => ({
+      id,
+      label: `dev.gallery.layout.pieces.${key}` as const,
+    })),
+    load: () => import('./LegacyLayoutSection'),
+  },
+]

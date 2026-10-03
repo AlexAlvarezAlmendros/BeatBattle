@@ -2,20 +2,26 @@ import { expect, test } from '@playwright/test'
 import { collectErrors, expectVisibleFocus, focusRingClippedBy, openGallery } from './support'
 
 /**
- * Galería `/dev/galeria` (tarea 0.9, `RD-VIS-03`): solo existe en desarrollo, y por eso los E2E corren
- * contra el servidor de Vite. Comprueba que están todas las secciones del índice, cada una con su
- * ancla y su título, sin errores de la página.
+ * Galería `/dev/galeria` (tareas 0.9 y 0.22, `RD-VIS-03`): solo existe en desarrollo, y por eso los E2E
+ * corren contra el servidor de Vite. Comprueba que están todas las secciones del índice (el registro de
+ * `ui/gallery/sections`), cada una con su ancla y su título, sin errores de la página.
  */
 
 const SECTIONS = [
-  { id: 'color', name: 'Color' },
-  { id: 'tipografia', name: 'Tipografía' },
-  { id: 'espaciado', name: 'Espaciado' },
-  { id: 'radios', name: 'Radios' },
-  { id: 'sombras', name: 'Sombras' },
-  { id: 'movimiento', name: 'Movimiento' },
+  { id: 'base', name: 'Base de la arena' },
   { id: 'componentes', name: 'Componentes' },
   { id: 'layout', name: 'Layout del sello' },
+] as const
+
+/** Bloques de la sección «Base» (tarea 0.22). */
+const BASE = [
+  { id: 'base-paleta', name: 'Paleta' },
+  { id: 'base-contraste', name: 'Contraste' },
+  { id: 'base-tipografia', name: 'Tipografía' },
+  { id: 'base-escala', name: 'Escala' },
+  { id: 'base-forma', name: 'Forma' },
+  { id: 'base-primitivas', name: 'Primitivas' },
+  { id: 'base-cursor', name: 'Cursor de juego' },
 ] as const
 
 /** Componentes base de §3.3, en su orden (cuelgan de «Componentes»). */
@@ -49,14 +55,15 @@ const LAYOUT = [
 test('RD-VIS-03: la galería pinta todas sus secciones, componentes y piezas del layout', async ({ page }) => {
   const errors = collectErrors(page)
   await openGallery(page)
-  await expect(page).toHaveTitle('Galería de componentes · Beat Battle')
+  await expect(page).toHaveTitle('Galería · Beat Battle')
   const main = page.getByRole('main')
-  await expect(main.getByRole('heading', { level: 1, name: 'Galería de componentes' })).toBeVisible()
+  await expect(main.getByRole('heading', { level: 1, name: 'Galería' })).toBeVisible()
 
   // El índice enlaza exactamente estas anclas, en este orden: una sección nueva sin test hace fallar.
   const index = main.getByRole('navigation', { name: 'Índice de la galería' })
   const expected = [
     ...SECTIONS.map((item) => ({ ...item, level: 'H2' })),
+    ...BASE.map((item) => ({ ...item, level: 'H3' })),
     ...COMPONENTS.map((item) => ({ ...item, level: 'H3' })),
     ...LAYOUT.map((item) => ({ ...item, level: 'H3' })),
   ]
@@ -68,7 +75,13 @@ test('RD-VIS-03: la galería pinta todas sus secciones, componentes y piezas del
   // Orden del índice: cada sección, con sus componentes o piezas del layout colgando de ella.
   const indexOrder = SECTIONS.flatMap((section) => [
     section,
-    ...(section.id === 'componentes' ? COMPONENTS : section.id === 'layout' ? LAYOUT : []),
+    ...(section.id === 'base'
+      ? BASE
+      : section.id === 'componentes'
+        ? COMPONENTS
+        : section.id === 'layout'
+          ? LAYOUT
+          : []),
   ])
   expect(links).toEqual(indexOrder.map(({ id, name }) => ({ id, name })))
 

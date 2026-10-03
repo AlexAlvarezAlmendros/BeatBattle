@@ -1,0 +1,254 @@
+/*
+ * Galería en la arena (tarea 0.22): cabecera, índice, secciones, bloques y muestras con las piezas y
+ * los tokens de la v0.6 (§3.2). Las secciones viejas (`ComponentSections`, `LayoutSection`) siguen con
+ * `GalleryPage.module.css` hasta que se rehacen (0.25) o se retiran (0.27).
+ */
+
+.page {
+  position: relative;
+  z-index: var(--bb-z-content);
+  isolation: isolate;
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: var(--bb-space-8) var(--bb-gutter) var(--bb-space-16);
+}
+
+/*
+ * La galería se ve sobre negro, como las maquetas: tapa el fondo del marco viejo (orbes del sello, que
+ * se retiran en la 0.23/0.27) para que lo que se mide aquí sea solo la arena.
+ */
+.page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--bb-black);
+}
+
+.header {
+  display: grid;
+  gap: var(--bb-space-4);
+  padding-bottom: var(--bb-space-8);
+  border-bottom: var(--bb-stroke) solid var(--bb-red);
+}
+
+.kicker {
+  color: var(--bb-red);
+}
+
+.title {
+  font-size: var(--bb-fs-title);
+}
+
+.summary {
+  max-width: 64ch;
+  color: var(--bb-text-2);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-4) var(--bb-space-6);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* ── Interruptor: chip de filtro de la arena con su estado en texto (§3.3 «Chip de filtro») ───── */
+.switchField {
+  display: grid;
+  gap: var(--bb-space-2);
+  max-width: 34ch;
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: var(--bb-space-3);
+  min-height: var(--bb-target);
+  padding: 0 var(--bb-space-3) 0 var(--bb-space-4);
+  border: 0;
+  background: transparent;
+  color: var(--bb-text);
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+  --frame-cut: var(--bb-cut-sm);
+}
+
+.switch[aria-checked="true"] {
+  --frame-border: var(--bb-red);
+  --frame-fill: var(--bb-red);
+  color: var(--bb-black);
+}
+
+.yesNo {
+  display: inline-flex;
+  font-family: var(--bb-font-display);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-button);
+}
+
+.yesNo span {
+  padding: var(--bb-space-1) var(--bb-space-2);
+  background: var(--bb-ink-3);
+  color: var(--bb-text-3);
+}
+
+.yesNo .on {
+  background: var(--bb-white);
+  color: var(--bb-black);
+}
+
+.hint {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-sm);
+}
+
+/* ── Índice ───────────────────────────────────────────────────────────────────────────────── */
+.index {
+  padding: var(--bb-space-6) 0;
+}
+
+.indexList,
+.indexSub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-1) var(--bb-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.indexList {
+  flex-direction: column;
+}
+
+.indexLink,
+.indexSubLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bb-target);
+  color: var(--bb-text);
+  text-decoration: none;
+}
+
+.indexLink {
+  font-family: var(--bb-font-display);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-plate);
+  text-transform: uppercase;
+}
+
+.indexSubLink {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.indexLink:hover,
+.indexSubLink:hover {
+  color: var(--bb-red);
+}
+
+/* ── Secciones y bloques ──────────────────────────────────────────────────────────────────── */
+.section {
+  display: grid;
+  gap: var(--bb-space-8);
+  padding-block: var(--bb-space-12);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-4);
+  font-size: var(--bb-fs-3xl);
+}
+
+/* Filete de sección: rojo los primeros 48 px y blanco tenue después (como en las maquetas). */
+.sectionTitle::after {
+  content: "";
+  flex: 1;
+  height: var(--bb-stroke);
+  background: linear-gradient(
+    to right,
+    var(--bb-red) 0 var(--bb-space-12),
+    var(--bb-line) var(--bb-space-12)
+  );
+}
+
+.intro {
+  max-width: 72ch;
+  color: var(--bb-text-2);
+}
+
+.block {
+  display: grid;
+  gap: var(--bb-space-5);
+  scroll-margin-top: var(--bb-space-8);
+}
+
+.blockTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-3);
+  font-size: var(--bb-fs-xl);
+}
+
+/* Barra roja inclinada delante del título del bloque (`slab` de las maquetas). */
+.blockTitle::before {
+  content: "";
+  width: var(--bb-space-1);
+  height: var(--bb-space-5);
+  background: var(--bb-red);
+  transform: skewX(calc(-1 * var(--bb-split-angle)));
+}
+
+.rowTitle {
+  margin-bottom: var(--bb-space-3);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+  gap: var(--bb-space-4);
+}
+
+.gridWide {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+}
+
+/* Muestra: la pieza sobre negro y su pie con el nombre (y el token). */
+.specimen {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: var(--bb-space-2);
+  margin: 0;
+}
+
+.stage {
+  display: grid;
+  place-items: center;
+  min-height: var(--bb-space-16);
+  padding: var(--bb-space-6) var(--bb-space-4);
+  --frame-fill: var(--bb-panel);
+  --frame-border: var(--bb-line);
+}
+
+.caption {
+  display: grid;
+  gap: var(--bb-space-1);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.token {
+  color: var(--bb-text-3);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  overflow-wrap: anywhere;
+}

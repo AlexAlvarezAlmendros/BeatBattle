@@ -1,7 +1,7 @@
-import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from 'react'
+import { lazy, Suspense, useEffect, useSyncExternalStore } from 'react'
 import { DocumentTitle } from '../../app/DocumentTitle'
 import { t } from '../../i18n'
-import type { CardSurface } from '../Card'
+import { cx } from '../forceState'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import {
   hasReducedMotionSetting,
@@ -9,47 +9,46 @@ import {
   setReducedMotion,
   subscribeReducedMotion,
 } from '../hooks/useReducedMotion'
-import { COMPONENT_ANCHORS, LAYOUT_ANCHORS, SECTION_ANCHORS } from './anchors'
-import styles from './GalleryPage.module.css'
-import { Switch } from './parts'
+import { isSeriousMode, setSeriousMode, subscribeSeriousMode } from '../hooks/useSeriousMode'
+import { GallerySwitch } from './kit'
+import styles from './kit.module.css'
+import { GALLERY_SECTIONS } from './sections'
 
-/** El cuerpo (todos los componentes y Motion) se carga aparte: la cabecera sale al momento. */
-const GalleryContent = lazy(async () => ({ default: (await import('./GalleryContent')).GalleryContent }))
+/** Cada sección se carga aparte (`React.lazy`): la cabecera y el índice salen al momento. */
+const SECTION_COMPONENTS = new Map(GALLERY_SECTIONS.map((section) => [section.id, lazy(section.load)]))
 
 /**
- * `/dev/galeria` — galería de componentes (`RD-VIS-03`, `RD-MOT-03`), solo en desarrollo: la ruta no
+ * `/dev/galeria` — galería de la arena (`RD-VIS-03`, `RD-MOT-03`), solo en desarrollo: la ruta no
  * existe en la construcción de producción.
  *
- * Enseña los tokens (color con su contraste, tipografía, espaciado, radios, sombras y movimiento) y
- * cada componente base de §3.3 en todos sus estados, forzados con `state` para verlos sin
- * interactuar, más una versión interactiva, y las piezas del layout del sello (isla, pie, hero, orbes y
- * `GlassSurface`). Dos interruptores: «Reducir movimiento» (pone
- * `data-motion="reduced"` en `<html>`, como el ajuste de accesibilidad) y cristal o macizo.
- *
- * El interruptor de movimiento lee el atributo (sigue también los cambios hechos fuera de la galería)
- * y, al salir de `/dev/galeria`, el atributo vuelve a como estaba al entrar: el ajuste de prueba no se
- * arrastra al resto de la app.
+ * Las secciones salen del registro (`sections/index.ts`, un fichero por sección). Dos interruptores en
+ * la cabecera: «Reducir movimiento» (`<html data-motion="reduced">`, como el ajuste de accesibilidad) y
+ * «Modo serio» (`<html data-serious>`). Los dos siguen el atributo aunque cambie fuera y, al salir de la
+ * galería, lo dejan como estaba al entrar: el ajuste de prueba no se arrastra al resto de la app.
  */
 export function GalleryPage() {
   const reduced = useSyncExternalStore(subscribeReducedMotion, hasReducedMotionSetting, () => false)
-  const [glass, setGlass] = useState(true)
+  const serious = useSyncExternalStore(subscribeSeriousMode, isSeriousMode, () => false)
   const systemReduced = useMediaQuery(REDUCED_MOTION_QUERY)
-  const surface: CardSurface = glass ? 'glass' : 'solid'
 
   useEffect(() => {
-    const before = hasReducedMotionSetting()
-    return () => setReducedMotion(before)
+    const before = { reduced: hasReducedMotionSetting(), serious: isSeriousMode() }
+    return () => {
+      setReducedMotion(before.reduced)
+      setSeriousMode(before.serious)
+    }
   }, [])
 
   return (
     <div className={styles.page}>
       <DocumentTitle page={t('dev.gallery.title')} />
       <header className={styles.header}>
-        <h1 className={styles.title}>{t('dev.gallery.title')}</h1>
+        <p className={cx('bb-label', styles.kicker)}>{t('dev.gallery.kicker')}</p>
+        <h1 className={cx('bb-display', styles.title)}>{t('dev.gallery.title')}</h1>
         <p className={styles.summary}>{t('dev.gallery.summary')}</p>
         <fieldset className={styles.controls}>
           <legend className="sr-only">{t('dev.gallery.controls.label')}</legend>
-          <Switch
+          <GallerySwitch
             checked={reduced}
             onChange={setReducedMotion}
             label={t('dev.gallery.controls.reducedMotion')}
@@ -59,11 +58,11 @@ export function GalleryPage() {
                 : t('dev.gallery.controls.reducedMotionHint')
             }
           />
-          <Switch
-            checked={glass}
-            onChange={setGlass}
-            label={t('dev.gallery.controls.glass')}
-            hint={t('dev.gallery.controls.glassHint')}
+          <GallerySwitch
+            checked={serious}
+            onChange={setSeriousMode}
+            label={t('dev.gallery.controls.serious')}
+            hint={t('dev.gallery.controls.seriousHint')}
           />
         </fieldset>
       </header>
@@ -71,25 +70,19 @@ export function GalleryPage() {
       <nav className={styles.index} aria-label={t('dev.gallery.indexLabel')}>
         {/* biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none */}
         <ol role="list" className={styles.indexList}>
-          {SECTION_ANCHORS.map(({ id, key }) => (
-            <li key={id}>
-              <a href={`#${id}`}>{t(`dev.gallery.sections.${key}`)}</a>
-              {key === 'components' && (
+          {GALLERY_SECTIONS.map((section) => (
+            <li key={section.id}>
+              <a href={`#${section.id}`} className={styles.indexLink}>
+                {t(section.title)}
+              </a>
+              {section.anchors && (
                 // biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none
                 <ol role="list" className={styles.indexSub}>
-                  {COMPONENT_ANCHORS.map((component) => (
-                    <li key={component.id}>
-                      <a href={`#${component.id}`}>{t(`dev.gallery.components.${component.key}`)}</a>
-                    </li>
-                  ))}
-                </ol>
-              )}
-              {key === 'layout' && (
-                // biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none
-                <ol role="list" className={styles.indexSub}>
-                  {LAYOUT_ANCHORS.map((piece) => (
-                    <li key={piece.id}>
-                      <a href={`#${piece.id}`}>{t(`dev.gallery.layout.pieces.${piece.key}`)}</a>
+                  {section.anchors.map((anchor) => (
+                    <li key={anchor.id}>
+                      <a href={`#${anchor.id}`} className={styles.indexSubLink}>
+                        {t(anchor.label)}
+                      </a>
                     </li>
                   ))}
                 </ol>
@@ -99,9 +92,14 @@ export function GalleryPage() {
         </ol>
       </nav>
 
-      <Suspense fallback={<p className={styles.summary}>{t('common.loading')}</p>}>
-        <GalleryContent surface={surface} />
-      </Suspense>
+      {GALLERY_SECTIONS.map((section) => {
+        const Section = SECTION_COMPONENTS.get(section.id)!
+        return (
+          <Suspense key={section.id} fallback={<p className={styles.summary}>{t('common.loading')}</p>}>
+            <Section />
+          </Suspense>
+        )
+      })}
     </div>
   )
 }

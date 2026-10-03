@@ -1,19 +1,7 @@
 /**
- * Anclas de la galería para el índice. Van aparte de las secciones para que la cabecera de la página
- * (título, ajustes e índice) se pinte sin esperar a cargar los componentes.
+ * Anclas de las secciones viejas de la galería (componentes de la 0.8 y layout del sello de la 0.7).
+ * Las usa `sections/index.ts` para el índice; desaparecen con esas secciones (0.25 y 0.27).
  */
-
-/** Secciones, en orden (los componentes y las piezas del layout cuelgan de la suya). */
-export const SECTION_ANCHORS = [
-  { id: 'color', key: 'color' },
-  { id: 'tipografia', key: 'typography' },
-  { id: 'espaciado', key: 'spacing' },
-  { id: 'radios', key: 'radii' },
-  { id: 'sombras', key: 'shadows' },
-  { id: 'movimiento', key: 'motion' },
-  { id: 'componentes', key: 'components' },
-  { id: 'layout', key: 'layout' },
-] as const
 
 /** Componentes, en el orden de §3.3. */
 export const COMPONENT_ANCHORS = [

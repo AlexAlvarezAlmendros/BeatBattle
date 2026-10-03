@@ -1,4 +1,3 @@
-import { color } from '@beatbattle/shared/tokens'
 import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
@@ -7,37 +6,27 @@ import { t } from '../../i18n'
 import { resetGlassCapabilityCache } from '../glass'
 import { useToasts } from '../Toast'
 import { COMPONENT_ANCHORS, LAYOUT_ANCHORS } from './anchors'
+import { CONTRAST_RULES } from './contrast'
 import { GalleryPage } from './GalleryPage'
+import { GALLERY_SECTIONS } from './sections'
 import { SEAL_STATES, STATE_MATRIX } from './stateMatrix'
 
-const SECTION_KEYS = [
-  'color',
-  'typography',
-  'spacing',
-  'radii',
-  'shadows',
-  'motion',
-  'components',
-  'layout',
-] as const
-
-/** Pinta la galería y espera a su cuerpo, que se carga aparte (`React.lazy`). */
+/** Pinta la galería y espera a sus secciones, que se cargan aparte (`React.lazy`). */
 async function renderGallery() {
   const view = render(
     <MemoryRouter initialEntries={['/dev/galeria']}>
       <GalleryPage />
     </MemoryRouter>,
   )
-  await screen.findByRole(
-    'heading',
-    { level: 2, name: t('dev.gallery.sections.components') },
-    { timeout: 10_000 },
-  )
+  for (const section of GALLERY_SECTIONS) {
+    await screen.findByRole('heading', { level: 2, name: t(section.title) }, { timeout: 10_000 })
+  }
   return view
 }
 
 afterEach(() => {
   document.documentElement.removeAttribute('data-motion')
+  document.documentElement.removeAttribute('data-serious')
   act(() => useToasts.getState().clear())
   vi.unstubAllGlobals()
   resetGlassCapabilityCache()
@@ -53,16 +42,108 @@ describe('galería /dev/galeria (0.9)', { timeout: 15_000 }, () => {
       </MemoryRouter>,
     )
     expect(screen.getByRole('heading', { level: 1, name: t('dev.gallery.title') })).toBeInTheDocument()
-    expect(screen.getAllByRole('switch')).toHaveLength(2)
+    expect(screen.getByRole('switch', { name: t('dev.gallery.controls.reducedMotion') })).toBeInTheDocument()
+    expect(screen.getByRole('switch', { name: t('dev.gallery.controls.serious') })).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: t('dev.gallery.indexLabel') })).toBeInTheDocument()
   })
 
-  it('RD-VIS-03: un solo <h1> y todas las secciones (tokens, tipografía, espaciado, radios, sombras, movimiento, componentes y layout)', async () => {
+  it('RD-VIS-03: un solo <h1> y las secciones del registro, en su orden, cada una con su ancla', async () => {
     await renderGallery()
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
     expect(screen.getByRole('heading', { level: 1, name: t('dev.gallery.title') })).toBeInTheDocument()
     const sections = screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent)
-    expect(sections).toEqual(SECTION_KEYS.map((key) => t(`dev.gallery.sections.${key}`)))
+    expect(sections).toEqual(GALLERY_SECTIONS.map((section) => t(section.title)))
+    for (const section of GALLERY_SECTIONS) {
+      const element = document.getElementById(section.id)
+      expect(element, section.id).not.toBeNull()
+      expect(element!.tagName).toBe('SECTION')
+    }
+    // Los ids del registro no se repiten.
+    expect(new Set(GALLERY_SECTIONS.map((section) => section.id)).size).toBe(GALLERY_SECTIONS.length)
+  })
+
+  it('RD-VIS-03: la sección «Base» enseña paleta, contraste, tipografía, escala, forma, primitivas y cursor', async () => {
+    await renderGallery()
+    const base = document.getElementById('base')!
+    for (const id of [
+      'base-paleta',
+      'base-contraste',
+      'base-tipografia',
+      'base-escala',
+      'base-forma',
+      'base-primitivas',
+      'base-cursor',
+    ]) {
+      expect(
+        within(base)
+          .getAllByRole('heading', { level: 3 })
+          .map((h) => h.closest('section')?.id),
+      ).toContain(id)
+    }
+    // Paleta: los cuatro colores del sello con su variable.
+    const palette = document.getElementById('base-paleta')!
+    for (const name of ['--bb-black', '--bb-red', '--bb-white', '--bb-wine']) {
+      expect(within(palette).getAllByText(name).length, name).toBeGreaterThan(0)
+    }
+    // Contraste: una fila por par de §3.2.
+    const rows = document.querySelectorAll('#base-contraste tbody tr')
+    expect(rows).toHaveLength(CONTRAST_RULES.length)
+    // Primitivas: marcos de las tres variantes, teclas, etiquetas y la pegatina con la firma.
+    const primitives = document.getElementById('base-primitivas')!
+    for (const variant of ['panel', 'stage', 'title']) {
+      expect(primitives.querySelector(`[data-frame="${variant}"]`), variant).not.toBeNull()
+    }
+    expect(primitives.querySelectorAll('kbd[data-key]').length).toBeGreaterThanOrEqual(9)
+    expect(primitives.querySelectorAll('[data-tag]').length).toBeGreaterThanOrEqual(9)
+    expect(within(primitives).getAllByRole('link', { name: t('ui.otpSlap.label') }).length).toBeGreaterThan(0)
+    // Cursor: forzado y en los tres grupos de foco itinerante.
+    const cursor = document.getElementById('base-cursor')!
+    expect(cursor.querySelectorAll('[data-force-state="focus"] [data-cursor-ring]')).toHaveLength(2)
+    expect(within(cursor).getByRole('menu')).toBeInTheDocument()
+    expect(within(cursor).getByRole('listbox')).toBeInTheDocument()
+    expect(within(cursor).getByRole('tablist')).toBeInTheDocument()
+  })
+
+  it('RD-MOT-05: el menú de la galería se recorre con el teclado y el foco es el cursor', async () => {
+    const user = userEvent.setup()
+    await renderGallery()
+    const menu = within(document.getElementById('base-cursor')!).getByRole('menu')
+    const items = within(menu).getAllByRole('menuitem')
+    expect(items.filter((item) => item.tabIndex === 0)).toHaveLength(1)
+    items[0]!.focus()
+    await user.keyboard('{ArrowUp}')
+    expect(items.at(-1)).toHaveFocus()
+    expect(items.at(-1)).toHaveAttribute('data-cursor-active', 'true')
+  })
+
+  it('el índice enlaza con cada sección y con cada bloque del registro', async () => {
+    await renderGallery()
+    const index = screen.getByRole('navigation', { name: t('dev.gallery.indexLabel') })
+    const targets = within(index)
+      .getAllByRole('link')
+      .map((link) => link.getAttribute('href')!.slice(1))
+    const expected = GALLERY_SECTIONS.flatMap((section) => [
+      section.id,
+      ...(section.anchors ?? []).map((a) => a.id),
+    ])
+    expect(targets).toEqual(expected)
+    for (const id of targets) expect(document.getElementById(id), id).not.toBeNull()
+  })
+
+  it('RD-VIS-03: el interruptor «Modo serio» pone data-serious en <html> y lo deja como estaba al salir', async () => {
+    const user = userEvent.setup()
+    const { unmount } = await renderGallery()
+    const toggle = screen.getByRole('switch', { name: t('dev.gallery.controls.serious') })
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
+    await user.click(toggle)
+    expect(toggle).toHaveAttribute('aria-checked', 'true')
+    expect(document.documentElement).toHaveAttribute('data-serious')
+    // Un cambio hecho fuera (los ajustes de la app) se refleja.
+    await act(async () => document.documentElement.removeAttribute('data-serious'))
+    expect(toggle).toHaveAttribute('aria-checked', 'false')
+    await user.click(toggle)
+    unmount()
+    expect(document.documentElement).not.toHaveAttribute('data-serious')
   })
 
   it('RD-VIS-03: pinta cada componente base de §3.3 en su bloque', async () => {
@@ -215,26 +296,8 @@ describe('galería /dev/galeria (0.9)', { timeout: 15_000 }, () => {
     await renderGallery()
     const layout = document.getElementById('layout')!
     expect(layout.querySelectorAll('[data-glass="on"]').length).toBeGreaterThan(0)
-    await user.click(screen.getByRole('switch', { name: t('dev.gallery.controls.glass') }))
+    await user.click(screen.getByRole('switch', { name: t('dev.gallery.controls.glassLayout') }))
     expect(layout.querySelectorAll('[data-glass="on"]')).toHaveLength(0)
-  })
-
-  it('las muestras de color salen de @beatbattle/shared/tokens con su contraste', async () => {
-    await renderGallery()
-    const swatches = within(document.getElementById('color')!).getAllByRole('listitem')
-    expect(swatches).toHaveLength(Object.keys(color).length)
-    expect(swatches[0]).toHaveTextContent('--bb-black')
-    expect(swatches[0]).toHaveTextContent(t('dev.gallery.color.onBlack'))
-  })
-
-  it('el índice enlaza con cada sección y con cada componente', async () => {
-    await renderGallery()
-    const index = screen.getByRole('navigation', { name: t('dev.gallery.indexLabel') })
-    const targets = within(index)
-      .getAllByRole('link')
-      .map((link) => link.getAttribute('href')!.slice(1))
-    expect(targets).toHaveLength(SECTION_KEYS.length + COMPONENT_ANCHORS.length + LAYOUT_ANCHORS.length)
-    for (const id of targets) expect(document.getElementById(id), id).not.toBeNull()
   })
 
   it('RNF-A11Y-03 / RD-MOT-03: el interruptor «Reducir movimiento» pone data-motion="reduced" en <html>', async () => {

@@ -1,5 +1,5 @@
 import { levelProgress } from '@beatbattle/rules'
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { type ReactNode, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { type Messages, t } from '../../i18n'
 import { Button, type ButtonProps } from '../Button'
 import { Card, type CardState, type CardSurface } from '../Card'
@@ -27,9 +27,10 @@ const ENTRIES = ['first', 'second', 'third', 'fourth'] as const
 /** Nombre de un género de muestra (`GENRES`, más abajo). */
 const genreName = (key: (typeof GENRES)[number]) => t(`dev.gallery.sample.genres.${key}`)
 
-export function ComponentsSection({ surface }: { surface: CardSurface }) {
+export function ComponentsSection({ surface, controls }: { surface: CardSurface; controls?: ReactNode }) {
   return (
     <GallerySection id="componentes" title={t('dev.gallery.sections.components')}>
+      {controls}
       <ButtonBlock />
       <ChipBlock />
       <CardBlock surface={surface} />
