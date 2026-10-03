@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6 · 2026-10-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.1 · 2026-10-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -424,8 +424,9 @@ con un barrido y un sonido (`vote.unlocked`).
 - Reproducción automática desde el principio; el umbral se ve en el medidor de escucha mínima y en
   el contador del HUD.
 - Votar con clic o teclas **1–5**; **S** salta (la entrada pasa al final), **Espacio** pausa,
-  **←/→** buscan, **Esc** sale.
-- Tras votar, transición de cambio de entrada a lo largo de la diagonal (1,2 s) y siguiente entrada.
+  **←/→** buscan en la onda (con el cursor en las estrellas, eligen la nota; §3.8.7), **Esc** sale.
+- Tras votar, transición de cambio de entrada a lo largo de la diagonal (1,2 s, `--bb-dur-swap`) y
+  siguiente entrada.
 - Contador de rondas («RONDA 07 / 23»), **combo** de votos seguidos en la sesión y XP flotante.
 - Al vaciar la cola: pantalla de «Jurado completo» con el logro si procede y un resumen (cuántas
   ha puntuado, su media dada).
@@ -589,7 +590,8 @@ El catálogo exacto, con disparadores y efectos, está en el **Anexo F** y es **
 reservada**: no se documenta en la web ni en el README.
 
 **Modo serio** (Opciones): apaga los secretos activos (familia 2) y, además, quita anunciador,
-estampas, rayos, líneas de barrido y partículas (§3.6). Se pierde espectáculo, nunca información.
+estampas, rayos, líneas de barrido, temblores y partículas (§3.6). Se pierde espectáculo, nunca
+información.
 
 | Id | Requisito | Aceptación |
 |---|---|---|
@@ -640,7 +642,7 @@ distintas:
 #### 2.12.1 El recibo de entrada («verificación de subida»)
 
 Es la prueba de que la entrada ha llegado bien. Se envía cuando el servidor termina la verificación
-y la medición (§4.8.4) y tiene forma de **ticket**, como las entradas del sello:
+y la medición (§4.8.4) y tiene forma de **ticket** (§3.8.12):
 
 - Número de recibo correlativo por semana (`BB-2026W41-0007`) y QR a la ficha.
 - Alias de batalla, título, duración, formato y tamaño del original, BPM y tonalidad.
@@ -903,7 +905,7 @@ Objetivo **WCAG 2.2 AA** con extras propios de un juego:
 | Visitante intenta votar | Modal de entrada con la estrella que pulsó «guardada» | «Entra y tu voto queda guardado.» (se aplica al volver si sigue siendo válido) |
 | Umbral de escucha sin cumplir | Estrellas dormidas con medidor de escucha | «Escucha un poco más: quedan 18 s.» |
 | Intento de votar la propia entrada | No hay estrellas; etiqueta | «Es tu beat. Aquí votan los demás.» |
-| Votación cerrada, sellado en curso | Sello girando | «Contando votos…» (si tarda > 10 s: «Esto va lento; recarga en un momento») |
+| Votación cerrada, sellado en curso | Vinilo girando | «Contando votos…» (si tarda > 10 s: «Esto va lento; recarga en un momento») |
 | Semana desierta | Vinilo polvoriento | «Esta semana nadie se atrevió.» |
 | Calendario vacío | Cuenta atrás oculta | «El próximo drop está en el horno.» |
 | Subida fallida | Error con motivo y reintentar | «Se ha cortado la subida. Tu ficha sigue aquí: reintenta.» |
@@ -944,7 +946,7 @@ y sonido. La familia se reconoce por el color y por la firma, no por la maqueta 
 | Pieza de `otherpeople.es` | Por qué no | Lo que hace BeatBattle en su lugar |
 |---|---|---|
 | Isla de navegación flotante con cristal | Es la cabecera del sello | HUD de juego arriba y barra de controles abajo (§3.4.1) |
-| Hero centrado con titular de dos líneas en contorno rojo y halo | Es la portada del sello | Logo del juego alineado a la izquierda con extrusión y estela (§3.3) y pantalla partida por la diagonal |
+| Hero centrado con titular de dos líneas en contorno rojo y halo | Es la portada del sello | Logo del juego alineado a la izquierda con extrusión y líneas de velocidad (§3.2 «Trazos», §3.8.1) y pantalla partida por la diagonal |
 | Banda de *marquee* con puntos rojos | Pieza del sello | Crónica de la arena: una línea que cambia por fundido en la barra de controles (§3.8.3) |
 | Fondo Silk y orbes rojos | Fondo del sello | La arena: cuña granate con trama, diagonal y rayos (§3.5) |
 | Superficies de cristal (`GlassSurface`), radios de 16–20 px, píldoras | Lenguaje del sello | Marcos de esquina recortada, placas en paralelogramo y paneles opacos |
@@ -960,6 +962,8 @@ y sonido. La familia se reconoce por el color y por la firma, no por la maqueta 
 | Pantalla de título y menú principal | Lockup «TORNEO SEMANAL DE PRODUCTORES **by** [OTP.]» junto al logo del juego (104–120 px de ancho; 62 px en móvil). Enlaza a `otherpeople.es` con el nombre «by Other People (abre la web del sello)». |
 | Arranque de la puerta | «[OTP.] PRESENTA», como el logo de editora antes del título (§3.8.1) |
 | Barra de controles de todas las pantallas | «Un juego de [OTP.] Other People Records» en el centro (pegatina de 30 px; 24 px en móvil), enlazada al sello |
+| Autenticación, admin y legales | El marco simple (§3.8.14) conserva la barra de controles con la firma en el centro; en autenticación, además, el lockup del título junto al logo |
+| Ceremonia de resultados | Tapa la barra de controles, así que lleva la pegatina (30 px) en la esquina inferior, junto a «Saltar [Esc]» |
 | Carta de luchador | Pegatina en el pie del anverso y en el reverso; el rango del nivel 20 se llama «Other People» |
 | Resultados y salón de la fama | Distintivo «Elección del sello» con la pegatina (§2.16) |
 | Emails | Pegatina en la cabecera, junto al logo del juego (§3.8.12) |
@@ -968,16 +972,17 @@ La pegatina no se recolorea, no se deforma y no se gira fuera de −7° (±2°).
 la altura de su «O».
 
 > **Hallazgo que se conserva.** La web del sello declara Montserrat pero no la carga (§3.1 de la
-> v0.5). Ya no afecta a BeatBattle; la propuesta de arreglo al sello (`RF-OTP-03`) sigue en pie como
-> mejora para ellos.
+> v0.5). Ya no afecta a BeatBattle y no es requisito suyo; queda como sugerencia opcional para el
+> sello, que puede ir en la misma PR de la Fase 9 en `ReactOtpWeb` (la del widget, `RF-OTP-03`).
 
 ### 3.2 Tokens
 
 Todos los valores de color, tipo, espaciado, forma, sombra, duración y curva salen de tokens
 (`apps/web/src/styles/tokens.css`, espejados en `packages/shared/src/tokens.ts` y comprobados por
-test). Nada literal fuera de `tokens.css` (`RD-VIS-01`, `pnpm lint:tokens`). Se retiran los tokens del
-sello: `--bb-glass*`, `--nav-*`, `--bb-radius-sm/md/lg/xl/pill`, `--bb-shadow-cta*`, `-glass`,
-`-hero-*`, `--bb-blur-*`, `--bb-space-cta-*`, `--bb-space-nav-*`, `--bb-space-marquee-y`,
+test). Nada literal fuera de `tokens.css` (`RD-VIS-01`, `pnpm lint:tokens`), salvo los tiempos
+internos de las ceremonias (§3.6, «Duraciones»). Se retiran los tokens del sello: `--bb-glass*`,
+`--nav-*`, `--bb-radius-sm/md/lg/xl/pill`, `--bb-shadow-cta*`, `-glass`, `-hero-*`, `--bb-blur-*`,
+`--bb-space-cta-*`, `--bb-space-nav-*`, `--bb-space-marquee-y`,
 `--bb-red-line`, `--bb-red-rule`, `--bb-red-text`, `--bb-red-hover`, `--bb-success`, `--bb-danger`,
 `--bb-gold*`, `--bb-platinum`, `--bb-diamond` y los de los orbes.
 
@@ -1041,7 +1046,7 @@ extendido por `unicode-range`; se precargan Anybody cursiva y Chakra Petch 600 l
 
 | Token | Familia | Paquete npm | Versión | Licencia | Uso |
 |---|---|---|---|---|---|
-| `--bb-font-display` | **Anybody** variable (wght 100–900, wdth 50–150 %), **solo cursiva** | `@fontsource-variable/anybody` | 5.3.0 | OFL-1.1 | Logo, títulos de pantalla, placas del menú, alias, VS, anunciador, botones, peanas. Siempre 900, mayúsculas, textos de ≤ 4 palabras; `font-stretch` 150 % (logo, títulos), 118–135 % (placas, botones), y baja hasta 105 % para que un alias quepa |
+| `--bb-font-display` | **Anybody** variable (wght 100–900, wdth 50–150 %), **solo cursiva** | `@fontsource-variable/anybody` | 5.3.0 | OFL-1.1 | Logo, títulos de pantalla, placas del menú, alias, VS, anunciador, botones, peanas. Peso 900 (800 en los botones y en la cinta blanca del lockup, de 14 a 16 px, donde el 900 cierra los huecos de las letras), siempre en mayúsculas, textos de ≤ 4 palabras; `font-stretch` 150 % (logo, títulos), 118–135 % (placas, botones), y baja hasta 105 % para que un alias quepa |
 | `--bb-font-ui` | **Chakra Petch** 500, 600, 700 y 600/700 cursiva | `@fontsource/chakra-petch` | 5.3.0 | OFL-1.1 | Texto, rótulos en mayúsculas, ayudas, formularios, barra de controles |
 | `--bb-font-num` | **Oxanium** variable (wght 200–800) | `@fontsource-variable/oxanium` | 5.3.0 | OFL-1.1 | Reloj, XP, BPM, puntuaciones, contadores, teclas. Sus cifras son de ancho fijo de serie («1111» y «0000» miden lo mismo): la cuenta atrás no baila |
 
@@ -1075,7 +1080,7 @@ Medianil de pantalla: 48 px en escritorio, 16 px en móvil (`--bb-gutter`).
 
 | Token | Valor | Uso |
 |---|---|---|
-| `--bb-cut-xs` / `-sm` / `--bb-cut` / `-lg` | 5 / 7 / 14 / 22 px | Chaflán de dos esquinas opuestas (arriba-izquierda y abajo-derecha): teclas / chips / marcos / paneles grandes y portadas |
+| `--bb-cut-xs` / `-sm` / `-md` / `--bb-cut` / `-lg` | 5 / 7 / 10 / 14 / 22 px | Chaflán de dos esquinas opuestas (arriba-izquierda y abajo-derecha): teclas / chips de dato y de filtro / botones, botón icono, teselas, avatar y placas pequeñas / marcos, casillas, panel de ayuda, notas y reloj de ronda / paneles grandes, modales y portadas. La capa de relleno del marco y el cursor derivan su chaflán del de la pieza con `calc()` sobre los tokens de trazo (`--bb-stroke`, `--bb-cursor-gap`, `--bb-stroke-cursor`), nunca con un número suelto. Los chaflanes literales de las maquetas se llevan al token más cercano: 9 y 10 px → `-md`; 12 y 16 px → `--bb-cut`; 20 px → `-lg` |
 | `--bb-slant` / `-sm` | 18 px (12 px en móvil) / 6 px | Desplazamiento del paralelogramo: placas del menú, medidores / etiquetas |
 | `--bb-split-angle` | 17° respecto a la vertical | Diagonal que parte la pantalla: banda roja de 12 px + filete blanco de 3 px separado 14 px |
 | `--bb-tilt-sticker` / `-card` / `-ann` | −7° / −3° / −6° | Pegatina OTP / carta de luchador / anunciador. Sellos de goma entre −9° y +9° |
@@ -1124,7 +1129,7 @@ enfocado queda tapado por el HUD ni por la barra de controles (`scroll-margin`).
 | Componente | Anatomía y comportamiento |
 |---|---|
 | **Marco** (`Frame`) | Base de casi todo: dos capas recortadas (borde `--fc` de 2 px y relleno `--ff`) para que el borde siga el chaflán. Variantes: `panel` (`--bb-panel-veil`, borde `--bb-line-strong`), `stage` (borde rojo, relleno `--bb-wine-3` con trama), `title` (borde blanco). |
-| **Botón** | Rectángulo con chaflán de 10 px, display cursiva 800 a 15 px y 118 %, mayúsculas, con su tecla a la derecha (`[INTRO]`). Variantes: `cta` (relleno `--bb-red-cta`, texto blanco), `brand` (relleno `--bb-red`, texto negro), `white` (relleno blanco, texto negro), `outline` (borde blanco, fondo negro). Alturas: `sm` 40 px (objetivo de 44 por pseudoelemento), `md` 48, `lg` 56. **Hover**: avanza 4 px. **Foco**: cursor. **Pulsado**: escala 0,97 + `ui.press`. **Cargando**: el texto se cambia por una onda de 5 barras y el botón queda `aria-busy`. **Deshabilitado**: 45 % de opacidad, `aria-disabled` y el motivo en texto al lado. **Éxito**: check y texto. **Error**: aviso de papel (§3.2 «Estados»). |
+| **Botón** | Rectángulo con chaflán `--bb-cut-md` (10 px), display cursiva 800 a 15 px y 118 %, mayúsculas, con su tecla a la derecha (`[INTRO]`). Variantes: `cta` (relleno `--bb-red-cta`, texto blanco), `brand` (relleno `--bb-red`, texto negro), `white` (relleno blanco, texto negro), `outline` (borde blanco, fondo negro). Alturas: `sm` 40 px (objetivo de 44 por pseudoelemento), `md` 48, `lg` 56. **Hover**: avanza 4 px. **Foco**: cursor. **Pulsado**: escala 0,97 + `ui.press`. **Cargando**: el texto se cambia por una onda de 5 barras y el botón queda `aria-busy`. **Deshabilitado**: 45 % de opacidad, `aria-disabled` y el motivo en texto al lado. **Éxito**: check y texto. **Error**: aviso de papel (§3.2 «Estados»). |
 | **Opción de menú** (`MenuPlate`) | Placa en paralelogramo (`--bb-slant`) de 70 px: índice en Oxanium rojo, etiqueta en display a 25 px y dato a la derecha (contador, «NUEVO», cierre). **Elegida/enfocada**: sale 26 px a la izquierda, crece a 84 px, se rellena de `--bb-red-cta` con trama, texto blanco a 31 px, marco blanco, flecha y etiqueta **1P**, y muestra su `[INTRO]`; el panel de ayuda de debajo describe el modo (región viva). **Pulsado**: escala 0,98 y barrido de la diagonal (transición de página). **Deshabilitado**: candado, etiqueta en `--bb-text-4` y motivo («Disponible el lunes»). En móvil: 48 px (56 la elegida), un toque entra. Semántica: `role="menu"` con `menuitem`. |
 | **Pestañas** | Paralelogramos de 44 px con `[Q]` y `[E]` a los lados; la activa en blanco con texto negro. `role="tablist"`. |
 | **Chip de dato** | Chaflán `--bb-cut-sm`, 32 px, valor en Oxanium y unidad en rótulo de 12 px («92 BPM», «Re menor», «2:51»). No es interactivo. |
@@ -1133,9 +1138,9 @@ enfocado queda tapado por el HUD ni por la barra de controles (`scroll-margin`).
 | **Etiqueta** | Paralelogramo pequeño (`--bb-slant-sm`) en display cursiva a 12–16 px: 1P, NUEVO, RETO, EN JUEGO, TU RESULTADO. Blanca (texto negro), roja (texto negro) o `cta` (texto blanco). |
 | **Sello de goma** | Borde de 3 px del color del texto con la máscara de ruido, girado entre −9° y +9°: «SIN VOTAR», «✓ VOTADA 4/5», «AUTORÍA OCULTA», «SELLADA». Es **estado propio** del usuario o de la semana, nunca un dato de la entrada. |
 | **Ficha de luchador** (entrada seleccionada) | Retrato (portada de 300 px en marco blanco con el sello «AUTORÍA OCULTA»), columna de 4 teselas (tempo, tonalidad, duración, género), **banda del alias** (placa negra con filete blanco y cuña roja; alias en display ajustado a su ancho: baja `font-stretch` de 150 a 105 % y después el cuerpo hasta 30 px) y panel opaco con título, estado («SIN VOTAR · Escucha 45 s y desbloqueas las estrellas»), previa de onda y botones. Se actualiza al mover el cursor (región viva educada). |
-| **Casilla de entrada** (rejilla) | Portada cuadrada en marco de chaflán 12 px + alias en dos líneas como máximo (12 px, mayúsculas). **Enfocada**: cursor blanco con 1P, marco rojo y alias blanco. **Votada**: portada al 42 % y sello «✓ VOTADA n/5» (es tu voto). **Aleatorio**: casilla final con «?» que elige una entrada sin votar. Sin números de orden, medias, recuentos ni autoría. `role="option"` dentro de un `listbox` 2D. |
+| **Casilla de entrada** (rejilla) | Portada cuadrada en marco de chaflán `--bb-cut` + alias en dos líneas como máximo (12 px, mayúsculas). **Enfocada**: cursor blanco con 1P, marco rojo y alias blanco. **Votada**: portada al 42 % y sello «✓ VOTADA n/5» (es tu voto). **Aleatorio**: casilla final con «?» que elige una entrada sin votar. Sin números de orden, medias, recuentos ni autoría. `role="option"` dentro de un `listbox` 2D. |
 | **Fila de entrada** (listas largas: archivo, clasificación, historial) | Marcador de 56–58 px: portada de 44 px, título y subtítulo, posición en display, puntuación en Oxanium y medalla. Antes del sellado, sin posición ni puntuación (`RF-PLAY-05`). **Hover**: `--bb-panel-2`. **Error de audio**: aviso y reintentar (`RF-PLAY-09`). |
-| **Tesela / estadística** | Marco de chaflán 10 px con rótulo de 12 px y valor en Oxanium 22–24 px, unidad en 12–13 px. `tile--hot`: borde rojo para el dato destacado. En móvil, lista de clave y valor. |
+| **Tesela / estadística** | Marco de chaflán `--bb-cut-md` con rótulo de 12 px y valor en Oxanium 22–24 px, unidad en 12–13 px. `tile--hot`: borde rojo para el dato destacado. En móvil, lista de clave y valor. |
 | **Forma de onda** | Barras de 3 px con 2 px de hueco; reproducido `--bb-red`, resto `--bb-wave-idle`; cabeza blanca de 2 px con halo de 6 px. En el Modo Jurado lleva la **marca del umbral** («45 s») y la nota «saltar con la onda no cuenta». Teclado: ←/→ 5 s, Inicio/Fin (`RF-PLAY-06`). |
 | **Modal** (ventana de juego) | Panel `--bb-panel-veil` con marco blanco y chaflán `--bb-cut-lg`, título en display, teclas de acción en el pie, sobre `--bb-scrim`. Entra con la diagonal (`--bb-dur-base`) y `ui.open`. El foco va al diálogo; Esc cierra. |
 | **Anunciador** | Rótulo de una a tres palabras en display, blanco con extrusión de trama y contorno, o etiqueta grande girada −6°: «RONDA 07», «¡A ESCUCHAR!», «¡VOTO LISTO!», «¡VOTO GUARDADO!», «¡TIEMPO!», «¡SELLADO!», «¡JURADO COMPLETO!», «¡CAMPEÓN!». **Uno por evento**, nunca encadenados, y repetido en `aria-live="polite"`. Modo serio: no aparece (queda la región viva). |
@@ -1172,8 +1177,9 @@ enfocado queda tapado por el HUD ni por la barra de controles (`scroll-margin`).
 
 #### 3.4.1 HUD y barra de controles
 
-Todas las pantallas (salvo la puerta, la ceremonia y las de autenticación, admin y legales) tienen el
-mismo marco:
+Todas las pantallas tienen el mismo marco, salvo la puerta y la ceremonia (capas a pantalla completa
+con su propia firma, §3.1) y las de autenticación, admin y legales, que usan un marco simple
+(§3.8.14) pero conservan la barra de controles con su firma (`RF-OTP-01`). El marco:
 
 - **HUD superior** (rejilla de tres columnas, medianil de 48 px):
   - **Izquierda, el jugador**: «1P» en display rojo, avatar en marco de chaflán con borde rojo y
@@ -1245,11 +1251,15 @@ servidor (imágenes OG):
   luminancia media de cada portada quedan a ±5 % de la media. Medido en las maquetas: peor desviación
   0,3 % en rojo y 0,7 % en luminancia. Se revisan a mano las 200 primeras semillas; si una prueba A/B
   mostrara sesgo, la alternativa preparada son portadas idénticas con solo el alias.
-- **Ojo con el rasterizador.** Esa medida es con el canvas rasterizado por CPU. Con el canvas por GPU
-  (Chrome con ANGLE sobre Vulkan, 2026-10-03) la calibración de la maqueta no converge en 4 de las 48
-  semillas: peor desviación 7,0 % en rojo y 10,9 % en luminancia, y el test no pasa. `RD-VIS-04` se
-  comprueba con el rasterizador con el que se pintan de verdad las portadas que ve el jurado; ver
-  `docs/planning/evidence/f0/arena/README.md`.
+- **Se pintan por CPU.** La calibración por medida no es portable entre rasterizadores, así que las
+  portadas se pintan siempre en un canvas 2D rasterizado por CPU: el contexto se pide con
+  `willReadFrequently: true` (también en un `OffscreenCanvas`), a su tamaño final en píxeles de
+  pantalla, y nunca en un canvas acelerado por GPU ni en WebGL; en el servidor (imágenes OG) el
+  rasterizador ya es de CPU. Medido el 2026-10-03 en el Chrome del sistema con la GPU real (ANGLE sobre
+  Vulkan, las opciones de `tools/shot`) con la hoja de 48 portadas de las maquetas: con el contexto por
+  defecto, acelerado por GPU, la calibración no converge en 4 semillas (peor desviación 7,0 % en rojo y
+  10,9 % en luminancia: no pasa); con `willReadFrequently: true`, el mismo resultado que la referencia
+  (0,3 % y 0,7 %: pasa). Ver `docs/planning/evidence/f0/arena/README.md`.
 - Tras el sellado se puede ver la portada propia del productor (§2.5).
 
 #### 3.4.6 Silueta del jurado
@@ -1312,7 +1322,8 @@ gana pega fuerte y dura poco.
 | `--bb-dur-slam` | 280 ms | Estampado (anunciador, VS, logo), entrada de paneles |
 | `--bb-dur-slow` | 420 ms | Entrada del VS, despertar de las estrellas |
 | `--bb-dur-reward` | 900 ms | XP, logro, voto de 5 |
-| Ceremonias | 3–25 s | Coreografías propias (§3.8) |
+| `--bb-dur-swap` | 1.200 ms | Cambio de entrada en el Modo Jurado (§2.7, §3.8.7) |
+| Ceremonias | 3–25 s | Coreografías propias (puerta, revelación del drop y ceremonia de resultados; §3.8). Sus tiempos internos (el sello arrancado y el foco del podio en 600 ms, el alias que pasa a productor en 400 ms…; Anexo E) son datos de la línea de tiempo de cada ceremonia, que corre con el reloj de audio (`RD-MOT-02`), y no tokens: es la única excepción a `RD-VIS-01` |
 
 **Curvas**: `--bb-ease-snap` `cubic-bezier(.2,1.4,.4,1)` (cursor, placas) · `--bb-ease-out`
 `cubic-bezier(.22,1,.36,1)` (por defecto) · `--bb-ease-in-out` `cubic-bezier(.65,0,.35,1)` (diagonal) ·
@@ -1373,7 +1384,8 @@ Cloudinary sale **en silencio** por la política de mismo origen. El *spike* de 
 
 En el **Anexo D**: id, disparador, diseño, duración, nivel y variación. Familias: interfaz
 (`ui.*`, con el tic del cursor de juego `ui.move`, y `nav.page`, el barrido de la diagonal),
-anunciador (`ann.*`: una estampa por rótulo, §3.9), voto (`star.*`, `vote.*`), subida (`upload.*`),
+anunciador (`ann.*`: una estampa por rótulo de la tabla de §3.9; los rótulos de logro y de nivel de
+§3.8.8 suenan con `ach.*` y `level.up`), voto (`star.*`, `vote.*`), subida (`upload.*`),
 drop (`drop.*`), cuenta atrás (`clock.*`), juego (`xp.*`, `level.*`, `ach.*`, `combo.*`, `jury.*`),
 ceremonia (`cer.*`, con el sello que se rasga, `cer.tear`) y secretos (`egg.*`).
 
@@ -1541,9 +1553,13 @@ saltar con la onda no cuenta»; el combo (§3.4.2) a la izquierda, las estrellas
 el veredicto o el motivo a la derecha. Barra de controles: `1–5 PUNTUAR · ESPACIO PAUSA · ←→ BUSCAR · S
 SALTAR · R DENUNCIAR · ESC SALIR`.
 
+**←/→ dependen del cursor**: en la onda buscan 5 s (`RF-PLAY-06`); en las estrellas eligen la nota
+(§3.8.4, `RNF-A11Y-06`) y la barra de controles cambia «←→ BUSCAR» por «←→ NOTA». Tab lleva el cursor
+de la onda a las estrellas y vuelta; 1–5, Espacio, S, R y Esc funcionan esté donde esté.
+
 **Entre entradas**: la portada sale por la derecha y entra la siguiente por la izquierda a lo largo de
-la diagonal (1,2 s, `jury.swap`); el VS se vuelve a estampar. **Al vaciar la cola**: «¡JURADO
-COMPLETO!» con el resumen (cuántas has puntuado y tu media dada) y el logro si procede.
+la diagonal (`--bb-dur-swap`, 1,2 s; `jury.swap`); el VS se vuelve a estampar. **Al vaciar la cola**:
+«¡JURADO COMPLETO!» con el resumen (cuántas has puntuado y tu media dada) y el logro si procede.
 
 **Integridad**: siempre «TÚ VS una entrada»; nunca dos entradas en pantalla con estrellas; la entrada
 no tiene barra de vida; el lector anuncia «Modo Jurado · ronda 7 de 23 · escuchando Tigre Púrpura»,
@@ -1621,15 +1637,15 @@ Recién subidas, Aleatorio; nunca «mejor valoradas»), el conmutador «Solo sin
 [F]» y la rejilla de 6 × 4 casillas con todas las entradas: primero las sin votar en el orden de Ronda
 justa y al final **tus votadas** (atenuadas, «✓ VOTADA n/5»), más la casilla «?» de aleatorio. Con el
 filtro activo, las votadas no aparecen. Debajo: «Ronda justa: primero, las que menos votos llevan
-(nadie ve cuántos). Notas y autoría, el domingo.». Con más de 23 entradas, la plantilla pagina con Q/E
-de fila en fila.
+(nadie ve cuántos). Notas y autoría, el domingo.». Con más de 23 entradas, la rejilla se desplaza de
+fila en fila siguiendo al cursor (↑↓) y RePág/AvPág saltan cuatro filas; Q/E solo cambian el orden.
 
 Sin números de orden en las casillas (se leerían como posición), sin medias, recuentos, retratos ni
 autores. Todas las casillas: mismo tamaño, mismo marco, misma tinta.
 
-Teclado: `listbox` 2D (←↑↓→ en bucle), Intro escucha, J lleva al Modo Jurado empezando por la
-enfocada, F abre filtros, Esc vuelve. Cada casilla se anuncia «Tigre Púrpura, 94 BPM, Re menor, sin
-votar».
+Teclado: `listbox` 2D (←↑↓→ en bucle; RePág/AvPág si la rejilla pagina), Q/E cambian el orden, Intro
+escucha, J lleva al Modo Jurado empezando por la enfocada, F abre filtros, Esc vuelve. Cada casilla se
+anuncia «Tigre Púrpura, 94 BPM, Re menor, sin votar».
 
 **Móvil**: la ficha pasa a una hoja inferior y la plantilla a 3 columnas con desplazamiento vertical.
 
@@ -1643,8 +1659,8 @@ votar».
 | **Temporada** | Clasificación de torneo con puntos tipo F1; el top 3 en peanas pequeñas |
 | **Cómo se juega** | «Lista de movimientos»: 1 Pilla el sample · 2 Cocina tu flip · 3 Sube y vota, cada uno con sus teclas o gestos y «HECHO» para quien lo ha completado; las reglas de juego limpio en 5 líneas (voto ciego, escucha mínima, Ronda justa, media bayesiana, el XP no puntúa) y el enlace a las bases |
 | **Ajustes = OPCIONES** | Pestañas Q/E (Sonido · Movimiento · Cuenta · Perfil · Emails · Sesiones · Privacidad · Accesibilidad); cada opción es una placa con «◀ SÍ ▶» o un medidor de 10 pasos que se cambia con ←/→: volumen por bus, reducir movimiento, sin sonido, **modo serio**, tamaño de texto, calidad visual, puerta de entrada |
-| **Autenticación** | «CONTINUAR PARTIDA» (entrar) y «NUEVO JUGADOR» (registro) como pantalla de título; campos normales y accesibles en paneles opacos; Google y Discord como botones neutros |
-| **Admin y legales** | Marco simple (HUD sin capa de juego, paneles y tablas); sin anunciador ni puerta |
+| **Autenticación** | «CONTINUAR PARTIDA» (entrar) y «NUEVO JUGADOR» (registro) como pantalla de título, con el logo y su lockup «by [OTP.]»; campos normales y accesibles en paneles opacos; Google y Discord como botones neutros; abajo, la barra de controles con sus teclas y la firma |
+| **Admin y legales** | Marco simple: HUD sin capa de juego, paneles y tablas, y la barra de controles con sus teclas y la firma en el centro; sin anunciador ni puerta |
 
 ### 3.9 Tono del anunciador y copys
 
@@ -1684,10 +1700,10 @@ modo serio: se pierde espectáculo, nunca información ni función (`RNF-A11Y-03
 
 | Id | Requisito de diseño | Aceptación |
 |---|---|---|
-| `RD-VIS-01` | Ningún color, chaflán, inclinación, trazo, sombra, duración o curva literal fuera de los tokens | `pnpm lint:tokens` (radios: solo `0` y `50%`) |
+| `RD-VIS-01` | Ningún color, chaflán, inclinación, trazo, sombra, duración o curva literal fuera de los tokens. Única excepción: los tiempos internos de las ceremonias, que son datos de su línea de tiempo (§3.6, «Duraciones») | `pnpm lint:tokens` (radios: solo `0` y `50%`) |
 | `RD-VIS-02` | **Prueba de marca y de juego.** Cada pantalla: (a) usa solo la paleta del sello y sus derivados de §3.2; (b) lleva la firma *OTP.* visible (barra de controles, lockup o placa); (c) no contiene ninguna pieza de la lista «Lo que nunca se imita» (§3.1); (d) se recorre entera con teclado como un menú de juego (foco = cursor, flechas, Intro, Esc) y enseña sus teclas; (e) la aprueba un jurado visual de tres lentes (marca, juego, accesibilidad) | (a) test de capturas (Chrome con `--disable-lcd-text`, sin imágenes de usuario): como el granate es casi 0,25 · rojo + 0,05 · blanco, toda la paleta vive en el plano negro–rojo–blanco; ≤ 0,1 % de píxeles fuera de ese triángulo (tolerancia 8/255 y 0,03 en los pesos), y ≥ 60 % de píxeles con luminancia relativa < 0,06; (b) E2E: `[data-otp-signature]` visible en cada ruta; (c) lint de componentes prohibidos (`GlassSurface`, `MarqueeBand`, `AmbientOrbs`, `SiteHeader` de isla, Montserrat) y revisión de capturas; (d) E2E de teclado por pantalla; (e) acta del jurado en `docs/planning/evidence/` en cada fase con UI |
 | `RD-VIS-03` | Galería de componentes con todos los estados de §3.3, con y sin movimiento y en modo serio | `/dev/galeria` + E2E de la galería |
-| `RD-VIS-04` | Integridad de las portadas: misma tinta y misma luminancia | Test: 48 semillas, proporción de rojo y luminancia media a ±5 % de la media; revisión manual de 200 semillas al cambiar el generador |
+| `RD-VIS-04` | Integridad de las portadas: misma tinta y misma luminancia, pintadas por CPU (§3.4.5) | Test en el Chrome del sistema con la GPU real (las opciones de `tools/shot`) y el contexto 2D de §3.4.5: 48 semillas, proporción de rojo y luminancia media a ±5 % de la media; revisión manual de 200 semillas al cambiar el generador |
 | `RD-VIS-05` | Texto legible: nunca sobre trama, rayos ni líneas de barrido; mínimo 12 px y escalable | Test de capturas con máscara de zonas de texto + test de tamaño mínimo de fuente en cada ruta |
 | `RD-MOT-01` | Toda animación > 400 ms se salta con Esc o cualquier tecla y no bloquea | Test por ceremonia y por puerta |
 | `RD-MOT-02` | Impactos visuales sincronizados con el sonido (desfase < 20 ms) | Medición en la ceremonia con el reloj de audio |
@@ -2876,6 +2892,8 @@ efectos al 100 %; variación = desafinación aleatoria por disparo.
 | `nav.page` | Cambio de página | Barrido de la diagonal: ruido paso banda que sube | 240 ms | −24 | 0 |
 | `ann.round` / `ann.ready` / `ann.saved` | Anunciador: «RONDA 01», «¡VOTO LISTO!», «¡VOTO GUARDADO!» (§3.9) | Estampa del anunciador | 200–400 ms | −14 | 0 |
 | `ann.time` / `ann.sealed` / `ann.champion` | Anunciador: «¡TIEMPO!», «¡SELLADO!», «¡CAMPEÓN!» (§3.9) | Estampa del anunciador | 200–400 ms | −14 | 0 |
+| `ann.listen` / `ann.complete` | Anunciador: «¡A ESCUCHAR!» (tras `jury.swap`), «¡JURADO COMPLETO!» (§3.9) | Estampa del anunciador | 200–400 ms | −14 | 0 |
+| `ann.newbeat` / `ann.week` | Anunciador: «¡NUEVO BEAT EN LA BATALLA!» (en el impacto de `upload.done`), «SEMANA 41» (tras `drop.needle`) (§3.9) | Estampa del anunciador | 200–400 ms | −14 | 0 |
 | `star.hover.1–5` | Hover de estrellas | Pulsación de la pentatónica (grado 1–5), FM suave | 120 ms | −26 | 0 |
 | `star.vote.1–4` | Votar 1–4 | La nota + su octava | 250 ms | −14 | 0 |
 | `star.vote.5` | Votar 5 | Acorde de la tónica arpegiado rápido + brillo de ruido agudo | 600 ms | −10 | 0 |
@@ -2907,7 +2925,7 @@ efectos al 100 %; variación = desafinación aleatoria por disparo.
 |---|---|---|---|---|
 | Cursor de menú | Salta a la opción: la placa sale 26 px y crece; brillo que la recorre una vez | `--bb-dur-tick`, `--bb-ease-snap` | `ui.move` | Salto instantáneo con el cursor visible |
 | Entrar (Intro) | Placa a 0,98 y barrido de la diagonal | 80 + 240 ms, `--bb-ease-in-out` | `ui.press` + `nav.page` | Fundido de 150 ms |
-| Cursor de rejilla | Marco blanco y 1P saltan de casilla; la ficha cambia con un barrido horizontal | 90 / 200 ms | `ui.move` | Cambio instantáneo |
+| Cursor de rejilla | Marco blanco y 1P saltan de casilla; la ficha cambia con un barrido horizontal | `--bb-dur-tick` / `--bb-dur-base` (90 / 240 ms) | `ui.move` | Cambio instantáneo |
 | Pestañas Q/E | La blanca se desliza a la nueva | 150 ms, `--bb-ease-snap` | `ui.toggle` | Cambio de color |
 | Botón | Hover: avanza 4 px; pulsado: 0,97 con muelle | 150 / 80 ms | `ui.press` | Cambio de color |
 | Chip de filtro | Relleno rojo que entra desde la izquierda; «SÍ/NO» cambia | 150 ms | `ui.toggle` | Cambio de color y texto |
@@ -2922,20 +2940,20 @@ efectos al 100 %; variación = desafinación aleatoria por disparo.
 | VS | Las dos mitades entran por los lados a lo largo de la diagonal; el VS se estampa | 420 ms | `jury.swap` | Composición fija |
 | Medidor de escucha | Se llena por tramos de 15 s con un pulso al completar cada uno | 150 ms por pulso | — | Relleno sin pulso |
 | Estrellas | §3.8.4 | 70 ms + 900 ms | `star.*`, `vote.*` | Relleno sin salto ni chispas |
-| Cambio de entrada | Portada sale por la derecha y entra la siguiente por la izquierda | 1,2 s | `jury.swap` | Fundido |
+| Cambio de entrada | Portada sale por la derecha y entra la siguiente por la izquierda | `--bb-dur-swap` (1,2 s) | `jury.swap` | Fundido |
 | XP flotante | Sube 24 px con muelle y vuela al medidor del HUD | 900 ms | `xp.gain` | «+5 XP» con fundido |
 | Combo | El segmento nuevo se enciende y el número crece | 150 ms | `combo.up` | Cambio de número |
 | Medidor de XP | Brillo que lo recorre una vez | 900 ms | — | Relleno |
-| Sello de goma | Se estampa (escala 1,3 → 1, giro final) | 200 ms, `--bb-ease-back` | `vote.locked` | Aparece |
+| Sello de goma | Se estampa (escala 1,3 → 1, giro final) | `--bb-dur-slam`, `--bb-ease-back` | `vote.locked` | Aparece |
 | Aviso de logro | Entra desde la diagonal con muelle | 420 ms | `ach.*` | Fundido |
 | Subir de nivel | El sello de nivel se estampa con el número nuevo | 900 ms | `level.up` | Fundido del número |
 | Modal | Entra con la diagonal y escala 0,96 → 1 | 240 ms | `ui.open` / `ui.close` | Fundido |
 | Aviso de error | Sacudida de 4 px | 240 ms | `ui.error` | Sin sacudida |
 | Esqueleto | Barrido diagonal de la trama | 1.500 ms en bucle | — | Trama fija |
 | Carta de luchador | Inclinación y brillo holo que siguen al cursor o al giroscopio; C la gira | Muelle | — | Carta plana |
-| Sello arrancado (ceremonia) | Se rompe en dos trozos que se despegan y caen | 600 ms | `cer.tear` | Desaparece por fundido |
-| Alias → productor | Glitch de letras del alias al nombre | 400 ms | `cer.reveal` | Cambio de texto |
-| Foco del podio | El haz baja sobre la peana | 600 ms | — | Haz fijo |
+| Sello arrancado (ceremonia) | Se rompe en dos trozos que se despegan y caen | 600 ms (línea de tiempo de la ceremonia, §3.6) | `cer.tear` | Desaparece por fundido |
+| Alias → productor | Glitch de letras del alias al nombre | 400 ms (línea de tiempo de la ceremonia) | `cer.reveal` | Cambio de texto |
+| Foco del podio | El haz baja sobre la peana | 600 ms (línea de tiempo de la ceremonia) | — | Haz fijo |
 | Subida: ranura | Se ilumina y vibra una vez al arrastrar | 240 ms | `upload.hover` | Borde que se ilumina |
 | Subida: tragaperras | BPM y tonalidad giran hasta fijarse | 900 ms | `upload.drop` | Valor fijo |
 | Crónica de la arena | Cambia de mensaje por fundido | 150 ms cada 5 s | — | Lista estática que rota cada 5 s |
@@ -3051,6 +3069,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-03 | 0.6.1 | Correcciones de la integración de la v0.6, tras revisarla contra el texto aprobado de §3. **Desviaciones del texto aprobado que se registran**: §3.4.4 empieza uniendo los nombres «carta de productor» (§2.10) y «carta de luchador»; §3.4.5 fija el rasterizador de las portadas. **Portadas por CPU** (§3.4.5, `RD-VIS-04`): contexto 2D con `willReadFrequently: true`; medido en el Chrome del sistema con la GPU real, con el canvas por GPU la calibración no converge (peor desviación 7,0 % en rojo y 10,9 % en luminancia) y por CPU pasa (0,3 % y 0,7 %); la aceptación dice con qué se mide. **Coherencia con `RD-VIS-01`**: nuevo `--bb-cut-md` (10 px) y regla para llevar los chaflanes de las maquetas a la escala (§3.2, §3.3); nuevo `--bb-dur-swap` (1,2 s, cambio de entrada; §2.7, §3.6, §3.8.7); cursor de rejilla y sello de goma con tokens (Anexo E); los tiempos internos de las ceremonias son datos de su línea de tiempo, única excepción declarada. Display a 900 salvo botones y cinta del lockup, a 800 (§3.2). **Teclado**: en la selección, Q/E solo cambian el orden y la rejilla pagina con ↑↓ y RePág/AvPág (§3.8.13); en el Modo Jurado, ←/→ buscan en la onda y eligen nota en las estrellas (§2.7, §3.8.7). **Firma**: autenticación, admin y legales conservan la barra de controles con la firma y la ceremonia lleva la pegatina (§3.1, §3.4.1, §3.8.14), como piden `RF-OTP-01` y `RD-VIS-02`. Efectos `ann.listen`, `ann.complete`, `ann.newbeat` y `ann.week` para los rótulos de §3.9 que no tenían estampa (§3.7.3, Anexo D). El hallazgo de Montserrat deja de atribuirse a `RF-OTP-03` (§3.1). Restos de redacción: ticket del recibo sin modelo del sello (§2.12.1), «vinilo girando» (§2.19), temblores en el modo serio (§2.11) y referencia del logo (§3.1). |
 | 2026-10-03 | 0.6 | Nueva dirección de arte **Arena** (decisión del usuario): BeatBattle deja de copiar la web del sello y pasa a ser un menú de juego de lucha que solo hereda la paleta y el logo como firma. §3.1–3.6, §3.8–3.10 y Anexo E reescritos; tipografía Anybody + Chakra Petch + Oxanium; medallas en la paleta; portadas generativas con presupuesto de tinta y test ±5 %; Escenario «arena» en lugar del Silk; limitador de destellos; `RD-VIS-02` pasa a prueba de marca y de juego; nuevos `RD-VIS-04/05` y `RD-MOT-04/05`. Cambios colaterales en §1, §2, §4–7 y anexos: pilares «Familia del sello» y «Se juega como un juego» (§1.2), `RF-OTP-01` como firma en todas las pantallas (§2.16), foco = cursor de juego (`RNF-A11Y-01`), contraste según §3.2 (`RNF-A11Y-02`), LCP en el título del escenario (`RNF-PERF-02`), presupuesto de fuentes (§4.17), efectos `ui.move`, `ann.*` y `cer.tear` (§3.7.3, Anexo D), decisiones del dorado y del pase de la carta (§7) y maquetas aprobadas en `docs/planning/evidence/f0/arena/` (Anexo J). §3.8.12 integra el texto de la v0.5 con los cambios de la Arena; el acento del perfil queda dentro de la paleta (§2.3) y el formulario «Avísame del próximo drop» pasa a la tarjeta de la semana del menú (§2.12.3, §3.8.3). |
 | 2026-10-02 | 0.5 | Cierre de la Fase 0 (olas 2 y 3, jurado de la prueba del sello y revisión adversarial). §3.1: evidencia A/B y `RD-VIS-02` pendiente del Silk. §3.2: medidas del sello fuera de escala como tokens, `--bb-shift-*` × `--bb-motion`, `--nav-obscured`, derivados de color, sombra y desenfoque, `paint-order` del contorno, jerarquía de títulos (display solo en el hero; interiores a 700 y 32 px), bordes `--bb-line` en el pie, nota sobre `♯`. §3.3: tamaño `hero` y opción `glass` del botón, estado de error, botón icono con objetivo por pseudoelemento, teselas en lista plegable en móvil, fila de entrada, onda, cuenta atrás, modal, avisos en el marco con parte diferida, esqueleto con `transform`, título interior, pie, teletipo con botón de pausa y **matriz de estados**. §3.6: periodos de bucle y entrada del hero sin retrasar el LCP. §3.8.3: sección `#alerta`. §4.4: estructura real (`features/`, `ui/hooks`, `ui/gallery`, patrón de módulo y `createRateLimiter`). §4.7.1: diferidos, grupos de proveedores y precarga. §4.15: API empaquetada con Vite SSR y prueba de humo. §4.17: definición del JS inicial y comprobación previa del LCP. Anexos B y E. §7: propuestas del jurado. |
 | 2026-10-02 | 0.4 | Desviaciones razonadas de la primera ola de la Fase 0 llevadas a la guía (spec first). **Diseño** (§3.1–3.3) ajustado a las medidas reales del sello (`docs/planning/evidence/f0/otp/`): titular `clamp(2.8rem, 8vw, 6rem)` con relleno negro y halo de 30 px, interletrajes 0,15 / 0,1 em, botón de contorno al 30 %, tarjetas de cristal con radio 16, chip activo macizo, rótulo de 3×12; tokens nuevos (`--bb-red-cta` por accesibilidad, `--bb-line-button`, `--bb-glass-card`, `--bb-fill-*`, `--bb-scrim`, `--bb-ink-850`, `--bb-wave-idle`, `--bb-gold-glow`); excepciones AA documentadas; alcance del lint de tokens; espejo en `@beatbattle/shared/tokens`; fuentes con latino extendido. **Técnica**: módulos `levels`, `prng`, `loudness` y `listen` en §4.5, `rankTitle` devuelve ids; i18n con `_zero`; `health` con 503; 415 solo con cuerpo, `Origin` en todas las escrituras y excepciones por ruta (baja en un clic); orígenes y previews (§4.15); aceptación de `RNF-SEC-01`. **Anexos**: cierre de votos como instante exclusivo del lunes, 100 MiB, «primera entrada de la semana», constantes extra, ritmo del nivel 20 y casos de Spearman. §2.18: «emails» en lugar de «notificaciones». |

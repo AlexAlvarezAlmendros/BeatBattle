@@ -70,6 +70,10 @@ ven con la fuente del sistema; los de la raíz de esta carpeta ya las llevan den
   se quedan cortas de tinta). La calibración por medida de `final.js` no es portable entre
   rasterizadores: al implementar `packages/covers` (Fase 4) hay que fijar con qué rasterizador se pintan
   las portadas que ve el jurado y medir `RD-VIS-04` con ese (guía §3.4.5).
+  **Decidido en la guía v0.6.1: por CPU.** Misma prueba (2026-10-03, Chrome del sistema con la GPU
+  real) pidiendo el contexto 2D con `willReadFrequently: true`, que hace que Chrome lo rasterice por
+  CPU: media 10,81 % y 0,0237, peor desviación 0,3 % en rojo y 0,7 % en luminancia (**pasa**, igual que
+  la hoja).
 - `01-menu-sin-movimiento.png`: el menú principal a 1440×900 con «reducir movimiento» (§3.10).
 
 ## Lo que estas maquetas no son

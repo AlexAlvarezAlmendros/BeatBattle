@@ -59,12 +59,15 @@ node tools/shot/ab.mjs [--otp-live]                  # A/B de la antigua prueba 
   cliente no se aceptan.
 - **Tiempo:** instantes UTC en ms; fronteras calculadas en `Europe/Madrid` al programar la semana;
   reloj inyectable (`x-bb-test-now` solo con `BB_TEST_CLOCK=1`, nunca en producción).
-- **Diseño:** colores, medidas, duraciones y curvas solo desde tokens. Del sello solo se usan la
-  paleta y el logo como firma; ninguna pantalla imita la composición de `otherpeople.es` (isla, hero en
+- **Diseño:** colores, medidas (chaflanes incluidos), duraciones y curvas solo desde tokens; la única
+  excepción son los tiempos internos de las ceremonias, que viven en su línea de tiempo (guía §3.6).
+  Del sello solo se usan la paleta y el logo como firma, visible en todas las pantallas
+  (`RF-OTP-01`); ninguna pantalla imita la composición de `otherpeople.es` (isla, hero en
   contorno, marquee, orbes, cristal, Montserrat). Las pantallas son menús de juego de lucha que se
   recorren con teclado (§3, `RD-VIS-02`); las maquetas aprobadas están en
   `docs/planning/evidence/f0/arena/`. Toda animación tiene variante sin movimiento; todo sonido,
-  equivalente visual; nada destella más de 3 veces por segundo.
+  equivalente visual; nada destella más de 3 veces por segundo. Las portadas generativas se pintan
+  por CPU (contexto 2D con `willReadFrequently: true`, guía §3.4.5): por GPU no pasan `RD-VIS-04`.
 - **Email:** todo email entra por `email_outbox` en el mismo `batch` que el hecho que lo provoca, con
   clave de idempotencia y su familia (servicio, aviso, marketing). Marketing solo con consentimiento
   registrado; baja en un clic; sin píxeles de seguimiento; ningún email revela datos sin sellar.
