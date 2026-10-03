@@ -11,15 +11,23 @@ export function isLegalDoc(value: unknown): value is LegalDoc {
   return typeof value === 'string' && (LEGAL_DOCS as readonly string[]).includes(value)
 }
 
-/** Secciones de `/ajustes/*`: slug de la URL → clave i18n `settings.<clave>`. */
+/**
+ * Secciones de `/ajustes/*` (Opciones, §3.8.14 y §2.18), en el orden de sus pestañas: slug de la URL →
+ * clave i18n `settings.<clave>`. `/ajustes` lleva a la primera.
+ */
 export const SETTINGS_SECTIONS = {
+  sonido: 'sound',
+  movimiento: 'motion',
   cuenta: 'account',
   perfil: 'profile',
-  sonido: 'sound',
   emails: 'emails',
   sesiones: 'sessions',
   privacidad: 'privacy',
+  accesibilidad: 'accessibility',
 } as const
+
+/** Primera sección de Opciones: a donde lleva `/ajustes`. */
+export const FIRST_SETTINGS_SECTION: SettingsSection = 'sonido'
 export type SettingsSection = keyof typeof SETTINGS_SECTIONS
 export type SettingsSectionKey = (typeof SETTINGS_SECTIONS)[SettingsSection]
 

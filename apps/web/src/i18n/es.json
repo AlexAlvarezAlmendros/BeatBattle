@@ -204,6 +204,14 @@
     "title": "Ajustes",
     "pageTitle": "{section} · Ajustes",
     "navLabel": "Secciones de ajustes",
+    "sound": {
+      "title": "Sonido y efectos",
+      "summary": "Aquí irán los volúmenes por bus (efectos, música de sala y entradas) y el silencio."
+    },
+    "motion": {
+      "title": "Movimiento",
+      "summary": "Aquí irán reducir movimiento, el modo serio y la calidad visual."
+    },
     "account": {
       "title": "Cuenta",
       "summary": "Aquí irán el email, la contraseña y los accesos con Google o Discord."
@@ -211,10 +219,6 @@
     "profile": {
       "title": "Perfil",
       "summary": "Aquí irá la edición de tu perfil público: nombre, avatar, enlaces y acento."
-    },
-    "sound": {
-      "title": "Sonido y efectos",
-      "summary": "Aquí irán los volúmenes por bus, el silencio, la calidad visual y el movimiento reducido."
     },
     "emails": {
       "title": "Emails",
@@ -227,6 +231,10 @@
     "privacy": {
       "title": "Privacidad",
       "summary": "Aquí irán la exportación de tus datos y el borrado de la cuenta."
+    },
+    "accessibility": {
+      "title": "Accesibilidad",
+      "summary": "Aquí irán el tamaño de texto y la puerta de entrada."
     }
   },
   "legal": {

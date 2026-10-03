@@ -3,7 +3,7 @@ import { data, type LoaderFunctionArgs, type RouteObject, redirect } from 'react
 import { devRoutes as defaultDevRoutes } from './devRoutes'
 import { RootLayout } from './layout/RootLayout'
 import { interiorScreen, MENU_SCREEN, type ScreenConfig, simpleScreen } from './layout/screen'
-import { isLegalDoc, paths } from './paths'
+import { FIRST_SETTINGS_SECTION, isLegalDoc, paths } from './paths'
 import { RouteErrorBoundary } from './RouteErrorBoundary'
 
 /**
@@ -192,13 +192,19 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               ),
               children: [
                 // Redirige antes de pintar; el Component vacío evita el aviso de ruta hoja sin elemento.
-                { index: true, loader: () => redirect(paths.settings('cuenta')), Component: Redirecting },
+                {
+                  index: true,
+                  loader: () => redirect(paths.settings(FIRST_SETTINGS_SECTION)),
+                  Component: Redirecting,
+                },
+                { path: 'sonido', lazy: page(settings, (m) => m.SoundSettingsPage) },
+                { path: 'movimiento', lazy: page(settings, (m) => m.MotionSettingsPage) },
                 { path: 'cuenta', lazy: page(settings, (m) => m.AccountSettingsPage) },
                 { path: 'perfil', lazy: page(settings, (m) => m.ProfileSettingsPage) },
-                { path: 'sonido', lazy: page(settings, (m) => m.SoundSettingsPage) },
                 { path: 'emails', lazy: page(settings, (m) => m.EmailSettingsPage) },
                 { path: 'sesiones', lazy: page(settings, (m) => m.SessionsSettingsPage) },
                 { path: 'privacidad', lazy: page(settings, (m) => m.PrivacySettingsPage) },
+                { path: 'accesibilidad', lazy: page(settings, (m) => m.AccessibilitySettingsPage) },
               ],
             },
             {

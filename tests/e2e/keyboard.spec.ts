@@ -122,6 +122,32 @@ test('RD-VIS-02 d: una pantalla interior se recorre con teclado y enseña sus te
   await expect(page).toHaveURL('/')
 })
 
+test('RD-VIS-02 d: Q/E recorren las ocho secciones de Opciones en el orden de §3.8.14 y dan la vuelta', async ({
+  page,
+}) => {
+  await page.goto('/ajustes')
+  await expect(page).toHaveURL('/ajustes/sonido')
+  const sections = [
+    ['sonido', 'Sonido y efectos'],
+    ['movimiento', 'Movimiento'],
+    ['cuenta', 'Cuenta'],
+    ['perfil', 'Perfil'],
+    ['emails', 'Emails'],
+    ['sesiones', 'Sesiones'],
+    ['privacidad', 'Privacidad'],
+    ['accesibilidad', 'Accesibilidad'],
+  ] as const
+  const heading = page.getByRole('main').getByRole('heading', { level: 1 })
+  await expect(heading).toHaveText(sections[0][1])
+  for (const [slug, title] of [...sections.slice(1), sections[0]]) {
+    await page.keyboard.press('e')
+    await expect(page).toHaveURL(`/ajustes/${slug}`)
+    await expect(heading).toHaveText(title)
+  }
+  await page.keyboard.press('q')
+  await expect(page).toHaveURL('/ajustes/accesibilidad')
+})
+
 test('RD-VIS-02 d / RD-MOT-05: «Cómo se juega» es una lista de movimientos que se recorre como un menú de juego', async ({
   page,
 }) => {

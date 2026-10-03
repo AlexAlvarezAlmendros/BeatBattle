@@ -34,9 +34,10 @@ test.describe('escritorio (1440 × 900)', () => {
       },
       {
         name: 'Ajustes',
-        path: '/ajustes/cuenta',
-        heading: 'Cuenta',
-        title: 'Cuenta · Ajustes',
+        // `/ajustes` lleva a la primera sección de Opciones (§3.8.14), la que promete la placa: sonido.
+        path: '/ajustes/sonido',
+        heading: 'Sonido y efectos',
+        title: 'Sonido y efectos · Ajustes',
         plate: 'Opciones',
       },
     ]

@@ -3,9 +3,20 @@ import type { SettingsSectionKey } from '../../app/paths'
 import { t } from '../../i18n'
 
 /*
- * Secciones de `/ajustes/*` (§2.3, §2.12.4, RNF-A11Y-08). Una por ruta para que cada fase sustituya la
- * suya sin tocar las demás. Provisionales (0.10).
+ * Secciones de `/ajustes/*` (Opciones, §3.8.14; §2.3, §2.12.4, RNF-A11Y-08), en el orden de sus pestañas:
+ * Sonido · Movimiento · Cuenta · Perfil · Emails · Sesiones · Privacidad · Accesibilidad. Una por ruta
+ * para que cada fase sustituya la suya sin tocar las demás. Provisionales (0.10).
  */
+
+/** `/ajustes/sonido` */
+export function SoundSettingsPage() {
+  return <SettingsSectionPlaceholder section="sound" />
+}
+
+/** `/ajustes/movimiento` */
+export function MotionSettingsPage() {
+  return <SettingsSectionPlaceholder section="motion" />
+}
 
 function SettingsSectionPlaceholder({ section }: { section: SettingsSectionKey }) {
   const title = t(`settings.${section}.title`)
@@ -28,11 +39,6 @@ export function ProfileSettingsPage() {
   return <SettingsSectionPlaceholder section="profile" />
 }
 
-/** `/ajustes/sonido` */
-export function SoundSettingsPage() {
-  return <SettingsSectionPlaceholder section="sound" />
-}
-
 /** `/ajustes/emails` */
 export function EmailSettingsPage() {
   return <SettingsSectionPlaceholder section="emails" />
@@ -46,4 +52,9 @@ export function SessionsSettingsPage() {
 /** `/ajustes/privacidad` */
 export function PrivacySettingsPage() {
   return <SettingsSectionPlaceholder section="privacy" />
+}
+
+/** `/ajustes/accesibilidad` */
+export function AccessibilitySettingsPage() {
+  return <SettingsSectionPlaceholder section="accessibility" />
 }

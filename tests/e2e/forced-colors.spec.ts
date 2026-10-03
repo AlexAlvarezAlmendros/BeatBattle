@@ -17,7 +17,10 @@ test.beforeEach(async ({ page }) => {
 
 /** Color de fondo calculado de un elemento o de un pseudoelemento. */
 function background(locator: Locator, pseudo?: '::before' | '::after') {
-  return locator.evaluate((element, which) => getComputedStyle(element, which ?? null).backgroundColor, pseudo)
+  return locator.evaluate(
+    (element, which) => getComputedStyle(element, which ?? null).backgroundColor,
+    pseudo,
+  )
 }
 
 /** El color del lienzo (`Canvas`) tal y como lo resuelve el navegador en el modo forzado. */
@@ -61,7 +64,9 @@ test('RNF-A11Y-01: en contraste alto, las pestañas de Opciones y las de la gale
   page,
 }) => {
   await open(page, '/ajustes/cuenta', 'Cuenta')
-  const link = page.getByRole('navigation', { name: 'Secciones de ajustes' }).getByRole('link', { name: 'Cuenta' })
+  const link = page
+    .getByRole('navigation', { name: 'Secciones de ajustes' })
+    .getByRole('link', { name: 'Cuenta' })
   await link.focus()
   await expectRingVisible(page, link)
 

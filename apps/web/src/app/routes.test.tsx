@@ -47,8 +47,11 @@ const PAGES: { path: string; heading: string; title: string }[] = [
     heading: 'pages.howItWorks.title',
     title: documentTitle(tk('pages.howItWorks.title')),
   },
-  ...(['account', 'profile', 'sound', 'emails', 'sessions', 'privacy'] as const).map((section, i) => ({
-    path: `/ajustes/${['cuenta', 'perfil', 'sonido', 'emails', 'sesiones', 'privacidad'][i]}`,
+  // Opciones (§3.8.14, §2.18): las ocho secciones, en el orden de sus pestañas.
+  ...(
+    ['sound', 'motion', 'account', 'profile', 'emails', 'sessions', 'privacy', 'accessibility'] as const
+  ).map((section, i) => ({
+    path: `/ajustes/${['sonido', 'movimiento', 'cuenta', 'perfil', 'emails', 'sesiones', 'privacidad', 'accesibilidad'][i]}`,
     heading: `settings.${section}.title`,
     title: documentTitle(t('settings.pageTitle', { section: tk(`settings.${section}.title`) })),
   })),
@@ -156,10 +159,30 @@ describe('router (0.10, guía §2.18)', () => {
     expect(screen.getByRole('link', { name: t('screen.backToMenu') })).toHaveAttribute('href', '/')
   })
 
-  it('/ajustes lleva a /ajustes/cuenta', async () => {
+  it('/ajustes lleva a la primera sección, /ajustes/sonido (§3.8.14)', async () => {
     const router = renderAt('/ajustes')
-    expect(await h1(t('settings.account.title'))).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/ajustes/cuenta')
+    expect(await h1(t('settings.sound.title'))).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/ajustes/sonido')
+  })
+
+  it('las pestañas de Opciones son las ocho secciones de §3.8.14, en su orden', async () => {
+    renderAt('/ajustes/sonido')
+    await h1(t('settings.sound.title'))
+    const nav = screen.getByRole('navigation', { name: t('settings.navLabel') })
+    expect(
+      within(nav)
+        .getAllByRole('link')
+        .map((link) => link.getAttribute('href')),
+    ).toEqual([
+      '/ajustes/sonido',
+      '/ajustes/movimiento',
+      '/ajustes/cuenta',
+      '/ajustes/perfil',
+      '/ajustes/emails',
+      '/ajustes/sesiones',
+      '/ajustes/privacidad',
+      '/ajustes/accesibilidad',
+    ])
   })
 
   it('RNF-A11Y-01: al navegar vuelve arriba y el foco pasa al contenido nuevo', async () => {
@@ -234,6 +257,8 @@ describe('router (0.10, guía §2.18)', () => {
       paths.howItWorks(),
       paths.settings(),
       paths.settings('privacidad'),
+      paths.settings('movimiento'),
+      paths.settings('accesibilidad'),
       paths.signIn(),
       paths.signUp(),
       paths.verify(),
