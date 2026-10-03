@@ -1,4 +1,4 @@
-import { type FocusEvent, useEffect, useLayoutEffect, useRef } from 'react'
+import { type FocusEvent, useLayoutEffect, useRef } from 'react'
 import {
   NavigationType,
   NavLink,
@@ -82,7 +82,7 @@ export function TabLinks({
   const target = pendingIndex >= 0 ? pendingIndex : current
   const requested = useRef<number | null>(null)
   // biome-ignore lint/correctness/useExhaustiveDependencies: se olvida la pedida cuando el router la alcanza
-  useEffect(() => {
+  useLayoutEffect(() => {
     requested.current = null
   }, [target])
   const navRef = useRef<HTMLElement>(null)
@@ -94,7 +94,14 @@ export function TabLinks({
   })
   const { moveTo } = roving
 
-  useEffect(() => {
+  /*
+   * Q/E. Se escucha desde un efecto de diseño, no uno normal: cada pantalla monta sus pestañas de nuevo
+   * (`RootLayout` pone la pantalla con su ruta de `key`), y el efecto normal de las nuevas llegaba
+   * después de pintar. Entre medias, con el foco ya en la pestaña nueva, la tecla la recibía el oyente de
+   * las pestañas viejas, que no la contenían: con los atajos apagados, la segunda de dos E seguidas se
+   * perdía (una de cada cinco veces en el E2E).
+   */
+  useLayoutEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.repeat || !isCharacterKey(event) || isEditableTarget(event.target))
         return
