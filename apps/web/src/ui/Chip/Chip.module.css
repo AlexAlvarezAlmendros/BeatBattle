@@ -40,22 +40,34 @@
   }
 }
 
-/* ── Chip de filtro ─────────────────────────────────────────────────────────────────────── */
+/*
+ * ── Chip de filtro ───────────────────────────────────────────────────────────────────────
+ * Si no cabe en una línea (una celda estrecha, el texto ampliado), la etiqueta parte en dos y la casilla
+ * «SÍ | NO» se queda entera dentro del marco: antes se salía por la derecha, sobre el chaflán y el
+ * anillo del cursor.
+ */
 .filterChip {
   --frame-fill: var(--bb-panel-veil);
   display: inline-flex;
   align-items: center;
   gap: var(--bb-space-3);
+  min-width: 0;
   min-height: var(--bb-target);
-  padding: 0 var(--bb-space-3) 0 var(--bb-space-4);
+  padding: var(--bb-space-1) var(--bb-space-3) var(--bb-space-1) var(--bb-space-4);
   border: 0;
   background: transparent;
   color: var(--bb-text);
   font-size: var(--bb-fs-xs);
   font-weight: var(--bb-weight-bold);
   letter-spacing: var(--bb-tracking-label);
+  line-height: var(--bb-leading-label);
+  text-align: start;
   text-transform: uppercase;
-  white-space: nowrap;
+}
+
+.label {
+  min-width: 0;
+  text-wrap: balance;
 }
 
 .filterChip:hover:not(:disabled),
@@ -81,6 +93,8 @@
 
 .yesNo {
   display: inline-flex;
+  flex: none;
+  white-space: nowrap;
   font-family: var(--bb-font-display);
   font-style: italic;
   font-weight: var(--bb-weight-black);

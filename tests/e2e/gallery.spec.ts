@@ -196,3 +196,50 @@ for (const viewport of [
     }
   })
 }
+
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 390, height: 844 },
+  { width: 320, height: 700 },
+]) {
+  test(`RD-VIS-03 / §3.3: la casilla «SÍ | NO» del chip de filtro no sale de su marco en ningún estado (${viewport.width} px)`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(viewport)
+    await openGallery(page)
+    const chips = page.locator('section#chip-filtro button[aria-pressed]')
+    expect(await chips.count()).toBeGreaterThanOrEqual(6)
+    const boxes = await chips.evaluateAll((elements) =>
+      elements.map((chip) => {
+        const box = chip.getBoundingClientRect()
+        const label = chip.querySelector(':scope > span:not([aria-hidden])')!.getBoundingClientRect()
+        const yesNo = chip.querySelector(':scope > [aria-hidden="true"]:not([data-cursor-ring])')!
+        const marks = yesNo.getBoundingClientRect()
+        const style = getComputedStyle(chip)
+        return {
+          state: chip.closest('[data-state]')?.getAttribute('data-state') ?? 'selected',
+          // Caja de contenido del chip: dentro del relleno, lejos del chaflán y del anillo del cursor.
+          left: box.left + Number.parseFloat(style.paddingLeft),
+          right: box.right - Number.parseFloat(style.paddingRight),
+          top: box.top,
+          bottom: box.bottom,
+          label: { left: label.left, right: label.right },
+          marks: { left: marks.left, right: marks.right, top: marks.top, bottom: marks.bottom },
+        }
+      }),
+    )
+    for (const chip of boxes) {
+      expect(chip.marks.right, `${chip.state}: «SÍ | NO» se sale por la derecha`).toBeLessThanOrEqual(
+        chip.right + 0.5,
+      )
+      expect(chip.marks.top, `${chip.state}: «SÍ | NO» se sale por arriba`).toBeGreaterThanOrEqual(chip.top)
+      expect(chip.marks.bottom, `${chip.state}: «SÍ | NO» se sale por abajo`).toBeLessThanOrEqual(chip.bottom)
+      expect(chip.label.left, `${chip.state}: la etiqueta se sale por la izquierda`).toBeGreaterThanOrEqual(
+        chip.left - 0.5,
+      )
+      expect(chip.label.right, `${chip.state}: la etiqueta pisa «SÍ | NO»`).toBeLessThanOrEqual(
+        chip.marks.left + 0.5,
+      )
+    }
+  })
+}

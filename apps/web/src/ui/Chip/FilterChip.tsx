@@ -43,7 +43,7 @@ export function FilterChip({
       {...forceStateAttr(state)}
     >
       <Cursor cut="sm" />
-      <span>{label}</span>
+      <span className={styles.label}>{label}</span>
       <span className={styles.yesNo} aria-hidden="true">
         <span data-on={pressed || undefined}>{t('ui.filterChip.yes')}</span>
         <span data-on={!pressed || undefined}>{t('ui.filterChip.no')}</span>
