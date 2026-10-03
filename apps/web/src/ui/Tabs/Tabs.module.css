@@ -93,25 +93,33 @@
 }
 
 /*
- * Móvil: [Q] pestañas [E] en una sola fila que se desplaza en horizontal (las teclas no se quedan en
- * líneas sueltas). El relleno deja sitio al cursor (7 px por fuera de la pestaña) dentro del recorte.
+ * Móvil (≤ 720 px): [Q] pestañas [E] en una fila y las pestañas parten en varias líneas entre las dos
+ * teclas. Antes se desplazaban en horizontal, sin pista y con la barra oculta: la activa salía cortada y
+ * el foco quedaba casi fuera de la ventana (WCAG 1.4.10 y 2.4.11). Así cada pestaña cabe entera, con su
+ * cursor (7 px por fuera) dentro del medianil.
  */
 @media (max-width: 720px) {
-  .row,
-  .list {
-    flex-wrap: nowrap;
-  }
-
   .row {
-    margin: calc(-1 * var(--bb-space-2));
-    padding: var(--bb-space-2);
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: none;
+    flex-wrap: nowrap;
+    align-items: flex-start;
   }
 
-  .row > * {
+  .row > [data-key] {
     flex: none;
+    margin-top: calc((var(--bb-target) - var(--bb-space-6) - var(--bb-stroke)) / 2);
+  }
+
+  .list {
+    flex: 1 1 0;
+    min-width: 0;
+    row-gap: var(--bb-space-3);
+  }
+}
+
+/* Táctil: sin las teclas Q/E (no hay teclado, §3.3); depende del tipo de entrada, no del ancho. */
+@media (hover: none), (pointer: coarse) {
+  .row > [data-key] {
+    display: none;
   }
 }
 

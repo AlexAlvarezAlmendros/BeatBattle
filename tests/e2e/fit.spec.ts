@@ -191,3 +191,53 @@ test.describe('menú a 640 × 360 (escritorio al 200 %)', () => {
     await expect(page.getByRole('contentinfo').locator('[data-chronicle]')).toBeVisible()
   })
 })
+
+/**
+ * Pestañas de Opciones y de los legales en móvil (guía §3.3 «Pestañas», §3.8.14; WCAG 1.4.10 y 2.4.11):
+ * en una ventana estrecha parten en varias líneas en vez de desplazarse sin pista, así que cada pestaña
+ * cabe entera en la ventana (también al enfocarla con Tab, cursor incluido), y en táctil no se pintan las
+ * teclas Q/E.
+ */
+for (const viewport of [
+  { width: 360, height: 740, touch: true },
+  { width: 390, height: 844, touch: true },
+  { width: 390, height: 844, touch: false },
+]) {
+  test.describe(`pestañas a ${viewport.width} px${viewport.touch ? ' táctil' : ' con teclado'}`, () => {
+    test.use({
+      viewport: { width: viewport.width, height: viewport.height },
+      isMobile: viewport.touch,
+      hasTouch: viewport.touch,
+    })
+
+    for (const { path, heading, nav } of [
+      { path: '/ajustes/sonido', heading: 'Sonido y efectos', nav: 'Secciones de ajustes' },
+      { path: '/legal/bases', heading: 'Bases de la competición', nav: 'Documentos legales' },
+    ]) {
+      test(`WCAG 1.4.10: en ${path} cada pestaña cabe entera en la ventana, también enfocada`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        const links = page.getByRole('navigation', { name: nav }).getByRole('link')
+        const count = await links.count()
+        expect(count).toBeGreaterThan(3)
+        const outside: string[] = []
+        for (let index = 0; index < count; index++) {
+          const link = links.nth(index)
+          await link.focus()
+          // El cursor se pinta 7 px por fuera de la pestaña: también tiene que caber.
+          const box = await link.evaluate((element) => {
+            const rect = element.getBoundingClientRect()
+            return { left: rect.left - 7, right: rect.right + 7, width: window.innerWidth }
+          })
+          if (box.left < 0 || box.right > box.width)
+            outside.push(`${await link.textContent()}: ${box.left.toFixed(0)}–${box.right.toFixed(0)}`)
+        }
+        expect(outside).toEqual([])
+        const keys = page.getByRole('navigation', { name: nav }).locator('[data-key]')
+        if (viewport.touch) for (const key of await keys.all()) await expect(key).toBeHidden()
+        else await expect(keys.first()).toBeVisible()
+      })
+    }
+  })
+}
