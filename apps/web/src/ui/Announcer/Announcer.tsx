@@ -1,4 +1,6 @@
+import { useRef } from 'react'
 import { cx } from '../forceState'
+import { useFitText } from '../hooks/useFitText'
 import { Tag } from '../Tag'
 import styles from './Announcer.module.css'
 
@@ -18,9 +20,17 @@ export interface AnnouncerProps {
  * en una región viva educada. Es espectáculo: el modo serio lo quita (`data-fx`) y deja la región viva.
  * Entra estampado (escala 1,12 → 1, `--bb-dur-slam`); sin movimiento, aparece montado.
  *
+ * Ocupa el ancho de su caja y centra el rótulo. El de display se ajusta a ese ancho (`useFitText`, como
+ * el alias de la ficha): en una pantalla estrecha o con un rótulo largo («¡JURADO COMPLETO!» a 320 px)
+ * baja la anchura de Anybody y después el cuerpo antes que salirse; la etiqueta girada parte por
+ * palabras. Un relleno lateral deja sitio a la sombra dura y a la cursiva, que pintan fuera de los
+ * glifos.
+ *
  * Los textos salen de `ann.*` (§3.9); nunca los prohibidos («FIGHT!», «K.O.»…).
  */
 export function Announcer({ text, variant = 'display', silent = false, className }: AnnouncerProps) {
+  const wordRef = useRef<HTMLParagraphElement>(null)
+  useFitText(wordRef, variant === 'display' ? text : '')
   return (
     <div className={cx(styles.announcer, className)} data-announcer={variant}>
       <div className={styles.visual} data-fx="" aria-hidden="true">
@@ -31,7 +41,9 @@ export function Announcer({ text, variant = 'display', silent = false, className
             </Tag>
           </span>
         ) : (
-          <p className={cx('bb-display', styles.word)}>{text}</p>
+          <p ref={wordRef} className={cx('bb-display', styles.word)}>
+            {text}
+          </p>
         )}
       </div>
       {!silent && (

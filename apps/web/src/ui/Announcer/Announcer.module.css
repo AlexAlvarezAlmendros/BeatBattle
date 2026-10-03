@@ -1,13 +1,19 @@
 /*
  * Anunciador (§3.3, §3.9): display blanco con contorno negro y sombra dura roja (la extrusión), o la
  * etiqueta grande girada `--bb-tilt-ann`. Entra estampado; sin movimiento, montado.
+ *
+ * Ocupa el ancho de su caja y centra el rótulo: el ajuste del display (`useFitText`) mide contra un
+ * ancho que no depende del texto, y vuelve a medir si la caja cambia. Sin recorte (`overflow`
+ * visible): la sombra dura y la cursiva pintan fuera de los glifos, en el relleno lateral de `.visual`
+ * (en el del propio rótulo no: el desborde que mide el ajuste no cuenta el relleno del final).
  */
 .announcer {
-  display: inline-grid;
-  justify-items: center;
+  inline-size: 100%;
+  text-align: center;
 }
 
 .visual {
+  padding-inline: var(--bb-space-2);
   animation: bb-announcer-slam var(--bb-dur-slam) var(--bb-ease-back) backwards;
 }
 
@@ -20,14 +26,18 @@
   white-space: nowrap;
 }
 
+/* Gira la línea entera (centrada): la etiqueta, en medio, gira sobre su centro. */
 .tilted {
-  display: inline-block;
+  display: block;
   rotate: var(--bb-tilt-ann);
 }
 
+/* Si no cabe en una línea (320 px), parte por palabras antes que salirse de su caja. */
 .tag {
+  max-width: 100%;
   padding-block: var(--bb-space-2);
   font-size: var(--bb-fs-xl);
+  white-space: normal;
 }
 
 @keyframes bb-announcer-slam {

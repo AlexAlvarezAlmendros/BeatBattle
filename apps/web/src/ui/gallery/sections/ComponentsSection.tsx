@@ -658,7 +658,7 @@ function ModalBlock() {
 function AnnouncerBlock() {
   return (
     <GalleryBlock id="anunciador" title={t('dev.gallery.components.announcer')}>
-      <GalleryRow wide>
+      <GalleryRow wide="xl">
         <StateCell label={stateLabel('rest')} state="rest">
           <Announcer text={t('dev.gallery.arena.announcer.round')} silent />
         </StateCell>

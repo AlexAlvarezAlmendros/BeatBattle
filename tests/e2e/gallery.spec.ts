@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, type Page, test } from '@playwright/test'
 import { collectErrors, expectVisibleFocus, focusRingClippedBy, openGallery } from './support'
 
 /**
@@ -127,3 +127,67 @@ test('RNF-A11Y-01: el anillo de foco del título de una fila de entrada se ve en
   await expectVisibleFocus(link)
   expect(await focusRingClippedBy(link)).toBeNull()
 })
+
+/**
+ * Lo que pintan los dos rótulos del anunciador frente al marco de su tesela: el aire a cada lado y si
+ * el texto desborda su caja. Del display, los glifos con la mitad del contorno y la sombra dura; de la
+ * etiqueta girada, su caja ya girada.
+ */
+function announcerAir(page: Page) {
+  return page.evaluate(async () => {
+    await document.fonts.ready
+    await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
+    const probe = document.createElement('div')
+    probe.style.width = 'var(--bb-space-3)'
+    document.body.append(probe)
+    const space3 = probe.getBoundingClientRect().width
+    probe.remove()
+    const viewport = document.documentElement.clientWidth
+    const measure = (painted: DOMRect, piece: HTMLElement) => {
+      const frame = piece.closest<HTMLElement>('[data-frame]')!.getBoundingClientRect()
+      return {
+        left: painted.left - frame.left,
+        right: frame.right - painted.right,
+        overflow: piece.scrollWidth - piece.clientWidth,
+        inViewport: painted.left >= 0 && painted.right <= viewport,
+      }
+    }
+    const word = document.querySelector<HTMLElement>('section#anunciador [data-announcer="display"] p')!
+    const range = document.createRange()
+    range.selectNodeContents(word)
+    const glyphs = range.getBoundingClientRect()
+    const style = getComputedStyle(word)
+    const halfStroke = Number.parseFloat(style.getPropertyValue('-webkit-text-stroke-width')) / 2 || 0
+    const [shadowX = 0] = (style.textShadow.match(/-?[\d.]+px/g) ?? []).map(Number.parseFloat)
+    const left = glyphs.left - halfStroke - Math.max(0, -shadowX)
+    const right = glyphs.right + halfStroke + Math.max(0, shadowX)
+    const tag = document.querySelector<HTMLElement>('section#anunciador [data-announcer="tag"] [data-tag]')!
+    return {
+      space3,
+      display: measure(new DOMRect(left, glyphs.top, right - left, glyphs.height), word),
+      tag: measure(tag.getBoundingClientRect(), tag),
+    }
+  })
+}
+
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 390, height: 844 },
+  { width: 320, height: 700 },
+]) {
+  test(`RD-VIS-02 e: los rótulos del anunciador caben en su tesela con aire a los dos lados (${viewport.width} px)`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(viewport)
+    await openGallery(page)
+    await page.locator('section#anunciador').scrollIntoViewIfNeeded()
+    const { space3, ...pieces } = await announcerAir(page)
+    for (const [name, air] of Object.entries(pieces)) {
+      expect(air.overflow, `${name}: el rótulo desborda su caja`).toBeLessThanOrEqual(1)
+      expect(air.inViewport, `${name}: el rótulo se sale de la ventana`).toBe(true)
+      // Ni la sombra dura ni la esquina de la etiqueta girada tocan el marco: `--bb-space-3` como poco.
+      expect(air.left, `${name}: aire a la izquierda`).toBeGreaterThanOrEqual(space3)
+      expect(air.right, `${name}: aire a la derecha`).toBeGreaterThanOrEqual(space3)
+    }
+  })
+}

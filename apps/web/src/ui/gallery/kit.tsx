@@ -46,7 +46,10 @@ export function GalleryBlock({ id, title, children }: { id: string; title: strin
   )
 }
 
-/** Grupo de muestras con un rótulo (`<h4>`). */
+/**
+ * Grupo de muestras con un rótulo (`<h4>`). `wide` da celdas de 22rem como poco; `wide="xl"`, de
+ * 28rem, para las piezas grandes en display (el anunciador), que así se ven a su tamaño y con aire.
+ */
 export function GalleryRow({
   title,
   children,
@@ -54,12 +57,14 @@ export function GalleryRow({
 }: {
   title?: string
   children: ReactNode
-  wide?: boolean
+  wide?: boolean | 'xl'
 }) {
   return (
     <div>
       {title && <h4 className={cx('bb-label', styles.rowTitle)}>{title}</h4>}
-      <div className={cx(styles.grid, wide && styles.gridWide)}>{children}</div>
+      <div className={cx(styles.grid, wide && styles.gridWide, wide === 'xl' && styles.gridXl)}>
+        {children}
+      </div>
     </div>
   )
 }

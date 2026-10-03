@@ -233,6 +233,11 @@
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
 }
 
+/* Piezas grandes en display (el anunciador): como mucho dos por fila en escritorio, a su tamaño. */
+.gridXl {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 28rem), 1fr));
+}
+
 /* Muestra: la pieza sobre negro y su pie con el nombre (y el token). */
 .specimen {
   display: grid;
