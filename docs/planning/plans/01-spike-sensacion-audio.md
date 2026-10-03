@@ -42,9 +42,10 @@ ya dentro del monorepo (`apps/web/src/stage`, `apps/web/src/audio`, `packages/au
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 1.4 | Motor de audio: `AudioContext` en la primera interacción (puerta mínima), buses (música, efectos, ambiente), compresor y limitador, síntesis de `SfxDef` (modelo de Orchard) y los efectos `ui.enter`, `ui.hover`, `ui.press`, `star.hover.1–5`, `star.vote.1–5`, `vote.locked`, `xp.gain`, `level.up` | ⬜ Listo | 0.1 | §3.7 · Anexo D · `RD-SND-01..03` |
+| 1.4 | Motor de audio: `AudioContext` en la primera interacción (puerta mínima; la puerta completa es la 1.13), buses (música, efectos, ambiente), compresor y limitador, síntesis de `SfxDef` (modelo de Orchard) y los efectos `ui.enter`, `ui.hover`, `ui.press`, `star.hover.1–5`, `star.vote.1–5`, `vote.locked`, `xp.gain`, `level.up` | ⬜ Listo | 0.1 | §3.7 · Anexo D · `RD-SND-01..03` |
 | 1.5 | Componente de estrellas completo (§3.8.4): dormidas con anillo, despertar, hover sonoro en pentatónica, voto con *squish*, chispas, vibración y variante sin movimiento; accesible como grupo de radio. Con su bloque en la galería (`/dev/galeria`) y sus estados de §3.3 en la matriz de la galería (`ui/gallery/stateMatrix.ts`) | 🔒 Bloqueado | 1.3, 1.4 | `RD-SND-04`, `RNF-A11Y-06`, `RF-VOTE-10`, `RD-VIS-03` (las Estrellas son el único componente de §3.3 que falta en la galería de la Fase 0) |
 | 1.6 | Reactividad: analizador (FFT 1024) → bandas y RMS suavizados → uniformes del Silk; limitador de luminancia (≤ 15 %, paso bajo 3 Hz) y medición de destellos con un beat a 160 BPM | 🔒 Bloqueado | 1.1, 1.4 | §3.5 · `RNF-A11Y-04` |
+| 1.13 | Puerta de entrada completa (§3.8.1; maqueta `00-titulo`): arranque «[OTP.] PRESENTA», logo que cae con su extrusión y el lockup, vinilo-sol de la semana partido por la diagonal y girando al BPM, «◀ PULSA PARA EMPEZAR ▶» que respira con «Entrar sin sonido [S]», campeón vigente y cartel EN JUEGO; al pulsar, `AudioContext`, `ui.enter` y la diagonal que abre el menú. Saltable, con su variante sin movimiento y desactivable en Opciones; no aparece en autenticación, admin ni legales | 🔒 Bloqueado | 1.4 | §3.8.1 · `RD-SND-01`, `RD-MOT-01`, `RD-MOT-03` · Sale del jurado visual de la Arena (0.28, `docs/planning/evidence/f0/arena/jurado.md`): la home entra directa al menú y falta el momento de «inserta moneda» |
 
 ### Audio en la nube ⚠️ crea recursos externos: pedir confirmación antes
 
@@ -96,5 +97,6 @@ repite el banco antes de seguir. **NO-GO** en 4 o 5 → se replantea el almacena
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-03 | 1.13 | Nueva tarea, del jurado visual de la Arena (0.28): la puerta de entrada completa con la pantalla de título `00-titulo` (§3.8.1). La 1.4 se queda con la puerta mínima (el desbloqueo del `AudioContext`). |
 | 2026-10-02 | 1.5 | Revisión adversarial de la Fase 0 (sdd-2): la 1.5 cierra también `RD-VIS-03` (Estrellas en la galería con sus estados). |
 | 2026-10-02 | — | Plan creado. |

@@ -76,6 +76,13 @@ ven con la fuente del sistema; los de la raíz de esta carpeta ya las llevan den
   la hoja).
 - `01-menu-sin-movimiento.png`: el menú principal a 1440×900 con «reducir movimiento» (§3.10).
 
+## `jurado.md` y `app/`
+
+- `jurado.md`: acta del jurado visual de la tarea 0.28 (`RD-VIS-02` e): los veredictos de las tres lentes
+  sobre la app real frente a estas maquetas, lo corregido (con su commit) y lo descartado o aplazado.
+- `app/`: capturas finales de la app tras los arreglos (Chrome del sistema con `tools/shot/shot.mjs`, a
+  1440×900 y 390×844, reducidas a 256 colores como las de las maquetas).
+
 ## Lo que estas maquetas no son
 
 - No son código del proyecto: no pasan por `pnpm lint:tokens` ni por i18n, y los textos están en el
