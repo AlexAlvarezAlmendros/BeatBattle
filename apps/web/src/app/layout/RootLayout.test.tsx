@@ -188,6 +188,20 @@ describe('RootLayout: marco de juego (0.23, §3.4.1)', () => {
     const bar = screen.getByRole('contentinfo')
     expect(within(bar).getByText('Crédito 01')).toBeInTheDocument()
     expect(within(bar).queryByRole('link', { name: t('frame.controls.legal') })).toBeNull()
+    expect(bar.querySelector('[data-controls-rule]')).toBeNull()
+  })
+
+  it('RD-VIS-02 e: «Legal» lleva delante el filete que lo separa de la firma, decorativo', () => {
+    renderFrame('/como-funciona')
+    const bar = screen.getByRole('contentinfo')
+    const legal = within(bar).getByRole('link', { name: t('frame.controls.legal') })
+    const rule = bar.querySelector('[data-controls-rule]')
+    expect(rule).toHaveAttribute('aria-hidden', 'true')
+    expect(rule).toBeEmptyDOMElement()
+    // Entre la firma y «Legal», en el orden de la barra.
+    expect(rule?.nextElementSibling).toBe(legal)
+    const signature = within(bar).getByRole('link', { name: t('frame.controls.signatureLabel') })
+    expect(signature.compareDocumentPosition(rule!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 })
 

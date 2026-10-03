@@ -123,6 +123,14 @@
 }
 
 /*
+ * Filete entre la firma y «Legal» (`data-controls-rule`): solo en móvil, donde van juntos en una fila.
+ * En escritorio «Legal» va en la columna de la derecha, lejos de la firma, y no hace falta.
+ */
+.rule {
+  display: none;
+}
+
+/*
  * Táctil: sin teclas (no hay teclado); queda la firma (§3.4.1). Las teclas dependen del tipo de entrada,
  * no del ancho: con teclado y ratón se ven también en una ventana estrecha (o ampliada al 200 %).
  */
@@ -134,9 +142,10 @@
 
 /*
  * Móvil (≤ 720 px): la barra sigue pegada al pie de la ventana (la firma se ve siempre, también en una
- * pantalla más alta que la ventana) y lleva la firma centrada con «Legal» al lado, en una fila
- * (maqueta `01-menu-390x844`). En táctil, el dato de la pantalla (la crónica del menú) se va; con
- * teclado y ratón, las teclas van en una fila de encima que parte de línea si no cabe y el dato, debajo.
+ * pantalla más alta que la ventana) y lleva la firma centrada (maqueta `01-menu-390x844`) o, en las
+ * pantallas con «Legal», la firma, un filete y «Legal» en una fila. En táctil, el dato de la pantalla
+ * (la crónica del menú) se va; con teclado y ratón, las teclas van en una fila de encima que parte de
+ * línea si no cabe y el dato, debajo.
  */
 @media (max-width: 720px) {
   .bar {
@@ -169,14 +178,43 @@
     padding-top: var(--bb-space-1);
   }
 
-  /* Con «Legal» al lado (pantallas interiores), la firma se aprieta para que quepan en una fila. */
+  /*
+   * Con «Legal» al lado (pantallas interiores, autenticación, 404), la firma se aprieta para que quepan
+   * en una fila y un filete vertical los separa, con un hueco a cada lado (jurado de la 0.28: pegado a
+   * la firma y con el mismo rótulo, se leía «Other People Records Legal», como parte del nombre del
+   * sello). La firma no va centrada en la ventana: centrarla con «Legal» a un lado pide 280 + 2 × (44 +
+   * hueco) px y no caben en 358; va centrado el grupo.
+   */
   .bar:has(.legal) {
-    gap: 0 var(--bb-space-3);
+    gap: 0 var(--bb-space-2);
   }
 
   .bar:has(.legal) .signature {
     gap: var(--bb-space-2);
     letter-spacing: var(--bb-tracking-button);
+  }
+
+  .rule {
+    display: block;
+    height: var(--bb-space-4);
+    margin-inline-end: var(--bb-space-2);
+    border-inline-start: var(--bb-stroke-hair) solid var(--bb-line);
+  }
+}
+
+/*
+ * Si firma, filete y «Legal» no caben en una fila (por debajo de 373 px con la letra por defecto: 280 +
+ * 8 + 9 + 44 px más los medianiles), «Legal» baja a la suya, centrado y sin filete. En `em` para que
+ * siga al tamaño de letra del navegador, como la firma y «Legal» (en `rem`).
+ */
+@media (max-width: 23.25em) {
+  .bar:has(.legal) .right {
+    flex-basis: 100%;
+    justify-content: center;
+  }
+
+  .rule {
+    display: none;
   }
 }
 

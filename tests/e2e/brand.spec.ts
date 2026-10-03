@@ -1,5 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
-import { ROUTES, settle } from './support'
+import { openGallery, ROUTES, settle } from './support'
 
 /**
  * Prueba de marca y de juego (`RD-VIS-02`, guía §3.10; tarea 0.27):
@@ -136,4 +136,122 @@ test.describe('móvil (390 × 844)', () => {
       await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport()
     })
   }
+})
+
+/**
+ * «Legal» junto a la firma en móvil (jurado de la 0.28, M3): con «Legal» a 12 px de «OTHER PEOPLE
+ * RECORDS» y con el mismo rótulo, la barra se leía «Other People Records Legal», como si fuera parte del
+ * nombre del sello. En las pantallas con «Legal» (interiores, autenticación, 404, galería) un filete
+ * vertical (`[data-controls-rule]`) lo separa de la firma, con al menos `MIN_RULE_GAP` a cada lado, en
+ * la misma fila; si no caben en una (< 373 px), «Legal» baja a su propia fila, centrado y sin filete.
+ */
+const MIN_RULE_GAP = 8
+
+interface Box {
+  left: number
+  right: number
+  top: number
+  bottom: number
+}
+
+/** Cajas de la firma, del texto de «Legal» (no de su objetivo de 44 px) y del filete, si se ve. */
+async function legalLayout(page: Page): Promise<{ signature: Box; legal: Box; rule: Box | null }> {
+  const bar = page.getByRole('contentinfo')
+  await expect(bar.getByRole('link', { name: 'Legal' })).toBeVisible()
+  await settle(page)
+  return bar.evaluate((footer) => {
+    const box = ({ left, right, top, bottom }: DOMRect) => ({ left, right, top, bottom })
+    const signature = footer.querySelector('[data-otp-signature]')!
+    const legal = footer.querySelector('a[href^="/legal/"]')!
+    const text = document.createRange()
+    text.selectNodeContents(legal)
+    const rule = footer.querySelector<HTMLElement>('[data-controls-rule]')
+    const style = rule && getComputedStyle(rule)
+    const painted =
+      !!rule &&
+      !!style &&
+      rule.getClientRects().length > 0 &&
+      style.visibility !== 'hidden' &&
+      style.borderInlineStartStyle !== 'none' &&
+      Number.parseFloat(style.borderInlineStartWidth) >= 1
+    return {
+      signature: box(signature.getBoundingClientRect()),
+      legal: box(text.getBoundingClientRect()),
+      rule: painted ? box(rule.getBoundingClientRect()) : null,
+    }
+  })
+}
+
+const middle = (box: Box) => (box.top + box.bottom) / 2
+
+/** Firma, filete y «Legal» en una fila, en ese orden, con el hueco mínimo a cada lado del filete. */
+async function expectRuleBetween(page: Page) {
+  const { signature, legal, rule } = await legalLayout(page)
+  expect(rule, 'filete visible entre la firma y «Legal»').not.toBeNull()
+  expect(Math.abs(middle(legal) - middle(signature)), 'misma fila').toBeLessThanOrEqual(2)
+  expect(Math.abs(middle(rule!) - middle(signature)), 'filete en la fila').toBeLessThanOrEqual(2)
+  expect(rule!.bottom - rule!.top, 'alto del filete').toBeGreaterThanOrEqual(12)
+  expect(rule!.left - signature.right, 'firma → filete').toBeGreaterThanOrEqual(MIN_RULE_GAP)
+  expect(legal.left - rule!.right, 'filete → «Legal»').toBeGreaterThanOrEqual(MIN_RULE_GAP)
+  await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({ ratio: 1 })
+  await expect(page.getByRole('contentinfo').getByRole('link', { name: 'Legal' })).toBeInViewport({
+    ratio: 1,
+  })
+}
+
+test.describe('móvil táctil (390 × 844): «Legal» separado de la firma', () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
+
+  for (const path of ['/como-funciona', '/entrar', '/ajustes', '/esto-no-existe']) {
+    test(`RD-VIS-02 e / RF-OTP-01: en ${path}, un filete separa «Legal» de la firma, en la misma fila`, async ({
+      page,
+    }) => {
+      await page.goto(path)
+      await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toBeAttached()
+      await expectRuleBetween(page)
+    })
+  }
+
+  test('RD-VIS-02 e / RF-OTP-01: en la galería, un filete separa «Legal» de la firma', async ({ page }) => {
+    await openGallery(page)
+    await expectRuleBetween(page)
+  })
+})
+
+test.describe('móvil táctil (375 × 667, maqueta 01-menu-375x667): «Legal» separado de la firma', () => {
+  test.use({ viewport: { width: 375, height: 667 }, isMobile: true, hasTouch: true })
+
+  test('RD-VIS-02 e / RF-OTP-01: firma, filete y «Legal» caben en una fila', async ({ page }) => {
+    await page.goto('/como-funciona')
+    await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toBeAttached()
+    await expectRuleBetween(page)
+  })
+})
+
+test.describe('ventana estrecha con teclado (390 × 844): «Legal» separado de la firma', () => {
+  test.use({ viewport: { width: 390, height: 844 } })
+
+  test('RD-VIS-02 e / RF-OTP-01: con las teclas encima, firma, filete y «Legal» en una fila', async ({
+    page,
+  }) => {
+    await page.goto('/como-funciona')
+    await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toBeAttached()
+    await expectRuleBetween(page)
+  })
+})
+
+test.describe('móvil táctil (360 × 740): «Legal» en su propia fila', () => {
+  test.use({ viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true })
+
+  test('RD-VIS-02 e / RF-OTP-01: si no caben en una fila, «Legal» va debajo de la firma, centrado y sin filete', async ({
+    page,
+  }) => {
+    await page.goto('/como-funciona')
+    await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toBeAttached()
+    const { signature, legal, rule } = await legalLayout(page)
+    expect(rule, 'sin filete al lado de «Legal» solo').toBeNull()
+    expect(legal.top, '«Legal» debajo de la firma').toBeGreaterThanOrEqual(signature.bottom - 1)
+    expect(Math.abs((legal.left + legal.right) / 2 - 180), '«Legal» centrado').toBeLessThanOrEqual(2)
+    await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({ ratio: 1 })
+  })
 })

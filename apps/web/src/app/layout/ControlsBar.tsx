@@ -39,9 +39,10 @@ export const CONTROL_KEYS: Readonly<
  * Barra de controles inferior (guía §3.4.1; tarea 0.23): 58 px, negra, con filete rojo y línea
  * discontinua encima. A la izquierda, las teclas de la pantalla; en el centro, la **firma** («Un juego
  * de [OTP.] Other People Records», enlazada al sello, `RF-OTP-01`); a la derecha, un dato (hueco
- * `controlsRight`: la crónica de la arena en el menú; «Legal» por defecto). En táctil y en móvil las
- * teclas desaparecen y queda la firma. Va pegada al pie de la ventana con su alto real como margen del
- * foco, salvo en ventanas bajas, donde se despega (`usePinnedBarHeight`).
+ * `controlsRight`: la crónica de la arena en el menú; «Legal» por defecto, que en móvil va al lado de
+ * la firma con un filete en medio). En táctil y en móvil las teclas desaparecen y queda la firma. Va
+ * pegada al pie de la ventana con su alto real como margen del foco, salvo en ventanas bajas, donde se
+ * despega (`usePinnedBarHeight`).
  */
 export function ControlsBar({ screen }: { screen: ScreenConfig }) {
   // Con los atajos de una tecla apagados (WCAG 2.1.4), M no hace nada: no se enseña.
@@ -72,9 +73,14 @@ export function ControlsBar({ screen }: { screen: ScreenConfig }) {
         name="controlsRight"
         className={styles.right}
         fallback={
-          <Link to={paths.legal('bases')} className={styles.legal}>
-            {t('frame.controls.legal')}
-          </Link>
+          <>
+            {/* Filete que separa «Legal» de la firma cuando van juntos (móvil): sin él se leía como
+                parte del nombre del sello, «Other People Records Legal». Decorativo. */}
+            <span className={styles.rule} aria-hidden="true" data-controls-rule="" />
+            <Link to={paths.legal('bases')} className={styles.legal}>
+              {t('frame.controls.legal')}
+            </Link>
+          </>
         }
       />
     </footer>
