@@ -2,15 +2,14 @@ import { expect, test } from '@playwright/test'
 import { collectErrors, expectVisibleFocus, focusRingClippedBy, openGallery } from './support'
 
 /**
- * Galería `/dev/galeria` (tareas 0.9 y 0.22, `RD-VIS-03`): solo existe en desarrollo, y por eso los E2E
- * corren contra el servidor de Vite. Comprueba que están todas las secciones del índice (el registro de
- * `ui/gallery/sections`), cada una con su ancla y su título, sin errores de la página.
+ * Galería `/dev/galeria` (tareas 0.9, 0.22 y 0.25, `RD-VIS-03`): solo existe en desarrollo, y por eso
+ * los E2E corren contra el servidor de Vite. Comprueba que están todas las secciones del índice (el
+ * registro de `ui/gallery/sections`), cada una con su ancla y su título, sin errores de la página.
  */
 
 const SECTIONS = [
   { id: 'base', name: 'Base de la arena' },
   { id: 'componentes', name: 'Componentes' },
-  { id: 'layout', name: 'Layout del sello' },
 ] as const
 
 /** Bloques de la sección «Base» (tarea 0.22). */
@@ -24,35 +23,32 @@ const BASE = [
   { id: 'base-cursor', name: 'Cursor de juego' },
 ] as const
 
-/** Componentes base de §3.3, en su orden (cuelgan de «Componentes»). */
+/** Componentes de §3.3, en su orden (tarea 0.25). */
 const COMPONENTS = [
   { id: 'boton', name: 'Botón' },
-  { id: 'chip', name: 'Chip' },
-  { id: 'tarjeta', name: 'Tarjeta' },
-  { id: 'tesela', name: 'Tesela de dato' },
-  { id: 'rotulo', name: 'Rótulo de sección' },
-  { id: 'onda', name: 'Forma de onda' },
+  { id: 'opcion-menu', name: 'Opción de menú' },
+  { id: 'pestanas', name: 'Pestañas' },
+  { id: 'chip-dato', name: 'Chip de dato' },
+  { id: 'chip-filtro', name: 'Chip de filtro' },
+  { id: 'sello', name: 'Sello de goma' },
+  { id: 'ficha', name: 'Ficha de luchador' },
+  { id: 'casilla', name: 'Casilla de entrada' },
   { id: 'fila', name: 'Fila de entrada' },
-  { id: 'modal', name: 'Modal' },
+  { id: 'tesela', name: 'Tesela' },
+  { id: 'onda', name: 'Forma de onda' },
+  { id: 'ventana', name: 'Ventana (modal)' },
+  { id: 'anunciador', name: 'Anunciador' },
   { id: 'aviso', name: 'Aviso' },
-  { id: 'xp', name: 'Barra de XP' },
-  { id: 'esqueleto', name: 'Esqueleto de carga' },
-  { id: 'cuenta-atras', name: 'Cuenta atrás' },
+  { id: 'medidor', name: 'Medidor' },
+  { id: 'esqueleto', name: 'Esqueleto' },
+  { id: 'reloj', name: 'Reloj de ronda' },
+  { id: 'placa', name: 'Placa de título' },
+  { id: 'portada', name: 'Portada y medallas' },
 ] as const
 
-/** Piezas del layout del sello (tarea 0.7; cuelgan de «Layout del sello»). */
-const LAYOUT = [
-  { id: 'isla', name: 'Isla de navegación' },
-  { id: 'pie', name: 'Pie del sello' },
-  { id: 'titular', name: 'Titular del hero' },
-  { id: 'rotulos', name: 'Rótulos laterales' },
-  { id: 'rejilla', name: 'Rejilla y viñeta' },
-  { id: 'marquee', name: 'Banda de marquee' },
-  { id: 'orbes', name: 'Orbes del fondo' },
-  { id: 'cristal', name: 'GlassSurface' },
-] as const
-
-test('RD-VIS-03: la galería pinta todas sus secciones, componentes y piezas del layout', async ({ page }) => {
+test('RD-VIS-03: la galería pinta todas sus secciones y bloques, en el orden del índice', async ({
+  page,
+}) => {
   const errors = collectErrors(page)
   await openGallery(page)
   await expect(page).toHaveTitle('Galería · Beat Battle')
@@ -61,62 +57,36 @@ test('RD-VIS-03: la galería pinta todas sus secciones, componentes y piezas del
 
   // El índice enlaza exactamente estas anclas, en este orden: una sección nueva sin test hace fallar.
   const index = main.getByRole('navigation', { name: 'Índice de la galería' })
-  const expected = [
-    ...SECTIONS.map((item) => ({ ...item, level: 'H2' })),
-    ...BASE.map((item) => ({ ...item, level: 'H3' })),
-    ...COMPONENTS.map((item) => ({ ...item, level: 'H3' })),
-    ...LAYOUT.map((item) => ({ ...item, level: 'H3' })),
-  ]
   const links = await index
     .getByRole('link')
     .evaluateAll((anchors) =>
       anchors.map((a) => ({ id: a.getAttribute('href')?.slice(1), name: a.textContent })),
     )
-  // Orden del índice: cada sección, con sus componentes o piezas del layout colgando de ella.
-  const indexOrder = SECTIONS.flatMap((section) => [
-    section,
-    ...(section.id === 'base'
-      ? BASE
-      : section.id === 'componentes'
-        ? COMPONENTS
-        : section.id === 'layout'
-          ? LAYOUT
-          : []),
-  ])
-  expect(links).toEqual(indexOrder.map(({ id, name }) => ({ id, name })))
+  const expected = [SECTIONS[0], ...BASE, SECTIONS[1], ...COMPONENTS]
+  expect(links).toEqual(expected.map(({ id, name }) => ({ id, name })))
 
-  // Cada ancla es una sección pintada (con tamaño) cuyo título empieza por el nombre del índice (el de
-  // la tarjeta añade la variante: «Tarjeta · cristal»). Se lee todo de una vez: la galería es pesada.
+  // Cada ancla es una sección pintada (con tamaño) cuyo título es el del índice.
   const sections = await page.evaluate(
     (ids) =>
       ids.map((id) => {
         const section = document.querySelector(`main section#${id}`)
         const heading = section?.querySelector(':scope > h2, :scope > h3')
         const box = section?.getBoundingClientRect()
-        return {
-          id,
-          level: heading?.tagName,
-          title: heading?.textContent,
-          painted: !!box && box.width > 0 && box.height > 0,
-        }
+        return { id, title: heading?.textContent, painted: !!box && box.width > 0 && box.height > 0 }
       }),
     expected.map(({ id }) => id),
   )
-  for (const [i, { id, name, level }] of expected.entries()) {
-    const section = sections[i]
-    expect(section, id).toMatchObject({ id, level, painted: true })
-    expect(section?.title, id).toMatch(new RegExp(`^${name}`))
-  }
+  for (const [i, { id, name }] of expected.entries())
+    expect(sections[i], id).toEqual({ id, title: name, painted: true })
 
   // Un enlace del índice lleva a su sección.
-  await index.getByRole('link', { name: 'Cuenta atrás' }).click()
-  await expect(page).toHaveURL(/#cuenta-atras$/)
-  await expect(main.locator('section#cuenta-atras')).toBeInViewport()
-
+  await index.getByRole('link', { name: 'Reloj de ronda' }).click()
+  await expect(page).toHaveURL(/#reloj$/)
+  await expect(main.locator('section#reloj')).toBeInViewport()
   expect(errors).toEqual([])
 })
 
-test('RD-MOT-03: el interruptor «Reducir movimiento» de la galería pone data-motion="reduced" y se deshace al salir', async ({
+test('RD-MOT-03: el interruptor «Reducir movimiento» pone data-motion="reduced" y se deshace al salir', async ({
   page,
 }) => {
   await openGallery(page)
@@ -127,72 +97,33 @@ test('RD-MOT-03: el interruptor «Reducir movimiento» de la galería pone data-
   await expect(toggle).toHaveAttribute('aria-checked', 'true')
   await expect(html).toHaveAttribute('data-motion', 'reduced')
 
-  // Al salir de la galería el ajuste de prueba no se arrastra al resto de la app.
-  await page.getByRole('banner').getByRole('link', { name: 'Semana', exact: true }).click()
+  // Al salir de la galería (Esc vuelve al menú) el ajuste de prueba no se arrastra al resto de la app.
+  await page.keyboard.press('Escape')
   await expect(page).toHaveURL('/')
   await expect(html).not.toHaveAttribute('data-motion', 'reduced')
 })
 
-test('RNF-A11Y-01: el anillo de foco del título de la fila de entrada se ve entero', async ({ page }) => {
+test('RD-VIS-03: el modo serio quita el espectáculo (anunciador, rayos) y deja la información', async ({
+  page,
+}) => {
   await openGallery(page)
-  const row = page.locator('section#fila').getByRole('article', { name: 'Tigre púrpura' }).last()
-  const link = row.getByRole('link', { name: 'Tigre púrpura' })
-  // Con el teclado: del play de la fila al enlace del título.
-  await row.getByRole('button', { name: /Reproducir/ }).focus()
+  const announcer = page.locator('section#anunciador [data-fx]').first()
+  await expect(announcer).toBeVisible()
+  await page.getByRole('switch', { name: /Modo serio/ }).click()
+  await expect(announcer).toBeHidden()
+  await expect(page.locator('section#anunciador [data-announcer]').first()).toBeAttached()
+})
+
+test('RNF-A11Y-01: el anillo de foco del título de una fila de entrada se ve entero', async ({ page }) => {
+  await openGallery(page)
+  const link = page.locator('section#fila').getByRole('link', { name: 'Neón en Sants' }).first()
+  await link.scrollIntoViewIfNeeded()
+  await page
+    .locator('section#fila')
+    .getByRole('button', { name: /Reproducir «Neón en Sants»/ })
+    .first()
+    .focus()
   await page.keyboard.press('Tab')
   await expectVisibleFocus(link)
   expect(await focusRingClippedBy(link)).toBeNull()
-})
-
-test.describe('móvil (390 × 844, táctil)', () => {
-  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
-
-  test('§3.3: el botón icono sigue siendo un círculo en móvil (ancho igual al alto)', async ({ page }) => {
-    await openGallery(page)
-    const sizes = await page.locator('section#boton [data-variant="icon"]').evaluateAll((elements) =>
-      elements.map((element) => {
-        const box = element.getBoundingClientRect()
-        return { width: Math.round(box.width), height: Math.round(box.height) }
-      }),
-    )
-    expect(sizes.length).toBeGreaterThan(0)
-    for (const size of sizes) expect(size.width, JSON.stringify(sizes)).toBe(size.height)
-  })
-
-  test('RNF-A11Y-01: el anillo de foco del título de la fila de entrada se ve entero en móvil', async ({
-    page,
-  }) => {
-    await openGallery(page)
-    const row = page.locator('section#fila').getByRole('article', { name: 'Tigre púrpura' }).last()
-    const link = row.getByRole('link', { name: 'Tigre púrpura' })
-    await link.focus()
-    expect(await focusRingClippedBy(link)).toBeNull()
-  })
-
-  test('RNF-A11Y-09: los chips de un grupo de varias filas conservan su área de 44 px', async ({ page }) => {
-    await openGallery(page)
-    const group = page.locator('section#chip').getByRole('group')
-    // `elementFromPoint` solo ve lo que está en la ventana.
-    await group.evaluate((element) => element.scrollIntoView({ block: 'center' }))
-    const chips = group.getByRole('button')
-    const rows = await chips.evaluateAll(
-      (elements) => new Set(elements.map((element) => Math.round(element.getBoundingClientRect().top))).size,
-    )
-    // Que el grupo salte de línea: si no, el test no mediría nada.
-    expect(rows).toBeGreaterThan(1)
-    // Área efectiva: lo que hay 21 px por encima y por debajo del centro de cada chip es el propio chip.
-    const short = await chips.evaluateAll((elements) =>
-      elements
-        .filter((element) => {
-          const box = element.getBoundingClientRect()
-          const x = box.left + box.width / 2
-          const y = box.top + box.height / 2
-          return [y - 21, y + 21].some(
-            (at) => document.elementFromPoint(x, at)?.closest('button') !== element,
-          )
-        })
-        .map((element) => element.textContent),
-    )
-    expect(short).toEqual([])
-  })
 })

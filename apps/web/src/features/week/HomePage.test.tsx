@@ -9,8 +9,9 @@ describe('HomePage: menú principal en «calendario vacío» y visitante (0.24, 
   it('el <h1> es el nombre del juego (el logo es decorativo) y el título lleva la firma del sello', () => {
     renderInRouter(<HomePage />)
     expect(screen.getByRole('heading', { level: 1, name: t('pages.home.title') })).toBeInTheDocument()
-    for (const logo of document.querySelectorAll('svg[data-game-logo]'))
-      expect(logo).toHaveAttribute('aria-hidden', 'true')
+    const logos = document.querySelectorAll('[data-game-logo]')
+    expect(logos).toHaveLength(2)
+    for (const logo of logos) expect(logo).toHaveAttribute('aria-hidden', 'true')
     const signature = screen.getByRole('link', { name: t('ui.otpSlap.label') })
     expect(signature).toHaveAttribute('href', `${OTHER_PEOPLE_URL}/`)
     expect(signature).toHaveAttribute('data-otp-signature')

@@ -46,7 +46,7 @@ function measuresPaint(): boolean {
  * Ejecuta `run` cuando la página ya se ha pintado con contenido (FCP) y el navegador está libre.
  *
  * - Con Paint Timing, espera a la entrada `first-contentful-paint` (si ya está, no espera): el primer
- *   fotograma puede salir sin texto todavía (la fuente en su periodo de bloqueo, el hero en su entrada).
+ *   fotograma puede salir sin texto todavía (la fuente en su periodo de bloqueo).
  * - Sin él, al fotograma siguiente.
  * - En una pestaña oculta no hay FCP: no corre hasta que la página se pinte. Quien necesite el trozo
  *   antes (un aviso que llega) lo pide en ese momento.

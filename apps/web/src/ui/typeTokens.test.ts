@@ -63,9 +63,14 @@ describe('tipografía de la arena (§3.2)', () => {
     }
   })
 
-  it('RD-VIS-02 c: ni Montserrat ni JetBrains Mono', () => {
-    expect(fonts).not.toMatch(/montserrat|jetbrains/i)
-    expect(css).not.toMatch(/montserrat|jetbrains/i)
+  it('RD-VIS-02 c: solo las tres familias de la arena (ninguna del sello)', () => {
+    // Toda familia que se carga o se nombra en un token es una de las tres; las del sello las rechaza
+    // además el lint de piezas prohibidas (`forbidden-font`).
+    expect(new Set(faces.map((face) => face.family))).toEqual(new Set(['Anybody', 'Chakra Petch', 'Oxanium']))
+    const families = [...css.matchAll(/--bb-font-[a-z]+:\s*([^;]+);/g)].flatMap(([, value]) =>
+      [...value!.matchAll(/"([^"]+)"/g)].map(([, name]) => name),
+    )
+    expect(new Set(families)).toEqual(new Set(['Anybody', 'Chakra Petch', 'Oxanium']))
   })
 
   it('RD-VIS-05: el escalón más pequeño es 12 px', () => {

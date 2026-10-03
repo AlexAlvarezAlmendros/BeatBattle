@@ -32,6 +32,12 @@ export const color = {
   ink4: '#2a2a2d',
   waveIdle: '#3a3a3e',
   waveHalo: 'rgba(255, 255, 255, 0.22)',
+  // Caras del logo (mezclas de la paleta en hex, para que el degradado se interpole en sRGB)
+  faceWhiteShade: '#d1d1d1',
+  faceWhiteTint: '#f2f2f2',
+  faceRedTint: '#ff4a75',
+  faceRedMid: '#ff1a50',
+  faceRedShade: '#d40032',
   text: '#ffffff',
   text2: '#d4d4d4',
   text3: '#a3a3a3',

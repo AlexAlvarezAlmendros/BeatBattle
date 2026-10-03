@@ -97,6 +97,8 @@
 .legal {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-width: var(--bb-target);
   min-height: var(--bb-target);
   color: var(--bb-text-2);
   font-family: var(--bb-font-ui);

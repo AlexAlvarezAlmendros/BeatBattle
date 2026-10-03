@@ -48,12 +48,40 @@ export async function open(page: Page, path: string, heading: string): Promise<v
 /**
  * Abre la galería y espera a su cuerpo, que se carga aparte (`React.lazy`) y arrastra todos los
  * componentes: tarda más que la espera normal de `expect`, sobre todo con Vite en frío (el proyecto
- * `warmup` lo calienta antes de los E2E).
+ * `warmup` lo calienta antes de los E2E). El último bloque es «Portada y medallas».
  */
 export async function openGallery(page: Page, timeout = 30_000): Promise<void> {
   await page.goto('/dev/galeria')
-  await expect(page.locator('section#cristal')).toBeVisible({ timeout })
+  await expect(page.locator('section#portada')).toBeVisible({ timeout })
 }
+
+/**
+ * Las pantallas de la app (guía §2.18) con el `<h1>` de cada una, más la 404 y las dos de desarrollo
+ * (`/dev/menu`, el menú con los datos de las maquetas, y la galería). Las comparten los E2E que
+ * recorren «cada ruta» (`RD-VIS-02`, `RD-VIS-05`, `RNF-A11Y-02`).
+ */
+export const ROUTES = [
+  { path: '/', heading: 'Beat Battle' },
+  { path: '/dev/menu', heading: 'Beat Battle' },
+  { path: '/semana/2026-41', heading: 'Semana' },
+  { path: '/semana/2026-41/resultados', heading: 'Resultados' },
+  { path: '/semanas', heading: 'Semanas' },
+  { path: '/e/0192f3a1', heading: 'Entrada' },
+  { path: '/jurado', heading: 'Modo Jurado' },
+  { path: '/subir', heading: 'Subir mi beat' },
+  { path: '/p/aina', heading: 'Perfil' },
+  { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
+  { path: '/temporada/t4', heading: 'Temporada' },
+  { path: '/como-funciona', heading: 'Cómo se juega' },
+  { path: '/ajustes/cuenta', heading: 'Cuenta' },
+  { path: '/entrar', heading: 'Entrar' },
+  { path: '/registro', heading: 'Crear cuenta' },
+  { path: '/verificar', heading: 'Verificar el email' },
+  { path: '/recuperar', heading: 'Recuperar la contraseña' },
+  { path: '/admin', heading: 'Administración' },
+  { path: '/legal/bases', heading: 'Bases de la competición' },
+  { path: '/esto-no-existe', heading: 'Página no encontrada' },
+] as const
 
 /** Resumen legible de una violación de axe: regla, impacto, ayuda y los nodos afectados. */
 function describe(violations: Awaited<ReturnType<AxeBuilder['analyze']>>['violations']): string {
@@ -70,8 +98,11 @@ function describe(violations: Awaited<ReturnType<AxeBuilder['analyze']>>['violat
     .join('\n\n')
 }
 
-/** Capas decorativas del fondo (`aria-hidden`): orbes rojos y rejilla y viñeta del hero. */
-const DECORATIVE_BACKDROP = '.ambient-orbs, .hero__backdrop'
+/**
+ * Capas decorativas (`aria-hidden`): la arena de detrás (cuña con trama, diagonal, rayos y viñeta) y la
+ * trama de las tarjetas.
+ */
+const DECORATIVE_BACKDROP = '[data-wedge][aria-hidden], [data-halftone]'
 
 /**
  * Auditoría de axe con las reglas de WCAG 2.2 AA sobre la página entera. Falla con la lista de
@@ -82,11 +113,11 @@ const DECORATIVE_BACKDROP = '.ambient-orbs, .hero__backdrop'
  *   fotograma, el de reposo, y se congelan mientras axe mide: así el contraste se mide en el estado
  *   legible y no en un instante al azar del ciclo (el `:` de la cuenta atrás baja a opacidad 0,25 a
  *   mitad de su parpadeo). Al terminar siguen corriendo.
- * - Segunda pasada solo de `color-contrast` sin las capas decorativas del fondo: axe no sabe medir el
- *   contraste sobre un degradado y deja como «incompleto» casi todo el texto que pasa por encima de los
- *   orbes o de la rejilla del hero. Sin ellas mide contra el negro de base y lo verifica. (Los orbes, a
- *   opacidad ≤ 0,2, apenas aclaran el fondo; el contraste de cada par de tokens sobre su superficie lo
- *   comprueba además `contrast.test.ts` de la galería.)
+ * - Segunda pasada solo de `color-contrast` sin las capas decorativas: axe no sabe medir el contraste
+ *   sobre la cuña con trama ni sobre un lienzo y deja como «incompleto» el texto que pasa por encima.
+ *   Sin ellas mide contra el fondo de su panel o el negro de base y lo verifica (todo texto sobre la
+ *   cuña va en un panel o en su zona sin trama, `RD-VIS-05`; el contraste de cada par de tokens lo
+ *   comprueba además `contrast.test.ts` de la galería).
  */
 export async function expectNoAxeViolations(page: Page): Promise<void> {
   await settle(page)
@@ -189,4 +220,15 @@ export function focusRingClippedBy(locator: Locator): Promise<string | null> {
     }
     return null
   })
+}
+
+/**
+ * El cursor de juego de §3.3 (`RD-MOT-05`): el elemento tiene el foco y enseña su anillo (el marco
+ * blanco de 3 px a 4 px que sigue su forma), en vez del contorno genérico.
+ */
+export async function expectCursor(locator: Locator): Promise<void> {
+  await expect(locator).toBeFocused()
+  await expect(locator).toHaveAttribute('data-cursor', '')
+  await expect(locator.locator(':scope > [data-cursor-ring]')).toBeVisible()
+  expect((await focusRing(locator)).outlineStyle).toBe('none')
 }

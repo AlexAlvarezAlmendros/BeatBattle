@@ -10,10 +10,8 @@
  * - Espejo tipado para el canvas, los generadores de texturas, Motion y las imágenes de servidor:
  *   `packages/shared/src/tokens.ts`. El test `packages/shared/test/tokens.test.ts` lee este fichero y
  *   falla si los dos divergen: si cambias un valor aquí, cámbialo también allí.
- * - Tokens retirados en la v0.6 (§3.2): los del sello (`--bb-glass*`, `--nav-*`, radios, sombras de CTA,
- *   cristal y hero, desenfoques, medidas de CTA, isla y marquee, rojos de filete y de texto, verde y rojo
- *   de estado, metales y orbes). Los componentes viejos que aún los nombran están en la lista de
- *   excepciones temporales del lint (`tools/lint/check-tokens.mjs`), que la tarea 0.27 vacía.
+ * - Los tokens de la web del sello se retiraron en la v0.6 (la lista, en la guía §3.2): el lint rechaza
+ *   cualquier `var(--bb-…)` que no esté aquí.
  * - Móvil: por debajo de 720 px de ancho (el corte de las maquetas) cambian el desplazamiento del
  *   paralelogramo, las placas del menú, el medianil y la celda de la trama (bloque al final).
  */
@@ -45,6 +43,16 @@
   --bb-ink-4: #2a2a2d; /* Pistas de medidor, segmentos gastados, separadores */
   --bb-wave-idle: #3a3a3e; /* Onda sin reproducir */
   --bb-wave-halo: rgba(255, 255, 255, 0.22); /* Halo de 6 px de la cabeza de lectura (§3.3 «Forma de onda») */
+  /*
+   * Caras del logo (§3.2 «Trazos»): los degradados de las letras, mezclas de la paleta escritas en hex
+   * (colores «de siempre»: el degradado se interpola en sRGB; un color-mix() se interpolaría en Oklab y
+   * saldría del triángulo negro–rojo–blanco de RD-VIS-02 a).
+   */
+  --bb-face-white-shade: #d1d1d1; /* Blanco al 82 % hacia el negro */
+  --bb-face-white-tint: #f2f2f2; /* Blanco al 95 % hacia el negro */
+  --bb-face-red-tint: #ff4a75; /* Rojo al 71 % con blanco */
+  --bb-face-red-mid: #ff1a50; /* Rojo al 90 % con blanco */
+  --bb-face-red-shade: #d40032; /* Rojo al 83 % hacia el negro */
 
   --bb-text: #ffffff; /* Principal */
   --bb-text-2: #d4d4d4; /* Secundario: 14,17:1 sobre negro */

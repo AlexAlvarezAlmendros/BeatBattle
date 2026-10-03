@@ -19,7 +19,8 @@ interface Target {
 /** Controles visibles de la página cuya área efectiva no llega a `min` en alto o en ancho. */
 function smallTargets(page: Page, min = MIN_TARGET_PX): Promise<Target[]> {
   return page.evaluate(async (minimum) => {
-    const SELECTOR = 'a[href], button, [role="button"], input, select, textarea, summary'
+    const SELECTOR =
+      'a[href], button, [role="button"], [role="menuitem"], [role="tab"], input, select, textarea, summary'
     const controls = [...document.querySelectorAll<HTMLElement>(SELECTOR)].filter((element) => {
       const box = element.getBoundingClientRect()
       const style = getComputedStyle(element)
@@ -59,7 +60,9 @@ test.describe('móvil táctil a 360 px', () => {
 
   for (const { name, path, heading } of [
     { name: 'la home', path: '/', heading: 'Beat Battle' },
-    { name: 'una página provisional (Cómo funciona)', path: '/como-funciona', heading: 'Cómo funciona' },
+    { name: 'el menú con semana en juego', path: '/dev/menu', heading: 'Beat Battle' },
+    { name: 'una pantalla interior (Cómo se juega)', path: '/como-funciona', heading: 'Cómo se juega' },
+    { name: 'Opciones', path: '/ajustes/cuenta', heading: 'Cuenta' },
     { name: 'la 404', path: '/esto-no-existe', heading: 'Página no encontrada' },
   ]) {
     test(`RNF-A11Y-09: todos los controles de ${name} tienen un área efectiva de 44 × 44 px`, async ({

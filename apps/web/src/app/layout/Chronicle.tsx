@@ -4,7 +4,7 @@ import { useReducedMotion } from '../../ui/hooks/useReducedMotion'
 import styles from './Chronicle.module.css'
 
 /**
- * Crónica de la arena (guía §3.8.3; sustituye al teletipo y a la banda de *marquee* del sello, §3.1): una
+ * Crónica de la arena (guía §3.8.3; la pieza propia que sustituye al teletipo, §3.1): una
  * línea en el hueco derecho de la barra de controles que cambia de mensaje cada 5 s por fundido
  * (`--bb-loop-chronicle`). En voto ciego nunca dice quién ha subido (§1.3): solo hechos de la semana.
  *

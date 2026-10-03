@@ -1,5 +1,5 @@
 /*
- * Modal, la ventana de juego (§3.3): sobre `--bb-scrim` (sin desenfoque: el cristal es del sello), un
+ * Modal, la ventana de juego (§3.3): sobre `--bb-scrim`, sin desenfoque (paneles opacos, §3.1), un
  * panel casi opaco con marco blanco y chaflán `--bb-cut-lg` (`[data-frame="title"]`), título en display
  * y las acciones en el pie.
  */

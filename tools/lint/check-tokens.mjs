@@ -49,10 +49,9 @@
  *
  * Excepciones, siempre razonadas:
  * - Ficheros: ver `EXCLUDED_FILES` (cada uno con su motivo).
- * - Excepciones temporales de la dirección «Arena»: `TEMPORARY_EXCEPTIONS`, ficheros viejos que aún
- *   usan tokens retirados o piezas prohibidas mientras se rehacen (0.23–0.26) y se retiran (0.27). Sus
- *   infracciones se cuentan aparte y no fallan; una entrada que ya no hace falta hace fallar el test
- *   del lint, así que la lista solo puede encoger.
+ * - Excepciones temporales de la dirección «Arena»: `TEMPORARY_EXCEPTIONS`. Sirvió para el cambio de
+ *   dirección (0.22 → 0.27) y desde la 0.27 está **vacía**: el repo entero cumple. Se queda el mecanismo
+ *   (con su test) por si un cambio grande vuelve a necesitarlo, siempre con fecha de caducidad.
  * - `apps/web/index.html` queda fuera del escaneo por construcción (no está en `apps/web/src`): pinta
  *   el negro de fondo antes de que cargue ningún CSS, así que no puede usar variables.
  * - Una línea concreta: comentario `lint-tokens-allow: <motivo>` en esa línea o en la anterior. Sin
@@ -115,32 +114,15 @@ export const FORBIDDEN_COMPONENTS = ['GlassSurface', 'MarqueeBand', 'AmbientOrbs
 const FORBIDDEN_FONT = /montserrat|jetbrains[\s_-]?mono/i
 
 /**
- * Excepciones temporales de la tarea 0.22 (cambio a la dirección «Arena», guía v0.6): ficheros que
- * existían antes y que aún usan tokens retirados, radios, trazos o piezas prohibidas. **No se añaden
- * ficheros nuevos**: cada entrada desaparece cuando su pieza se rehace (0.23 marco de juego, 0.25
- * componentes, 0.26 páginas interiores) o se retira (0.27, que deja la lista vacía). El test
- * «ninguna excepción temporal sobra» falla si una entrada ya no tiene la infracción que excusa.
+ * Excepciones temporales: ficheros que, durante un cambio de dirección, aún usan tokens retirados,
+ * radios, trazos o piezas prohibidas. Las de la dirección «Arena» (0.22) se vaciaron en la 0.27: la lista
+ * queda vacía. El test «ninguna excepción temporal sobra» falla si una entrada ya no tiene la infracción
+ * que excusa, así que la lista solo puede encoger.
  *
  * `rules` son las reglas que se excusan en ese fichero; las demás se siguen aplicando.
  * @type {ReadonlyArray<{ file: string, rules: readonly string[], reason: string }>}
  */
-export const TEMPORARY_EXCEPTIONS = [
-  {
-    file: 'apps/web/src/ui/GlassSurface/GlassSurface.css',
-    rules: ['token-unknown'],
-    reason: 'Cristal del sello (pieza prohibida, §3.1): la 0.27 lo borra.',
-  },
-  {
-    file: 'apps/web/src/ui/GlassSurface/GlassSurface.tsx',
-    rules: ['forbidden-component'],
-    reason: 'Cristal del sello (pieza prohibida, §3.1): la 0.27 lo borra.',
-  },
-  {
-    file: 'apps/web/src/ui/GlassSurface/index.ts',
-    rules: ['forbidden-component'],
-    reason: 'Cristal del sello (pieza prohibida, §3.1): la 0.27 lo borra.',
-  },
-]
+export const TEMPORARY_EXCEPTIONS = []
 
 const ALLOW_DIRECTIVE = /lint-tokens-allow:?(.*?)(?:\*\/|$)/
 
@@ -1062,7 +1044,7 @@ async function main() {
   if (deferred.length > 0) {
     const pending = new Set(deferred.map((v) => v.file)).size
     console.log(
-      `lint:tokens — ${deferred.length} infracción(es) excusada(s) en ${pending} fichero(s) de la lista de excepciones temporales (la vacía la 0.27).`,
+      `lint:tokens — ${deferred.length} infracción(es) excusada(s) en ${pending} fichero(s) de la lista de excepciones temporales.`,
     )
   }
   if (violations.length > 0) {

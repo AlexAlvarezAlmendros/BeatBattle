@@ -1,11 +1,11 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
-import { expectVisibleFocus, open, openGallery } from './support'
+import { expectCursor, expectVisibleFocus, open, openGallery } from './support'
 
 /**
- * Recorrido solo con teclado (`RNF-A11Y-01`, guía §2.17): «Saltar al contenido» es lo primero, el foco
- * se ve (anillo rojo de 2 px y halo) en la isla y en los botones, y el menú móvil es un diálogo que
- * atrapa el foco y lo devuelve al cerrarse. Los recorridos de registro, Modo Jurado y subida llegan
- * con sus fases.
+ * Recorridos con teclado (`RNF-A11Y-01`, `RD-VIS-02` d y `RD-MOT-05`; guía §2.17, §3.3 y §3.10):
+ * «Saltar al contenido» es lo primero; las pantallas son menús de juego que se recorren con flechas,
+ * Intro y Esc, con una sola parada de tabulación por grupo y el foco visto como el cursor de juego; lo
+ * demás lleva el foco genérico (contorno blanco con halo rojo).
  */
 
 /** Pulsa Tab hasta que el foco llegue a `target` (como mucho `max` veces) y devuelve cuántas hicieron falta. */
@@ -17,6 +17,9 @@ async function tabTo(page: Page, target: Locator, max = 40): Promise<number> {
   throw new Error(`El foco no llegó al elemento tras ${max} pulsaciones de Tab`)
 }
 
+const menu = (page: Page) => page.getByRole('main').getByRole('menu', { name: 'Elige modo' })
+const plate = (page: Page, name: string) => menu(page).getByRole('menuitem', { name: new RegExp(`^${name}`) })
+
 test('RNF-A11Y-01: el primer Tab enseña «Saltar al contenido» y Intro lleva el foco al <main>', async ({
   page,
 }) => {
@@ -24,210 +27,165 @@ test('RNF-A11Y-01: el primer Tab enseña «Saltar al contenido» y Intro lleva e
   await page.keyboard.press('Tab')
   const skip = page.getByRole('link', { name: 'Saltar al contenido' })
   await expectVisibleFocus(skip)
-  // Fuera de pantalla sin foco; con foco, a la vista y con su tamaño real.
   await expect(skip).toBeInViewport()
-  const box = await skip.boundingBox()
-  expect(box?.width).toBeGreaterThan(40)
-
   await page.keyboard.press('Enter')
   await expect(page.getByRole('main')).toBeFocused()
-  // El siguiente Tab ya es el contenido (el primer botón del hero), no la isla.
-  await page.keyboard.press('Tab')
-  await expect(page.getByRole('main').getByRole('link', { name: 'Avísame del próximo drop' })).toBeFocused()
 })
 
-test('RNF-A11Y-01: foco visible en la isla, que se recorre en orden y navega con Intro', async ({ page }) => {
+test('RD-VIS-02 d / RD-MOT-05: el menú principal se recorre como un menú de juego (una parada, flechas en bucle, Intro y Esc)', async ({
+  page,
+}) => {
   await open(page, '/', 'Beat Battle')
-  const island = page.getByRole('banner')
-  const nav = island.getByRole('navigation', { name: 'Principal' })
+  // Al entrar, el cursor está en la primera opción disponible (Jugar está deshabilitado: Jurado), sin
+  // robar el foco.
+  await expect(plate(page, 'Jurado')).toHaveAttribute('data-cursor-active', 'true')
+  await expect(page.locator('body')).toBeFocused()
 
-  // Orden: saltar al contenido → logo del sello → enlaces de la isla → «Entrar».
-  const logo = island.getByRole('link', { name: /Other People Records/ })
-  expect(await tabTo(page, logo)).toBe(2)
-  await expectVisibleFocus(logo)
+  // Con el foco en ningún control, las flechas van al menú.
+  await page.keyboard.press('ArrowDown')
+  await expectCursor(plate(page, 'Resultados'))
+  await page.keyboard.press('ArrowUp')
+  await page.keyboard.press('ArrowUp')
+  await expectCursor(plate(page, 'Jugar'))
+  // En bucle, Fin e Inicio.
+  await page.keyboard.press('ArrowUp')
+  await expectCursor(plate(page, 'Ajustes'))
+  await page.keyboard.press('Home')
+  await expectCursor(plate(page, 'Jugar'))
+  await page.keyboard.press('End')
+  await expectCursor(plate(page, 'Ajustes'))
+  // El panel de ayuda describe la opción del cursor.
+  await expect(page.getByRole('navigation').locator('[aria-live="polite"]')).toContainText(
+    'Sonido, movimiento',
+  )
 
-  const order = ['Semana', 'Jurado', 'Resultados', 'Salón de la fama', 'Cómo funciona']
-  for (const name of order) {
-    await page.keyboard.press('Tab')
-    await expectVisibleFocus(nav.getByRole('link', { name, exact: true }))
-  }
+  // Una sola parada de tabulación: Tab sale del menú.
+  const items = menu(page).getByRole('menuitem')
+  await expect(items.and(page.locator('[tabindex="0"]'))).toHaveCount(1)
   await page.keyboard.press('Tab')
-  await expectVisibleFocus(island.getByRole('link', { name: 'Entrar', exact: true }))
+  await expect(items.and(page.locator(':focus'))).toHaveCount(0)
 
-  // Intro sobre un enlace de la isla navega y deja el foco en el contenido nuevo.
+  // Letra inicial: «C» salta a «Cómo se juega»; Intro entra.
   await page.keyboard.press('Shift+Tab')
-  await expect(nav.getByRole('link', { name: 'Cómo funciona', exact: true })).toBeFocused()
+  await expectCursor(plate(page, 'Ajustes'))
+  await page.keyboard.press('c')
+  await expectCursor(plate(page, 'Cómo se juega'))
   await page.keyboard.press('Enter')
   await expect(page).toHaveURL('/como-funciona')
   await expect(page.getByRole('main')).toBeFocused()
+
+  // Esc vuelve al menú.
+  await page.keyboard.press('Escape')
+  await expect(page).toHaveURL('/')
+  await expect(menu(page)).toBeVisible()
 })
 
-test('RNF-A11Y-01: foco visible en un botón (pausa del teletipo), que se acciona con Espacio e Intro', async ({
+test('RD-VIS-02 d / RD-MOT-05: una opción deshabilitada se recorre pero no entra', async ({ page }) => {
+  await open(page, '/', 'Beat Battle')
+  await page.keyboard.press('Home')
+  const play = plate(page, 'Jugar')
+  await expectCursor(play)
+  await expect(play).toHaveAttribute('aria-disabled', 'true')
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL('/')
+})
+
+test('RD-VIS-02 d: una pantalla interior se recorre con teclado y enseña sus teclas; Esc y «Volver al menú» vuelven', async ({
+  page,
+}) => {
+  await open(page, '/ajustes/cuenta', 'Cuenta')
+  const keys = page.getByRole('contentinfo').getByRole('list', { name: 'Controles' })
+  await expect(keys.getByRole('listitem')).toHaveText([/Q\s*E\s*Sección/i, /Esc\s*Volver/i, /M\s*Sonido/i])
+
+  // Q/E cambian de sección (Opciones, §3.8.14).
+  await page.keyboard.press('e')
+  await expect(page).toHaveURL('/ajustes/perfil')
+  await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toHaveText('Perfil')
+  await page.keyboard.press('q')
+  await expect(page).toHaveURL('/ajustes/cuenta')
+
+  // Tab llega a las pestañas (cursor de juego) y a «Volver al menú» (cursor del botón), que vuelve.
+  const tab = page
+    .getByRole('navigation', { name: 'Secciones de ajustes' })
+    .getByRole('link', { name: 'Cuenta' })
+  await tabTo(page, tab)
+  await expectCursor(tab)
+  const back = page.getByRole('main').getByRole('link', { name: /Volver al menú/ })
+  await tabTo(page, back)
+  await expectCursor(back)
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL('/')
+
+  // Y Esc, desde cualquier pantalla interior.
+  await open(page, '/salon-de-la-fama', 'Salón de la fama')
+  await page.keyboard.press('Escape')
+  await expect(page).toHaveURL('/')
+})
+
+test('RNF-A11Y-01: foco genérico visible en los enlaces del marco (la firma del sello y «Legal»)', async ({
+  page,
+}) => {
+  await open(page, '/como-funciona', 'Cómo se juega')
+  const signature = page
+    .getByRole('contentinfo')
+    .getByRole('link', { name: /Un juego de Other People Records/ })
+  await tabTo(page, signature)
+  await expectVisibleFocus(signature)
+  await page.keyboard.press('Tab')
+  await expectVisibleFocus(page.getByRole('contentinfo').getByRole('link', { name: 'Legal' }))
+})
+
+test('RD-SND-06: M enciende y apaga el sonido desde cualquier pantalla, también con el foco en el menú', async ({
   page,
 }) => {
   await open(page, '/', 'Beat Battle')
-  const pause = page.getByRole('button', { name: 'Pausar el teletipo' })
-  await tabTo(page, pause)
-  await expectVisibleFocus(pause)
-  await expect(pause).toHaveAttribute('aria-pressed', 'false')
-  await page.keyboard.press('Space')
-  await expect(pause).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.getByRole('marquee')).toHaveAttribute('data-paused', 'true')
-  await page.keyboard.press('Enter')
-  await expect(pause).toHaveAttribute('aria-pressed', 'false')
-  await expectVisibleFocus(pause)
+  const sound = page.getByRole('banner').getByRole('button', { name: 'Sonido de efectos (M)' })
+  await expect(sound).toHaveAttribute('aria-pressed', 'true')
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('m')
+  await expect(sound).toHaveAttribute('aria-pressed', 'false')
+  await page.keyboard.press('m')
+  await expect(sound).toHaveAttribute('aria-pressed', 'true')
 })
 
-test('RNF-A11Y-01: foco visible en el botón base de §3.3 (galería), que lo conserva mientras carga', async ({
+test('RD-MOT-05: la rejilla y las pestañas de la galería tienen una parada y se recorren con flechas y Q/E', async ({
   page,
 }) => {
   await openGallery(page)
-  const block = page.locator('section#boton')
-  // Los interruptores de la cabecera también son botones con el anillo del sistema.
-  const motionSwitch = page.getByRole('switch', { name: /Reducir movimiento/ })
-  await tabTo(page, motionSwitch)
-  await expectVisibleFocus(motionSwitch)
+  const grid = page.getByRole('listbox', { name: 'Entradas de muestra' })
+  const cells = grid.getByRole('option')
+  await cells.first().focus()
+  await expectCursor(cells.first())
+  await page.keyboard.press('ArrowDown')
+  await expectCursor(cells.nth(4))
+  await page.keyboard.press('ArrowLeft')
+  await expectCursor(cells.nth(3))
+  await expect(cells.and(page.locator('[tabindex="0"]'))).toHaveCount(1)
 
-  // El botón interactivo va justo después del enlace «Ver semanas»: se llega a él con Tab desde ahí.
-  await block.getByRole('link', { name: 'Ver semanas' }).focus()
-  await page.keyboard.press('Tab')
-  // Celda «Interactivo»: el nombre del botón cambia con su estado, la celda no.
-  const live = block.getByRole('figure').filter({ hasText: 'Interactivo' }).getByRole('button')
-  await expect(live).toHaveAccessibleName('Subir mi beat')
-  await expectVisibleFocus(live)
-
-  // Intro lo acciona: mientras carga sigue enfocado (no se deshabilita) y al terminar dice «Subido».
-  await page.keyboard.press('Enter')
-  await expect(live).toHaveAttribute('aria-busy', 'true')
-  await expect(live).toBeFocused()
-  await expect(live).toHaveAccessibleName(/^Subido/)
-  await expectVisibleFocus(live)
+  const tablist = page.locator('section#pestanas').getByRole('tablist').first()
+  const tabs = tablist.getByRole('tab')
+  await tabs.first().focus()
+  await page.keyboard.press('ArrowRight')
+  await expectCursor(tabs.nth(1))
+  await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true')
 })
 
-const scrollY = (page: Page) => page.evaluate(() => Math.round(window.scrollY))
-
-/**
- * Desde el último enlace del pie, Tab vuelve a empezar por arriba: «Saltar al contenido» y la isla. La
- * isla es sticky y siempre está a la vista, así que enfocarla no debe mover la página (antes, con
- * `scroll-padding-top` en `html`, cada Tab la subía media ventana).
- */
-async function tabThroughIslandFromFooter(page: Page, last: Locator, max = 12): Promise<string[]> {
-  await page.getByRole('contentinfo').getByRole('link').last().focus()
-  const start = await scrollY(page)
-  expect(start).toBeGreaterThan(200)
-  const visited: string[] = []
-  while (!(await last.evaluate((element) => element === document.activeElement))) {
-    expect(visited.length, `el foco no llegó tras ${visited.join(' → ')}`).toBeLessThan(max)
-    await page.keyboard.press('Tab')
-    visited.push(
-      await page.evaluate(() => {
-        const active = document.activeElement
-        return active && active !== document.body
-          ? active.textContent?.trim() || active.tagName
-          : '(documento)'
-      }),
-    )
-    expect(await scrollY(page), `tras enfocar ${visited.join(' → ')}`).toBe(start)
-  }
-  return visited
-}
-
-test('RNF-A11Y-01: recorrer la isla con Tab desde el pie no desplaza la página', async ({ page }) => {
-  await open(page, '/', 'Beat Battle')
-  const visited = await tabThroughIslandFromFooter(
-    page,
-    page.getByRole('banner').getByRole('link', { name: 'Entrar', exact: true }),
-  )
-  // Pasa por «Saltar al contenido» y los enlaces de la isla antes de «Entrar».
-  expect(visited).toEqual(
-    expect.arrayContaining(['Saltar al contenido', 'Semana', 'Jurado', 'Cómo funciona']),
-  )
-  // Mayús+Tab de vuelta por la isla tampoco la mueve.
-  const start = await scrollY(page)
-  for (let step = 0; step < 6; step++) {
-    await page.keyboard.press('Shift+Tab')
-    expect(await scrollY(page)).toBe(start)
-  }
-})
-
-test('RNF-A11Y-01: un control del contenido enfocado bajo el logo que cuelga de la isla se desplaza hasta verse entero', async ({
+test('RNF-A11Y-01: la ventana de juego atrapa el foco, Esc la cierra y el foco vuelve al botón', async ({
   page,
 }) => {
-  await open(page, '/como-funciona', 'Cómo funciona')
-  await page.getByRole('contentinfo').scrollIntoViewIfNeeded()
-  const link = page.getByRole('main').getByRole('link', { name: 'Bases de la competición' })
-  // Deja el enlace a y ≈ 100: por debajo de la isla (85 px) pero bajo el logo (hasta y = 119).
-  await link.evaluate((element) => window.scrollBy(0, element.getBoundingClientRect().top - 100))
-  expect(Math.round((await link.boundingBox())?.y ?? 0)).toBe(100)
-  await link.focus()
-  const box = await link.boundingBox()
-  // Con su anillo (2 + 2 px) por debajo del logo, y lo que hay en su centro es el propio enlace.
-  expect(box?.y ?? 0).toBeGreaterThanOrEqual(123)
-  const hit = await link.evaluate((element) => {
-    const rect = element.getBoundingClientRect()
-    const atCenter = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
-    return atCenter === element || element.contains(atCenter)
-  })
-  expect(hit).toBe(true)
-})
-
-test.describe('móvil (390 × 844)', () => {
-  test.use({ viewport: { width: 390, height: 844 } })
-
-  test('RNF-A11Y-01: el menú móvil se abre con teclado, atrapa el foco y lo devuelve al cerrarse con Esc', async ({
-    page,
-  }) => {
-    await open(page, '/', 'Beat Battle')
-    const toggle = page.getByRole('banner').getByRole('button', { name: 'Menú' })
-    await tabTo(page, toggle)
-    await expectVisibleFocus(toggle)
-
-    await page.keyboard.press('Enter')
-    const dialog = page.getByRole('dialog', { name: 'Menú' })
-    await expect(dialog).toBeVisible()
-    const close = dialog.getByRole('button', { name: 'Cerrar el menú' })
-    await expect(close).toBeFocused()
-
-    // Tab no sale del diálogo: desde el primero, Mayús+Tab va al último («Entrar») y Tab vuelve al primero.
-    await page.keyboard.press('Shift+Tab')
-    const signIn = dialog.getByRole('link', { name: 'Entrar', exact: true })
-    await expectVisibleFocus(signIn)
+  await openGallery(page)
+  const trigger = page.getByRole('button', { name: 'Abrir ventana' })
+  await trigger.click()
+  const dialog = page.getByRole('dialog', { name: '¿Salir del Modo Jurado?' })
+  await expect(dialog).toBeVisible()
+  await expect(dialog).toBeFocused()
+  for (let step = 0; step < 6; step++) {
     await page.keyboard.press('Tab')
-    await expectVisibleFocus(close)
-
-    // Un enlace del panel con su anillo (el del menú lleva su propio estilo de foco).
-    await page.keyboard.press('Tab')
-    await expect(dialog.getByRole('link', { name: 'Semana' })).toBeFocused()
-
-    await page.keyboard.press('Escape')
-    await expect(dialog).toBeHidden()
-    await expectVisibleFocus(toggle)
-  })
-
-  test('RNF-A11Y-01: enfocar el botón «Menú» desde el pie no desplaza la página', async ({ page }) => {
-    await open(page, '/como-funciona', 'Cómo funciona')
-    const visited = await tabThroughIslandFromFooter(
-      page,
-      page.getByRole('banner').getByRole('button', { name: 'Menú' }),
-    )
-    expect(visited).toContain('Saltar al contenido')
-  })
-
-  test('RNF-A11Y-01: un enlace enfocado bajo el logo centrado se desplaza hasta verse entero', async ({
-    page,
-  }) => {
-    await open(page, '/como-funciona', 'Cómo funciona')
-    await page.getByRole('contentinfo').scrollIntoViewIfNeeded()
-    const link = page.getByRole('main').getByRole('link', { name: 'Bases de la competición' })
-    // A y ≈ 80: por debajo de la isla (70 px) pero bajo el logo (hasta y = 117).
-    await link.evaluate((element) => window.scrollBy(0, element.getBoundingClientRect().top - 80))
-    await link.focus()
-    expect((await link.boundingBox())?.y ?? 0).toBeGreaterThanOrEqual(121)
-    const hit = await link.evaluate((element) => {
-      const rect = element.getBoundingClientRect()
-      const atCenter = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
-      return atCenter === element || element.contains(atCenter)
-    })
-    expect(hit).toBe(true)
-  })
+    expect(await dialog.evaluate((element) => element.contains(document.activeElement))).toBe(true)
+  }
+  await page.keyboard.press('Escape')
+  await expect(dialog).toBeHidden()
+  await expect(trigger).toBeFocused()
+  // Esc en la ventana no saca de la pantalla.
+  await expect(page).toHaveURL(/\/dev\/galeria/)
 })

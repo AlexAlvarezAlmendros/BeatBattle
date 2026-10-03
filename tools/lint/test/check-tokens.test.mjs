@@ -350,6 +350,10 @@ describe('RD-VIS-02 c: piezas prohibidas del sello', () => {
 })
 
 describe('RD-VIS-01: excepciones temporales de la arena (0.22 → 0.27)', () => {
+  it('RD-VIS-02 c: desde la 0.27 la lista está vacía (lo copiado del sello ya no está)', () => {
+    assert.deepEqual(TEMPORARY_EXCEPTIONS, [])
+  })
+
   it('cada entrada existe, tiene motivo y solo excusa reglas del lint', () => {
     const rules = new Set([
       'color-hex',
@@ -389,15 +393,13 @@ describe('RD-VIS-01: excepciones temporales de la arena (0.22 → 0.27)', () => 
     }
   })
 
-  it('las piezas prohibidas que siguen en el repo fallan de verdad (solo las excusa la lista)', async () => {
+  it('RD-VIS-02 c: en el repo real no queda ninguna pieza ni fuente prohibida', async () => {
     const { all } = await checkTokens({ root: DEFAULT_ROOT })
-    const forbidden = all.filter((v) => v.rule === 'forbidden-component')
-    assert.ok(
-      forbidden.length > 0,
-      'la regla no encuentra GlassSurface, MarqueeBand, AmbientOrbs ni SiteHeader',
+    const forbidden = all.filter((v) => v.rule === 'forbidden-component' || v.rule === 'forbidden-font')
+    assert.deepEqual(
+      forbidden.map((v) => `${v.file}:${v.line} ${v.match}`),
+      [],
     )
-    const { failing } = applyTemporaryExceptions(forbidden, [])
-    assert.equal(failing.length, forbidden.length)
   })
 
   it('applyTemporaryExceptions solo excusa la regla y el fichero de la entrada', () => {

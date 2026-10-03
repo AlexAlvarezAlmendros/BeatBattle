@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 import { collectErrors, open, openGallery, WCAG_22_AA } from './support'
 
 /**
- * Zona de avisos del marco (§3.3, `RNF-A11Y-07`): una sola, montada en `RootLayout`, con las dos
+ * Zona de avisos del marco (§3.3, `RNF-A11Y-07`): una sola, montada en el marco de juego, con las dos
  * regiones vivas desde la primera pintura y la parte animada en diferido.
  */
 
@@ -31,7 +31,7 @@ test('RNF-A11Y-07: los avisos de la galería salen en la zona del marco, cada un
   const assertive = zone.locator('[aria-live="assertive"]')
   await expect(polite.getByRole('listitem')).toHaveText(/Beat subido/)
   await expect(assertive.getByRole('listitem')).toHaveText(/Se ha cortado la subida/)
-  // El tono, con palabras (nunca solo el color).
+  // El tono, con palabras (nunca solo el color); el error, de papel.
   await expect(assertive.getByRole('img', { name: 'Error' })).toBeVisible()
 
   // Con el foco dentro, el aviso no se cierra solo (WCAG 2.2.1): da tiempo a pasar axe por la zona.

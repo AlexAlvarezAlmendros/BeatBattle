@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.2 · 2026-10-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.3 · 2026-10-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -896,6 +896,7 @@ Objetivo **WCAG 2.2 AA** con extras propios de un juego:
 | `/admin/*` | Administración | Admin |
 | `/legal/{bases,terminos,privacidad,cookies}` | Legal | Público |
 | `*` | 404 «BONUS STAGE» con beat pad (§3.8.11) | Público |
+| `/dev/galeria`, `/dev/menu` | Solo en desarrollo (no existen en la build de producción): la galería de componentes (`RD-VIS-03`) y el menú principal con los datos de muestra de las maquetas aprobadas, para compararlo con ellas (`?estado=abierta\|votacion\|vacio`, `?visitante`, `?subida`) | Desarrollo |
 
 ### 2.19 Estados vacíos, errores y casos límite
 
@@ -1148,7 +1149,10 @@ opción enfocada y, si el foco sale de su grupo, en la opción elegida, para que
 desaparezca. API común (tarea 0.22): `[data-cursor]` en la pieza enfocable, `[data-cursor-group]` en el
 grupo, `[data-cursor-active]` en la elegida y el componente `Cursor` dentro de la pieza; los hooks
 `useRovingMenu`, `useRovingGrid` y `useRovingTabs` ponen los roles ARIA y esos atributos. Las teclas que
-consume un menú llegan a los manejadores globales con `defaultPrevented`, y estos las ignoran.
+consume un menú llegan a los manejadores globales con `defaultPrevented`, y estos las ignoran. Con
+**mando** (Gamepad API, mapeo estándar), la cruceta y la palanca izquierda son las flechas, A acepta (el
+clic sobre lo enfocado), B es Esc y LB/RB son Q/E: el mando no tiene lógica propia, se traduce a esas
+teclas. En táctil, las teclas que enseñan los botones y la barra de controles desaparecen.
 
 | Componente | Anatomía y comportamiento |
 |---|---|
@@ -1315,8 +1319,8 @@ del sello). Concentra en un contexto el fondo, las vistas 3D y las partículas.
 | Apagada | Sin WebGL: el **fondo estático pregenerado** (trama + diagonal + rayos) como imagen por *breakpoint* y DPR, piezas en SVG y CSS. Automática con `prefers-reduced-motion`, sin WebGL o con ahorro de datos |
 
 La identidad no depende del Escenario: con calidad Apagada la pantalla se ve igual, quieta. El render
-se pausa con la pestaña oculta. El LCP nunca es el canvas ni el logo (que es SVG de contornos): es un
-texto (el título del escenario de la semana en la home) y sale con la primera pintura (`RNF-PERF-02`).
+se pausa con la pestaña oculta. El LCP nunca es el canvas ni el logo (que se pinta en un canvas 2D, sin
+`<text>` que pueda contar como candidato): es un texto (el título del escenario de la semana en la home) y sale con la primera pintura (`RNF-PERF-02`).
 
 ### 3.6 Movimiento
 
@@ -1490,8 +1494,10 @@ VOLVER · M SONIDO`, la firma y «Inserta tu beat · Crédito 01» (o «Crédito
 fundido: «NUEVA ENTRADA: TIGRE PÚRPURA», «QUEDAN 2 DÍAS», «340 VOTOS ESTA SEMANA». En voto ciego nunca
 dice quién ha subido.
 
-Al entrar, el cursor está en la primera opción disponible (Jugar; si ya subiste, Jurado). Teclado:
-`role="menu"`, ↑↓ en bucle, Inicio/Fin, Intro, letra inicial; el ratón mueve el cursor al pasar.
+Al entrar, el cursor está en la primera opción disponible (Jugar; si ya subiste, Jurado), sin robar el
+foco: el primer Tab sigue siendo «Saltar al contenido»; con el foco en ningún control, las flechas e
+Intro van al menú. Teclado: `role="menu"`, ↑↓ en bucle, Inicio/Fin, Intro, letra inicial; el ratón
+mueve el cursor al pasar.
 
 **Móvil (390×844)**: mismo HTML apilado sin desplazamiento: HUD en una fila, logo a todo el ancho con el
 lockup, tarjeta de la semana compacta (título, cuatro chips, play y reloj con la barra de la semana) y
@@ -1624,7 +1630,9 @@ blanco) y los **logros** (no conseguidos en silueta, ocultos como «???», cada 
 
 «Te has perdido… pero ya que estás.» Un pad de 4×4 en teclas de chaflán (1 2 3 4 / Q W E R / A S D F
 / Z X C V): la fila de arriba son los *chops* del sample de la semana y el resto, batería sintetizada.
-Metrónomo opcional, grabación de 4 compases y logro oculto al grabar. Botón «Volver al menú [Esc]».
+Metrónomo opcional, grabación de 4 compases y logro oculto al grabar. Botón «Volver al menú [Esc]». Hasta
+que llega el pad (Fase 8), la pantalla enseña su forma, quieta y decorativa, con la placa «ERROR 404 ·
+BONUS STAGE» en el HUD.
 
 #### 3.8.12 Emails
 
@@ -1727,7 +1735,7 @@ modo serio: se pierde espectáculo, nunca información ni función (`RNF-A11Y-03
 | Id | Requisito de diseño | Aceptación |
 |---|---|---|
 | `RD-VIS-01` | Ningún color, chaflán, inclinación, trazo, sombra, duración o curva literal fuera de los tokens. Única excepción: los tiempos internos de las ceremonias, que son datos de su línea de tiempo (§3.6, «Duraciones») | `pnpm lint:tokens`: colores, duraciones, curvas y sombras por token; radios solo `0` y `50%`; longitudes de `clip-path: polygon()` (chaflanes), ángulos de `rotate()`/`skew()` (inclinaciones, salvo 0 y cuartos de vuelta) y anchos de borde, contorno y trazo, por token; ninguna `var(--bb-…)` que no declare `tokens.css` |
-| `RD-VIS-02` | **Prueba de marca y de juego.** Cada pantalla: (a) usa solo la paleta del sello y sus derivados de §3.2; (b) lleva la firma *OTP.* visible (barra de controles, lockup o placa); (c) no contiene ninguna pieza de la lista «Lo que nunca se imita» (§3.1); (d) se recorre entera con teclado como un menú de juego (foco = cursor, flechas, Intro, Esc) y enseña sus teclas; (e) la aprueba un jurado visual de tres lentes (marca, juego, accesibilidad) | (a) test de capturas (Chrome con `--disable-lcd-text`, sin imágenes de usuario): como el granate es casi 0,25 · rojo + 0,05 · blanco, toda la paleta vive en el plano negro–rojo–blanco; ≤ 0,1 % de píxeles fuera de ese triángulo (tolerancia 8/255 y 0,03 en los pesos), y ≥ 60 % de píxeles con luminancia relativa < 0,06; (b) E2E: `[data-otp-signature]` visible en cada ruta; (c) lint de componentes prohibidos (`GlassSurface`, `MarqueeBand`, `AmbientOrbs`, `SiteHeader` de isla, Montserrat y JetBrains Mono) dentro de `pnpm lint:tokens` —hasta la 0.27, los ficheros viejos que aún las usan están en una lista de excepciones temporales que solo puede encoger— y revisión de capturas; (d) E2E de teclado por pantalla; (e) acta del jurado en `docs/planning/evidence/` en cada fase con UI |
+| `RD-VIS-02` | **Prueba de marca y de juego.** Cada pantalla: (a) usa solo la paleta del sello y sus derivados de §3.2; (b) lleva la firma *OTP.* visible (barra de controles, lockup o placa); (c) no contiene ninguna pieza de la lista «Lo que nunca se imita» (§3.1); (d) se recorre entera con teclado como un menú de juego (foco = cursor, flechas, Intro, Esc) y enseña sus teclas; (e) la aprueba un jurado visual de tres lentes (marca, juego, accesibilidad) | (a) test de capturas (Chrome con `--disable-lcd-text`, sin imágenes de usuario): como el granate es casi 0,25 · rojo + 0,05 · blanco, toda la paleta vive en el plano negro–rojo–blanco; ≤ 0,1 % de píxeles fuera de ese triángulo (tolerancia 8/255 y 0,03 en los pesos), y ≥ 60 % de píxeles con luminancia relativa < 0,06; (b) E2E: `[data-otp-signature]` visible en cada ruta; (c) lint de componentes prohibidos (`GlassSurface`, `MarqueeBand`, `AmbientOrbs`, `SiteHeader` de isla, Montserrat y JetBrains Mono) dentro de `pnpm lint:tokens` —la lista de excepciones temporales del cambio de dirección quedó vacía en la 0.27— y revisión de capturas; (d) E2E de teclado por pantalla; (e) acta del jurado en `docs/planning/evidence/` en cada fase con UI |
 | `RD-VIS-03` | Galería de componentes con todos los estados de §3.3, con y sin movimiento y en modo serio | `/dev/galeria` + E2E de la galería |
 | `RD-VIS-04` | Integridad de las portadas: misma tinta y misma luminancia, pintadas por CPU (§3.4.5) | Test en el Chrome del sistema con la GPU real (las opciones de `tools/shot`) y el contexto 2D de §3.4.5: 48 semillas, proporción de rojo y luminancia media a ±5 % de la media; revisión manual de 200 semillas al cambiar el generador |
 | `RD-VIS-05` | Texto legible: nunca sobre trama, rayos ni líneas de barrido; mínimo 12 px y escalable | Test de capturas con máscara de zonas de texto + test de tamaño mínimo de fuente en cada ruta |
@@ -3095,6 +3103,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-03 | 0.6.3 | Marco de juego, menú principal, componentes y pantallas interiores de la arena (tareas 0.23–0.27). **Mando** (§3.3): la Gamepad API se traduce a las teclas de los menús (cruceta y palanca = flechas, A = aceptar, B = Esc, LB/RB = Q/E); en táctil se ocultan las teclas de los botones. **Menú principal** (§3.8.3): el cursor empieza en la primera opción disponible sin robar el foco, y las flechas e Intro van al menú si el foco no está en ningún control. **404** (§3.8.11): mientras llega el pad, su forma quieta con la placa «ERROR 404 · BONUS STAGE». **Rutas de desarrollo** (§2.18): `/dev/galeria` y `/dev/menu` (el menú con los datos de las maquetas). **`RD-VIS-02` c** (§3.10): la lista de excepciones temporales del lint quedó vacía en la 0.27. **Logo** (§3.5): se pinta en un canvas 2D (el `logo()` de las maquetas con la API del canvas); en SVG, su `<text>` era el LCP de la home y rompía `RNF-PERF-02`. |
 | 2026-10-03 | 0.6.2 | Base de la arena (tarea 0.22). **Tokens** (§3.2): los derivados que hacían falta para que todo salga de tokens (interlineados, interletrajes, pesos y anchuras del display; `--bb-target`, `--bb-controls-h`; trazos `--bb-stroke-hair` y de la diagonal; `--bb-tilt-stamp`; logo; parámetros y tintas de las texturas `--bb-tex-*`; `--bb-wave-halo`; `--bb-loop-loader` y `--bb-loop-chronicle`; `--bb-z-controls`), el corte de móvil a 720 px y `--bb-fx` para el modo serio (§3.6). **Cursor** (§3.3): marco cerrado que sigue también los chaflanes (las maquetas dejaban abiertas las esquinas recortadas) y visible en la opción elegida cuando el foco sale del grupo; API por atributos y hooks de foco itinerante. **Marco**: variables `--frame-*` y atributos `data-frame`. **Pegatina OTP**: 120 × 82 px a 1×, en otra pestaña y con el nombre accesible que lo dice. **`RD-VIS-01`/`RD-VIS-02` (c)**: aceptación con las reglas nuevas del lint (radios, chaflanes, inclinaciones, trazos, tokens desconocidos y piezas prohibidas, con JetBrains Mono) y la lista de excepciones temporales hasta la 0.27. |
 | 2026-10-03 | 0.6.1 | Correcciones de la integración de la v0.6, tras revisarla contra el texto aprobado de §3. **Desviaciones del texto aprobado que se registran**: §3.4.4 empieza uniendo los nombres «carta de productor» (§2.10) y «carta de luchador»; §3.4.5 fija el rasterizador de las portadas. **Portadas por CPU** (§3.4.5, `RD-VIS-04`): contexto 2D con `willReadFrequently: true`; medido en el Chrome del sistema con la GPU real, con el canvas por GPU la calibración no converge (peor desviación 7,0 % en rojo y 10,9 % en luminancia) y por CPU pasa (0,3 % y 0,7 %); la aceptación dice con qué se mide. **Coherencia con `RD-VIS-01`**: nuevo `--bb-cut-md` (10 px) y regla para llevar los chaflanes de las maquetas a la escala (§3.2, §3.3); nuevo `--bb-dur-swap` (1,2 s, cambio de entrada; §2.7, §3.6, §3.8.7); cursor de rejilla y sello de goma con tokens (Anexo E); los tiempos internos de las ceremonias son datos de su línea de tiempo, única excepción declarada. Display a 900 salvo botones y cinta del lockup, a 800 (§3.2). **Teclado**: en la selección, Q/E solo cambian el orden y la rejilla pagina con ↑↓ y RePág/AvPág (§3.8.13); en el Modo Jurado, ←/→ buscan en la onda y eligen nota en las estrellas (§2.7, §3.8.7). **Firma**: autenticación, admin y legales conservan la barra de controles con la firma y la ceremonia lleva la pegatina (§3.1, §3.4.1, §3.8.14), como piden `RF-OTP-01` y `RD-VIS-02`. Efectos `ann.listen`, `ann.complete`, `ann.newbeat` y `ann.week` para los rótulos de §3.9 que no tenían estampa (§3.7.3, Anexo D). El hallazgo de Montserrat deja de atribuirse a `RF-OTP-03` (§3.1). Restos de redacción: ticket del recibo sin modelo del sello (§2.12.1), «vinilo girando» (§2.19), temblores en el modo serio (§2.11) y referencia del logo (§3.1). |
 | 2026-10-03 | 0.6 | Nueva dirección de arte **Arena** (decisión del usuario): BeatBattle deja de copiar la web del sello y pasa a ser un menú de juego de lucha que solo hereda la paleta y el logo como firma. §3.1–3.6, §3.8–3.10 y Anexo E reescritos; tipografía Anybody + Chakra Petch + Oxanium; medallas en la paleta; portadas generativas con presupuesto de tinta y test ±5 %; Escenario «arena» en lugar del Silk; limitador de destellos; `RD-VIS-02` pasa a prueba de marca y de juego; nuevos `RD-VIS-04/05` y `RD-MOT-04/05`. Cambios colaterales en §1, §2, §4–7 y anexos: pilares «Familia del sello» y «Se juega como un juego» (§1.2), `RF-OTP-01` como firma en todas las pantallas (§2.16), foco = cursor de juego (`RNF-A11Y-01`), contraste según §3.2 (`RNF-A11Y-02`), LCP en el título del escenario (`RNF-PERF-02`), presupuesto de fuentes (§4.17), efectos `ui.move`, `ann.*` y `cer.tear` (§3.7.3, Anexo D), decisiones del dorado y del pase de la carta (§7) y maquetas aprobadas en `docs/planning/evidence/f0/arena/` (Anexo J). §3.8.12 integra el texto de la v0.5 con los cambios de la Arena; el acento del perfil queda dentro de la paleta (§2.3) y el formulario «Avísame del próximo drop» pasa a la tarjeta de la semana del menú (§2.12.3, §3.8.3). |

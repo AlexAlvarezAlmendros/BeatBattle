@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Hojas A/B de la «prueba del sello» (`tools/shot/ab.mjs`): sello a la izquierda, BeatBattle a la derecha.
+"""HERRAMIENTA HISTÓRICA (tarea 0.27): hojas A/B de la abandonada «prueba del sello» (`tools/shot/ab.mjs`).
+
+Sello a la izquierda, BeatBattle a la derecha.
 
 Uso: python3 tools/shot/ab_sheet.py <trabajos.json>
 

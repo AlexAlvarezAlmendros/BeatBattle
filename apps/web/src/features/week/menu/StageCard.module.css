@@ -207,7 +207,12 @@
   }
 
   .emptyTitle {
-    font-size: var(--bb-fs-lg);
+    font-size: var(--bb-fs-xl);
+  }
+
+  /* El aviso, en una línea: el título del escenario sigue siendo el texto principal (y el LCP). */
+  .alertText {
+    display: none;
   }
 
   .chips {

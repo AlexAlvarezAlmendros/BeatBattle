@@ -5,8 +5,9 @@ import { expect, type Page, test } from '@playwright/test'
  * `playwright.config.ts`), en el móvil y la red de §4.17: 4G lento (150 ms de RTT, 1,6 Mbit/s) y CPU ×4,
  * 412 × 823 a DPR 1,75. Es la comprobación de `RNF-PERF-02` hasta que llegue Lighthouse CI (Fase 10):
  *
- * - el LCP es el titular «BEAT / BATTLE» y se pinta con la primera pintura (sin la entrada escalonada
- *   con opacidad 0, que lo retrasaba ~650 ms), y
+ * - el LCP es un texto —el título del escenario de la semana, que con el calendario vacío es «El
+ *   próximo drop está en el horno»— y no el logo (SVG) ni un lienzo, y se pinta con la primera pintura
+ *   (§3.5), y
  * - el LCP queda por debajo de 2,5 s (mediana de tres cargas en frío).
  *
  * La CPU ×4 multiplica la de la máquina que corre el test: en local (la de referencia de las medidas del
@@ -49,11 +50,16 @@ async function coldLoad(page: Page): Promise<PaintTimes> {
     window.__bbLcp = []
     new PerformanceObserver((list) => {
       for (const entry of list.getEntries() as (PerformanceEntry & { element?: Element | null })[])
-        window.__bbLcp.push({ time: entry.startTime, element: entry.element?.className.toString() ?? '' })
+        window.__bbLcp.push({
+          time: entry.startTime,
+          element: entry.element ? `${entry.element.tagName} ${entry.element.className.toString()}` : '',
+        })
     }).observe({ type: 'largest-contentful-paint', buffered: true })
   })
   await page.goto('/', { waitUntil: 'load' })
-  await expect(page.getByRole('heading', { level: 1, name: 'Beat Battle' })).toBeVisible()
+  await expect(
+    page.getByRole('heading', { level: 2, name: 'El próximo drop está en el horno' }),
+  ).toBeVisible()
   // El LCP se da por cerrado con la primera interacción; hasta entonces, se espera a que asiente.
   await page.waitForTimeout(1_500)
   const times = await page.evaluate(() => ({
@@ -66,7 +72,7 @@ async function coldLoad(page: Page): Promise<PaintTimes> {
 
 test.use({ viewport: { width: 412, height: 823 }, deviceScaleFactor: 1.75, isMobile: true, hasTouch: true })
 
-test('RNF-PERF-02: LCP de la home < 2,5 s en 4G lento con CPU ×4, con el titular en la primera pintura', async ({
+test('RNF-PERF-02: LCP de la home < 2,5 s en 4G lento con CPU ×4; es un texto (el título del escenario) y sale con la primera pintura', async ({
   browser,
 }) => {
   test.setTimeout(120_000)
@@ -82,11 +88,14 @@ test('RNF-PERF-02: LCP de la home < 2,5 s en 4G lento con CPU ×4, con el titula
     samples.push(await coldLoad(await context.newPage()))
     await context.close()
   }
-  const summary = samples.map((s) => `FCP ${Math.round(s.fcp)} ms, LCP ${Math.round(s.lcp)} ms`).join(' | ')
+  const summary = samples
+    .map((s) => `FCP ${Math.round(s.fcp)} ms, LCP ${Math.round(s.lcp)} ms (${s.element})`)
+    .join(' | ')
   test.info().annotations.push({ type: 'LCP', description: summary })
 
   for (const sample of samples) {
-    expect(sample.element, summary).toContain('hero-title__line')
+    // Un texto: el título del escenario de la tarjeta de la semana (ni el logo, que se pinta en un canvas, ni otro lienzo).
+    expect(sample.element, summary).toMatch(/^H2 .*title/i)
     expect(sample.lcp - sample.fcp, summary).toBeLessThanOrEqual(LCP_AFTER_FCP_MAX_MS)
   }
   const median = samples.map((s) => s.lcp).sort((a, b) => a - b)[Math.floor(RUNS / 2)] ?? Number.NaN

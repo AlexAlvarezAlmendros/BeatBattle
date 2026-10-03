@@ -100,13 +100,13 @@ export function EntryRow({
           {to !== undefined ? (
             <Link
               to={to}
-              className={styles.titleLink}
+              className={cx(styles.titleText, styles.titleLink)}
               {...forceStateAttr(state === 'focusTitle' ? 'focus' : undefined)}
             >
               {title}
             </Link>
           ) : (
-            title
+            <span className={styles.titleText}>{title}</span>
           )}
         </TitleTag>
         {status === 'error' ? (

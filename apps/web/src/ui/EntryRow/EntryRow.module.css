@@ -75,14 +75,23 @@
   min-width: 0;
 }
 
+/*
+ * El título se corta con puntos suspensivos en el enlace, no en el encabezado: un ancestro que recorta
+ * taparía el anillo de foco del enlace (el propio `overflow` del enlace no recorta su contorno).
+ */
 .title {
-  overflow: hidden;
+  min-width: 0;
   color: var(--bb-white);
   font-size: var(--bb-fs-md);
   font-weight: var(--bb-weight-semibold);
   line-height: var(--bb-leading-label);
-  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.titleText {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .titleLink {

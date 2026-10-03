@@ -47,9 +47,10 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 0.21 está hecha: guía v0.6 (§3) y maquetas aprobadas en `docs/planning/evidence/f0/arena/`. La 0.22
 también (guía v0.6.2): fuentes, tokens, lint de tokens y piezas prohibidas, base global, primitivas
 (`Frame`, `Key`, `Tag`, `Cursor`, `OtpSlap`), foco itinerante, limitador de destellos, modo serio y galería
-por secciones. Siguen, en paralelo, el marco de juego (0.23) y los componentes (0.25); después, el menú
-principal, las páginas interiores y la retirada de lo copiado del sello, que vacía la lista de
-excepciones temporales del lint.
+por secciones. Del 0.23 al 0.27 también (guía v0.6.3): marco de juego, componentes con todos sus
+estados, menú principal como pantalla de título, pantallas interiores y retirada de lo copiado del sello
+(lista de excepciones del lint vacía, E2E de marca y de juego en verde). Queda la 0.28: jurado visual,
+revisión adversarial y README.
 La Fase 1 espera a que termine, porque su Escenario (1.1) dependía del Silk del sello.
 
 ## Grafo de dependencias
@@ -164,6 +165,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-03 | F0 | 0.22–0.27 hechas: base de la arena, marco de juego, componentes, menú principal, pantallas interiores y retirada de lo copiado del sello (guía v0.6.3; `check`, `typecheck`, `test`, `build` y `e2e` en verde). Lista la 0.28. |
 | 2026-10-03 | F0 | 0.21 hecha: guía v0.6 con la dirección «Arena» y maquetas aprobadas en `docs/planning/evidence/f0/arena/`. Lista la 0.22. |
 | 2026-10-02 | F0 | **Reabierta**: cambio de dirección de arte a arena de lucha (decisión del usuario). |
 | 2026-10-02 | F0 | **Cerrada.** CI de GitHub en verde en la PR #1 (la primera ejecución destapó una dependencia sin declarar, ya arreglada). |
