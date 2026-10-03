@@ -4,7 +4,10 @@
  */
 .card {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--bb-space-4);
+  width: 100%;
+  min-width: 0;
   max-width: 36rem;
 }
 
@@ -22,6 +25,22 @@
 .cover {
   --frame-fill: var(--bb-black);
   padding: var(--bb-stroke-cursor);
+}
+
+/*
+ * La portada lleva el mismo chaflán que el marco, metido lo que la separa del borde (2 − √2 ≈ 0,586 por
+ * cada px hacia dentro): el filete blanco cierra las esquinas recortadas y nada sobresale (§3.3).
+ */
+.cover > svg {
+  --cover-cut: calc(var(--bb-cut-lg) - var(--bb-stroke-cursor) * 0.586);
+  clip-path: polygon(
+    var(--cover-cut) 0,
+    100% 0,
+    100% calc(100% - var(--cover-cut)),
+    calc(100% - var(--cover-cut)) 100%,
+    0 100%,
+    0 var(--cover-cut)
+  );
 }
 
 .hidden {
@@ -56,9 +75,11 @@
   clip-path: polygon(var(--bb-slant) 0, 100% 0, calc(100% - var(--bb-slant)) 100%, 0 100%);
 }
 
+/* Recorta solo en horizontal (para ajustarse): las tildes de «PÚRPURA» salen enteras por arriba. */
 .alias {
   min-width: 0;
-  overflow: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
   font-size: var(--bb-fs-alias);
   text-shadow: var(--bb-shadow-hard);
   white-space: nowrap;

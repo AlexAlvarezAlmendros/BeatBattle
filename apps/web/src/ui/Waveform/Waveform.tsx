@@ -178,6 +178,7 @@ export function Waveform({
       )}
       style={{ height }}
       data-progress={percent}
+      data-has-threshold={threshold ? '' : undefined}
       {...forceStateAttr(state)}
       {...control}
     >

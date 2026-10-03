@@ -1,7 +1,8 @@
 /*
  * Fila de entrada (§3.3; maquetas `05-perfil.html`, «historial de combates»): marcador de 58 px en un
- * marco de chaflán `--bb-cut-md` con portada de 44 px, play, título y subtítulo, y a la derecha la
- * posición en display, la nota en Oxanium y la medalla (solo tras el sellado).
+ * marco de chaflán `--bb-cut-md` con portada de 44 px en chaflán `--bb-cut-sm` (el play va dentro),
+ * título y subtítulo, y a la derecha la posición en display, la nota en Oxanium y la medalla (solo tras
+ * el sellado).
  */
 .list {
   display: grid;
@@ -16,7 +17,7 @@
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: var(--bb-target) var(--bb-target) minmax(0, 1fr) auto auto;
+  grid-template-columns: var(--bb-target) minmax(0, 1fr) auto auto;
   align-items: center;
   gap: var(--bb-space-3);
   min-height: calc(var(--bb-space-14) + var(--bb-stroke));
@@ -64,15 +65,51 @@
   opacity: 0.45;
 }
 
+/* Portada en chaflán con el play encima, en la misma celda. */
+.coverPlay {
+  display: grid;
+  width: var(--bb-target);
+  height: var(--bb-target);
+}
+
+.coverPlay > * {
+  grid-area: 1 / 1;
+}
+
 .cover {
   width: var(--bb-target);
-  border-radius: 50%;
+  clip-path: polygon(
+    var(--bb-cut-sm) 0,
+    100% 0,
+    100% calc(100% - var(--bb-cut-sm)),
+    calc(100% - var(--bb-cut-sm)) 100%,
+    0 100%,
+    0 var(--bb-cut-sm)
+  );
+}
+
+/* El play deja ver la portada debajo (velo del fondo de los modales); sonando, rojo. */
+.row .play:not([data-variant="cta"]) {
+  --frame-border: var(--bb-line-strong);
+  --frame-fill: var(--bb-scrim);
+  --frame-cut: var(--bb-cut-sm);
 }
 
 .info {
   display: grid;
   gap: var(--bb-space-1);
   min-width: 0;
+}
+
+.infoLink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.infoLink[data-force-state="focus"] {
+  outline: var(--bb-stroke-cursor) solid var(--bb-white);
+  outline-offset: var(--bb-cursor-gap);
+  box-shadow: var(--bb-focus-halo);
 }
 
 /*
@@ -94,19 +131,8 @@
   text-overflow: ellipsis;
 }
 
-.titleLink {
-  color: inherit;
-  text-decoration: none;
-}
-
-.titleLink:hover {
+.infoLink:hover .titleText {
   text-decoration: underline;
-}
-
-.titleLink[data-force-state="focus"] {
-  outline: var(--bb-stroke-cursor) solid var(--bb-white);
-  outline-offset: var(--bb-cursor-gap);
-  box-shadow: var(--bb-focus-halo);
 }
 
 .subtitle {
@@ -138,11 +164,13 @@
   gap: var(--bb-space-4);
 }
 
+/* La posición en display blanco con sombra dura roja (maqueta `05-perfil`). */
 .position {
   min-width: 3ch;
-  color: var(--bb-red);
+  color: var(--bb-white);
   font-size: var(--bb-fs-xl);
   text-align: right;
+  text-shadow: var(--bb-shadow-hard-sm);
 }
 
 .score {
@@ -165,12 +193,7 @@
 
 @media (max-width: 720px) {
   .row {
-    grid-template-columns: var(--bb-target) minmax(0, 1fr) auto;
     padding-inline: var(--bb-space-2);
-  }
-
-  .cover {
-    display: none;
   }
 
   .result {

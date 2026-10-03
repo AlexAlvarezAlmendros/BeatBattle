@@ -494,6 +494,7 @@
           "display": "Display · Anybody cursiva 900, de 150 a 105 % de ancho",
           "displaySample": "Elige modo",
           "hardSample": "Beat Battle",
+          "accentsSample": "Gràcia · Próximo · Púrpura · ÀÓÚ",
           "ui": "Interfaz · Chakra Petch 500, 600 y 700 (y cursivas 600 y 700)",
           "uiSample": "Pilla el sample, cocina tu flip y súbelo antes del domingo 11 a las 20:00.",
           "w500": "500 · Texto",
@@ -714,7 +715,9 @@
           "settings": "Ajustes",
           "juryDetail": "16 sin votar",
           "playLocked": "Disponible el lunes",
-          "resultsLocked": "Aún no hay semanas selladas",
+          "accents": "Tildes en display",
+          "minute": "1 min",
+          "resultsLocked": "Aún nada sellado",
           "help": {
             "play": "Pilla el sample, cocina tu flip y súbelo antes del domingo a las 20:00.",
             "jury": "Escucha 45 s de cada beat y puntúalo de 1 a 5. Sin nombres hasta el domingo.",
@@ -817,7 +820,8 @@
           "start": "XP {value}",
           "end": "NV {next} · {max}",
           "full": "Lleno (éxito)",
-          "add": "+40 XP"
+          "add": "{amount} XP",
+          "amount": "+40"
         },
         "clock": {
           "label": "Tiempo · cierre de envíos",

@@ -154,7 +154,7 @@ function ContrastBlock() {
           <tbody>
             {CONTRAST_RULES.map((rule) => (
               <tr key={`${rule.text}-${rule.surface}`} data-contrast={rule.use}>
-                <td>
+                <td data-label={t('dev.gallery.base.contrast.sample')}>
                   {/* Cada par se enseña como se usa: los de «solo texto grande» (y el que no se usa), en grande. */}
                   <span
                     className={cx(
@@ -171,7 +171,7 @@ function ContrastBlock() {
                       : t('dev.gallery.base.contrast.text')}
                   </span>
                 </td>
-                <td>
+                <td data-label={t('dev.gallery.base.contrast.pair')}>
                   <code className={styles.swatchName}>
                     {t('dev.gallery.base.contrast.over', {
                       foreground: cssVarName('color', rule.text),
@@ -179,7 +179,7 @@ function ContrastBlock() {
                     })}
                   </code>
                 </td>
-                <td className={styles.ratio}>
+                <td className={styles.ratio} data-label={t('dev.gallery.base.contrast.ratio')}>
                   {t('dev.gallery.base.contrast.value', {
                     ratio: formatNumber(ruleRatio(rule), {
                       minimumFractionDigits: 2,
@@ -187,7 +187,9 @@ function ContrastBlock() {
                     }),
                   })}
                 </td>
-                <td>{t(`dev.gallery.base.contrast.uses.${rule.use}`)}</td>
+                <td data-label={t('dev.gallery.base.contrast.rule')}>
+                  {t(`dev.gallery.base.contrast.uses.${rule.use}`)}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -227,6 +229,10 @@ function TypographyBlock() {
           </div>
           <p className={cx('bb-display', 'bb-hard', styles.uiSample)}>
             {t('dev.gallery.base.type.hardSample')}
+          </p>
+          {/* Mayúsculas con tilde en display: la tilde sale entera aunque la caja recorte en horizontal. */}
+          <p className={cx('bb-display', styles.accentsSample)} data-accents="">
+            {t('dev.gallery.base.type.accentsSample')}
           </p>
         </Frame>
         <Frame cut="lg" className={styles.family}>

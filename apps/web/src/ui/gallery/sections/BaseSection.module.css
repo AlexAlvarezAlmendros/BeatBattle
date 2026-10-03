@@ -132,9 +132,62 @@
   vertical-align: middle;
 }
 
+/*
+ * Por debajo de 720 px, la tabla pasa a lista de clave y valor (como la tesela en móvil, §3.3): cada par
+ * es un bloque con sus cuatro filas, el nombre de la columna delante. Nada se sale ni hay que desplazar.
+ */
+@media (max-width: 720px) {
+  .tableWrap {
+    overflow: visible;
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+  }
+
+  .table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .table tr {
+    padding: var(--bb-space-3) 0;
+    border-bottom: var(--bb-stroke-hair) solid var(--bb-line);
+  }
+
+  .table td {
+    display: grid;
+    grid-template-columns: var(--bb-space-16) minmax(0, 1fr);
+    align-items: center;
+    gap: var(--bb-space-3);
+    padding: var(--bb-space-1) 0;
+    border: 0;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    color: var(--bb-text-3);
+    font-size: var(--bb-fs-xs);
+    font-weight: var(--bb-weight-bold);
+    letter-spacing: var(--bb-tracking-label);
+    text-transform: uppercase;
+  }
+
+  .swatchName {
+    overflow-wrap: anywhere;
+  }
+}
+
 .sample {
   display: inline-block;
-  min-width: 9rem;
+  min-width: min(9rem, 100%);
   padding: var(--bb-space-2) var(--bb-space-3);
   font-weight: var(--bb-weight-bold);
 }
@@ -151,11 +204,13 @@
 /* ── Tipografía y escala ────────────────────────────────────────────────────────────────── */
 .families {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--bb-space-6);
 }
 
 .family {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--bb-space-3);
   padding: var(--bb-space-5);
 }
@@ -177,6 +232,7 @@
 
 .stretches {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--bb-space-2);
 }
 
@@ -641,4 +697,11 @@
   text-transform: uppercase;
   --frame-border: var(--bb-red-cta);
   --frame-fill: var(--bb-red-cta);
+}
+
+/* Muestra de tildes en display (§3.2): recorta en horizontal como las placas, nunca en vertical. */
+.accentsSample {
+  overflow-x: clip;
+  overflow-y: visible;
+  font-size: var(--bb-fs-2xl);
 }

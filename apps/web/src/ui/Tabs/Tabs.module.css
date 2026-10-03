@@ -91,3 +91,26 @@
 .panel:focus-visible {
   outline-offset: var(--bb-cursor-gap);
 }
+
+/*
+ * Móvil: [Q] pestañas [E] en una sola fila que se desplaza en horizontal (las teclas no se quedan en
+ * líneas sueltas). El relleno deja sitio al cursor (7 px por fuera de la pestaña) dentro del recorte.
+ */
+@media (max-width: 720px) {
+  .row,
+  .list {
+    flex-wrap: nowrap;
+  }
+
+  .row {
+    margin: calc(-1 * var(--bb-space-2));
+    padding: var(--bb-space-2);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .row > * {
+    flex: none;
+  }
+}

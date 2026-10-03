@@ -115,13 +115,25 @@
   flex-direction: column;
 }
 
+/*
+ * Enlaces del índice: chips de chaflán `--bb-cut-sm` (se leen como enlaces sin subrayado) con su
+ * objetivo de 44 × 44 px (RNF-A11Y-09).
+ */
 .indexLink,
 .indexSubLink {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-width: var(--bb-target);
   min-height: var(--bb-target);
   color: var(--bb-text);
   text-decoration: none;
+}
+
+.indexSubLink {
+  --frame-cut: var(--bb-cut-sm);
+  --frame-fill: var(--bb-panel);
+  padding-inline: var(--bb-space-3);
 }
 
 .indexLink {
@@ -137,14 +149,23 @@
   font-size: var(--bb-fs-sm);
 }
 
+.indexSubLink:hover {
+  --frame-border: var(--bb-white);
+}
+
 .indexLink:hover,
 .indexSubLink:hover {
   color: var(--bb-red);
 }
 
 /* ── Secciones y bloques ──────────────────────────────────────────────────────────────────── */
+/*
+ * Las rejillas de la galería (secciones, bloques, muestras y celdas) son de una columna `minmax(0, 1fr)`
+ * y sus hijos tienen `min-width: 0`: ninguna pieza ancha estira la columna más allá de la ventana.
+ */
 .section {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--bb-space-8);
   padding-block: var(--bb-space-12);
 }
@@ -153,7 +174,9 @@
   display: flex;
   align-items: center;
   gap: var(--bb-space-4);
+  min-width: 0;
   font-size: var(--bb-fs-3xl);
+  overflow-wrap: anywhere;
 }
 
 /* Filete de sección: rojo los primeros 48 px y blanco tenue después (como en las maquetas). */
@@ -175,6 +198,7 @@
 
 .block {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--bb-space-5);
   scroll-margin-top: var(--bb-space-8);
 }
@@ -212,6 +236,7 @@
 /* Muestra: la pieza sobre negro y su pie con el nombre (y el token). */
 .specimen {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: 1fr auto;
   gap: var(--bb-space-2);
   margin: 0;
@@ -243,6 +268,7 @@
 /* ── Celdas de estado (matriz de §3.3) ────────────────────────────────────────────────────── */
 .cell {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: 1fr auto;
   gap: var(--bb-space-2);
   min-width: 0;
@@ -269,6 +295,13 @@
 
 .matrixStage {
   place-items: start;
+}
+
+/* En móvil, las piezas casi al ancho de la ventana (como se ven en las pantallas). */
+@media (max-width: 720px) {
+  .cellStage {
+    padding: var(--bb-space-4) var(--bb-space-2);
+  }
 }
 
 .matrixReason {

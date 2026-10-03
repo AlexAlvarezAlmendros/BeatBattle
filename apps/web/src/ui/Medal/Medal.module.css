@@ -49,13 +49,3 @@
 .hole {
   fill: var(--bb-black);
 }
-
-.number {
-  fill: var(--bb-black);
-  font-family: var(--bb-font-num);
-  font-weight: var(--bb-weight-extrabold);
-}
-
-.medal[data-place="3"] .number {
-  fill: var(--bb-white);
-}

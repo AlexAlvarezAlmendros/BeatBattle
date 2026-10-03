@@ -48,8 +48,8 @@ export interface EntryRowProps {
 
 /**
  * Fila de entrada (guía §3.3; listas largas: archivo, clasificación, historial): un marcador de
- * 56–58 px con portada de 44 px, título y subtítulo, posición en display, puntuación en Oxanium y
- * medalla. **Antes del sellado, sin posición ni puntuación** (`RF-PLAY-05`): `result` solo llega con la
+ * 56–58 px con portada de 44 px (en chaflán, con el play dentro), título y subtítulo, posición en
+ * display, puntuación en Oxanium y medalla. **Antes del sellado, sin posición ni puntuación** (`RF-PLAY-05`): `result` solo llega con la
  * semana sellada. Hover: `--bb-panel-2`. Error de audio: aviso y reintentar (`RF-PLAY-09`).
  */
 export function EntryRow({
@@ -67,6 +67,26 @@ export function EntryRow({
   className,
 }: EntryRowProps) {
   const titleId = useId()
+  const subtitleId = useId()
+  const info = (
+    <>
+      <TitleTag id={titleId} className={styles.title}>
+        <span className={styles.titleText}>{title}</span>
+      </TitleTag>
+      {status === 'error' ? (
+        <p className={styles.error}>
+          <Icon name="alert" />
+          {t('ui.entryRow.loadError')}
+        </p>
+      ) : (
+        subtitle && (
+          <p id={subtitleId} className={styles.subtitle}>
+            {subtitle}
+          </p>
+        )
+      )}
+    </>
+  )
   return (
     <article
       className={cx(styles.row, className)}
@@ -79,45 +99,41 @@ export function EntryRow({
         state === 'focusTitle' || state === 'focus' || state === 'pressed' ? undefined : state,
       )}
     >
-      <CoverArt className={styles.cover} />
-      <Button
-        variant={playing ? 'cta' : 'outline'}
-        size="sm"
-        iconOnly
-        icon={playing ? 'pause' : 'play'}
-        aria-label={t(
-          status === 'error' ? 'ui.entryRow.retry' : playing ? 'ui.entryRow.pause' : 'ui.entryRow.play',
-          { title },
-        )}
-        onClick={onPlayToggle}
-        loading={status === 'loading'}
-        loadingLabel={t('ui.entryRow.loading', { title })}
-        disabled={disabled}
-        state={state === 'focus' || state === 'pressed' ? state : undefined}
-      />
-      <div className={styles.info}>
-        <TitleTag id={titleId} className={styles.title}>
-          {to !== undefined ? (
-            <Link
-              to={to}
-              className={cx(styles.titleText, styles.titleLink)}
-              {...forceStateAttr(state === 'focusTitle' ? 'focus' : undefined)}
-            >
-              {title}
-            </Link>
-          ) : (
-            <span className={styles.titleText}>{title}</span>
+      {/* El play va dentro de la portada (no es un botón redondo suelto, como la lista del sello). */}
+      <div className={styles.coverPlay}>
+        <CoverArt className={styles.cover} />
+        <Button
+          variant={playing ? 'cta' : 'outline'}
+          size="sm"
+          iconOnly
+          icon={playing ? 'pause' : 'play'}
+          className={styles.play}
+          aria-label={t(
+            status === 'error' ? 'ui.entryRow.retry' : playing ? 'ui.entryRow.pause' : 'ui.entryRow.play',
+            { title },
           )}
-        </TitleTag>
-        {status === 'error' ? (
-          <p className={styles.error}>
-            <Icon name="alert" />
-            {t('ui.entryRow.loadError')}
-          </p>
-        ) : (
-          subtitle && <p className={styles.subtitle}>{subtitle}</p>
-        )}
+          onClick={onPlayToggle}
+          loading={status === 'loading'}
+          loadingLabel={t('ui.entryRow.loading', { title })}
+          disabled={disabled}
+          state={state === 'focus' || state === 'pressed' ? state : undefined}
+        />
       </div>
+      {to !== undefined ? (
+        // El enlace a la ficha abarca título y subtítulo: su anillo de foco los rodea a los dos y no
+        // tapa el subtítulo (§3.3 «Fila de entrada»). Su nombre es el título.
+        <Link
+          to={to}
+          className={cx(styles.info, styles.infoLink)}
+          aria-labelledby={titleId}
+          aria-describedby={subtitle && status !== 'error' ? subtitleId : undefined}
+          {...forceStateAttr(state === 'focusTitle' ? 'focus' : undefined)}
+        >
+          {info}
+        </Link>
+      ) : (
+        <div className={styles.info}>{info}</div>
+      )}
       {result && (
         <div className={styles.result}>
           <span className={cx('bb-display', styles.position)}>

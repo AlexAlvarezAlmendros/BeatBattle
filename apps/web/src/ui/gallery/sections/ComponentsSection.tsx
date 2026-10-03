@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { type Messages, t } from '../../../i18n'
+import { Trans } from '../../../i18n/Trans'
 import { Announcer } from '../../Announcer'
 import { BUTTON_VARIANTS, Button } from '../../Button'
 import { DataChip, FilterChip } from '../../Chip'
@@ -186,6 +187,22 @@ function MenuPlateBlock() {
             />
           </div>
         </StateCell>
+      </GalleryRow>
+      {/* Tildes de las mayúsculas en display: enteras en reposo y en la elegida (que crece). */}
+      <GalleryRow title={t('dev.gallery.arena.menu.accents')} wide>
+        {(['rest', 'focus'] as const).map((state) => (
+          <StateCell key={state} label={stateLabel(state)} wide>
+            <div className={styles.menuStage} aria-hidden="true" data-accents="">
+              <MenuPlate
+                index={state === 'rest' ? 4 : 5}
+                label={t(state === 'rest' ? 'home.modes.hallOfFame.label' : 'home.modes.howItWorks.label')}
+                detail={state === 'rest' ? undefined : t('dev.gallery.arena.menu.minute')}
+                itemProps={{ ...static_, 'data-cursor': '' }}
+                state={state === 'rest' ? undefined : state}
+              />
+            </div>
+          </StateCell>
+        ))}
       </GalleryRow>
       <GalleryRow title={t('dev.gallery.states.interactive')} wide>
         <div className={styles.menuStage}>
@@ -758,7 +775,13 @@ function MeterBlock() {
           <div className={styles.stack}>
             {xpMeter(xp)}
             <Button size="sm" variant="outline" onClick={() => setXp((value) => Math.min(3350, value + 40))}>
-              {t('dev.gallery.arena.meter.add')}
+              {/* La cifra del XP, con su signo, en Oxanium rojo (§3.4.2): el «+» de Anybody parece un punto. */}
+              <Trans
+                k="dev.gallery.arena.meter.add"
+                values={{
+                  amount: <span className={styles.xpAmount}>{t('dev.gallery.arena.meter.amount')}</span>,
+                }}
+              />
             </Button>
           </div>
         </StateCell>

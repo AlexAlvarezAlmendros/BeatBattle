@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useSyncExternalStore } from 'react'
 import { DocumentTitle } from '../../app/DocumentTitle'
 import { t } from '../../i18n'
+import { frameAttributes } from '../Frame'
 import { cx } from '../forceState'
 import { useMediaQuery } from '../hooks/useMediaQuery'
 import {
@@ -80,7 +81,11 @@ export function GalleryPage() {
                 <ol role="list" className={styles.indexSub}>
                   {section.anchors.map((anchor) => (
                     <li key={anchor.id}>
-                      <a href={`#${anchor.id}`} className={styles.indexSubLink}>
+                      <a
+                        href={`#${anchor.id}`}
+                        {...frameAttributes({ cut: 'sm' })}
+                        className={styles.indexSubLink}
+                      >
                         {t(anchor.label)}
                       </a>
                     </li>

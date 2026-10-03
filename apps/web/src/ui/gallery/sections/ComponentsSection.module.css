@@ -62,13 +62,21 @@
   width: 100%;
 }
 
+/* XP flotante (§3.4.2): cifra y signo en Oxanium rojo. */
+.xpAmount {
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-style: normal;
+  font-weight: var(--bb-weight-extrabold);
+}
+
 .cover {
   width: 10rem;
 }
 
 @media (max-width: 720px) {
   .menuStage {
-    padding-left: var(--bb-space-4);
+    padding-left: 0;
   }
 
   .grid {
