@@ -1,6 +1,7 @@
 /*
- * Portada del voto ciego (§3.4.5): fondo granate que se oscurece hacia el borde, puntos rojos y
- * blancos, galleta negra con filete rojo. Solo colores de la paleta.
+ * Portada del voto ciego (§3.4.5; `drawCover` de las maquetas): fondo granate que se oscurece hacia el
+ * borde con rayos blancos al 3 %, puntos rojos y blancos (al 94 %), galleta negra con filete rojo y el
+ * canto. Solo colores de la paleta.
  */
 .cover {
   display: block;
@@ -8,6 +9,11 @@
   height: auto;
   aspect-ratio: 1;
   background: radial-gradient(circle, var(--bb-wine-2) 0 40%, var(--bb-wine-3) 70%, var(--bb-black) 100%);
+}
+
+.ray {
+  fill: var(--bb-white);
+  fill-opacity: 0.03;
 }
 
 .rim {
@@ -22,6 +28,7 @@
 
 .white {
   fill: var(--bb-white);
+  fill-opacity: 0.94;
 }
 
 .hole {

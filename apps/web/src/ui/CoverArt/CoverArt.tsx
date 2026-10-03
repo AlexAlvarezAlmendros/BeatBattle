@@ -1,45 +1,43 @@
+import { referenceCoverDots } from '@beatbattle/covers'
 import { cx } from '../forceState'
 import styles from './CoverArt.module.css'
 
-/** Anillos del emblema (§3.4.5: un disco de 13 anillos). */
-const RINGS = 13
-const R0 = 0.15
-const R1 = 0.92
-const CELL = (R1 - R0) / (RINGS - 1)
+/** Radio del disco del emblema en el `viewBox` de 100 (el 46 % del lado, como en las maquetas). */
+export const COVER_RADIUS = 46
 
-interface Dot {
-  x: number
-  y: number
-  r: number
-  white: boolean
-}
+/** Centro de la portada en el `viewBox`. */
+const CENTER = 50
+
+/** Rayos del fondo (§3.4.5: «degradado granate a negro y rayos al 3 %»): 24, como en `drawCover`. */
+const RAYS = 24
+
+/** Coordenada en el `viewBox`, con dos decimales (el SVG no necesita más). */
+const at = (value: number) => Math.round(value * 100) / 100
 
 /**
- * Puntos del emblema de muestra, calculados una sola vez: anillos de puntos rojos cuyo tamaño ondula
- * con el ángulo (cinco pliegues) y, uno de cada tres, puntos blancos pequeños (el acento de §3.4.5).
- * Es **el mismo para todas las entradas**: hasta que `packages/covers` genere la portada de cada una
- * (Fase 4, `RD-VIS-04`), ninguna se distingue por su portada (la alternativa de §3.4.5: «portadas
- * idénticas con solo el alias»).
+ * La portada de referencia de las maquetas, calculada una sola vez con `@beatbattle/covers`: los puntos
+ * ya traen su presupuesto de tinta (11,5 % del disco en rojo y 1,6 % en blanco) y los rayos se giran con
+ * su `rot`, como en `drawCover` de `final.js`.
  */
-const DOTS: readonly Dot[] = (() => {
-  const dots: Dot[] = []
-  for (let ring = 0; ring < RINGS; ring += 1) {
-    const radius = R0 + CELL * ring
-    const count = Math.max(8, Math.round((Math.PI * 2 * radius) / CELL))
-    const white = ring % 3 === 1
-    for (let index = 0; index < count; index += 1) {
-      const angle = (index / count) * Math.PI * 2 + (ring % 2) * (Math.PI / count)
-      const wave = 0.5 + 0.5 * Math.cos(5 * angle + ring * 0.7)
-      const size = white ? 0.18 + 0.12 * wave : 0.12 + 0.4 * wave * (0.45 + 0.55 * (radius / R1))
-      dots.push({
-        x: 50 + Math.cos(angle) * radius * 46,
-        y: 50 + Math.sin(angle) * radius * 46,
-        r: CELL * 46 * size,
-        white,
-      })
-    }
+const COVER = (() => {
+  const { spec, red, white } = referenceCoverDots()
+  const toCircle = (dot: { x: number; y: number; r: number }) => ({
+    cx: at(CENTER + dot.x * COVER_RADIUS),
+    cy: at(CENTER + dot.y * COVER_RADIUS),
+    r: at(dot.r * COVER_RADIUS),
+  })
+  const rays = Array.from({ length: RAYS }, (_, index) => {
+    const angle = spec.rot + ((index + 1) * Math.PI * 2) / RAYS
+    // Un triángulo del centro hasta fuera de la portada, de ±5 % de ancho (el de las maquetas).
+    const point = (along: number, across: number) =>
+      `${at(CENTER + Math.cos(angle) * along - Math.sin(angle) * across)},${at(CENTER + Math.sin(angle) * along + Math.cos(angle) * across)}`
+    return `${CENTER},${CENTER} ${point(100, -5)} ${point(100, 5)}`
+  })
+  return {
+    rays,
+    red: red.map(toCircle).filter((circle) => circle.r > 0),
+    white: white.map(toCircle).filter((circle) => circle.r > 0),
   }
-  return dots
 })()
 
 export interface CoverArtProps {
@@ -47,26 +45,28 @@ export interface CoverArtProps {
 }
 
 /**
- * Portada de una entrada durante el voto ciego (guía §3.4.5): emblema de puntos rojos y blancos sobre
- * el disco granate con la galleta central. Decorativa (`aria-hidden`): la entrada se nombra por su
- * alias. Sin retratos ni nada que identifique a nadie.
+ * Portada de una entrada durante el voto ciego (guía §3.4.5): el emblema de puntos de la **portada de
+ * referencia** de las maquetas (espiral, 7 pliegues, 92 BPM) sobre el fondo granate con rayos al 3 %, y
+ * la galleta central. Es **la misma para todas las entradas** hasta que `packages/covers` pinte la de
+ * cada una (Fase 4, `RD-VIS-04`), así que ninguna se distingue por su portada (§1.3). Decorativa
+ * (`aria-hidden`): la entrada se nombra por su alias. Sin retratos ni nada que identifique a nadie.
  */
 export function CoverArt({ className }: CoverArtProps) {
   return (
     <svg viewBox="0 0 100 100" className={cx(styles.cover, className)} aria-hidden="true" focusable="false">
-      <circle cx="50" cy="50" r="48.5" className={styles.rim} />
-      {DOTS.map((dot) => (
-        <circle
-          key={`${dot.x.toFixed(2)}-${dot.y.toFixed(2)}`}
-          cx={dot.x}
-          cy={dot.y}
-          r={dot.r}
-          className={dot.white ? styles.white : styles.red}
-        />
+      {COVER.rays.map((points) => (
+        <polygon key={points} points={points} className={styles.ray} />
+      ))}
+      {COVER.red.map((dot) => (
+        <circle key={`r${dot.cx}-${dot.cy}`} {...dot} className={styles.red} data-ink="red" />
+      ))}
+      {COVER.white.map((dot) => (
+        <circle key={`w${dot.cx}-${dot.cy}`} {...dot} className={styles.white} data-ink="white" />
       ))}
       <circle cx="50" cy="50" r="8.5" className={styles.hole} />
       <circle cx="50" cy="50" r="7" className={styles.label} />
       <circle cx="50" cy="50" r="1.4" className={styles.spindle} />
+      <circle cx="50" cy="50" r="48.5" className={styles.rim} />
     </svg>
   )
 }
