@@ -1,61 +1,198 @@
 /*
- * Fuentes alojadas en el proyecto (guía §3.1 «Hallazgo» y §3.2, tarea 0.5): Montserrat y JetBrains
- * Mono variables, de `@fontsource-variable/*`. La web del sello declara Montserrat pero no la carga;
- * aquí se carga de verdad y con el mismo nombre de familia, `Montserrat`, para que el CSS portado del
- * sello funcione tal cual.
+ * Fuentes de la arena (guía §3.2 «Tipografía», tarea 0.22), alojadas en el proyecto con `@fontsource`
+ * y licencia OFL-1.1:
  *
- * - Solo los subconjuntos latino y latino extendido: el castellano cabe entero en el latino (el que
- *   se precarga, ver `fontPreload.ts`); el extendido cubre nombres de productores con ł, ő, ș…, y el
+ * | Familia        | Paquete                          | Ficheros                                        |
+ * |----------------|----------------------------------|-------------------------------------------------|
+ * | Anybody        | `@fontsource-variable/anybody`   | variable `standard` (wght 100–900, wdth 50–150), |
+ * |                |                                  | solo cursiva                                    |
+ * | Chakra Petch   | `@fontsource/chakra-petch`       | 500, 600 y 700 rectas; 600 y 700 cursivas       |
+ * | Oxanium        | `@fontsource-variable/oxanium`   | variable `wght` (200–800)                       |
+ *
+ * - Solo los subconjuntos latino y latino extendido: el castellano cabe entero en el latino (el que se
+ *   precarga, ver `fontPreload.ts`); el extendido cubre nombres de productores con ł, ő, ș…, y el
  *   navegador solo lo descarga si aparece uno de esos caracteres (`unicode-range`).
  * - `font-display: swap`: el texto se ve desde el primer momento con la de sistema.
- * - Un único fichero variable por subconjunto cubre todos los pesos (Montserrat 100–900, JetBrains
- *   Mono 100–800).
+ * - Las familias se declaran con su nombre corto (`Anybody`, `Chakra Petch`, `Oxanium`), el que usan
+ *   los tokens `--bb-font-*` y las maquetas aprobadas (`docs/planning/evidence/f0/arena/src/`).
+ * - Anybody solo se declara en cursiva: el display siempre es cursiva (§3.2). Si algo la pidiera
+ *   recta, el navegador usaría igualmente la cursiva (no hay otra cara) y `global.css` desactiva la
+ *   síntesis de negrita y de inclinación (`font-synthesis: none`).
+ *
+ * Latino: Anybody cursiva 62 KB, Chakra Petch 5 × ~10 KB, Oxanium 14 KB (≈ 127 KB).
  */
 
-/* Montserrat — latino */
+/* ── Anybody (display) ─────────────────────────────────────────────────────────────────────── */
+
+/* Anybody cursiva — latino */
 @font-face {
-  font-family: "Montserrat";
-  font-style: normal;
+  font-family: "Anybody";
+  font-style: italic;
   font-display: swap;
   font-weight: 100 900;
-  src: url("@fontsource-variable/montserrat/files/montserrat-latin-wght-normal.woff2") format("woff2");
+  font-stretch: 50% 150%;
+  src: url("@fontsource-variable/anybody/files/anybody-latin-standard-italic.woff2") format("woff2");
   unicode-range:
     U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
     U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* Montserrat — latino extendido */
+/* Anybody cursiva — latino extendido */
 @font-face {
-  font-family: "Montserrat";
-  font-style: normal;
+  font-family: "Anybody";
+  font-style: italic;
   font-display: swap;
   font-weight: 100 900;
-  src: url("@fontsource-variable/montserrat/files/montserrat-latin-ext-wght-normal.woff2") format("woff2");
+  font-stretch: 50% 150%;
+  src: url("@fontsource-variable/anybody/files/anybody-latin-ext-standard-italic.woff2") format("woff2");
   unicode-range:
     U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF,
     U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
-/* JetBrains Mono — latino */
+/* ── Chakra Petch (interfaz) ───────────────────────────────────────────────────────────────── */
+
+/* Chakra Petch 500 — latino */
 @font-face {
-  font-family: "JetBrains Mono";
+  font-family: "Chakra Petch";
   font-style: normal;
   font-display: swap;
-  font-weight: 100 800;
-  src: url("@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2") format("woff2");
+  font-weight: 500;
+  src: url("@fontsource/chakra-petch/files/chakra-petch-latin-500-normal.woff2") format("woff2");
   unicode-range:
     U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
     U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* JetBrains Mono — latino extendido */
+/* Chakra Petch 500 — latino extendido */
 @font-face {
-  font-family: "JetBrains Mono";
+  font-family: "Chakra Petch";
   font-style: normal;
   font-display: swap;
-  font-weight: 100 800;
-  src: url("@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-ext-wght-normal.woff2")
-    format("woff2");
+  font-weight: 500;
+  src: url("@fontsource/chakra-petch/files/chakra-petch-latin-ext-500-normal.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF,
+    U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Chakra Petch 600 — latino (se precarga) */
+@font-face {
+  font-family: "Chakra Petch";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("@fontsource/chakra-petch/files/chakra-petch-latin-600-normal.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+    U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Chakra Petch 600 — latino extendido */
+@font-face {
+  font-family: "Chakra Petch";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url("@fontsource/chakra-petch/files/chakra-petch-latin-ext-600-normal.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF,
+    U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Chakra Petch 700 — latino */
+@font-face {
+  font-family: "Chakra Petch";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("@fontsource/chakra-petch/files/chakra-petch-latin-700-normal.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+    U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Chakra Petch 700 — latino extendido */
+@font-face {
+  font-family: "Chakra Petch";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("@fontsource/chakra-petch/files/chakra-petch-latin-ext-700-normal.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF,
+    U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Chakra Petch 600 cursiva — latino */
+@font-face {
+  font-family: "Chakra Petch";
+  font-style: italic;
+  font-display: swap;
+  font-weight: 600;
+  src: url("@fontsource/chakra-petch/files/chakra-petch-latin-600-italic.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+    U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Chakra Petch 600 cursiva — latino extendido */
+@font-face {
+  font-family: "Chakra Petch";
+  font-style: italic;
+  font-display: swap;
+  font-weight: 600;
+  src: url("@fontsource/chakra-petch/files/chakra-petch-latin-ext-600-italic.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF,
+    U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Chakra Petch 700 cursiva — latino */
+@font-face {
+  font-family: "Chakra Petch";
+  font-style: italic;
+  font-display: swap;
+  font-weight: 700;
+  src: url("@fontsource/chakra-petch/files/chakra-petch-latin-700-italic.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+    U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Chakra Petch 700 cursiva — latino extendido */
+@font-face {
+  font-family: "Chakra Petch";
+  font-style: italic;
+  font-display: swap;
+  font-weight: 700;
+  src: url("@fontsource/chakra-petch/files/chakra-petch-latin-ext-700-italic.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF,
+    U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ── Oxanium (cifras) ──────────────────────────────────────────────────────────────────────── */
+
+/* Oxanium — latino */
+@font-face {
+  font-family: "Oxanium";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url("@fontsource-variable/oxanium/files/oxanium-latin-wght-normal.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F,
+    U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Oxanium — latino extendido */
+@font-face {
+  font-family: "Oxanium";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url("@fontsource-variable/oxanium/files/oxanium-latin-ext-wght-normal.woff2") format("woff2");
   unicode-range:
     U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF,
     U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
