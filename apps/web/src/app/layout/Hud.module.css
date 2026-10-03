@@ -2,31 +2,51 @@
  * HUD superior (guía §3.4.1): rejilla de tres columnas con el medianil de pantalla, como en las
  * maquetas (`final.css` `.hud`, `.p1`, `.iconbtn`). En móvil se compacta en una fila (jugador y
  * sonido) y el centro baja a la pantalla (el reloj, a la tarjeta de la semana).
+ *
+ * Los lados nunca miden menos que su contenido (`minmax(max-content, 1fr)`): si uno es más ancho, el
+ * centro se aparta un poco en vez de pisarlo. Si las tres piezas no caben en una fila, el HUD se apila
+ * (`data-stacked`, lo pone `Hud`): arriba el jugador y la derecha, debajo el centro (jurado de la 0.28: de
+ * 721 a unos 1000 px el reloj pisaba la ficha del jugador y la temporada; la placa de título, «1P ·
+ * PULSA PARA UNIRTE»).
  */
 .hud {
   position: relative;
   z-index: var(--bb-z-hud);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
+  grid-template-areas: "player center right";
   align-items: start;
   gap: var(--bb-space-6);
   padding: var(--bb-space-5) var(--bb-gutter) 0;
 }
 
 .player {
+  grid-area: player;
   justify-self: start;
   min-width: 0;
 }
 
 .center {
+  grid-area: center;
   justify-self: center;
 }
 
 .right {
+  grid-area: right;
   justify-self: end;
   display: flex;
   align-items: center;
   gap: var(--bb-space-2);
+}
+
+@media (min-width: 721px) {
+  .hud[data-stacked] {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "player right"
+      "center center";
+    row-gap: var(--bb-space-3);
+  }
 }
 
 .extras {
@@ -102,6 +122,7 @@
 @media (max-width: 720px) {
   .hud {
     grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "player right";
     gap: var(--bb-space-3);
     padding: var(--bb-space-3) var(--bb-gutter) 0;
   }

@@ -42,7 +42,9 @@ function plateCuts(page: Page): Promise<PlateCut[]> {
       // acaba antes de él queda dentro del corte.
       const box = plate.getBoundingClientRect()
       const end = box.right - Number.parseFloat(getComputedStyle(plate).paddingRight)
-      for (const piece of plate.querySelectorAll<HTMLElement>('kbd, [data-plate-detail]')) {
+      for (const piece of plate.querySelectorAll<HTMLElement>(
+        'kbd, [data-plate-detail], [data-plate-extra]',
+      )) {
         if (getComputedStyle(piece).display === 'none') continue
         const rect = piece.getBoundingClientRect()
         if (rect.right > end + 1 || rect.left < box.left)
@@ -311,6 +313,38 @@ for (const viewport of [
   })
 }
 
+/** Con el espaciado de 1.4.12, en la composición intermedia (la del jurado) tampoco se corta nada. */
+for (const viewport of [
+  { width: 721, height: 900, touch: false },
+  { width: 768, height: 1024, touch: true },
+  { width: 1024, height: 768, touch: false },
+]) {
+  test.describe(`espaciado de texto (WCAG 1.4.12) a ${viewport.width} × ${viewport.height}`, () => {
+    test.use({
+      viewport: { width: viewport.width, height: viewport.height },
+      isMobile: viewport.touch,
+      hasTouch: viewport.touch,
+    })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`WCAG 1.4.12 / §3.1: con el espaciado de texto, nada de ${path} se corta (la cinta parte antes que cortarse)`, async ({
+        page,
+      }) => {
+        await page.addInitScript((css) => {
+          document.addEventListener('DOMContentLoaded', () => {
+            const style = document.createElement('style')
+            style.textContent = css
+            document.head.append(style)
+          })
+        }, TEXT_SPACING)
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        expect(await clippedHorizontally(page)).toEqual([])
+      })
+    }
+  })
+}
+
 interface LockupOverLogo {
   /** Píxeles de la pegatina OTP girada que caen sobre la zona opaca del logo. */
   sticker: number
@@ -557,6 +591,135 @@ for (const viewport of [
         const keys = page.getByRole('navigation', { name: nav }).locator('[data-key]')
         if (viewport.touch) for (const key of await keys.all()) await expect(key).toBeHidden()
         else await expect(keys.first()).toBeVisible()
+      })
+    }
+  })
+}
+
+/**
+ * Lo que se pisa en el marco de juego (§3.4.1):
+ *
+ * - **HUD**: piezas (jugador, centro y derecha) cuyo contenido visible se pisa con el de otra (la caja de
+ *   cada una es la unión de las de sus descendientes visibles).
+ * - **Barra de controles**: la firma con las teclas o con el dato de la derecha (la crónica), y las teclas
+ *   cortadas por la mitad (cada una se ve entera o no se ve).
+ */
+function frameClashes(page: Page): Promise<{ hud: string[]; bar: string[] }> {
+  return page.evaluate(() => {
+    type Box = { left: number; top: number; right: number; bottom: number }
+    const boxOf = (element: Element | null): Box | null => {
+      let box: Box | null = null
+      if (!element) return box
+      for (const node of [element, ...element.querySelectorAll('*')]) {
+        const style = getComputedStyle(node)
+        if (style.display === 'none' || style.visibility === 'hidden' || node.closest('.sr-only')) continue
+        const rect = node.getBoundingClientRect()
+        if (rect.width < 1 || rect.height < 1) continue
+        box = box
+          ? {
+              left: Math.min(box.left, rect.left),
+              top: Math.min(box.top, rect.top),
+              right: Math.max(box.right, rect.right),
+              bottom: Math.max(box.bottom, rect.bottom),
+            }
+          : { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }
+      }
+      return box
+    }
+    const overlaps = (a: Box | null, b: Box | null) =>
+      !!a &&
+      !!b &&
+      a.left < b.right - 0.5 &&
+      b.left < a.right - 0.5 &&
+      a.top < b.bottom - 0.5 &&
+      b.top < a.bottom - 0.5
+
+    const hud: string[] = []
+    const pieces = [...document.querySelector('header')!.children].map((piece) => ({
+      name: piece.getAttribute('data-frame-slot') ?? 'right',
+      box: boxOf(piece),
+    }))
+    for (const [index, a] of pieces.entries())
+      for (const b of pieces.slice(index + 1))
+        if (overlaps(a.box, b.box)) hud.push(`${a.name} pisa ${b.name}`)
+
+    const bar: string[] = []
+    const footer = document.querySelector('footer')!
+    const keys = footer.querySelector<HTMLElement>('ul')!
+    const signature = boxOf(footer.querySelector('[data-otp-signature]'))
+    const keysStyle = getComputedStyle(keys)
+    if (keysStyle.visibility !== 'hidden' && keysStyle.display !== 'none') {
+      const keysBox = keys.getBoundingClientRect()
+      for (const key of keys.children) {
+        const box = key.getBoundingClientRect()
+        if (box.top >= keysBox.bottom - 0.5) continue
+        if (box.right > keysBox.right + 0.5 || box.bottom > keysBox.bottom + 0.5)
+          bar.push(`tecla cortada: ${key.textContent}`)
+        if (overlaps(box, signature)) bar.push(`la tecla ${key.textContent} pisa la firma`)
+      }
+    }
+    if (overlaps(boxOf(footer.querySelector('[data-frame-slot="controlsRight"]')), signature))
+      bar.push('el dato de la derecha pisa la firma')
+    return { hud, bar }
+  })
+}
+
+/**
+ * Composición intermedia (de 721 a unos 1200 px: tabletas y escritorio ampliado; revisión de los arreglos
+ * de la 0.28, guía §3.3, §3.4.1 y §3.8.3). Antes, de 721 a 900 px las etiquetas de las placas se quedaban
+ * sin ancho («JUGAR», «RESULTADOS» y «AJUSTES» a 0 px), la crónica pisaba la firma y en el HUD el reloj
+ * pisaba la ficha del jugador y la temporada. Ahora el dato de las placas baja a una segunda línea si la
+ * lista es estrecha, el HUD se apila si sus piezas no caben en una fila y la crónica va en su propia fila
+ * bajo la firma.
+ */
+for (const viewport of [
+  { width: 721, height: 900, touch: false },
+  { width: 768, height: 1024, touch: true },
+  { width: 820, height: 1180, touch: true },
+  { width: 823, height: 514, touch: false },
+  { width: 1024, height: 768, touch: false },
+]) {
+  test.describe(`composición intermedia a ${viewport.width} × ${viewport.height}${viewport.touch ? ' táctil' : ''}`, () => {
+    test.use({
+      viewport: { width: viewport.width, height: viewport.height },
+      isMobile: viewport.touch,
+      hasTouch: viewport.touch,
+    })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`§3.3 / RD-VIS-02: las placas de ${path} no cortan su etiqueta, su dato ni su tecla, ni se salen de la placa`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await page.evaluate(() => document.fonts.ready)
+        expect(await plateCuts(page)).toEqual([])
+        expect(await plateOverflowY(page)).toEqual([])
+      })
+
+      test(`§3.4.1 / RF-OTP-01: en ${path} nada del HUD se pisa, y en la barra ni la crónica ni las teclas pisan la firma`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        expect(await frameClashes(page)).toEqual({ hud: [], bar: [] })
+      })
+    }
+  })
+}
+
+/** El HUD de las pantallas interiores: «1P · PULSA PARA UNIRTE» y la placa de título no se pisan. */
+for (const width of [721, 768]) {
+  test.describe(`HUD de las pantallas interiores a ${width} px`, () => {
+    test.use({ viewport: { width, height: 900 } })
+
+    for (const { path, heading } of [
+      { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
+      { path: '/como-funciona', heading: 'Cómo se juega' },
+    ]) {
+      test(`§3.4.1: en ${path} el jugador y la placa de título del HUD no se pisan`, async ({ page }) => {
+        await open(page, path, heading)
+        await settle(page)
+        expect(await frameClashes(page)).toEqual({ hud: [], bar: [] })
       })
     }
   })

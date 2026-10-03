@@ -42,10 +42,17 @@
   pointer-events: none;
 }
 
+/*
+ * Las teclas, en una fila de 44 px: las que no caben pasan a una segunda fila que queda oculta, así que
+ * nunca se ve una tecla cortada por la mitad (antes, de 721 a unos 1300 px, «[ESC] V…» o «[E»).
+ */
 .keys {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  align-content: flex-start;
   gap: var(--bb-space-4);
+  height: var(--bb-target);
   min-width: 0;
   overflow: hidden;
 }
@@ -53,6 +60,7 @@
 .control {
   display: flex;
   align-items: center;
+  min-height: var(--bb-target);
   gap: var(--bb-space-1);
   color: var(--bb-text-2);
   font-size: var(--bb-fs-xs);
@@ -100,6 +108,39 @@
   font-weight: var(--bb-weight-bold);
   letter-spacing: var(--bb-tracking-label);
   white-space: nowrap;
+}
+
+/*
+ * El dato de la pantalla (la crónica del menú) no pasa de su columna: antes, más ancho que ella, se
+ * salía hacia la izquierda y pisaba la firma (jurado de la 0.28). Si un mensaje no cabe, la crónica lo
+ * acaba en «…» (`Chronicle`); por debajo de 1200 px va en su propia fila (más abajo).
+ */
+.right[data-claimed] {
+  justify-self: stretch;
+  justify-content: flex-end;
+}
+
+/*
+ * ── Composición intermedia (721–1199 px) con la crónica ─────────────────────────────────────
+ * La crónica no cabe al lado de la firma centrada sin cortarse: baja a su propia fila, centrada bajo la
+ * firma, como en móvil (jurado de la 0.28: de 721 a 900 px «Inserta tu beat» pisaba «Other People
+ * Records», la firma de `RF-OTP-01`). Las teclas y la firma siguen en la fila de arriba.
+ */
+@media (min-width: 721px) and (max-width: 1199px) {
+  .bar:has(.right[data-claimed]) {
+    grid-template-rows: auto auto;
+    row-gap: 0;
+    height: auto;
+    min-height: var(--bb-controls-h);
+    padding-block: var(--bb-space-1);
+  }
+
+  .right[data-claimed] {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    justify-self: center;
+    max-width: 100%;
+  }
 }
 
 /* «Legal»: un rótulo más de la barra (no un enlace subrayado de web); el foco es el genérico. */
@@ -175,7 +216,12 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: var(--bb-space-1) var(--bb-space-3);
+    height: auto;
     padding-top: var(--bb-space-1);
+  }
+
+  .control {
+    min-height: 0;
   }
 
   /*

@@ -107,7 +107,12 @@
   }
 }
 
+/*
+ * La lista es un contenedor (`menu-plates`): en una columna estrecha, el dato de cada placa baja a una
+ * segunda línea (`MenuPlate`). Solo en la composición de dos columnas; en móvil, no (más abajo).
+ */
 .plates {
+  container: menu-plates / inline-size;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--bb-space-3);
@@ -202,6 +207,7 @@
   }
 
   .plates {
+    container-type: normal;
     gap: calc(var(--bb-space-1) + var(--bb-stroke));
   }
 

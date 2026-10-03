@@ -247,6 +247,72 @@
 }
 
 /*
+ * ── Lista estrecha (la composición de dos columnas de 721 a unos 1150 px, o ampliada) ──────────
+ * La lista de placas del menú es un contenedor (`menu-plates`; solo en la composición de dos columnas,
+ * `MainMenu`): por debajo de 32 rem el dato y la tecla bajan a una segunda línea, bajo la etiqueta, en
+ * vez de quitarle el sitio (jurado de la 0.28: de 721 a 900 px «JUGAR», «RESULTADOS» y «AJUSTES» se
+ * quedaban sin ancho). La placa no cambia de alto (70 px, 84 la elegida): las dos líneas caben dentro;
+ * si la etiqueta parte en dos, crece con ella.
+ */
+@container menu-plates (width < 32rem) {
+  .plate {
+    grid-template-columns: var(--bb-space-13) minmax(0, 1fr);
+    grid-template-areas:
+      "index label"
+      "index detail";
+    align-content: center;
+    row-gap: var(--bb-space-1);
+    height: auto;
+    min-height: calc(var(--bb-space-16) + var(--bb-space-1) + var(--bb-stroke));
+    padding-block: var(--bb-space-2);
+    transition:
+      margin-left var(--bb-dur-tick) var(--bb-ease-snap),
+      min-height var(--bb-dur-tick) var(--bb-ease-snap);
+  }
+
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
+    grid-template-columns: var(--bb-space-14) minmax(0, 1fr);
+    height: auto;
+    min-height: calc(var(--bb-space-16) + var(--bb-space-5));
+  }
+
+  /* El dato, en su línea: si sus piezas (cifra o etiqueta, dato largo, tecla) no caben, parten en dos. */
+  .detail {
+    flex-wrap: wrap;
+    justify-self: start;
+    row-gap: var(--bb-space-1);
+    max-width: 100%;
+    text-align: start;
+  }
+
+  .plate[data-disabled] .detailText {
+    max-width: none;
+  }
+}
+
+/*
+ * Lista muy estrecha (< 21 rem: de 721 a unos 800 px, tan estrecha como en un móvil): el índice ocupa
+ * menos y, como en móvil, sin la flecha ni la etiqueta 1P a la izquierda (no caben: pisaban la tarjeta
+ * de la semana); el cursor es el anillo. Así «SONIDO · MOVIMIENTO» cabe en su línea.
+ */
+@container menu-plates (width < 21rem) {
+  .plate,
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
+    grid-template-columns: var(--bb-space-9) minmax(0, 1fr);
+    column-gap: var(--bb-space-3);
+  }
+
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+    .arrow {
+    display: none;
+  }
+
+  .plate :global([data-cursor-player="left"]) {
+    visibility: hidden;
+  }
+}
+
+/*
  * ── Móvil: 48 px (56 la elegida), sin flecha ni 1P (no caben a la izquierda) ───────────────────
  * El dato largo solo en la elegida; el corto (cifras, etiquetas, motivos) siempre. La tecla de entrar
  * depende del tipo de entrada, no del ancho: se oculta en táctil (más abajo).

@@ -1,3 +1,4 @@
+import { type RefObject, useLayoutEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import { t } from '../../i18n'
 import { Frame } from '../../ui/Frame'
@@ -24,8 +25,10 @@ import { useSound } from './soundStore'
  * sonido.
  */
 export function Hud({ screen }: { screen: ScreenConfig }) {
+  const ref = useRef<HTMLElement>(null)
+  useHudStack(ref)
   return (
-    <header className={styles.hud}>
+    <header ref={ref} className={styles.hud}>
       <FrameSlotTarget
         name="hudPlayer"
         className={styles.player}
@@ -46,6 +49,44 @@ export function Hud({ screen }: { screen: ScreenConfig }) {
       </div>
     </header>
   )
+}
+
+/**
+ * Apila el HUD (`data-stacked`: el jugador y la derecha arriba, el centro debajo) cuando sus tres piezas
+ * no caben en una fila (§3.4.1): en una fila, cada lado mide como poco su contenido, así que no caben si
+ * la última pieza se sale del HUD. Depende de lo que lleve cada hueco (la ficha del jugador, el reloj y
+ * la temporada del menú; «1P · PULSA PARA UNIRTE» y la placa de título de las pantallas interiores), no
+ * de un ancho fijo: de 721 a unos 1000 px en el menú.
+ *
+ * Se mide en una fila (sin el atributo) y se vuelve a poner en el mismo paso, sin pintar entre medias.
+ * Cuando cambia el tamaño del HUD o de una pieza (la letra que llega, una pantalla que rellena un hueco)
+ * se vuelve a medir en el fotograma siguiente: hacerlo dentro del aviso de `ResizeObserver` cambiaría lo
+ * observado en el mismo fotograma, un bucle que el navegador corta con un error.
+ */
+export function useHudStack(ref: RefObject<HTMLElement | null>): void {
+  useLayoutEffect(() => {
+    const hud = ref.current
+    if (!hud) return
+    const update = () => {
+      hud.removeAttribute('data-stacked')
+      const last = hud.lastElementChild?.getBoundingClientRect()
+      const end = hud.getBoundingClientRect().right - Number.parseFloat(getComputedStyle(hud).paddingRight)
+      hud.toggleAttribute('data-stacked', last !== undefined && last.right > end + 0.5)
+    }
+    update()
+    if (typeof ResizeObserver === 'undefined') return
+    let frame = 0
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(update)
+    })
+    observer.observe(hud)
+    for (const piece of hud.children) observer.observe(piece)
+    return () => {
+      cancelAnimationFrame(frame)
+      observer.disconnect()
+    }
+  }, [ref])
 }
 
 /** «1P · PULSA PARA UNIRTE» (§3.4.1, sin sesión): lleva a entrar. */
