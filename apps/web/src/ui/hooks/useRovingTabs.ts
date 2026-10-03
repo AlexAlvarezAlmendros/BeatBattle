@@ -1,4 +1,5 @@
 import { type FocusEvent, type KeyboardEvent, useCallback, useEffect, useId, useRef, useState } from 'react'
+import { singleKeyAllowed } from '../shortcuts'
 import { isCharacterKey, isEditableTarget, listNavigation, wrapIndex } from './roving'
 import { type GroupLabel, type ItemHandlers, type RovingItemBaseProps, useRovingCore } from './useRoving'
 
@@ -15,7 +16,8 @@ export interface RovingTabsOptions {
   /**
    * Q y E cambian de pestaña desde cualquier parte de la pantalla (por defecto, sí: §3.3, §3.8.13).
    * Solo una lista de pestañas por pantalla debe tenerlas. No actúan mientras se escribe en un campo
-   * ni con modificadores, ni si otro manejador ya ha usado la tecla (`defaultPrevented`).
+   * ni con modificadores, ni si otro manejador ya ha usado la tecla (`defaultPrevented`), y con los
+   * atajos de una tecla apagados solo actúan con el foco en las pestañas (`ui/shortcuts.ts`).
    */
   globalKeys?: boolean
   /**
@@ -142,9 +144,11 @@ export function useRovingTabs(options: RovingTabsOptions): RovingTabs {
         return
       const key = event.key.toLowerCase()
       if (key !== 'q' && key !== 'e') return
-      event.preventDefault()
       const focused = document.activeElement
       const inside = elements.current.some((element) => element === focused)
+      // Atajo de una tecla: con los atajos apagados, solo con el foco en las pestañas (WCAG 2.1.4).
+      if (!singleKeyAllowed(inside)) return
+      event.preventDefault()
       const step = key === 'e' ? 1 : -1
       const total = latest.current.count
       let next = selectedRef.current

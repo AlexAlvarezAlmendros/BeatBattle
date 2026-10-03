@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { isEditableTarget } from '../../ui/hooks/roving'
+import { singleKeyAllowed } from '../../ui/shortcuts'
 import { paths } from '../paths'
 import { useSound } from './soundStore'
 
@@ -10,7 +11,8 @@ import { useSound } from './soundStore'
  *
  * - **Esc — VOLVER**: de una pantalla interior al menú principal. En el menú no hace nada (es el nivel
  *   de arriba). Un diálogo abierto se queda su Esc (lo consume antes de llegar aquí).
- * - **M — SONIDO**: enciende o apaga los efectos (`RD-SND-06`).
+ * - **M — SONIDO**: enciende o apaga los efectos (`RD-SND-06`). Es un atajo de una tecla: con los
+ *   atajos apagados (Opciones → Accesibilidad, WCAG 2.1.4) no hace nada y queda el botón del HUD.
  *
  * No roban teclas: se ignoran con modificadores, dentro de un campo de texto y cuando una pieza ya las
  * ha usado (`defaultPrevented`, p. ej. la letra inicial de un menú, §3.3).
@@ -30,7 +32,7 @@ export function useFrameKeys(): void {
         navigate(paths.home())
         return
       }
-      if (event.key === 'm' || event.key === 'M') {
+      if ((event.key === 'm' || event.key === 'M') && singleKeyAllowed()) {
         event.preventDefault()
         toggleSound()
       }

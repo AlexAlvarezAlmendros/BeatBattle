@@ -217,6 +217,33 @@ test('RD-SND-06: M enciende y apaga el sonido desde cualquier pantalla, también
   await expect(sound).toHaveAttribute('aria-pressed', 'true')
 })
 
+test('RNF-A11Y-08 / WCAG 2.1.4: los atajos de una tecla se apagan en Opciones → Accesibilidad y la preferencia se queda', async ({
+  page,
+}) => {
+  await open(page, '/ajustes/accesibilidad', 'Accesibilidad')
+  const toggle = page.getByRole('main').getByRole('button', { name: /Atajos de una tecla/ })
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true')
+  await toggle.click()
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false')
+
+  // En «Cómo se juega», con el foco fuera de la lista: ni M ni B hacen nada (queda el botón de sonido).
+  await open(page, '/como-funciona', 'Cómo se juega')
+  const sound = page.getByRole('banner').getByRole('button', { name: 'Sonido de efectos' })
+  await expect(sound).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('main').focus()
+  await page.keyboard.press('m')
+  await page.keyboard.press('b')
+  await expect(page).toHaveURL('/como-funciona')
+  await expect(sound).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByRole('contentinfo').getByRole('list', { name: 'Controles' })).not.toContainText(
+    'Sonido',
+  )
+  // Con el foco en la lista de movimientos, B sí (es su grupo).
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('b')
+  await expect(page).toHaveURL('/legal/bases')
+})
+
 test('RD-MOT-05: la rejilla y las pestañas de la galería tienen una parada y se recorren con flechas y Q/E', async ({
   page,
 }) => {

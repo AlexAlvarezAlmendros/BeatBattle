@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { type SimpleMessageKey, t } from '../../i18n'
 import { Key } from '../../ui/Key'
 import { OTP_SIGNATURE_HREF, OtpSlapImage } from '../../ui/OtpSlap'
+import { useShortcuts } from '../../ui/shortcuts'
 import { paths } from '../paths'
 import styles from './ControlsBar.module.css'
 import type { ControlKey, ScreenConfig } from './screen'
@@ -41,11 +42,14 @@ export const CONTROL_KEYS: Readonly<
  * teclas desaparecen y queda la firma.
  */
 export function ControlsBar({ screen }: { screen: ScreenConfig }) {
+  // Con los atajos de una tecla apagados (WCAG 2.1.4), M no hace nada: no se enseña.
+  const shortcuts = useShortcuts((state) => state.enabled)
+  const keys = shortcuts ? screen.keys : screen.keys.filter((id) => id !== 'sound')
   return (
     <footer className={styles.bar}>
       {/* biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none */}
       <ul role="list" className={styles.keys} aria-label={t('frame.keys.label')}>
-        {screen.keys.map((id) => {
+        {keys.map((id) => {
           const { keys, verb } = CONTROL_KEYS[id]
           return (
             <li key={id} className={styles.control} data-control={id}>

@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { t } from '../../i18n'
 import { Frame } from '../../ui/Frame'
 import { Icon } from '../../ui/Icon'
+import { useShortcuts } from '../../ui/shortcuts'
 import { TitlePlate } from '../../ui/TitlePlate'
 import { paths } from '../paths'
 import styles from './Hud.module.css'
@@ -62,10 +63,14 @@ export function JoinPrompt() {
   )
 }
 
-/** Botón de sonido del HUD (§3.4.1, `RD-SND-06`): 44 px, conmutador con `aria-pressed` y tecla M. */
+/**
+ * Botón de sonido del HUD (§3.4.1, `RD-SND-06`): 44 px, conmutador con `aria-pressed` y tecla M. Con los
+ * atajos de una tecla apagados (WCAG 2.1.4, `ui/shortcuts.ts`) la M no hace nada y el nombre no la cita.
+ */
 export function SoundButton() {
   const enabled = useSound((state) => state.enabled)
   const toggle = useSound((state) => state.toggle)
+  const shortcuts = useShortcuts((state) => state.enabled)
   return (
     <Frame
       as="button"
@@ -73,7 +78,8 @@ export function SoundButton() {
       cut="md"
       className={styles.sound}
       aria-pressed={enabled}
-      aria-label={t('frame.hud.sound')}
+      aria-label={t(shortcuts ? 'frame.hud.sound' : 'frame.hud.soundNoKey')}
+      aria-keyshortcuts={shortcuts ? 'M' : undefined}
       onClick={toggle}
       data-sound={enabled ? 'on' : 'off'}
     >

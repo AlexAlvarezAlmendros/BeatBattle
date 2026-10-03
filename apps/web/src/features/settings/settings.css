@@ -3,3 +3,17 @@
   display: grid;
   gap: var(--bb-space-6);
 }
+
+/* Una opción de la sección: el conmutador y, debajo, qué hace (RNF-A11Y-08). */
+.settings-option {
+  display: grid;
+  justify-items: start;
+  gap: var(--bb-space-2);
+  margin-bottom: var(--bb-space-5);
+}
+
+.settings-option-help {
+  max-width: 60ch;
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}

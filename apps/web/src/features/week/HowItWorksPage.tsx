@@ -10,6 +10,7 @@ import { isEditableTarget } from '../../ui/hooks/roving'
 import { useIdleMenuKeys } from '../../ui/hooks/useIdleMenuKeys'
 import { useRovingMenu } from '../../ui/hooks/useRovingMenu'
 import { Key } from '../../ui/Key'
+import { singleKeyAllowed } from '../../ui/shortcuts'
 import styles from './HowItWorksPage.module.css'
 
 /** Una tecla de ayuda de un movimiento: lo que se ve y, si hace falta, cómo se lee. */
@@ -82,11 +83,13 @@ export function HowItWorksPage() {
   useIdleMenuKeys(menu, count, listRef)
 
   // B abre las bases desde cualquier sitio de la pantalla (en captura: antes que la letra inicial del
-  // menú, que si no la usaría para saltar a «Bases»).
+  // menú, que si no la usaría para saltar a «Bases»). Con los atajos de una tecla apagados, solo con el
+  // foco en la lista de movimientos (WCAG 2.1.4, `ui/shortcuts.ts`).
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return
       if (isEditableTarget(event.target) || event.key.toLowerCase() !== BASES_KEY) return
+      if (!singleKeyAllowed(listRef.current?.contains(document.activeElement) ?? false)) return
       event.preventDefault()
       navigate(paths.legal('bases'))
     }

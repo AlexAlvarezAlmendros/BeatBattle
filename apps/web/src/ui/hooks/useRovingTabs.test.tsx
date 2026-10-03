@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { useShortcuts } from '../shortcuts'
 import { useRovingTabs } from './useRovingTabs'
 
 const ORDERS = ['Ronda justa', 'Recién subidas', 'Aleatorio']
@@ -29,6 +30,11 @@ function Tabs({ onChange, globalKeys }: { onChange?: (index: number) => void; gl
 }
 
 const tabs = () => screen.getAllByRole('tab')
+
+afterEach(() => {
+  useShortcuts.getState().set(true)
+  localStorage.clear()
+})
 
 describe('useRovingTabs (§3.3 «Pestañas», §3.8.13, RD-MOT-05)', () => {
   it('RD-MOT-05: tablist con pestañas y paneles enlazados; una sola parada de tabulación', () => {
@@ -83,6 +89,19 @@ describe('useRovingTabs (§3.3 «Pestañas», §3.8.13, RD-MOT-05)', () => {
     expect(tabs()[1]).toHaveAttribute('aria-selected', 'true')
     await user.keyboard('{Control>}e{/Control}')
     expect(tabs()[1]).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('RNF-A11Y-08 / WCAG 2.1.4: con los atajos de una tecla apagados, Q/E solo actúan con el foco en las pestañas', async () => {
+    const user = userEvent.setup()
+    useShortcuts.getState().set(false)
+    render(<Tabs />)
+    screen.getByRole('button', { name: 'Rejilla' }).focus()
+    await user.keyboard('e')
+    expect(tabs()[0]).toHaveAttribute('aria-selected', 'true')
+    tabs()[0]!.focus()
+    await user.keyboard('e')
+    expect(tabs()[1]).toHaveAttribute('aria-selected', 'true')
+    expect(tabs()[1]).toHaveFocus()
   })
 
   it('sin teclas globales, Q/E no hacen nada', async () => {

@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
+import { useShortcuts } from '../../ui/shortcuts'
 import { toast, useToasts } from '../../ui/Toast/useToasts'
 import { OTHER_PEOPLE_URL } from '../paths'
 import { RootLayout } from './RootLayout'
@@ -41,6 +42,7 @@ beforeEach(() => {
   // jsdom no implementa el scroll que hace `ScrollRestoration`.
   vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
   useSound.getState().set(true)
+  useShortcuts.getState().set(true)
 })
 
 afterEach(() => {
@@ -119,6 +121,20 @@ describe('RootLayout: marco de juego (0.23, §3.4.1)', () => {
     await user.keyboard('m')
     expect(sound).toHaveAttribute('aria-pressed', 'true')
     input.remove()
+  })
+
+  it('RNF-A11Y-08 / WCAG 2.1.4: con los atajos de una tecla apagados, M no toca el sonido (queda el botón) ni se enseña en la barra', async () => {
+    const user = userEvent.setup()
+    useShortcuts.getState().set(false)
+    renderFrame()
+    const sound = screen.getByRole('button', { name: t('frame.hud.soundNoKey') })
+    await user.keyboard('m')
+    expect(sound).toHaveAttribute('aria-pressed', 'true')
+    expect(useSound.getState().enabled).toBe(true)
+    const keys = within(screen.getByRole('contentinfo')).getByRole('list', { name: t('frame.keys.label') })
+    expect(within(keys).queryByText(t('frame.keys.sound'))).not.toBeInTheDocument()
+    await user.click(sound)
+    expect(useSound.getState().enabled).toBe(false)
   })
 
   it('Esc vuelve al menú desde una pantalla interior; en el menú no hace nada', async () => {

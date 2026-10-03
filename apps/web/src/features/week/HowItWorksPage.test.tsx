@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { RootLayout } from '../../app/layout/RootLayout'
 import { interiorScreen } from '../../app/layout/screen'
 import { t } from '../../i18n'
+import { useShortcuts } from '../../ui/shortcuts'
 import { HowItWorksPage } from './HowItWorksPage'
 
 function renderPage() {
@@ -36,7 +37,11 @@ function renderPage() {
 }
 
 beforeEach(() => vi.spyOn(window, 'scrollTo').mockImplementation(() => {}))
-afterEach(() => vi.restoreAllMocks())
+afterEach(() => {
+  vi.restoreAllMocks()
+  useShortcuts.getState().set(true)
+  localStorage.clear()
+})
 
 const moveList = () => screen.getByRole('menu', { name: t('frame.plates.howItWorks') })
 
@@ -76,6 +81,18 @@ describe('«Cómo se juega» como lista de movimientos (§3.8.14; 0.26, 0.28)', 
   it('B abre las bases de la competición desde cualquier sitio de la pantalla', async () => {
     const user = userEvent.setup()
     const router = renderPage()
+    within(moveList()).getAllByRole('menuitem')[0]!.focus()
+    await user.keyboard('b')
+    expect(router.state.location.pathname).toBe('/legal/bases')
+  })
+
+  it('RNF-A11Y-08 / WCAG 2.1.4: con los atajos de una tecla apagados, B solo abre las bases con el foco en la lista', async () => {
+    const user = userEvent.setup()
+    useShortcuts.getState().set(false)
+    const router = renderPage()
+    screen.getByRole('main').focus()
+    await user.keyboard('b')
+    expect(router.state.location.pathname).toBe('/como-funciona')
     within(moveList()).getAllByRole('menuitem')[0]!.focus()
     await user.keyboard('b')
     expect(router.state.location.pathname).toBe('/legal/bases')

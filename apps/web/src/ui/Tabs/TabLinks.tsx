@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router'
 import { t } from '../../i18n'
 import { Cursor } from '../Cursor'
 import { cx } from '../forceState'
 import { isCharacterKey, isEditableTarget } from '../hooks/roving'
 import { Key } from '../Key'
+import { singleKeyAllowed } from '../shortcuts'
 import styles from './Tabs.module.css'
 
 export interface TabLink {
@@ -16,7 +17,7 @@ export interface TabLink {
  * Pestañas que son secciones con su propia URL (guía §3.8.14: las de Opciones; los documentos legales):
  * enlaces con la forma de las pestañas de §3.3 (paralelogramos de 44 px, la activa en blanco) y `[Q]`
  * `[E]` a los lados, que van a la sección anterior y a la siguiente desde cualquier parte de la
- * pantalla. Son navegación (`<nav>` con `aria-current`), no un `tablist`: cada una carga su pantalla.
+ * pantalla (con los atajos de una tecla apagados, solo con el foco en ellas: `ui/shortcuts.ts`). Son navegación (`<nav>` con `aria-current`), no un `tablist`: cada una carga su pantalla.
  */
 export function TabLinks({
   label,
@@ -30,6 +31,7 @@ export function TabLinks({
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const current = links.findIndex((link) => pathname === link.to || pathname.startsWith(`${link.to}/`))
+  const navRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -37,6 +39,8 @@ export function TabLinks({
         return
       const key = event.key.toLowerCase()
       if (key !== 'q' && key !== 'e') return
+      // Atajo de una tecla: con los atajos apagados, solo con el foco en las pestañas (WCAG 2.1.4).
+      if (!singleKeyAllowed(navRef.current?.contains(document.activeElement) ?? false)) return
       event.preventDefault()
       const from = Math.max(0, current)
       const next = (from + (key === 'e' ? 1 : -1) + links.length) % links.length
@@ -47,7 +51,7 @@ export function TabLinks({
   }, [current, links, navigate])
 
   return (
-    <nav aria-label={label} className={cx(styles.row, className)}>
+    <nav ref={navRef} aria-label={label} className={cx(styles.row, className)}>
       <Key aria-hidden="true">{t('ui.tabs.previousKey')}</Key>
       {/* biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none */}
       <ul role="list" className={styles.list}>

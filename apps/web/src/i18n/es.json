@@ -234,7 +234,11 @@
     },
     "accessibility": {
       "title": "Accesibilidad",
-      "summary": "Aquí irán el tamaño de texto y la puerta de entrada."
+      "summary": "Aquí irán el tamaño de texto y la puerta de entrada. Ya puedes apagar los atajos de una tecla.",
+      "shortcuts": {
+        "label": "Atajos de una tecla",
+        "help": "M (sonido), Q y E (secciones) y B (bases) funcionan desde cualquier sitio de la pantalla. Si usas control por voz o pulsas teclas sin querer, apágalos: Q, E y B solo actuarán con el foco en sus pestañas o en su lista, y el sonido se cambia con su botón."
+      }
     }
   },
   "legal": {
@@ -889,7 +893,8 @@
     "hud": {
       "join": "Pulsa para unirte",
       "joinLabel": "1P · Pulsa para unirte: entra o crea tu cuenta",
-      "sound": "Sonido de efectos (M)"
+      "sound": "Sonido de efectos (M)",
+      "soundNoKey": "Sonido de efectos"
     },
     "keys": {
       "label": "Controles",
