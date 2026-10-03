@@ -1,0 +1,157 @@
+/*
+ * Cursor de juego (`Cursor`, guía §3.3 «El foco es el cursor», RD-MOT-05, RNF-A11Y-01): en los menús
+ * de juego (lista de modos, rejilla, pestañas, estrellas) el foco y la selección son lo mismo y se ven
+ * como un marco blanco de 3 px separado 4 px de la pieza, que sigue su forma (chaflán o
+ * paralelogramo), con la etiqueta 1P en las listas.
+ *
+ * CSS reutilizable por atributos:
+ *   [data-cursor]                    el elemento que lleva el cursor (el que recibe el foco)
+ *   [data-cursor-active="true"]      la opción elegida de su grupo
+ *   [data-cursor-group]              el grupo (menú, rejilla, lista de pestañas)
+ *   [data-cursor-ring="cut|slant"]   el anillo, dentro de [data-cursor]
+ *     data-cursor-cut="xs|sm|md|base|lg"   chaflán de la pieza (por defecto, base)
+ *     data-cursor-slant="base|sm"          paralelogramo de la pieza (por defecto, base)
+ *   [data-cursor-player="left|top"]  la etiqueta 1P, a la izquierda (listas) o encima (rejillas)
+ *
+ * El cursor se ve en el elemento enfocado (también con el ratón: en un menú de juego el ratón mueve el
+ * cursor, ver `useRovingMenu`) y, si el foco está fuera del grupo, en la opción elegida, para que la
+ * selección no desaparezca. El foco genérico (contorno) se apaga en [data-cursor] (global.css).
+ *
+ * El anillo es un único polígono con un hueco (`evenodd`): el exterior está a 7 px de la pieza (hueco
+ * de 4 + trazo de 3) y el interior a 4. Los chaflanes salen del de la pieza con `calc()` sobre los
+ * tokens de trazo: al alejar un chaflán de 45° una distancia d, crece d · (2 − √2) ≈ d · 0,586.
+ */
+
+:where([data-cursor]) {
+  --cursor-reach: calc(var(--bb-cursor-gap) + var(--bb-stroke-cursor));
+  position: relative;
+}
+
+:where([data-cursor-ring]) {
+  --cursor-s: var(--bb-stroke-cursor);
+  position: absolute;
+  inset: calc(-1 * var(--cursor-reach));
+  z-index: 3;
+  display: none;
+  background: var(--bb-white);
+  pointer-events: none;
+}
+
+/* Chaflán: exterior e interior derivados del chaflán de la pieza. */
+:where([data-cursor-ring="cut"]) {
+  --cursor-piece-cut: var(--bb-cut);
+  --cursor-outer-cut: calc(var(--cursor-piece-cut) + var(--cursor-reach) * 0.586);
+  --cursor-inner-cut: calc(var(--cursor-piece-cut) + var(--bb-cursor-gap) * 0.586);
+  clip-path: polygon(
+    evenodd,
+    var(--cursor-outer-cut) 0,
+    100% 0,
+    100% calc(100% - var(--cursor-outer-cut)),
+    calc(100% - var(--cursor-outer-cut)) 100%,
+    0 100%,
+    0 var(--cursor-outer-cut),
+    var(--cursor-outer-cut) 0,
+    calc(var(--cursor-s) + var(--cursor-inner-cut)) var(--cursor-s),
+    var(--cursor-s) calc(var(--cursor-s) + var(--cursor-inner-cut)),
+    var(--cursor-s) calc(100% - var(--cursor-s)),
+    calc(100% - var(--cursor-s) - var(--cursor-inner-cut)) calc(100% - var(--cursor-s)),
+    calc(100% - var(--cursor-s)) calc(100% - var(--cursor-s) - var(--cursor-inner-cut)),
+    calc(100% - var(--cursor-s)) var(--cursor-s),
+    calc(var(--cursor-s) + var(--cursor-inner-cut)) var(--cursor-s)
+  );
+}
+
+:where([data-cursor-ring="cut"][data-cursor-cut="xs"]) {
+  --cursor-piece-cut: var(--bb-cut-xs);
+}
+
+:where([data-cursor-ring="cut"][data-cursor-cut="sm"]) {
+  --cursor-piece-cut: var(--bb-cut-sm);
+}
+
+:where([data-cursor-ring="cut"][data-cursor-cut="md"]) {
+  --cursor-piece-cut: var(--bb-cut-md);
+}
+
+:where([data-cursor-ring="cut"][data-cursor-cut="lg"]) {
+  --cursor-piece-cut: var(--bb-cut-lg);
+}
+
+/*
+ * Paralelogramo (placas del menú, pestañas, medidores): la pieza se desplaza `--bb-slant` arriba a la
+ * izquierda y abajo a la derecha. El anillo, paralelo a ella, se desplaza un trazo más.
+ */
+:where([data-cursor-ring="slant"]) {
+  --cursor-piece-slant: var(--bb-slant);
+  --cursor-slant-outer: calc(var(--cursor-piece-slant) + var(--cursor-s));
+  clip-path: polygon(
+    evenodd,
+    var(--cursor-slant-outer) 0,
+    100% 0,
+    calc(100% - var(--cursor-slant-outer)) 100%,
+    0 100%,
+    var(--cursor-slant-outer) 0,
+    calc(var(--cursor-slant-outer) + var(--cursor-s)) var(--cursor-s),
+    calc(100% - var(--cursor-s)) var(--cursor-s),
+    calc(100% - var(--cursor-slant-outer) - var(--cursor-s)) calc(100% - var(--cursor-s)),
+    var(--cursor-s) calc(100% - var(--cursor-s)),
+    calc(var(--cursor-slant-outer) + var(--cursor-s)) var(--cursor-s)
+  );
+}
+
+:where([data-cursor-ring="slant"][data-cursor-slant="sm"]) {
+  --cursor-piece-slant: var(--bb-slant-sm);
+}
+
+/* Etiqueta 1P (es una `Tag` cta): a la izquierda en las listas, encima en las rejillas. */
+/*
+ * Sin `:where()` en el `display: none`: la etiqueta es también una `Tag` (`[data-tag]`, que pone
+ * `display: inline-block` con especificidad 0) y tiene que seguir oculta hasta que se vea el cursor.
+ */
+[data-cursor-player] {
+  display: none;
+}
+
+:where([data-cursor-player]) {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+}
+
+:where([data-cursor-player="left"]) {
+  top: 50%;
+  right: calc(100% + var(--cursor-reach) + var(--bb-space-2));
+  transform: translateY(-50%);
+}
+
+:where([data-cursor-player="top"]) {
+  bottom: calc(100% + var(--cursor-reach) - var(--bb-space-2));
+  left: calc(-1 * var(--cursor-reach));
+}
+
+/* ── Cuándo se ve ─────────────────────────────────────────────────────────────────────────── */
+:where([data-cursor]:focus, [data-cursor][data-force-state="focus"])
+> :is([data-cursor-ring], [data-cursor-player]),
+:where([data-cursor-group]:not(:focus-within) [data-cursor][data-cursor-active="true"])
+  > :is([data-cursor-ring], [data-cursor-player]) {
+  display: block;
+  animation: bb-cursor-in var(--bb-dur-tick) var(--bb-ease-snap);
+}
+
+/*
+ * El cursor salta a la opción (Anexo E): aparece un pelo más grande y se asienta en `--bb-dur-tick`.
+ * Con «reducir movimiento», `--bb-motion` es 0: salto instantáneo con el cursor visible.
+ */
+@keyframes bb-cursor-in {
+  from {
+    opacity: calc(1 - 0.5 * var(--bb-motion));
+    scale: calc(1 + 0.06 * var(--bb-motion));
+  }
+}
+
+/* En móvil la etiqueta lateral no cabe: queda el anillo (como en las maquetas). */
+@media (max-width: 720px) {
+  :where([data-cursor-player="left"]) {
+    visibility: hidden;
+  }
+}

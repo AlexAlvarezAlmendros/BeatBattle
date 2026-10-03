@@ -1,0 +1,10 @@
+/*
+ * Primitivas de la arena (tarea 0.22), como CSS global por atributos para que cualquier pieza las use
+ * sin envolverse en su componente: marco (`[data-frame]`), cursor de juego (`[data-cursor]`), tecla
+ * (`[data-key]`) y etiqueta (`[data-tag]`). Las importa `styles/index.css`; cada componente importa
+ * además la suya (Vite no la duplica), para que los tests la vean.
+ */
+@import "./Frame/frame.css";
+@import "./Cursor/cursor.css";
+@import "./Key/key.css";
+@import "./Tag/tag.css";

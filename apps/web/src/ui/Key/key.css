@@ -1,0 +1,78 @@
+/*
+ * Tecla (`Key`, guía §3.3): la ayuda visible del teclado. Pieza de chaflán `--bb-cut-xs` y 26 px de
+ * alto, cifras y letras en Oxanium 700 de 12 px. Dos capas recortadas, como el marco: borde
+ * (`::before`) y relleno (`::after`), metido trazo y medio.
+ *
+ *   data-key="dark | light | marked"
+ *     dark    tecla oscura (`--bb-ink-3`) con borde en reposo: la de la barra de controles
+ *     light   tecla clara (en botones blancos): relleno blanco, borde y texto negros
+ *     marked  tecla marcada (`--bb-red-press`): la que está pulsada o la de la estrella elegida
+ *
+ * Especificidad 0 (`:where()`), para que la pieza que la usa pueda ajustarla.
+ */
+
+:where([data-key]) {
+  --key-border: var(--bb-line-strong);
+  --key-fill: var(--bb-ink-3);
+  --key-stroke: calc((var(--bb-stroke-hair) + var(--bb-stroke)) / 2);
+  --key-cut: var(--bb-cut-xs);
+  position: relative;
+  isolation: isolate;
+  display: inline-grid;
+  place-items: center;
+  min-width: var(--bb-space-7);
+  height: calc(var(--bb-space-6) + var(--bb-stroke));
+  padding: 0 calc(var(--bb-space-2) - var(--bb-stroke-hair));
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  font-style: normal;
+  font-weight: var(--bb-weight-bold);
+  line-height: 1;
+  letter-spacing: var(--bb-tracking-button);
+  white-space: nowrap;
+}
+
+:where([data-key])::before,
+:where([data-key])::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+}
+
+:where([data-key])::before {
+  inset: 0;
+  background: var(--key-border);
+  clip-path: polygon(
+    var(--key-cut) 0,
+    100% 0,
+    100% calc(100% - var(--key-cut)),
+    calc(100% - var(--key-cut)) 100%,
+    0 100%,
+    0 var(--key-cut)
+  );
+}
+
+:where([data-key])::after {
+  --key-cut-inner: calc(var(--key-cut) - var(--key-stroke) * 0.586);
+  inset: var(--key-stroke);
+  background: var(--key-fill);
+  clip-path: polygon(
+    var(--key-cut-inner) 0,
+    100% 0,
+    100% calc(100% - var(--key-cut-inner)),
+    calc(100% - var(--key-cut-inner)) 100%,
+    0 100%,
+    0 var(--key-cut-inner)
+  );
+}
+
+:where([data-key="light"]) {
+  --key-border: var(--bb-black);
+  --key-fill: var(--bb-white);
+  color: var(--bb-black);
+}
+
+:where([data-key="marked"]) {
+  --key-fill: var(--bb-red-press);
+}

@@ -262,12 +262,18 @@
         "tenMinutes": "Quedan 10 minutos",
         "ended": "Tiempo agotado"
       }
+    },
+    "cursor": {
+      "player": "1P"
+    },
+    "otpSlap": {
+      "label": "by Other People (abre la web del sello en una pestaña nueva)"
     }
   },
   "dev": {
     "gallery": {
-      "title": "Galería de componentes",
-      "summary": "Los tokens, la tipografía, el movimiento, los componentes base con todos sus estados y el layout del sello, con y sin movimiento. Solo existe en desarrollo.",
+      "title": "Galería",
+      "summary": "La base de la arena (paleta, contraste, tipografía, forma, primitivas y cursor de juego) y los componentes, con y sin movimiento y en modo serio. Solo existe en desarrollo.",
       "indexLabel": "Índice de la galería",
       "combined": "{first} · {second}",
       "matrix": {
@@ -301,15 +307,15 @@
         "reducedMotionHint": "Pone data-motion=\"reduced\" en la página, como el ajuste de accesibilidad.",
         "reducedMotionSystem": "Tu sistema ya pide reducir el movimiento: todo va sin movimiento aunque el interruptor esté apagado.",
         "glass": "Superficies de cristal",
-        "glassHint": "Apagado: tarjetas y modales macizos y el layout sin cristal, como en calidad baja."
+        "glassHint": "Apagado: tarjetas y modales macizos y el layout sin cristal, como en calidad baja.",
+        "serious": "Modo serio",
+        "seriousHint": "Pone data-serious en la página: sin anunciador, estampas, rayos, barrido ni partículas (§3.6).",
+        "glassLayout": "Cristal en el layout del sello",
+        "yes": "Sí",
+        "no": "No"
       },
       "sections": {
-        "color": "Color",
-        "typography": "Tipografía",
-        "spacing": "Espaciado",
-        "radii": "Radios",
-        "shadows": "Sombras",
-        "motion": "Movimiento",
+        "base": "Base de la arena",
         "components": "Componentes",
         "layout": "Layout del sello"
       },
@@ -371,46 +377,6 @@
         "link": "Enlace",
         "glass": "Cristal",
         "solid": "Maciza"
-      },
-      "color": {
-        "note": "Contraste WCAG de cada color usado como texto o icono. Los que llevan transparencia se mezclan antes con el fondo.",
-        "onBlack": "Sobre negro",
-        "onInk": "Sobre --bb-ink-800",
-        "ratio": "{ratio}:1",
-        "aa": "AA",
-        "aaLarge": "AA grande",
-        "fail": "No AA"
-      },
-      "typography": {
-        "families": "Familias",
-        "display": "Display · Montserrat 800–900",
-        "body": "Texto · Montserrat 400–700",
-        "mono": "Mono · JetBrains Mono 500–700, cifras tabulares",
-        "sampleDisplay": "Beat Battle",
-        "sampleBody": "Pilla el sample, cocina tu flip y sube tu beat antes del domingo.",
-        "sampleMono": "142 BPM · 02:14:05 · +5 XP",
-        "weights": "Pesos",
-        "scale": "Escala",
-        "scaleSample": "Pilla el sample",
-        "headline": "Titular en contorno",
-        "headlineSolid": "Beat",
-        "headlineOutline": "Battle",
-        "caps": "Mayúsculas espaciadas",
-        "capsSample": "Sample · Flip · Vota · Repite"
-      },
-      "motion": {
-        "durations": "Duraciones",
-        "curves": "Curvas",
-        "springs": "Muelles",
-        "loops": "Bucles",
-        "play": "Reproducir",
-        "reset": "Volver",
-        "note": "Con «reducir movimiento», las duraciones se recortan (200 ms como mucho), no hay desplazamientos y solo quedan fundidos. Los bucles no se aceleran: se quitan.",
-        "ms": "{ms} ms",
-        "reducedMs": "{ms} ms (sin movimiento: {reduced} ms)",
-        "spring": "rigidez {stiffness} · amortiguación {damping}",
-        "perSecond": "{ms} ms · {rate} por segundo",
-        "stagger": "Escalonado de la onda: {ms} ms por barra"
       },
       "demo": {
         "primary": "Pillar el sample",
@@ -527,6 +493,219 @@
         },
         "replay": "Repetir la entrada",
         "glassSample": "Cristal"
+      },
+      "kicker": "Beat Battle · banco de pruebas de la arena",
+      "base": {
+        "intro": "Tokens de la guía v0.6 (§3.2) y primitivas compartidas (§3.3): lo que usan todas las pantallas. Con «Reducir movimiento», el cursor salta sin animación; en modo serio no hay destellos.",
+        "blocks": {
+          "palette": "Paleta",
+          "contrast": "Contraste",
+          "typography": "Tipografía",
+          "scale": "Escala",
+          "shape": "Forma",
+          "primitives": "Primitivas",
+          "cursor": "Cursor de juego"
+        },
+        "palette": {
+          "proportion": "Proporción aproximada: 70 % negro · 15 % granate · 10 % rojo · 5 % blanco",
+          "brand": "Paleta del sello",
+          "derived": "Derivados (mezclas hacia el negro)",
+          "text": "Texto",
+          "lines": "Líneas, velos y onda",
+          "textures": "Tintas de las texturas",
+          "medals": "Medallas",
+          "medal1": "Disco de oro",
+          "medal2": "Disco de platino",
+          "medal3": "Disco de diamante"
+        },
+        "contrast": {
+          "note": "Pares de la tabla de §3.2 con el ratio calculado sobre los tokens (WCAG 2.2). El rojo de marca vale para texto de cualquier tamaño sobre negro, paneles y la cuña; sobre granate o fondos más claros, solo texto grande.",
+          "sample": "Muestra",
+          "pair": "Par",
+          "ratio": "Ratio",
+          "rule": "Uso",
+          "text": "Aa · Texto 14 px",
+          "textLarge": "Aa · Grande 20 px",
+          "over": "{foreground} sobre {background}",
+          "value": "{ratio}:1",
+          "uses": {
+            "anyText": "Cualquier texto",
+            "largeText": "Solo texto grande (≥ 24 px o ≥ 18,7 px en negrita) e iconos",
+            "unused": "No se usa",
+            "pressed": "Pulsado",
+            "disabled": "Deshabilitado (cumple aunque no lo exige)"
+          }
+        },
+        "type": {
+          "display": "Display · Anybody cursiva 900, de 150 a 105 % de ancho",
+          "displaySample": "Elige modo",
+          "hardSample": "Beat Battle",
+          "ui": "Interfaz · Chakra Petch 500, 600 y 700 (y cursivas 600 y 700)",
+          "uiSample": "Pilla el sample, cocina tu flip y súbelo antes del domingo 11 a las 20:00.",
+          "w500": "500 · Texto",
+          "w600": "600 · Ayudas",
+          "w700": "700 · Rótulos",
+          "i600": "600 cursiva",
+          "i700": "700 cursiva",
+          "labelSample": "Rótulo · cierre de envíos",
+          "num": "Cifras · Oxanium, de ancho fijo",
+          "numSample": "04:07:12:45",
+          "tabular": "1111 · 0000 · 92 BPM · 2.980 XP"
+        },
+        "scale": {
+          "note": "Rem sobre 16 px: todo escala con el tamaño de texto. Ningún texto con información baja de 12 px (RD-VIS-05).",
+          "sample": "Torneo semanal",
+          "digits": "04:07:12",
+          "xs": "12 px · rótulos, teclas, chips",
+          "sm": "14 px",
+          "md": "16 px",
+          "lg": "20 px",
+          "xl": "20 → 24 px",
+          "xl2": "24 → 32 px",
+          "xl3": "36 → 48 px",
+          "plate": "25 px (19 en móvil) · placa del menú",
+          "plateOn": "31 px (22 en móvil) · placa elegida",
+          "title": "28 → 42 px · título de pantalla",
+          "alias": "30 → 46 px · alias",
+          "clock": "34 px · reloj de ronda",
+          "timer": "58 px · contador del umbral"
+        },
+        "shape": {
+          "cuts": "Chaflanes",
+          "cut": {
+            "xs": "Teclas",
+            "sm": "Chips",
+            "md": "Botones, teselas, avatar",
+            "base": "Marcos, casillas, reloj",
+            "lg": "Paneles grandes, modales, portadas"
+          },
+          "slants": "Paralelogramos y diagonal",
+          "slant": "Placas del menú y medidores",
+          "slantSm": "Etiquetas",
+          "slantToken": "--bb-slant · 18 px (12 px en móvil)",
+          "split": "Diagonal: banda roja, filete blanco, 17°",
+          "tilts": "Inclinaciones",
+          "tiltSticker": "Pegatina OTP",
+          "tiltCard": "Carta de luchador",
+          "tiltAnn": "Anunciador",
+          "annSample": "¡Voto listo!",
+          "stamps": "Sellos de goma",
+          "stampNotVoted": "Sin votar",
+          "stampSealed": "Sellada",
+          "strokes": "Trazos",
+          "strokeHair": "Filete",
+          "strokeBase": "Marco",
+          "strokeCursor": "Cursor y foco",
+          "shadows": "Sombras duras y foco",
+          "hard": "Sombra dura",
+          "hardSm": "Sombra dura pequeña",
+          "drop": "Sombra de objeto",
+          "vs": "VS",
+          "focus": "Foco genérico",
+          "focusReplica": "Foco",
+          "focusTry": "Prueba con Tab"
+        },
+        "primitives": {
+          "frame": "Marco (Frame)",
+          "frameKicker": {
+            "panel": "Panel",
+            "stage": "Semana 41 · escenario",
+            "title": "Placa de título"
+          },
+          "frameTitle": {
+            "panel": "Panel opaco",
+            "stage": "Escenario",
+            "title": "Perfil"
+          },
+          "key": "Tecla (Key)",
+          "keyTone": {
+            "dark": "Oscura",
+            "light": "Clara",
+            "marked": "Marcada"
+          },
+          "keys": {
+            "enter": "Intro",
+            "escape": "Esc",
+            "q": "Q",
+            "e": "E",
+            "up": "↑",
+            "upLabel": "Flecha arriba"
+          },
+          "tag": "Etiqueta (Tag)",
+          "tagTone": {
+            "white": "Blanca",
+            "red": "Roja",
+            "cta": "Roja con texto blanco"
+          },
+          "tags": {
+            "player": "1P",
+            "new": "Nuevo",
+            "challenge": "Reto",
+            "live": "En juego",
+            "result": "Tu resultado"
+          },
+          "slap": "Pegatina OTP (OtpSlap)",
+          "slapSize": {
+            "title": "Lockup del título · 120 px",
+            "menu": "Lockup del menú · 104 px",
+            "bar": "Barra de controles · 30 px de alto"
+          },
+          "slapBarBefore": "Un juego de",
+          "slapBarAfter": "Other People Records"
+        },
+        "cursor": {
+          "intro": "El foco es el cursor (§3.3): marco blanco de 3 px a 4 px de la pieza, que sigue su forma, con la etiqueta 1P en las listas. Una sola parada de tabulación por grupo; el ratón también mueve el cursor.",
+          "static": "Cursor forzado",
+          "staticSlant": "Paralelogramo con 1P a la izquierda",
+          "staticCut": "Chaflán con 1P encima",
+          "menuTitle": "useRovingMenu · ↑↓ en bucle, Inicio/Fin, letra inicial, Intro",
+          "menuLabel": "Menú de prueba",
+          "menuIndex": "0{index}",
+          "menu": {
+            "play": "Jugar",
+            "jury": "Jurado",
+            "results": "Resultados",
+            "settings": "Ajustes"
+          },
+          "menuHelp": {
+            "play": "Pilla el sample, cocina tu flip y súbelo antes del domingo.",
+            "jury": "Escucha 45 s de cada beat y puntúalo de 1 a 5. Sin nombres hasta el domingo.",
+            "results": "La semana sellada, con su ceremonia y su podio.",
+            "settings": "Sonido, movimiento, modo serio y tamaño de texto."
+          },
+          "entered": "Has entrado en «{item}»",
+          "gridTitle": "useRovingGrid · ←→↑↓ en bucle, Inicio/Fin, RePág/AvPág, Intro",
+          "gridLabel": "Rejilla de prueba",
+          "gridHelp": "Mueve el cursor con las flechas y pulsa Intro. Todas las casillas iguales: sin números de orden ni medias.",
+          "grid": {
+            "tiger": "Tigre púrpura",
+            "cobra": "Cobra lunar",
+            "lynx": "Lince eléctrico",
+            "raven": "Cuervo cromado",
+            "siren": "Sirena fantasma",
+            "comet": "Cometa rojo",
+            "thunder": "Trueno magnético",
+            "random": "Aleatorio"
+          },
+          "tabsTitle": "useRovingTabs · Q/E desde cualquier sitio, ←→ en las pestañas",
+          "tabsLabel": "Orden de la lista",
+          "tabs": {
+            "fair": "Ronda justa",
+            "recent": "Recién subidas",
+            "random": "Aleatorio"
+          },
+          "tabPanels": {
+            "fair": "Primero, las que menos votos llevan (nadie ve cuántos).",
+            "recent": "Las últimas subidas, primero.",
+            "random": "Un orden nuevo cada vez."
+          },
+          "flashTitle": "flash.request() · como mucho 3 destellos por segundo (RD-MOT-04)",
+          "flashButton": "Pedir destello",
+          "flashIdle": "Pulsa varias veces seguidas: el cuarto destello en un segundo se deniega.",
+          "flashGranted": "Autorizado: {count} de 3 en el último segundo (área ≤ 25 %, opacidad ≤ 40 %).",
+          "flashDenied": "Denegado: ya van 3 destellos en el último segundo.",
+          "flashSerious": "Modo serio: no se autoriza ningún destello."
+        }
       }
     }
   },
