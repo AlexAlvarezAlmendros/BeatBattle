@@ -1,8 +1,8 @@
 /*
  * Barra de controles inferior (guía §3.4.1; maquetas `final.css` `.ctrl`): 58 px, negra, filete rojo de
  * 2 px y línea discontinua encima. Pegada al pie de la ventana mientras se desplaza la pantalla
- * (`sticky`), con su alto como margen del foco (`--bb-controls-h`, global.css). Tres columnas: teclas,
- * firma centrada y dato.
+ * (`sticky`), con su alto real como margen del foco (`--controls-pinned-h`, que mide `ControlsBar`;
+ * global.css). Tres columnas: teclas, firma centrada y dato.
  */
 .bar {
   position: sticky;
@@ -16,6 +16,14 @@
   padding: 0 var(--bb-gutter);
   border-top: var(--bb-stroke) solid var(--bb-red);
   background: var(--bb-black);
+}
+
+/*
+ * Despegada (`data-unpinned`, la pone `ControlsBar` si la barra pasa de un cuarto del alto de la
+ * ventana): al final de la pantalla, para no tapar el contenido en una ventana baja (WCAG 1.4.10).
+ */
+.bar[data-unpinned] {
+  position: relative;
 }
 
 /* Línea discontinua roja por encima del filete. */

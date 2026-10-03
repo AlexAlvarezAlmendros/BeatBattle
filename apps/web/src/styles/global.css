@@ -103,10 +103,12 @@ pre {
 
 /*
  * Ningún control enfocado queda tapado por la barra de controles (§3.3): al desplazarse para enseñarlo,
- * el navegador deja ese margen por debajo.
+ * el navegador deja ese margen por debajo. Es el alto **real** de la barra pegada (`--controls-pinned-h`,
+ * que publica `ControlsBar`: en una ventana estrecha con teclado crece de 58 a 80–110 px; 0 si va
+ * despegada), con `--bb-controls-h` mientras no se ha medido.
  */
 :is(a[href], button, input, select, textarea, summary, [tabindex]) {
-  scroll-margin-block-end: calc(var(--bb-controls-h) + var(--bb-space-4));
+  scroll-margin-block-end: calc(var(--controls-pinned-h, var(--bb-controls-h)) + var(--bb-space-4));
 }
 
 /*
