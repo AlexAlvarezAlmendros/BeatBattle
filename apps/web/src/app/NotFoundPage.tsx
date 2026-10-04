@@ -10,18 +10,22 @@ import { BackToMenu, ScreenPage } from './ScreenPage'
 /** El pad de 4 × 4 de §3.8.11, fila a fila: los *chops* del sample arriba y la batería debajo. */
 const PAD_ROWS = ['1234', 'QWER', 'ASDF', 'ZXCV'] as const
 
-/** Cómo se toca el pad (§3.8.11), en filas como las reglas de «Cómo se juega»: sus teclas y qué suena. */
+/**
+ * Cómo se tocará el pad cuando llegue (§3.8.11), en filas como las reglas de «Cómo se juega»: sus teclas,
+ * en las mismas filas del pad, y qué sonará. La batería va por filas (Q W E R / A S D F / Z X C V), no
+ * como intervalo: «[Q]–[V]» se leía como Q, R, S, T, U, V (tercer pase del jurado, L-404).
+ */
 const LEGEND = [
-  { id: 'chops', keys: ['1', '2', '3', '4'], tone: 'marked' },
-  { id: 'drums', keys: ['Q', 'V'], tone: 'dark', range: true },
+  { id: 'chops', rows: PAD_ROWS.slice(0, 1), tone: 'marked' },
+  { id: 'drums', rows: PAD_ROWS.slice(1), tone: 'dark' },
 ] as const
 
 /**
  * `*` — la 404 «BONUS STAGE» (guía §3.8.11): el titular es el momento de juego, «BONUS STAGE», con «Te
  * has perdido… pero ya que estás» de subtítulo. La pieza de la cuña es el beat pad de 4 × 4 (teclas de
  * chaflán `--bb-cut-md` de 72 px), quieto y decorativo hasta la Fase 8, con «Volver al menú [Esc]»
- * debajo; el panel, estirado hasta el pie del pad, lleva el subtítulo arriba y abajo cómo se toca (los
- * chops en la fila de arriba, la batería en el resto). El panel va antes que el pad en el orden de
+ * debajo; el panel, estirado hasta el pie del pad, lleva el subtítulo arriba y abajo cómo se tocará
+ * cuando llegue (los chops en la fila de arriba, la batería en las otras tres). El panel va antes que el pad en el orden de
  * lectura y del foco (`panelFirst`): en móvil, el subtítulo sale con el titular, en la primera vista,
  * y el pad debajo; en escritorio siguen el pad a la izquierda y el panel a la derecha.
  *
@@ -76,12 +80,13 @@ export function NotFoundPage() {
             {LEGEND.map((row) => (
               <li key={row.id} className={styles.legendRow}>
                 <span className={styles.legendKeys} aria-hidden="true">
-                  {row.keys.map((key, index) => (
-                    <span key={key} className={styles.keyGroup}>
-                      {'range' in row && index > 0 && (
-                        <span className={styles.dash}>{t('howItWorks.keys.dash')}</span>
-                      )}
-                      <Key tone={row.tone}>{key}</Key>
+                  {row.rows.map((padRow) => (
+                    <span key={padRow} className={styles.keyRow} data-pad-row>
+                      {[...padRow].map((key) => (
+                        <Key key={key} tone={row.tone}>
+                          {key}
+                        </Key>
+                      ))}
                     </span>
                   ))}
                 </span>

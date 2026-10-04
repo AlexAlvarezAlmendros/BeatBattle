@@ -192,15 +192,15 @@
       "summary": "Esta página no existe. Aquí habrá un beat pad para que no te vayas con las manos vacías.",
       "plate": "Bonus stage",
       "pad": "El beat pad de 4 × 4 llega pronto.",
-      "legendTitle": "Cómo se toca",
+      "legendTitle": "Cuando llegue el pad",
       "legend": {
         "chops": {
-          "text": "Chops del sample de la semana",
-          "keysLabel": "Teclas del 1 al 4:"
+          "text": "Tocarás los chops del sample de la semana",
+          "keysLabel": "La fila de arriba, teclas 1, 2, 3 y 4:"
         },
         "drums": {
-          "text": "Batería sintetizada",
-          "keysLabel": "Teclas de la Q a la V:"
+          "text": "Tocarás una batería sintetizada",
+          "keysLabel": "Las otras tres filas, teclas Q W E R, A S D F y Z X C V:"
         }
       }
     },

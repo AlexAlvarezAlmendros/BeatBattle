@@ -44,7 +44,7 @@
 }
 
 /*
- * Cómo se toca: filas con sus teclas, como las reglas de «Cómo se juega», en el pie del panel (que en
+ * Cómo se tocará: filas con sus teclas, como las reglas de «Cómo se juega», en el pie del panel (que en
  * escritorio llega al pie del pad).
  */
 .legend {
@@ -74,16 +74,17 @@
   font-weight: var(--bb-weight-bold);
 }
 
-.legendKeys,
-.keyGroup {
-  display: inline-flex;
-  align-items: center;
+/* Las teclas de la fila, en las filas del pad: la batería, en tres (Q W E R / A S D F / Z X C V). */
+.legendKeys {
+  display: grid;
+  justify-items: start;
   gap: var(--bb-space-1);
 }
 
-.dash {
-  color: var(--bb-text-2);
-  font-family: var(--bb-font-num);
+.keyRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-1);
 }
 
 /* Muy estrecho (< 360 px): teclas de 60 px para que el pad quepa. */

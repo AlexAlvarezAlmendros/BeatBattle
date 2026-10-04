@@ -93,7 +93,7 @@ describe('plantilla de pantalla interior (0.26, §3.8.14)', () => {
     await act(async () => {})
   })
 
-  it('§3.8.11 / RD-VIS-02 e: el panel de la 404 cuenta cómo se toca el pad (chops arriba, batería debajo)', async () => {
+  it('§3.8.11 / RD-VIS-02 e: el panel de la 404 cuenta cómo se tocará el pad (chops arriba, batería debajo)', async () => {
     renderAt('/legal/no-existe')
     const main = screen.getByRole('main')
     const legend = within(main).getByRole('region', { name: t('pages.notFound.legendTitle') })
@@ -107,6 +107,25 @@ describe('plantilla de pantalla interior (0.26, §3.8.14)', () => {
     )
     // Las teclas se ven, pero se leen en palabras («Teclas del 1 al 4:»).
     expect(rows[0]!.querySelectorAll('[aria-hidden="true"] kbd[data-key="marked"]')).toHaveLength(4)
+    await act(async () => {})
+  })
+
+  it('RD-VIS-02 e / §3.8.11: la leyenda de la 404 da la batería por filas del pad, no como un intervalo, y en futuro (L-404)', async () => {
+    renderAt('/legal/no-existe')
+    const main = screen.getByRole('main')
+    // El pad aún no suena (Fase 8): la leyenda cuenta cómo será, no cómo se toca ya.
+    const legend = within(main).getByRole('region', { name: 'Cuando llegue el pad' })
+    const drums = within(legend).getAllByRole('listitem')[1]!
+    // Las teclas, en las filas del pad (Q W E R / A S D F / Z X C V), sin guion de intervalo: «[Q]–[V]»
+    // se leía como Q, R, S, T, U, V.
+    const keyRows = [...drums.querySelectorAll('[aria-hidden="true"] [data-pad-row]')].map((row) =>
+      [...row.querySelectorAll('kbd')].map((key) => key.textContent).join(''),
+    )
+    expect(keyRows).toEqual(['QWER', 'ASDF', 'ZXCV'])
+    expect(drums).not.toHaveTextContent(t('howItWorks.keys.dash'))
+    // En palabras, por filas también.
+    expect(drums).toHaveTextContent('Q W E R, A S D F y Z X C V')
+    expect(legend).not.toHaveTextContent(/de la Q a la V/i)
     await act(async () => {})
   })
 })
