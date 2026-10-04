@@ -137,9 +137,10 @@
    */
   --bb-plate-cursor-reach: 5.25rem;
   /*
-   * Ventana baja de escritorio (≥ 721 px de ancho y < 900 de alto; §3.8.3): las placas del menú bajan con
-   * el alto de la ventana, lineal de 640 a 900 px de alto (a 900 valen lo de la maqueta), y el logo ocupa
-   * el alto que le dejan, para caber sin desplazar en la ventana de un portátil (1366 × 657).
+   * Ventana baja de escritorio (≥ 721 px de ancho y < 900 de alto, o < 969 por debajo de 1200; §3.8.3):
+   * las placas del menú bajan con el alto de la ventana, lineal de 640 a 900 px de alto (a 900 valen lo
+   * de la maqueta), y el logo ocupa el alto que le dejan, para caber sin desplazar en la ventana de un
+   * portátil (1366 × 657). `MainMenu` descuenta además lo que la barra mide de más que la de la maqueta.
    */
   --bb-plate-h-low: clamp(2.75rem, 10dvh - 1.25rem, 4.375rem); /* Placa: 44 → 70 px (≥ --bb-target) */
   --bb-plate-on-scale: 1.2; /* La placa elegida mide un 20 % más que en reposo, a todo alto (84 / 70 px) */

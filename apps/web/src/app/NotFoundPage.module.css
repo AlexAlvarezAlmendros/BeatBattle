@@ -142,13 +142,24 @@
   }
 }
 
-/* Móvil: las teclas, debajo del texto. */
+/*
+ * Móvil: las teclas, debajo del texto, y las filas más juntas (8 px), y la que no lleva teclas (el
+ * metrónomo y la grabación), en una sola fila, sin el hueco de la de las teclas. Así «Volver al menú»
+ * queda encima de la barra en la primera vista (L2) también cuando «Legal» va debajo de la firma y la
+ * barra mide 98 px (a 390 × 844 táctil; M3r): con 12 px y el hueco vacío, la barra le tapaba 37.
+ */
 @media (max-width: 720px) {
   .legendRow {
     grid-template-columns: var(--bb-space-10) minmax(0, 1fr);
     grid-template-areas:
       "index text"
       ". keys";
+    gap: var(--bb-space-2) var(--bb-space-3);
+    padding-block: var(--bb-space-2);
+  }
+
+  .legendRow:not(:has(.legendKeys)) {
+    grid-template-areas: "index text";
   }
 }
 

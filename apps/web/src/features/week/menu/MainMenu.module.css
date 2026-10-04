@@ -202,7 +202,7 @@
 }
 
 /*
- * ── Ventana baja de escritorio (≥ 721 px de ancho y < 900 de alto) ───────────────────────────────
+ * ── Ventana baja de escritorio (≥ 721 px de ancho y < 900 de alto, o < 969 por debajo de 1200) ───
  * Con la ventana de un portátil (1366 × 657, 1280 × 720) el menú de la maqueta mide unos 900 px y se
  * desplazaba como una web (jurado de la 0.28, tercer pase). Aquí baja con el alto, sin esconder nada (con
  * teclado y ratón no hay pliegues que escondan; §3.8.3):
@@ -221,8 +221,14 @@
  *   su margen.
  *
  * A 900 px de alto la maqueta queda como está; por debajo de unos 640 ya no cabe y se desplaza.
+ *
+ * Por debajo de 1200 px de ancho, la ventana es baja hasta los 968 px de alto: ahí la barra lleva la
+ * crónica en su fila y, con teclado, las teclas en otra (`ControlsBar`), hasta 69 px más que la de la
+ * maqueta (127 frente a 58), así que el alto que le queda al menú es el de una ventana de 899 px. A
+ * 721 × 900 la composición de la maqueta se desplazaba 23 px; esta, que ya era la de 721 × 899, cabe.
  */
-@media (min-width: 721px) and (max-height: 899px) {
+@media (min-width: 721px) and (max-height: 899px),
+  (min-width: 721px) and (max-width: 1199px) and (max-height: 968px) {
   .menu {
     margin-top: calc(-1 * var(--bb-space-6));
   }
@@ -282,10 +288,23 @@
    * menos que el objetivo táctil); la elegida, `--bb-plate-on-scale` más (como 70 → 84). En la lista
    * estrecha son el alto mínimo: con el dato en una segunda línea, la placa crece con su texto. Solo en
    * este menú (`--menu-plate-h`, `MenuPlate`): las placas de la galería no cambian.
+   *
+   * `--menu-bar-extra`: lo que la barra pegada mide de más que la de la maqueta (su alto real,
+   * `--controls-pinned-h`, frente a `--bb-controls-h`): con teclado, las teclas en su fila si no caben al
+   * lado de la firma y, por debajo de 1200 px, la crónica en la suya (`ControlsBar`). Las placas se lo
+   * reparten entre las seis (cinco en reposo y la elegida, `--bb-plate-on-scale` veces), sin bajar del
+   * objetivo táctil: a 1280 × 720 la barra lleva las teclas en su fila (84 px) y el menú se desplazaba
+   * 6 px. Despegada (0), no cuenta.
    */
   .plates {
-    --menu-plate-h: var(--bb-plate-h-low);
-    --menu-plate-h-on: calc(var(--bb-plate-h-low) * var(--bb-plate-on-scale));
+    --menu-bar-extra: max(0px, var(--controls-pinned-h, var(--bb-controls-h)) - var(--bb-controls-h));
+    --menu-plate-h: max(
+      var(--bb-target),
+      var(--bb-plate-h-low) -
+      var(--menu-bar-extra) /
+      (5 + var(--bb-plate-on-scale))
+    );
+    --menu-plate-h-on: calc(var(--menu-plate-h) * var(--bb-plate-on-scale));
     gap: var(--bb-plate-gap-low);
   }
 

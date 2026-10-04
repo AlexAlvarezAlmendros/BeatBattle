@@ -303,7 +303,9 @@ for (const viewport of [
   { width: 721, height: 900, touch: false, short: true },
   { width: 768, height: 1024, touch: true, short: true },
   { width: 823, height: 514, touch: false, short: true },
-  { width: 900, height: 900, touch: false, short: false },
+  // Por debajo de 1200 px y hasta 968 de alto, la ventana es baja para el menú (la barra lleva las teclas y
+  // la crónica en sus filas, `MainMenu`): el logo baja con el alto y el lockup, con él.
+  { width: 900, height: 900, touch: false, short: true },
   { width: 1024, height: 768, touch: false, short: false },
   { width: 1100, height: 900, touch: false, short: false },
   { width: 1280, height: 800, touch: false, short: false },
@@ -934,7 +936,10 @@ function underControls(page: Page): Promise<string[]> {
  * 1536 × 730; 1440 × 789, la de la pantalla de 1440 × 900 de las maquetas), el menú medía unos 900 px y
  * se desplazaba como una web: a 1366 × 657 la barra tapaba las opciones 05 y 06 y cortaba el título de
  * la tarjeta. Ahora logo, placas y tarjeta bajan con la altura y la pantalla cabe sin desplazar, sin
- * esconder nada (con teclado y ratón no hay pliegues que escondan).
+ * esconder nada (con teclado y ratón no hay pliegues que escondan). Con la barra más alta que la de la
+ * maqueta (con teclado, las teclas en su fila a 1280 × 720; y por debajo de 1200 px, también la crónica),
+ * el menú cuenta con su alto real: a 1024 × 900 y 1100 × 900 la barra mide 127 px y /dev/menu se
+ * desplazaba 86 y 103 px.
  */
 for (const viewport of [
   { width: 1440, height: 789 },
@@ -942,6 +947,8 @@ for (const viewport of [
   { width: 1536, height: 730 },
   { width: 1280, height: 720 },
   { width: 1920, height: 955 },
+  { width: 1024, height: 900 },
+  { width: 1100, height: 900 },
 ]) {
   test.describe(`menú con la ventana baja a ${viewport.width} × ${viewport.height}`, () => {
     test.use({ viewport })

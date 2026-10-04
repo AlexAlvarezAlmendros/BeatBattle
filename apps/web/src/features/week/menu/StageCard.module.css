@@ -197,8 +197,10 @@
  * La misma tarjeta, apretada: menos relleno y separación, el vinilo de 64 px (decorativo: repite la
  * semana y el BPM) y las entradas a 20 px. Si el reto no cabe junto a las entradas, parte su texto en
  * vez de mandarlas a otra fila. No se va nada: chips, play con la onda, reto y entradas siguen ahí.
+ * Por debajo de 1200 px de ancho, hasta 968 px de alto: ahí la barra es más alta (`MainMenu`).
  */
-@media (min-width: 721px) and (max-height: 899px) {
+@media (min-width: 721px) and (max-height: 899px),
+  (min-width: 721px) and (max-width: 1199px) and (max-height: 968px) {
   .card {
     gap: var(--bb-space-2);
     padding: var(--bb-space-2) var(--bb-space-5);
