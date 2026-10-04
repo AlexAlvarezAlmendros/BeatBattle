@@ -109,6 +109,24 @@
   color: var(--bb-black);
 }
 
+/*
+ * Contraste alto (`forced-colors: active`, RNF-A11Y-01): el estado iba solo en fondos (la casilla blanca
+ * de «SÍ | NO» y el relleno rojo del encendido), y el modo los quita: «SÍ» y «NO» se veían iguales. Como
+ * en el chip de filtro (`Chip.module.css`): la casilla elegida en `Highlight` con su texto en
+ * `HighlightText`, y el encendido con el borde en `Highlight` (el de reposo, `CanvasText`, `frame.css`).
+ */
+@media (forced-colors: active) {
+  .yesNo .on {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  .switch[aria-checked="true"]::before {
+    background: Highlight;
+  }
+}
+
 .hint {
   color: var(--bb-text-3);
   font-size: var(--bb-fs-sm);

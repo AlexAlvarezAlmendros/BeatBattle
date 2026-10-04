@@ -127,3 +127,31 @@ test('RNF-A11Y-01: en contraste alto, el conmutador «SÍ | NO» enseña su esta
   expect(await yesNo(rest)).toEqual(off)
   expect(await background(active, '::before')).not.toBe(await background(rest, '::before'))
 })
+
+/**
+ * Los interruptores de la galería («Reducir movimiento», «Modo serio»; `role="switch"`) marcaban su estado
+ * solo con fondos, y en contraste alto «SÍ» y «NO» se veían iguales (tercer pase del jurado, L5). Como el
+ * chip de filtro: la casilla elegida en `Highlight` y el borde del encendido en `Highlight`.
+ */
+test('RNF-A11Y-01: en contraste alto, los interruptores de la galería enseñan su estado («SÍ | NO» y el borde)', async ({
+  page,
+}) => {
+  await openGallery(page)
+  const canvas = await canvasColor(page)
+  const serious = page.getByRole('switch', { name: /Modo serio/ })
+  await expect(serious).toHaveAttribute('aria-checked', 'false')
+  // Apagado: «NO» resaltada (no del color del lienzo) y «SÍ» no.
+  const off = await yesNo(serious)
+  expect(off[1]).not.toBe(canvas)
+  expect(off[1]).not.toBe(off[0])
+  const offBorder = await background(serious, '::before')
+  // Encendido: el resaltado pasa a «SÍ» y el borde cambia.
+  await serious.click()
+  await expect(serious).toHaveAttribute('aria-checked', 'true')
+  expect(await yesNo(serious)).toEqual([off[1], off[0]])
+  expect(await background(serious, '::before')).not.toBe(offBorder)
+  // El otro interruptor, apagado, enseña lo mismo que el primero antes de encenderlo.
+  const reduced = page.getByRole('switch', { name: /Reducir movimiento/ })
+  await expect(reduced).toHaveAttribute('aria-checked', 'false')
+  expect(await yesNo(reduced)).toEqual(off)
+})
