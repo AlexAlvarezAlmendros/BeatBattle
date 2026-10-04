@@ -395,10 +395,14 @@ for (const fontSize of [20, 24]) {
             ),
           )
           expect(overflow, 'ningún texto de la firma se sale de su caja').toBe(false)
-          if (path !== '/dev/menu')
-            await expect(page.getByRole('contentinfo').getByRole('link', { name: 'Legal' })).toBeInViewport({
-              ratio: 1,
-            })
+          if (path !== '/dev/menu') {
+            // Con la letra grande, la barra (firma en dos líneas y «Legal» debajo) pasa del 15 % de la
+            // ventana y se despega: «Legal» va al final de la pantalla (§3.4.1 v0.6.7).
+            const bar = page.getByRole('contentinfo')
+            if (await bar.evaluate((footer) => footer.hasAttribute('data-unpinned')))
+              await page.evaluate(() => window.scrollTo(0, document.scrollingElement!.scrollHeight))
+            await expect(bar.getByRole('link', { name: 'Legal' })).toBeInViewport({ ratio: 1 })
+          }
         })
       }
     })

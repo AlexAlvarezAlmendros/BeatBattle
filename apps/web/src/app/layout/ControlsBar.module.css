@@ -46,10 +46,10 @@
 }
 
 /*
- * Despegada (`data-unpinned`, la pone `ControlsBar` si la barra pasa de un cuarto del alto de la
- * ventana, o del 15 % con teclado en una ventana de 720 px de ancho o menos o de 700 px de alto o
- * menos): las teclas, «Legal» y la crónica van al final de la pantalla, para no tapar el contenido en
- * una ventana pequeña (WCAG 1.4.10), **salvo la fila de la firma, que sigue pegada al pie** (§3.4.1
+ * Despegada (`data-unpinned`, la pone `ControlsBar` si la barra pasa del 15 % del alto de la ventana, en
+ * cualquier ventana y con cualquier entrada, §3.4.1 v0.6.7): las teclas, «Legal» y la crónica van al
+ * final de la pantalla, para no tapar el contenido (WCAG 1.4.10), **salvo la fila de la firma, que sigue
+ * pegada al pie** (§3.4.1
  * v0.6.6, `RF-OTP-01`: antes se despegaba entera y las interiores, sin lockup, no enseñaban ninguna firma
  * al abrir). La fila de la firma pasa arriba (las demás, debajo y en el mismo orden) y la barra sigue
  * pegada con `bottom` negativo: lo que mide de más que esa fila (`--bar-tail`, que mide `ControlsBar`)

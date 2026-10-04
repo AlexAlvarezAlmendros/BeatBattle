@@ -238,9 +238,9 @@ function barShare(
  * L8: en una ventana baja con teclado y ratón (360 × 640, 375 × 667), la barra pegada al pie medía 154 px
  * (teclas en dos filas, firma, crónica y pausa), el 24 % de la ventana, y en el menú la primera vista no
  * enseñaba ninguna placa. En su revisión, lo mismo en una ventana estrecha más alta: a 390 × 844 medía
- * 158 px (18,7 %) y empezaba en mitad de «JUGAR». Con puntero fino y una ventana de 720 px de ancho o
- * menos o de 700 px de alto o menos, la barra se despega en cuanto pasa del 15 % de la ventana (en
- * táctil, del 25 %: allí no lleva teclas). También con el escritorio ampliado: a 823 × 514 (1440 × 900 al
+ * 158 px (18,7 %) y empezaba en mitad de «JUGAR». La barra se despega en cuanto pasa del 15 % de la
+ * ventana (desde la v0.6.7, en cualquier ventana y con cualquier entrada). También con el escritorio
+ * ampliado: a 823 × 514 (1440 × 900 al
  * 175 %) la del menú mide 127 px y, pegada, tapaba «JUGAR» (ninguna placa entera en la primera vista).
  * Despegada, la fila de la firma sigue pegada al pie (§3.4.1 v0.6.6, cuarto pase, F2): lo que queda pegado
  * es esa fila, que no pasa del 15 %, y la firma se ve al abrir.
@@ -308,15 +308,15 @@ for (const { width, height } of [
 }
 
 /**
- * Lo que no cambia: en táctil y en una ventana de escritorio de tamaño normal la barra sigue pegada (la
- * firma se ve al abrir). A 1024 × 768 con teclado, la del menú (teclas, firma y crónica en tres filas)
- * mide el 16,5 %: por debajo del cuarto de la ventana, que es el límite fuera de las ventanas pequeñas.
+ * Lo que no cambia: mientras la barra no pase del 15 % de la ventana va pegada entera (la firma se ve al
+ * abrir). En táctil, la del menú es solo la firma; a 390 × 844, la de las interiores (firma y «Legal»
+ * debajo) mide el 11,6 %; a 1280 × 720 con teclado, la del menú (teclas en su fila) mide 84 px, el 11,7 %.
  */
-for (const { width, height, touch } of [
-  { width: 360, height: 640, touch: true },
-  { width: 390, height: 844, touch: true },
-  { width: 1024, height: 768, touch: false },
-  { width: 1280, height: 720, touch: false },
+for (const { width, height, touch, paths } of [
+  { width: 360, height: 640, touch: true, paths: ['/dev/menu'] },
+  { width: 390, height: 844, touch: true, paths: ['/como-funciona', '/dev/menu'] },
+  { width: 1280, height: 720, touch: false, paths: ['/como-funciona', '/dev/menu'] },
+  { width: 1440, height: 900, touch: false, paths: ['/como-funciona', '/dev/menu'] },
 ]) {
   test.describe(`barra pegada a ${width} × ${height}${touch ? ' táctil' : ' con teclado'}`, () => {
     test.use({ viewport: { width, height }, isMobile: touch, hasTouch: touch })
@@ -324,7 +324,7 @@ for (const { width, height, touch } of [
     for (const { path, heading } of [
       { path: '/como-funciona', heading: 'Cómo se juega' },
       { path: '/dev/menu', heading: 'Beat Battle' },
-    ]) {
+    ].filter(({ path }) => paths.includes(path))) {
       test(`§3.4.1 / RF-OTP-01: en ${path} la barra va pegada al pie con la firma a la vista`, async ({
         page,
       }) => {
@@ -338,6 +338,127 @@ for (const { width, height, touch } of [
         })
       })
     }
+  })
+}
+
+/**
+ * Lo pegado de la barra al abrir y lo que va al final de la pantalla: si va despegada, su alto pegado
+ * (`--controls-pinned-h`, el margen del foco) y las cajas de la firma, de las teclas, del dato de la
+ * derecha y de «Legal» (null si no se ven), sin desplazar y al final de la pantalla. `cover` es por
+ * dónde empezaría a tapar el contenido una pieza de la barra: el pie de la ventana o, si la pantalla
+ * acaba antes (la barra, en su sitio al final, no va encima de nada), el pie del `<main>`.
+ */
+function unpinnedLayout(page: Page) {
+  return page.evaluate(() => {
+    const bar = document.querySelector('footer')!
+    const box = (element: Element | null) => {
+      if (!element || element.getClientRects().length === 0) return null
+      const { top, bottom, left, right } = element.getBoundingClientRect()
+      return bottom - top < 1 || right - left < 1 ? null : { top, bottom }
+    }
+    const pieces = () => ({
+      signature: box(bar.querySelector('[data-otp-signature]')),
+      keys:
+        getComputedStyle(bar.querySelector('ul')!).visibility === 'visible'
+          ? box(bar.querySelector('ul'))
+          : null,
+      right: box(bar.querySelector('[data-frame-slot="controlsRight"]')),
+      legal: box(bar.querySelector('a[href^="/legal/"]')),
+      barBottom: bar.getBoundingClientRect().bottom,
+      cover: Math.min(innerHeight, document.querySelector('main')!.getBoundingClientRect().bottom),
+    })
+    window.scrollTo(0, 0)
+    const atTop = pieces()
+    const pinned = Number.parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--controls-pinned-h'),
+    )
+    window.scrollTo(0, document.scrollingElement!.scrollHeight)
+    const atEnd = pieces()
+    window.scrollTo(0, 0)
+    return { unpinned: bar.hasAttribute('data-unpinned'), pinned, height: innerHeight, atTop, atEnd }
+  })
+}
+
+/**
+ * Tercer pase del jurado sobre la v0.6.6 (B1): la barra solo se despegaba pasado el 15 % con teclado en
+ * una ventana pequeña (720 px de ancho o menos, 700 de alto o menos); en el resto, pasado el 25 %. A
+ * 1024 × 768 con teclado la del menú lleva tres filas (teclas, firma y crónica), mide 127 px (16,5 %) e iba
+ * pegada entera: tapaba el dato de la placa 06, el panel de ayuda y el play, la onda y el reto de la
+ * tarjeta. Lo mismo a 1024 × 820, 1100 × 800 y 1199 × 840. En táctil, la de las interiores (firma y
+ * «Legal» debajo) mide 98 px, el 15,3 % a 360 × 640 y el 17,3 % a 320 × 568, y tampoco se despegaba.
+ * §3.4.1 v0.6.7: el 15 % vale en cualquier ventana y con cualquier entrada; despegada, la fila de la
+ * firma sigue pegada al pie y lo demás («Legal», las teclas, la crónica) va al final de la pantalla.
+ */
+for (const { width, height } of [
+  { width: 1024, height: 768 },
+  { width: 1024, height: 820 },
+  { width: 1100, height: 800 },
+  { width: 1199, height: 840 },
+]) {
+  test.describe(`barra despegada a ${width} × ${height} con teclado`, () => {
+    test.use({ viewport: { width, height } })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`§3.4.1 v0.6.7 / RF-OTP-01 / WCAG 1.4.10: en ${path}, pasado el 15 %, la barra se despega salvo la fila de la firma`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        const { unpinned, pinned, atTop, atEnd } = await unpinnedLayout(page)
+        expect(unpinned, 'la barra, despegada').toBe(true)
+        expect(pinned / height, 'lo pegado, ≤ 15 % de la ventana').toBeLessThanOrEqual(0.15)
+        // Al abrir, la firma entera al pie; las teclas y la crónica, al final de la pantalla: por
+        // debajo de la ventana o, si la pantalla acaba antes, después del contenido (no encima de él).
+        expect(atTop.signature, 'la firma se ve al abrir').not.toBeNull()
+        expect(atTop.signature!.bottom).toBeLessThanOrEqual(height + 0.5)
+        expect(atTop.keys!.top, 'las teclas, al final de la pantalla').toBeGreaterThanOrEqual(
+          atTop.cover - 0.5,
+        )
+        expect(atTop.right!.top, 'la crónica, al final de la pantalla').toBeGreaterThanOrEqual(
+          atTop.cover - 0.5,
+        )
+        await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({
+          ratio: 1,
+        })
+        // Al final de la pantalla, la barra entera.
+        expect(atEnd.barBottom).toBeLessThanOrEqual(height + 0.5)
+        expect(atEnd.keys!.bottom).toBeLessThanOrEqual(height + 0.5)
+        const { hidden } = await hiddenKeys(page)
+        expect(hidden).toEqual([])
+      })
+    }
+  })
+}
+
+for (const { width, height } of [
+  { width: 360, height: 640 },
+  { width: 320, height: 568 },
+]) {
+  test.describe(`barra despegada a ${width} × ${height} táctil`, () => {
+    test.use({ viewport: { width, height }, isMobile: true, hasTouch: true })
+
+    test('§3.4.1 v0.6.7 / RF-OTP-01 / WCAG 1.4.10: en /como-funciona «Legal» va al final de la pantalla y la firma sigue pegada al pie', async ({
+      page,
+    }) => {
+      await open(page, '/como-funciona', 'Cómo se juega')
+      await settle(page)
+      const { unpinned, pinned, atTop, atEnd } = await unpinnedLayout(page)
+      expect(unpinned, 'la barra, despegada').toBe(true)
+      expect(pinned / height, 'lo pegado, ≤ 15 % de la ventana').toBeLessThanOrEqual(0.15)
+      expect(atTop.signature, 'la firma se ve al abrir').not.toBeNull()
+      expect(atTop.signature!.bottom).toBeLessThanOrEqual(height + 0.5)
+      expect(atTop.legal!.top, '«Legal», al final de la pantalla').toBeGreaterThanOrEqual(atTop.cover - 0.5)
+      await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({
+        ratio: 1,
+      })
+      // Al final de la pantalla, «Legal» entero, debajo de la firma.
+      expect(atEnd.legal!.bottom).toBeLessThanOrEqual(height + 0.5)
+      expect(atEnd.legal!.top).toBeGreaterThanOrEqual(atEnd.signature!.bottom - 0.5)
+      await page.evaluate(() => window.scrollTo(0, document.scrollingElement!.scrollHeight))
+      await expect(page.getByRole('contentinfo').getByRole('link', { name: 'Legal' })).toBeInViewport({
+        ratio: 1,
+      })
+    })
   })
 }
 
