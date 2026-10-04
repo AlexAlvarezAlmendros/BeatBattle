@@ -17,6 +17,8 @@ interface PlaceholderPageProps {
   piece?: ReactNode
   /** Reparto de la pantalla (`ScreenPage`): `title` en la autenticación, como la pantalla de título. */
   layout?: ScreenPageProps['layout']
+  /** Las pestañas de la pantalla (`ScreenPage`): las secciones de Opciones. */
+  tabs?: ReactNode
   children?: ReactNode
 }
 
@@ -32,6 +34,7 @@ export function PlaceholderPage({
   kicker,
   piece,
   layout,
+  tabs,
   children,
 }: PlaceholderPageProps) {
   return (
@@ -43,6 +46,7 @@ export function PlaceholderPage({
       piece={piece ?? <UnderConstruction big />}
       badge={piece ? <UnderConstruction /> : undefined}
       layout={layout}
+      tabs={tabs}
     >
       {children}
     </ScreenPage>

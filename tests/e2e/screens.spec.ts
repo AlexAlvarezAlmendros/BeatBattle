@@ -328,6 +328,19 @@ test.describe('390 × 844', () => {
     await expect(back).toBeInViewport({ ratio: 1 })
   })
 
+  test('RD-VIS-02 e: en móvil, Opciones abre con su rótulo y su título, antes de las pestañas (L3)', async ({
+    page,
+  }) => {
+    await open(page, '/ajustes', 'Sonido y efectos')
+    await settle(page)
+    const box = await boxes(page, {
+      head: 'main [data-screen-part="head"]',
+      tabs: 'main nav[aria-label="Secciones de ajustes"]',
+    })
+    expect(box.head.bottom).toBeLessThanOrEqual(box.tabs.top)
+    await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toBeInViewport({ ratio: 1 })
+  })
+
   for (const path of ['/ajustes', '/ajustes/cuenta']) {
     test(`§3.1 / RD-VIS-02 e: en móvil, la cuña de ${path} no pasa del granate de las maquetas (≤ 18 %)`, async ({
       page,

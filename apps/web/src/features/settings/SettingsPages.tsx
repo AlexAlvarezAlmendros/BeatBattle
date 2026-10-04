@@ -4,6 +4,7 @@ import type { SettingsSectionKey } from '../../app/paths'
 import { t } from '../../i18n'
 import { FilterChip } from '../../ui/Chip'
 import { useShortcuts } from '../../ui/shortcuts'
+import { SettingsTabs } from './SettingsLayout'
 import { SettingsPreview } from './SettingsPreview'
 
 /*
@@ -38,6 +39,8 @@ function SettingsSectionPlaceholder({
       summary={t(`settings.${section}.summary`)}
       // La pieza de la cuña: las placas de la sección en vista previa (el sello «EN OBRAS» pasa al panel).
       piece={<SettingsPreview section={section} />}
+      // Las secciones, después del rótulo y del título (en móvil, la pantalla abre con su título).
+      tabs={<SettingsTabs />}
       documentTitle={t('settings.pageTitle', { section: title })}
     >
       {children}

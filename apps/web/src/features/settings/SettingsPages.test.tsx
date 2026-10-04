@@ -20,6 +20,15 @@ describe('Opciones (§3.8.14)', () => {
     expect(kicker.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
+  it('RD-VIS-02 e: la cabeza (rótulo y título) va antes de las pestañas en el orden de lectura, como en las demás interiores (L3)', () => {
+    renderInRouter(<SoundSettingsPage />, '/ajustes/sonido')
+    const heading = screen.getByRole('heading', { level: 1, name: t('settings.sound.title') })
+    const tabs = screen.getByRole('navigation', { name: t('settings.navLabel') })
+    expect(heading.compareDocumentPosition(tabs) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    // Las pestañas, en la pantalla (su zona de la plantilla), antes que la pieza y el panel.
+    expect(tabs.closest('[data-screen-part="tabs"]')).not.toBeNull()
+  })
+
   it('RD-VIS-02 e: la cuña lleva la pieza de la sección (sus placas en vista previa, quietas) y el sello pasa al panel', () => {
     const { container } = renderInRouter(<SoundSettingsPage />, '/ajustes/sonido')
     const piece = container.querySelector('[data-screen-part="piece"]')!

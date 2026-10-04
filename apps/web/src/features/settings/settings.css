@@ -1,8 +1,4 @@
-/* Opciones (§3.8.14): las pestañas de las secciones encima de la pantalla de la sección. */
-.settings-layout {
-  display: grid;
-  gap: var(--bb-space-6);
-}
+/* Opciones (§3.8.14): las pestañas de las secciones van en la pantalla de cada sección (`SettingsTabs`). */
 
 /* Una opción de la sección: el conmutador y, debajo, qué hace (RNF-A11Y-08). */
 .settings-option {

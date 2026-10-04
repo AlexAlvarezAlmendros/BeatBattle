@@ -28,6 +28,12 @@ export interface ScreenPageProps {
   /** Distintivo arriba del panel (el sello «EN OBRAS» cuando la pieza es otra cosa). */
   badge?: ReactNode
   /**
+   * Las pestañas de la pantalla (las secciones de Opciones), a todo lo ancho, después de la cabeza y
+   * antes de la pieza y el panel: en móvil, la pantalla abre con su rótulo y su título y las pestañas
+   * van debajo, como se leen (tercer pase del jurado, L3).
+   */
+  tabs?: ReactNode
+  /**
    * Reparto de la pantalla. `interior` (por defecto): la pieza arriba a la izquierda y el panel a su
    * lado, estirado hasta el pie de la pieza. `title`: la pantalla de título de la autenticación
    * (maqueta `00-titulo`), con la pieza ancha (el logo grande con su lockup) y el bloque centrado en
@@ -77,6 +83,7 @@ export function ScreenPage({
   documentTitle = title,
   piece,
   badge,
+  tabs,
   layout = 'interior',
   fill = false,
   panelFirst = false,
@@ -100,6 +107,7 @@ export function ScreenPage({
       className={cx(styles.screen, className)}
       data-title-in-hud={inHud || undefined}
       data-piece={piece ? '' : undefined}
+      data-tabs={tabs ? '' : undefined}
       data-layout={layout}
       data-fill={fill || undefined}
       data-panel-first={panelFirst || undefined}
@@ -109,6 +117,11 @@ export function ScreenPage({
         {kicker && <p className={cx('bb-label', styles.kicker)}>{kicker}</p>}
         <h1 className={cx('bb-display', styles.title)}>{title}</h1>
       </div>
+      {tabs && (
+        <div className={styles.tabs} data-screen-part="tabs">
+          {tabs}
+        </div>
+      )}
       {panelFirst && panel}
       {piece && (
         <div className={styles.piece} data-screen-part="piece">

@@ -43,6 +43,20 @@
   min-width: 0;
 }
 
+/* Las pestañas de la pantalla (Opciones), a todo lo ancho entre la cabeza y la pieza y el panel. */
+.tabs {
+  grid-area: tabs;
+  min-width: 0;
+}
+
+.screen[data-tabs] {
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas:
+    "head head"
+    "tabs tabs"
+    "piece panel";
+}
+
 .kicker {
   color: var(--bb-text-2);
   letter-spacing: var(--bb-tracking-label-wide);
@@ -151,6 +165,10 @@
     grid-template-rows: 1fr;
   }
 
+  .screen[data-fill][data-title-in-hud][data-tabs] {
+    grid-template-rows: auto 1fr;
+  }
+
   .screen[data-fill] .piece {
     display: flex;
     flex-direction: column;
@@ -171,6 +189,13 @@
   .screen[data-title-in-hud] {
     grid-template-rows: auto;
     grid-template-areas: "piece panel";
+  }
+
+  .screen[data-title-in-hud][data-tabs] {
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      "tabs tabs"
+      "piece panel";
   }
 
   .screen[data-title-in-hud] .head {
@@ -203,6 +228,16 @@
       "head"
       "panel"
       "piece";
+  }
+
+  /* Con pestañas (Opciones): la cabeza, las pestañas, la pieza y el panel, como se leen (L3). */
+  .screen[data-tabs],
+  .screen[data-title-in-hud][data-tabs] {
+    grid-template-areas:
+      "head"
+      "tabs"
+      "piece"
+      "panel";
   }
 
   /* Pantalla de título en una columna: el logo en medio y el panel anclado al pie, encima de la barra. */
