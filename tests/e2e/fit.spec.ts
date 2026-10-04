@@ -287,6 +287,50 @@ for (const touch of [true, false]) {
 }
 
 /**
+ * La etiqueta nunca se corta, tampoco en el móvil con teclado (§3.3; jurado de la 0.28, ronda final, E2): con
+ * AJUSTES elegida, el dato largo «Sonido · movimiento» y la tecla `[INTRO]` le quitaban el sitio. A 360 × 640
+ * la placa enseñaba «06 AJUS Sonido · movimiento [INTRO]» y, a 390 × 844, la etiqueta bajaba a 12 px: la
+ * regla de bajar el dato a la segunda línea solo valía de 721 px en adelante. Ahora el dato y la tecla bajan,
+ * y la etiqueta queda entera y a su cuerpo de elegida (nunca por debajo del mínimo de las placas, 16 px).
+ */
+for (const viewport of [
+  { width: 360, height: 640 },
+  { width: 390, height: 844 },
+]) {
+  test.describe(`placa apretada a ${viewport.width} × ${viewport.height} con teclado`, () => {
+    test.use({ viewport })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`§3.3 / RD-VIS-05: en ${path}, con la placa 06 elegida, la etiqueta no se corta ni se encoge: el dato y la tecla bajan a la segunda línea`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        const plate = page.locator('main [data-menu-plate]').nth(5)
+        await plate.focus()
+        await expect
+          .poll(() =>
+            plate.evaluate((element) => {
+              const label = element.querySelector<HTMLElement>('[data-plate-label]')!
+              const aside = label.nextElementSibling!.getBoundingClientRect()
+              const box = label.getBoundingClientRect()
+              return {
+                text: label.textContent,
+                clipped: label.scrollWidth > label.clientWidth + 0.5,
+                legible: Number.parseFloat(getComputedStyle(label).fontSize) >= 16,
+                below: aside.top >= box.bottom - 1,
+              }
+            }),
+          )
+          .toEqual({ text: 'Ajustes', clipped: false, legible: true, below: true })
+        expect(await plateCuts(page)).toEqual([])
+        expect(await plateOverflowY(page)).toEqual([])
+      })
+    }
+  })
+}
+
+/**
  * Espaciado de texto de WCAG 1.4.12 (interlineado 1,5, letras 0,12 em, palabras 0,16 em, párrafos 2 em),
  * con `!important` en todo, como lo aplica quien lo necesita (una hoja de estilo propia o un
  * marcador).
@@ -396,6 +440,8 @@ for (const viewport of [
         await page.addStyleTag({ content: TEXT_SPACING })
         expect(await page.evaluate(() => getComputedStyle(document.body).letterSpacing)).not.toBe('normal')
         await expect.poll(() => clippedFitTexts(page)).toEqual([])
+        // Y eligiendo cada placa: con el dato al lado no cabe, así que baja (también en el móvil, E2).
+        expect(await plateCuts(page)).toEqual([])
       })
     }
   })

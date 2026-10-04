@@ -71,7 +71,8 @@ export interface MenuPlateProps {
  *
  * El dato y la tecla nunca se encogen: lo que cede es la etiqueta, que baja su anchura de 125 a 105 % y
  * después el cuerpo (`useFitText`), como el alias de la ficha de luchador. Si ni así cabe al lado del dato,
- * el dato baja a una segunda línea (`useStackWhenCramped`): la etiqueta nunca se corta. La trama de relleno
+ * el dato baja a una segunda línea (`useStackWhenCramped`, a cualquier ancho: también en el móvil, con
+ * teclado y en táctil): la etiqueta nunca se corta. La trama de relleno
  * va en una franja al final de la placa, fuera de todo texto (`RD-VIS-05`).
  */
 export function MenuPlate({

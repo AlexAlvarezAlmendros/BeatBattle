@@ -322,14 +322,14 @@
 }
 
 /*
- * ── Placa apretada (`data-plate-stack`, fuera del móvil) ─────────────────────────────────────────
+ * ── Placa apretada (`data-plate-stack`) ──────────────────────────────────────────────────────────
  * La etiqueta nunca se corta (§3.3): si con el dato o el motivo al lado no cabe ni a su cuerpo mínimo, el
  * dato baja a una segunda línea, bajo la etiqueta, antes que recortarla. Lo mide la propia placa
  * (`MenuPlate`, `useStackWhenCramped`), con su dato de verdad: en la galería, la deshabilitada
  * «RESULTADOS · Aún nada sellado» en una columna de 313 px baja el motivo (dejaba la etiqueta en 12–21 px de
  * ancho, con el candado y un trozo de la «R»; jurado de la 0.28, cierre), y «JUGAR [INTRO]», que cabe, no
  * (revisión del cierre). El motivo va en una línea si cabe (el alto de la placa no cambia). En el móvil
- * (≤ 720 px) las placas tienen sus medidas y sus reglas (más abajo); en la lista estrecha del menú, el dato
+ * (≤ 720 px) vale la misma regla con las medidas del móvil (más abajo); en la lista estrecha del menú, el dato
  * ya va debajo (más arriba).
  */
 @media (min-width: 721px) {
@@ -433,6 +433,60 @@
   }
 }
 
+/*
+ * Placa apretada en el móvil (`data-plate-stack`, con teclado y en táctil): la misma regla que fuera del móvil
+ * (más arriba). Si la etiqueta no cabe al lado del dato ni a su cuerpo mínimo, el dato y la tecla bajan a la
+ * segunda línea y la placa crece con ellas, sin bajar de su alto de móvil (`--plate-h-mobile`). Antes la regla
+ * solo valía de 721 px en adelante (jurado de la 0.28, ronda final, E2): a 360 × 640 con teclado, AJUSTES
+ * elegida enseñaba «06 AJUS Sonido · movimiento [INTRO]» y, a 390 × 844, la etiqueta bajaba a 12 px. Donde la
+ * etiqueta cabe al lado (en táctil a 360 × 640 y 375 × 667, sin la tecla), nada cambia.
+ */
+@media (max-width: 720px) {
+  .plate {
+    --plate-h-mobile: var(--bb-space-12);
+  }
+
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
+    --plate-h-mobile: var(--bb-space-14);
+  }
+
+  .plate[data-plate-stack],
+  .plate[data-plate-stack]:is(
+    :focus,
+    [data-cursor-active="true"],
+    [data-force-state="focus"],
+    [data-force-state="pressed"]
+  ) {
+    grid-template-columns: var(--bb-space-7) minmax(0, 1fr);
+    grid-template-areas:
+      "index label"
+      "index detail";
+    align-content: center;
+    row-gap: var(--bb-space-1);
+    height: auto;
+    min-height: var(--plate-h-mobile);
+    padding-block: var(--bb-space-2);
+  }
+
+  .plate[data-plate-stack] .detail {
+    flex-wrap: wrap;
+    justify-self: start;
+    row-gap: var(--bb-space-1);
+    max-width: 100%;
+    text-align: start;
+  }
+
+  .plate[data-plate-stack] :is(.detailText, .extra) {
+    flex-wrap: wrap;
+    line-height: var(--bb-leading-label);
+    white-space: normal;
+  }
+
+  .plate[data-plate-stack][data-disabled] .detailText {
+    max-width: none;
+  }
+}
+
 /* Táctil: sin teclas (no hay teclado, §3.3); con teclado y ratón se enseñan a cualquier ancho. */
 @media (hover: none), (pointer: coarse) {
   .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
@@ -444,11 +498,24 @@
 /* Móvil bajo (≤ 700 px de alto): placas de 44 px (§3.8.3) y 48 la elegida. */
 @media (max-width: 720px) and (max-height: 700px) {
   .plate {
+    --plate-h-mobile: var(--bb-target);
     height: var(--bb-target);
   }
 
   .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
+    --plate-h-mobile: var(--bb-space-12);
     height: var(--bb-space-12);
+  }
+
+  /* Apretada (más arriba): crece con sus dos líneas, sin bajar de esos altos. */
+  .plate[data-plate-stack],
+  .plate[data-plate-stack]:is(
+    :focus,
+    [data-cursor-active="true"],
+    [data-force-state="focus"],
+    [data-force-state="pressed"]
+  ) {
+    height: auto;
   }
 }
 
