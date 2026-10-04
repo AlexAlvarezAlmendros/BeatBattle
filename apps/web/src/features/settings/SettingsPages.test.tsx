@@ -49,7 +49,7 @@ describe('Opciones (§3.8.14)', () => {
 })
 
 describe('Opciones → qué hará cada opción (J3r)', () => {
-  it('RD-VIS-02 e / RNF-A11Y-08: el panel cuenta en filas con índice qué hará cada opción de la vista previa, en su orden', () => {
+  it('RD-VIS-02 e / RNF-A11Y-08: el panel cuenta en filas densas con índice qué hará cada opción de la vista previa, en su orden: el nombre en display y una línea (§3.8.14)', () => {
     const { container } = renderInRouter(<SoundSettingsPage />, '/ajustes/sonido')
     const panel = container.querySelector('[data-screen-part="panel"]') as HTMLElement
     const help = within(panel).getByRole('region', { name: t('settings.preview.helpTitle') })
@@ -58,7 +58,12 @@ describe('Opciones → qué hará cada opción (J3r)', () => {
     const plates = [...container.querySelectorAll('[data-settings-preview] li')].map(
       (plate) => plate.querySelector('.settings-preview-label')?.textContent,
     )
-    expect(rows.map((row) => row.querySelector('b')?.textContent)).toEqual(plates.map((label) => `${label}.`))
+    const names = rows.map((row) => row.querySelector('b'))
+    expect(names.map((name) => name?.textContent)).toEqual(plates)
+    for (const name of names) expect(name).toHaveClass('bb-display')
+    // Las placas de la vista previa también llevan su nombre en display, como las del menú en reposo.
+    for (const label of container.querySelectorAll('[data-settings-preview] .settings-preview-label'))
+      expect(label).toHaveClass('bb-display')
     expect(rows[0]).toHaveTextContent(t('settings.preview.help.effects'))
     expect(rows[3]).toHaveTextContent(t('settings.preview.help.mute'))
     // «Volver al menú», al pie del panel, después de las filas.

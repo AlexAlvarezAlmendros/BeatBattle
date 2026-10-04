@@ -34,20 +34,20 @@ export interface ScreenPageProps {
    */
   tabs?: ReactNode
   /**
-   * Reparto de la pantalla. `interior` (por defecto): la pieza arriba a la izquierda y el panel a su
-   * lado, estirado hasta el pie de la pieza. `title`: la pantalla de título de la autenticación
-   * (maqueta `00-titulo`), con la pieza ancha (el logo grande con su lockup) y el bloque centrado en
-   * vertical entre el HUD y la barra, con el pie del panel a la altura del de la pieza; en móvil, la
-   * pieza en medio y el panel anclado al pie, encima de la barra.
+   * Reparto de la pantalla. `interior` (por defecto): la pieza a la izquierda y el panel a su lado, del
+   * mismo alto, con el bloque centrado entre el HUD y la barra (§3.8.14 «Reparto del alto»). `title`: la
+   * pantalla de título de la autenticación (maqueta `00-titulo`), con la pieza ancha (el logo grande con
+   * su lockup) y el bloque centrado en vertical entre el HUD y la barra, con el pie del panel a la altura
+   * del de la pieza; en móvil, la pieza en medio y el panel anclado al pie, encima de la barra.
    */
   layout?: 'interior' | 'title'
   /**
-   * La pantalla llena el alto entre el HUD y la barra en escritorio (≥ 961 px), como las maquetas de
-   * interiores (`02-seleccion`, `05-perfil`): la pieza y el panel se estiran hasta la barra y cada uno
-   * reparte lo suyo (filas que comparten alto, acciones al pie), sin huecos dentro. La pieza pasa a ser
-   * una columna flexible para que la pantalla diga qué crece y qué va al pie. Si no cabe, se desplaza.
-   * Para las pantallas con contenido que repartir («Cómo se juega», Opciones, la 404); las provisionales
-   * con solo una línea se quedan a su alto (un panel hueco hasta la barra sería peor).
+   * Pantalla de **contenido** (selección, ficha, perfil, resultados, salón de la fama, archivo; §3.8.14):
+   * llena el alto entre el HUD y la barra en escritorio (≥ 961 px), como sus maquetas (`02-seleccion`,
+   * `05-perfil`): la pieza y el panel se estiran hasta la barra y cada uno reparte lo suyo. La pieza pasa
+   * a ser una columna flexible para que la pantalla diga qué crece y qué va al pie. Si no cabe, se
+   * desplaza. Las de poco contenido («Cómo se juega», Opciones, la 404, los legales y las provisionales)
+   * no lo llevan: no estiran cajas, centran su bloque.
    */
   fill?: boolean
   /**

@@ -42,8 +42,6 @@ function SettingsSectionPlaceholder({
       // Las secciones, después del rótulo y del título (en móvil, la pantalla abre con su título).
       tabs={<SettingsTabs />}
       documentTitle={t('settings.pageTitle', { section: title })}
-      // En escritorio, del HUD a la barra: la vista previa y la ayuda de cada opción se reparten el alto.
-      fill
     >
       {children}
       <SettingsOptionsHelp section={section} />

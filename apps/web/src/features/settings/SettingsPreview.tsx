@@ -155,20 +155,29 @@ const PREVIEW: Record<SettingsSectionKey, readonly PreviewOption[]> = {
 }
 
 /**
- * La pieza de Opciones en la cuña (§3.8.14; segundo pase del jurado, tarea 0.28): las placas de la
- * sección en vista previa, quietas, con su pie «Vista previa: … todavía no hacen nada». Las placas
- * son dibujo (`aria-hidden`): lo que tendrá la sección ya lo dice en palabras el resumen del panel, y
- * el pie lo cuenta a los lectores de pantalla. Cada placa es opaca: la cuña lleva trama (`RD-VIS-05`).
+ * La pieza de Opciones en la cuña (§3.8.14; pases del jurado de la tarea 0.28): las placas de la sección
+ * en vista previa, quietas, en un tablero opaco (como la ventana de opciones de un juego) con su pie
+ * «Vista previa: … todavía no hacen nada». El tablero y cada placa van a su alto natural (no se estiran
+ * para llenar la columna): el nombre en display, como las placas del menú en reposo, y el valor o el
+ * medidor a su lado, más grandes que un rótulo. Las placas son dibujo (`aria-hidden`): lo que tendrá la
+ * sección ya lo dice en palabras el panel, y el pie lo cuenta a los lectores de pantalla. El tablero es
+ * opaco (la cuña lleva trama, `RD-VIS-05`) y tapa el granate que dejaban ver las secciones de dos
+ * placas (≤ 24,5 % a 1440 px, §3.8.14).
  */
 export function SettingsPreview({ section }: { section: SettingsSectionKey }) {
   const captionId = useId()
   return (
-    <figure className="settings-preview" data-settings-preview={section} aria-labelledby={captionId}>
+    <figure
+      {...frameAttributes({ cut: 'base' })}
+      className="settings-preview"
+      data-settings-preview={section}
+      aria-labelledby={captionId}
+    >
       {/* biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none */}
       <ul role="list" className="settings-preview-list" aria-hidden="true">
         {PREVIEW[section].map((option) => (
           <li key={option.label} {...frameAttributes({ cut: 'md' })} className="settings-preview-option">
-            <span className="settings-preview-label">{t(option.label)}</span>
+            <span className={cx('bb-display', 'settings-preview-label')}>{t(option.label)}</span>
             <PreviewControl option={option} />
           </li>
         ))}
@@ -181,9 +190,9 @@ export function SettingsPreview({ section }: { section: SettingsSectionKey }) {
 }
 
 /**
- * Qué hará cada opción de la sección (tercer pase del jurado, J3r), en el panel: filas con índice, como
- * las reglas de «Cómo se juega», en el orden de las placas de la cuña. Son la versión en palabras de la
- * vista previa (que es dibujo) y, en escritorio, se reparten el alto del panel, que llega a la barra.
+ * Qué hará cada opción de la sección (§3.8.14), en el panel: filas densas con índice, como las reglas
+ * de «Cómo se juega» y las de `05-perfil` (el nombre en display y una línea de explicación), en el orden
+ * de las placas de la cuña. Son la versión en palabras de la vista previa, que es dibujo.
  */
 export function SettingsOptionsHelp({ section }: { section: SettingsSectionKey }) {
   const titleId = useId()
@@ -199,8 +208,9 @@ export function SettingsOptionsHelp({ section }: { section: SettingsSectionKey }
             <span className="settings-help-index" aria-hidden="true">
               {String(index + 1).padStart(2, '0')}
             </span>
-            <p>
-              <b>{t(option.label)}.</b> {t(option.help)}
+            <p className="settings-help-body">
+              <b className={cx('bb-display', 'settings-help-name')}>{t(option.label)}</b>
+              <span className="settings-help-text">{t(option.help)}</span>
             </p>
           </li>
         ))}
@@ -212,13 +222,16 @@ export function SettingsOptionsHelp({ section }: { section: SettingsSectionKey }
 function PreviewControl({ option }: { option: PreviewOption }) {
   if ('meter' in option) {
     return (
-      <Meter
-        value={option.meter}
-        max={METER_STEPS}
-        width={METER_WIDTH}
-        label={t(option.label)}
-        valueText={t('settings.preview.meterValue', { value: option.meter, max: METER_STEPS })}
-      />
+      <span className="settings-preview-meter">
+        <Meter
+          value={option.meter}
+          max={METER_STEPS}
+          width={METER_WIDTH}
+          label={t(option.label)}
+          valueText={t('settings.preview.meterValue', { value: option.meter, max: METER_STEPS })}
+        />
+        <span className="settings-preview-number">{option.meter}</span>
+      </span>
     )
   }
   if ('toggle' in option) {

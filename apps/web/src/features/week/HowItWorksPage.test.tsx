@@ -98,12 +98,21 @@ describe('«Cómo se juega» como lista de movimientos (§3.8.14; 0.26, 0.28)', 
     expect(router.state.location.pathname).toBe('/legal/bases')
   })
 
-  it('las cinco reglas de juego limpio, como filas con su índice', async () => {
+  it('RD-VIS-02 e: las cinco reglas de juego limpio, como filas densas con su índice, el nombre en display y una línea (§3.8.14)', async () => {
     renderPage()
     const rules = screen.getByRole('region', { name: t('howItWorks.rulesTitle') })
     const rows = within(rules).getAllByRole('listitem')
     expect(rows).toHaveLength(5)
     expect(rows[0]).toHaveTextContent(`01${t('howItWorks.rules.blind.title')}`)
+    // Voto ciego, escucha mínima, Ronda justa, media bayesiana y el XP no puntúa (§1.3, §2.7, §2.8).
+    const names = rows.map((row) => row.querySelector('b'))
+    expect(names.map((name) => name?.textContent)).toEqual(
+      (['blind', 'listen', 'fairRound', 'bayes', 'xp'] as const).map((rule) =>
+        t(`howItWorks.rules.${rule}.title`),
+      ),
+    )
+    for (const name of names) expect(name).toHaveClass('bb-display')
+    expect(rows[4]).toHaveTextContent(t('howItWorks.rules.xp.text'))
     await act(async () => {})
   })
 })

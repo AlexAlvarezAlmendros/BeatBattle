@@ -134,10 +134,15 @@
   scale: 0.98;
 }
 
-/* ── Reglas de juego limpio: filas con índice, como un marcador ─────────────────────────── */
+/*
+ * ── Reglas de juego limpio: filas con índice, como un marcador ───────────────────────────
+ * Al pie del panel: si la lista de movimientos es más alta, el panel llega a su pie (`ScreenPage`) y la
+ * última regla queda a la altura de «Volver al menú», con el resumen arriba.
+ */
 .rules {
   display: grid;
   gap: var(--bb-space-3);
+  margin-top: auto;
 }
 
 .rulesTitle {
@@ -149,19 +154,35 @@
   border-top: var(--bb-stroke-hair) solid var(--bb-line);
 }
 
+/*
+ * Cada regla, una fila densa (§3.8.14, como las de `05-perfil`): el índice, el nombre en display y una
+ * línea de explicación, a su alto natural (unos 64 px; 56 con la ventana baja).
+ */
 .rule {
   display: grid;
   grid-template-columns: var(--bb-space-10) minmax(0, 1fr);
-  align-items: baseline;
+  align-items: center;
   gap: var(--bb-space-3);
   padding: var(--bb-space-3) 0;
   border-bottom: var(--bb-stroke-hair) solid var(--bb-line);
-  color: var(--bb-text-2);
-  font-size: var(--bb-fs-sm);
 }
 
-.rule b {
+.ruleBody {
+  display: grid;
+  gap: var(--bb-space-1);
+}
+
+.ruleTitle {
   color: var(--bb-white);
+  font-size: var(--bb-fs-md);
+  font-stretch: var(--bb-stretch-plate);
+  line-height: 1;
+}
+
+.ruleText {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
 }
 
 .ruleIndex {
@@ -173,47 +194,8 @@
 }
 
 /*
- * Escritorio: la pantalla llena el alto hasta la barra (`ScreenPage` con `fill`, tercer pase del jurado,
- * J2r). A la izquierda, los tres movimientos se reparten el alto de la lista (sus placas crecen y su
- * contenido va centrado) y «Bases» y «Volver al menú» quedan al pie, a su alto; a la derecha, las cinco
- * reglas se reparten el del panel, como un marcador. Ni medio panel vacío ni hueco bajo las columnas.
- */
-@media (min-width: 961px) {
-  .moves {
-    flex: 1 0 auto;
-    grid-template-rows: minmax(0, 1fr);
-  }
-
-  .list {
-    grid-template-rows: repeat(3, minmax(auto, 1fr)) auto auto;
-  }
-
-  .list > li {
-    display: grid;
-  }
-
-  .move {
-    align-content: center;
-  }
-
-  .rules {
-    flex: 1;
-    grid-template-rows: auto minmax(0, 1fr);
-  }
-
-  .ruleList {
-    grid-auto-rows: minmax(0, 1fr);
-  }
-
-  .rule {
-    align-content: center;
-  }
-}
-
-/*
  * Pantalla grande (≥ 1600 px): la columna de la pieza y el panel crecen con la ventana (`ScreenPage`,
- * tercer pase del jurado, L1); la letra de los movimientos y de las reglas crece con ellos, para que
- * las placas y las filas no se queden en aire.
+ * tercer pase del jurado, L1); la letra de los movimientos y de las reglas crece con ellos.
  */
 @media (min-width: 1600px) {
   .move {
@@ -229,8 +211,12 @@
   }
 
   .moveText,
-  .rule {
+  .ruleText {
     font-size: var(--bb-fs-md);
+  }
+
+  .ruleTitle {
+    font-size: var(--bb-fs-lg);
   }
 
   .ruleIndex {

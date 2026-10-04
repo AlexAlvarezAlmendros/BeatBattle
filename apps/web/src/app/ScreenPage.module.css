@@ -16,7 +16,7 @@
   --screen-piece: clamp(20rem, calc(var(--bb-split-x-left) - var(--bb-gutter) + var(--bb-space-4)), 36rem);
   display: grid;
   grid-template-columns: minmax(0, var(--screen-piece)) minmax(0, 1fr);
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto auto;
   grid-template-areas:
     "head panel"
     "piece panel";
@@ -50,7 +50,7 @@
 }
 
 .screen[data-tabs] {
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto auto;
   grid-template-areas:
     "head head"
     "tabs tabs"
@@ -131,12 +131,32 @@
 }
 
 /*
- * Dos columnas (escritorio): el panel se estira hasta el pie de la pieza, como en las maquetas
- * (`02-seleccion`, `05-perfil`), en vez de quedarse en media columna con la otra mitad vacía.
+ * Dos columnas (escritorio). **Reparto del alto** (§3.8.14, guía v0.6.6): la pieza y el panel miden lo
+ * mismo (la fila los iguala: el panel llega al pie de la pieza o la pieza al del panel, con las acciones
+ * al pie del panel) y la pieza va centrada en su columna, que sigue a la cuña.
+ *
+ * - **Poco contenido** (por defecto: «Cómo se juega», Opciones, la 404, los legales y las provisionales):
+ *   no se estira ninguna caja para llenar el alto. La pantalla ocupa del HUD a la barra y su bloque
+ *   (las pestañas, si las hay, y las dos columnas) se centra en vertical; las filas tienen su alto
+ *   natural. Si el bloque es más alto que el hueco, la pantalla crece con él (`flex: 1 0 auto`): empieza
+ *   arriba y se desplaza, y la barra no tapa ningún control (su alto real es el margen del foco).
+ * - **Contenido** (`fill`: selección, ficha, perfil, resultados…): la fila de la pieza y el panel es
+ *   `1fr` y las dos columnas llegan a la barra, como las maquetas `02-seleccion` y `05-perfil`.
  */
 @media (min-width: 961px) {
+  .screen[data-layout="interior"] {
+    flex: 1 0 auto;
+    align-content: center;
+  }
+
   .screen[data-piece] .panel {
     align-self: stretch;
+  }
+
+  .screen[data-layout="interior"] .piece {
+    align-self: stretch;
+    align-content: center;
+    justify-items: center;
   }
 
   /*
@@ -152,15 +172,20 @@
   }
 
   /*
-   * Pantallas que llenan el alto (`fill`): la pantalla ocupa del HUD a la barra (la fila de la pieza y
-   * el panel es `1fr`, nunca menos que su contenido: si no cabe, se desplaza) y la pieza y el panel se
-   * estiran hasta la barra. La pieza es una columna flexible: cada pantalla dice qué crece y qué va al
-   * pie, como la columna de `05-perfil`.
+   * Pantallas de contenido (`fill`): la fila de la pieza y el panel es `1fr` (nunca menos que su
+   * contenido: si no cabe, se desplaza) y las dos columnas se estiran hasta la barra. La pieza es una
+   * columna flexible: cada pantalla dice qué crece y qué va al pie, como la columna de `05-perfil`.
    */
   .screen[data-fill] {
-    flex: 1 0 auto;
+    align-content: stretch;
+    grid-template-rows: auto 1fr;
   }
 
+  .screen[data-fill][data-tabs] {
+    grid-template-rows: auto auto 1fr;
+  }
+
+  /* Con el título en la placa del HUD, sin la fila de la cabeza (va solo para lectores, abajo). */
   .screen[data-fill][data-title-in-hud] {
     grid-template-rows: 1fr;
   }
@@ -173,11 +198,6 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    align-self: stretch;
-  }
-
-  .screen[data-fill] .panel {
-    align-self: stretch;
   }
 }
 

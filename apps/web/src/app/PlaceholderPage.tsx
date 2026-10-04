@@ -19,7 +19,7 @@ interface PlaceholderPageProps {
   layout?: ScreenPageProps['layout']
   /** Las pestañas de la pantalla (`ScreenPage`): las secciones de Opciones. */
   tabs?: ReactNode
-  /** La pantalla llena el alto entre el HUD y la barra (`ScreenPage`): Opciones. */
+  /** La pantalla llena el alto entre el HUD y la barra (`ScreenPage`): solo las de contenido. */
   fill?: boolean
   children?: ReactNode
 }

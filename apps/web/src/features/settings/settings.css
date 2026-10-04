@@ -9,9 +9,9 @@
 }
 
 .settings-option-help {
-  max-width: 60ch;
   color: var(--bb-text-2);
   font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
 }
 
 /*
@@ -20,10 +20,12 @@
  * control a la derecha, un medidor de 10 pasos, «◀ SÍ ▶» o la acción con su flecha.
  */
 .settings-preview {
+  --frame-fill: var(--bb-panel-veil);
   display: grid;
   gap: var(--bb-space-3);
   width: 100%;
   margin: 0;
+  padding: var(--bb-space-5) var(--bb-space-4);
 }
 
 .settings-preview-list {
@@ -34,23 +36,28 @@
   list-style: none;
 }
 
+/*
+ * Cada placa, a su alto natural y acotado: el de las placas del menú en reposo (70 px; 56 con la ventana
+ * baja y 48 en móvil), nunca estirada para llenar la columna (§3.8.14 «Reparto del alto»). El nombre, en
+ * display como las del menú, parte en dos líneas antes que cortarse; el valor o el medidor, a su lado,
+ * más grandes que un rótulo y nunca más que el nombre.
+ */
 .settings-preview-option {
-  --frame-fill: var(--bb-panel-veil);
+  --frame-fill: var(--bb-panel-2);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--bb-space-4);
-  min-height: var(--bb-space-14);
+  min-height: calc(var(--bb-space-16) + var(--bb-space-1) + var(--bb-stroke));
   padding: var(--bb-space-2) var(--bb-space-5);
 }
 
 .settings-preview-label {
-  color: var(--bb-text);
-  font-size: var(--bb-fs-xs);
-  font-weight: var(--bb-weight-bold);
-  letter-spacing: var(--bb-tracking-label);
-  line-height: var(--bb-leading-label);
-  text-transform: uppercase;
+  color: var(--bb-white);
+  font-size: var(--bb-fs-lg);
+  font-stretch: var(--bb-stretch-plate);
+  line-height: 1;
+  text-wrap: balance;
 }
 
 .settings-preview-toggle,
@@ -60,17 +67,44 @@
   gap: var(--bb-space-2);
   color: var(--bb-white);
   font-family: var(--bb-font-display);
-  font-size: var(--bb-fs-sm);
+  font-size: var(--bb-fs-lg);
   font-style: italic;
   font-weight: var(--bb-weight-black);
   font-stretch: var(--bb-stretch-button);
   letter-spacing: var(--bb-tracking-button);
+  line-height: 1;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
+/* La acción («Cambiar ▸»): un punto por debajo del nombre y en gris, como un dato de la placa. */
 .settings-preview-action {
   color: var(--bb-text-2);
+  font-size: var(--bb-fs-md);
+}
+
+/*
+ * El medidor, más grande que el de una línea de texto (16 px de alto en vez de 10, los mismos diez
+ * segmentos), con su valor en cifra al lado (Oxanium, como las teselas).
+ */
+.settings-preview-meter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-3);
+}
+
+.settings-preview-meter [role="meter"] {
+  height: var(--bb-space-4);
+}
+
+.settings-preview-number {
+  min-width: 2ch;
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-lg);
+  font-weight: var(--bb-weight-extrabold);
+  line-height: 1;
+  text-align: right;
 }
 
 /*
@@ -91,19 +125,16 @@
   }
 }
 
-/* El pie, sobre un panel como el del pad de la 404 (la cuña lleva trama). */
+/* El pie, en el propio tablero (opaco: la cuña lleva trama). */
 .settings-preview-caption {
-  justify-self: start;
-  max-width: 100%;
-  padding: var(--bb-space-2) var(--bb-space-3);
-  background: var(--bb-panel-veil);
   color: var(--bb-text-2);
   font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
 }
 
 /*
- * Qué hará cada opción (en el panel): filas con índice, como las reglas de «Cómo se juega». En
- * escritorio, el panel llega a la barra (`ScreenPage` con `fill`) y las filas se reparten su alto.
+ * Qué hará cada opción (en el panel): filas densas con índice, como las reglas de «Cómo se juega» y las
+ * de `05-perfil`: el nombre en display y una línea de explicación, a su alto natural.
  */
 .settings-help {
   display: grid;
@@ -125,17 +156,28 @@
 .settings-help-row {
   display: grid;
   grid-template-columns: var(--bb-space-10) minmax(0, 1fr);
-  align-items: baseline;
+  align-items: center;
   gap: var(--bb-space-3);
   padding: var(--bb-space-3) 0;
   border-bottom: var(--bb-stroke-hair) solid var(--bb-line);
+}
+
+.settings-help-body {
+  display: grid;
+  gap: var(--bb-space-1);
+}
+
+.settings-help-name {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-md);
+  font-stretch: var(--bb-stretch-plate);
+  line-height: 1;
+}
+
+.settings-help-text {
   color: var(--bb-text-2);
   font-size: var(--bb-fs-sm);
   line-height: var(--bb-leading-body);
-}
-
-.settings-help-row b {
-  color: var(--bb-white);
 }
 
 .settings-help-index {
@@ -151,48 +193,14 @@
   border-bottom: 0;
 }
 
-/*
- * Escritorio (tercer pase del jurado, J3r): la pantalla llena el alto hasta la barra. En la cuña, las
- * placas de la vista previa crecen con la columna hasta el doble de su alto (con el nombre y el control
- * centrados: más, con dos opciones, serían cajas huecas) y el pie va abajo, al pie de la columna; en el
- * panel, las filas de la ayuda se reparten su alto, con «Volver al menú» al pie.
- */
-@media (min-width: 961px) {
-  /*
-   * La vista previa crece con lo que deja la columna (base 0), no con su alto natural: con `auto`, las
-   * placas medían ya el doble y alargaban la pantalla, que en ventanas bajas (1440 × 789) se desplazaba
-   * aunque el panel cupiera. Si la columna es más baja, las placas vuelven a su alto (nunca menos que
-   * su contenido).
-   */
-  .settings-preview {
-    flex: 1 1 0;
-    min-height: 0;
-    grid-template-rows: minmax(0, 1fr) auto;
-  }
-
-  .settings-preview-list {
-    grid-auto-rows: minmax(auto, calc(2 * var(--bb-space-14)));
-    align-content: start;
-  }
-
-  .settings-help {
-    flex: 1;
-    grid-template-rows: auto minmax(0, 1fr);
-  }
-
-  .settings-help-list {
-    grid-auto-rows: minmax(0, 1fr);
-  }
-
-  .settings-help-row {
-    align-content: center;
-  }
-}
-
 /* Pantalla grande (≥ 1600 px): la letra de la ayuda crece con el panel, como la de «Cómo se juega». */
 @media (min-width: 1600px) {
-  .settings-help-row {
+  .settings-help-text {
     font-size: var(--bb-fs-md);
+  }
+
+  .settings-help-name {
+    font-size: var(--bb-fs-lg);
   }
 
   .settings-help-index {
@@ -201,8 +209,22 @@
 }
 
 @media (max-width: 720px) {
+  .settings-preview {
+    padding: var(--bb-space-3);
+  }
+
   .settings-preview-option {
     min-height: var(--bb-space-12);
     padding: var(--bb-space-2) var(--bb-space-4);
+  }
+
+  .settings-preview-label,
+  .settings-preview-toggle,
+  .settings-preview-number {
+    font-size: var(--bb-fs-md);
+  }
+
+  .settings-preview-action {
+    font-size: var(--bb-fs-sm);
   }
 }

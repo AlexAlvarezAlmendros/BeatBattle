@@ -63,10 +63,13 @@
 }
 
 /*
- * Cómo se tocará: filas con sus teclas, como las reglas de «Cómo se juega», en el pie del panel (que en
- * escritorio llega al pie del pad).
+ * Cómo se tocará (en el pie del panel): filas densas con índice, como las reglas de «Cómo se juega», a
+ * su alto natural (§3.8.14): el índice, qué traerá y sus teclas, en las filas del pad y en una sola línea
+ * (la batería, Q W E R · A S D F · Z X C V). El metrónomo y la grabación no tienen tecla propia: su texto
+ * ocupa también la columna de las teclas. Si el panel es estrecho, las teclas van debajo del texto.
  */
 .legend {
+  container: legend / inline-size;
   display: grid;
   gap: var(--bb-space-3);
   margin-top: auto;
@@ -81,18 +84,22 @@
   border-top: var(--bb-stroke-hair) solid var(--bb-line);
 }
 
-/* Índice, sus teclas y qué traerá (el metrónomo y la grabación no tienen tecla propia). */
 .legendRow {
   display: grid;
-  grid-template-columns: var(--bb-space-10) minmax(0, 8rem) minmax(0, 1fr);
-  grid-template-areas: "index keys text";
+  grid-template-columns: var(--bb-space-10) minmax(0, 26rem) max-content;
+  grid-template-areas: "index text keys";
+  justify-content: start;
   align-items: center;
-  gap: var(--bb-space-3);
+  gap: var(--bb-space-2) var(--bb-space-3);
   padding: var(--bb-space-3) 0;
   border-bottom: var(--bb-stroke-hair) solid var(--bb-line);
   color: var(--bb-white);
   font-size: var(--bb-fs-sm);
   font-weight: var(--bb-weight-bold);
+}
+
+.legendRow:not(:has(.legendKeys)) {
+  grid-template-areas: "index text text";
 }
 
 .legendIndex {
@@ -108,27 +115,12 @@
   grid-area: text;
 }
 
-/* Las teclas de la fila, en las filas del pad: la batería, en tres (Q W E R / A S D F / Z X C V). */
+/* Las teclas de la fila, en las filas del pad, seguidas: la batería, Q W E R · A S D F · Z X C V. */
 .legendKeys {
   grid-area: keys;
-  display: grid;
-  justify-items: start;
-  gap: var(--bb-space-1);
-}
-
-/*
- * Escritorio: la pantalla llena el alto hasta la barra (`fill`, tercer pase del jurado, J3r) y las
- * filas de la leyenda se reparten el del panel, como las reglas de «Cómo se juega».
- */
-@media (min-width: 961px) {
-  .legend {
-    flex: 1;
-    grid-template-rows: auto minmax(0, 1fr);
-  }
-
-  .legendList {
-    grid-auto-rows: minmax(0, 1fr);
-  }
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-1) var(--bb-space-3);
 }
 
 /* Pantalla grande (≥ 1600 px): la letra de la leyenda crece con el panel, como la de «Cómo se juega». */
@@ -143,23 +135,26 @@
 }
 
 /*
- * Móvil: las teclas, debajo del texto, y las filas más juntas (8 px), y la que no lleva teclas (el
- * metrónomo y la grabación), en una sola fila, sin el hueco de la de las teclas. Así «Volver al menú»
- * queda encima de la barra en la primera vista (L2) también cuando «Legal» va debajo de la firma y la
- * barra mide 98 px (a 390 × 844 táctil; M3r): con 12 px y el hueco vacío, la barra le tapaba 37.
+ * Panel estrecho (escritorio de 961 a ~1300 px, móvil): las teclas, debajo del texto, y las filas más
+ * juntas (8 px). Así «Volver al menú» queda encima de la barra en la primera vista del móvil (L2) también
+ * cuando «Legal» va debajo de la firma y la barra mide 98 px (a 390 × 844 táctil; M3r).
  */
-@media (max-width: 720px) {
+@container legend (width < 50rem) {
   .legendRow {
     grid-template-columns: var(--bb-space-10) minmax(0, 1fr);
     grid-template-areas:
       "index text"
       ". keys";
-    gap: var(--bb-space-2) var(--bb-space-3);
-    padding-block: var(--bb-space-2);
   }
 
   .legendRow:not(:has(.legendKeys)) {
     grid-template-areas: "index text";
+  }
+}
+
+@media (max-width: 720px) {
+  .legendRow {
+    padding-block: var(--bb-space-2);
   }
 }
 

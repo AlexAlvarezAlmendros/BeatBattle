@@ -58,7 +58,9 @@ const BASES_KEY = 'b'
  * `/como-funciona` — «Cómo se juega» como **lista de movimientos** de recreativa (guía §3.8.14): a la
  * izquierda, sobre la cuña, un menú de juego con los tres movimientos (1 Pilla el sample · 2 Cocina tu
  * flip · 3 Sube y vota, cada uno con sus teclas o su gesto), «Bases [B]» y «Volver al menú [ESC]»; a la
- * derecha, las cinco reglas de juego limpio como filas con índice.
+ * derecha, las cinco reglas de juego limpio como filas con índice, cada una con su nombre en display y
+ * una línea de explicación (como las filas de `05-perfil`). La pantalla tiene poco contenido: su bloque
+ * va centrado entre el HUD y la barra, a su alto natural (§3.8.14 «Reparto del alto»).
  *
  * Teclado (`RD-VIS-02` d, `RD-MOT-05`): `role="menu"` de una sola parada con el cursor y la etiqueta
  * 1P; ↑/↓ en bucle, Inicio/Fin y letra inicial; Intro entra; B abre las bases desde cualquier sitio de
@@ -137,7 +139,6 @@ export function HowItWorksPage() {
       kicker={t('frame.plates.howItWorks')}
       summary={t('pages.howItWorks.summary')}
       actions={null}
-      fill
       piece={
         <nav className={styles.moves} aria-labelledby={listLabelId}>
           {/* El rótulo ya se ve en la placa del HUD («LISTA DE MOVIMIENTOS · CÓMO SE JUEGA»). */}
@@ -159,8 +160,9 @@ export function HowItWorksPage() {
               <span className={styles.ruleIndex} aria-hidden="true">
                 {t('howItWorks.ruleIndex', { index: String(index + 1).padStart(2, '0') })}
               </span>
-              <p>
-                <b>{t(`howItWorks.rules.${rule}.title`)}</b> {t(`howItWorks.rules.${rule}.text`)}
+              <p className={styles.ruleBody}>
+                <b className={cx('bb-display', styles.ruleTitle)}>{t(`howItWorks.rules.${rule}.title`)}</b>
+                <span className={styles.ruleText}>{t(`howItWorks.rules.${rule}.text`)}</span>
               </p>
             </li>
           ))}

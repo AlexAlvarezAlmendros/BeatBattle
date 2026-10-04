@@ -315,7 +315,7 @@
         "marketing": "Marketing",
         "quietHours": "Horas de silencio",
         "activeSessions": "Sesiones activas",
-        "closeOthers": "Cerrar las que no reconozcas",
+        "closeOthers": "Cerrar las demás",
         "export": "Exportar mis datos",
         "deleteAccount": "Borrar la cuenta",
         "textSize": "Tamaño de texto",
@@ -1076,24 +1076,24 @@
     "rulesTitle": "Juego limpio",
     "rules": {
       "blind": {
-        "title": "Voto ciego.",
-        "text": "Nadie sabe de quién es cada beat hasta el domingo a las 23:59."
+        "title": "Voto ciego",
+        "text": "Nadie sabe de quién es cada beat hasta el sellado, el domingo a las 23:59."
       },
       "listen": {
-        "title": "Escucha mínima.",
-        "text": "Sin 45 s de escucha no hay voto."
+        "title": "Escucha mínima",
+        "text": "Para votar, escucha 45 s de la entrada (la mitad, si es corta); saltar con la onda no cuenta."
       },
       "fairRound": {
-        "title": "Ronda justa.",
-        "text": "Primero salen las que menos votos llevan; nadie ve cuántos."
+        "title": "Ronda justa",
+        "text": "Primero salen las que menos votos llevan; nadie ve medias ni recuentos hasta el sellado."
       },
       "bayes": {
-        "title": "Media bayesiana.",
-        "text": "La clasificación no premia a quien tiene pocos votos."
+        "title": "Media bayesiana",
+        "text": "Un solo 5 no gana a veinte votos de 4,6: la puntuación cuenta cuántos votos hay."
       },
       "xp": {
-        "title": "El XP no puntúa.",
-        "text": "El XP, los logros y las rachas nunca cambian la clasificación."
+        "title": "El XP no puntúa",
+        "text": "XP, logros, rachas y sorpresas nunca cambian la clasificación."
       }
     }
   }

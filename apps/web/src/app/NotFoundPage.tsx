@@ -30,10 +30,10 @@ const LEGEND: readonly {
  * `*` — la 404 «BONUS STAGE» (guía §3.8.11): el titular es el momento de juego, «BONUS STAGE», con «Te
  * has perdido… pero ya que estás» de subtítulo. La pieza de la cuña es el beat pad de 4 × 4 (teclas de
  * chaflán `--bb-cut-md` de 72 px), quieto y decorativo hasta la Fase 8, con «Volver al menú [Esc]»
- * debajo; el panel lleva el subtítulo arriba y debajo lo que traerá el pad cuando llegue (los chops en
- * la fila de arriba, la batería en las otras tres, el metrónomo y la grabación). En escritorio la
- * pantalla llena el alto hasta la barra (`fill`): las filas de la leyenda se reparten el del panel y
- * «Volver al menú» va al pie de la columna del pad (tercer pase del jurado, J3r). El panel va antes que
+ * debajo; el panel lleva el subtítulo arriba y, al pie, lo que traerá el pad cuando llegue (los chops
+ * en la fila de arriba, la batería en las otras tres, el metrónomo y la grabación), en filas a su alto
+ * natural. Es una pantalla de poco contenido: el bloque del pad y el panel, del mismo alto, va centrado
+ * entre el HUD y la barra (§3.8.14 «Reparto del alto»). El panel va antes que
  * el pad en el orden de lectura y del foco (`panelFirst`), y «Volver al menú», entre los dos: en móvil,
  * el subtítulo sale con el titular, en la primera vista, la salida al pie del panel y el pad debajo;
  * en escritorio siguen el pad a la izquierda, con la salida debajo, y el panel a la derecha.
@@ -60,7 +60,6 @@ export function NotFoundPage() {
         titleInHud
         panelFirst
         actions={null}
-        fill
         piece={
           <>
             {/*
@@ -99,6 +98,12 @@ export function NotFoundPage() {
                 <span className={styles.legendIndex} aria-hidden="true">
                   {String(index + 1).padStart(2, '0')}
                 </span>
+                <span className={styles.legendText}>
+                  {row.id !== 'extras' && (
+                    <span className="sr-only">{t(`pages.notFound.legend.${row.id}.keysLabel`)} </span>
+                  )}
+                  {t(`pages.notFound.legend.${row.id}.text`)}
+                </span>
                 {row.rows && (
                   <span className={styles.legendKeys} aria-hidden="true">
                     {row.rows.map((padRow) => (
@@ -112,12 +117,6 @@ export function NotFoundPage() {
                     ))}
                   </span>
                 )}
-                <span className={styles.legendText}>
-                  {row.id !== 'extras' && (
-                    <span className="sr-only">{t(`pages.notFound.legend.${row.id}.keysLabel`)} </span>
-                  )}
-                  {t(`pages.notFound.legend.${row.id}.text`)}
-                </span>
               </li>
             ))}
           </ul>

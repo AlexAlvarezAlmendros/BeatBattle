@@ -2,16 +2,18 @@ import { expect, type Page, test } from '@playwright/test'
 import { open, settle } from './support'
 
 /**
- * Composición de las pantallas interiores (guía §3.8.14, §3.8.11; `RD-VIS-02` e: segundo pase del
- * jurado visual de la tarea 0.28). La plantilla (`ScreenPage`) reparte la pantalla como las maquetas
- * (`00-titulo`, `02-seleccion`, `05-perfil`): nada de medio panel arriba y la otra mitad vacía.
+ * Composición de las pantallas interiores (guía §3.8.14, §3.8.11; `RD-VIS-02` e: pases del jurado visual
+ * de la tarea 0.28). La plantilla (`ScreenPage`) reparte la pantalla como fija la v0.6.6 («Reparto del
+ * alto»):
  *
  * - **Autenticación** como pantalla de título: el logo con su lockup y el panel, centrados en vertical
  *   entre el HUD y la barra, con el pie del panel a la altura del lockup; en móvil, el panel anclado al
  *   pie, encima de la barra.
- * - **Pantallas con pieza** («Cómo se juega», la 404, Opciones): el panel de la derecha llega al pie
- *   de la pieza de la cuña y, en escritorio, las dos columnas llegan a la barra con el contenido
- *   repartido, sin huecos dentro (tercer pase, J2r y J3r); a 1920, de medianil a medianil (L1).
+ * - **Pantallas de poco contenido** («Cómo se juega», Opciones, la 404, los legales y las provisionales):
+ *   no estiran cajas para llenar el alto. El bloque de dos columnas (pieza y panel, del mismo alto) se
+ *   centra en vertical entre el HUD y la barra, con filas densas (nombre en display y una línea, como las
+ *   de `05-perfil`: ninguna pasa de 72 px) y las acciones al pie del panel; a 1920, de medianil a
+ *   medianil, centrado con la placa del HUD (L1).
  * - **404 en móvil**: el subtítulo va con el titular, antes del pad, y se ve sin desplazar, y «Volver al
  *   menú» va antes del pad (L2).
  * - **Pestañas**: [Q] y [E] a los lados, también cuando parten (L11).
@@ -85,39 +87,44 @@ async function wineShare(page: Page): Promise<number> {
 }
 
 /**
- * Hueco máximo entre el pie de las columnas y la barra en las pantallas que llenan el alto (`fill`): el
- * contenido deja 32 px de margen abajo (`.game-main`), y las maquetas llegan casi a la barra.
+ * Las interiores de poco contenido (§3.8.14 «Reparto del alto»): «Cómo se juega», Opciones (con la
+ * sección de más filas, Sonido, y las de menos), la 404 y una provisional.
  */
-const BAR_GAP = 48
-
-/** Las interiores con pieza que llenan la pantalla (`ScreenPage` con `fill`). */
-const FILL_SCREENS = [
+const FEW_SCREENS = [
   { path: '/como-funciona', heading: 'Cómo se juega' },
-  { path: '/ajustes', heading: 'Sonido y efectos' },
+  { path: '/ajustes/sonido', heading: 'Sonido y efectos' },
+  { path: '/ajustes/accesibilidad', heading: 'Accesibilidad' },
   { path: '/ajustes/sesiones', heading: 'Sesiones' },
+  { path: '/ajustes/privacidad', heading: 'Privacidad' },
   { path: '/esto-no-existe', heading: 'Bonus stage' },
+  { path: '/semanas', heading: 'Semanas' },
 ]
 
+/** Alto máximo de una fila densa (§3.8.14: nombre en display y una línea, «unos 56–72 px»). */
+const ROW_MAX = 72
+
 /**
- * Huecos entre los hijos visibles de una caja, de arriba abajo (sin los que van fuera del flujo, como
- * el `<h1>` solo para lectores de pantalla): dentro de un panel o de una columna, nada de huecos vacíos.
+ * El bloque de la pantalla (pestañas, pieza y panel) y sus márgenes con el HUD y la barra: centrado, el
+ * de arriba y el de abajo se parecen (el `<main>` deja 24 px arriba y 32 abajo).
  */
-async function innerGaps(page: Page, selector: string): Promise<number[]> {
-  return page.evaluate((sel) => {
-    const rects = [...document.querySelector(sel)!.children]
-      .filter((child) => getComputedStyle(child).position !== 'absolute')
-      .map((child) => child.getBoundingClientRect())
-      .filter((rect) => rect.height > 0)
-      .sort((a, b) => a.top - b.top)
-    return rects.slice(1).map((rect, index) => Math.round(rect.top - rects[index]!.bottom))
-  }, selector)
+async function block(page: Page) {
+  const box = await boxes(page, { panel: PANEL, piece: PIECE })
+  const tabs = await page.evaluate(
+    () => document.querySelector('main [data-screen-part="tabs"]')?.getBoundingClientRect().top ?? null,
+  )
+  const top = Math.min(tabs ?? Number.POSITIVE_INFINITY, box.piece.top, box.panel.top)
+  const bottom = Math.max(box.piece.bottom, box.panel.bottom)
+  return { ...box, top, bottom, above: top - box.hud.bottom, below: box.bar.top - bottom }
 }
 
-/** Baja hasta el final de la página (en ventanas bajas, lo que no cabe se desplaza). */
-async function scrollToEnd(page: Page): Promise<void> {
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
-  await page.waitForFunction(
-    () => Math.ceil(window.scrollY + window.innerHeight) >= document.documentElement.scrollHeight - 1,
+/** Altos de las filas de la pantalla: las del panel (reglas, ayuda, leyenda) y las placas de la cuña. */
+async function rowHeights(page: Page): Promise<number[]> {
+  return page.evaluate(
+    ([panel, piece]) =>
+      [...document.querySelectorAll(`${panel} section li, ${piece} figure li`)].map((row) =>
+        Math.round(row.getBoundingClientRect().height),
+      ),
+    [PANEL, PIECE],
   )
 }
 
@@ -140,107 +147,87 @@ test.describe('1440 × 900', () => {
     expect(Math.abs(box.panel.bottom - box.title.bottom)).toBeLessThanOrEqual(4)
   })
 
-  test('RD-VIS-02 e: «Cómo se juega» estira el panel de reglas hasta el pie de la lista de movimientos', async ({
-    page,
-  }) => {
-    await open(page, '/como-funciona', 'Cómo se juega')
-    await settle(page)
-    const box = await boxes(page, {
-      panel: PANEL,
-      back: `${PIECE} ul > li:last-child > a`,
-      lastRule: 'main ol > li:last-child',
-    })
-    // El pie del panel, a la altura de «Volver al menú».
-    expect(Math.abs(box.panel.bottom - box.back.bottom)).toBeLessThanOrEqual(2)
-    // Las cinco filas se reparten el alto del panel: la última llega a su pie.
-    expect(box.panel.bottom - box.lastRule.bottom).toBeLessThanOrEqual(48)
-  })
-
-  test('RD-VIS-02 e: «Cómo se juega» llena el alto entre el HUD y la barra: la lista de movimientos y el panel de reglas llegan a la barra (J2r)', async ({
-    page,
-  }) => {
-    await open(page, '/como-funciona', 'Cómo se juega')
-    await settle(page)
-    const box = await boxes(page, {
-      panel: PANEL,
-      piece: PIECE,
-      back: `${PIECE} ul > li:last-child > a`,
-      lastRule: 'main ol > li:last-child',
-    })
-    // Como las maquetas de interiores (`02-seleccion`, `05-perfil`): las dos columnas, hasta la barra.
-    expect(box.bar.top - box.panel.bottom, 'hueco bajo el panel').toBeLessThanOrEqual(BAR_GAP)
-    expect(box.bar.top - box.back.bottom, 'hueco bajo la lista').toBeLessThanOrEqual(BAR_GAP)
-    expect(box.panel.bottom).toBeLessThanOrEqual(box.bar.top)
-    // Sin hueco dentro del panel: las filas de las reglas se reparten su alto.
-    expect(box.panel.bottom - box.lastRule.bottom).toBeLessThanOrEqual(48)
-    // Sin hueco dentro de la lista: los movimientos se reparten el alto, «Volver al menú» al pie.
-    const gaps = await page.evaluate((selector) => {
-      const items = [...document.querySelectorAll(`${selector} ul > li > a`)].map((a) =>
-        a.getBoundingClientRect(),
-      )
-      return items.slice(1).map((rect, index) => rect.top - items[index]!.bottom)
-    }, PIECE)
-    for (const gap of gaps) expect(gap, `huecos entre placas: ${gaps.join(', ')}`).toBeLessThanOrEqual(24)
-  })
-
-  for (const { path, heading } of FILL_SCREENS.filter((screen) => screen.path !== '/como-funciona')) {
-    test(`RD-VIS-02 e: ${path} llena el alto entre el HUD y la barra, sin huecos dentro del panel (J3r)`, async ({
+  for (const { path, heading } of FEW_SCREENS) {
+    test(`RD-VIS-02 e: ${path} no estira cajas: centra el bloque entre el HUD y la barra, con la pieza y el panel del mismo alto (§3.8.14)`, async ({
       page,
     }) => {
       await open(page, path, heading)
       await settle(page)
-      const box = await boxes(page, { panel: PANEL, piece: PIECE })
-      for (const name of ['panel', 'piece'] as const) {
-        expect(box[name].bottom, `pie de «${name}» y barra`).toBeLessThanOrEqual(box.bar.top)
-        expect(box.bar.top - box[name].bottom, `hueco bajo «${name}»`).toBeLessThanOrEqual(BAR_GAP)
-      }
-      // El contenido del panel se reparte: lo suyo arriba, filas que comparten el alto, acciones al pie.
-      const gaps = await innerGaps(page, PANEL)
-      for (const gap of gaps) expect(gap, `huecos en el panel: ${gaps.join(', ')}`).toBeLessThanOrEqual(40)
-      // Y el de la última lista del panel (reglas, opciones, leyenda) llega a su pie.
-      const lastRow = await page.evaluate((sel) => {
-        const rows = document.querySelectorAll(`${sel} section li`)
-        return rows[rows.length - 1]?.getBoundingClientRect().bottom ?? 0
-      }, PANEL)
-      const listEnd = await page.evaluate(
-        (sel) => document.querySelector(`${sel} section`)!.getBoundingClientRect().bottom,
-        PANEL,
+      const box = await block(page)
+      // Centrado: los márgenes de arriba y de abajo se parecen (y no es un bloque estirado hasta la barra).
+      expect(
+        Math.abs(box.above - box.below),
+        `arriba ${box.above} px · abajo ${box.below} px`,
+      ).toBeLessThanOrEqual(24)
+      expect(box.below, 'hueco bajo el bloque').toBeGreaterThanOrEqual(40)
+      // La pieza y el panel, del mismo alto (la fila los iguala; las acciones, al pie del panel).
+      expect(
+        Math.abs(box.piece.bottom - box.panel.bottom),
+        'pies de la pieza y del panel',
+      ).toBeLessThanOrEqual(2)
+      expect(Math.abs(box.piece.top - box.panel.top), 'cabezas de la pieza y del panel').toBeLessThanOrEqual(
+        2,
       )
-      expect(listEnd - lastRow, 'hueco bajo la última fila').toBeLessThanOrEqual(2)
+    })
+
+    test(`RD-VIS-02 e: en ${path} ninguna fila pasa de ${ROW_MAX} px: nombre y una línea, como las de 05-perfil (§3.8.14)`, async ({
+      page,
+    }) => {
+      await open(page, path, heading)
+      await settle(page)
+      const heights = await rowHeights(page)
+      for (const height of heights)
+        expect(height, `filas de ${heights.join(', ')} px`).toBeLessThanOrEqual(ROW_MAX)
     })
   }
 
-  test('RD-VIS-02 e: en Opciones, la vista previa de la cuña llena la columna, con su pie abajo (J3r)', async ({
+  test('RD-VIS-02 e: las reglas de «Cómo se juega» y la ayuda y las placas de Opciones llevan su nombre en display (§3.8.14)', async ({
     page,
   }) => {
-    for (const { path, heading } of FILL_SCREENS.filter((screen) => screen.path.startsWith('/ajustes'))) {
+    for (const { path, heading, name } of [
+      { path: '/como-funciona', heading: 'Cómo se juega', name: `${PANEL} section li .bb-display` },
+      { path: '/ajustes/sonido', heading: 'Sonido y efectos', name: `${PANEL} section li .bb-display` },
+      { path: '/ajustes/sonido', heading: 'Sonido y efectos', name: `${PIECE} figure li .bb-display` },
+    ]) {
       await open(page, path, heading)
       await settle(page)
-      // Las placas, seguidas y más altas que en la columna suelta (56 px), sin pasar del doble.
-      const gaps = await innerGaps(page, `${PIECE} figure ul`)
-      for (const gap of gaps)
-        expect(gap, `${path}: huecos entre placas ${gaps.join(', ')}`).toBeLessThanOrEqual(24)
-      const heights = await page.evaluate(
-        (sel) =>
-          [...document.querySelectorAll(`${sel} figure li`)].map((li) => li.getBoundingClientRect().height),
-        PIECE,
+      const fonts = await page.evaluate(
+        (selector) =>
+          [...document.querySelectorAll(selector)].map((element) => {
+            const style = getComputedStyle(element)
+            return { family: style.fontFamily, size: Number.parseFloat(style.fontSize) }
+          }),
+        name,
       )
-      for (const height of heights) {
-        expect(height, `${path}: placas de ${heights.join(', ')} px`).toBeGreaterThan(56)
-        expect(height, `${path}: placas de ${heights.join(', ')} px`).toBeLessThanOrEqual(112)
+      expect(fonts.length, `${path}: nombres en display`).toBeGreaterThanOrEqual(4)
+      for (const font of fonts) {
+        expect(font.family, path).toMatch(/Anybody/)
+        expect(font.size, path).toBeGreaterThanOrEqual(16)
       }
-      // Y el pie de la vista previa, al pie de la columna, que llega a la barra.
-      const box = await boxes(page, { piece: PIECE, caption: `${PIECE} figcaption` })
-      expect(box.piece.bottom - box.caption.bottom, `${path}: pie de la columna`).toBeLessThanOrEqual(2)
-      expect(box.bar.top - box.piece.bottom, `${path}: hueco bajo la columna`).toBeLessThanOrEqual(BAR_GAP)
     }
   })
 
-  test('RD-VIS-02 e: la 404 estira el panel del subtítulo hasta el pie del pad', async ({ page }) => {
-    await open(page, '/esto-no-existe', 'Bonus stage')
-    await settle(page)
-    const box = await boxes(page, { panel: PANEL, piece: PIECE })
-    expect(Math.abs(box.panel.bottom - box.piece.bottom)).toBeLessThanOrEqual(2)
+  test('RD-VIS-02 e: en Opciones, el nombre de cada placa de la vista previa no pesa menos que su valor (§3.8.14)', async ({
+    page,
+  }) => {
+    for (const { path, heading } of [
+      { path: '/ajustes/movimiento', heading: 'Movimiento' },
+      { path: '/ajustes/cuenta', heading: 'Cuenta' },
+    ]) {
+      await open(page, path, heading)
+      await settle(page)
+      const sizes = await page.evaluate(
+        (selector) =>
+          [...document.querySelectorAll(`${selector} figure li`)].map((row) => {
+            const [label, value] = [...row.children].map((child) =>
+              Number.parseFloat(getComputedStyle(child).fontSize),
+            )
+            return { label: label!, value: value! }
+          }),
+        PIECE,
+      )
+      for (const size of sizes) expect(size.label, path).toBeGreaterThanOrEqual(size.value)
+    }
   })
 
   test('RD-VIS-02 e / §3.8.11: en escritorio, «Volver al menú» de la 404 sigue debajo del pad', async ({
@@ -251,14 +238,6 @@ test.describe('1440 × 900', () => {
     const box = await boxes(page, { pad: 'main figure', back: 'main a[href="/"]' })
     expect(box.back.top).toBeGreaterThanOrEqual(box.pad.bottom)
     expect(box.back.left).toBeLessThan(box.pad.right)
-  })
-
-  test('RD-VIS-02 e: Opciones lleva su pieza en la cuña y el panel llega a su pie', async ({ page }) => {
-    await open(page, '/ajustes', 'Sonido y efectos')
-    await settle(page)
-    const box = await boxes(page, { panel: PANEL, piece: PIECE })
-    expect(box.piece.bottom - box.piece.top).toBeGreaterThanOrEqual(240)
-    expect(Math.abs(box.panel.bottom - box.piece.bottom)).toBeLessThanOrEqual(2)
   })
 
   for (const path of WINE_SCREENS) {
@@ -276,30 +255,6 @@ test.describe('1440 × 900', () => {
     })
   }
 })
-
-for (const viewport of [
-  { width: 1440, height: 789 },
-  { width: 1366, height: 657 },
-]) {
-  test.describe(`${viewport.width} × ${viewport.height}`, () => {
-    test.use({ viewport })
-
-    for (const { path, heading } of FILL_SCREENS) {
-      test(`RD-VIS-02 e: ${path} llena el alto y, si no cabe, se desplaza sin pisar la barra (J2r, J3r)`, async ({
-        page,
-      }) => {
-        await open(page, path, heading)
-        await settle(page)
-        await scrollToEnd(page)
-        const box = await boxes(page, { panel: PANEL, piece: PIECE })
-        for (const name of ['panel', 'piece'] as const) {
-          expect(box[name].bottom, `pie de «${name}» y barra`).toBeLessThanOrEqual(box.bar.top)
-          expect(box.bar.top - box[name].bottom, `hueco bajo «${name}»`).toBeLessThanOrEqual(BAR_GAP)
-        }
-      })
-    }
-  })
-}
 
 /**
  * ¿Pisa la caja la diagonal de la cuña? La arena de cuña a la izquierda (`ArenaBackdrop`) corta el pie
@@ -338,22 +293,6 @@ for (const viewport of [
     })
   })
 }
-
-test.describe('1440 × 789, Opciones', () => {
-  test.use({ viewport: { width: 1440, height: 789 } })
-
-  test('RD-VIS-02 e: Opciones cabe sin desplazar cuando cabe su panel: las placas de la vista previa no alargan la pantalla (J3r)', async ({
-    page,
-  }) => {
-    await open(page, '/ajustes', 'Sonido y efectos')
-    await settle(page)
-    const overflow = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)
-    expect(overflow, `${overflow} px de desplazamiento`).toBeLessThanOrEqual(1)
-    const box = await boxes(page, { panel: PANEL, piece: PIECE })
-    expect(box.panel.bottom).toBeLessThanOrEqual(box.bar.top)
-    expect(box.bar.top - box.piece.bottom).toBeLessThanOrEqual(BAR_GAP)
-  })
-})
 
 /**
  * Las pestañas con teclas (§3.3 «Pestañas»): [Q] y [E] a los lados de la fila y, si parte, las líneas
@@ -493,7 +432,7 @@ for (const colorScheme of ['dark', 'light'] as const) {
 test.describe('1920 × 1080', () => {
   test.use({ viewport: { width: 1920, height: 1080 } })
 
-  for (const { path, heading } of FILL_SCREENS) {
+  for (const { path, heading } of FEW_SCREENS) {
     test(`RD-VIS-02 e: a 1920 × 1080, ${path} llena el ancho, centrada con la placa del HUD (L1)`, async ({
       page,
     }) => {
