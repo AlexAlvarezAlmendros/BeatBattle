@@ -1710,21 +1710,30 @@ test.describe('arena tras navegar con movimiento', () => {
   test.describe('1440 × 900', () => {
     test.use({ viewport: { width: 1440, height: 900 } })
 
+    /*
+     * Tras el clic y tras cada Q/E se espera al `<h1>` de la pantalla nueva antes de `settle`: la URL cambia
+     * antes de montarla, y sin esa espera `settle` no encontraba aún su entrada (`bb-screen-in`) y la sonda medía
+     * la pieza en su primer fotograma, 40 px a la izquierda (jurado de la 0.28, cierre, R4: fallaba 3 de 7
+     * veces con la suite entera).
+     */
     test('§3.2 / §3.8.14: con el enlace «Legal» de la barra y con Q/E entre los legales, los rayos salen de la pieza (P8)', async ({
       page,
     }) => {
+      const heading = page.getByRole('main').getByRole('heading', { level: 1 })
       await open(page, '/como-funciona', 'Cómo se juega')
       await settle(page)
       await page.locator('.game-frame > footer a[href="/legal/bases"]').click()
       await expect(page).toHaveURL('/legal/bases')
+      await expect(heading).toHaveText('Bases de la competición')
       await settle(page)
       await expectRaysFromPiece(page)
-      for (const [key, path] of [
-        ['e', '/legal/terminos'],
-        ['q', '/legal/bases'],
+      for (const [key, path, title] of [
+        ['e', '/legal/terminos', 'Términos de uso'],
+        ['q', '/legal/bases', 'Bases de la competición'],
       ] as const) {
         await page.keyboard.press(key)
         await expect(page).toHaveURL(path)
+        await expect(heading).toHaveText(title)
         await settle(page)
         await expectRaysFromPiece(page)
       }
