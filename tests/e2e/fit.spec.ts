@@ -1555,6 +1555,68 @@ for (const viewport of [
   })
 }
 
+/**
+ * La tableta vertical escala con el ancho (§3.8.3 v0.6.7; jurado de la 0.28, cierre, K2): usaba las medidas del
+ * móvil sin escalar (logo de 384 px de ancho, el 47 % de 820; placas de 48/56 px; pegatina de 62 px) y dejaba
+ * una franja vacía de ~195 px entre el HUD y el logo a 820 × 1180. Ahora el logo ocupa el ancho útil (el 90 %
+ * como poco), el lockup va en la versión de su ancho (la pegatina de la maqueta), las placas miden
+ * `--bb-plate-h` si caben (y nunca menos que el objetivo táctil), lo que sobra no queda arriba (el logo sube
+ * hasta el HUD) y, en táctil, cabe sin desplazar.
+ */
+for (const viewport of [
+  { width: 768, height: 1024 },
+  { width: 820, height: 1180 },
+]) {
+  test.describe(`tableta vertical escalada a ${viewport.width} × ${viewport.height} táctil`, () => {
+    test.use({ viewport, isMobile: true, hasTouch: true })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`RD-VIS-02 e / §3.8.3: en ${path} el logo ocupa el 90 % del ancho útil como poco, con el lockup y las placas de la tableta, sin desplazar`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        const plateH = await tokenPx(page, '--bb-plate-h')
+        const target = await tokenPx(page, '--bb-target')
+        const tablet = await page.evaluate(() => {
+          const main = document.querySelector('main')!
+          const style = getComputedStyle(main)
+          const canvas = [...main.querySelectorAll('[data-game-logo] canvas')].find(
+            (element) => element.getBoundingClientRect().width > 0,
+          )!
+          const plates = [...main.querySelectorAll<HTMLElement>('[data-menu-plate]')].filter(
+            (plate) => plate.getAttribute('data-cursor-active') !== 'true',
+          )
+          return {
+            useful:
+              main.clientWidth - Number.parseFloat(style.paddingLeft) - Number.parseFloat(style.paddingRight),
+            logo: canvas.getBoundingClientRect().width,
+            logoTop: canvas.getBoundingClientRect().top,
+            hud: document.querySelector('.game-frame > header')!.getBoundingClientRect().bottom,
+            sticker: main.querySelector('[data-otp-signature] img')!.getBoundingClientRect().width,
+            plates: plates.map((plate) => plate.getBoundingClientRect().height),
+            scroll: document.scrollingElement!.scrollHeight - window.innerHeight,
+          }
+        })
+        expect(
+          tablet.logo / tablet.useful,
+          `logo de ${tablet.logo.toFixed(0)} de ${tablet.useful} px`,
+        ).toBeGreaterThanOrEqual(0.9)
+        // Lo que sobra no queda arriba: el lienzo del logo empieza en el HUD (sube sobre su aire transparente).
+        expect(tablet.logoTop).toBeLessThanOrEqual(tablet.hud + 0.5)
+        // La versión del lockup de su ancho, la de la maqueta: la pegatina de 104 px (girada, unos 112 de caja).
+        expect(tablet.sticker).toBeGreaterThan(100)
+        for (const height of tablet.plates) {
+          expect(height).toBeLessThanOrEqual(plateH + 0.5)
+          expect(height).toBeGreaterThanOrEqual(target - 0.5)
+        }
+        expect(tablet.scroll).toBeLessThanOrEqual(0)
+        expect(await lockupOverLogo(page)).toEqual({ sticker: 0, ribbon: 0 })
+      })
+    }
+  })
+}
+
 /** Los altos y el cuerpo del rótulo de las placas en reposo del menú. */
 function restPlates(page: Page): Promise<{ heights: number[]; fonts: number[] }> {
   return page.evaluate(() => {

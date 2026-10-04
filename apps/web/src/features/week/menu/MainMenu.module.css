@@ -543,48 +543,109 @@
 
 /*
  * ── Tableta vertical (de 721 a 1199 px de ancho, en vertical: 768 × 1024, 820 × 1180) ─────────────
- * La composición apilada del móvil a escala de tableta (§3.8.3): en dos columnas, la tarjeta de la semana
- * iba en una de 290 px (título en tres líneas, créditos en cuatro, chips en tres filas), la barra la
- * cortaba y la pantalla se desplazaba 110 px (jurado de la 0.28, cierre). Apilado: el logo de tableta
- * (`--bb-menu-logo-w-tablet`) con su lockup, la tarjeta a todo el ancho (plegada en táctil, como en el
- * móvil: `StageCard`), «ELIGE MODO» y las seis placas en la lista ancha, con el dato al lado, y la cuña
- * abajo (`ArenaBackdrop`). Las letras y las placas son las de escritorio (los tokens de móvil son solo de
- * ≤ 720 px), y el reloj del HUD pasa a la tarjeta, como en el móvil: el HUD queda en una fila. El 1P y la
- * flecha de la elegida no caben a la izquierda (la placa empieza en el medianil): queda el anillo.
- * Se mide por la proporción (como mucho 3:4), no por el ancho.
+ * La composición apilada del móvil escalada con el ancho (§3.8.3 v0.6.7): el logo ocupa el ancho útil, el
+ * lockup va en la versión que le toca por su ancho (la de la maqueta, con la pegatina de 104 px), la
+ * tarjeta a todo el ancho (plegada en táctil, como en el móvil: `StageCard`), «ELIGE MODO» y las seis
+ * placas de `--bb-plate-h` (70 px; 84 la elegida) en la lista ancha, con el dato al lado, y la cuña abajo
+ * (`ArenaBackdrop`). Antes usaba las medidas del móvil sin escalar (logo de 384 px, el 47 % de 820; placas de
+ * 48 px; pegatina de 62) y dejaba una franja vacía de ~195 px entre el HUD y el logo (jurado de la 0.28,
+ * cierre, K2).
+ *
+ * - El logo y su lockup (`.brand`) son un contenedor de tamaño flexible: se quedan con el alto que sobra,
+ *   no arriba. Si ese alto da para el logo en dos líneas al 90 % del ancho útil como poco, va en dos líneas
+ *   (por su alto, sin pasar del ancho); si no, en una línea (el del móvil bajo) a todo el ancho, y lo que
+ *   sobre queda bajo el lockup, entre el logo y las placas. En dos líneas, al 90 % del ancho, mide 255–275
+ *   px de alto: con el jugador en el HUD y la semana en juego no cabe ni a 768 × 1024 ni a 820 × 1180.
+ * - En táctil cabe sin desplazar (más abajo); con teclado y ratón no se pliega nada (el panel de ayuda, la
+ *   tarjeta entera) y puede desplazarse.
+ *
+ * Las letras son las de escritorio (los tokens de móvil son solo de ≤ 720 px), y el reloj del HUD pasa a
+ * la tarjeta, como en el móvil: el HUD queda en una fila. El 1P y la flecha de la elegida no caben a la
+ * izquierda (la placa empieza en el medianil): queda el anillo. Se mide por la proporción (como mucho 3:4),
+ * no por el ancho.
  */
 @media (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) {
-  /* Lo que sobra de alto (820 × 1180, «/» sin reloj) queda arriba: las placas, sobre la cuña y la barra. */
+  /*
+   * Filas: el título (`1fr`: se queda con lo que sobra) y, en una subrejilla, los modos: «ELIGE MODO», la
+   * lista de placas (entre su mínimo y su máximo; más abajo) y la ayuda. La rejilla da primero a la lista
+   * hasta su máximo y después al título lo que quede.
+   */
   .menu {
     --menu-s: 1;
+    --menu-plates-n: calc(5 + var(--bb-plate-on-scale));
+    --menu-plates-max: calc(var(--bb-plate-h) * var(--menu-plates-n) + 5 * var(--bb-space-1));
+    --menu-plates-min: var(--menu-plates-max);
     grid-template-columns: minmax(0, 1fr);
-    align-content: end;
+    grid-template-rows: 1fr auto minmax(var(--menu-plates-min), var(--menu-plates-max)) auto;
+    align-content: stretch;
     gap: var(--bb-space-3);
-    margin-top: calc(-1 * var(--bb-space-3));
+    margin-top: calc(-1 * var(--bb-space-6));
     margin-bottom: calc(-1 * var(--bb-space-6));
   }
 
-  .logoFull {
-    width: min(100%, var(--bb-menu-logo-w-tablet));
-    margin: 0;
+  .title {
+    display: flex;
+    flex-direction: column;
   }
 
-  /* El lockup, debajo de la zona opaca del logo y no más ancho que él (como en el móvil). */
+  /*
+   * Como poco, el logo en una línea a todo el ancho de la columna (`100cqw`: la del título,
+   * `--game-logo-aspect-compact`) con el lockup: lo que mide en una línea, sin los `--bb-space-3` que sube
+   * hacia el HUD, más el lockup de la maqueta (`--bb-menu-lockup-h`), `--bb-space-3` encima y
+   * `--bb-space-4` debajo (más abajo).
+   */
+  .brand {
+    container: menu-tablet-brand / size;
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-height: calc(100cqw / var(--game-logo-aspect-compact) + var(--bb-menu-lockup-h) + var(--bb-space-4));
+  }
+
+  .logoFull {
+    display: none;
+  }
+
+  /* Su lienzo deja unos 20 px transparentes por arriba: sube `--bb-space-3` hacia el HUD, sin tapar sus clics. */
+  .logoCompact {
+    display: block;
+    width: 100%;
+    margin-top: calc(-1 * var(--bb-space-3));
+    pointer-events: none;
+  }
+
+  /*
+   * El lockup de la maqueta (la pegatina, dentro de su fila de 63 px, sobresale unos 12 px por arriba y 5 por
+   * abajo): `--bb-space-3` bajo el lienzo del logo en una línea, que casi no deja aire al pie, para que la
+   * pegatina no pise la extrusión (§3.1), y `--bb-space-4` hasta la tarjeta, para que su tinta quede a
+   * `--bb-space-2` de ella como poco.
+   */
   .lockup {
-    --lockup-signature-hang: calc(-1 * var(--bb-space-2));
-    --lockup-signature-lift: var(--bb-space-1);
-    width: min(100%, var(--bb-menu-logo-w-tablet));
-    margin: var(--bb-space-1) 0 0;
+    flex: none;
+    margin: var(--bb-space-3) 0 var(--bb-space-4) var(--bb-space-2);
   }
 
   .title > article {
-    margin-top: var(--bb-space-3);
+    flex: none;
+    margin-top: 0;
   }
 
+  /*
+   * Los modos, en las filas de la rejilla del menú: «ELIGE MODO», la lista de placas y la ayuda. Una subrejilla
+   * no puede ser contenedor (la contención de diseño la saca de la rejilla del menú): aquí la lista es ancha
+   * (de 625 a 1103 px), como en el móvil, y no hace falta.
+   */
   .modes {
-    --menu-modes-foot: 0px;
-    --menu-modes-foot-max: 0px;
+    container-type: normal;
+    display: grid;
+    grid-row: 2 / span 3;
+    grid-template-rows: subgrid;
+    row-gap: 0;
     padding-top: 0;
+  }
+
+  .modes::after {
+    display: none;
   }
 
   .head,
@@ -593,14 +654,27 @@
   }
 
   .head {
+    margin-top: 0;
     margin-bottom: var(--bb-space-2);
   }
 
-  /* Las placas del móvil (48 px, 56 la elegida) con el rótulo de escritorio. */
+  /*
+   * Las placas de escritorio (`--bb-plate-h`, 70 px; la elegida, `--bb-plate-on-scale` más), separadas
+   * `--bb-space-1`, como en el móvil. La lista es un contenedor de tamaño (su fila, entre su mínimo y su
+   * máximo): si es más baja que seis placas de `--bb-plate-h` (en táctil, más abajo), las placas miden lo que
+   * quepa, nunca menos que el objetivo táctil. Lo que sobra con las placas a su alto es para el logo.
+   */
   .plates {
-    --menu-plate-h: var(--bb-space-12);
-    --menu-plate-h-on: var(--bb-space-14);
-    gap: var(--bb-space-2);
+    --menu-plate-h: clamp(
+      var(--bb-target),
+      (100cqh - 5 * var(--bb-space-1)) /
+      var(--menu-plates-n),
+      var(--bb-plate-h)
+    );
+    --menu-plate-h-on: calc(var(--menu-plate-h) * var(--bb-plate-on-scale));
+    container-type: size;
+    align-content: start;
+    gap: var(--bb-space-1);
   }
 
   .plates :global([data-cursor-player="left"]),
@@ -618,9 +692,57 @@
   }
 }
 
-/* Tableta vertical táctil: sin panel de ayuda, como en el móvil táctil (y lo lee igual el lector). */
+/*
+ * Logo en dos líneas en la tableta vertical, si el alto que le queda (con su lockup) da para que mida el 90 %
+ * del ancho útil como poco. El contenedor es más alto que ancho / 1,9: con el lockup (unos 75 px) eso deja
+ * al logo, de proporción 2,36 (`logoAspect()`), del 90 al 100 % del ancho en toda la tableta (de 625 a 1103 px
+ * de columna). Va por su alto y sin pasar del ancho; como en el móvil, sube hacia el HUD (su lienzo deja
+ * unos 36 px transparentes arriba) y el lockup se pega a su pie (unos 22 px transparentes), como en la
+ * maqueta.
+ */
+@container menu-tablet-brand (max-aspect-ratio: 103 / 50) {
+  .logoCompact {
+    display: none;
+  }
+
+  .logoFull {
+    display: block;
+    width: 100%;
+    margin: calc(-1 * var(--bb-space-3)) 0 0;
+    pointer-events: none;
+  }
+
+  .logoFull canvas {
+    width: min(
+      100cqw,
+      (100cqh - var(--bb-menu-lockup-h) - var(--bb-space-4) + var(--bb-space-3) + var(--bb-space-1)) *
+      var(--game-logo-aspect)
+    );
+  }
+
+  .lockup {
+    margin-top: calc(-1 * var(--bb-space-1));
+  }
+}
+
+/*
+ * Tableta vertical táctil: sin panel de ayuda, como en el móvil táctil (y lo lee igual el lector), y cabe sin
+ * desplazar. El menú mide el alto que queda entre el HUD y la barra (base 0; nunca menos que su mínimo) y, si
+ * no cabe todo, cede la lista de placas, hasta seis placas de `--bb-target`: a 768 × 1024 con el jugador en
+ * el HUD y la semana en juego, unos 63 px. El logo no cede: su mínimo es el de una línea.
+ */
 @media (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) and (hover: none),
   (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) and (pointer: coarse) {
+  /*
+   * Sin mínimo propio: el de una rejilla es lo que mide con la lista a su máximo. En esta composición (de
+   * 721 px de ancho y 961 de alto en adelante) lo mínimo, con las placas de `--bb-target`, siempre cabe.
+   */
+  .menu {
+    --menu-plates-min: calc(var(--bb-target) * var(--menu-plates-n) + 5 * var(--bb-space-1));
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
   .help {
     display: none;
   }

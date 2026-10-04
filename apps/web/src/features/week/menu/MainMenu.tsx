@@ -41,8 +41,14 @@ interface ModeEntry {
 
 const bold = (text: ReactNode) => <b>{text}</b>
 
-/** La proporción del logo en dos líneas, para que el lockup (fuera del logo) se mida con él (§3.8.3). */
-const BRAND_STYLE = { '--game-logo-aspect': logoAspect() } as CSSProperties
+/**
+ * La proporción del logo en dos líneas, para que el lockup (fuera del logo) se mida con él, y la del logo en
+ * una, para el alto mínimo del logo en la tableta vertical (§3.8.3).
+ */
+const BRAND_STYLE = {
+  '--game-logo-aspect': logoAspect(),
+  '--game-logo-aspect-compact': logoAspect(true),
+} as CSSProperties
 
 /** Táctil: el mismo criterio que el CSS de los pliegues del móvil (`hover: none` o `pointer: coarse`). */
 const TOUCH_QUERY = '(hover: none), (pointer: coarse)'
