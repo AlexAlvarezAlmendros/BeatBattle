@@ -147,7 +147,7 @@ test.describe('390 × 844', () => {
     expect(box.panel.top - box.title.bottom).toBeGreaterThanOrEqual(48)
   })
 
-  test('§3.8.11: en móvil, el subtítulo de la 404 va con el titular, antes del pad, y se ve sin desplazar', async ({
+  test('RD-VIS-02 e / §3.8.11: en móvil, el subtítulo de la 404 va con el titular, antes del pad, y se ve sin desplazar', async ({
     page,
   }) => {
     await open(page, '/esto-no-existe', 'Bonus stage')

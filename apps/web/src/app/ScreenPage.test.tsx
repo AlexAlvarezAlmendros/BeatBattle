@@ -76,7 +76,7 @@ describe('plantilla de pantalla interior (0.26, §3.8.14)', () => {
     await act(async () => {})
   })
 
-  it('§3.8.11: el subtítulo de la 404 va con el titular, antes del pad, en el orden de lectura (y en móvil, en pantalla)', async () => {
+  it('RD-VIS-02 e / §3.8.11: el subtítulo de la 404 va con el titular, antes del pad, en el orden de lectura (y en móvil, en pantalla)', async () => {
     renderAt('/legal/no-existe')
     const main = screen.getByRole('main')
     const heading = within(main).getByRole('heading', { level: 1 })
