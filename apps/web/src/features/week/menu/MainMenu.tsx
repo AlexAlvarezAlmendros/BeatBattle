@@ -308,7 +308,8 @@ export function MainMenu({ model }: { model: MenuModel }) {
 function revealHelp(list: HTMLElement | null, help: HTMLElement | null) {
   const focused = document.activeElement
   if (!list || !help || !(focused instanceof HTMLElement) || !list.contains(focused)) return
-  if (!focused.matches(':focus-visible')) return
+  // Sin `scrollIntoView` (jsdom) no hay nada que desplazar.
+  if (!focused.matches(':focus-visible') || typeof help.scrollIntoView !== 'function') return
   const reveal = () => {
     help.scrollIntoView({ block: 'nearest' })
     focused.scrollIntoView({ block: 'nearest' })
