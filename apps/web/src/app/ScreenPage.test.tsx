@@ -1,4 +1,5 @@
 import { act, render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../i18n'
@@ -89,6 +90,23 @@ describe('plantilla de pantalla interior (0.26, §3.8.14)', () => {
     expect(links[0]).toHaveAccessibleName(t('legal.docs.bases'))
     expect(links[2]).toHaveAccessibleName(t('legal.docs.privacidad'))
     await act(async () => {})
+  })
+
+  it('RD-VIS-02 d / §3.8.14: el primer elemento de juego lleva el cursor sin robar el foco; ↓ e Intro van a él', async () => {
+    const user = userEvent.setup()
+    const router = renderAt('/semanas')
+    const main = screen.getByRole('main')
+    const back = within(main).getByRole('link', { name: t('screen.backToMenu') })
+    // «Volver al menú», la opción elegida de su grupo: el cursor se ve mientras el foco está fuera.
+    expect(back).toHaveAttribute('data-cursor-active', 'true')
+    expect(back.closest('[data-cursor-group]')).not.toBeNull()
+    expect(back).not.toHaveFocus()
+    main.focus()
+    await user.keyboard('{ArrowDown}')
+    expect(back).toHaveFocus()
+    main.focus()
+    await user.keyboard('{Enter}')
+    expect(router.state.location.pathname).toBe('/')
   })
 
   it('la 404 «BONUS STAGE» pone su propia placa en el HUD y el pad decorativo de 4 × 4', async () => {

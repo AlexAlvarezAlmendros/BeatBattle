@@ -141,11 +141,14 @@ export function TabLinks({
     moveTo(Math.max(0, current), { focus: false })
   }
 
+  // El grupo del cursor: con el foco fuera de las pestañas, la sección actual lo lleva (§3.3, §3.8.14).
+  const listProps = { 'data-cursor-group': '', onKeyDown: roving.onKeyDown, onBlur }
+
   return (
     <nav ref={navRef} aria-label={label} className={cx(styles.row, className)}>
       <Key aria-hidden="true">{t('ui.tabs.previousKey')}</Key>
       {/* biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none */}
-      <ul role="list" className={styles.list} onKeyDown={roving.onKeyDown} onBlur={onBlur}>
+      <ul role="list" className={styles.list} {...listProps}>
         {links.map((link, index) => (
           <li key={link.to}>
             <NavLink

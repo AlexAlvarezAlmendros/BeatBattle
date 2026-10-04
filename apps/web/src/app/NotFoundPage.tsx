@@ -68,7 +68,7 @@ export function NotFoundPage() {
              * salida); en dos columnas, justo debajo del pad y su nota, alineado con él (§3.8.11).
              */}
             <div className={styles.back}>
-              <BackToMenu />
+              <BackToMenu start />
             </div>
             <figure className={styles.pad}>
               <div className={styles.keys} aria-hidden="true">

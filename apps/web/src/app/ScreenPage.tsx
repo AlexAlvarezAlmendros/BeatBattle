@@ -1,8 +1,9 @@
-import type { ReactNode } from 'react'
+import { type ReactNode, useMemo, useRef } from 'react'
 import { t } from '../i18n'
 import { Button } from '../ui/Button'
 import { Frame } from '../ui/Frame'
 import { cx } from '../ui/forceState'
+import { useIdleMenuKeys } from '../ui/hooks/useIdleMenuKeys'
 import { Stamp } from '../ui/Stamp'
 import { DocumentTitle } from './DocumentTitle'
 import { useScreen } from './layout/screen'
@@ -79,12 +80,33 @@ export interface ScreenPageProps {
 }
 
 /**
+ * El primer elemento de juego de la pantalla (§3.8.14): la pestaña de la sección actual (Opciones, los
+ * legales) o, si no hay pestañas, el que se marca con `data-idle-start` («Volver al menú» en la
+ * autenticación, la 404 y las provisionales). Las pantallas con su propio menú de juego («Cómo se juega»)
+ * no marcan nada: sus flechas las lleva su menú.
+ */
+const IDLE_START = '[data-screen-part="tabs"] [aria-current="page"], [data-idle-start]'
+
+/**
+ * Intro con el foco en ningún control: entra en el primer elemento de juego (el clic), salvo si es la
+ * pestaña de la sección en la que ya se está, que solo se enfoca (entrar sería recargarla).
+ */
+function activateStart(element: HTMLElement) {
+  if (element.getAttribute('aria-current') === 'page') element.focus()
+  else element.click()
+}
+
+/**
  * Plantilla de las pantallas interiores (guía §3.8.14; tareas 0.26 y 0.28): a la izquierda, sobre la
  * cuña, la **pieza** de la pantalla; a la derecha, el contenido en un panel opaco de chaflán grande con
  * «Volver al menú [ESC]» en su pie (Esc hace lo mismo desde cualquier sitio, `useFrameKeys`). El título
  * va una sola vez: en la placa del HUD si la ruta la tiene (el `<h1>` sigue ahí para los lectores de
  * pantalla) o, si no, en display arriba a la izquierda. En móvil, todo apilado y el título visible
  * sobre un panel.
+ *
+ * Teclado (§3.8.14, `RD-VIS-02` d): el primer elemento de juego (`IDLE_START`) lleva el cursor al
+ * cargar, sin robar el foco (el primer Tab sigue siendo «Saltar al contenido»), y con el foco en ningún
+ * control ↑↓, Inicio y Fin van a él e Intro lo acciona, como en el menú (`useIdleMenuKeys`).
  */
 export function ScreenPage({
   title,
@@ -105,6 +127,16 @@ export function ScreenPage({
 }: ScreenPageProps) {
   const screen = useScreen()
   const inHud = titleInHud ?? Boolean(screen.plate)
+  const rootRef = useRef<HTMLDivElement>(null)
+  // Un menú de una sola opción, el primer elemento de juego: moverse es enfocarlo.
+  const start = useMemo(
+    () => ({
+      activeIndex: 0,
+      moveTo: () => rootRef.current?.querySelector<HTMLElement>(IDLE_START)?.focus(),
+    }),
+    [],
+  )
+  useIdleMenuKeys(start, 1, rootRef, { itemSelector: IDLE_START, activate: activateStart })
   const heading = (
     <h1
       className={
@@ -126,11 +158,12 @@ export function ScreenPage({
         </div>
       )}
       {children}
-      {actions !== null && <div className={styles.actions}>{actions ?? <BackToMenu />}</div>}
+      {actions !== null && <div className={styles.actions}>{actions ?? <BackToMenu start={!tabs} />}</div>}
     </Frame>
   )
   return (
     <div
+      ref={rootRef}
       className={cx(styles.screen, className)}
       data-title-in-hud={inHud || undefined}
       data-piece={piece ? '' : undefined}
@@ -171,12 +204,29 @@ export function ScreenPage({
   )
 }
 
-/** «Volver al menú [ESC]» (§3.4.1: la tecla de volver de la barra de controles). */
-export function BackToMenu() {
-  return (
-    <Button variant="outline" to={paths.home()} keyHint={t('frame.keys.glyph.escape')}>
+/**
+ * «Volver al menú [ESC]» (§3.4.1: la tecla de volver de la barra de controles). `start`: es el primer
+ * elemento de juego de la pantalla (§3.8.14; la autenticación, la 404 y las provisionales): lleva el
+ * cursor mientras el foco no esté en él, como la opción elegida de un menú, y ↑↓ e Intro van a él con el
+ * foco en ningún control (`ScreenPage`).
+ */
+export function BackToMenu({ start = false }: { start?: boolean }) {
+  const button = (
+    <Button
+      variant="outline"
+      to={paths.home()}
+      keyHint={t('frame.keys.glyph.escape')}
+      {...(start ? { 'data-idle-start': '', 'data-cursor-active': 'true' } : {})}
+    >
       {t('screen.backToMenu')}
     </Button>
+  )
+  return start ? (
+    <span className={styles.startGroup} data-cursor-group="">
+      {button}
+    </span>
+  ) : (
+    button
   )
 }
 

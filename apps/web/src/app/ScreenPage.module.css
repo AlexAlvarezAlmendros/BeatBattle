@@ -138,6 +138,11 @@
   line-height: var(--bb-leading-body);
 }
 
+/* El grupo del cursor de «Volver al menú» cuando es el primer elemento de juego: no cuenta en la caja. */
+.startGroup {
+  display: contents;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

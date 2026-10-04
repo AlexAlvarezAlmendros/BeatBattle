@@ -1,5 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
-import { open, settle } from './support'
+import { expectCursor, open, settle } from './support'
 
 /**
  * Composición de las pantallas interiores (guía §3.8.14, §3.8.11; `RD-VIS-02` e: pases del jurado visual
@@ -376,6 +376,56 @@ for (const viewport of [
       expect(gap, `${gap} px entre la nota del pad y el botón`).toBeLessThanOrEqual(24)
       expect(Math.abs(box.back.left - box.pad.left), 'alineado con el pad').toBeLessThanOrEqual(2)
     })
+  })
+}
+
+/**
+ * Teclado de recreativa en las interiores sin menú propio (§3.8.14, v0.6.6): al cargar, el primer
+ * elemento de juego lleva el cursor sin robar el foco (la pestaña actual en Opciones y en los legales,
+ * «Volver al menú» en la autenticación y en la 404); con el foco en ningún control, ↑↓ van a él e Intro
+ * lo acciona (la pestaña actual, que ya es la sección, se queda enfocada). El primer Tab sigue siendo
+ * «Saltar al contenido».
+ */
+for (const { path, heading, start, enter } of [
+  {
+    path: '/ajustes/sonido',
+    heading: 'Sonido y efectos',
+    start: 'Sonido y efectos',
+    enter: '/ajustes/sonido',
+  },
+  {
+    path: '/legal/bases',
+    heading: 'Bases de la competición',
+    start: 'Bases de la competición',
+    enter: '/legal/bases',
+  },
+  { path: '/esto-no-existe', heading: 'Bonus stage', start: 'Volver al menú', enter: '/' },
+  { path: '/entrar', heading: 'Entrar', start: 'Volver al menú', enter: '/' },
+  { path: '/registro', heading: 'Crear cuenta', start: 'Volver al menú', enter: '/' },
+]) {
+  test(`RD-VIS-02 d: en ${path}, el cursor empieza en «${start}» y ↑↓ e Intro van a él con el foco en ningún control (§3.8.14)`, async ({
+    page,
+  }) => {
+    await open(page, path, heading)
+    const target = page.getByRole('main').getByRole('link', { name: start, exact: true })
+    // Al cargar: el cursor en el primer elemento de juego, sin robarle el foco a la página.
+    await expect(page.locator('body')).toBeFocused()
+    await expect(target.locator(':scope > [data-cursor-ring]')).toBeVisible()
+    await expect(page.getByRole('main').locator('[data-cursor-ring]:visible')).toHaveCount(1)
+    // ↓ y ↑ con el foco en ningún control van a él.
+    await page.keyboard.press('ArrowDown')
+    await expectCursor(target)
+    await page.getByRole('main').focus()
+    await page.keyboard.press('ArrowUp')
+    await expectCursor(target)
+    // Intro, con el foco en ningún control, lo acciona.
+    await page.getByRole('main').focus()
+    await page.keyboard.press('Enter')
+    await expect(page).toHaveURL(enter)
+    // El primer Tab de una carga nueva sigue siendo «Saltar al contenido».
+    await open(page, path, heading)
+    await page.keyboard.press('Tab')
+    await expect(page.getByRole('link', { name: 'Saltar al contenido' })).toBeFocused()
   })
 }
 

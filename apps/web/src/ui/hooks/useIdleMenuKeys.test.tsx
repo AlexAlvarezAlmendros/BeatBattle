@@ -63,6 +63,39 @@ describe('useIdleMenuKeys (§3.8.3: con el foco en ningún control, las flechas 
     expect(items()[0]).toHaveAttribute('data-cursor-active', 'true')
   })
 
+  it('RD-VIS-02 d: sin ninguna opción en la lista, deja pasar la tecla para que la recoja otro menú (§3.8.14)', () => {
+    function Empty() {
+      const listRef = useRef<HTMLDivElement>(null)
+      useIdleMenuKeys({ activeIndex: 0, moveTo: () => {} }, 1, listRef, { itemSelector: '[data-idle-start]' })
+      return <div ref={listRef} />
+    }
+    render(<Empty />)
+    const event = new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true })
+    document.body.dispatchEvent(event)
+    expect(event.defaultPrevented).toBe(false)
+  })
+
+  it('RD-VIS-02 d: con su selector y su forma de activar, Intro acciona el primer elemento de juego (§3.8.14)', () => {
+    const activate = vi.fn()
+    const moveTo = vi.fn()
+    function Start() {
+      const listRef = useRef<HTMLDivElement>(null)
+      useIdleMenuKeys({ activeIndex: 0, moveTo }, 1, listRef, { itemSelector: '[data-idle-start]', activate })
+      return (
+        <div ref={listRef}>
+          <a href="/" data-idle-start="">
+            Volver al menú
+          </a>
+        </div>
+      )
+    }
+    render(<Start />)
+    press('ArrowDown')
+    expect(moveTo).toHaveBeenCalledWith(0)
+    press('Enter')
+    expect(activate).toHaveBeenCalledWith(screen.getByRole('link', { name: 'Volver al menú' }))
+  })
+
   it('RNF-A11Y-01: con una ventana abierta, tampoco cuenta como reposo el foco en <body>', () => {
     const onActivate = vi.fn()
     render(<Screen onActivate={onActivate} dialog />)
