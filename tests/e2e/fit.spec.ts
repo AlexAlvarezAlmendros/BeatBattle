@@ -10,8 +10,8 @@ import { open, openGallery, settle } from './support'
  *   paralelogramo; también deshabilitadas (el motivo pasa a dos líneas antes que cortarse) y a 320 px.
  * - **Tildes**: las mayúsculas en display («GRÀCIA», «SALÓN», «PRÓXIMO», «PÚRPURA») no las recorta
  *   ningún antepasado por arriba (las cajas solo recortan en horizontal).
- * - **Galería a 390 px**: ninguna hoja de texto se sale de la ventana (salvo dentro de una fila que se
- *   desplaza, como las pestañas en móvil).
+ * - **Galería a 390 y 320 px**: ninguna hoja de texto ni ninguna pieza (control, marco, placa) se sale de
+ *   la ventana (salvo dentro de una fila que se desplaza, como las pestañas en móvil).
  */
 
 interface PlateCut {
@@ -526,35 +526,61 @@ test('RD-VIS-05: las tildes en display de la galería (la muestra «ÀÓÚ», pl
   expect(await clippedAccents(page, `${DISPLAY_TEXTS}, section#ficha h2`)).toEqual([])
 })
 
-test.describe('galería a 390 × 844', () => {
-  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
+/**
+ * La galería en móvil (`RD-VIS-03`; WCAG 1.4.10 a 320 px): ni el texto ni las piezas se salen por la
+ * derecha. El marco de juego recorta lo que se sale, así que una pieza que desborda pierde el lado
+ * derecho, el chaflán y el anillo del cursor aunque su texto quepa (la demo de `useRovingMenu` llegaba a
+ * x = 343 en una ventana de 320; tercer pase del jurado, L10).
+ */
+for (const viewport of [
+  { width: 390, height: 844 },
+  { width: 320, height: 568 },
+]) {
+  test.describe(`galería a ${viewport.width} × ${viewport.height}`, () => {
+    test.use({ viewport, isMobile: true, hasTouch: true })
 
-  test('RD-VIS-03: ninguna hoja de texto se sale por la derecha de la ventana', async ({ page }) => {
-    await openGallery(page)
-    await page.evaluate(() => document.fonts.ready)
-    const outside = await page.evaluate(() => {
-      const width = window.innerWidth
-      const out: string[] = []
-      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
-      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-        const element = node.parentElement
-        if (!node.textContent?.trim() || !element || element.closest('.sr-only, [hidden]')) continue
+    test('RD-VIS-03: ninguna hoja de texto ni ninguna pieza se sale por la derecha de la ventana', async ({
+      page,
+    }) => {
+      await openGallery(page)
+      await page.evaluate(() => document.fonts.ready)
+      const outside = await page.evaluate(() => {
+        const width = window.innerWidth
+        const out: string[] = []
         // Dentro de una fila que se desplaza en horizontal (las pestañas en móvil), salirse es lo normal.
-        let scrolls = false
-        for (let a: HTMLElement | null = element; a; a = a.parentElement)
-          if (/auto|scroll/.test(getComputedStyle(a).overflowX)) scrolls = true
-        if (scrolls) continue
-        const range = document.createRange()
-        range.selectNodeContents(node)
-        const rect = range.getBoundingClientRect()
-        if (rect.width > 0 && rect.right > width + 1)
-          out.push(`«${node.textContent.trim().slice(0, 30)}» llega a ${Math.round(rect.right)} px`)
-      }
-      return out
+        const inScroller = (element: Element) => {
+          for (let a: Element | null = element; a; a = a.parentElement)
+            if (/auto|scroll/.test(getComputedStyle(a).overflowX)) return true
+          return false
+        }
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+          const element = node.parentElement
+          if (!node.textContent?.trim() || !element || element.closest('.sr-only, [hidden]')) continue
+          if (inScroller(element)) continue
+          const range = document.createRange()
+          range.selectNodeContents(node)
+          const rect = range.getBoundingClientRect()
+          if (rect.width > 0 && rect.right > width + 1)
+            out.push(`«${node.textContent.trim().slice(0, 30)}» llega a ${Math.round(rect.right)} px`)
+        }
+        // Las piezas: controles, marcos, placas y etiquetas (su caja entera, no solo el texto).
+        const PIECES =
+          'a[href], button, [role="menuitem"], [role="tab"], [role="switch"], [data-cursor], [data-frame], [data-tag]'
+        for (const element of document.querySelectorAll<HTMLElement>(`main :is(${PIECES})`)) {
+          if (element.closest('.sr-only, [hidden]') || inScroller(element)) continue
+          const rect = element.getBoundingClientRect()
+          if (rect.width > 0 && rect.right > width + 1) {
+            const name = (element.getAttribute('aria-label') ?? element.textContent ?? '').trim().slice(0, 30)
+            out.push(`<${element.tagName.toLowerCase()}> «${name}» llega a ${Math.round(rect.right)} px`)
+          }
+        }
+        return out
+      })
+      expect(outside).toEqual([])
     })
-    expect(outside).toEqual([])
   })
-})
+}
 
 /**
  * Ampliar no quita información (WCAG 1.4.4 y 1.4.10; guía §3.8.3): los pliegues de «móvil» y «móvil bajo»

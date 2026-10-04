@@ -446,10 +446,15 @@
 }
 
 /* ── Cursor ─────────────────────────────────────────────────────────────────────────────── */
+/*
+ * Escenario de las demos del cursor: a la izquierda, el sitio del 1P (en escritorio). Su columna es
+ * `minmax(0, 1fr)`: ninguna demo la estira más allá de la ventana.
+ */
 .cursorStage {
   grid-column: 1 / -1;
   width: 100%;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--bb-space-8);
   padding: var(--bb-space-8) var(--bb-space-6) var(--bb-space-8) var(--bb-space-16);
 }
@@ -465,7 +470,7 @@
   position: relative;
   min-width: min(100%, 24rem);
   display: grid;
-  grid-template-columns: var(--bb-space-10) 1fr auto;
+  grid-template-columns: var(--bb-space-10) minmax(0, 1fr) auto;
   align-items: center;
   min-height: var(--bb-space-14);
   padding: 0 calc(var(--bb-slant) + var(--bb-space-4));
@@ -535,10 +540,61 @@
 .menu {
   display: grid;
   gap: var(--bb-space-3);
-  max-width: 34rem;
+  min-width: 0;
+  max-width: min(100%, 34rem);
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/*
+ * Muy estrecho (< 360 px; reflow de WCAG 1.4.10 a 320 px), como el menú de verdad (`MenuPlate`): la lista
+ * llegaba a x = 343 en una ventana de 320 y el marco de juego le cortaba el lado derecho, el chaflán y el
+ * anillo del cursor. El escenario deja menos margen a la izquierda (el 1P de la izquierda no se ve por
+ * debajo de 720 px: queda el anillo, que cabe en `--bb-space-2`), el índice ocupa menos y la tecla de la
+ * elegida baja a una segunda línea, bajo la etiqueta, en vez de quitarle sitio.
+ */
+@media (max-width: 359px) {
+  .cursorStage {
+    padding-inline: var(--bb-space-2);
+  }
+
+  .plate {
+    grid-template-columns: var(--bb-space-7) minmax(0, 1fr);
+    grid-template-areas:
+      "index label"
+      "index key";
+    align-content: center;
+    row-gap: var(--bb-space-1);
+    padding: var(--bb-space-2) calc(var(--bb-slant) + var(--bb-space-2));
+  }
+
+  .plateIndex {
+    grid-area: index;
+  }
+
+  .plateLabel {
+    grid-area: label;
+  }
+
+  .plateKey {
+    grid-area: key;
+    justify-self: start;
+    display: none;
+  }
+
+  .plate:focus .plateKey,
+  .plate[data-force-state="focus"] .plateKey {
+    display: inline-flex;
+  }
+}
+
+/* Táctil: sin teclas (no hay teclado, §3.3), como en el menú de verdad; con teclado se ven a cualquier ancho. */
+@media (hover: none), (pointer: coarse) {
+  .plate .plateKey,
+  .plate:is(:focus, [data-force-state="focus"]) .plateKey {
+    display: none;
+  }
 }
 
 .note {

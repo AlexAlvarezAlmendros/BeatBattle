@@ -510,7 +510,7 @@ function CursorBlock() {
               <span className={styles.plateIndex}>
                 {t('dev.gallery.base.cursor.menuIndex', { index: 1 })}
               </span>
-              <span>{t('dev.gallery.base.cursor.menu.play')}</span>
+              <span className={styles.plateLabel}>{t('dev.gallery.base.cursor.menu.play')}</span>
               <Key tone="light" className={styles.plateKey}>
                 {t('dev.gallery.base.primitives.keys.enter')}
               </Key>
@@ -562,7 +562,7 @@ function MenuDemo() {
                 <span className={styles.plateIndex} aria-hidden="true">
                   {t('dev.gallery.base.cursor.menuIndex', { index: index + 1 })}
                 </span>
-                <span>{t(`dev.gallery.base.cursor.menu.${item}`)}</span>
+                <span className={styles.plateLabel}>{t(`dev.gallery.base.cursor.menu.${item}`)}</span>
                 <Key tone="light" className={styles.plateKey} aria-hidden="true">
                   {t('dev.gallery.base.primitives.keys.enter')}
                 </Key>
