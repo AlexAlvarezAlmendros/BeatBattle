@@ -573,8 +573,8 @@ for (const { name, select, enter } of [
 
 /**
  * ¿Pisa la caja la diagonal de la cuña? La arena de cuña a la izquierda (`ArenaBackdrop`) corta el pie
- * de la ventana en `--split-x` (el 30 % del ancho; en ventana grande, menos: sigue a la columna de la
- * pieza, P8) y sube hacia la derecha a 17° de la vertical; el borde derecho de una placa de la cuña, a su
+ * de la ventana en `--split-x` (el 30 % del ancho; en ventana grande, menos: sigue a lo que lleva la
+ * columna de la pieza, P8) y sube hacia la derecha a 17° de la vertical; el borde derecho de una placa de la cuña, a su
  * pie, no puede pasar de ahí. El corte se lee de la arena con una sonda (`left: var(--split-x)`).
  */
 async function diagonalAt(page: Page, y: number): Promise<number> {
@@ -627,6 +627,7 @@ for (const viewport of [
       { path: '/como-funciona', heading: 'Cómo se juega', boxes: 'ul > li > a' },
       { path: '/ajustes/sonido', heading: 'Sonido y efectos', boxes: 'figure' },
       { path: '/esto-no-existe', heading: 'Bonus stage', boxes: 'figure, a' },
+      { path: '/semanas', heading: 'Semanas', boxes: '*' },
     ]) {
       test(`RD-VIS-02 e: la columna de ${path} queda a la izquierda de la diagonal, también al pie (L1)`, async ({
         page,
@@ -1278,9 +1279,10 @@ for (const viewport of [
 }
 
 /**
- * Ventana grande (§3.8.14 v0.6.7; cuarto pase del jurado, P8): la cuña de las interiores sigue a la columna
- * de la pieza y el granate no pasa del ~24 % (la 404 llegaba al 25,8 % a 1920 × 1080 y al 26,5 % a
- * 2560 × 1440: el pad se queda en 72 px y la cuña crecía con la ventana).
+ * Ventana grande (§3.8.14 v0.6.7; cuarto pase del jurado, P8): la cuña de las interiores sigue a la pieza y
+ * el granate no pasa del ~24 % (la 404 llegaba al 25,8 % a 1920 × 1080 y al 26,5 % a 2560 × 1440: el pad
+ * se queda en 72 px y la cuña crecía con la ventana). También en las provisionales (quinto pase): con la
+ * diagonal pegada a la columna entera, su sello de ~290 px las dejaba en el 26,5 % a 1920 × 1080.
  */
 for (const viewport of [
   { width: 1920, height: 1080 },
@@ -1294,8 +1296,9 @@ for (const viewport of [
       { path: '/como-funciona', heading: 'Cómo se juega' },
       { path: '/ajustes/sonido', heading: 'Sonido y efectos' },
       { path: '/ajustes/accesibilidad', heading: 'Accesibilidad' },
+      { path: '/semanas', heading: 'Semanas' },
     ]) {
-      test(`§3.1 / §3.8.14: en ${path}, la cuña sigue a la columna de la pieza y el granate no pasa del ~24 % (P8)`, async ({
+      test(`§3.1 / §3.8.14: en ${path}, la cuña sigue a la pieza y el granate no pasa del ~24 % (P8)`, async ({
         page,
       }) => {
         await open(page, path, heading)

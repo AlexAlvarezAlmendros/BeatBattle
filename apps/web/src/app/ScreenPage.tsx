@@ -107,9 +107,11 @@ const IDLE_START = '[data-screen-part="tabs"] [aria-current="page"], [data-idle-
  *   ella). En dos columnas es el centro de los rayos (§3.8.14 v0.6.7: «el centro de los rayos sigue a la
  *   pieza»; era un punto fijo de la ventana y en los legales caía ~200 px por encima del sello «EN OBRAS»,
  *   y en /entrar a 1920 × 1080, arriba a la izquierda del logo; P8).
- * - `--screen-piece-right` / `--screen-piece-bottom`: la esquina de abajo a la derecha de esa columna. En
- *   ventana grande (≥ 1600 px) la cuña de las interiores sigue a la columna: su diagonal pasa a la derecha
- *   de esa esquina y el granate no pasa del ~24 % (P8).
+ * - `--screen-piece-right` / `--screen-piece-bottom`: la esquina de abajo a la derecha de lo que lleva esa
+ *   columna (la lista de movimientos, el tablero de Opciones, el pad de la 404 con su botón, el sello «EN
+ *   OBRAS»). En ventana grande (≥ 1600 px) la cuña de las interiores sigue a la pieza: su diagonal pasa a
+ *   la derecha de esa esquina y el granate no pasa del ~24 % (P8). Con la columna entera, las provisionales
+ *   (un sello de ~290 px en una columna de 544) se quedaban en el 26,5 % a 1920 × 1080 (quinto pase).
  *
  * Las medidas son las de la pantalla ya en su sitio: descuentan el desplazamiento de la entrada de
  * pantalla (`entryShift`). Sin pestañas o sin pieza (o sin caja: la pieza del móvil bajo de la 404 no hace
@@ -163,12 +165,22 @@ function useArenaGeometry(rootRef: RefObject<HTMLDivElement | null>) {
       const tabs = part('tabs')?.getBoundingClientRect()
       if (tabs && tabs.height >= 1) set(SCREEN_TABS_BOTTOM_VAR, tabs.bottom + dy)
       else clear([SCREEN_TABS_BOTTOM_VAR])
-      const piece = part('piece')?.getBoundingClientRect()
-      if (piece && piece.width >= 1 && piece.height >= 1) {
+      const column = part('piece')
+      const piece = column?.getBoundingClientRect()
+      if (column && piece && piece.width >= 1 && piece.height >= 1) {
         set(SCREEN_PIECE_X_VAR, piece.left + piece.width / 2 + dx)
         set(SCREEN_PIECE_Y_VAR, piece.top + piece.height / 2 + dy)
-        set(SCREEN_PIECE_RIGHT_VAR, piece.right + dx)
-        set(SCREEN_PIECE_BOTTOM_VAR, piece.bottom + dy)
+        // La esquina de lo que lleva la columna (sin nada con caja, la de la columna).
+        let right = Number.NEGATIVE_INFINITY
+        let bottom = Number.NEGATIVE_INFINITY
+        for (const child of column.children) {
+          const box = child.getBoundingClientRect()
+          if (box.width < 1 || box.height < 1) continue
+          right = Math.max(right, box.right)
+          bottom = Math.max(bottom, box.bottom)
+        }
+        set(SCREEN_PIECE_RIGHT_VAR, (Number.isFinite(right) ? right : piece.right) + dx)
+        set(SCREEN_PIECE_BOTTOM_VAR, (Number.isFinite(bottom) ? bottom : piece.bottom) + dy)
       } else clear(PIECE_VARS)
     }
     update()
@@ -180,6 +192,7 @@ function useArenaGeometry(rootRef: RefObject<HTMLDivElement | null>) {
       const element = part(name)
       if (element) observer?.observe(element)
     }
+    for (const child of part('piece')?.children ?? []) observer?.observe(child)
     window.addEventListener('resize', update)
     return () => {
       observer?.disconnect()
