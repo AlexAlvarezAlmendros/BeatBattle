@@ -112,6 +112,7 @@
       "insert": "{action}\u00a0· Crédito\u00a0{credit}",
       "insertAction": "Inserta\u00a0tu\u00a0beat",
       "inside": "Crédito\u00a0{credit}\u00a0· ya\u00a0estás\u00a0dentro",
+      "closed": "Envíos\u00a0cerrados\u00a0· votos\u00a0hasta\u00a0las\u00a023:59",
       "credit": "{count}",
       "idle": {
         "nextDrop": "Próximo drop en el horno",

@@ -202,9 +202,13 @@ export function MainMenu({ model }: { model: MenuModel }) {
   useIdleMenuKeys(menu, entries.length, listRef)
 
   const { week, player } = model
-  const chronicle: ReactNode[] = week
-    ? [<CreditLine key="credit" inside={Boolean(player?.uploaded)} />, ...model.chronicle]
-    : [...model.chronicle]
+  // La crónica empieza por el crédito solo con la semana abierta a envíos; en `voting` la barra no invita
+  // a subir y empieza por el cierre (§3.8.3 v0.6.7).
+  const chronicle: ReactNode[] = !week
+    ? [...model.chronicle]
+    : week.phase === 'open'
+      ? [<CreditLine key="credit" inside={Boolean(player?.uploaded)} />, ...model.chronicle]
+      : [t('home.chronicle.closed'), ...model.chronicle]
 
   return (
     <div className={styles.menu} data-week={week ? week.phase : 'empty'}>

@@ -123,6 +123,25 @@ describe('MainMenu (0.24, §3.8.3)', () => {
     expect(screen.getByRole('timer', { name: t('home.clock.votes') })).toBeInTheDocument()
   })
 
+  it('RD-VIS-02 e / §3.8.3: en voting la barra no invita a subir; la crónica empieza por «Envíos cerrados · votos hasta las 23:59»', () => {
+    renderMenu({ week: { ...WEEK, phase: 'voting' } })
+    const bar = screen.getByRole('contentinfo')
+    // Sin «Inserta tu beat · Crédito 01» (ni su respiro): con los envíos cerrados no hay crédito que gastar.
+    expect(bar.querySelector('[data-credit]')).toBeNull()
+    expect(bar).not.toHaveTextContent(/Inserta tu beat|Crédito/)
+    // El primer mensaje de la crónica (el que se ve al abrir) es el del cierre.
+    expect(bar.querySelector('[data-chronicle]')).toHaveTextContent(
+      /^Crónica de la arena: Envíos cerrados · votos hasta las 23:59$/,
+    )
+  })
+
+  it('RD-VIS-02 e / §3.8.3: con la semana abierta a envíos, la crónica empieza por «Inserta tu beat · Crédito 01»', () => {
+    renderMenu()
+    expect(screen.getByRole('contentinfo').querySelector('[data-chronicle] [data-credit]')).toHaveTextContent(
+      /Inserta tu beat · Crédito 01/,
+    )
+  })
+
   it('RD-MOT-05: con el foco en ningún control, ↓ lleva el cursor al menú e Intro entra', async () => {
     renderMenu()
     expect(document.activeElement).toBe(document.body)
