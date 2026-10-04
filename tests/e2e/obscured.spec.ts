@@ -118,3 +118,41 @@ for (const viewport of [
     expect(problems).toEqual([])
   })
 }
+
+/**
+ * Con las flechas repetidas deprisa (la repetición de una tecla mantenida, o pulsaciones a menos de lo que
+ * dura la transición de la placa elegida), la placa enfocada sigue entera a la vista (revisión del cierre de
+ * la 0.28): al mover el cursor, el menú trae a la vista también el panel de ayuda (§3.8.3), y lo que dejaba
+ * esperando un movimiento viejo (el final de la transición de su placa) volvía a desplazar la pantalla hasta
+ * esa placa, que ya no tenía el foco. A 640 × 360, ↓ seis veces cada 40 ms dejaba «Jugar» enfocada a −21 px.
+ */
+for (const viewport of [
+  { width: 320, height: 256, name: '1280 px al 400 %' },
+  { width: 640, height: 360, name: '1280 × 720 al 200 %' },
+  { width: 1024, height: 768, name: 'composición intermedia' },
+  { width: 823, height: 514, name: '1440 × 900 al 175 %' },
+]) {
+  test(`RNF-A11Y-01 / §3.3 / WCAG 2.4.11: a ${viewport.width}×${viewport.height} (${viewport.name}), con las flechas repetidas deprisa, la placa enfocada queda entera a la vista`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height })
+    await open(page, '/dev/menu', 'Beat Battle')
+    const problems: string[] = []
+    for (const [keys, delay] of [
+      [['ArrowDown', 'ArrowDown', 'ArrowDown', 'ArrowDown', 'ArrowDown', 'ArrowDown'], 40],
+      [['ArrowUp', 'ArrowUp', 'ArrowUp'], 0],
+      [['End', 'Home'], 20],
+    ] as const) {
+      for (const key of keys) {
+        await page.keyboard.press(key)
+        if (delay) await page.waitForTimeout(delay)
+      }
+      // Lo que tarden en acabar las transiciones de las placas (`--bb-dur-tick`) y algo más.
+      await page.waitForTimeout(500)
+      const { label, covered, inside } = await focusedVersusBar(page)
+      if (covered > 0.5 || !inside)
+        problems.push(`${keys.join(' ')} → ${label}: tapado ${covered.toFixed(1)} px, entero=${inside}`)
+    }
+    expect(problems).toEqual([])
+  })
+}

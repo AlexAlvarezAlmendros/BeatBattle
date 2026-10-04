@@ -1,4 +1,12 @@
-import { type CSSProperties, type ReactNode, type RefObject, useId, useLayoutEffect, useRef } from 'react'
+import {
+  type CSSProperties,
+  type ReactNode,
+  type RefObject,
+  useCallback,
+  useId,
+  useLayoutEffect,
+  useRef,
+} from 'react'
 import { Chronicle, CreditLine } from '../../../app/layout/Chronicle'
 import { HudStat, PlayerCard } from '../../../app/layout/PlayerCard'
 import { FrameSlot } from '../../../app/layout/slots'
@@ -176,12 +184,13 @@ export function MainMenu({ model }: { model: MenuModel }) {
   const helpRef = useRef<HTMLDivElement>(null)
   const brandRef = useRef<HTMLDivElement>(null)
   const firstEnabled = Math.max(0, model.player?.uploaded ? 1 : entries.findIndex((entry) => !entry.disabled))
+  const revealHelp = useRevealHelp(listRef, helpRef)
   const menu = useRovingMenu({
     count: entries.length,
     initialIndex: firstEnabled,
     isDisabled: (index) => Boolean(entries[index]?.disabled),
     getLabel: (index) => t(`home.modes.${MENU_MODES[index]!}.label`),
-    onMove: () => requestAnimationFrame(() => revealHelp(listRef.current, helpRef.current)),
+    onMove: revealHelp,
   })
   const active = entries[menu.activeIndex] ?? entries[0]!
   // Un mismo cuerpo de rótulo y un mismo alto para todas las placas en reposo (§3.3).
@@ -300,28 +309,53 @@ export function MainMenu({ model }: { model: MenuModel }) {
  * Al mover el cursor con el teclado (o el mando), el panel de ayuda de debajo de las placas (la región viva
  * que describe el modo) queda también a la vista, por encima de la barra de controles (§3.8.3, composición
  * intermedia; jurado de la 0.28, cierre: a 1024 × 768 quedaba entero bajo la barra). El navegador ya ha
- * desplazado la pantalla hasta la placa enfocada; aquí se desplaza lo justo para la ayuda (su
- * `scroll-margin` es el alto real de la barra) y, si las dos no caben juntas, manda la placa. La elegida
- * crece con una transición (`--bb-dur-tick`) que empuja la ayuda hacia abajo: se repite al acabar. Con el
- * ratón no se mueve nada: solo cuenta el foco que se ve (`:focus-visible`), el del teclado.
+ * desplazado la pantalla hasta la placa enfocada; en el fotograma siguiente se desplaza lo justo para la
+ * ayuda (su `scroll-margin` es el alto real de la barra) y, si las dos no caben juntas, manda la placa. La
+ * elegida crece y la anterior encoge con su transición (`--bb-dur-tick`), que mueve la ayuda: al acabar
+ * las dos, se repite. Con el ratón no se mueve nada: solo cuenta el foco que se ve (`:focus-visible`), el
+ * del teclado.
+ *
+ * Cada movimiento anula el anterior (WCAG 2.4.11; revisión del cierre de la 0.28): con las flechas
+ * repetidas deprisa, lo que dejó esperando un movimiento viejo (su fotograma, el final de sus transiciones)
+ * ya no desplaza la pantalla hasta una placa que ha dejado de tener el foco, dejando fuera la enfocada. Y
+ * solo se espera a las transiciones de alto de las placas que hay en marcha (`getAnimations`): sin ellas
+ * (sin movimiento) no se espera nada, y ningún `transitionend` de otra pieza lo dispara.
  */
-function revealHelp(list: HTMLElement | null, help: HTMLElement | null) {
-  const focused = document.activeElement
-  if (!list || !help || !(focused instanceof HTMLElement) || !list.contains(focused)) return
-  // Sin `scrollIntoView` (jsdom) no hay nada que desplazar.
-  if (!focused.matches(':focus-visible') || typeof help.scrollIntoView !== 'function') return
-  const reveal = () => {
-    help.scrollIntoView({ block: 'nearest' })
-    focused.scrollIntoView({ block: 'nearest' })
-  }
-  reveal()
-  focused.addEventListener('transitionend', reveal, { once: true })
-  // Sin transición (sin movimiento), el aviso no llega: no se deja esperando a la siguiente.
-  setTimeout(() => focused.removeEventListener('transitionend', reveal), REVEAL_WAIT_MS)
+function useRevealHelp(
+  listRef: RefObject<HTMLElement | null>,
+  helpRef: RefObject<HTMLElement | null>,
+): () => void {
+  const moves = useRef(0)
+  return useCallback(() => {
+    const move = ++moves.current
+    const current = () => move === moves.current
+    requestAnimationFrame(() => {
+      const list = listRef.current
+      const help = helpRef.current
+      const focused = document.activeElement
+      if (!current() || !list || !help || !(focused instanceof HTMLElement) || !list.contains(focused)) return
+      // Sin `scrollIntoView` (jsdom) no hay nada que desplazar.
+      if (!focused.matches(':focus-visible') || typeof help.scrollIntoView !== 'function') return
+      const reveal = () => {
+        if (!current() || document.activeElement !== focused) return
+        help.scrollIntoView({ block: 'nearest' })
+        focused.scrollIntoView({ block: 'nearest' })
+      }
+      reveal()
+      const resizing = list.getAnimations?.({ subtree: true }).filter(isPlateResize) ?? []
+      if (resizing.length > 0) void Promise.allSettled(resizing.map((change) => change.finished)).then(reveal)
+    })
+  }, [listRef, helpRef])
 }
 
-/** Lo que se espera al final de la transición de la placa elegida (`--bb-dur-tick`, 90 ms) antes de soltarla. */
-const REVEAL_WAIT_MS = 500
+/** Una transición de alto de una placa (la elegida crece, la anterior encoge; `MenuPlate`). */
+function isPlateResize(animation: Animation): boolean {
+  return (
+    typeof CSSTransition !== 'undefined' &&
+    animation instanceof CSSTransition &&
+    (animation.transitionProperty === 'height' || animation.transitionProperty === 'min-height')
+  )
+}
 
 /** Variable con lo que ocupa el lockup bajo el logo (`MainMenu.module.css`, ventana baja). */
 const LOCKUP_EXTENT_VAR = '--menu-lockup-extent'
