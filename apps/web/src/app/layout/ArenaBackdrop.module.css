@@ -56,15 +56,22 @@
  * respaldo de `var()` deja el mismo porcentaje). El menú (la cuña a la derecha) no cambia.
  */
 @media (min-width: 961px) {
-  .arena:not([data-wedge="right"]) {
-    --burst-x: calc(var(--screen-piece-x, 26% - 100% / 7) + 100% / 7);
-    --burst-y: calc(var(--screen-piece-y, 34% - 100% / 7) + 100% / 7);
-  }
-
   .arena[data-wedge="left"] {
     --burst-x: calc(var(--screen-piece-x, 18% - 100% / 7) + 100% / 7);
     --burst-y: calc(var(--screen-piece-y, 46% - 100% / 7) + 100% / 7);
   }
+}
+
+/*
+ * En el marco simple (sin cuña: la autenticación, los legales), también en una columna (≤ 960 px; sexto
+ * pase del jurado, G5): en la autenticación el logo es la pieza de la primera vista, y el estallido volvía
+ * al punto fijo aunque la pantalla publicaba el centro de la pieza (en /entrar a 820 × 1180, los rayos en
+ * (134, 326) y el logo en (398, 467); a 960 × 800, en (157, 221) y (468, 322)). Las interiores en una
+ * columna (la cuña abajo en el móvil) siguen con el punto de siempre.
+ */
+.arena[data-wedge="none"] {
+  --burst-x: calc(var(--screen-piece-x, 26% - 100% / 7) + 100% / 7);
+  --burst-y: calc(var(--screen-piece-y, 34% - 100% / 7) + 100% / 7);
 }
 
 /*

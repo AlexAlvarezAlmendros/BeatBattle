@@ -1536,9 +1536,10 @@ for (const viewport of [
 }
 
 /**
- * El centro de los rayos es el de la columna de la pieza, a ±2 px. El centro del estallido (`--burst-x`,
- * `--burst-y`) está en la caja del estallido, más grande que la ventana: una sonda en esa posición dice
- * dónde cae en la ventana.
+ * El centro de los rayos es el de la pieza (lo que lleva su columna: en dos columnas va centrado en ella,
+ * así que es el de la columna; en una, el sello «EN OBRAS» va a la izquierda), a ±2 px. El centro del
+ * estallido (`--burst-x`, `--burst-y`) está en la caja del estallido, más grande que la ventana: una sonda
+ * en esa posición dice dónde cae en la ventana.
  */
 async function expectRaysFromPiece(page: Page): Promise<void> {
   const center = await page.evaluate(() => {
@@ -1548,10 +1549,16 @@ async function expectRaysFromPiece(page: Page): Promise<void> {
     burst.append(probe)
     const at = probe.getBoundingClientRect()
     probe.remove()
-    const piece = document.querySelector('main [data-screen-part="piece"]')!.getBoundingClientRect()
+    const boxes = [...document.querySelector('main [data-screen-part="piece"]')!.children]
+      .map((child) => child.getBoundingClientRect())
+      .filter((box) => box.width >= 1 && box.height >= 1)
+    const left = Math.min(...boxes.map((box) => box.left))
+    const right = Math.max(...boxes.map((box) => box.right))
+    const top = Math.min(...boxes.map((box) => box.top))
+    const bottom = Math.max(...boxes.map((box) => box.bottom))
     return {
       burst: { x: at.left, y: at.top },
-      piece: { x: piece.left + piece.width / 2, y: piece.top + piece.height / 2 },
+      piece: { x: (left + right) / 2, y: (top + bottom) / 2 },
     }
   })
   expect(Math.abs(center.burst.x - center.piece.x), `rayos en x ${center.burst.x}`).toBeLessThanOrEqual(2)
@@ -1574,6 +1581,36 @@ for (const { path, heading, viewport } of [
     test.use({ viewport })
 
     test(`§3.2 / §3.8.14: el centro de los rayos de ${path} es el de su pieza (P8)`, async ({ page }) => {
+      await open(page, path, heading)
+      await settle(page)
+      await expectRaysFromPiece(page)
+    })
+  })
+}
+
+/**
+ * También en una columna en el marco simple (§3.8.14 v0.6.7; sexto pase del jurado, G5): en la autenticación
+ * el logo es la pieza de la primera vista y el estallido volvía al punto fijo de la ventana (el 26 % × 34 %)
+ * por debajo de 961 px: en /entrar a 820 × 1180, los rayos en (134, 326) y el logo en (398, 467); a 960 ×
+ * 800, en (157, 221) y (468, 322). En los legales, el sello «EN OBRAS».
+ */
+for (const { path, heading, viewport, touch } of [
+  { path: '/entrar', heading: 'Entrar', viewport: { width: 820, height: 1180 }, touch: true },
+  { path: '/entrar', heading: 'Entrar', viewport: { width: 960, height: 800 }, touch: false },
+  { path: '/registro', heading: 'Crear cuenta', viewport: { width: 390, height: 844 }, touch: true },
+  {
+    path: '/legal/bases',
+    heading: 'Bases de la competición',
+    viewport: { width: 820, height: 1180 },
+    touch: true,
+  },
+]) {
+  test.describe(`rayos de ${path} a ${viewport.width} × ${viewport.height}${touch ? ' táctil' : ''}`, () => {
+    test.use({ viewport, isMobile: touch, hasTouch: touch })
+
+    test(`§3.2 / §3.8.14: en una columna, el centro de los rayos de ${path} es el de su pieza (G5)`, async ({
+      page,
+    }) => {
       await open(page, path, heading)
       await settle(page)
       await expectRaysFromPiece(page)

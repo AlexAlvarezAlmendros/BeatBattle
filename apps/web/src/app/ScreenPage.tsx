@@ -104,10 +104,12 @@ const IDLE_START = '[data-screen-part="tabs"] [aria-current="page"], [data-idle-
  *
  * - `--screen-tabs-bottom`: el pie de las pestañas. Por debajo de 360 px, donde ocupan varias filas, la
  *   cuña empieza bajo ellas (§3.8.14 v0.6.7; cuarto pase del jurado, P3).
- * - `--screen-piece-x` / `--screen-piece-y`: el centro de la columna de la pieza (la pieza va centrada en
- *   ella). En dos columnas es el centro de los rayos (§3.8.14 v0.6.7: «el centro de los rayos sigue a la
- *   pieza»; era un punto fijo de la ventana y en los legales caía ~200 px por encima del sello «EN OBRAS»,
- *   y en /entrar a 1920 × 1080, arriba a la izquierda del logo; P8).
+ * - `--screen-piece-x` / `--screen-piece-y`: el centro de lo que lleva la columna de la pieza (en dos
+ *   columnas va centrado en ella, así que es el de la columna; en una, el sello «EN OBRAS» va a la
+ *   izquierda). Es el centro de los rayos (§3.8.14 v0.6.7: «el centro de los rayos sigue a la pieza»; era un
+ *   punto fijo de la ventana y en los legales caía ~200 px por encima del sello «EN OBRAS», y en /entrar a
+ *   1920 × 1080, arriba a la izquierda del logo; P8): en dos columnas, y en una en el marco simple (la
+ *   autenticación, con el logo como pieza de la primera vista, y los legales; sexto pase, G5).
  * - `--screen-piece-right` / `--screen-piece-bottom`: la esquina de abajo a la derecha de lo que lleva esa
  *   columna (la lista de movimientos, el tablero de Opciones, el pad de la 404 con su botón, el sello «EN
  *   OBRAS»). En ventana grande (≥ 1600 px) la cuña de las interiores sigue a la pieza: su diagonal pasa a
@@ -169,19 +171,24 @@ function useArenaGeometry(rootRef: RefObject<HTMLDivElement | null>) {
       const column = part('piece')
       const piece = column?.getBoundingClientRect()
       if (column && piece && piece.width >= 1 && piece.height >= 1) {
-        set(SCREEN_PIECE_X_VAR, piece.left + piece.width / 2 + dx)
-        set(SCREEN_PIECE_Y_VAR, piece.top + piece.height / 2 + dy)
-        // La esquina de lo que lleva la columna (sin nada con caja, la de la columna).
+        // La caja de lo que lleva la columna (sin nada con caja, la de la columna).
+        let left = Number.POSITIVE_INFINITY
+        let top = Number.POSITIVE_INFINITY
         let right = Number.NEGATIVE_INFINITY
         let bottom = Number.NEGATIVE_INFINITY
         for (const child of column.children) {
           const box = child.getBoundingClientRect()
           if (box.width < 1 || box.height < 1) continue
+          left = Math.min(left, box.left)
+          top = Math.min(top, box.top)
           right = Math.max(right, box.right)
           bottom = Math.max(bottom, box.bottom)
         }
-        set(SCREEN_PIECE_RIGHT_VAR, (Number.isFinite(right) ? right : piece.right) + dx)
-        set(SCREEN_PIECE_BOTTOM_VAR, (Number.isFinite(bottom) ? bottom : piece.bottom) + dy)
+        const content = Number.isFinite(left) ? { left, top, right, bottom } : piece
+        set(SCREEN_PIECE_X_VAR, (content.left + content.right) / 2 + dx)
+        set(SCREEN_PIECE_Y_VAR, (content.top + content.bottom) / 2 + dy)
+        set(SCREEN_PIECE_RIGHT_VAR, content.right + dx)
+        set(SCREEN_PIECE_BOTTOM_VAR, content.bottom + dy)
       } else clear(PIECE_VARS)
     }
     update()
