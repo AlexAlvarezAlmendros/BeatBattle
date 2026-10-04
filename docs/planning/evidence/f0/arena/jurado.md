@@ -143,7 +143,8 @@ que fueron saliendo en las rondas 4 a 6).
 - **Puertas** sobre `d88a9e2`: `pnpm check` (Biome, `lint:tokens` con 203 ficheros sin literales ni piezas
   prohibidas, pureza de `packages/rules`), `pnpm typecheck`, `pnpm test` (web 411, server 144, rules 178,
   shared 37, covers 5, audio 1, emails 1), `pnpm build` (con la prueba de humo de la API empaquetada) y
-  `pnpm e2e` **980/980** (proyectos `e2e` y `perf`; eran 155 al acabar el primer pase).
+  `pnpm e2e` **980/980** (proyectos `e2e` y `perf`; eran 155 al acabar el primer pase). En la CI de
+  GitHub (PR #2, run `37224071537`), lo mismo: 980/980, con la CI ya en el Chromium completo de Playwright.
 - **Tamaños de ventana que vigilan los E2E** (además de 1440×900 y 390×844): 1920×1080, 1536×730,
   1440×789, 1366×657, 1280×720, 1024×768, 900×700, 823×514 (1440 al 175 %), 820×1180 y 768×1024
   táctiles, 720×450 (200 %), 414×736, 412×780, 375×667, 360×640 y 320×568, con teclado y en táctil, con

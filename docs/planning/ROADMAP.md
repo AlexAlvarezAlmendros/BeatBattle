@@ -165,6 +165,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-04 | F0 | CI de GitHub en verde en la PR #2 (980/980 E2E) tras pasar la CI al Chromium completo de Playwright: el *headless shell* medía el texto más ancho y tumbaba 24 pruebas de encaje. |
 | 2026-10-04 | F0 | **Fase 0 cerrada.** 0.28 hecha: segundo pase del jurado, seis rondas de arreglos (143 commits) y verificación final en verde en las tres lentes; guía v0.6.6–v0.6.8 con las reglas que fijó el jurado; `e2e` 980/980 en local. La PR #1 se había mezclado con el estado anterior a la Arena; el rediseño va en una PR nueva. Fase 1 lista. Nueva decisión abierta: móviles de 781 a ~840 px de alto. |
 | 2026-10-04 | F1 | Plan 01 replanificado para la Arena (1.1 arena en *shader*, 1.3 vinilo-sol y limitador, 1.5 estrellas con medidor, 1.6 reactividad sobre el tamaño de punto, 1.11–1.12 jurado visual; 1.1 depende también de la 0.23). |
 | 2026-10-03 | F0 | 0.28: revisión adversarial de la Arena hecha (16 hallazgos confirmados de accesibilidad, rendimiento, código e integridad, arreglados en 14 commits `fix(0.22)`…`fix(0.27)` con su test); guía v0.6.5; LCP de la home 1,75 s; `check`, `typecheck`, `test`, `build` y `e2e` 170/170 en verde. Quedan el README y el segundo pase del jurado. |

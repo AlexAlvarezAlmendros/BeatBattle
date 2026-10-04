@@ -246,9 +246,9 @@ Y lo que falta, además del juego en sí:
   versión quieta, la de calidad «Apagada».
 - **No está desplegado** ni hay recursos en la nube: ni proyecto en Vercel, ni Turso, ni Cloudinary,
   ni dominio.
-- **La CI** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) pasó en verde en GitHub Actions
-  con la Fase 0 anterior al cambio de dirección; lo de la Arena todavía no ha pasado por ella: está
-  comprobado en local.
+- **La CI** ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) pasa en verde en GitHub Actions
+  con la Arena (PR #2, 2026-10-04): auditoría, Biome y lints propios, tipos, Vitest, build y los 980
+  E2E.
 - `packages/audio`, `packages/emails` y `tools/seed` son esqueletos vacíos, y `packages/covers` solo
   tiene la portada de referencia del voto ciego: se llenan en su fase.
 
