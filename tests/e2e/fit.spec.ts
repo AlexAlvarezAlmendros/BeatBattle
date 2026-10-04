@@ -313,6 +313,26 @@ for (const viewport of [
   })
 }
 
+/**
+ * La cinta del lockup de la autenticación (§3.8.14; jurado de la 0.28, tercer pase): a 1024 × 768, y entre
+ * unos 1000 y 1040 px, salía cortada a mitad de palabra («TORNEO SEMANAL DE PRODUCTOR…»). Desde que cada
+ * paso de la cinta depende del ancho del propio lockup, va entera y en una línea.
+ */
+for (const width of [1000, 1024, 1040]) {
+  test.describe(`cinta de /entrar a ${width} × 768`, () => {
+    test.use({ viewport: { width, height: 768 } })
+
+    test('§3.1 / §3.8.14: la cinta del lockup de /entrar va entera, en una línea y sin cortarse', async ({
+      page,
+    }) => {
+      await open(page, '/entrar', 'Entrar')
+      await settle(page)
+      expect(await ribbonLines(page)).toEqual({ text: 'TORNEO SEMANAL DE PRODUCTORES', lines: 1 })
+      expect(await clippedHorizontally(page, 'main [class*=lockup]')).toEqual([])
+    })
+  })
+}
+
 /** Con el espaciado de 1.4.12, en la composición intermedia (la del jurado) tampoco se corta nada. */
 for (const viewport of [
   { width: 721, height: 900, touch: false },
