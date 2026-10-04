@@ -275,6 +275,10 @@ for (const { width, height } of [
         // composición de móvil no esconde nada y se desplaza (§3.8.3), y el HUD lleva la temporada y la
         // racha en una segunda fila (§3.4.1 v0.6.6, F3), así que la primera placa queda bajo la primera
         // vista aunque la barra no tape nada más que su fila de la firma.
+        // EXCEPCIÓN TEMPORAL (revisión del cuarto pase del jurado de la 0.28): cumple §3.8.3, pero reabre
+        // lo que el jurado señaló en L8 (ninguna placa ni «ELIGE MODO» al abrir). Le toca a la línea del
+        // menú (0.24): compactar el menú con teclado por debajo de 700 px de alto, o que el acta lo acepte
+        // de forma explícita. Resuelto eso, se quita la condición `height > 700`.
         if ((path === '/dev/menu' || path === '/') && height > 700)
           expect(plates, 'rótulos de placa en la primera vista').toBeGreaterThan(0)
       })
