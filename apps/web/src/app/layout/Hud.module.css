@@ -175,8 +175,8 @@
   }
 }
 
-/* Móvil bajo (≤ 700 px de alto): el HUD, más pegado arriba (§3.8.3). */
-@media (max-width: 720px) and (max-height: 700px) {
+/* Móvil bajo (≤ 780 px de alto; `MainMenu`): el HUD, más pegado arriba (§3.8.3). */
+@media (max-width: 720px) and (max-height: 780px) {
   .hud {
     padding-top: var(--bb-space-2);
   }

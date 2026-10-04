@@ -395,11 +395,17 @@ function plateFitWithEachChosen(page: Page): Promise<string[]> {
  * cabiendo sin desplazar con cualquier placa elegida y en todos los estados (§3.3, §3.8.3; jurado de la 0.28,
  * cierre, R1: con RESULTADOS elegida, «NUEVO · Semana 40» bajaba y la placa crecía de 48 a 64 px; a 360 × 640
  * la página desbordaba 13 px y AJUSTES quedaba 5,6 px bajo la barra, y a 390 × 844, 4 px).
+ *
+ * También en los móviles de 701 a 780 px de alto, que pasan al móvil bajo (§3.8.3; jurado de la 0.28, cierre,
+ * R3: con el umbral en 700 px, a 414 × 736 /dev/menu se desplazaba 114 px, con SALÓN DE LA FAMA, CÓMO SE JUEGA
+ * y AJUSTES bajo la barra al abrir, y «/», 47; a 412 × 780, 70 y 2).
  */
 for (const viewport of [
   { width: 390, height: 844 },
   { width: 375, height: 667 },
   { width: 360, height: 640 },
+  { width: 414, height: 736 },
+  { width: 412, height: 780 },
 ]) {
   test.describe(`placas elegidas a ${viewport.width} × ${viewport.height} táctil`, () => {
     test.use({ viewport, isMobile: true, hasTouch: true })

@@ -361,8 +361,8 @@
   }
 }
 
-/* Móvil bajo (≤ 700 px de alto): todo más junto. */
-@media (max-width: 720px) and (max-height: 700px) {
+/* Móvil bajo (≤ 780 px de alto; `MainMenu`): todo más junto. */
+@media (max-width: 720px) and (max-height: 780px) {
   .card {
     gap: var(--bb-space-1);
   }
@@ -377,8 +377,8 @@
  * ese alto a la franja de «ELIGE MODO», que lleva aire (`MainMenu`), y a 360 × 640 todo sigue cabiendo. Solo
  * en táctil: con teclado el rótulo no se pliega y necesita su sitio (más arriba).
  */
-@media (max-width: 720px) and (max-height: 700px) and (hover: none),
-  (max-width: 720px) and (max-height: 700px) and (pointer: coarse) {
+@media (max-width: 720px) and (max-height: 780px) and (hover: none),
+  (max-width: 720px) and (max-height: 780px) and (pointer: coarse) {
   .chips {
     display: none;
   }
@@ -417,8 +417,8 @@
 }
 
 /* Por debajo de 375 px, el rótulo del reloj con el interletraje de los botones: a 360 px cabe en la fila. */
-@media (max-width: 374px) and (max-height: 700px) and (hover: none),
-  (max-width: 374px) and (max-height: 700px) and (pointer: coarse) {
+@media (max-width: 374px) and (max-height: 780px) and (hover: none),
+  (max-width: 374px) and (max-height: 780px) and (pointer: coarse) {
   .play .mobileClock [role="timer"] > p[aria-hidden] {
     letter-spacing: var(--bb-tracking-button);
   }

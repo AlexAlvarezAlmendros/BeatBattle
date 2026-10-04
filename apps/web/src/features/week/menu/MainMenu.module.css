@@ -809,7 +809,12 @@
 }
 
 /*
- * Móvil bajo (≤ 700 px de alto): logo en una línea y todo más junto (§3.8.3). Ese lienzo casi no deja
+ * Móvil bajo (≤ 780 px de alto): logo en una línea y todo más junto (§3.8.3). El umbral es el alto por debajo
+ * del cual la composición del móvil (logo en dos líneas, la tarjeta con sus chips) ya no cabe sin desplazar en
+ * los móviles anchos: a 414 × 736 táctil se desplazaba 114 px y a 412 × 780, 70, con SALÓN DE LA FAMA, CÓMO SE
+ * JUEGA y AJUSTES bajo la barra al abrir (jurado de la 0.28, cierre, R3: con 700 px solo entraban 375 × 667 y
+ * 360 × 640). A 390 × 844 no cambia nada. Entre los móviles bajos, la tarjeta plegada (`StageCard`), las placas
+ * de 44 px (`MenuPlate`) y el HUD más pegado arriba (`Hud`) usan el mismo umbral. Ese lienzo casi no deja
  * aire transparente al pie, así que el lockup baja `--bb-space-3` para que la pegatina (que sube
  * `--bb-space-1` sobre la cinta, más arriba) y la cinta queden debajo de la extrusión (§3.1; jurado de la
  * 0.28). Así la pegatina queda a 9 px de tinta de la tarjeta (antes, 5; jurado de la 0.28, cierre, K6). Para
@@ -818,7 +823,7 @@
  * maqueta) y «ELIGE MODO» se acerca a la tarjeta y a las placas (`--bb-space-1`, la separación entre placas
  * en móvil).
  */
-@media (max-width: 720px) and (max-height: 700px) {
+@media (max-width: 720px) and (max-height: 780px) {
   .logoFull {
     display: none;
   }

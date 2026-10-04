@@ -495,8 +495,10 @@
   }
 }
 
-/* Móvil bajo (≤ 700 px de alto): placas de 44 px (§3.8.3) y 48 la elegida. */
-@media (max-width: 720px) and (max-height: 700px) {
+/*
+ * Móvil bajo (≤ 780 px de alto; `MainMenu`): placas de 44 px (§3.8.3) y 48 la elegida.
+ */
+@media (max-width: 720px) and (max-height: 780px) {
   .plate {
     --plate-h-mobile: var(--bb-target);
     height: var(--bb-target);
