@@ -21,10 +21,7 @@
    * `MainMenu`). Fuera de ese menú (la galería) son siempre los de la maqueta.
    */
   --plate-scale: var(--menu-plate-scale, 1);
-  --plate-h: var(
-    --menu-plate-h,
-    calc((var(--bb-space-16) + var(--bb-space-1) + var(--bb-stroke)) * var(--plate-scale))
-  );
+  --plate-h: var(--menu-plate-h, calc(var(--bb-plate-h) * var(--plate-scale)));
   --plate-h-on: var(--menu-plate-h-on, calc((var(--bb-space-16) + var(--bb-space-5)) * var(--plate-scale)));
   --plate-fs: var(--menu-plate-fs, calc(var(--bb-fs-plate) * var(--plate-scale)));
   --plate-fs-on: var(--menu-plate-fs-on, calc(var(--bb-fs-plate-on) * var(--plate-scale)));

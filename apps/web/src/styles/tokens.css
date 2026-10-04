@@ -137,6 +137,12 @@
    */
   --bb-plate-cursor-reach: 5.25rem;
   /*
+   * Alto de la placa del menú en reposo (§3.3 «Opción de menú»: 70 px, el de la maqueta). Lo comparten
+   * `MenuPlate` y las placas en vista previa de Opciones (§3.8.14: «al alto de las placas del menú en
+   * reposo»), para que no se separen si cambia.
+   */
+  --bb-plate-h: calc(var(--bb-space-16) + var(--bb-space-1) + var(--bb-stroke));
+  /*
    * Ventana baja de escritorio (≥ 721 px de ancho y < 900 de alto, o < 969 por debajo de 1200; §3.8.3):
    * las placas del menú bajan con el alto de la ventana, lineal de 640 a 900 px de alto (a 900 valen lo
    * de la maqueta), y el logo ocupa el alto que le dejan, para caber sin desplazar en la ventana de un
