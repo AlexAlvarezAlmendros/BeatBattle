@@ -424,6 +424,18 @@
   }
 
   /*
+   * Si el bloque cabe entre el HUD y la barra, la pantalla mide la ventana: el bloque centrado se come el aire
+   * del `<main>` (24 px arriba y 32 abajo; 12 y 16 con la ventana baja, más arriba) hasta dejar `--bb-space-2`
+   * bajo el HUD y `--bb-space-3` sobre la barra (4 px por encima de su línea discontinua). Antes el aire se
+   * sumaba al bloque aunque cupiera: /como-funciona a 820 × 1180 táctil medía 1186 de 1180 y la 404 a 960 × 800
+   * con teclado, 807 de 800, y se desplazaban 6 y 7 px sin nada que ver (jurado de la 0.28, cierre, R6). Si no
+   * cabe, empieza a `--bb-space-2` del HUD y se desplaza. Con pestañas, no: van fijas arriba, con su aire.
+   */
+  .screen[data-layout="interior"]:not([data-fill], [data-tabs]) {
+    margin-block: calc(var(--bb-space-2) - var(--bb-space-6)) calc(var(--bb-space-3) - var(--bb-space-8));
+  }
+
+  /*
    * Con el título en la placa del HUD, la cabeza va solo para los lectores (fuera de la rejilla): sin su
    * fila, que con su separación bajaba el bloque 24 px del centro.
    */

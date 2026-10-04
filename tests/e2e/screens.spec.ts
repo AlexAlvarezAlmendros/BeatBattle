@@ -364,6 +364,48 @@ for (const { viewport, touch, screens } of [
 }
 
 /**
+ * En una columna, si el bloque cabe entre el HUD y la barra, la pantalla mide la ventana (§3.8.14; jurado de la
+ * 0.28, cierre, R6): el aire del `<main>` (24 px arriba y 32 abajo; 12 y 16 con la ventana baja) se sumaba al
+ * bloque centrado aunque cupiera, y /como-funciona a 820 × 1180 táctil medía 1186 de 1180 y la 404 a 960 × 800
+ * con teclado, 807 de 800, sin nada que ver al desplazar. El bloque centrado deja como poco `--bb-space-2`
+ * bajo el HUD y `--bb-space-3` sobre la barra (por encima de su línea discontinua).
+ */
+for (const { viewport, touch, path, heading } of [
+  { viewport: { width: 820, height: 1180 }, touch: true, path: '/como-funciona', heading: 'Cómo se juega' },
+  { viewport: { width: 960, height: 800 }, touch: false, path: '/esto-no-existe', heading: 'Bonus stage' },
+]) {
+  test.describe(`${path} a ${viewport.width} × ${viewport.height}${touch ? ' táctil' : ' con teclado'}, una columna`, () => {
+    test.use({ viewport, isMobile: touch, hasTouch: touch })
+
+    test(`RD-VIS-02 e / §3.8.14: si el bloque de ${path} cabe entre el HUD y la barra, la pantalla no se desplaza (R6)`, async ({
+      page,
+    }) => {
+      await open(page, path, heading)
+      await settle(page)
+      const fit = await page.evaluate(() => {
+        const hud = document.querySelector('.game-frame > header')!.getBoundingClientRect()
+        const bar = document.querySelector('.game-frame > footer')!.getBoundingClientRect()
+        const parts = [
+          ...document.querySelectorAll('main [data-screen-part="piece"], main [data-screen-part="panel"]'),
+        ]
+          .map((part) => part.getBoundingClientRect())
+          .filter((box) => box.height > 0)
+        return {
+          scroll: document.scrollingElement!.scrollHeight,
+          view: window.innerHeight,
+          above: Math.min(...parts.map((box) => box.top)) - hud.bottom,
+          below: bar.top - Math.max(...parts.map((box) => box.bottom)),
+        }
+      })
+      expect(fit.scroll, `la pantalla mide ${fit.scroll} de ${fit.view}`).toBeLessThanOrEqual(fit.view)
+      // `--bb-space-2` bajo el HUD y `--bb-space-3` sobre la barra, como poco.
+      expect(fit.above, 'aire bajo el HUD').toBeGreaterThanOrEqual(8 - 0.5)
+      expect(fit.below, 'aire sobre la barra').toBeGreaterThanOrEqual(12 - 0.5)
+    })
+  })
+}
+
+/**
  * Las pestañas de Opciones y de los legales van fijas arriba (§3.8.14: solo se centra el bloque de dos
  * columnas): al cambiar de sección con Q/E, la fila no salta y la pestaña nueva, con el foco, se queda
  * donde estaba. Con todo el bloque centrado (revisión de la 0.28), la fila bajaba o subía hasta 71 px
