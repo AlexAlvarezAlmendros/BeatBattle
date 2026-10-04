@@ -979,6 +979,48 @@ for (const viewport of [
   })
 }
 
+/**
+ * Con la ventana baja, la tarjeta de la semana y el panel de ayuda acaban por encima de la línea discontinua
+ * de la barra (§3.8.3 v0.6.7; jurado de la 0.28, cierre, K5): a 1440 × 789, 1366 × 657 y 1280 × 720 acababan
+ * en el borde de la barra (731 = 731) y la línea, pintada 8 px por encima de su caja, cruzaba el pie del
+ * panel de ayuda, que es translúcido. Y el menú sigue cabiendo sin desplazar.
+ */
+for (const viewport of [
+  { width: 1440, height: 789 },
+  { width: 1366, height: 657 },
+  { width: 1280, height: 720 },
+  { width: 1536, height: 730 },
+]) {
+  test.describe(`pie del menú con la ventana baja a ${viewport.width} × ${viewport.height}`, () => {
+    test.use({ viewport })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`RD-VIS-02 e / §3.8.3: en ${path} la tarjeta y la ayuda acaban por encima de la línea discontinua de la barra`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        const box = await page.evaluate(() => {
+          const bar = document.querySelector('footer')!
+          const line = getComputedStyle(bar, '::before')
+          const main = document.querySelector('main')!
+          return {
+            line: bar.getBoundingClientRect().top + Number.parseFloat(line.top),
+            painted: line.display !== 'none' && line.content !== 'none',
+            card: main.querySelector('article')!.getBoundingClientRect().bottom,
+            help: main.querySelector('nav [aria-live]')!.parentElement!.getBoundingClientRect().bottom,
+            scroll: document.scrollingElement!.scrollHeight - window.innerHeight,
+          }
+        })
+        expect(box.painted, 'la barra lleva su línea discontinua').toBe(true)
+        expect(box.card, 'pie de la tarjeta').toBeLessThanOrEqual(box.line + 0.5)
+        expect(box.help, 'pie del panel de ayuda').toBeLessThanOrEqual(box.line + 0.5)
+        expect(box.scroll).toBeLessThanOrEqual(0)
+      })
+    }
+  })
+}
+
 /** Cuánto pasa el lockup (la cinta o la firma con la pegatina) del borde derecho del lienzo del logo. */
 function lockupPastLogo(page: Page): Promise<number> {
   return page.evaluate(() => {

@@ -271,8 +271,16 @@
  */
 @media (min-width: 721px) and (max-height: 899px),
   (min-width: 721px) and (max-width: 1199px) and (max-height: 968px) {
+  /*
+   * `--menu-bar-line`: lo que la línea discontinua de la barra sube por encima de su caja (`ControlsBar`:
+   * `--bb-space-2`, con su alto dentro). La tarjeta y la ayuda acaban por encima de ella (§3.8.3 v0.6.7): a
+   * 1440 × 789 acababan en el borde de la barra y la línea cruzaba el pie del panel de ayuda, translúcido
+   * (jurado de la 0.28, cierre, K5). Las placas lo descuentan con lo que la barra mide de más (más abajo).
+   */
   .menu {
+    --menu-bar-line: var(--bb-space-2);
     margin-top: calc(-1 * var(--bb-space-6));
+    margin-bottom: calc(var(--menu-bar-line) - var(--bb-space-8));
   }
 
   .title {
@@ -364,14 +372,15 @@
    * lado de la firma y, por debajo de 1200 px, la crónica en la suya (`ControlsBar`). Las placas se lo
    * reparten entre las seis (cinco en reposo y la elegida, `--bb-plate-on-scale` veces), sin bajar del
    * objetivo táctil: a 1280 × 720 la barra lleva las teclas en su fila (84 px) y el menú se desplazaba
-   * 6 px. Despegada (0), no cuenta.
+   * 6 px. Despegada (0), no cuenta. Se reparten también el sitio de la línea discontinua de la barra
+   * (`--menu-bar-line`), para que el menú siga cabiendo sin desplazar.
    */
   .plates {
     --menu-bar-extra: max(0px, var(--controls-pinned-h, var(--bb-controls-h)) - var(--bb-controls-h));
     --menu-plate-h: max(
       var(--bb-target),
       var(--bb-plate-h-low) -
-      var(--menu-bar-extra) /
+      (var(--menu-bar-extra) + var(--menu-bar-line)) /
       (5 + var(--bb-plate-on-scale))
     );
     --menu-plate-h-on: calc(var(--menu-plate-h) * var(--bb-plate-on-scale));
