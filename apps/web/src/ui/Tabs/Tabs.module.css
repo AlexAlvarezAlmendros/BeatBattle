@@ -7,17 +7,39 @@
   gap: var(--bb-space-4);
 }
 
+/*
+ * [Q] pestañas [E] (§3.3 «Pestañas»; tercer pase del jurado, L11): una rejilla con las teclas en las
+ * columnas de los lados y las pestañas en la del centro, que parte en varias líneas si no caben (las
+ * líneas, entre [Q] y [E]; antes, con flex, cada tecla podía quedarse sola en una línea encima y
+ * debajo). La columna del centro mide lo que las pestañas, hasta lo que haya: en una línea, [E] sigue a
+ * la última pestaña. Las teclas, centradas en la primera línea (pestañas de 44 px, `--bb-target`).
+ */
 .row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: grid;
+  grid-template-columns: auto minmax(0, max-content) auto;
+  justify-content: start;
+  align-items: start;
   gap: var(--bb-space-2);
 }
 
+.row > [data-key] {
+  margin-top: calc((var(--bb-target) - var(--bb-space-6) - var(--bb-stroke)) / 2);
+}
+
+.row > [data-key]:first-child {
+  grid-column: 1;
+}
+
+.row > [data-key]:last-child {
+  grid-column: 3;
+}
+
 .list {
+  grid-column: 2;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--bb-space-2);
+  gap: var(--bb-space-3) var(--bb-space-2);
+  min-width: 0;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -93,33 +115,24 @@
 }
 
 /*
- * Móvil (≤ 720 px): [Q] pestañas [E] en una fila y las pestañas parten en varias líneas entre las dos
- * teclas. Antes se desplazaban en horizontal, sin pista y con la barra oculta: la activa salía cortada y
- * el foco quedaba casi fuera de la ventana (WCAG 1.4.10 y 2.4.11). Así cada pestaña cabe entera, con su
- * cursor (7 px por fuera) dentro del medianil.
+ * Móvil (≤ 720 px): igual, [Q] pestañas [E] en una fila y las pestañas parten entre las dos teclas, nunca
+ * en desplazamiento horizontal (la activa salía cortada y el foco casi fuera de la ventana, WCAG 1.4.10
+ * y 2.4.11). Cada pestaña cabe entera, con su cursor (7 px por fuera) dentro del medianil.
  */
-@media (max-width: 720px) {
+
+/* Táctil: sin las teclas Q/E (no hay teclado, §3.3), y las pestañas, a todo lo ancho; depende del tipo
+ * de entrada, no del ancho. */
+@media (hover: none), (pointer: coarse) {
   .row {
-    flex-wrap: nowrap;
-    align-items: flex-start;
+    grid-template-columns: minmax(0, max-content);
   }
 
   .row > [data-key] {
-    flex: none;
-    margin-top: calc((var(--bb-target) - var(--bb-space-6) - var(--bb-stroke)) / 2);
+    display: none;
   }
 
   .list {
-    flex: 1 1 0;
-    min-width: 0;
-    row-gap: var(--bb-space-3);
-  }
-}
-
-/* Táctil: sin las teclas Q/E (no hay teclado, §3.3); depende del tipo de entrada, no del ancho. */
-@media (hover: none), (pointer: coarse) {
-  .row > [data-key] {
-    display: none;
+    grid-column: 1;
   }
 }
 

@@ -320,6 +320,73 @@ for (const viewport of [
   })
 }
 
+/**
+ * Las pestañas con teclas (§3.3 «Pestañas»): [Q] y [E] a los lados de la fila y, si parte, las líneas
+ * entre [Q] y [E], nunca una tecla sola en su línea encima o debajo.
+ */
+async function tabKeys(page: Page, nav: string) {
+  return page.evaluate((selector) => {
+    const row = document.querySelector(selector)!
+    const keys = [...row.querySelectorAll(':scope > [data-key]')].map((key) => key.getBoundingClientRect())
+    const tabs = [...row.querySelectorAll('li, [role="tab"]')].map((tab) => tab.getBoundingClientRect())
+    const top = Math.min(...tabs.map((tab) => tab.top))
+    const firstLine = tabs.filter((tab) => tab.top < top + 4)
+    return {
+      q: { left: keys[0]!.left, right: keys[0]!.right, top: keys[0]!.top, bottom: keys[0]!.bottom },
+      e: { left: keys[1]!.left, right: keys[1]!.right, top: keys[1]!.top, bottom: keys[1]!.bottom },
+      tabsLeft: Math.min(...tabs.map((tab) => tab.left)),
+      tabsRight: Math.max(...tabs.map((tab) => tab.right)),
+      firstLineTop: top,
+      firstLineBottom: Math.max(...firstLine.map((tab) => tab.bottom)),
+      lastRight: Math.max(...firstLine.map((tab) => tab.right)),
+      lines: new Set(tabs.map((tab) => Math.round(tab.top))).size,
+    }
+  }, nav)
+}
+
+for (const { viewport, path, heading, nav } of [
+  {
+    viewport: { width: 1440, height: 900 },
+    path: '/legal/bases',
+    heading: 'Bases de la competición',
+    nav: 'main nav[aria-label="Documentos legales"]',
+  },
+  {
+    viewport: { width: 800, height: 900 },
+    path: '/ajustes/accesibilidad',
+    heading: 'Accesibilidad',
+    nav: 'main nav[aria-label="Secciones de ajustes"]',
+  },
+  {
+    viewport: { width: 1440, height: 900 },
+    path: '/ajustes',
+    heading: 'Sonido y efectos',
+    nav: 'main nav[aria-label="Secciones de ajustes"]',
+  },
+]) {
+  test.describe(`${viewport.width} × ${viewport.height}, pestañas`, () => {
+    test.use({ viewport })
+
+    test(`§3.3 / RD-VIS-02 e: en ${path}, [Q] y [E] van a los lados de las pestañas, también si parten (L11)`, async ({
+      page,
+    }) => {
+      await open(page, path, heading)
+      await settle(page)
+      const box = await tabKeys(page, nav)
+      // A los lados: [Q] a la izquierda de todas las pestañas y [E] a la derecha de todas.
+      expect(box.q.right, 'Q a la izquierda').toBeLessThanOrEqual(box.tabsLeft)
+      expect(box.e.left, 'E a la derecha').toBeGreaterThanOrEqual(box.tabsRight)
+      // En la primera línea de pestañas, no solas encima o debajo.
+      for (const key of [box.q, box.e]) {
+        expect(key.top).toBeGreaterThanOrEqual(box.firstLineTop)
+        expect(key.bottom).toBeLessThanOrEqual(box.firstLineBottom)
+      }
+      // En una sola línea, [E] sigue a la última pestaña (no se va al otro lado de la pantalla).
+      if (box.lines === 1) expect(box.e.left - box.lastRight).toBeLessThanOrEqual(16)
+    })
+  })
+}
+
 test.describe('1920 × 1080', () => {
   test.use({ viewport: { width: 1920, height: 1080 } })
 
