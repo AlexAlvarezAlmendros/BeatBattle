@@ -932,6 +932,71 @@ for (const viewport of [
   })
 }
 
+/**
+ * Qué hay debajo del «by» del lockup: la primera caja del lockup (el propio «by» o un antepasado) que
+ * cubre su texto con un fondo, y su opacidad. Sin ninguna, el texto va directamente sobre la arena.
+ */
+function byBackdrop(page: Page): Promise<{ text: string; alpha: number } | null> {
+  return page.evaluate(() => {
+    const signature = document.querySelector<HTMLElement>('main [data-otp-signature]')!
+    const by = [...signature.querySelectorAll<HTMLElement>('span')].find(
+      (span) => span.textContent?.trim() === 'by',
+    )!
+    const range = document.createRange()
+    range.selectNodeContents(by)
+    const text = range.getBoundingClientRect()
+    const lockup = signature.closest('[class*=lockup]')
+    for (
+      let node: HTMLElement | null = by;
+      node && node !== lockup?.parentElement;
+      node = node.parentElement
+    ) {
+      const color = getComputedStyle(node).backgroundColor
+      const alpha = color.startsWith('rgba') ? Number(color.split(',')[3]?.replace(')', '')) : 1
+      if (color === 'transparent' || alpha === 0) continue
+      const box = node.getBoundingClientRect()
+      if (
+        box.left <= text.left &&
+        box.right >= text.right &&
+        box.top <= text.top &&
+        box.bottom >= text.bottom
+      )
+        return { text: by.textContent!.trim(), alpha }
+    }
+    return null
+  })
+}
+
+/**
+ * El «by» del lockup no va directamente sobre los rayos (`RD-VIS-05`: ningún texto directamente sobre
+ * trama, rayos o líneas de barrido; jurado de la 0.28, tercer pase): lleva detrás una caja de
+ * `--bb-panel-veil` (opacidad 0,94), casi invisible sobre el negro de la arena, que tapa las bandas.
+ */
+for (const { path, heading, viewport } of [
+  { path: '/', heading: 'Beat Battle', viewport: { width: 1440, height: 900, touch: false } },
+  { path: '/dev/menu', heading: 'Beat Battle', viewport: { width: 1440, height: 900, touch: false } },
+  { path: '/dev/menu', heading: 'Beat Battle', viewport: { width: 390, height: 844, touch: true } },
+  { path: '/', heading: 'Beat Battle', viewport: { width: 390, height: 844, touch: true } },
+  { path: '/entrar', heading: 'Entrar', viewport: { width: 1440, height: 900, touch: false } },
+]) {
+  test.describe(`«by» del lockup de ${path} a ${viewport.width} × ${viewport.height}`, () => {
+    test.use({
+      viewport: { width: viewport.width, height: viewport.height },
+      isMobile: viewport.touch,
+      hasTouch: viewport.touch,
+    })
+
+    test(`RD-VIS-05: el «by» del lockup de ${path} va sobre un velo, no sobre los rayos`, async ({
+      page,
+    }) => {
+      await open(page, path, heading)
+      const backdrop = await byBackdrop(page)
+      expect(backdrop).not.toBeNull()
+      expect(backdrop!.alpha).toBeGreaterThanOrEqual(0.9)
+    })
+  })
+}
+
 /** A 1440 × 900 (la maqueta) la compactación no entra: placas de 70 px (84 la elegida) y logo de 640. */
 test('§3.8.3: a 1440 × 900 el menú es el de la maqueta (placas de 70 y 84 px, logo de 640)', async ({
   page,

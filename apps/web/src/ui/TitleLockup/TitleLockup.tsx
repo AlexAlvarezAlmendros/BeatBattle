@@ -26,7 +26,9 @@ export function TitleLockup({ className }: { className?: string }) {
           aria-label={t('ui.otpSlap.label')}
           data-otp-signature=""
         >
-          <span aria-hidden="true">{t('home.title.by')}</span>
+          <span className={styles.by} aria-hidden="true">
+            {t('home.title.by')}
+          </span>
           <OtpSlapImage size="menu" />
         </a>
       </div>

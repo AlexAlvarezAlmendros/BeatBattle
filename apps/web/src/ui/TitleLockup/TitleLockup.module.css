@@ -71,6 +71,21 @@
   text-decoration: none;
 }
 
+/*
+ * El «by» va sobre un velo (`--bb-panel-veil`) en paralelogramo, como las etiquetas (`--bb-slant-sm`), no
+ * directamente sobre los rayos de la arena (`RD-VIS-05`; jurado de la 0.28, tercer pase). Sobre el negro
+ * casi no se ve: la composición de la maqueta no cambia. El relleno (el del paralelogramo de una
+ * etiqueta) sale por los lados con margen negativo, así que el lockup mide lo mismo; por la derecha
+ * queda bajo la pegatina, que se pinta encima.
+ */
+.by {
+  --by-pad: calc(var(--bb-slant-sm) + var(--bb-space-1));
+  margin-inline: calc(-1 * var(--by-pad));
+  padding-inline: var(--by-pad);
+  background: var(--bb-panel-veil);
+  clip-path: polygon(var(--bb-slant-sm) 0, 100% 0, calc(100% - var(--bb-slant-sm)) 100%, 0 100%);
+}
+
 @container title-lockup (width < 36rem) {
   .ribbon {
     font-stretch: var(--bb-stretch-min);
