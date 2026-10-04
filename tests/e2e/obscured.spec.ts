@@ -26,10 +26,58 @@ function focusedVersusBar(page: Page) {
 }
 
 /**
+ * Dónde queda una pieza enfocada (se evalúa en la página con el elemento): si está dentro de la barra de
+ * controles, si cabe entera en la ventana, si su foco cabe y cuánto la tapa la barra si va en el
+ * contenido. El foco es el contorno (3 px a 4 px de la caja) y el halo (`--bb-focus-halo`, 10 px), con lo
+ * que de ellos deje ver un `clip-path` del propio control (jurado de la 0.28, L6). Autónoma: Playwright la
+ * pasa a la página tal cual.
+ */
+function measureFocus(element: Element) {
+  const style = getComputedStyle(element)
+  const px = (value: string) => Number.parseFloat(value) || 0
+  const outline = style.outlineStyle === 'none' ? 0 : px(style.outlineOffset) + px(style.outlineWidth)
+  // Extensión de la sombra (el último valor en px de `box-shadow`) y lo que deja ver un `inset()`.
+  const spread = style.boxShadow === 'none' ? 0 : px(style.boxShadow.match(/(-?[\d.]+)px\s*$/)?.[1] ?? '0')
+  const clip = style.clipPath.startsWith('inset(') ? -px(style.clipPath.slice(6)) : Number.POSITIVE_INFINITY
+  const extent = Math.max(outline, Math.min(spread, clip))
+  const box = element.getBoundingClientRect()
+  const ring = {
+    left: box.left - extent,
+    top: box.top - extent,
+    right: box.right + extent,
+    bottom: box.bottom + extent,
+  }
+  const bar = document.querySelector('footer')
+  const inBar = !!bar?.contains(element)
+  const barBox = bar?.getBoundingClientRect()
+  const position = bar ? getComputedStyle(bar).position : 'static'
+  // Si la barra flota sobre el contenido, lo que quede por debajo de su borde superior está tapado.
+  const floats = position === 'sticky' || position === 'fixed'
+  const covered =
+    !inBar && floats && barBox && barBox.top < window.innerHeight ? Math.max(0, box.bottom - barBox.top) : 0
+  const label = (element.getAttribute('aria-label') ?? element.textContent ?? element.tagName)
+    .trim()
+    .slice(0, 32)
+  return {
+    focusVisible: element.matches(':focus-visible'),
+    inBar,
+    inside: box.top >= -0.5 && box.bottom <= window.innerHeight + 0.5,
+    ringInside:
+      ring.left >= -0.5 &&
+      ring.top >= -0.5 &&
+      ring.right <= window.innerWidth + 0.5 &&
+      ring.bottom <= window.innerHeight + 0.5,
+    covered,
+    label,
+    key: `${element.tagName}|${label}|${element.getAttribute('href') ?? ''}`,
+    where: `${box.top.toFixed(1)}–${box.bottom.toFixed(1)} (ventana ${window.innerHeight}, desplazada ${Math.round(window.scrollY)})`,
+    ring: `${ring.left.toFixed(1)},${ring.top.toFixed(1)} → ${ring.right.toFixed(1)},${ring.bottom.toFixed(1)}`,
+  }
+}
+
+/**
  * Lo que se sale de la ventana del foco de cada control de la barra de controles (jurado de la 0.28,
- * L6): el contorno (3 px a 4 px de la caja) y el halo (`--bb-focus-halo`, 10 px), con lo que de ellos
- * deje ver un `clip-path` del propio control. Se enfoca cada uno con el teclado ya en uso (Tab antes),
- * para que sea `:focus-visible`.
+ * L6). Se enfoca cada uno con el teclado ya en uso (Tab antes), para que sea `:focus-visible`.
  */
 async function barRingsOutsideWindow(page: Page): Promise<string[]> {
   await page.keyboard.press('Tab')
@@ -38,40 +86,16 @@ async function barRingsOutsideWindow(page: Page): Promise<string[]> {
   for (const control of await controls.all()) {
     if (!(await control.isVisible())) continue
     await control.focus()
-    const result = await control.evaluate((element) => {
-      const style = getComputedStyle(element)
-      const px = (value: string) => Number.parseFloat(value) || 0
-      const outline = style.outlineStyle === 'none' ? 0 : px(style.outlineOffset) + px(style.outlineWidth)
-      // Extensión de la sombra (el último valor en px de `box-shadow`) y lo que deja ver un `inset()`.
-      const spread =
-        style.boxShadow === 'none' ? 0 : px(style.boxShadow.match(/(-?[\d.]+)px\s*$/)?.[1] ?? '0')
-      const clip = style.clipPath.startsWith('inset(')
-        ? -px(style.clipPath.slice(6))
-        : Number.POSITIVE_INFINITY
-      const extent = Math.max(outline, Math.min(spread, clip))
-      const box = element.getBoundingClientRect()
-      const ring = {
-        left: box.left - extent,
-        top: box.top - extent,
-        right: box.right + extent,
-        bottom: box.bottom + extent,
-      }
-      const inside =
-        ring.left >= -0.5 &&
-        ring.top >= -0.5 &&
-        ring.right <= window.innerWidth + 0.5 &&
-        ring.bottom <= window.innerHeight + 0.5
-      return {
-        focusVisible: element.matches(':focus-visible'),
-        inside,
-        label: (element.getAttribute('aria-label') ?? element.textContent ?? '').trim().slice(0, 32),
-        ring: `${ring.left.toFixed(1)},${ring.top.toFixed(1)} → ${ring.right.toFixed(1)},${ring.bottom.toFixed(1)}`,
-      }
-    })
+    const result = await control.evaluate(measureFocus)
     if (!result.focusVisible) outside.push(`${result.label}: sin :focus-visible`)
-    else if (!result.inside) outside.push(`${result.label}: ${result.ring}`)
+    else if (!result.ringInside) outside.push(`${result.label}: ${result.ring}`)
   }
   return outside
+}
+
+/** Deja pasar dos fotogramas: el desplazamiento al foco es instantáneo, pero se mide ya pintado. */
+function nextFrame(page: Page): Promise<unknown> {
+  return page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))))
 }
 
 for (const { width, height, touch, paths } of [
@@ -107,10 +131,7 @@ for (const viewport of [
     const problems: string[] = []
     for (let step = 0; step < 6; step++) {
       await page.keyboard.press('ArrowDown')
-      // El desplazamiento al foco es instantáneo; se deja un fotograma para medir.
-      await page.evaluate(
-        () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
-      )
+      await nextFrame(page)
       const { label, covered, inside } = await focusedVersusBar(page)
       if (covered > 0.5 || !inside)
         problems.push(`${label}: tapado ${covered.toFixed(1)} px, entero=${inside}`)
@@ -154,5 +175,69 @@ for (const viewport of [
         problems.push(`${keys.join(' ')} → ${label}: tapado ${covered.toFixed(1)} px, entero=${inside}`)
     }
     expect(problems).toEqual([])
+  })
+}
+
+/**
+ * Recorrido con Tab de cada pantalla con teclado y ratón en ventanas pequeñas (revisión del cuarto pase
+ * del jurado de la 0.28, sobre F2). Con la barra despegada, «Legal» y la pausa de la crónica cuelgan por
+ * debajo de la ventana dentro de una barra `sticky` (solo la fila de la firma sigue pegada, §3.4.1 v0.6.6)
+ * y, al llegar con Tab, el navegador no desplazaba lo bastante: a 360 × 640, 375 × 667 y 320 × 568, en
+ * /como-funciona «Legal» quedaba entero fuera de la ventana y solo asomaba el borde de su anillo. Se pulsa
+ * Tab como un usuario de teclado hasta dar la vuelta: cada control de la barra tiene que verse entero, con
+ * su anillo, y cada control del contenido, entero y sin la parte pegada de la barra encima.
+ */
+for (const { width, height } of [
+  { width: 320, height: 568 },
+  { width: 360, height: 640 },
+  { width: 375, height: 667 },
+  { width: 390, height: 844 },
+  { width: 720, height: 450 },
+  { width: 823, height: 514 },
+]) {
+  test.describe(`recorrido con Tab a ${width} × ${height} con teclado y ratón`, () => {
+    test.use({ viewport: { width, height } })
+
+    for (const { path, heading } of [
+      { path: '/como-funciona', heading: 'Cómo se juega' },
+      { path: '/ajustes/sonido', heading: 'Sonido y efectos' },
+      { path: '/legal/bases', heading: 'Bases de la competición' },
+      { path: '/esto-no-existe', heading: 'Bonus stage' },
+      { path: '/entrar', heading: 'Entrar' },
+      { path: '/dev/menu', heading: 'Beat Battle' },
+    ]) {
+      test(`RD-VIS-02 b / RNF-A11Y-01 / WCAG 2.4.11 (§3.4.1): en ${path}, cada control al que se llega con Tab se ve entero; los de la barra, con su anillo`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        const problems: string[] = []
+        const seen = new Set<string>()
+        let barControls = 0
+        for (let step = 0; step < 40; step++) {
+          await page.keyboard.press('Tab')
+          await nextFrame(page)
+          // Pasada la última pieza, el foco sale de la página (al <body>) antes de dar la vuelta.
+          if (await page.evaluate(() => !document.activeElement || document.activeElement === document.body))
+            continue
+          const focused = await page.evaluateHandle(() => document.activeElement as Element)
+          const state = await focused.evaluate(measureFocus)
+          if (seen.has(state.key)) break
+          seen.add(state.key)
+          if (state.inBar) {
+            barControls++
+            await expect(page.locator(':focus'), `${state.label}, entero en la ventana`).toBeInViewport({
+              ratio: 1,
+            })
+            if (!state.ringInside) problems.push(`[barra] ${state.label}: anillo ${state.ring}`)
+          } else if (!state.inside || state.covered > 0.5)
+            problems.push(`${state.label}: ${state.where}, tapado ${state.covered.toFixed(1)} px`)
+        }
+        expect(
+          barControls,
+          'controles de la barra recorridos (la firma y «Legal» o la pausa)',
+        ).toBeGreaterThanOrEqual(2)
+        expect(problems).toEqual([])
+      })
+    }
   })
 }

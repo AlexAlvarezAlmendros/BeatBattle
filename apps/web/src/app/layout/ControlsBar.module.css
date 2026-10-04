@@ -36,6 +36,16 @@
 }
 
 /*
+ * Los controles de la barra no llevan el margen del foco de `global.css` (el alto de lo pegado: ya están
+ * en ello), solo su anillo, que cabe bajo la pieza: pegada, al llegar con Tab a la firma o a «Legal» la
+ * pantalla no salta 67 px cada vez (revisión del cuarto pase del jurado de la 0.28). Lo que cuelga de la
+ * barra despegada lo trae a la vista `ControlsBar` (`revealUnpinned`).
+ */
+.bar :is(a[href], button) {
+  scroll-margin-block-end: var(--bar-ring);
+}
+
+/*
  * Despegada (`data-unpinned`, la pone `ControlsBar` si la barra pasa de un cuarto del alto de la
  * ventana, o del 15 % con teclado en una ventana de 720 px de ancho o menos o de 700 px de alto o
  * menos): las teclas, «Legal» y la crónica van al final de la pantalla, para no tapar el contenido en

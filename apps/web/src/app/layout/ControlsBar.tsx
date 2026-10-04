@@ -42,8 +42,9 @@ export const CONTROL_KEYS: Readonly<
  * `controlsRight`: la crónica de la arena en el menú; «Legal» por defecto, que en móvil va al lado de
  * la firma con un filete en medio si cabe y, si no, debajo). La firma va siempre centrada. En táctil y
  * en móvil las teclas desaparecen y queda la firma. Con teclado, si las teclas no caben al lado de la
- * firma, van en su propia fila encima (`useBarLayout`). Va pegada al pie de la ventana con su alto real
- * como margen del foco, salvo si ocupa demasiado de la ventana, donde se despega.
+ * firma, primero se aprietan y, si aun así no caben, van en su propia fila encima (`useBarLayout`). Va
+ * pegada al pie de la ventana con su alto real como margen del foco, salvo si ocupa demasiado de la
+ * ventana, donde se despega todo menos la fila de la firma, que sigue pegada (§3.4.1 v0.6.6).
  */
 export function ControlsBar({ screen }: { screen: ScreenConfig }) {
   // Con los atajos de una tecla apagados (WCAG 2.1.4), M no hace nada: no se enseña.
@@ -148,12 +149,18 @@ const BAR_TAIL_VAR = '--bar-tail'
  * - **Dato debajo** (`data-right-row`): si lo que va a la derecha («Legal» con su filete) no cabe en su
  *   columna al lado de la firma centrada, baja a su propia fila, centrado (jurado de la 0.28, M3r: en
  *   móvil se centraba el grupo y la firma quedaba descentrada). Igual: lo que cabe de verdad. La crónica
- *   del menú no se mide: llena su columna y acaba en «…», y por debajo de 1200 px va siempre en su fila.
+ *   del menú no se mide: llena su columna (si un mensaje no cabe en una línea, parte en dos dentro del
+ *   alto de su botón de pausa) y por debajo de 1200 px va siempre en su fila.
  * - **Alto real** en `CONTROLS_HEIGHT_VAR`, para que ningún control enfocado quede debajo de la barra
  *   (§3.3): con las teclas en su fila crece y un margen fijo no basta. Si la barra pasa de
  *   `CONTROLS_MAX_VIEWPORT_SHARE` del alto de la ventana (`CONTROLS_MAX_VIEWPORT_SHARE_SMALL` con teclado
- *   en una ventana pequeña), se despega (`data-unpinned`): va al final de la pantalla y el margen vuelve a
- *   ser el de siempre.
+ *   en una ventana pequeña), se despega (`data-unpinned`): las teclas, «Legal» y la crónica van al final
+ *   de la pantalla y solo sigue pegada la fila de la firma (§3.4.1 v0.6.6), así que el margen pasa a ser
+ *   el alto de esa fila.
+ * - **Foco en lo despegado** (`revealUnpinned`): con Tab hasta «Legal» o la pausa, que despegadas quedan
+ *   por debajo de la ventana dentro de una barra `sticky`, el navegador no desplaza lo bastante (lo que
+ *   mueve, la barra lo sigue) y el control quedaba entero fuera de la ventana (revisión del cuarto pase,
+ *   a 360 × 640 en /como-funciona). Se baja al final de la pantalla, donde la barra está entera.
  *
  * Cuando cambia el tamaño de la barra, de una tecla, de la firma o del dato (la letra que llega, una
  * pantalla que reclama el hueco) se vuelve a medir en el fotograma siguiente: dentro del aviso de
@@ -206,14 +213,34 @@ function useBarLayout(
     for (const piece of [bar, signature, right, ...(keys?.children ?? [])])
       if (piece) observer?.observe(piece)
     window.addEventListener('resize', later)
+    const reveal = (event: FocusEvent) => revealUnpinned(bar, event.target)
+    bar.addEventListener('focusin', reveal)
     return () => {
       cancelAnimationFrame(frame)
       observer?.disconnect()
       window.removeEventListener('resize', later)
+      bar.removeEventListener('focusin', reveal)
       root.style.removeProperty(CONTROLS_HEIGHT_VAR)
       bar.style.removeProperty(BAR_TAIL_VAR)
     }
   }, [ref, keysRef, keyIds])
+}
+
+/**
+ * Con la barra despegada, un control suyo que recibe el foco por debajo de la ventana («Legal», la pausa
+ * de la crónica: van en la parte que cuelga, `--bar-tail`) se trae a la vista bajando al final de la
+ * pantalla, donde la barra está en su sitio y entera (§3.4.1: «pegada o no, ningún control enfocado queda
+ * debajo de ella… el anillo del cursor de sus piezas cabe entero en la ventana»; WCAG 2.4.11). El
+ * desplazamiento del navegador no basta: la barra es `sticky` y sigue a lo que se desplaza. Es un salto,
+ * como el del foco, sin animación (también con «reducir movimiento»). Se decide antes de que el navegador
+ * desplace (`focusin` llega antes), así que no hay ningún fotograma con el control fuera.
+ */
+function revealUnpinned(bar: HTMLElement, target: EventTarget | null): void {
+  if (!bar.hasAttribute('data-unpinned') || !(target instanceof Element)) return
+  const ring = Number.parseFloat(getComputedStyle(bar).paddingBottom) || 0
+  if (target.getBoundingClientRect().bottom + ring <= window.innerHeight + 0.5) return
+  const page = document.scrollingElement ?? document.documentElement
+  page.scrollTo({ top: page.scrollHeight, behavior: 'instant' })
 }
 
 /**
