@@ -296,3 +296,19 @@ pre {
   /* biome-ignore lint/complexity/noImportantStyles: la preferencia del usuario manda sobre cualquier pieza */
   scroll-behavior: auto !important;
 }
+
+/*
+ * Pausa de los bucles (§3.6 «Bucles», WCAG 2.2.2): con el botón «Pausar las animaciones» de la barra
+ * (`<html data-loops="paused">`, `ui/loops.ts`), la misma red: ningún bucle sigue (el que ya ha dado su
+ * pasada se queda en reposo; el que está en ella la acaba). Cubre las piezas que no traen su propia
+ * variante de pausa (en la galería, los barridos del esqueleto y los cargadores de onda de los botones
+ * seguían en marcha: tercer pase del jurado sobre la v0.6.6, B3); las que la traen (el latido del reloj,
+ * el respiro de «Inserta tu beat») la quitan del todo. Las animaciones de una sola pasada (entradas,
+ * transiciones) no cambian.
+ */
+:root[data-loops="paused"] *,
+:root[data-loops="paused"] *::before,
+:root[data-loops="paused"] *::after {
+  /* biome-ignore lint/complexity/noImportantStyles: la pausa del usuario manda sobre cualquier pieza */
+  animation-iteration-count: 1 !important;
+}

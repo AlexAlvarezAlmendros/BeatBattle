@@ -3,6 +3,7 @@ import { type FocusEvent, type ReactNode, useEffect, useState } from 'react'
 import { t } from '../../i18n'
 import { Trans } from '../../i18n/Trans'
 import { frameAttributes } from '../../ui/Frame'
+import { cx } from '../../ui/forceState'
 import { useReducedMotion } from '../../ui/hooks/useReducedMotion'
 import { Icon } from '../../ui/Icon'
 import { useLoops } from '../../ui/loops'
@@ -39,7 +40,6 @@ export function Chronicle({
 }) {
   const reduced = useReducedMotion()
   const paused = useLoops((state) => state.paused)
-  const togglePaused = useLoops((state) => state.toggle)
   const [index, setIndex] = useState(0)
   const [hovered, setHovered] = useState(false)
   const [focused, setFocused] = useState(false)
@@ -76,20 +76,32 @@ export function Chronicle({
           {current}
         </span>
       </p>
-      {canPause && (
-        <button
-          type="button"
-          {...frameAttributes({ cut: 'sm' })}
-          className={styles.pause}
-          aria-pressed={paused}
-          aria-label={t('frame.controls.loopsPause')}
-          onClick={togglePaused}
-          data-chronicle-pause=""
-        >
-          <Icon name={paused ? 'play' : 'pause'} />
-        </button>
-      )}
+      {canPause && <LoopsPause />}
     </div>
+  )
+}
+
+/**
+ * «Pausar las animaciones» (WCAG 2.2.2; §3.6 «Bucles», §3.4.1): botón de 44 px con `aria-pressed` que
+ * para y reanuda todos los bucles decorativos de la pantalla (`<html data-loops="paused">`,
+ * `ui/loops.ts`). Va con la crónica en el menú y, en las pantallas que declaran bucles en su ruta
+ * (`ScreenConfig.loops`, la galería), al lado de «Legal» (`ControlsBar`).
+ */
+export function LoopsPause({ className }: { className?: string }) {
+  const paused = useLoops((state) => state.paused)
+  const toggle = useLoops((state) => state.toggle)
+  return (
+    <button
+      type="button"
+      {...frameAttributes({ cut: 'sm' })}
+      className={cx(styles.pause, className)}
+      aria-pressed={paused}
+      aria-label={t('frame.controls.loopsPause')}
+      onClick={toggle}
+      data-loops-pause=""
+    >
+      <Icon name={paused ? 'play' : 'pause'} />
+    </button>
   )
 }
 

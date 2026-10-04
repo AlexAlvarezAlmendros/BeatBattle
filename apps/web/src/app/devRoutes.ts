@@ -12,10 +12,13 @@ export const devRoutes: RouteObject[] = import.meta.env.DEV
         path: 'dev/galeria',
         handle: {
           access: 'public',
-          // Sin rayos: la galería es texto sobre negro de arriba abajo (`RD-VIS-05`).
+          // Sin rayos: la galería es texto sobre negro de arriba abajo (`RD-VIS-05`). Con bucles (los
+          // barridos del esqueleto, los cargadores de onda, el latido del reloj): la barra lleva el botón
+          // «Pausar las animaciones» (§3.6, WCAG 2.2.2).
           screen: {
             ...simpleScreen({ kicker: 'frame.plates.dev', title: 'dev.gallery.title' }, ['back', 'sound']),
             rays: false,
+            loops: true,
           },
         },
         lazy: async () => ({ Component: (await import('../ui/gallery/GalleryPage')).GalleryPage }),

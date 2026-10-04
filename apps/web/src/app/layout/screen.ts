@@ -43,6 +43,13 @@ export interface ScreenConfig {
    * ningún texto quede sobre los rayos (`RD-VIS-05`).
    */
   rays?: boolean
+  /**
+   * La pantalla tiene bucles decorativos que arrancan solos (§3.6 «Bucles»: barridos de esqueleto,
+   * cargadores, el latido del reloj): la barra lleva el botón «Pausar las animaciones» al lado de «Legal»
+   * (§3.4.1, WCAG 2.2.2). El menú no lo declara aquí: su crónica ocupa ese hueco y lleva el botón con ella
+   * (`Chronicle`, `loops`).
+   */
+  loops?: boolean
 }
 
 /** Menú principal (home): cuña a la derecha y las teclas del menú. */

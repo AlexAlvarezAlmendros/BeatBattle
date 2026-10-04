@@ -312,6 +312,14 @@
 }
 
 /*
+ * «Pausar las animaciones» de una pantalla con bucles (la galería; `ScreenConfig.loops`, §3.6): después de
+ * «Legal», con el mismo aire que lleva al lado de la crónica en el menú.
+ */
+.loopsPause {
+  margin-inline-start: var(--bb-space-2);
+}
+
+/*
  * Filete entre la firma y «Legal» (`data-controls-rule`): solo en móvil, donde van juntos en una fila.
  * En escritorio «Legal» va en la columna de la derecha, lejos de la firma, y no hace falta.
  */

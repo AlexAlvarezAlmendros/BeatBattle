@@ -3,11 +3,12 @@ import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
+import { useLoops } from '../../ui/loops'
 import { useShortcuts } from '../../ui/shortcuts'
 import { toast, useToasts } from '../../ui/Toast/useToasts'
 import { OTHER_PEOPLE_URL } from '../paths'
 import { RootLayout } from './RootLayout'
-import { interiorScreen, MENU_SCREEN } from './screen'
+import { interiorScreen, MENU_SCREEN, simpleScreen } from './screen'
 import { FrameSlot } from './slots'
 import { useSound } from './soundStore'
 
@@ -47,6 +48,7 @@ beforeEach(() => {
 
 afterEach(() => {
   act(() => useToasts.getState().clear())
+  act(() => useLoops.getState().set(false))
   vi.restoreAllMocks()
   localStorage.clear()
 })
@@ -202,6 +204,65 @@ describe('RootLayout: marco de juego (0.23, §3.4.1)', () => {
     expect(rule?.nextElementSibling).toBe(legal)
     const signature = within(bar).getByRole('link', { name: t('frame.controls.signatureLabel') })
     expect(signature.compareDocumentPosition(rule!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('§3.6 / WCAG 2.2.2: una pantalla con bucles (`loops`) lleva en la barra «Pausar las animaciones», que los para; sin bucles, no', async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          element: <RootLayout />,
+          children: [
+            {
+              path: 'galeria',
+              handle: { screen: { ...simpleScreen(), loops: true } },
+              element: <h1>Galería</h1>,
+            },
+            { path: '*', handle: { screen: simpleScreen() }, element: <h1>Página</h1> },
+          ],
+        },
+      ],
+      { initialEntries: ['/galeria'] },
+    )
+    render(<RouterProvider router={router} />)
+    const bar = screen.getByRole('contentinfo')
+    const pause = within(bar).getByRole('button', { name: t('frame.controls.loopsPause') })
+    // Al lado de «Legal», después de él.
+    const legal = within(bar).getByRole('link', { name: t('frame.controls.legal') })
+    expect(legal.compareDocumentPosition(pause) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(pause).toHaveAttribute('aria-pressed', 'false')
+    await userEvent.click(pause)
+    expect(pause).toHaveAttribute('aria-pressed', 'true')
+    expect(document.documentElement).toHaveAttribute('data-loops', 'paused')
+    await userEvent.click(pause)
+    expect(document.documentElement).not.toHaveAttribute('data-loops')
+    await act(() => router.navigate('/otra'))
+    expect(within(bar).queryByRole('button', { name: t('frame.controls.loopsPause') })).toBeNull()
+  })
+
+  it('RNF-A11Y-03: con «reducir movimiento» los bucles ya están parados y la barra no lleva el botón de pausa', () => {
+    document.documentElement.setAttribute('data-motion', 'reduced')
+    try {
+      const router = createMemoryRouter(
+        [
+          {
+            element: <RootLayout />,
+            children: [
+              {
+                path: 'galeria',
+                handle: { screen: { ...simpleScreen(), loops: true } },
+                element: <h1>Galería</h1>,
+              },
+            ],
+          },
+        ],
+        { initialEntries: ['/galeria'] },
+      )
+      render(<RouterProvider router={router} />)
+      const bar = screen.getByRole('contentinfo')
+      expect(within(bar).queryByRole('button', { name: t('frame.controls.loopsPause') })).toBeNull()
+    } finally {
+      document.documentElement.removeAttribute('data-motion')
+    }
   })
 })
 

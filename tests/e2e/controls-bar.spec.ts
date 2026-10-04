@@ -1,5 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
-import { open, settle } from './support'
+import { open, openGallery, settle } from './support'
 
 /**
  * La barra de controles con teclado y ratón (guía §3.4.1 y §3.8.3; WCAG 1.4.4 y 1.4.10; tercer pase del
@@ -504,6 +504,60 @@ for (const { width, height, fontSize } of [
       }
       expect(seen.size, 'los cuatro mensajes').toBe(4)
       expect([...heights], 'un solo alto de barra').toHaveLength(1)
+    })
+  })
+}
+
+/** Bucles infinitos en marcha (CSS y Web Animations), por su nombre. */
+function runningLoops(page: Page): Promise<string[]> {
+  return page.evaluate(() =>
+    document
+      .getAnimations()
+      .filter((a) => a.playState === 'running' && a.effect?.getTiming().iterations === Infinity)
+      .map(
+        (a) =>
+          (a as CSSAnimation).animationName ?? String((a.effect as KeyframeEffect | null)?.target?.className),
+      ),
+  )
+}
+
+/**
+ * El botón de pausa aparece en las pantallas con bucles (§3.6 y §3.4.1 v0.6.7; tercer pase del jurado
+ * sobre la v0.6.6, B3). La galería tiene más de 40 bucles infinitos (los barridos del esqueleto, los
+ * cargadores de onda de los botones, el latido del reloj) y la barra no enseñaba «Pausar las animaciones»
+ * (ni a 1440 ni a 390 táctil): solo lo llevaba la crónica del menú. Ahora la pantalla lo declara en su
+ * ruta (`loops`) y la barra lo pone al lado de «Legal»; el botón los para todos (`data-loops="paused"`).
+ */
+for (const { width, height, touch } of [
+  { width: 1440, height: 900, touch: false },
+  { width: 390, height: 844, touch: true },
+]) {
+  test.describe(`pausa de los bucles de la galería a ${width} × ${height}${touch ? ' táctil' : ''}`, () => {
+    test.use({
+      viewport: { width, height },
+      isMobile: touch,
+      hasTouch: touch,
+      reducedMotion: 'no-preference',
+    })
+
+    test('§3.6 / WCAG 2.2.2: en /dev/galeria la barra lleva «Pausar las animaciones» y el botón para todos los bucles', async ({
+      page,
+    }) => {
+      await openGallery(page)
+      await settle(page)
+      expect((await runningLoops(page)).length, 'bucles en marcha').toBeGreaterThan(0)
+      const pause = page.getByRole('contentinfo').getByRole('button', { name: 'Pausar las animaciones' })
+      await pause.scrollIntoViewIfNeeded()
+      await expect(pause).toBeVisible()
+      await expect(pause).toHaveAttribute('aria-pressed', 'false')
+      await pause.click()
+      await expect(pause).toHaveAttribute('aria-pressed', 'true')
+      await expect(page.locator('html')).toHaveAttribute('data-loops', 'paused')
+      await expect.poll(() => runningLoops(page), { timeout: 10_000 }).toEqual([])
+      // Al reanudar, vuelven.
+      await pause.click()
+      await expect(page.locator('html')).not.toHaveAttribute('data-loops', 'paused')
+      await expect.poll(async () => (await runningLoops(page)).length).toBeGreaterThan(0)
     })
   })
 }

@@ -1,10 +1,12 @@
 import { useLayoutEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import { type SimpleMessageKey, t } from '../../i18n'
+import { useReducedMotion } from '../../ui/hooks/useReducedMotion'
 import { Key } from '../../ui/Key'
 import { OTP_SIGNATURE_HREF, OtpSlapImage } from '../../ui/OtpSlap'
 import { useShortcuts } from '../../ui/shortcuts'
 import { paths } from '../paths'
+import { LoopsPause } from './Chronicle'
 import styles from './ControlsBar.module.css'
 import type { ControlKey, ScreenConfig } from './screen'
 import { FrameSlotTarget } from './slots'
@@ -83,11 +85,23 @@ export function ControlsBar({ screen }: { screen: ScreenConfig }) {
             <Link to={paths.legal('bases')} className={styles.legal}>
               {t('frame.controls.legal')}
             </Link>
+            {screen.loops && <ScreenLoopsPause />}
           </>
         }
       />
     </footer>
   )
+}
+
+/**
+ * «Pausar las animaciones» de una pantalla con bucles (`ScreenConfig.loops`, la galería; §3.6 y §3.4.1:
+ * «aparece en las pantallas con bucles»), al lado de «Legal». Con «reducir movimiento» los bucles ya
+ * están parados (`global.css`, Anexo E) y no hay nada que pausar: no se enseña, como en la crónica sin
+ * rotación.
+ */
+function ScreenLoopsPause() {
+  const reduced = useReducedMotion()
+  return reduced ? null : <LoopsPause className={styles.loopsPause} />
 }
 
 /**
