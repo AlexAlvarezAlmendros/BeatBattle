@@ -880,6 +880,38 @@ for (const viewport of [
   })
 }
 
+/**
+ * Las separaciones del lockup y de las placas del menú en móvil salen de la escala de espaciado
+ * (`--bb-space-*`, múltiplos de 4 px; guía §3.2, `RD-VIS-01`; jurado de la 0.28, tercer pase): antes eran
+ * sumas de trazos y espacios (2, 10, 6 y 3 px) que disfrazaban medidas fuera de la escala.
+ */
+for (const viewport of [
+  { width: 390, height: 844 },
+  { width: 360, height: 640 },
+]) {
+  test.describe(`separaciones del menú a ${viewport.width} × ${viewport.height} táctil`, () => {
+    test.use({ viewport, isMobile: true, hasTouch: true })
+
+    test('RD-VIS-01: el lockup, la tarjeta, las placas y las columnas se separan con la escala de espaciado', async ({
+      page,
+    }) => {
+      await open(page, '/dev/menu', 'Beat Battle')
+      const spacings = await page.evaluate(() => {
+        const main = document.querySelector('main')!
+        const px = (value: string) => Number.parseFloat(value) || 0
+        return {
+          lockup: px(getComputedStyle(main.querySelector('[class*=lockup]')!).marginTop),
+          tarjeta: px(getComputedStyle(main.querySelector('article')!).marginTop),
+          placas: px(getComputedStyle(main.querySelector('ul')!).rowGap),
+          columnas: px(getComputedStyle(main.querySelector('[data-week]')!).rowGap),
+        }
+      })
+      const offScale = Object.entries(spacings).filter(([, value]) => value % 4 !== 0)
+      expect(offScale).toEqual([])
+    })
+  })
+}
+
 /** A 1440 × 900 (la maqueta) la compactación no entra: placas de 70 px (84 la elegida) y logo de 640. */
 test('§3.8.3: a 1440 × 900 el menú es el de la maqueta (placas de 70 y 84 px, logo de 640)', async ({
   page,
