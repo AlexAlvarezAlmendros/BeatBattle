@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.5 · 2026-10-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.6 · 2026-10-04 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -937,7 +937,7 @@ cuando el espectáculo choca con la integridad gana la integridad (§1.3).
 | Del sello (`otherpeople.es`) | En BeatBattle |
 |---|---|
 | **Paleta**: negro `#000000`, rojo `#ff003c`, blanco `#ffffff` y granate `#4a0d1c` | Los cuatro colores de marca, con la misma intensidad y proporción aproximada **70 % negro · 15 % granate · 10 % rojo · 5 % blanco**. Los derivados son mezclas de esos cuatro colores entre sí, casi siempre hacia el negro (§3.2); no hay otros matices. |
-| **Logo *OTP.*** (blanco con contorno negro, `apps/web/public/img/otp-logo.webp`) | Es la **firma** del juego, siempre como pegatina troquelada («*slap*») con borde de corte rojo de 4 px, generada en el *build*. Dónde aparece: ver «La firma» más abajo. |
+| **Logo *OTP.*** (blanco con contorno negro, `apps/web/public/img/otp-logo.webp`) | Es la **firma** del juego, siempre como pegatina troquelada («*slap*») con borde de corte rojo de 4 px, generada con `pnpm brand:slap` (`tools/brand/otp-slap.mjs`) y versionada en `apps/web/public/img/`, para que el *build* y la CI no necesiten Chrome. Dónde aparece: ver «La firma» más abajo. |
 
 **Todo lo demás es propio del juego**: tipografía, composición, piezas, texturas, iconos, movimiento
 y sonido. La familia se reconoce por el color y por la firma, no por la maqueta de la web.
@@ -960,7 +960,7 @@ y sonido. La familia se reconoce por el color y por la firma, no por la maqueta 
 
 | Sitio | Forma |
 |---|---|
-| Pantalla de título y menú principal | Lockup «TORNEO SEMANAL DE PRODUCTORES **by** [OTP.]» junto al logo del juego (104–120 px de ancho; 62 px en móvil). Enlaza a `otherpeople.es` con el nombre «by Other People (abre la web del sello)». |
+| Pantalla de título y menú principal | Lockup «TORNEO SEMANAL DE PRODUCTORES **by** [OTP.]» junto al logo del juego (104–120 px de ancho; 62 px en móvil y siempre que el lockup mida menos de 27 rem, como en la composición intermedia y el escritorio con ventana baja: el lockup sigue al tamaño del logo, §3.8.3). Enlaza a `otherpeople.es` con el nombre «by Other People (abre la web del sello)». |
 | Arranque de la puerta | «[OTP.] PRESENTA», como el logo de editora antes del título (§3.8.1) |
 | Barra de controles de todas las pantallas | «Un juego de [OTP.] Other People Records» en el centro (pegatina de 30 px; 24 px en móvil), enlazada al sello |
 | Autenticación, admin y legales | El marco simple (§3.8.14) conserva la barra de controles con la firma en el centro; en autenticación, además, el lockup del título junto al logo |
@@ -970,7 +970,11 @@ y sonido. La familia se reconoce por el color y por la firma, no por la maqueta 
 | Emails | Pegatina en la cabecera, junto al logo del juego (§3.8.12) |
 
 La pegatina no se recolorea, no se deforma y no se gira fuera de −7° (±2°). Margen mínimo alrededor:
-la altura de su «O».
+la altura de su «O» (unas 0,44 veces el alto de la imagen). En el lockup, hacia el logo del juego, ese
+margen no se aplica (las maquetas aprobadas `00-titulo` y `01-menu` la dejan junto a la extrusión), pero
+la pegatina **nunca pisa** los píxeles opacos del logo ni la tarjeta de la semana, a ningún tamaño de
+ventana y tampoco con el espaciado de texto de WCAG 1.4.12 (el lockup reserva su alto real; E2E de
+`fit.spec.ts`). Nada se pinta encima de ella: tampoco el 1P del cursor del menú.
 
 > **Hallazgo que se conserva.** La web del sello declara Montserrat pero no la carga (§3.1 de la
 > v0.5). Ya no afecta a BeatBattle y no es requisito suyo; queda como sugerencia opcional para el
@@ -1049,7 +1053,7 @@ primera vista: precargar Anybody cursiva, 62 KB, competía con el JS crítico y 
 
 | Token | Familia | Paquete npm | Versión | Licencia | Uso |
 |---|---|---|---|---|---|
-| `--bb-font-display` | **Anybody** variable (wght 100–900, wdth 50–150 %), **solo cursiva** | `@fontsource-variable/anybody` | 5.3.0 | OFL-1.1 | Logo, títulos de pantalla, placas del menú, alias, VS, anunciador, botones, peanas. Peso 900 (800 en los botones y en la cinta blanca del lockup, de 14 a 16 px, donde el 900 cierra los huecos de las letras), siempre en mayúsculas, textos de ≤ 4 palabras; `font-stretch` 150 % (logo, títulos), 118–135 % (placas, botones), y baja hasta 105 % para que un alias quepa |
+| `--bb-font-display` | **Anybody** variable (wght 100–900, wdth 50–150 %), **solo cursiva** | `@fontsource-variable/anybody` | 5.3.0 | OFL-1.1 | Logo, títulos de pantalla, placas del menú, alias, VS, anunciador, botones, peanas. Peso 900 (800 en los botones y en la cinta blanca del lockup, de 14 a 16 px, donde el 900 cierra los huecos de las letras), siempre en mayúsculas, textos de ≤ 4 palabras; `font-stretch` 150 % (logo, títulos), 118–135 % (placas, botones), y baja hasta 105 % para que un alias o un rótulo del anunciador quepa |
 | `--bb-font-ui` | **Chakra Petch** 500, 600, 700 y 600/700 cursiva | `@fontsource/chakra-petch` | 5.3.0 | OFL-1.1 | Texto, rótulos en mayúsculas, ayudas, formularios, barra de controles |
 | `--bb-font-num` | **Oxanium** variable (wght 200–800) | `@fontsource-variable/oxanium` | 5.3.0 | OFL-1.1 | Reloj, XP, BPM, puntuaciones, contadores, teclas. Sus cifras son de ancho fijo de serie («1111» y «0000» miden lo mismo): la cuenta atrás no baila |
 
@@ -1152,7 +1156,7 @@ opción enfocada y, si el foco sale de su grupo, en la opción elegida, para que
 desaparezca. En **contraste alto** (`forced-colors: active`) el navegador quita los fondos de color, y el
 cursor, los bordes de los marcos, las placas, las pestañas, las teclas, los medidores y la barra de la
 semana son fondos: el cursor (y la etiqueta 1P) se pinta con `Highlight`, los bordes con `CanvasText` sobre
-rellenos `Canvas`, los medidores con `Highlight` sobre `GrayText`, el contorno del foco vuelve como red de
+rellenos `Canvas`, los medidores con los segmentos llenos en `Highlight` y los vacíos solo con borde `CanvasText` (se distinguen por la forma, no por el tono, en los esquemas claro y oscuro), la casilla elegida de los conmutadores «SÍ | NO» (chip de filtro, interruptores) en `Highlight` con texto `HighlightText` y el borde del activo en `Highlight`, las etiquetas conservan su caja con borde `CanvasText`, las flechas de los selectores son iconos en `currentColor`, el contorno del foco vuelve como red de
 seguridad en `[data-cursor]` y el número gigante de la cuña se quita. API común (tarea 0.22): `[data-cursor]` en la pieza enfocable, `[data-cursor-group]` en el
 grupo, `[data-cursor-active]` en la elegida y el componente `Cursor` dentro de la pieza; los hooks
 `useRovingMenu`, `useRovingGrid` y `useRovingTabs` ponen los roles ARIA y esos atributos. Las teclas que
@@ -1169,27 +1173,27 @@ una ventana estrecha o ampliada al 200 %.
 |---|---|
 | **Marco** (`Frame`) | Base de casi todo: dos capas recortadas (borde `--frame-border` de 2 px y relleno `--frame-fill`) para que el borde siga el chaflán. Variantes: `panel` (`--bb-panel-veil`, borde `--bb-line-strong`), `stage` (borde rojo, relleno `--bb-wine-3` con trama), `title` (borde blanco). Chaflán por prop (`xs` a `lg`). Cualquier elemento puede ser un marco con `data-frame` y `data-frame-cut`. |
 | **Botón** | Rectángulo con chaflán `--bb-cut-md` (10 px), display cursiva 800 a 15 px y 118 %, mayúsculas, con su tecla a la derecha (`[INTRO]`). Variantes: `cta` (relleno `--bb-red-cta`, texto blanco), `brand` (relleno `--bb-red`, texto negro), `white` (relleno blanco, texto negro), `outline` (borde blanco, fondo negro). Alturas: `sm` 40 px (objetivo de 44 por pseudoelemento), `md` 48, `lg` 56. **Hover**: avanza 4 px. **Foco**: cursor. **Pulsado**: escala 0,97 + `ui.press`. **Cargando**: el texto se cambia por una onda de 5 barras y el botón queda `aria-busy`. **Deshabilitado**: 45 % de opacidad, `aria-disabled` y el motivo en texto al lado. **Éxito**: check y texto. **Error**: aviso de papel (§3.2 «Estados»). |
-| **Opción de menú** (`MenuPlate`) | Placa en paralelogramo (`--bb-slant`) de 70 px: índice en Oxanium rojo, etiqueta en display a 25 px y dato a la derecha (contador, «NUEVO», cierre). **Elegida/enfocada**: sale 26 px a la izquierda, crece a 84 px, se rellena de `--bb-red-cta` (la trama, en una franja al final, nunca bajo el texto), texto blanco a 31 px, marco blanco, flecha y etiqueta **1P**, y muestra su `[INTRO]`; el panel de ayuda de debajo describe el modo (región viva). **Pulsado**: escala 0,98 y barrido de la diagonal (transición de página). **Deshabilitado**: candado, etiqueta en `--bb-text-4` y motivo («Disponible el lunes»), que pasa a dos líneas antes que cortarse. **Nada se corta**: el dato y la tecla no se encogen; cede la etiqueta, que baja su anchura de 125 a 105 % y después el cuerpo (como el alias de la ficha), y la tecla queda dentro del corte del paralelogramo. El dato corto (cifra con su unidad, etiqueta, motivo) se ve siempre; el largo, en texto («Subir mi beat», «Semana 40»), en móvil solo en la elegida. Por debajo de 360 px el dato baja a una segunda línea (reflow a 320 px). En móvil: 48 px (56 la elegida), un toque entra. Semántica: `role="menu"` con `menuitem`. |
-| **Pestañas** | Paralelogramos de 44 px con `[Q]` y `[E]` a los lados; la activa en blanco con texto negro. `role="tablist"` (o navegación con `aria-current` si cada una es una URL, como Opciones y los legales). En móvil parten en varias líneas entre `[Q]` y `[E]` (nunca una fila que se desplaza sin pista: cada pestaña cabe entera, con su cursor); en táctil, sin las teclas. |
+| **Opción de menú** (`MenuPlate`) | Placa en paralelogramo (`--bb-slant`) de 70 px: índice en Oxanium rojo, etiqueta en display a 25 px y dato a la derecha (contador, «NUEVO», cierre). **Elegida/enfocada**: sale 26 px a la izquierda, crece a 84 px, se rellena de `--bb-red-cta` (la trama, en una franja al final, nunca bajo el texto), texto blanco a 31 px, marco blanco, flecha y etiqueta **1P**, y muestra su `[INTRO]`; el panel de ayuda de debajo describe el modo (región viva). **Pulsado**: escala 0,98 y barrido de la diagonal (transición de página). **Deshabilitado**: candado, etiqueta en `--bb-text-4` y motivo («Disponible el lunes»), que pasa a dos líneas antes que cortarse. **Nada se corta**: el dato y la tecla no se encogen; cede la etiqueta, que baja su anchura de 125 a 105 % y después el cuerpo (como el alias de la ficha), y la tecla queda dentro del corte del paralelogramo. El dato corto (cifra con su unidad, etiqueta, motivo) se ve siempre; el largo, en texto («Subir mi beat», «Semana 40»), en móvil solo en la elegida. Por debajo de 360 px el dato baja a una segunda línea (reflow a 320 px) y la placa tiene alto automático (44 px como poco), también con la ventana baja. **Lista estrecha** (el contenedor de la lista de modos mide menos de 32 rem: el menú de 721 a ~1150 px): el dato y la tecla bajan a una segunda línea bajo la etiqueta; por debajo de 21 rem, medidas de móvil (índice estrecho; en reposo sale 12 px). El 1P y la flecha de la elegida caen siempre en el hueco entre las columnas del menú (`--bb-plate-cursor-reach`) y nunca pisan el logo ni la pegatina. Si la etiqueta no cabe ni a 12 px (placa estrecha, espaciado de 1.4.12), el dato o el motivo bajan a la segunda línea antes que recortarla: **la etiqueta nunca se corta**. En un mismo menú todas las placas en reposo miden lo mismo y llevan el mismo cuerpo de rótulo (el menor que necesite cualquiera de ellas); el alto es el de la maqueta o el que fije el menú en sus compactaciones (`--menu-plate-h`, §3.8.3). En móvil: 48 px (56 la elegida), un toque entra. Semántica: `role="menu"` con `menuitem`. |
+| **Pestañas** | Paralelogramos de 44 px en una rejilla `[Q] · pestañas · [E]`: las teclas van siempre a los lados y, si las pestañas parten en varias líneas, parten en la columna del centro (nunca una fila que se desplaza sin pista: cada pestaña cabe entera, con su cursor); una etiqueta que no cabe parte en dos líneas y nunca queda bajo una tecla. La activa en blanco con texto negro. `role="tablist"` (o navegación con `aria-current` si cada una es una URL, como Opciones y los legales). Las de URL también tienen foco itinerante: una sola parada (la sección actual), ←/→ en bucle, Inicio/Fin mueven el cursor sin cambiar de sección e Intro entra; con el foco en ellas, Q/E cambian de sección y **dejan el foco en la pestaña de la sección nueva** (excepción a «el foco va al `<main>` al cambiar de pantalla», para poder encadenarlas también con los atajos de una tecla apagados). En táctil, sin las teclas. |
 | **Chip de dato** | Chaflán `--bb-cut-sm`, 32 px, valor en Oxanium y unidad en rótulo de 12 px («92 BPM», «Re menor», «2:51»). No es interactivo. |
-| **Chip de filtro** | Conmutador de 44 px con su estado en texto: «Solo sin votar [SÍ/NO]». Activo: relleno `--bb-red` con texto negro. `aria-pressed`. |
+| **Chip de filtro** | Conmutador de 44 px con su estado en texto: «Solo sin votar [SÍ/NO]». Activo: relleno `--bb-red` con texto negro. `aria-pressed`. Si no cabe en una línea, la etiqueta parte en dos y la casilla «SÍ | NO» nunca sale del marco. |
 | **Tecla** (`Key`) | Pieza de chaflán `--bb-cut-xs`, 26 px de alto, Oxanium 12 px. Variante clara (en botones blancos) y marcada (`--bb-red-press`). Son la ayuda visible del teclado. |
 | **Etiqueta** | Paralelogramo pequeño (`--bb-slant-sm`) en display cursiva a 12–16 px: 1P, NUEVO, RETO, EN JUEGO, TU RESULTADO. Blanca (texto negro), roja (texto negro) o `cta` (texto blanco). |
 | **Sello de goma** | Borde de 3 px del color del texto con la máscara de ruido, girado entre −9° y +9°: «SIN VOTAR», «✓ VOTADA 4/5», «AUTORÍA OCULTA», «SELLADA». Es **estado propio** del usuario o de la semana, nunca un dato de la entrada. |
 | **Ficha de luchador** (entrada seleccionada) | Retrato (portada de 300 px en marco blanco con el sello «AUTORÍA OCULTA»), columna de 4 teselas (tempo, tonalidad, duración, género), **banda del alias** (placa negra con filete blanco y cuña roja; alias en display ajustado a su ancho: baja `font-stretch` de 150 a 105 % y después el cuerpo hasta 30 px) y panel opaco con título, estado («SIN VOTAR · Escucha 45 s y desbloqueas las estrellas»), previa de onda y botones. Se actualiza al mover el cursor (región viva educada). |
 | **Casilla de entrada** (rejilla) | Portada cuadrada en marco de chaflán `--bb-cut` + alias en dos líneas como máximo (12 px, mayúsculas). **Enfocada**: cursor blanco con 1P, marco rojo y alias blanco. **Votada**: portada al 42 % y sello «✓ VOTADA n/5» (es tu voto). **Aleatorio**: casilla final con «?» que elige una entrada sin votar. Sin números de orden, medias, recuentos ni autoría. `role="option"` dentro de un `listbox` 2D. |
-| **Fila de entrada** (listas largas: archivo, clasificación, historial) | Marcador de 56–58 px: portada de 44 px en chaflán `--bb-cut-sm` con el play dentro (nunca un play redondo suelto: es la lista de beats del sello, §3.1), título y subtítulo (los dos son el enlace a la ficha: el foco los rodea sin tapar nada), posición en display blanco con `--bb-shadow-hard-sm`, puntuación en Oxanium y medalla. Antes del sellado, sin posición ni puntuación (`RF-PLAY-05`). **Hover**: `--bb-panel-2`. **Error de audio**: aviso y reintentar (`RF-PLAY-09`). |
+| **Fila de entrada** (listas largas: archivo, clasificación, historial) | Marcador de 56–58 px: portada de 44 px en chaflán `--bb-cut-sm` con el play dentro (nunca un play redondo suelto: es la lista de beats del sello, §3.1), título y subtítulo (los dos son el enlace a la ficha: el foco los rodea sin tapar nada), posición en display blanco con `--bb-shadow-hard-sm`, puntuación en Oxanium y medalla. Antes del sellado, sin posición ni puntuación (`RF-PLAY-05`). **Hover**: `--bb-panel-2`. **Error de audio**: aviso y reintentar (`RF-PLAY-09`). El enlace de título y subtítulo mide 44 px de alto como poco y su anillo de foco cabe dentro de la fila. **Fila estrecha** (contenedor estrecho o espaciado de 1.4.12): título y subtítulo parten en líneas, sin puntos suspensivos, y el resultado baja a una segunda fila; la medalla solo se oculta en táctil. |
 | **Tesela / estadística** | Marco de chaflán `--bb-cut-md` con rótulo de 12 px y valor en Oxanium 22–24 px, unidad en 12–13 px. `tile--hot`: borde rojo para el dato destacado. En móvil, lista de clave y valor. |
 | **Forma de onda** | Barras de 3 px con 2 px de hueco; reproducido `--bb-red`, resto `--bb-wave-idle`; cabeza blanca de 2 px con halo de 6 px. En el Modo Jurado lleva la **marca del umbral**: un filete que sobresale por arriba de la pista y su rótulo «45 s» en una línea encima, sobre `--bb-panel-veil`; y la nota «saltar con la onda no cuenta». Teclado: ←/→ 5 s, Inicio/Fin (`RF-PLAY-06`). |
 | **Modal** (ventana de juego) | Panel `--bb-panel-veil` con marco blanco y chaflán `--bb-cut-lg`, título en display, teclas de acción en el pie, sobre `--bb-scrim`. Entra con la diagonal (`--bb-dur-base`) y `ui.open`. El foco va al diálogo; Esc cierra. |
-| **Anunciador** | Rótulo de una a tres palabras en display, blanco con extrusión de trama y contorno, o etiqueta grande girada −6°: «RONDA 07», «¡A ESCUCHAR!», «¡VOTO LISTO!», «¡VOTO GUARDADO!», «¡TIEMPO!», «¡SELLADO!», «¡JURADO COMPLETO!», «¡CAMPEÓN!». **Uno por evento**, nunca encadenados, y repetido en `aria-live="polite"`. Modo serio: no aparece (queda la región viva). |
+| **Anunciador** | Rótulo de una a tres palabras en display, blanco con extrusión de trama y contorno, o etiqueta grande girada −6°: «RONDA 07», «¡A ESCUCHAR!», «¡VOTO LISTO!», «¡VOTO GUARDADO!», «¡TIEMPO!», «¡SELLADO!», «¡JURADO COMPLETO!», «¡CAMPEÓN!». **Uno por evento**, nunca encadenados, y repetido en `aria-live="polite"`. El rótulo en display ocupa el ancho de su caja, centrado y con `--bb-space-2` de aire a los lados para la sombra dura, y se ajusta con `useFitText` como el alias (anchura de 150 a 105 %, después el cuerpo hasta 30 px y, como último recurso, parte entre palabras). La etiqueta girada es roja con texto blanco (`cta`, como en `03-jurado`), parte entre palabras y en contraste alto conserva su caja. Modo serio: no aparece (queda la región viva); la galería lo explica en la tesela. |
 | **Aviso** (*toast*) | Panel opaco con marco, icono y texto; abajo a la derecha (arriba en móvil), 4 s, pausa con ratón o foco, como mucho 4. El de error es de papel (§3.2). Logros: §3.8.8. |
 | **Medidor** (XP, escucha, combo, semana) | Paralelogramo segmentado (segmentos de 9–12 px con hueco negro de 2 px), pista `--bb-ink-4`, relleno `--bb-red`. Siempre con su valor en texto y `role="meter"`/`progressbar` con `aria-valuetext`. Al subir, un brillo lo recorre una vez. |
 | **Esqueleto** | Placa con la forma final y trama de relleno al 20 % que barre en diagonal con `transform` (nunca `background-position`). Sin movimiento: trama fija. Nunca *spinners*, salvo el sellado (vinilo girando). |
-| **Reloj de ronda** (cuenta atrás) | Caja de marco rojo con rótulo («TIEMPO · CIERRE DE ENVÍOS»), `DD:HH:MM:SS` en Oxanium 34 px con unidades debajo y separadores rojos, y la **barra de la semana**: 7 segmentos L–D (días gastados rayados, hoy parcial, el tramo de solo votos del domingo con rayado rojo). ≤ 24 h: dígitos rojos. ≤ 1 h: el marco late a 1 Hz. Agotado: «¡TIEMPO!». `role="timer"`, avisos solo en hitos (`RNF-A11Y-07`). |
+| **Reloj de ronda** (cuenta atrás) | Caja de marco rojo con rótulo («TIEMPO · CIERRE DE ENVÍOS»), `DD:HH:MM:SS` en Oxanium 34 px con unidades debajo y separadores rojos, y la **barra de la semana**: 7 segmentos L–D (días gastados rayados, hoy parcial, el tramo de solo votos del domingo con rayado rojo). ≤ 24 h: dígitos rojos. ≤ 1 h: el marco late a 1 Hz (la variante en línea de la tarjeta móvil, sin marco, no late: quedan los dígitos rojos). Agotado: «¡TIEMPO!». `role="timer"`, avisos solo en hitos (`RNF-A11Y-07`). |
 | **Estrellas** | §3.8.4. |
 | **Placa de título** | Centro del HUD en las pantallas interiores: marco blanco con rótulo y título en display («CARTA DE PRODUCTOR · PERFIL»). |
-| **Pegatina OTP** (`OtpSlap`) | Imagen generada en el *build* (logo + borde de corte rojo de 4 px + sombra dura), en WebP y PNG, a 1× y 2× (120 × 82 px a 1×, la de la pantalla de título; `tools/brand/otp-slap.mjs`). Siempre enlazada al sello, en otra pestaña, con nombre accesible («by Other People (abre la web del sello en una pestaña nueva)») y `data-otp-signature`; dentro de un enlace que ya lleva la firma (barra de controles) va sin enlace propio. |
+| **Pegatina OTP** (`OtpSlap`) | Imagen generada con `pnpm brand:slap` y versionada (logo + borde de corte rojo de 4 px, `--bb-red` exacto en todo píxel opaco, + sombra dura), en WebP y PNG, a 1× y 2× (120 × 82 px a 1×, la de la pantalla de título; `tools/brand/otp-slap.mjs`). Siempre enlazada al sello, en otra pestaña, con nombre accesible («by Other People (abre la web del sello en una pestaña nueva)») y `data-otp-signature`; dentro de un enlace que ya lleva la firma (barra de controles) va sin enlace propio. |
 
 **Matriz de estados** (`ui/gallery/stateMatrix.ts`; S = se enseña, NA = no aplica)
 
@@ -1229,18 +1233,30 @@ con su propia firma, §3.1) y las de autenticación, admin y legales, que usan u
     (Modo Jurado) o la placa de título (pantallas interiores).
   - **Derecha**: temporada («T4 · 12 PTS · 9.º»), racha («×3») y el botón de sonido (44 px,
     `aria-pressed`, tecla M).
+  - Cada lado mide como poco su contenido; si las tres piezas no caben en una fila, el HUD se apila
+    (jugador y derecha arriba, el centro debajo). Los rayos de la arena se apagan en la franja del HUD,
+    para que su texto nunca vaya sobre ellos (`RD-VIS-05`).
 - **Barra de controles inferior** (58 px, negra, filete rojo de 2 px y línea discontinua encima):
   las teclas de la pantalla a la izquierda (`[↑][↓] ELEGIR · [INTRO] ENTRAR · [ESC] VOLVER ·
   [M] SONIDO`), la firma en el centro y un dato a la derecha («Crédito 01», «Nv 13 · 6.480 XP», la
-  crónica de la arena). En táctil, las teclas desaparecen y queda la firma. Va pegada al pie de la
-  ventana también en móvil (firma de 24 px y «Legal» en una fila; con teclado, las teclas en una fila
-  de encima): la firma se ve al abrir cualquier pantalla, aunque sea más alta que la ventana. Si la barra
-  pasa de **un cuarto del alto de la ventana** (una ventana baja con teclado: móvil apaisado, escritorio
-  al 400 %), se despega y va al final de la pantalla, para no tapar el contenido (WCAG 1.4.10 y 2.4.11).
-  Pegada o no, ningún control enfocado queda debajo de ella (su alto real es el margen del foco).
+  crónica de la arena). En táctil, las teclas desaparecen y queda la firma. La firma va centrada;
+  «Legal» va a su lado, separado por un filete (`--bb-stroke-hair`, `--bb-line`), si cabe, y si no,
+  debajo y centrado. **Las teclas nunca se cortan ni se esconden con teclado**: entre la última tecla y
+  la firma queda siempre `--bar-gap`; si no caben, primero se aprietan sus huecos y después van en su
+  propia fila (de 721 a 1199 px la crónica va además en otra fila, centrada bajo la firma, y nunca pasa
+  de su columna). Va pegada al pie de la ventana también en móvil (firma de 24 px): la firma se ve al
+  abrir cualquier pantalla, aunque sea más alta que la ventana. Si la barra pasa del **15 % del alto de
+  la ventana** (con teclado en una ventana baja o estrecha: móvil apaisado, escritorio ampliado), se
+  despega y va al final de la pantalla **salvo la fila de la firma, que sigue pegada al pie**: la firma
+  se ve siempre al abrir (`RF-OTP-01`) y el contenido no queda tapado (WCAG 1.4.10 y 2.4.11). Pegada o
+  no, ningún control enfocado queda debajo de ella (su alto real es el margen del foco) y el anillo del
+  cursor de sus piezas cabe entero en la ventana. Lleva, si la pantalla tiene bucles, el botón de 44 px
+  «Pausar las animaciones» (`aria-pressed`, §3.6).
 
 En móvil el HUD se compacta en una fila (avatar, nombre, nivel, XP y sonido) y el reloj baja a la
-tarjeta de la semana.
+tarjeta de la semana. Ese pliegue (sin las cifras del medidor ni las teselas de temporada y racha) es
+**del móvil táctil**: con teclado y ratón en una ventana estrecha o ampliada, las cifras y las teselas
+siguen visibles, en una segunda fila del HUD si hace falta (§3.8.3, WCAG 1.4.4 y 1.4.10).
 
 Los enlaces legales (bases, términos, privacidad, cookies) están en Opciones → Privacidad, en «Cómo
 se juega» y, en las pantallas interiores, en el hueco derecho de la barra de controles («Legal»).
@@ -1382,8 +1398,12 @@ gana pega fuerte y dura poco.
 
 **Bucles** (`--bb-loop-*`; con «reducir movimiento» se paran, no se acortan; **ninguno pasa de
 3 Hz**): respiración de «PULSA PARA EMPEZAR» y de «Inserta tu beat» 2.000 ms (opacidad 1 ↔ 0,55, sin
-saltos); latido del reloj en la última hora 1.000 ms; vinilo-sol una vuelta por compás (92 BPM = 2,6 s);
-barrido del esqueleto 1.500 ms.
+saltos); latido del reloj en la última hora 1.000 ms; vinilo-sol una vuelta por compás (92 BPM = 2,6 s;
+no gira mientras no se pinta); barrido del esqueleto 1.500 ms. También se paran con el botón «Pausar
+las animaciones» de la barra (`<html data-loops="paused">`, mientras dure la pestaña; WCAG 2.2.2), que
+aparece en las pantallas con bucles. La **rotación de la crónica** no es un bucle decorativo sino
+información: con «reducir movimiento» sigue cambiando cada 5 s, sin fundido, y se para con el mismo
+botón.
 
 **Transición de página**: la diagonal barre la pantalla (`--bb-dur-base`, `--bb-ease-in-out`) y los
 paneles nuevos entran deslizándose desde ella (`--bb-dur-slam`). Sin movimiento: fundido de 150 ms.
@@ -1515,8 +1535,36 @@ VOLVER · M SONIDO`, la firma y «Inserta tu beat · Crédito 01» (o «Crédito
 caja mixta con el crédito en Oxanium rojo y «Inserta tu beat» respirando (§3.6; quieto sin movimiento). La
 **crónica de la arena** (antes, el teletipo; `/api/weeks/:slug/ticker`) rota en ese hueco cada 5 s por
 fundido: «NUEVA ENTRADA: TIGRE PÚRPURA», «QUEDAN 2 DÍAS», «340 VOTOS ESTA SEMANA». En voto ciego nunca
-dice quién ha subido. Se para con el ratón encima o con el foco dentro, y lleva al lado un botón de 44 px
-«Pausar la crónica» (`aria-pressed`) que la deja quieta (WCAG 2.2.2).
+dice quién ha subido. Se para con el ratón encima o con el foco dentro, y lleva al lado el botón de 44 px
+«Pausar las animaciones» (`aria-pressed`), que la deja quieta junto con el vinilo-sol, el respiro de
+«Inserta tu beat» y el latido del reloj (§3.6, WCAG 2.2.2). Con «reducir movimiento» la crónica sigue
+rotando, sin fundido, y el botón sigue ahí.
+
+**Lockup.** Decide su versión por su propio ancho (*container query*), no por la ventana: la de la
+maqueta a partir de 36 rem; estrecha (105 %, sin interletraje) por debajo; a 12 px por debajo de 29,75
+rem; la de móvil (pegatina de 62 px) por debajo de 27 rem; la corta («TORNEO SEMANAL») por debajo de 22
+rem. Va en una fila; solo con el espaciado de WCAG 1.4.12 o con la letra ampliada puede partir, nunca
+cortada con «…». El «by» va sobre un velo `--bb-panel-veil`, no sobre los rayos.
+
+**Escritorio con ventana baja** (≥ 721 px de ancho y < 900 px de alto; por debajo de 1200 px de ancho,
+hasta 968 px, porque ahí la barra lleva más filas). La misma composición apretada por altura, **sin
+esconder nada**: placas de `--bb-plate-h-low` (de 44 a 70 px, nunca por debajo de `--bb-target`) que
+descuentan lo que la barra mide de más, tarjeta apretada, márgenes de 8 px y el logo ocupando el alto
+que queda, con el lockup a su tamaño. Cabe sin desplazar a 1440×789 (la ventana real de una pantalla de
+1440×900), 1366×657, 1536×730, 1280×720 y 1920×955; a 1440×900 no cambia nada.
+
+**Ventana grande** (≥ 1600 px de ancho o ≥ 1000 px de alto). La composición escala con
+`min(100vw / 1440, 100dvh / 900)`, acotado entre 1 y 1,33 (logo, placas, cuerpos en display, columnas y
+separaciones), y la cuña sigue a la columna de modos, para que el granate no pase del ~24 % de la
+pantalla (el techo de las maquetas). En todos los estados, también con el calendario vacío, la columna de
+«ELIGE MODO» y la tarjeta de la semana acaban a la misma altura, junto a la barra.
+
+**Composición intermedia** (de 721 a ~1199 px en horizontal: tabletas apaisadas y escritorio ampliado;
+tamaños de prueba 1024×768, 900×700 y 823×514, que es 1440×900 al 175 %). Dos columnas con la lista
+estrecha de §3.3 (dato y tecla en una segunda línea), el HUD apilado si no cabe, la crónica bajo la firma
+y el lockup estrecho; todas las placas en reposo con el mismo alto y el mismo cuerpo de rótulo. Mover el
+cursor trae a la vista también el panel de ayuda. **Tableta vertical** (de 721 a 1199 px en vertical,
+como 768×1024 y 820×1180): la composición apilada de móvil a escala de tableta, que cabe sin desplazar.
 
 Al entrar, el cursor está en la primera opción disponible (Jugar; si ya subiste, Jurado), sin robar el
 foco: el primer Tab sigue siendo «Saltar al contenido»; con el foco en ningún control (la página recién
@@ -1527,11 +1575,14 @@ mueve el cursor al pasar.
 **Móvil (390×844)**: mismo HTML apilado sin desplazamiento: HUD en una fila, logo a todo el ancho con el
 lockup, tarjeta de la semana compacta (título, cuatro chips, play y reloj con la barra de la semana) y
 seis placas de 48 px (56 la elegida) con «Toca para entrar» («Intro para entrar» con teclado: el rótulo
-sigue al tipo de entrada, no al ancho). «ELIGE MODO» va sobre una franja `--bb-panel-veil`: la trama y la
-diagonal pueden pasar por detrás a cualquier tamaño de ventana sin tocar el texto. La diagonal pasa a
+sigue al tipo de entrada, no al ancho). «ELIGE MODO» va sobre una franja `--bb-panel-veil`, con aire arriba y abajo: la trama, la
+diagonal y el anillo del cursor pueden pasar cerca a cualquier tamaño de ventana sin tocar el texto. Los
+chips de la tarjeta van en una fila y, si no caben, en otra (nunca recortados). La diagonal pasa a
 horizontal inclinada.
-Un toque entra. **Móvil bajo (≤ 700 px de alto, 375×667 y 360×640)**: logo en una línea, la semana
-plegada en título + reloj, placas de 44 px; cabe sin desplazar ni desbordar. **Los pliegues son del móvil
+Un toque entra. **Móvil bajo (≤ 700 px de alto: 375×667, 360×640 y 320×568)**: logo en una línea, la semana
+plegada en título + reloj («CIERRE DE ENVÍOS» en una línea junto al reloj), placas de 44 px (alto
+automático por debajo de 360 px de ancho, con el dato en la segunda línea); cabe sin desplazar ni
+desbordar. **Los pliegues son del móvil
 táctil** (`hover: none` o `pointer: coarse`), no del ancho: con teclado y ratón en una ventana estrecha o
 ampliada (1280 × 720 al 200 % = 640 × 360) la composición es la de móvil, pero no se esconde nada que
 informe (chips, créditos, reto, entradas, fecha absoluta del cierre, panel de ayuda bajo las placas y la
@@ -1664,9 +1715,12 @@ Titular «BONUS STAGE» (el `<h1>`; la pestaña dice «Página no encontrada») 
 perdido… pero ya que estás.» Un pad de 4×4, la pieza de la cuña, en teclas de chaflán `--bb-cut-md` de
 72 px (1 2 3 4 / Q W E R / A S D F / Z X C V): la fila de arriba son los *chops* del sample de la semana
 y el resto, batería sintetizada. Metrónomo opcional, grabación de 4 compases y logro oculto al grabar.
-Botón «Volver al menú [Esc]», debajo del pad. Hasta
+Botón «Volver al menú [Esc]», justo debajo del pad y su nota. Hasta
 que llega el pad (Fase 8), la pantalla enseña su forma, quieta y decorativa, con la placa «ERROR 404 ·
-BONUS STAGE» en el HUD.
+BONUS STAGE» en el HUD, y el panel explica en futuro cómo se tocará («Cómo se toca», por filas del pad:
+[1] [2] [3] [4] los *chops* del sample; Q W E R · A S D F · Z X C V la batería). Orden de lectura y de
+foco: titular, subtítulo, resumen, cómo se toca, pad y «Volver al menú». En móvil el panel va antes que el
+pad y «Volver al menú», al pie del panel, se ve sin desplazar.
 
 #### 3.8.12 Emails
 
@@ -1721,10 +1775,26 @@ anuncia «Tigre Púrpura, 94 BPM, Re menor, sin votar».
 
 **Plantilla** (maquetas `02-seleccion` y `05-perfil`): el título se ve **una sola vez**, en la placa de
 título del HUD (el `<h1>` sigue en la página para los lectores de pantalla; en móvil, donde el HUD no
-lleva placa, se ve arriba sobre un panel). La cuña de la izquierda sostiene la **pieza** de la pantalla
-(la carta, la ficha, la lista de movimientos, el pad de la 404, el logo con su lockup en la
-autenticación; en las provisionales, el sello «EN OBRAS») y la derecha son paneles de juego, no un
-artículo: filas con índice, placas, teselas. Los rayos solo van detrás de una pieza (logo, VS, podio):
+lleva placa, se ve arriba sobre un panel, con el mismo rótulo y título que la placa —en Opciones,
+«OPCIONES · AJUSTES»; en los legales, «LEGAL · LETRA PEQUEÑA»— y antes de las pestañas, que ya nombran la
+sección). La cuña de la izquierda sostiene la **pieza** de la pantalla (la carta, la ficha, la lista de
+movimientos, el pad de la 404, el logo con su lockup en la autenticación; en Opciones, sus placas en
+vista previa; en las demás provisionales, el sello «EN OBRAS») y la derecha son paneles de juego, no un
+artículo: filas con índice, placas, teselas. La columna de la pieza sigue a la cuña (la misma variable
+que la diagonal).
+
+**Reparto del alto** (decisión del 2026-10-04, tras tres pases del jurado). Las pantallas de contenido
+(selección, ficha, perfil, resultados, salón de la fama, archivo) llenan el hueco entre el HUD y la barra,
+como sus maquetas. Las de poco contenido (Cómo se juega, Opciones, la 404, los legales y las
+provisionales) **no estiran cajas para llenarlo**: el bloque de dos columnas (pieza y panel, del mismo
+alto) se **centra en vertical** entre el HUD y la barra, y en horizontal a partir de 1600 px, alineado con
+la placa del HUD; la pieza se centra en su columna; las filas tienen su alto natural y denso (como las de
+`05-perfil`: nombre en display y una línea de explicación, unos 56–72 px) y las acciones van al pie del
+panel. Si el contenido es más alto que el hueco, empieza arriba y la pantalla se desplaza sin que la barra
+tape un control. Con la ventana baja (≥ 721 px de ancho y < 900 px de alto) se aprietan por altura como el
+menú (filas, separaciones y el pad a 56 px), sin esconder nada. Con el foco en ningún control, ↑↓ e Intro
+van al primer elemento de juego de la pantalla (la pestaña actual, el primer movimiento o «Volver al
+menú») y lo marcan con el cursor, como en el menú. Los rayos solo van detrás de una pieza (logo, VS, podio):
 las pantallas de texto sin pieza, como la galería, no los llevan.
 
 | Pantalla | Aspecto de juego |
@@ -1733,10 +1803,10 @@ las pantallas de texto sin pieza, como la galería, no los llevan.
 | **Salón de la fama** | Tabla de récords de recreativa: campeones semana a semana (portada y disco de oro), campeones de temporada en placas grandes y récords (más victorias, racha más larga, mejor puntuación, más votos emitidos) con cifras en Oxanium y posición en display. Flechas en horizontal; en móvil, lista |
 | **Archivo** (`/semanas`) | «Selección de escenario»: rejilla de semanas selladas (vinilo-sol en miniatura, número de entradas y podio), con flechas y Q/E |
 | **Temporada** | Clasificación de torneo con puntos tipo F1; el top 3 en peanas pequeñas |
-| **Cómo se juega** | «Lista de movimientos», un menú de juego en la cuña (cursor con 1P, ↑↓, Intro): 1 Pilla el sample · 2 Cocina tu flip · 3 Sube y vota, cada uno con sus teclas o su gesto como ayuda («[INTRO] Jugar», «En tu estudio», «[1]–[5] Votar») y «HECHO» para quien lo ha completado (con las cuentas, Fase 2), más «Bases de la competición [B]» y «Volver al menú [Esc]»; a la derecha, las reglas de juego limpio en 5 filas con índice (voto ciego, escucha mínima, Ronda justa, media bayesiana, el XP no puntúa) |
-| **Ajustes = OPCIONES** | Pestañas Q/E (Sonido · Movimiento · Cuenta · Perfil · Emails · Sesiones · Privacidad · Accesibilidad; `/ajustes` lleva a Sonido); cada opción es una placa con «◀ SÍ ▶» o un medidor de 10 pasos que se cambia con ←/→: volumen por bus, reducir movimiento, sin sonido, **modo serio**, tamaño de texto, calidad visual, puerta de entrada y atajos de una tecla (Accesibilidad, `RNF-A11Y-08`) |
-| **Autenticación** | «CONTINUAR PARTIDA» (entrar) y «NUEVO JUGADOR» (registro) como pantalla de título (maqueta `00-titulo`): a la izquierda, sobre los rayos, el logo con el mismo lockup que el menú («TORNEO SEMANAL DE PRODUCTORES by [OTP.]», en una fila); campos normales y accesibles en paneles opacos; Google y Discord como botones neutros; abajo, la barra de controles con sus teclas y la firma |
-| **Admin y legales** | Marco simple: HUD sin capa de juego, paneles y tablas, y la barra de controles con sus teclas y la firma en el centro; sin anunciador ni puerta |
+| **Cómo se juega** | «Lista de movimientos», un menú de juego en la cuña (cursor con 1P, ↑↓, Intro): 1 Pilla el sample · 2 Cocina tu flip · 3 Sube y vota, cada uno con sus teclas o su gesto como ayuda («[INTRO] Jugar», «En tu estudio», «[1]–[5] Votar») y «HECHO» para quien lo ha completado (con las cuentas, Fase 2), más «Bases de la competición [B]» y «Volver al menú [Esc]»; a la derecha, las reglas de juego limpio en 5 filas con índice (voto ciego, escucha mínima, Ronda justa, media bayesiana, el XP no puntúa), cada una con su nombre en display y una línea de explicación |
+| **Ajustes = OPCIONES** | Pestañas Q/E (Sonido · Movimiento · Cuenta · Perfil · Emails · Sesiones · Privacidad · Accesibilidad; `/ajustes` lleva a Sonido); cada opción es una placa con «◀ SÍ ▶» o un medidor de 10 pasos que se cambia con ←/→: volumen por bus, reducir movimiento, sin sonido, **modo serio**, tamaño de texto, calidad visual, puerta de entrada y atajos de una tecla (Accesibilidad, `RNF-A11Y-08`). Mientras no funcionan (Fase 2), la cuña enseña las placas de la sección en vista previa, quietas («Todavía no hacen nada»), con su nombre en display y su valor o medidor, y el granate queda en el rango de las maquetas (≤ 24,5 % a 1440 px, ≤ 18 % en móvil); el sello «EN OBRAS» pasa al panel |
+| **Autenticación** | «CONTINUAR PARTIDA» (entrar) y «NUEVO JUGADOR» (registro) como pantalla de título (maqueta `00-titulo`): a la izquierda, sobre los rayos, el logo con el mismo lockup que el menú («TORNEO SEMANAL DE PRODUCTORES by [OTP.]», en una fila); el bloque del logo y el panel se centra en vertical entre el HUD y la barra, con el pie del panel alineado con el del lockup y un ancho de panel acotado; en móvil, el panel va anclado al pie; campos normales y accesibles en paneles opacos; Google y Discord como botones neutros; abajo, la barra de controles con sus teclas y la firma |
+| **Admin y legales** | Marco simple: HUD sin capa de juego, paneles y tablas, y la barra de controles con sus teclas y la firma en el centro; sin anunciador ni puerta. Los legales usan la plantilla de las interiores (mientras no estén los textos, Fase 10, el sello «EN OBRAS» en la columna de la pieza) y sus pestañas van en una fila de rótulos cortos («BASES · TÉRMINOS · PRIVACIDAD · COOKIES»; el nombre completo, en el título del panel) |
 
 ### 3.9 Tono del anunciador y copys
 
@@ -3147,6 +3217,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-04 | 0.6.6 | Cierre del **segundo y tercer pase del jurado visual de la Arena** (tarea 0.28; acta en `docs/planning/evidence/f0/arena/jurado.md`). Se fijan las reglas que hacían oscilar al jurado entre pases. **Reparto del alto de las interiores** (§3.8.14): las de contenido llenan hasta la barra; las de poco contenido no estiran cajas, centran su bloque en vertical (y en horizontal a partir de 1600 px), con filas densas y acciones al pie; ↑↓ e Intro llevan al primer elemento de juego. **Menú** (§3.8.3): escritorio con ventana baja (compactación por altura sin esconder nada; cabe a 1440×789, 1366×657, 1536×730, 1280×720 y 1920×955), ventana grande (escala acotada y cuña que sigue a la columna de modos), composición intermedia (721–1199 px) y tableta vertical (apilada); lockup por su propio ancho, con el «by» sobre un velo; móvil bajo hasta 320×568. **Barra** (§3.4.1): teclas que nunca se cortan ni se esconden con teclado y siempre a `--bar-gap` de la firma; «Legal» al lado con un filete o debajo; se despega pasado el 15 % del alto **salvo la fila de la firma**; botón «Pausar las animaciones». **HUD**: se apila si no cabe; los rayos no pasan bajo él; el pliegue sin cifras es solo del móvil táctil. **Bucles** (§3.6): se paran con el botón de pausa (WCAG 2.2.2); la crónica es información y con «reducir movimiento» sigue rotando sin fundido. **Componentes** (§3.3): pestañas en rejilla `[Q] · pestañas · [E]` con foco itinerante y Q/E que dejan el foco en la pestaña nueva; opción de menú en lista estrecha y etiqueta que nunca se corta; chip de filtro y fila de entrada que parten en vez de cortarse; anunciador ajustado a su caja con la etiqueta roja; contraste alto de medidores, conmutadores, etiquetas y flechas. **Firma** (§3.1): pegatina versionada y regenerada con `pnpm brand:slap` (borde `--bb-red` exacto); en el lockup no se aplica el margen hacia el logo, pero nunca lo pisa; 62 px cuando el lockup mide menos de 27 rem. **404** (§3.8.11): leyenda «Cómo se toca» en futuro, orden de lectura y botón bajo el pad. **Opciones**: placas en vista previa en la cuña. |
 | 2026-10-03 | 0.6.5 | Correcciones de la **revisión adversarial de la Arena** (tarea 0.28). **Teclado y mando**: con una ventana de juego abierta, Intro y las flechas no llegan al menú de detrás (§3.8.3); la A del mando es Intro con el foco en ningún control (§3.3). **Contraste alto** (`forced-colors`, §3.3 y `RNF-A11Y-01`): cursor en `Highlight`, bordes en `CanvasText`, medidores y barra de la semana con colores del sistema y sin número gigante. **Opciones** (§3.8.14): `/ajustes` lleva a la primera sección, Sonido. **Atajos de una tecla** (WCAG 2.1.4; §3.3, §3.8.14 y `RNF-A11Y-08`): M, Q/E y B se pueden apagar en Opciones → Accesibilidad. **Barra de controles** (§3.2, §3.4.1): el margen del foco es su alto real medido y se despega si pasa de un cuarto del alto de la ventana. **Crónica** (§3.8.3): botón de pausa y pausa con el foco dentro (WCAG 2.2.2). **Menú en ventana estrecha** (§3.8.3): los pliegues de móvil son solo del móvil táctil; ampliar no esconde información (WCAG 1.4.4 y 1.4.10). **Pestañas en móvil** (§3.3): en varias líneas, sin desplazamiento horizontal, y sin Q/E en táctil. **Botón sin Motion** (§4.7.1, §4.17, Anexo E): el pulsado es una transición CSS y Motion sale de la primera pintura (−20 kB gz). **Fuentes** (§3.2, §4.17): se precarga solo Chakra Petch 700; Anybody ya no (LCP 2,00 → 1,64 s). **Portada del voto ciego** (§3.4.5): la de referencia de las maquetas, con su presupuesto de tinta, desde `packages/covers`. |
 | 2026-10-03 | 0.6.4 | Correcciones del **jurado visual de la Arena** (tarea 0.28; acta en `docs/planning/evidence/f0/arena/jurado.md`). **Opción de menú** (§3.3): nada se corta (el dato y la tecla no se encogen, cede la etiqueta; motivo de la deshabilitada en dos líneas; segunda línea por debajo de 360 px), dato corto siempre y largo en móvil solo en la elegida, trama en una franja al final (también en §3.2). **Teclas por tipo de entrada**, no por ancho (§3.3). **Barra de controles** pegada al pie también en móvil, con la firma dentro de la ventana (§3.4.1). **Menú** (§3.8.3): crédito en caja mixta con la cifra en Oxanium rojo, «Intro para entrar» con teclado y «ELIGE MODO» sobre una franja `--bb-panel-veil`. **Fila de entrada** con el play dentro de la portada en chaflán y posición en blanco con sombra dura; **marca del umbral** encima de la onda (§3.3); **medallas** sin cifra en la galleta (§3.4.3). **404** (§3.8.11): titular «BONUS STAGE» con subtítulo y pad en la cuña con teclas de 72 px. **Pantallas interiores** (§3.8.14): plantilla con el título una sola vez y la pieza en la cuña, «Cómo se juega» como menú de juego con «Bases [B]» y «Volver [Esc]», autenticación como la pantalla de título y rayos solo detrás de una pieza. |
 | 2026-10-03 | 0.6.3 | Marco de juego, menú principal, componentes y pantallas interiores de la arena (tareas 0.23–0.27). **Mando** (§3.3): la Gamepad API se traduce a las teclas de los menús (cruceta y palanca = flechas, A = aceptar, B = Esc, LB/RB = Q/E); en táctil se ocultan las teclas de los botones. **Menú principal** (§3.8.3): el cursor empieza en la primera opción disponible sin robar el foco, y las flechas e Intro van al menú si el foco no está en ningún control. **404** (§3.8.11): mientras llega el pad, su forma quieta con la placa «ERROR 404 · BONUS STAGE». **Rutas de desarrollo** (§2.18): `/dev/galeria` y `/dev/menu` (el menú con los datos de las maquetas). **`RD-VIS-02` c** (§3.10): la lista de excepciones temporales del lint quedó vacía en la 0.27. **Logo** (§3.5): se pinta en un canvas 2D (el `logo()` de las maquetas con la API del canvas); en SVG, su `<text>` era el LCP de la home y rompía `RNF-PERF-02`. |
