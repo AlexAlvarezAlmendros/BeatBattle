@@ -618,6 +618,31 @@ for (const colorScheme of ['dark', 'light'] as const) {
 test.describe('1920 × 1080', () => {
   test.use({ viewport: { width: 1920, height: 1080 } })
 
+  for (const { path, heading } of [
+    { path: '/entrar', heading: 'Entrar' },
+    { path: '/registro', heading: 'Crear cuenta' },
+  ]) {
+    test(`RD-VIS-02 e: a 1920 × 1080, el panel de ${path} tiene el ancho acotado y el bloque va centrado con la placa (§3.8.14)`, async ({
+      page,
+    }) => {
+      await open(page, path, heading)
+      await settle(page)
+      const box = await boxes(page, {
+        title: 'main [data-title-piece]',
+        panel: PANEL,
+        plate: '.game-frame > header [data-frame="title"]',
+      })
+      // Acotado (36 rem): con una línea de texto, el panel no se estira a lo que quede (984 px).
+      expect(box.panel.right - box.panel.left, 'ancho del panel').toBeLessThanOrEqual(576)
+      const center = (box.title.left + box.panel.right) / 2
+      const plateCenter = (box.plate.left + box.plate.right) / 2
+      expect(
+        Math.abs(center - plateCenter),
+        `bloque en ${center}, placa en ${plateCenter}`,
+      ).toBeLessThanOrEqual(8)
+    })
+  }
+
   for (const { path, heading } of FEW_SCREENS) {
     test(`RD-VIS-02 e: a 1920 × 1080, ${path} llena el ancho, centrada con la placa del HUD (L1)`, async ({
       page,

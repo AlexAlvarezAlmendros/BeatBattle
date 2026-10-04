@@ -27,12 +27,18 @@
 /*
  * Pantalla de título (autenticación, maqueta `00-titulo`): la pieza ancha (el logo grande con su lockup,
  * como el de la maqueta) y la pantalla entera, del HUD a la barra, para repartirla (abajo). El panel
- * guarda su ancho mínimo (el botón entero) y en ventanas medianas cede el logo, no el panel.
+ * guarda su ancho mínimo (el botón entero) y en ventanas medianas cede el logo, no el panel. Su ancho
+ * está acotado (34 rem, §3.8.14): en ventanas grandes la pantalla no pasa del logo, el medianil y ese
+ * panel, y va centrada, con la placa del HUD (el panel no se estira con una línea de texto).
  */
 .screen[data-layout="title"] {
+  --title-panel-max: 34rem;
   flex: 1 0 auto;
   grid-template-columns: minmax(0, 50rem) minmax(20rem, 1fr);
   column-gap: var(--bb-space-10);
+  width: 100%;
+  max-width: calc(50rem + var(--bb-space-10) + var(--title-panel-max));
+  margin-inline: auto;
 }
 
 .head {
