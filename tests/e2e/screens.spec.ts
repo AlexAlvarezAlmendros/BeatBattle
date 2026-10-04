@@ -1094,3 +1094,48 @@ for (const touch of [false, true]) {
     }
   })
 }
+
+/**
+ * La lista va justo debajo de la entrada del panel (§3.8.14 v0.6.7, «Reparto del alto»; cuarto pase del
+ * jurado, P4): lo que sobra del alto queda antes de las acciones o, sin ellas, al pie del panel; nunca
+ * entre la frase de entrada y la lista (en «Cómo se juega» quedaban ~80 px a 1440 × 900 y ~110 a
+ * 1024 × 768; en la 404, ~140). Entre las dos, la separación del panel (20 px; 12 con la ventana baja).
+ */
+for (const { path, heading, entry, list, viewports } of [
+  {
+    path: '/como-funciona',
+    heading: 'Cómo se juega',
+    entry: `${PANEL} > div > p`,
+    list: `${PANEL} > section`,
+    viewports: [
+      { width: 1440, height: 900 },
+      { width: 1024, height: 768 },
+    ],
+  },
+  {
+    path: '/esto-no-existe',
+    heading: 'Bonus stage',
+    entry: `${PANEL} > p:nth-of-type(2)`,
+    list: `${PANEL} > section`,
+    viewports: [
+      { width: 1440, height: 900 },
+      { width: 1366, height: 657 },
+      { width: 1920, height: 1080 },
+    ],
+  },
+])
+  for (const viewport of viewports)
+    test.describe(`${path} a ${viewport.width} × ${viewport.height}`, () => {
+      test.use({ viewport })
+
+      test(`RD-VIS-02 e / §3.8.14: en ${path}, la lista va justo debajo de la entrada del panel (P4)`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        const box = await boxes(page, { entry, list })
+        const gap = box.list.top - box.entry.bottom
+        expect(gap, `${gap} px entre la entrada y la lista`).toBeGreaterThanOrEqual(0)
+        expect(gap, `${gap} px entre la entrada y la lista`).toBeLessThanOrEqual(24)
+      })
+    })

@@ -126,7 +126,9 @@
 }
 
 /*
- * Cómo se tocará (en el pie del panel): filas densas con índice, como las reglas de «Cómo se juega», a
+ * Cómo se tocará, justo debajo del resumen (§3.8.14 v0.6.7: «la lista va justo debajo de la entrada»; lo
+ * que sobra del alto, al pie del panel: quedaban ~140 px entre el resumen y la leyenda; cuarto pase del
+ * jurado, P4): filas densas con índice, como las reglas de «Cómo se juega», a
  * su alto natural (§3.8.14): el índice, qué traerá y sus teclas, en las filas del pad y en una sola línea
  * (la batería, Q W E R · A S D F · Z X C V). El metrónomo y la grabación no tienen tecla propia: su texto
  * ocupa también la columna de las teclas. Si el panel es estrecho, las teclas van debajo del texto.
@@ -135,7 +137,6 @@
   container: legend / inline-size;
   display: grid;
   gap: var(--bb-space-3);
-  margin-top: auto;
 }
 
 .legendTitle {
