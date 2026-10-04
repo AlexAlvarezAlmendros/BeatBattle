@@ -569,6 +569,16 @@
    * Filas: el título (`1fr`: se queda con lo que sobra) y, en una subrejilla, los modos: «ELIGE MODO», la
    * lista de placas (entre su mínimo y su máximo; más abajo) y la ayuda. La rejilla da primero a la lista
    * hasta su máximo y después al título lo que quede.
+   *
+   * El máximo de la lista lleva un porcentaje (`min(…, 100%)`, que nunca manda: la rejilla siempre es más alta
+   * que la lista): mientras el alto del menú sale de su contenido, el porcentaje cuenta como `auto` y la lista
+   * (un contenedor de tamaño, sin alto propio) cuenta con su mínimo. Así el alto natural del menú es el de
+   * todo con las placas a su mínimo (el logo en una línea, el lockup, la tarjeta, la cabecera y seis placas
+   * de `--bb-target` en táctil) y, si la pantalla da para más, el menú crece hasta la barra y la lista y el
+   * logo se reparten lo que sobra. Si no da ni para eso (con el espaciado de texto de WCAG 1.4.12 o la letra
+   * ampliada), el menú mide su alto natural y la página se desplaza: ninguna placa queda bajo la barra
+   * (jurado de la 0.28, cierre, revisión de K2: con el menú fijado al hueco entre el HUD y la barra, a
+   * 768 × 1024 la placa 06 quedaba tapada y no se podía llegar a ella).
    */
   .menu {
     --menu-s: 1;
@@ -576,7 +586,7 @@
     --menu-plates-max: calc(var(--bb-plate-h) * var(--menu-plates-n) + 5 * var(--bb-space-1));
     --menu-plates-min: var(--menu-plates-max);
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: 1fr auto minmax(var(--menu-plates-min), var(--menu-plates-max)) auto;
+    grid-template-rows: 1fr auto minmax(var(--menu-plates-min), min(var(--menu-plates-max), 100%)) auto;
     align-content: stretch;
     gap: var(--bb-space-3);
     margin-top: calc(-1 * var(--bb-space-6));
@@ -727,20 +737,16 @@
 
 /*
  * Tableta vertical táctil: sin panel de ayuda, como en el móvil táctil (y lo lee igual el lector), y cabe sin
- * desplazar. El menú mide el alto que queda entre el HUD y la barra (base 0; nunca menos que su mínimo) y, si
- * no cabe todo, cede la lista de placas, hasta seis placas de `--bb-target`: a 768 × 1024 con el jugador en
- * el HUD y la semana en juego, unos 63 px. El logo no cede: su mínimo es el de una línea.
+ * desplazar. Si no cabe todo, cede la lista de placas, hasta seis placas de `--bb-target`: a 768 × 1024 con el
+ * jugador en el HUD y la semana en juego, unos 63 px. El logo no cede: su mínimo es el de una línea. Con eso
+ * cabe siempre en esta composición (de 721 px de ancho y 961 de alto en adelante) con la letra y el espaciado
+ * de la maqueta; con el espaciado de WCAG 1.4.12 o la letra ampliada puede no caber, y entonces la página se
+ * desplaza (el menú no baja de su alto natural, más arriba).
  */
 @media (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) and (hover: none),
   (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) and (pointer: coarse) {
-  /*
-   * Sin mínimo propio: el de una rejilla es lo que mide con la lista a su máximo. En esta composición (de
-   * 721 px de ancho y 961 de alto en adelante) lo mínimo, con las placas de `--bb-target`, siempre cabe.
-   */
   .menu {
     --menu-plates-min: calc(var(--bb-target) * var(--menu-plates-n) + 5 * var(--bb-space-1));
-    flex: 1 1 0;
-    min-height: 0;
   }
 
   .help {

@@ -1617,6 +1617,71 @@ for (const viewport of [
   })
 }
 
+/**
+ * En la tableta vertical táctil, lo que no cabe se desplaza sin esconder nada (§3.8.3; WCAG 1.4.4, 1.4.12 y
+ * 2.4.11; revisión del cierre de la 0.28, K2): el menú medía justo el hueco entre el HUD y la barra y, con el
+ * espaciado de texto o la letra del navegador a 24 px, lo que no cabía se salía de su caja por debajo, bajo la
+ * barra pegada, sin que la página se pudiera desplazar (a 768 × 1024, AJUSTES de 907 a 962 con la barra en
+ * 922). Ahora el menú no baja de su alto natural: se recorren las seis placas con ↓ y cada una queda entera
+ * por encima de la barra.
+ */
+for (const viewport of [
+  { width: 768, height: 1024 },
+  { width: 744, height: 1133 },
+]) {
+  for (const adaptation of ['espaciado de texto', 'letra de 24 px'] as const) {
+    test.describe(`tableta vertical táctil a ${viewport.width} × ${viewport.height} con ${adaptation}`, () => {
+      test.use({ viewport, isMobile: true, hasTouch: true })
+
+      for (const path of ['/dev/menu', '/']) {
+        test(`§3.8.3 / WCAG 1.4.12, 1.4.4 y 2.4.11: en ${path}, recorriendo las seis placas, cada una queda entera por encima de la barra`, async ({
+          page,
+        }) => {
+          if (adaptation === 'letra de 24 px') {
+            const cdp = await page.context().newCDPSession(page)
+            await cdp.send('Page.enable')
+            await cdp.send('Page.setFontSizes', { fontSizes: { standard: 24, fixed: 24 } })
+          } else
+            await page.addInitScript((css) => {
+              document.addEventListener('DOMContentLoaded', () => {
+                const style = document.createElement('style')
+                style.textContent = css
+                document.head.append(style)
+              })
+            }, TEXT_SPACING)
+          await open(page, path, 'Beat Battle')
+          await settle(page)
+          if (adaptation === 'letra de 24 px')
+            expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize)).toBe(
+              '24px',
+            )
+          else
+            expect(await page.evaluate(() => getComputedStyle(document.body).letterSpacing)).not.toBe(
+              'normal',
+            )
+          // Sin foco, ↓ lleva al menú (como un teclado conectado a la tableta).
+          await page.keyboard.press('ArrowDown')
+          const seen = new Set<string>()
+          const problems: string[] = []
+          for (let step = 0; step < 6; step++) {
+            if (step > 0) await page.keyboard.press('ArrowDown')
+            const plate = await focusedPlate(page)
+            expect(plate.item, 'el foco está en una opción del menú').toBe(true)
+            expect(plate.pinned, 'la barra va pegada al pie').toBe(true)
+            seen.add(plate.label)
+            if (plate.top < -0.5 || plate.bottom > plate.limit + 0.5)
+              problems.push(
+                `${plate.label}: ${plate.top.toFixed(1)}–${plate.bottom.toFixed(1)}, barra en ${plate.limit.toFixed(1)}`,
+              )
+          }
+          expect(seen.size, 'las seis placas recorridas').toBe(6)
+          expect(problems).toEqual([])
+        })
+      }
+    })
+  }
+}
+
 /** Los altos y el cuerpo del rótulo de las placas en reposo del menú. */
 function restPlates(page: Page): Promise<{ heights: number[]; fonts: number[] }> {
   return page.evaluate(() => {
