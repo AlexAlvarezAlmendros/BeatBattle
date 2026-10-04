@@ -14,15 +14,24 @@ for (const { path, heading } of ROUTES) {
   })
 }
 
+/*
+ * La galería es la página más grande de la app (todas las piezas en todos sus estados): cargarla y pasar
+ * axe dos veces por la página entera (todas las reglas y después el contraste sin las capas decorativas)
+ * pasa del tiempo de 60 s con la máquina cargada. `test.slow()` les da el triple (y la carga, 90 s en vez
+ * de 30), sin partir la auditoría: las reglas de página (`duplicate-id`, `landmark-*`, `region`…) siguen
+ * viendo la galería entera.
+ */
 test('RNF-A11Y-02: axe sin violaciones WCAG 2.2 AA en la galería', async ({ page }) => {
-  await openGallery(page)
+  test.slow()
+  await openGallery(page, 90_000)
   await expectNoAxeViolations(page)
 })
 
 test('RNF-A11Y-02: axe sin violaciones en la galería con «reducir movimiento» y en modo serio', async ({
   page,
 }) => {
-  await openGallery(page)
+  test.slow()
+  await openGallery(page, 90_000)
   await page.getByRole('switch', { name: /Reducir movimiento/ }).click()
   await page.getByRole('switch', { name: /Modo serio/ }).click()
   await expect(page.locator('html')).toHaveAttribute('data-motion', 'reduced')
