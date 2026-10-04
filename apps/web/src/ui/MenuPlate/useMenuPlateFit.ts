@@ -38,9 +38,13 @@ function rootNumber(name: string): number {
  *   dos o sin dato). Lo usa `MenuPlate` como alto mínimo cuando su alto es automático.
  *
  * Devuelve las variables para la lista y una clave que cambia con ellas: cada placa reajusta su anchura
- * (`useFitText`) desde el cuerpo nuevo. Se vuelve a medir tras cada render del menú (cambia el contenido o
- * la elegida), si cambia el ancho de la lista y cuando llega la fuente web. Sin `ResizeObserver` (jsdom) no
- * hace nada.
+ * (`useFitText`) desde el cuerpo nuevo. Mide al montar y, en el fotograma siguiente, solo cuando cambia algo
+ * de lo que depende: el ancho de la lista (columnas, escala de la ventana grande, zoom), el tamaño de la
+ * ventana (el alto de las placas sigue al de la ventana baja; las consultas de táctil y móvil), el contenido
+ * de las placas (etiquetas y datos: el estado de la semana y del jugador) y la fuente web al llegar. No al
+ * mover el cursor: la medida ya es en reposo para todas (revisión del cierre de la 0.28: medir en cada
+ * render del menú, con las transiciones de la elegida, tardaba segundos en asentarse con la máquina
+ * cargada). Sin `ResizeObserver` (jsdom) no hace nada.
  */
 export function useMenuPlateFit(listRef: RefObject<HTMLElement | null>): MenuPlateFit {
   const [fit, setFit] = useState<MenuPlateFit>(NONE)
@@ -48,20 +52,29 @@ export function useMenuPlateFit(listRef: RefObject<HTMLElement | null>): MenuPla
   useLayoutEffect(() => {
     const list = listRef.current
     if (!list || typeof ResizeObserver === 'undefined') return
+    let frame = 0
     const update = () => {
+      cancelAnimationFrame(frame)
       const next = measure(list)
       setFit((current) => (current.key === next.key ? current : next))
     }
-    update()
-    let width = list.clientWidth
-    let frame = 0
-    const observer = new ResizeObserver(() => {
-      if (list.clientWidth === width) return
-      width = list.clientWidth
+    const later = () => {
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(update)
+    }
+    update()
+    // Solo el ancho: el alto de la lista cambia con la elegida (y con su transición) y con el propio ajuste.
+    let width = list.clientWidth
+    const resize = new ResizeObserver(() => {
+      if (list.clientWidth === width) return
+      width = list.clientWidth
+      later()
     })
-    observer.observe(list)
+    resize.observe(list)
+    window.addEventListener('resize', later)
+    // Texto y piezas de las placas; no sus atributos (la elegida, los estilos del ajuste de cada etiqueta).
+    const content = new MutationObserver(later)
+    content.observe(list, { childList: true, characterData: true, subtree: true })
     let active = true
     void document.fonts?.ready.then(() => {
       if (active) update()
@@ -69,9 +82,11 @@ export function useMenuPlateFit(listRef: RefObject<HTMLElement | null>): MenuPla
     return () => {
       active = false
       cancelAnimationFrame(frame)
-      observer.disconnect()
+      resize.disconnect()
+      content.disconnect()
+      window.removeEventListener('resize', later)
     }
-  })
+  }, [listRef])
 
   return fit
 }
@@ -105,11 +120,12 @@ function measure(list: HTMLElement): MenuPlateFit {
   list.after(probe)
   try {
     const labels = copies.map((copy) => copy.querySelector<HTMLElement>('[data-plate-label]'))
+    const narrowest = rootNumber('--bb-stretch-min')
     for (const label of labels) {
       if (!label) continue
       label.style.fontSize = ''
       label.style.whiteSpace = ''
-      label.style.fontStretch = `${rootNumber('--bb-stretch-min') || 105}%`
+      label.style.fontStretch = Number.isFinite(narrowest) ? `${narrowest}%` : ''
     }
     const base = labels[0] ? Number.parseFloat(getComputedStyle(labels[0]).fontSize) : 0
     if (!base) return NONE

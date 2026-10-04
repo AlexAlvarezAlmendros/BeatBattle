@@ -1404,12 +1404,18 @@ for (const viewport of [
       }) => {
         await open(page, path, 'Beat Battle')
         await settle(page)
-        // El ajuste de las etiquetas va un fotograma después de la fuente.
-        await page.waitForTimeout(300)
-        const rest = await restPlates(page)
-        expect(rest.heights).toHaveLength(5)
-        expect(Math.max(...rest.fonts) - Math.min(...rest.fonts)).toBeLessThanOrEqual(0.25)
-        expect(Math.max(...rest.heights) - Math.min(...rest.heights)).toBeLessThanOrEqual(0.5)
+        // El ajuste común va un fotograma después de la fuente, y cada etiqueta se ajusta después: se espera a
+        // que se asiente (con la máquina cargada puede tardar), sin un tiempo fijo.
+        await expect
+          .poll(async () => {
+            const rest = await restPlates(page)
+            return {
+              plates: rest.heights.length,
+              fonts: Math.max(...rest.fonts) - Math.min(...rest.fonts) <= 0.25,
+              heights: Math.max(...rest.heights) - Math.min(...rest.heights) <= 0.5,
+            }
+          })
+          .toEqual({ plates: 5, fonts: true, heights: true })
         expect(await plateCuts(page)).toEqual([])
       })
     }
