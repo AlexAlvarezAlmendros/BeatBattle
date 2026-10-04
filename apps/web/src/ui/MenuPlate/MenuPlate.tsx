@@ -1,4 +1,12 @@
-import { type HTMLAttributes, type ReactNode, type Ref, useRef } from 'react'
+import {
+  type HTMLAttributes,
+  type ReactNode,
+  type Ref,
+  type RefObject,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import { Link, type To } from 'react-router'
 import { t } from '../../i18n'
 import { Cursor } from '../Cursor'
@@ -62,8 +70,9 @@ export interface MenuPlateProps {
  * Va dentro de un `role="menu"` como `menuitem` (lo ponen las `itemProps`).
  *
  * El dato y la tecla nunca se encogen: lo que cede es la etiqueta, que baja su anchura de 125 a 105 % y
- * después el cuerpo (`useFitText`), como el alias de la ficha de luchador. La trama de relleno va en una
- * franja al final de la placa, fuera de todo texto (`RD-VIS-05`).
+ * después el cuerpo (`useFitText`), como el alias de la ficha de luchador. Si ni así cabe al lado del dato,
+ * el dato baja a una segunda línea (`useStackWhenCramped`): la etiqueta nunca se corta. La trama de relleno
+ * va en una franja al final de la placa, fuera de todo texto (`RD-VIS-05`).
  */
 export function MenuPlate({
   index,
@@ -82,10 +91,13 @@ export function MenuPlate({
   // La elegida crece (25 → 31 px): la etiqueta se vuelve a ajustar a su hueco desde ese cuerpo.
   const chosen = item['data-cursor-active'] === 'true' || state === 'focus' || state === 'pressed'
   const labelRef = useRef<HTMLSpanElement>(null)
+  const detailRef = useRef<HTMLSpanElement>(null)
+  // Antes que ajustar la etiqueta: decide si el dato va al lado o debajo, y el ajuste parte de ahí.
+  const stacked = useStackWhenCramped(labelRef, detailRef, `${label}|${disabled}|${chosen}`)
   useFitText(labelRef, label, {
     fromStretch: '--bb-stretch-plate',
     minFontPx: MENU_LABEL_MIN_PX,
-    state: `${chosen}|${fitKey ?? ''}`,
+    state: `${chosen}|${fitKey ?? ''}|${stacked}`,
   })
   const body = (
     <>
@@ -99,7 +111,7 @@ export function MenuPlate({
         {disabled && <Icon name="lock" className={styles.lock} />}
         {label}
       </span>
-      <span className={styles.detail}>
+      <span ref={detailRef} className={styles.detail}>
         {detail !== undefined && (
           <span className={styles.detailText} data-plate-detail="">
             {detail}
@@ -123,6 +135,7 @@ export function MenuPlate({
     className: cx(styles.plate, className),
     'data-menu-plate': '',
     'data-disabled': disabled || undefined,
+    'data-plate-stack': stacked || undefined,
     ...forceStateAttr(state),
   }
   if (to !== undefined) {
@@ -137,4 +150,79 @@ export function MenuPlate({
       {body}
     </div>
   )
+}
+
+/** Atributo de la placa con el dato en una segunda línea (`MenuPlate.module.css`). */
+const STACK_ATTR = 'data-plate-stack'
+
+/**
+ * La etiqueta nunca se corta (§3.3): si, con el dato o el motivo al lado, no cabe ni a su cuerpo mínimo
+ * (`MENU_LABEL_MIN_PX`) con la anchura mínima del display (`--bb-stretch-min`), el dato baja a una segunda
+ * línea, bajo la etiqueta. Se mide en la propia placa, con el dato al lado (quitando un momento el atributo y
+ * el ajuste de `useFitText`, sin pintar nada en medio), cuando cambian su ancho, su etiqueta, su estado
+ * (`state`: la elegida enseña su tecla), el texto del dato y la fuente web. Donde el dato ya va debajo (la
+ * lista estrecha del menú, por debajo de 360 px) o no hay dato, no hace nada. Solo baja lo que no cabe: la
+ * deshabilitada «RESULTADOS · Aún nada sellado» en una placa de 313 px (la galería; jurado de la 0.28, cierre:
+ * la etiqueta quedaba en 12–21 px de ancho, recortada), no «JUGAR [INTRO]», que cabe al lado (revisión del
+ * cierre: con un umbral de ancho, la tecla bajaba igual). Sin `ResizeObserver` (jsdom), nunca baja.
+ */
+function useStackWhenCramped(
+  labelRef: RefObject<HTMLElement | null>,
+  detailRef: RefObject<HTMLElement | null>,
+  state: string,
+): boolean {
+  const [stacked, setStacked] = useState(false)
+  useLayoutEffect(() => {
+    void state
+    const label = labelRef.current
+    const plate = label?.parentElement
+    const detail = detailRef.current
+    if (!label || !plate || !detail || typeof ResizeObserver === 'undefined') return
+    const check = () => {
+      const was = plate.hasAttribute(STACK_ATTR)
+      const { fontSize, fontStretch, whiteSpace } = label.style
+      if (was) plate.removeAttribute(STACK_ATTR)
+      const narrowest = Number.parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue('--bb-stretch-min'),
+      )
+      label.style.fontSize = `${MENU_LABEL_MIN_PX}px`
+      label.style.fontStretch = Number.isFinite(narrowest) ? `${narrowest}%` : ''
+      label.style.whiteSpace = ''
+      // Solo si el dato va al lado (en la lista estrecha y por debajo de 360 px ya va debajo) y ocupa algo.
+      const box = label.getBoundingClientRect()
+      const aside = detail.getBoundingClientRect()
+      const beside = aside.width > 0 && aside.top < box.bottom && box.top < aside.bottom
+      const cramped = beside && label.scrollWidth > label.clientWidth + 0.5
+      Object.assign(label.style, { fontSize, fontStretch, whiteSpace })
+      if (was) plate.setAttribute(STACK_ATTR, '')
+      setStacked(cramped)
+    }
+    check()
+    let frame = 0
+    const later = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(check)
+    }
+    // Solo el ancho: al bajar el dato, la placa cambia de alto, y eso no cambia lo medido.
+    let width = plate.clientWidth
+    const resize = new ResizeObserver(() => {
+      if (plate.clientWidth === width) return
+      width = plate.clientWidth
+      later()
+    })
+    resize.observe(plate)
+    const content = new MutationObserver(later)
+    content.observe(detail, { childList: true, characterData: true, subtree: true })
+    let active = true
+    void document.fonts?.ready.then(() => {
+      if (active) check()
+    })
+    return () => {
+      active = false
+      cancelAnimationFrame(frame)
+      resize.disconnect()
+      content.disconnect()
+    }
+  }, [labelRef, detailRef, state])
+  return stacked
 }

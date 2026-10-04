@@ -1441,13 +1441,15 @@ for (const viewport of [
  * La etiqueta de una placa nunca se corta (§3.3; jurado de la 0.28, cierre): en la galería, «Opción de menú
  * → Interactivo» pone sus placas en una columna de 313 px, y «03 RESULTADOS · Aún nada sellado» dejaba la
  * etiqueta en 12–21 px de ancho, recortada (el candado y un trozo de la «R»), y con el espaciado de WCAG
- * 1.4.12 también. Ahora, en una placa estrecha (contenedor `menu-plate`) el motivo baja a la segunda línea.
+ * 1.4.12 también. Ahora, si la etiqueta no cabe al lado del dato ni a su cuerpo mínimo, el motivo baja a la
+ * segunda línea; y solo entonces (revisión del cierre: con un umbral de ancho, «JUGAR [INTRO]» bajaba también
+ * la tecla, que cabía al lado).
  */
 test.describe('galería: opción de menú interactiva a 1440 × 900', () => {
   const MENU = '#opcion-menu [role="menu"] [data-menu-plate]'
 
   for (const spacing of [false, true]) {
-    test(`§3.3 / RD-VIS-05${spacing ? ' / WCAG 1.4.12' : ''}: ninguna placa del menú interactivo corta su etiqueta, su dato ni su tecla${spacing ? ' con el espaciado de texto' : ''}`, async ({
+    test(`§3.3 / RD-VIS-05${spacing ? ' / WCAG 1.4.12' : ''}: ninguna placa del menú interactivo corta su etiqueta, su dato ni su tecla, y solo baja el dato que no cabe${spacing ? ' con el espaciado de texto' : ''}`, async ({
       page,
     }) => {
       if (spacing)
@@ -1461,6 +1463,20 @@ test.describe('galería: opción de menú interactiva a 1440 × 900', () => {
       await openGallery(page)
       await page.evaluate(() => document.fonts.ready)
       await page.locator('#opcion-menu [role="menu"]').scrollIntoViewIfNeeded()
+      // La elegida al entrar, «JUGAR», lleva la tecla al lado de la etiqueta; «RESULTADOS», el motivo debajo.
+      await expect
+        .poll(() =>
+          page.evaluate((scope) => {
+            const rows = [...document.querySelectorAll<HTMLElement>(scope)].map((plate) => {
+              const label = plate.querySelector('[data-plate-label]')!.getBoundingClientRect()
+              const aside = plate.querySelector('[data-plate-label] + *')!.getBoundingClientRect()
+              const beside = aside.top < label.bottom && label.top < aside.bottom
+              return `${plate.querySelector('[data-plate-label]')!.textContent}: ${beside ? 'al lado' : 'debajo'}`
+            })
+            return [rows[0], rows[2]]
+          }, MENU),
+        )
+        .toEqual(['Jugar: al lado', 'Resultados: debajo'])
       expect(await plateCuts(page, MENU)).toEqual([])
       expect(await plateOverflowY(page, MENU)).toEqual([])
       // Ningún rótulo por debajo del mínimo legible (RD-VIS-05).
