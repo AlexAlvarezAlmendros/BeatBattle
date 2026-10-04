@@ -38,10 +38,18 @@
 /*
  * Despegada (`data-unpinned`, la pone `ControlsBar` si la barra pasa de un cuarto del alto de la
  * ventana, o del 15 % con teclado en una ventana de 720 px de ancho o menos o de 700 px de alto o
- * menos): al final de la pantalla, para no tapar el contenido en una ventana pequeña (WCAG 1.4.10).
+ * menos): las teclas, «Legal» y la crónica van al final de la pantalla, para no tapar el contenido en
+ * una ventana pequeña (WCAG 1.4.10), **salvo la fila de la firma, que sigue pegada al pie** (§3.4.1
+ * v0.6.6, `RF-OTP-01`: antes se despegaba entera y las interiores, sin lockup, no enseñaban ninguna firma
+ * al abrir). La fila de la firma pasa arriba (las demás, debajo y en el mismo orden) y la barra sigue
+ * pegada con `bottom` negativo: lo que mide de más que esa fila (`--bar-tail`, que mide `ControlsBar`)
+ * queda por debajo de la ventana hasta que se llega al final de la pantalla. Entre filas, el aire del
+ * anillo del foco (`--bar-ring`): la parte pegada acaba ahí, sin asomar la fila siguiente. El orden de las
+ * filas, más abajo («Despegada: la firma arriba»).
  */
 .bar[data-unpinned] {
-  position: relative;
+  bottom: calc(-1 * var(--bar-tail, 0px));
+  row-gap: var(--bar-ring);
 }
 
 /* Línea discontinua roja por encima del filete. */
@@ -243,6 +251,31 @@
 
 .bar[data-keys-row][data-right-row] .right {
   grid-row: 3;
+}
+
+/*
+ * ── Despegada: la firma arriba (`data-unpinned`) ────────────────────────────────────────────
+ * La fila de la firma es la primera (la que sigue pegada al pie); debajo, el dato si no cabe a su lado
+ * («Legal» o la crónica, como en la barra pegada) y al final las teclas, si van en su fila (la colocación
+ * automática las lleva a la primera fila libre). Van después de las reglas de arriba: mandan sobre ellas.
+ */
+.bar[data-unpinned] > .signature,
+.bar[data-unpinned] .right {
+  grid-row: 1;
+}
+
+.bar[data-unpinned][data-keys-row] .keys {
+  grid-row: auto;
+}
+
+.bar[data-unpinned][data-right-row] .right {
+  grid-row: 2;
+}
+
+@media (max-width: 1199px) {
+  .bar[data-unpinned] .right[data-claimed] {
+    grid-row: 2;
+  }
 }
 
 /* «Legal»: un rótulo más de la barra (no un enlace subrayado de web); el foco es el genérico. */

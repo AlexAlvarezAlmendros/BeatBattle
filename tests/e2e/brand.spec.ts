@@ -139,6 +139,49 @@ test.describe('móvil (390 × 844)', () => {
 })
 
 /**
+ * Con teclado y ratón en una ventana pequeña la barra se despega (pasa del 15 % del alto, §3.4.1), pero
+ * **la fila de la firma sigue pegada al pie** (v0.6.6): antes se despegaba entera y las interiores, sin
+ * lockup, no enseñaban ninguna firma al abrir (cuarto pase del jurado de la 0.28, F2). Se mira al abrir,
+ * sin desplazar, con puntero fino.
+ */
+for (const { width, height } of [
+  { width: 390, height: 844 },
+  { width: 720, height: 450 },
+  { width: 360, height: 640 },
+  { width: 823, height: 514 },
+]) {
+  test.describe(`ventana pequeña con teclado a ${width} × ${height}`, () => {
+    test.use({ viewport: { width, height } })
+
+    for (const path of [
+      '/como-funciona',
+      '/ajustes/sonido',
+      '/ajustes/cuenta',
+      '/legal/bases',
+      '/legal/privacidad',
+      '/esto-no-existe',
+      '/entrar',
+      '/dev/galeria',
+    ]) {
+      test(`RD-VIS-02 b / RF-OTP-01: en ${path} la firma de la barra se ve al abrir, sin desplazar`, async ({
+        page,
+      }) => {
+        if (path === '/dev/galeria') await openGallery(page)
+        else {
+          await page.goto(path)
+          await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toBeAttached()
+        }
+        await settle(page)
+        expect(await page.evaluate(() => window.scrollY), 'sin desplazar').toBe(0)
+        await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({
+          ratio: 1,
+        })
+      })
+    }
+  })
+}
+
+/**
  * La firma y «Legal» en la barra de móvil (jurado de la 0.28, M3 y su revisión M3r):
  *
  * - **La firma va centrada** en la barra (su columna central), con o sin «Legal»: antes, con «Legal» al
@@ -161,15 +204,16 @@ interface Box {
 
 /**
  * Cajas de la firma, del texto de «Legal» (no de su objetivo de 44 px) y del filete, si se ve. Si la barra
- * va despegada (con teclado en una ventana pequeña, §3.4.1), se baja hasta ella: lo que cuenta aquí es
- * cómo se compone al llegar.
+ * va despegada (con teclado en una ventana pequeña, §3.4.1), se baja hasta el final de la pantalla: lo que
+ * cuenta aquí es cómo se compone al llegar (despegada sigue `sticky` con la fila de la firma pegada, así
+ * que `scrollIntoView` no la trae entera).
  */
 async function legalLayout(page: Page): Promise<{ signature: Box; legal: Box; rule: Box | null }> {
   const bar = page.getByRole('contentinfo')
   await expect(bar.getByRole('link', { name: 'Legal' })).toBeVisible()
   await settle(page)
   return bar.evaluate((footer) => {
-    if (footer.hasAttribute('data-unpinned')) footer.scrollIntoView({ block: 'end' })
+    if (footer.hasAttribute('data-unpinned')) window.scrollTo(0, document.scrollingElement!.scrollHeight)
     const box = ({ left, right, top, bottom }: DOMRect) => ({ left, right, top, bottom })
     const signature = footer.querySelector('[data-otp-signature]')!
     const legal = footer.querySelector('a[href^="/legal/"]')!

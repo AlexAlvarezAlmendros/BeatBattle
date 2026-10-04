@@ -124,8 +124,14 @@ function maxViewportShare(): number {
     : CONTROLS_MAX_VIEWPORT_SHARE
 }
 
-/** Variable con el alto real de la barra pegada: el margen del foco de `global.css` (0 si no va pegada). */
+/**
+ * Variable con el alto real de lo que va pegado al pie: el margen del foco de `global.css`. La barra
+ * entera o, despegada, la fila de la firma (§3.4.1 v0.6.6).
+ */
 export const CONTROLS_HEIGHT_VAR = '--controls-pinned-h'
+
+/** Variable de la barra despegada: lo que mide de más que la fila de la firma (su `bottom` negativo). */
+const BAR_TAIL_VAR = '--bar-tail'
 
 /**
  * Compone y mide la barra (§3.4.1):
@@ -167,6 +173,8 @@ function useBarLayout(
     const right = bar.querySelector<HTMLElement>('[data-frame-slot="controlsRight"]')
     const root = document.documentElement
     const update = () => {
+      // Se mide siempre en la composición pegada (despegada, la firma va arriba y hay aire entre filas).
+      bar.removeAttribute('data-unpinned')
       bar.removeAttribute('data-keys-tight')
       bar.removeAttribute('data-keys-row')
       bar.removeAttribute('data-right-row')
@@ -182,7 +190,11 @@ function useBarLayout(
       const height = bar.getBoundingClientRect().height
       const unpinned = height > window.innerHeight * maxViewportShare()
       bar.toggleAttribute('data-unpinned', unpinned)
-      root.style.setProperty(CONTROLS_HEIGHT_VAR, `${unpinned ? 0 : Math.ceil(height)}px`)
+      // Despegada, sigue pegada la fila de la firma (arriba): lo demás queda por debajo de la ventana.
+      const pinned = Math.ceil(unpinned && signature ? signatureRowHeight(bar, signature, right) : height)
+      const tail = unpinned ? Math.max(0, Math.floor(bar.getBoundingClientRect().height - pinned)) : 0
+      bar.style.setProperty(BAR_TAIL_VAR, `${tail}px`)
+      root.style.setProperty(CONTROLS_HEIGHT_VAR, `${pinned}px`)
     }
     update()
     let frame = 0
@@ -199,8 +211,24 @@ function useBarLayout(
       observer?.disconnect()
       window.removeEventListener('resize', later)
       root.style.removeProperty(CONTROLS_HEIGHT_VAR)
+      bar.style.removeProperty(BAR_TAIL_VAR)
     }
   }, [ref, keysRef, keyIds])
+}
+
+/**
+ * Alto de lo que sigue pegado con la barra despegada (§3.4.1 v0.6.6): del borde de arriba de la barra (con
+ * su filete) al pie de la fila de la firma (con «Legal» o la crónica si van a su lado), más el aire del
+ * anillo del foco (`--bar-ring`, el relleno de abajo de la barra y el hueco entre filas al despegarse).
+ */
+function signatureRowHeight(bar: HTMLElement, signature: HTMLElement, right: HTMLElement | null): number {
+  const top = bar.getBoundingClientRect().top
+  const row = signature.getBoundingClientRect()
+  let bottom = row.bottom
+  const beside = right?.getBoundingClientRect()
+  if (beside && beside.height > 0 && beside.top < row.bottom - 0.5 && beside.bottom > row.top + 0.5)
+    bottom = Math.max(bottom, beside.bottom)
+  return bottom - top + Number.parseFloat(getComputedStyle(bar).paddingBottom)
 }
 
 /**

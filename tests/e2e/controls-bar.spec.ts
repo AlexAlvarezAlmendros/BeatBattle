@@ -9,12 +9,13 @@ import { open, settle } from './support'
 /**
  * Teclas de la barra que no se ven enteras: fuera de la ventana, recortadas por un antepasado que
  * recorta (`overflow`, `clip-path`, `contain: paint`) o encima de la firma. Devuelve también cuántas hay
- * en la lista. Si la barra va despegada (ventana baja), se baja hasta ella: lo que cuenta es que se vean
- * al llegar.
+ * en la lista. Si la barra va despegada (ventana baja), se baja hasta el final de la pantalla: lo que
+ * cuenta es que se vean al llegar (la barra despegada sigue `sticky` con su fila de la firma pegada, así
+ * que `scrollIntoView` no la trae entera).
  */
 function hiddenKeys(page: Page): Promise<{ count: number; hidden: string[] }> {
   return page.evaluate(() => {
-    document.querySelector('footer')?.scrollIntoView({ block: 'end' })
+    window.scrollTo(0, document.scrollingElement!.scrollHeight)
     const list = document.querySelector('footer ul')
     const keys = [...(list?.children ?? [])] as HTMLElement[]
     const signature = document.querySelector('footer [data-otp-signature]')?.getBoundingClientRect()
@@ -197,20 +198,39 @@ for (const { width, height, fontSize } of [
   })
 }
 
-/** Alto de la barra, si va pegada al pie y cuántas placas del menú se ven enteras sin que la barra las tape. */
-function barShare(page: Page): Promise<{ height: number; share: number; pinned: boolean; plates: number }> {
+/**
+ * Lo que la barra tapa al abrir (sin desplazar): el alto de su parte pegada al pie de la ventana (la barra
+ * entera o, despegada, la fila de la firma, §3.4.1 v0.6.6), si va pegada, si va entera y de cuántas placas
+ * del menú se lee el rótulo («JUGAR») entero por encima de ella (la fila de la firma, pegada, puede tapar
+ * el pie de la primera placa, nunca su rótulo).
+ */
+function barShare(
+  page: Page,
+): Promise<{ height: number; share: number; pinned: boolean; whole: boolean; plates: number }> {
   return page.evaluate(() => {
+    window.scrollTo(0, 0)
     const bar = document.querySelector('footer')!
     const box = bar.getBoundingClientRect()
     const position = getComputedStyle(bar).position
     const pinned = position === 'sticky' || position === 'fixed'
     // Lo que tapa la barra: lo que queda bajo su borde de arriba si va pegada; si no, nada.
     const limit = pinned ? box.top : innerHeight
-    const plates = [...document.querySelectorAll('main [data-menu-plate]')].filter((plate) => {
-      const rect = plate.getBoundingClientRect()
-      return rect.top >= 0 && rect.bottom <= Math.min(limit, innerHeight)
-    }).length
-    return { height: box.height, share: box.height / innerHeight, pinned, plates }
+    const visible = pinned ? Math.max(0, Math.min(box.bottom, innerHeight) - Math.max(box.top, 0)) : 0
+    const plates = [...document.querySelectorAll('main [data-menu-plate] [data-plate-label]')].filter(
+      (label) => {
+        const text = document.createRange()
+        text.selectNodeContents(label)
+        const rect = text.getBoundingClientRect()
+        return rect.top >= 0 && rect.bottom <= Math.min(limit, innerHeight)
+      },
+    ).length
+    return {
+      height: visible,
+      share: visible / innerHeight,
+      pinned,
+      whole: box.bottom <= innerHeight + 0.5,
+      plates,
+    }
   })
 }
 
@@ -222,6 +242,8 @@ function barShare(page: Page): Promise<{ height: number; share: number; pinned: 
  * menos o de 700 px de alto o menos, la barra se despega en cuanto pasa del 15 % de la ventana (en
  * táctil, del 25 %: allí no lleva teclas). También con el escritorio ampliado: a 823 × 514 (1440 × 900 al
  * 175 %) la del menú mide 127 px y, pegada, tapaba «JUGAR» (ninguna placa entera en la primera vista).
+ * Despegada, la fila de la firma sigue pegada al pie (§3.4.1 v0.6.6, cuarto pase, F2): lo que queda pegado
+ * es esa fila, que no pasa del 15 %, y la firma se ve al abrir.
  */
 for (const { width, height } of [
   { width: 360, height: 640 },
@@ -238,15 +260,19 @@ for (const { width, height } of [
       { path: '/como-funciona', heading: 'Cómo se juega' },
       { path: '/ajustes', heading: 'Sonido y efectos' },
     ]) {
-      test(`§3.4.1 / WCAG 1.4.10: en ${path} la barra no se queda pegada ocupando más del 15 % de la ventana`, async ({
+      test(`§3.4.1 / WCAG 1.4.10 / RF-OTP-01: en ${path} lo pegado de la barra no pasa del 15 % de la ventana y la firma se ve`, async ({
         page,
       }) => {
         await open(page, path, heading)
         await settle(page)
         const { share, pinned, plates } = await barShare(page)
         if (pinned) expect(share).toBeLessThanOrEqual(0.15)
+        // Despegada, la fila de la firma sigue pegada al pie (v0.6.6).
+        await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({
+          ratio: 1,
+        })
         if (path === '/dev/menu' || path === '/')
-          expect(plates, 'placas en la primera vista').toBeGreaterThan(0)
+          expect(plates, 'rótulos de placa en la primera vista').toBeGreaterThan(0)
       })
     }
 
@@ -301,7 +327,9 @@ for (const { width, height, touch } of [
       }) => {
         await open(page, path, heading)
         await settle(page)
-        expect((await barShare(page)).pinned).toBe(true)
+        const { pinned, whole } = await barShare(page)
+        expect(pinned).toBe(true)
+        expect(whole, 'la barra entera, no solo la fila de la firma').toBe(true)
         await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({
           ratio: 1,
         })
