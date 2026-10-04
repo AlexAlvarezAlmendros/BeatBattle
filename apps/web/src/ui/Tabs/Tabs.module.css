@@ -147,6 +147,37 @@
   }
 }
 
+/*
+ * Con teclado y ratón en la composición estrecha (≤ 720 px; sexto pase del jurado, G3), [Q] y [E] van a los
+ * lados y «COOKIES» bajaba a otra fila a 390, 375 y 360 px. Para que [Q] · las cuatro pestañas · [E] quepan
+ * en una fila a 360 px: las teclas, en su variante estrecha (sin ancho mínimo y con `--bb-space-1` a los
+ * lados: 16 px en vez de 28), las pestañas, con el relleno de la inclinación (`--bb-slant-sm`: el rótulo no
+ * pasa del corte del paralelogramo) y a `--bb-space-1` entre ellas. Entre las teclas y las pestañas sigue
+ * `--bb-space-2`: el cursor de la pestaña de un extremo (7 px por fuera) no llega a la tecla, y entre dos
+ * pestañas el anillo queda a 4 px de la vecina. El rótulo sigue a 12 px y la pestaña, a 44 de alto.
+ */
+@media (max-width: 720px) and (hover: hover) and (pointer: fine) {
+  .row[data-short] > [data-key] {
+    min-width: 0;
+    padding-inline: var(--bb-space-1);
+  }
+
+  .row[data-short] .list {
+    column-gap: var(--bb-space-1);
+  }
+
+  .row[data-short] .tab {
+    padding-inline: var(--bb-slant-sm);
+  }
+}
+
+/* Desde 390 px (el móvil de la guía) sobra sitio para un trazo más de aire a cada lado del rótulo. */
+@media (min-width: 390px) and (max-width: 720px) and (hover: hover) and (pointer: fine) {
+  .row[data-short] .tab {
+    padding-inline: calc(var(--bb-slant-sm) + var(--bb-stroke));
+  }
+}
+
 /* Táctil: sin las teclas Q/E (no hay teclado, §3.3), y las pestañas, a todo lo ancho; depende del tipo
  * de entrada, no del ancho. */
 @media (hover: none), (pointer: coarse) {

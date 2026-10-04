@@ -1390,6 +1390,72 @@ for (const viewport of [
 }
 
 /**
+ * Las mismas pestañas con teclado y ratón (§3.8.14 v0.6.7, §3.3; sexto pase del jurado, G3): [Q] y [E] van
+ * a los lados y «COOKIES» bajaba a otra fila a 390 × 844, 375 × 667 y 360 × 640. En la composición estrecha
+ * con teclado, las teclas van en su variante estrecha y las pestañas aprietan su relleno y su separación:
+ * [Q] · las cuatro · [E] en una fila desde 360 px. El rótulo no pasa del corte del paralelogramo
+ * (`--bb-slant-sm`, 6 px, a cada lado) y el cursor de la pestaña de un extremo (7 px por fuera) no llega a
+ * su tecla.
+ */
+for (const viewport of [
+  { width: 360, height: 640 },
+  { width: 375, height: 667 },
+  { width: 390, height: 844 },
+]) {
+  test.describe(`pestañas de los legales a ${viewport.width} × ${viewport.height} con teclado`, () => {
+    test.use({ viewport })
+
+    test('RD-VIS-02 e / §3.8.14 / §3.3: [Q] · BASES · TÉRMINOS · PRIVACIDAD · COOKIES · [E] van en una fila (G3)', async ({
+      page,
+    }) => {
+      await open(page, '/legal/bases', 'Bases de la competición')
+      await settle(page)
+      const row = await page.evaluate(() => {
+        const nav = document.querySelector('main nav[aria-label="Documentos legales"]')!
+        const rect = (element: Element) => {
+          const box = element.getBoundingClientRect()
+          return { top: box.top, bottom: box.bottom, left: box.left, right: box.right }
+        }
+        const [q, e] = [...nav.querySelectorAll(':scope > [data-key]')].map(rect)
+        const tabs = [...nav.querySelectorAll('li > a')].map((tab) => {
+          // El rótulo (el último nodo: antes va el cursor).
+          const range = document.createRange()
+          range.selectNodeContents(tab.lastChild!)
+          const text = [...range.getClientRects()].filter((line) => line.width > 0)
+          return {
+            ...rect(tab),
+            lines: text.length,
+            textLeft: Math.min(...text.map((line) => line.left)),
+            textRight: Math.max(...text.map((line) => line.right)),
+            size: Number.parseFloat(getComputedStyle(tab).fontSize),
+          }
+        })
+        return { q: q!, e: e!, tabs }
+      })
+      expect(row.tabs).toHaveLength(4)
+      expect(new Set(row.tabs.map((tab) => Math.round(tab.top))).size, 'filas de pestañas').toBe(1)
+      // El alcance del cursor: el hueco de 4 px y el trazo de 3 (`--bb-cursor-gap`, `--bb-stroke-cursor`).
+      const reach = 7
+      expect(row.q.right, '[Q] a la izquierda, sin que llegue el cursor').toBeLessThanOrEqual(
+        row.tabs[0]!.left - reach,
+      )
+      expect(row.e.left, '[E] a la derecha, sin que llegue el cursor').toBeGreaterThanOrEqual(
+        row.tabs[3]!.right + reach,
+      )
+      expect(row.e.right, 'dentro de la ventana').toBeLessThanOrEqual(viewport.width)
+      for (const tab of row.tabs) {
+        expect(tab.bottom - tab.top).toBeGreaterThanOrEqual(44)
+        expect(tab.size).toBeGreaterThanOrEqual(12)
+        expect(tab.lines, 'el rótulo, en una línea').toBe(1)
+        // Dentro del corte del paralelogramo (6 px a cada lado).
+        expect(tab.textLeft - tab.left).toBeGreaterThanOrEqual(5.5)
+        expect(tab.right - tab.textRight).toBeGreaterThanOrEqual(5.5)
+      }
+    })
+  })
+}
+
+/**
  * Ventana grande (§3.8.14 v0.6.7; cuarto pase del jurado, P8): la cuña de las interiores sigue a la pieza y
  * el granate no pasa del ~24 % (la 404 llegaba al 25,8 % a 1920 × 1080 y al 26,5 % a 2560 × 1440: el pad
  * se queda en 72 px y la cuña crecía con la ventana). También en las provisionales (quinto pase): con la
