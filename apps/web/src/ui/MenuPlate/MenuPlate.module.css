@@ -254,8 +254,8 @@
 
 /*
  * ── Lista estrecha (la composición de dos columnas de 721 a unos 1200 px, o ampliada) ──────────
- * La lista de placas del menú es un contenedor (`menu-plates`; solo en la composición de dos columnas,
- * `MainMenu`): por debajo de 32 rem el dato y la tecla bajan a una segunda línea, bajo la etiqueta, en
+ * La columna de las placas del menú es un contenedor (`menu-plates`; solo en la composición de dos
+ * columnas, `MainMenu`): por debajo de 32 rem el dato y la tecla bajan a una segunda línea, bajo la etiqueta, en
  * vez de quitarle el sitio (jurado de la 0.28: de 721 a 900 px «JUGAR», «RESULTADOS» y «AJUSTES» se
  * quedaban sin ancho). La placa no cambia de alto (70 px, 84 la elegida): las dos líneas caben dentro;
  * si la etiqueta parte en dos, crece con ella.
@@ -282,7 +282,11 @@
     min-height: var(--plate-h-on);
   }
 
-  /* El dato, en su línea: si sus piezas (cifra o etiqueta, dato largo, tecla) no caben, parten en dos. */
+  /*
+   * El dato, en su línea: si sus piezas (cifra o etiqueta, dato largo, tecla) no caben, parten en dos; y si
+   * una sola no cabe (el espaciado de texto de WCAG 1.4.12, la letra ampliada), parte su texto: nunca se
+   * sale de la placa ni pasa por encima de su borde.
+   */
   .detail {
     flex-wrap: wrap;
     justify-self: start;
@@ -291,22 +295,35 @@
     text-align: start;
   }
 
+  .detailText,
+  .extra {
+    flex-wrap: wrap;
+    line-height: var(--bb-leading-label);
+    white-space: normal;
+  }
+
   .plate[data-disabled] .detailText {
     max-width: none;
   }
 }
 
 /*
- * Lista muy estrecha (< 21 rem: de 721 a unos 850 px, tan estrecha como en un móvil): el índice ocupa
- * menos, para que «SONIDO · MOVIMIENTO» quepa en su línea. La flecha y el 1P se quedan: van en el hueco
- * entre las columnas del menú, que mide como poco su alcance (`--bb-plate-cursor-reach`, `MainMenu`), así
- * que no pisan la tarjeta de la semana ni el logo.
+ * Lista muy estrecha (< 21 rem: de 721 a unos 850 px, tan estrecha como en un móvil): las medidas de la
+ * placa en móvil, para que el dato quepa en su línea (jurado de la 0.28, tercer pase: «SONIDO ·
+ * MOVIMIENTO» se salía hasta 25 px por el borde inclinado de AJUSTES en reposo): índice de 28 px,
+ * separación de 8 y, en reposo, sale 12 a la izquierda en vez de 28 (`MainMenu` alinea la cabecera y la
+ * ayuda con ella). La flecha y el 1P se quedan: van en el hueco entre las columnas del menú, que mide
+ * como poco su alcance (`--bb-plate-cursor-reach`, `MainMenu`), así que no pisan la tarjeta ni el logo.
  */
 @container menu-plates (width < 21rem) {
+  .plate {
+    --plate-shift: var(--bb-space-3);
+  }
+
   .plate,
   .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
-    grid-template-columns: var(--bb-space-9) minmax(0, 1fr);
-    column-gap: var(--bb-space-3);
+    grid-template-columns: var(--bb-space-7) minmax(0, 1fr);
+    column-gap: var(--bb-space-2);
   }
 }
 

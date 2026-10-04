@@ -5,9 +5,9 @@ import { open, openGallery, settle } from './support'
  * Que nada se corte (tarea 0.28, jurado visual; `RD-VIS-02`, `RD-VIS-05`, guía §3.3 «Opción de menú»
  * y §2.17, reflow de WCAG 1.4.10):
  *
- * - **Placas del menú**: con cada placa elegida (crece a 31 px), ni la etiqueta ni el dato desbordan su
- *   caja y la tecla `[INTRO]` queda dentro del corte del paralelogramo; también deshabilitadas (el
- *   motivo pasa a dos líneas antes que cortarse) y a 320 px.
+ * - **Placas del menú**: con cada placa elegida (crece a 31 px), y con las demás en reposo, ni la
+ *   etiqueta ni el dato desbordan su caja y el dato y la tecla `[INTRO]` quedan dentro del corte del
+ *   paralelogramo; también deshabilitadas (el motivo pasa a dos líneas antes que cortarse) y a 320 px.
  * - **Tildes**: las mayúsculas en display («GRÀCIA», «SALÓN», «PRÓXIMO», «PÚRPURA») no las recorta
  *   ningún antepasado por arriba (las cajas solo recortan en horizontal).
  * - **Galería a 390 px**: ninguna hoja de texto se sale de la ventana (salvo dentro de una fila que se
@@ -19,19 +19,18 @@ interface PlateCut {
   problem: string
 }
 
-/** Elige cada placa del menú (foco) y mide si su etiqueta, su dato o su tecla se cortan. */
+/**
+ * Elige cada placa del menú (foco) y mide si su etiqueta, su dato o su tecla se cortan, en ella (la
+ * elegida) y en las demás (en reposo, con el cursor en otra placa; jurado de la 0.28, tercer pase: de 721
+ * a unos 765 px, «SONIDO · MOVIMIENTO» de AJUSTES en reposo se salía por el borde de la placa).
+ */
 function plateCuts(page: Page): Promise<PlateCut[]> {
   return page.evaluate(async () => {
     const frame = () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
     const cuts: { plate: string; problem: string }[] = []
     const plates = [...document.querySelectorAll<HTMLElement>('main [data-menu-plate]')]
-    for (const plate of plates) {
-      plate.focus()
-      await frame()
-      // El ajuste de la etiqueta va en el fotograma siguiente al cambio de ancho (transición de 120 ms).
-      await new Promise((done) => setTimeout(done, 250))
-      await frame()
-      const name = plate.querySelector('[data-plate-label]')?.textContent ?? '?'
+    const check = (plate: HTMLElement, state: string) => {
+      const name = `${plate.querySelector('[data-plate-label]')?.textContent ?? '?'}${state}`
       const label = plate.querySelector<HTMLElement>('[data-plate-label]')!
       if (label.scrollWidth > label.clientWidth + 1)
         cuts.push({ plate: name, problem: `etiqueta ${label.scrollWidth} > ${label.clientWidth}` })
@@ -39,19 +38,36 @@ function plateCuts(page: Page): Promise<PlateCut[]> {
       if (detail && detail.scrollWidth > detail.clientWidth + 1)
         cuts.push({ plate: name, problem: `dato ${detail.scrollWidth} > ${detail.clientWidth}` })
       // El relleno del final es, como poco, el desplazamiento del paralelogramo más un margen: lo que
-      // acaba antes de él queda dentro del corte.
+      // acaba antes de él queda dentro del corte. Se mide el texto (no la caja, que puede ser más ancha).
       const box = plate.getBoundingClientRect()
       const end = box.right - Number.parseFloat(getComputedStyle(plate).paddingRight)
       for (const piece of plate.querySelectorAll<HTMLElement>(
         'kbd, [data-plate-detail], [data-plate-extra]',
       )) {
         if (getComputedStyle(piece).display === 'none') continue
-        const rect = piece.getBoundingClientRect()
-        if (rect.right > end + 1 || rect.left < box.left)
-          cuts.push({ plate: name, problem: `${piece.tagName.toLowerCase()} fuera del corte` })
+        const range = document.createRange()
+        range.selectNodeContents(piece)
+        for (const rect of [piece.getBoundingClientRect(), range.getBoundingClientRect()])
+          if (rect.width > 0 && (rect.right > end + 1 || rect.left < box.left)) {
+            const overflow = (rect.right - end).toFixed(1)
+            cuts.push({
+              plate: name,
+              problem: `${piece.tagName.toLowerCase()} fuera del corte (${overflow} px)`,
+            })
+            break
+          }
       }
     }
-    return cuts
+    for (const plate of plates) {
+      plate.focus()
+      await frame()
+      // El ajuste de la etiqueta va en el fotograma siguiente al cambio de ancho (transición de 120 ms).
+      await new Promise((done) => setTimeout(done, 250))
+      await frame()
+      check(plate, '')
+      for (const other of plates) if (other !== plate) check(other, ' (en reposo)')
+    }
+    return [...new Map(cuts.map((cut) => [`${cut.plate}|${cut.problem}`, cut])).values()]
   })
 }
 
@@ -694,6 +710,7 @@ function frameClashes(page: Page): Promise<{ hud: string[]; bar: string[] }> {
  */
 for (const viewport of [
   { width: 721, height: 900, touch: false },
+  { width: 744, height: 1133, touch: true },
   { width: 768, height: 1024, touch: true },
   { width: 820, height: 1180, touch: true },
   { width: 823, height: 514, touch: false },
@@ -726,6 +743,26 @@ for (const viewport of [
     }
   })
 }
+
+/**
+ * En «/» a 721 × 900 (el calendario vacío, sin semana) la pantalla cabe sin desplazar, como antes de
+ * reservar el alcance del cursor entre las columnas (jurado de la 0.28, tercer pase: con las columnas 22 px
+ * más estrechas, la ayuda y la placa elegida partían más y la pantalla se desplazaba 13 px). En la columna
+ * muy estrecha, las placas en reposo, la cabecera y la ayuda salen 12 px a la izquierda, no 28.
+ */
+test.describe('«/» a 721 × 900', () => {
+  test.use({ viewport: { width: 721, height: 900 } })
+
+  test('RD-VIS-02 e: el menú de / cabe sin desplazar', async ({ page }) => {
+    await open(page, '/', 'Beat Battle')
+    await settle(page)
+    const { scroll, view } = await page.evaluate(() => ({
+      scroll: document.scrollingElement!.scrollHeight,
+      view: window.innerHeight,
+    }))
+    expect(scroll).toBeLessThanOrEqual(view)
+  })
+})
 
 /** El HUD de las pantallas interiores: «1P · PULSA PARA UNIRTE» y la placa de título no se pisan. */
 for (const width of [721, 768]) {

@@ -60,8 +60,15 @@
   margin-top: var(--bb-space-5);
 }
 
-/* ── Modos ──────────────────────────────────────────────────────────────────────────────── */
+/*
+ * ── Modos ────────────────────────────────────────────────────────────────────────────────
+ * La columna es un contenedor (`menu-plates`): en una columna estrecha, el dato de cada placa baja a una
+ * segunda línea (`MenuPlate`), y en una muy estrecha (< 21 rem) las placas en reposo salen menos a la
+ * izquierda, y la cabecera y la ayuda con ellas (más abajo). Solo en la composición de dos columnas; en
+ * móvil, no (más abajo).
+ */
 .modes {
+  container: menu-plates / inline-size;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   min-width: 0;
@@ -113,12 +120,7 @@
   }
 }
 
-/*
- * La lista es un contenedor (`menu-plates`): en una columna estrecha, el dato de cada placa baja a una
- * segunda línea (`MenuPlate`). Solo en la composición de dos columnas; en móvil, no (más abajo).
- */
 .plates {
-  container: menu-plates / inline-size;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--bb-space-3);
@@ -150,6 +152,19 @@
 .helpText b {
   color: var(--bb-white);
   font-weight: var(--bb-weight-bold);
+}
+
+/*
+ * Columna muy estrecha (< 21 rem, de 721 a unos 850 px): las placas en reposo salen 12 px a la izquierda,
+ * como en móvil (`MenuPlate`), y la cabecera y la ayuda se alinean con ellas. Así el dato de las placas y
+ * el texto de la ayuda ganan 16 px (jurado de la 0.28, tercer pase: «SONIDO · MOVIMIENTO» se salía de su
+ * placa y, en «/» a 721 × 900, la ayuda partía tanto que la pantalla se desplazaba).
+ */
+@container menu-plates (width < 21rem) {
+  .head,
+  .help {
+    margin-left: var(--bb-space-3);
+  }
 }
 
 /* El número de semana gigante, en contorno blanco al 7 % dentro de la cuña (§3.2 «Texturas»). */
@@ -275,8 +290,11 @@
     letter-spacing: var(--bb-tracking-label);
   }
 
-  .plates {
+  .modes {
     container-type: normal;
+  }
+
+  .plates {
     gap: var(--bb-space-1);
   }
 
