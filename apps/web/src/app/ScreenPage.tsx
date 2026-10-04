@@ -103,13 +103,26 @@ const IDLE_START = '[data-screen-part="tabs"] [aria-current="page"], [data-idle-
  *
  * - `--screen-tabs-bottom`: el pie de las pestañas. Por debajo de 360 px, donde ocupan varias filas, la
  *   cuña empieza bajo ellas (§3.8.14 v0.6.7; cuarto pase del jurado, P3).
+ * - `--screen-piece-x` / `--screen-piece-y`: el centro de la columna de la pieza (la pieza va centrada en
+ *   ella). En dos columnas es el centro de los rayos (§3.8.14 v0.6.7: «el centro de los rayos sigue a la
+ *   pieza»; era un punto fijo de la ventana y en los legales caía ~200 px por encima del sello «EN OBRAS»,
+ *   y en /entrar a 1920 × 1080, arriba a la izquierda del logo; P8).
+ * - `--screen-piece-right` / `--screen-piece-bottom`: la esquina de abajo a la derecha de esa columna. En
+ *   ventana grande (≥ 1600 px) la cuña de las interiores sigue a la columna: su diagonal pasa a la derecha
+ *   de esa esquina y el granate no pasa del ~24 % (P8).
  *
- * Sin pestañas, la variable no se publica y la arena usa su valor de siempre. Se quita al salir de la
- * pantalla.
+ * Sin pestañas o sin pieza (o sin caja: la pieza del móvil bajo de la 404 no hace caja), la variable no se
+ * publica y la arena usa su valor de siempre. Se quitan al salir de la pantalla.
  */
 export const SCREEN_TABS_BOTTOM_VAR = '--screen-tabs-bottom'
+export const SCREEN_PIECE_X_VAR = '--screen-piece-x'
+export const SCREEN_PIECE_Y_VAR = '--screen-piece-y'
+export const SCREEN_PIECE_RIGHT_VAR = '--screen-piece-right'
+export const SCREEN_PIECE_BOTTOM_VAR = '--screen-piece-bottom'
 
-/** Publica en `<html>` la geometría de las pestañas de la pantalla (ver arriba). */
+const PIECE_VARS = [SCREEN_PIECE_X_VAR, SCREEN_PIECE_Y_VAR, SCREEN_PIECE_RIGHT_VAR, SCREEN_PIECE_BOTTOM_VAR]
+
+/** Publica en `<html>` la geometría de las pestañas y de la pieza de la pantalla (ver arriba). */
 function useArenaGeometry(rootRef: RefObject<HTMLDivElement | null>) {
   useLayoutEffect(() => {
     const root = rootRef.current
@@ -124,19 +137,28 @@ function useArenaGeometry(rootRef: RefObject<HTMLDivElement | null>) {
       const tabs = part('tabs')?.getBoundingClientRect()
       if (tabs && tabs.height >= 1) set(SCREEN_TABS_BOTTOM_VAR, tabs.bottom + window.scrollY)
       else clear([SCREEN_TABS_BOTTOM_VAR])
+      const piece = part('piece')?.getBoundingClientRect()
+      if (piece && piece.width >= 1 && piece.height >= 1) {
+        set(SCREEN_PIECE_X_VAR, piece.left + piece.width / 2 + window.scrollX)
+        set(SCREEN_PIECE_Y_VAR, piece.top + piece.height / 2 + window.scrollY)
+        set(SCREEN_PIECE_RIGHT_VAR, piece.right + window.scrollX)
+        set(SCREEN_PIECE_BOTTOM_VAR, piece.bottom + window.scrollY)
+      } else clear(PIECE_VARS)
     }
     update()
     // Cambiar las variables no cambia el tamaño de la pantalla: se puede actualizar dentro del aviso. La
-    // pantalla cambia de tamaño con la letra, la ventana o el contenido.
+    // pantalla cambia de tamaño con la letra, la ventana o el contenido; la pieza, al cambiar de sección.
     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(update)
     observer?.observe(root)
-    const tabs = part('tabs')
-    if (tabs) observer?.observe(tabs)
+    for (const name of ['tabs', 'piece']) {
+      const element = part(name)
+      if (element) observer?.observe(element)
+    }
     window.addEventListener('resize', update)
     return () => {
       observer?.disconnect()
       window.removeEventListener('resize', update)
-      clear([SCREEN_TABS_BOTTOM_VAR])
+      clear([SCREEN_TABS_BOTTOM_VAR, ...PIECE_VARS])
     }
   }, [rootRef])
 }

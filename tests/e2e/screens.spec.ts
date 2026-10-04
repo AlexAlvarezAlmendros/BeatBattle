@@ -573,12 +573,22 @@ for (const { name, select, enter } of [
 
 /**
  * ¿Pisa la caja la diagonal de la cuña? La arena de cuña a la izquierda (`ArenaBackdrop`) corta el pie
- * de la ventana en el 30 % del ancho y sube hacia la derecha a 17° de la vertical; el borde derecho de
- * una placa de la cuña, a su pie, no puede pasar de ahí.
+ * de la ventana en `--split-x` (el 30 % del ancho; en ventana grande, menos: sigue a la columna de la
+ * pieza, P8) y sube hacia la derecha a 17° de la vertical; el borde derecho de una placa de la cuña, a su
+ * pie, no puede pasar de ahí. El corte se lee de la arena con una sonda (`left: var(--split-x)`).
  */
 async function diagonalAt(page: Page, y: number): Promise<number> {
-  const { width, height } = page.viewportSize()!
-  return 0.3 * width + (height - y) * Math.tan((17 * Math.PI) / 180)
+  const { height } = page.viewportSize()!
+  const split = await page.evaluate(() => {
+    const arena = document.querySelector<HTMLElement>('[data-wedge="left"][aria-hidden="true"]')!
+    const probe = document.createElement('div')
+    probe.style.cssText = 'position:absolute;left:var(--split-x);top:0;width:0;height:0'
+    arena.append(probe)
+    const left = probe.getBoundingClientRect().left
+    probe.remove()
+    return left
+  })
+  return split + (height - y) * Math.tan((17 * Math.PI) / 180)
 }
 
 /*
@@ -589,6 +599,7 @@ async function diagonalAt(page: Page, y: number): Promise<number> {
 for (const viewport of [
   { width: 1440, height: 900 },
   { width: 1920, height: 1080 },
+  { width: 2560, height: 1440 },
   { width: 1280, height: 720 },
   { width: 1024, height: 768 },
 ]) {
@@ -1257,6 +1268,78 @@ for (const viewport of [
         expect(tab.clipped).toBe(false)
         expect(tab.right).toBeLessThanOrEqual(viewport.width)
       }
+    })
+  })
+}
+
+/**
+ * Ventana grande (§3.8.14 v0.6.7; cuarto pase del jurado, P8): la cuña de las interiores sigue a la columna
+ * de la pieza y el granate no pasa del ~24 % (la 404 llegaba al 25,8 % a 1920 × 1080 y al 26,5 % a
+ * 2560 × 1440: el pad se queda en 72 px y la cuña crecía con la ventana).
+ */
+for (const viewport of [
+  { width: 1920, height: 1080 },
+  { width: 2560, height: 1440 },
+]) {
+  test.describe(`granate a ${viewport.width} × ${viewport.height}`, () => {
+    test.use({ viewport })
+
+    for (const { path, heading } of [
+      { path: '/esto-no-existe', heading: 'Bonus stage' },
+      { path: '/como-funciona', heading: 'Cómo se juega' },
+      { path: '/ajustes/sonido', heading: 'Sonido y efectos' },
+      { path: '/ajustes/accesibilidad', heading: 'Accesibilidad' },
+    ]) {
+      test(`§3.1 / §3.8.14: en ${path}, la cuña sigue a la columna de la pieza y el granate no pasa del ~24 % (P8)`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        const share = await wineShare(page)
+        test
+          .info()
+          .annotations.push({ type: 'granate', description: `${path}: ${(share * 100).toFixed(2)} %` })
+        expect(share, `granate ${(share * 100).toFixed(1)} %`).toBeLessThanOrEqual(0.24)
+      })
+    }
+  })
+}
+
+/**
+ * El centro de los rayos sigue a la pieza (§3.8.14 v0.6.7; P8): era un punto fijo de la ventana (el 26 % ×
+ * 34 % en el marco simple, el 18 % × 46 % en las interiores) y en los legales caía ~200 px por encima del
+ * sello «EN OBRAS», y en /entrar a 1920 × 1080, arriba a la izquierda del logo. En dos columnas, el centro
+ * del estallido es el de la columna de la pieza, que publica la pantalla.
+ */
+for (const { path, heading, viewport } of [
+  { path: '/legal/bases', heading: 'Bases de la competición', viewport: { width: 1440, height: 900 } },
+  { path: '/entrar', heading: 'Entrar', viewport: { width: 1920, height: 1080 } },
+  { path: '/esto-no-existe', heading: 'Bonus stage', viewport: { width: 1920, height: 1080 } },
+  { path: '/como-funciona', heading: 'Cómo se juega', viewport: { width: 1024, height: 768 } },
+]) {
+  test.describe(`rayos de ${path} a ${viewport.width} × ${viewport.height}`, () => {
+    test.use({ viewport })
+
+    test(`§3.2 / §3.8.14: el centro de los rayos de ${path} es el de su pieza (P8)`, async ({ page }) => {
+      await open(page, path, heading)
+      await settle(page)
+      const center = await page.evaluate(() => {
+        // El centro del estallido (`--burst-x`, `--burst-y`) está en la caja del estallido, más grande que
+        // la ventana: una sonda en esa posición dice dónde cae en la ventana.
+        const burst = document.querySelector<HTMLElement>('[data-fx] > div')!
+        const probe = document.createElement('div')
+        probe.style.cssText = 'position:absolute;left:var(--burst-x);top:var(--burst-y);width:0;height:0'
+        burst.append(probe)
+        const at = probe.getBoundingClientRect()
+        probe.remove()
+        const piece = document.querySelector('main [data-screen-part="piece"]')!.getBoundingClientRect()
+        return {
+          burst: { x: at.left, y: at.top },
+          piece: { x: piece.left + piece.width / 2, y: piece.top + piece.height / 2 },
+        }
+      })
+      expect(Math.abs(center.burst.x - center.piece.x), `rayos en x ${center.burst.x}`).toBeLessThanOrEqual(2)
+      expect(Math.abs(center.burst.y - center.piece.y), `rayos en y ${center.burst.y}`).toBeLessThanOrEqual(2)
     })
   })
 }

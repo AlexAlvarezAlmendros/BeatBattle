@@ -46,6 +46,49 @@
 }
 
 /*
+ * El centro de los rayos sigue a la pieza (§3.8.14 v0.6.7; cuarto pase del jurado, P8): en dos columnas
+ * (≥ 961 px), las pantallas con pieza (las interiores, los legales, la autenticación) publican el centro
+ * de su columna (`--screen-piece-x/y`, `ScreenPage`) y el estallido sale de ahí. Era un punto fijo de la
+ * ventana: en los legales caía ~200 px por encima del sello «EN OBRAS» y en /entrar a 1920 × 1080, arriba
+ * a la izquierda del logo. El estallido es la capa de los rayos con un 20 % más por cada lado (`.burst`,
+ * `inset: -20%`, 1,4 veces la ventana): lo que sobresale, el 20 % de la ventana, es 1/7 de su caja, y los
+ * porcentajes de `--burst-x/y` se resuelven en esa caja. Sin pieza publicada, el punto de siempre (el
+ * respaldo de `var()` deja el mismo porcentaje). El menú (la cuña a la derecha) no cambia.
+ */
+@media (min-width: 961px) {
+  .arena:not([data-wedge="right"]) {
+    --burst-x: calc(var(--screen-piece-x, 26% - 100% / 7) + 100% / 7);
+    --burst-y: calc(var(--screen-piece-y, 34% - 100% / 7) + 100% / 7);
+  }
+
+  .arena[data-wedge="left"] {
+    --burst-x: calc(var(--screen-piece-x, 18% - 100% / 7) + 100% / 7);
+    --burst-y: calc(var(--screen-piece-y, 46% - 100% / 7) + 100% / 7);
+  }
+}
+
+/*
+ * Ventana grande (≥ 1600 px; §3.8.14 v0.6.7, P8): la cuña de las interiores sigue a la columna de la pieza
+ * y el granate no pasa del ~24 % (la 404 llegaba al 25,8 % a 1920 × 1080 y al 26,5 % a 2560 × 1440: la
+ * pieza no crece con la ventana y la cuña, sí). La diagonal pasa `--bb-space-8` a la derecha de la esquina
+ * de abajo de la columna (`--screen-piece-right/bottom`, `ScreenPage`): a la altura de esa esquina corta la
+ * ventana en `--split-x` más lo que sube la inclinación, `(100vh − pie) · tan(17°)`. Nunca más allá del
+ * 30 % de siempre (`--bb-split-x-left`): en las pantallas de contenido, cuya columna llega a la barra, la
+ * cuña es la de siempre. Sin pieza publicada, también.
+ */
+@media (min-width: 1600px) {
+  .arena[data-wedge="left"] {
+    --split-x: min(
+      var(--bb-split-x-left),
+      var(--screen-piece-right, 100vw) +
+      var(--bb-space-2) -
+      (100vh - var(--screen-piece-bottom, 0px)) *
+      tan(var(--bb-split-angle))
+    );
+  }
+}
+
+/*
  * ── Estallido de rayos (§3.2): blanco al 4,5 %, rayo de 1,2° cada 6°, con máscara radial ─────
  * La capa de los rayos (`.rays`, del tamaño de la ventana) los apaga bajo el jugador del HUD (la caja
  * que publica `Hud`: `--hud-player-right` × `--hud-player-bottom`, desde la esquina de arriba a la
