@@ -326,7 +326,7 @@ pnpm build        # web y API empaquetada para Vercel, con una prueba de humo de
 pnpm e2e          # Playwright + axe contra su propia web (:5174) y API (:3101), con BD temporal
 ```
 
-En local, `pnpm e2e` usa el Chrome del sistema con la GPU real; la CI usa el Chromium de Playwright
+En local, `pnpm e2e` usa el Chrome del sistema con la GPU real; la CI usa el Chromium completo de Playwright (`channel: 'chromium'`), que mide el texto como Chrome
 (`CI=1`). Sus puertos son otros para no chocar con `pnpm dev:all`, y se cambian con `PW_PORT`,
 `PW_API_PORT` y `PW_PREVIEW_PORT`. Para mirar, no solo compilar:
 
