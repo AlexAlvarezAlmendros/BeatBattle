@@ -9,7 +9,15 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto 1fr auto;
-  min-height: 100dvh;
+  /*
+   * Con la barra despegada (§3.4.1 v0.6.7), la pantalla desborda como poco lo que cuelga de ella
+   * (`--bar-tail`, que publica `ControlsBar`; 0 si va pegada): lo de antes de la barra mide como poco el
+   * alto de la ventana menos la fila de la firma y, al abrir, solo se ve esa fila, entera y pegada al pie.
+   * Sin esto, en una pantalla solo un poco más alta que la ventana la barra `sticky` no podía bajar de su
+   * sitio y asomaban cortadas las filas de debajo de la firma («LEGAL» a 360 × 640 táctil en /entrar, la
+   * fila de las teclas a 900 × 700 en «/»; ronda final de la 0.28, D1).
+   */
+  min-height: calc(100dvh + var(--bar-tail, 0px));
   /*
    * Nada se sale de lado: el cursor de juego de una opción pegada al borde (7 px por fuera de la pieza)
    * ensancharía la ventana en móvil al cargar. `clip` no crea contenedor de desplazamiento (el HUD y la

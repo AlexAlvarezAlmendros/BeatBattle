@@ -52,8 +52,11 @@
  * pegada al pie** (§3.4.1
  * v0.6.6, `RF-OTP-01`: antes se despegaba entera y las interiores, sin lockup, no enseñaban ninguna firma
  * al abrir). La fila de la firma pasa arriba (las demás, debajo y en el mismo orden) y la barra sigue
- * pegada con `bottom` negativo: lo que mide de más que esa fila (`--bar-tail`, que mide `ControlsBar`)
- * queda por debajo de la ventana hasta que se llega al final de la pantalla. Entre filas, el aire del
+ * pegada con `bottom` negativo: lo que mide de más que esa fila (`--bar-tail`, que mide `ControlsBar` y
+ * publica en la raíz) queda por debajo de la ventana hasta que se llega al final de la pantalla. `sticky`
+ * solo sube la barra, no la baja de su sitio: por eso la pantalla desborda como poco `--bar-tail` (el
+ * marco, `layout.css`) y, aunque sea poco más alta que la ventana, al abrir no asoman las filas de debajo
+ * (ronda final de la 0.28, D1). Entre filas, el aire del
  * anillo del foco (`--bar-ring`): la parte pegada acaba ahí, sin asomar la fila siguiente. El orden de las
  * filas, más abajo («Despegada: la firma arriba»).
  */

@@ -463,6 +463,90 @@ for (const { width, height } of [
 }
 
 /**
+ * Lo que se ve de la barra despegada al abrir (sin desplazar): si va despegada, la caja de la firma y las
+ * piezas de las filas de debajo de la suya (teclas, «Legal», la crónica y su pausa) que asoman por encima
+ * del pie de la ventana, con dónde empiezan. Y, al final de la pantalla, el pie de la barra.
+ */
+function signatureRowAtTop(page: Page) {
+  return page.evaluate(() => {
+    window.scrollTo(0, 0)
+    const bar = document.querySelector('footer')!
+    const signature = bar.querySelector('[data-otp-signature]')!.getBoundingClientRect()
+    const peeking: string[] = []
+    for (const piece of bar.querySelectorAll('ul > li, a[href], button, [data-chronicle]')) {
+      if (piece.closest('[data-otp-signature]')) continue
+      if (!piece.checkVisibility({ visibilityProperty: true })) continue
+      const box = piece.getBoundingClientRect()
+      if (box.width < 1 || box.height < 1) continue
+      // Al lado de la firma (en su fila) no cuenta: va pegado con ella.
+      if (box.top < signature.bottom - 0.5) continue
+      if (box.top < innerHeight - 0.5)
+        peeking.push(
+          `${piece.textContent?.trim().slice(0, 20) || piece.tagName}: desde ${box.top.toFixed(1)}`,
+        )
+    }
+    const top = { top: signature.top, bottom: signature.bottom }
+    window.scrollTo(0, document.scrollingElement!.scrollHeight)
+    const barBottom = bar.getBoundingClientRect().bottom
+    window.scrollTo(0, 0)
+    return { unpinned: bar.hasAttribute('data-unpinned'), signature: top, peeking, barBottom }
+  })
+}
+
+/**
+ * Ronda final de la 0.28 (D1): con la barra despegada y la pantalla solo un poco más alta que la ventana
+ * (menos que lo que cuelga de la barra, `--bar-tail`), la barra no podía bajar de su sitio (`sticky` con
+ * `bottom` negativo solo la sube) y al abrir asomaban cortadas las filas de debajo de la firma: a 360 × 640
+ * táctil, «LEGAL» en /entrar, /legal/bases, /legal/cookies y /registro; a 900 × 700 con teclado, en «/», la
+ * fila de las teclas por la mitad; a 823 × 514 en /legal/bases, la parte de arriba de [Q]/[E]. §3.4.1
+ * v0.6.7: despegada, la barra va al final de la pantalla salvo la fila de la firma, que es lo único que se
+ * ve al abrir, entera y pegada al pie.
+ */
+for (const { width, height, touch, routes } of [
+  {
+    width: 360,
+    height: 640,
+    touch: true,
+    routes: [
+      { path: '/entrar', heading: 'Entrar' },
+      { path: '/legal/bases', heading: 'Bases de la competición' },
+      { path: '/legal/cookies', heading: 'Política de cookies' },
+      { path: '/registro', heading: 'Crear cuenta' },
+    ],
+  },
+  { width: 900, height: 700, touch: false, routes: [{ path: '/', heading: 'Beat Battle' }] },
+  {
+    width: 823,
+    height: 514,
+    touch: false,
+    routes: [{ path: '/legal/bases', heading: 'Bases de la competición' }],
+  },
+]) {
+  test.describe(`fila de la firma al abrir a ${width} × ${height}${touch ? ' táctil' : ' con teclado'}`, () => {
+    test.use({ viewport: { width, height }, isMobile: touch, hasTouch: touch })
+
+    for (const { path, heading } of routes) {
+      test(`RF-OTP-01 / §3.4.1 v0.6.7: en ${path}, con la barra despegada, al abrir solo se ve la fila de la firma, entera, sin asomar las de debajo`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        const { unpinned, signature, peeking, barBottom } = await signatureRowAtTop(page)
+        expect(unpinned, 'la barra, despegada').toBe(true)
+        expect(signature.top, 'la firma, entera en la ventana').toBeGreaterThanOrEqual(-0.5)
+        expect(signature.bottom, 'la firma, entera en la ventana').toBeLessThanOrEqual(height + 0.5)
+        await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({
+          ratio: 1,
+        })
+        expect(peeking, 'piezas de las filas de debajo de la firma que asoman al abrir').toEqual([])
+        // Al final de la pantalla, la barra entera.
+        expect(barBottom).toBeLessThanOrEqual(height + 0.5)
+      })
+    }
+  })
+}
+
+/**
  * La crónica con la letra del navegador grande (cuarto pase del jurado de la 0.28, F6): a 1440 × 900 con
  * la letra por defecto a 24 px iba en la columna de la derecha y acababa en «Inserta tu beat · Crédit…»
  * (WCAG 1.4.4). Ahora, si un mensaje no cabe en una línea, parte en dos; dos líneas caben en el alto del

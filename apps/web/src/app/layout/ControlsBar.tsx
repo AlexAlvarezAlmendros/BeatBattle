@@ -121,7 +121,11 @@ export const CONTROLS_MAX_VIEWPORT_SHARE = 0.15
  */
 export const CONTROLS_HEIGHT_VAR = '--controls-pinned-h'
 
-/** Variable de la barra despegada: lo que mide de más que la fila de la firma (su `bottom` negativo). */
+/**
+ * Variable de la barra despegada: lo que mide de más que la fila de la firma, lo que cuelga por debajo de la
+ * ventana (su `bottom` negativo; 0 pegada). Va en la raíz, como el alto de lo pegado: el marco la usa para
+ * que la pantalla desborde como poco eso (`layout.css`), y al abrir solo se vea la fila de la firma.
+ */
 const BAR_TAIL_VAR = '--bar-tail'
 
 /**
@@ -146,7 +150,9 @@ const BAR_TAIL_VAR = '--bar-tail'
  *   `CONTROLS_MAX_VIEWPORT_SHARE` del alto de la ventana (el 15 %, en cualquier ventana y con cualquier
  *   entrada), se despega (`data-unpinned`): las teclas, «Legal» y la crónica van al final de la pantalla y
  *   solo sigue pegada la fila de la firma (§3.4.1 v0.6.6 y v0.6.7), así que el margen pasa a ser el alto de
- *   esa fila.
+ *   esa fila. Lo que cuelga (`BAR_TAIL_VAR`) va en la raíz: el marco hace que la pantalla desborde como poco
+ *   eso, para que al abrir solo se vea la fila de la firma aunque la pantalla sea poco más alta que la
+ *   ventana (ronda final de la 0.28, D1).
  * - **Foco en lo despegado** (`revealUnpinned`): con Tab hasta «Legal» o la pausa, que despegadas quedan
  *   por debajo de la ventana dentro de una barra `sticky`, el navegador no desplaza lo bastante (lo que
  *   mueve, la barra lo sigue) y el control quedaba entero fuera de la ventana (revisión del cuarto pase,
@@ -187,11 +193,13 @@ function useBarLayout(
       const height = bar.getBoundingClientRect().height
       const unpinned = height > window.innerHeight * CONTROLS_MAX_VIEWPORT_SHARE
       bar.toggleAttribute('data-unpinned', unpinned)
-      // Despegada, sigue pegada la fila de la firma (arriba): lo demás queda por debajo de la ventana.
-      const pinned = Math.ceil(unpinned && signature ? signatureRowHeight(bar, signature, right) : height)
-      const tail = unpinned ? Math.max(0, Math.floor(bar.getBoundingClientRect().height - pinned)) : 0
-      bar.style.setProperty(BAR_TAIL_VAR, `${tail}px`)
-      root.style.setProperty(CONTROLS_HEIGHT_VAR, `${pinned}px`)
+      // Despegada, sigue pegada la fila de la firma (arriba): lo demás queda por debajo de la ventana. Lo que
+      // cuelga es exacto, sin redondear: lo que se ve al abrir acaba justo donde empieza la fila siguiente,
+      // sin asomar ni un píxel de ella (ronda final de la 0.28, D1). El margen del foco sí se redondea arriba.
+      const row = unpinned && signature ? signatureRowHeight(bar, signature, right) : height
+      const tail = unpinned ? Math.max(0, bar.getBoundingClientRect().height - row) : 0
+      root.style.setProperty(BAR_TAIL_VAR, `${tail}px`)
+      root.style.setProperty(CONTROLS_HEIGHT_VAR, `${Math.ceil(row)}px`)
     }
     update()
     let frame = 0
@@ -211,7 +219,7 @@ function useBarLayout(
       window.removeEventListener('resize', later)
       bar.removeEventListener('focusin', reveal)
       root.style.removeProperty(CONTROLS_HEIGHT_VAR)
-      bar.style.removeProperty(BAR_TAIL_VAR)
+      root.style.removeProperty(BAR_TAIL_VAR)
     }
   }, [ref, keysRef, keyIds])
 }
