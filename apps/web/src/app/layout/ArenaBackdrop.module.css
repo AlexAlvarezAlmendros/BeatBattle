@@ -28,7 +28,35 @@
   --burst-y: 46%;
 }
 
-/* ── Estallido de rayos (§3.2): blanco al 4,5 %, rayo de 1,2° cada 6°, con máscara radial ───── */
+/*
+ * ── Estallido de rayos (§3.2): blanco al 4,5 %, rayo de 1,2° cada 6°, con máscara radial ─────
+ * La capa de los rayos (`.rays`, del tamaño de la ventana) los apaga bajo el jugador del HUD (la caja
+ * que publica `Hud`: `--hud-player-right` × `--hud-player-bottom`, desde la esquina de arriba a la
+ * izquierda) y los deja volver en 32 px: ningún texto del HUD («LILBRU», «NV 7 · BEATMAKER», el XP, «1P ·
+ * PULSA PARA UNIRTE») va directamente sobre ellos (`RD-VIS-05`, §3.2; jurado de la 0.28, L12). Las
+ * demás piezas del HUD van en su panel. Son dos capas sumadas: se ven a la derecha de la caja o debajo
+ * de ella. El estallido no cambia de sitio ni de forma: sigue detrás del logo y llega arriba entre el
+ * jugador y el reloj, como en la maqueta.
+ */
+.rays {
+  /* Sin jugador (marco simple), la caja queda fuera de la ventana y los rayos se ven enteros. */
+  --rays-x: var(--hud-player-right, calc(-1 * var(--bb-space-8)));
+  --rays-y: var(--hud-player-bottom, calc(-1 * var(--bb-space-8)));
+  position: absolute;
+  inset: 0;
+  mask:
+    linear-gradient(
+      to right,
+      transparent var(--rays-x),
+      var(--bb-black) calc(var(--rays-x) + var(--bb-space-8))
+    ),
+    linear-gradient(
+      to bottom,
+      transparent var(--rays-y),
+      var(--bb-black) calc(var(--rays-y) + var(--bb-space-8))
+    );
+}
+
 .burst {
   position: absolute;
   inset: -20%;

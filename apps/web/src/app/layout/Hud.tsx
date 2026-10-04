@@ -27,6 +27,7 @@ import { useSound } from './soundStore'
 export function Hud({ screen }: { screen: ScreenConfig }) {
   const ref = useRef<HTMLElement>(null)
   useHudStack(ref)
+  useHudPlayerBox(ref)
   return (
     <header ref={ref} className={styles.hud}>
       <FrameSlotTarget
@@ -85,6 +86,49 @@ export function useHudStack(ref: RefObject<HTMLElement | null>): void {
     return () => {
       cancelAnimationFrame(frame)
       observer.disconnect()
+    }
+  }, [ref])
+}
+
+/**
+ * Variables con la caja del jugador del HUD (su borde derecho y su borde de abajo, en px desde la esquina
+ * de arriba a la izquierda de la página): la arena apaga ahí sus rayos (`ArenaBackdrop`).
+ */
+export const HUD_PLAYER_RIGHT_VAR = '--hud-player-right'
+export const HUD_PLAYER_BOTTOM_VAR = '--hud-player-bottom'
+
+/**
+ * Publica la caja del jugador del HUD (la ficha o «1P · PULSA PARA UNIRTE») para que la arena apague los
+ * rayos debajo: es la única pieza del HUD cuyo texto va directamente sobre el fondo (el reloj, la placa
+ * de título, la temporada, la racha y el sonido van en su panel). Ningún texto sobre rayos (`RD-VIS-05`,
+ * §3.2; jurado de la 0.28, L12: «LILBRU», «NV 7 · BEATMAKER» y el XP iban sobre sus bandas). Sigue a la
+ * pieza cuando cambia de tamaño o de sitio (la ficha que llega, el HUD apilado, el medianil de móvil). Sin
+ * jugador (marco simple), no hay caja.
+ */
+export function useHudPlayerBox(ref: RefObject<HTMLElement | null>): void {
+  useLayoutEffect(() => {
+    const player = ref.current?.querySelector<HTMLElement>('[data-frame-slot="hudPlayer"]')
+    if (!player) return
+    const root = document.documentElement
+    const clear = () => {
+      root.style.removeProperty(HUD_PLAYER_RIGHT_VAR)
+      root.style.removeProperty(HUD_PLAYER_BOTTOM_VAR)
+    }
+    const update = () => {
+      const box = player.getBoundingClientRect()
+      if (box.width < 1 || box.height < 1) return clear()
+      root.style.setProperty(HUD_PLAYER_RIGHT_VAR, `${Math.ceil(box.right + window.scrollX)}px`)
+      root.style.setProperty(HUD_PLAYER_BOTTOM_VAR, `${Math.ceil(box.bottom + window.scrollY)}px`)
+    }
+    update()
+    // Cambiar las variables no cambia el tamaño de la pieza: se puede actualizar dentro del aviso.
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(update)
+    observer?.observe(player)
+    window.addEventListener('resize', update)
+    return () => {
+      observer?.disconnect()
+      window.removeEventListener('resize', update)
+      clear()
     }
   }, [ref])
 }

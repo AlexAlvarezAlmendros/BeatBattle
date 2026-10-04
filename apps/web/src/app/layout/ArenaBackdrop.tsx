@@ -19,7 +19,8 @@ export const MOBILE_QUERY = '(max-width: 720px)'
  *   ángulo es el token en cualquier proporción de ventana); dentro, la trama se endereza con el giro
  *   contrario. En móvil, la diagonal pasa a horizontal inclinada (`clip-path`, como las maquetas).
  * - **Estallido de rayos** detrás del logo y **viñeta** en el borde. Los rayos son espectáculo
- *   (`data-fx`): el modo serio los quita y deja la trama fija.
+ *   (`data-fx`): el modo serio los quita y deja la trama fija. No llegan bajo el jugador del HUD (su
+ *   caja la publica `Hud`): ningún texto del HUD va sobre ellos (`RD-VIS-05`).
  * - El hueco `arena` es para lo que la pantalla pone dentro de la cuña (el número de semana gigante).
  * - Sin rayos (`rays={false}`) en las pantallas de texto sin pieza que los tape (la galería).
  *
@@ -32,7 +33,11 @@ export function ArenaBackdrop({ wedge, rays = true }: { wedge: ArenaWedge; rays?
   const shape = mobile ? 'menuWedgeMobile' : wedge === 'right' ? 'menuWedge' : 'interiorWedge'
   return (
     <div className={styles.arena} data-wedge={wedge} aria-hidden="true">
-      {rays && <div className={styles.burst} data-fx="" />}
+      {rays && (
+        <div className={styles.rays} data-fx="">
+          <div className={styles.burst} />
+        </div>
+      )}
       {wedge !== 'none' && (
         <>
           <div className={styles.wedge}>
