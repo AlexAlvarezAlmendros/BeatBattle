@@ -36,6 +36,15 @@ export interface ScreenPageProps {
    */
   layout?: 'interior' | 'title'
   /**
+   * La pantalla llena el alto entre el HUD y la barra en escritorio (≥ 961 px), como las maquetas de
+   * interiores (`02-seleccion`, `05-perfil`): la pieza y el panel se estiran hasta la barra y cada uno
+   * reparte lo suyo (filas que comparten alto, acciones al pie), sin huecos dentro. La pieza pasa a ser
+   * una columna flexible para que la pantalla diga qué crece y qué va al pie. Si no cabe, se desplaza.
+   * Para las pantallas con contenido que repartir («Cómo se juega», Opciones, la 404); las provisionales
+   * con solo una línea se quedan a su alto (un panel hueco hasta la barra sería peor).
+   */
+  fill?: boolean
+  /**
    * El panel va antes que la pieza en el orden de lectura y del foco y, en la columna única (≤ 960 px),
    * también en pantalla; en dos columnas siguen la pieza a la izquierda y el panel a la derecha. Para
    * la 404, cuyo subtítulo va con el titular (§3.8.11).
@@ -69,6 +78,7 @@ export function ScreenPage({
   piece,
   badge,
   layout = 'interior',
+  fill = false,
   panelFirst = false,
   titleInHud,
   actions,
@@ -91,6 +101,7 @@ export function ScreenPage({
       data-title-in-hud={inHud || undefined}
       data-piece={piece ? '' : undefined}
       data-layout={layout}
+      data-fill={fill || undefined}
       data-panel-first={panelFirst || undefined}
     >
       <DocumentTitle page={documentTitle ?? undefined} />

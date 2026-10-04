@@ -68,6 +68,20 @@ async function wineShare(page: Page): Promise<number> {
   }, png.toString('base64'))
 }
 
+/**
+ * Hueco máximo entre el pie de las columnas y la barra en las pantallas que llenan el alto (`fill`): el
+ * contenido deja 32 px de margen abajo (`.game-main`), y las maquetas llegan casi a la barra.
+ */
+const BAR_GAP = 48
+
+/** Baja hasta el final de la página (en ventanas bajas, lo que no cabe se desplaza). */
+async function scrollToEnd(page: Page): Promise<void> {
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+  await page.waitForFunction(
+    () => Math.ceil(window.scrollY + window.innerHeight) >= document.documentElement.scrollHeight - 1,
+  )
+}
+
 test.describe('1440 × 900', () => {
   test('RD-VIS-02 e: la autenticación es una pantalla de título, con el logo y el panel centrados entre el HUD y la barra', async ({
     page,
@@ -101,6 +115,31 @@ test.describe('1440 × 900', () => {
     expect(Math.abs(box.panel.bottom - box.back.bottom)).toBeLessThanOrEqual(2)
     // Las cinco filas se reparten el alto del panel: la última llega a su pie.
     expect(box.panel.bottom - box.lastRule.bottom).toBeLessThanOrEqual(48)
+  })
+
+  test('RD-VIS-02 e: «Cómo se juega» llena el alto entre el HUD y la barra: la lista de movimientos y el panel de reglas llegan a la barra (J2r)', async ({
+    page,
+  }) => {
+    await open(page, '/como-funciona', 'Cómo se juega')
+    await settle(page)
+    const box = await boxes(page, {
+      panel: PANEL,
+      piece: PIECE,
+      back: `${PIECE} ul > li:last-child > a`,
+      lastRule: 'main ol > li:last-child',
+    })
+    // Como las maquetas de interiores (`02-seleccion`, `05-perfil`): las dos columnas, hasta la barra.
+    expect(box.bar.top - box.panel.bottom, 'hueco bajo el panel').toBeLessThanOrEqual(BAR_GAP)
+    expect(box.bar.top - box.back.bottom, 'hueco bajo la lista').toBeLessThanOrEqual(BAR_GAP)
+    expect(box.panel.bottom).toBeLessThanOrEqual(box.bar.top)
+    // Sin hueco dentro del panel: las filas de las reglas se reparten su alto.
+    expect(box.panel.bottom - box.lastRule.bottom).toBeLessThanOrEqual(48)
+    // Sin hueco dentro de la lista: los movimientos se reparten el alto, «Volver al menú» al pie.
+    const gaps = await page.evaluate((selector) => {
+      const items = [...document.querySelectorAll(`${selector} ul > li > a`)].map((a) => a.getBoundingClientRect())
+      return items.slice(1).map((rect, index) => rect.top - items[index]!.bottom)
+    }, PIECE)
+    for (const gap of gaps) expect(gap, `huecos entre placas: ${gaps.join(', ')}`).toBeLessThanOrEqual(24)
   })
 
   test('RD-VIS-02 e: la 404 estira el panel del subtítulo hasta el pie del pad', async ({ page }) => {
@@ -138,6 +177,30 @@ test.describe('1440 × 900', () => {
     })
   }
 })
+
+for (const viewport of [
+  { width: 1440, height: 789 },
+  { width: 1366, height: 657 },
+]) {
+  test.describe(`${viewport.width} × ${viewport.height}`, () => {
+    test.use({ viewport })
+
+    for (const { path, heading } of [{ path: '/como-funciona', heading: 'Cómo se juega' }]) {
+      test(`RD-VIS-02 e: ${path} llena el alto y, si no cabe, se desplaza sin pisar la barra (J2r)`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        await scrollToEnd(page)
+        const box = await boxes(page, { panel: PANEL, piece: PIECE })
+        for (const name of ['panel', 'piece'] as const) {
+          expect(box[name].bottom, `pie de «${name}» y barra`).toBeLessThanOrEqual(box.bar.top)
+          expect(box.bar.top - box[name].bottom, `hueco bajo «${name}»`).toBeLessThanOrEqual(BAR_GAP)
+        }
+      })
+    }
+  })
+}
 
 test.describe('390 × 844', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })

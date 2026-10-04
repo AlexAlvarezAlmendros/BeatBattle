@@ -173,10 +173,29 @@
 }
 
 /*
- * Escritorio: el panel se estira hasta el pie de la lista de movimientos (`ScreenPage`) y las cinco
- * filas se reparten su alto, como un marcador, en vez de quedarse arriba con medio panel vacío.
+ * Escritorio: la pantalla llena el alto hasta la barra (`ScreenPage` con `fill`, tercer pase del jurado,
+ * J2r). A la izquierda, los tres movimientos se reparten el alto de la lista (sus placas crecen y su
+ * contenido va centrado) y «Bases» y «Volver al menú» quedan al pie, a su alto; a la derecha, las cinco
+ * reglas se reparten el del panel, como un marcador. Ni medio panel vacío ni hueco bajo las columnas.
  */
 @media (min-width: 961px) {
+  .moves {
+    flex: 1 0 auto;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .list {
+    grid-template-rows: repeat(3, minmax(auto, 1fr)) auto auto;
+  }
+
+  .list > li {
+    display: grid;
+  }
+
+  .move {
+    align-content: center;
+  }
+
   .rules {
     flex: 1;
     grid-template-rows: auto minmax(0, 1fr);

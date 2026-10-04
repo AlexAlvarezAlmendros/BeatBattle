@@ -128,6 +128,31 @@
   .screen[data-layout="title"] .panel {
     align-self: end;
   }
+
+  /*
+   * Pantallas que llenan el alto (`fill`): la pantalla ocupa del HUD a la barra (la fila de la pieza y
+   * el panel es `1fr`, nunca menos que su contenido: si no cabe, se desplaza) y la pieza y el panel se
+   * estiran hasta la barra. La pieza es una columna flexible: cada pantalla dice qué crece y qué va al
+   * pie, como la columna de `05-perfil`.
+   */
+  .screen[data-fill] {
+    flex: 1 0 auto;
+  }
+
+  .screen[data-fill][data-title-in-hud] {
+    grid-template-rows: 1fr;
+  }
+
+  .screen[data-fill] .piece {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    align-self: stretch;
+  }
+
+  .screen[data-fill] .panel {
+    align-self: stretch;
+  }
 }
 
 /*

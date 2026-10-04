@@ -137,6 +137,7 @@ export function HowItWorksPage() {
       kicker={t('frame.plates.howItWorks')}
       summary={t('pages.howItWorks.summary')}
       actions={null}
+      fill
       piece={
         <nav className={styles.moves} aria-labelledby={listLabelId}>
           {/* El rótulo ya se ve en la placa del HUD («LISTA DE MOVIMIENTOS · CÓMO SE JUEGA»). */}
