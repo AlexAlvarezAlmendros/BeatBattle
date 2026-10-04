@@ -26,7 +26,7 @@ describe('crónica de la arena (§3.8.3)', () => {
 
   it('no es una región viva y lleva su nombre para los lectores de pantalla', () => {
     render(<Chronicle messages={MESSAGES} label="Crónica de la arena" />)
-    const line = screen.getByText(MESSAGES[0]).closest('p')!
+    const line = screen.getByText(MESSAGES[0]).closest('[data-chronicle]')!
     expect(line).toHaveAttribute('aria-live', 'off')
     expect(line).toHaveTextContent('Crónica de la arena:')
   })
@@ -34,10 +34,10 @@ describe('crónica de la arena (§3.8.3)', () => {
   it('RNF-A11Y-03: con «reducir movimiento» sigue rotando cada 5 s, sin fundido (la crónica es información, §3.6)', () => {
     document.documentElement.setAttribute('data-motion', 'reduced')
     render(<Chronicle messages={MESSAGES} label="Crónica de la arena" />)
-    expect(screen.getByText(MESSAGES[0]).closest('p')).toHaveAttribute('data-static', 'true')
+    expect(screen.getByText(MESSAGES[0]).closest('[data-chronicle]')).toHaveAttribute('data-static', 'true')
     act(() => vi.advanceTimersByTime(loop.chronicle))
     expect(screen.getByText(MESSAGES[1])).toBeInTheDocument()
-    expect(screen.getByText(MESSAGES[1]).closest('p')).toHaveAttribute('data-static', 'true')
+    expect(screen.getByText(MESSAGES[1]).closest('[data-chronicle]')).toHaveAttribute('data-static', 'true')
   })
 
   it('RNF-A11Y-03 / WCAG 2.2.2: con «reducir movimiento» el botón «Pausar las animaciones» sigue ahí y la para', () => {

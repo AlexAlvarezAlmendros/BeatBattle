@@ -70,12 +70,16 @@ export function Chronicle({
       onFocus={() => setFocused(true)}
       onBlur={onBlur}
     >
-      <p className={styles.chronicle} aria-live="off" data-chronicle="" data-static={reduced || undefined}>
+      {/*
+       * Un `div`, no un párrafo: el espaciado de WCAG 1.4.12 (`p { margin-bottom: 2em }`) le daba un margen que
+       * contaba al centrarla con la pausa, y una línea quedaba pegada arriba (jurado de la 0.28, cierre, R5).
+       */}
+      <div className={styles.chronicle} aria-live="off" data-chronicle="" data-static={reduced || undefined}>
         <span className="sr-only">{label}: </span>
         <span key={index} className={styles.message}>
           {current}
         </span>
-      </p>
+      </div>
       {canPause && <LoopsPause />}
     </div>
   )

@@ -592,6 +592,69 @@ for (const { width, height, fontSize } of [
   })
 }
 
+/** Espaciado de texto de WCAG 1.4.12, con `!important` (como en `fit.spec.ts`). */
+const TEXT_SPACING = `*, *::before, *::after { line-height: 1.5 !important; letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important; } p { margin-bottom: 2em !important; }`
+
+/**
+ * La crónica va centrada en vertical con su botón de pausa, también con el espaciado de texto de WCAG 1.4.12
+ * (jurado de la 0.28, cierre, R5: a 1440 × 900, con el espaciado, el texto de una línea iba de 851 a 865 px
+ * con la pausa en 849–893, pegado arriba: el margen de párrafo del espaciado, `p { margin-bottom: 2em }`,
+ * contaba al centrarla). Se mira cada mensaje (reloj falso) con el espaciado aplicado después de cargar y,
+ * con la letra a 24 px, que las dos líneas siguen dentro del alto de la pausa.
+ */
+for (const { width, height, fontSize } of [
+  { width: 1440, height: 900, fontSize: 16 },
+  { width: 1280, height: 720, fontSize: 16 },
+  { width: 1024, height: 768, fontSize: 16 },
+  { width: 390, height: 844, fontSize: 16 },
+  { width: 1440, height: 900, fontSize: 24 },
+]) {
+  test.describe(`crónica con el espaciado de texto a ${width} × ${height}${fontSize === 16 ? '' : ` con letra de ${fontSize} px`}`, () => {
+    test.use({ viewport: { width, height } })
+
+    test('§3.4.1 / WCAG 1.4.12: cada mensaje de la crónica va centrado con el botón de pausa y dentro de su alto', async ({
+      page,
+    }) => {
+      if (fontSize !== 16) {
+        const cdp = await page.context().newCDPSession(page)
+        await cdp.send('Page.enable')
+        await cdp.send('Page.setFontSizes', { fontSizes: { standard: fontSize, fixed: fontSize } })
+      }
+      await page.clock.install()
+      await open(page, '/dev/menu', 'Beat Battle')
+      await page.mouse.move(0, 0)
+      await page.addStyleTag({ content: TEXT_SPACING })
+      const chronicle = page.getByRole('contentinfo').locator('[data-chronicle]')
+      const seen = new Set<string>()
+      const problems: string[] = []
+      for (let step = 0; step < 4; step++) {
+        await expect(chronicle).not.toContainText([...seen].at(-1) ?? '\u0000')
+        const state = await chronicle.evaluate((line) => {
+          const message = line.lastElementChild!
+          const range = document.createRange()
+          range.selectNodeContents(message)
+          const text = range.getBoundingClientRect()
+          const pause = line.parentElement!.querySelector('button')!.getBoundingClientRect()
+          return {
+            message: message.textContent ?? '',
+            offset: (text.top + text.bottom) / 2 - (pause.top + pause.bottom) / 2,
+            inside: text.top >= pause.top - 0.5 && text.bottom <= pause.bottom + 0.5,
+            text: `${text.top.toFixed(1)}–${text.bottom.toFixed(1)}`,
+            pause: `${pause.top.toFixed(1)}–${pause.bottom.toFixed(1)}`,
+          }
+        })
+        seen.add(state.message)
+        if (Math.abs(state.offset) > 1.5 || !state.inside)
+          problems.push(`«${state.message}»: texto en ${state.text}, pausa en ${state.pause}`)
+        await page.clock.runFor(5_000)
+      }
+      expect(seen.size, 'los cuatro mensajes').toBe(4)
+      expect(problems).toEqual([])
+    })
+  })
+}
+
 /** Bucles infinitos en marcha (CSS y Web Animations), por su nombre. */
 function runningLoops(page: Page): Promise<string[]> {
   return page.evaluate(() =>

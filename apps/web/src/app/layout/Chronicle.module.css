@@ -38,7 +38,9 @@
  * barra no cambia de alto al rotar. Solo un mensaje más largo que dos líneas acaba en «…». El crédito
  * parte por el «·» y no antes de él («Inserta tu beat ·» / «Crédito 01»: espacios de no separación en
  * `home.chronicle.*`); si un trozo así no cabe ni solo en su línea, parte donde haga falta antes que
- * cortarse (`overflow-wrap`).
+ * cortarse (`overflow-wrap`). Va centrada en vertical con el botón de pausa (`.wrap`); es un `div` para que el
+ * margen de párrafo del espaciado de WCAG 1.4.12 no la descentre (jurado de la 0.28, cierre, R5: a 1440 × 900
+ * el texto de una línea iba de 851 a 865 px con la pausa en 849–893).
  */
 .chronicle {
   display: -webkit-box;
