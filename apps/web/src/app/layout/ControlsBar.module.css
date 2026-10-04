@@ -62,8 +62,9 @@
 
 /*
  * Las teclas, en una fila de 44 px a la izquierda de la firma. Si no caben en una línea (lo mide
- * `ControlsBar`: aquí, la segunda línea queda recortada por la columna), la barra pone `data-keys-row` y
- * van en su propia fila (más abajo): nunca se ve una tecla cortada por la mitad ni falta ninguna.
+ * `ControlsBar`: aquí, la segunda línea, o una tecla sola más ancha que la columna, queda recortada), la
+ * barra pone `data-keys-row` y van en su propia fila (más abajo): nunca se ve una tecla cortada por la
+ * mitad ni falta ninguna.
  */
 .keys {
   grid-column: 1;

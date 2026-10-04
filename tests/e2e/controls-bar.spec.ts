@@ -7,15 +7,17 @@ import { open, settle } from './support'
  */
 
 /**
- * Teclas de la barra que no se ven enteras: fuera de la ventana o recortadas por un antepasado que
- * recorta (`overflow`, `clip-path`, `contain: paint`). Devuelve también cuántas hay en la lista. Si la
- * barra va despegada (ventana baja), se baja hasta ella: lo que cuenta es que se vean al llegar.
+ * Teclas de la barra que no se ven enteras: fuera de la ventana, recortadas por un antepasado que
+ * recorta (`overflow`, `clip-path`, `contain: paint`) o encima de la firma. Devuelve también cuántas hay
+ * en la lista. Si la barra va despegada (ventana baja), se baja hasta ella: lo que cuenta es que se vean
+ * al llegar.
  */
 function hiddenKeys(page: Page): Promise<{ count: number; hidden: string[] }> {
   return page.evaluate(() => {
     document.querySelector('footer')?.scrollIntoView({ block: 'end' })
     const list = document.querySelector('footer ul')
     const keys = [...(list?.children ?? [])] as HTMLElement[]
+    const signature = document.querySelector('footer [data-otp-signature]')?.getBoundingClientRect()
     const hidden: string[] = []
     for (const key of keys) {
       const box = key.getBoundingClientRect()
@@ -26,6 +28,12 @@ function hiddenKeys(page: Page): Promise<{ count: number; hidden: string[] }> {
       }
       if (box.left < -0.5 || box.top < -0.5 || box.right > innerWidth + 0.5 || box.bottom > innerHeight + 0.5)
         hidden.push(`${name}: fuera de la ventana`)
+      if (
+        signature &&
+        Math.min(box.right, signature.right) - Math.max(box.left, signature.left) > 0.5 &&
+        Math.min(box.bottom, signature.bottom) - Math.max(box.top, signature.top) > 0.5
+      )
+        hidden.push(`${name}: pisa la firma`)
       for (let node = key.parentElement; node && node !== document.body; node = node.parentElement) {
         const style = getComputedStyle(node)
         const clips =
@@ -77,6 +85,44 @@ for (const { width, height } of [
         await settle(page)
         const { count, hidden } = await hiddenKeys(page)
         expect(count).toBe(keys)
+        expect(hidden).toEqual([])
+      })
+    }
+  })
+}
+
+/**
+ * Revisión de L7: con una sola tecla en la barra no hay otra que baje de línea, así que «no cabe» no se
+ * notaba en el alto. Con los atajos de una tecla apagados (WCAG 2.1.4, `RNF-A11Y-08`), las pantallas
+ * por defecto solo enseñan «ESC VOLVER»; en una columna más estrecha que ella (en /entrar a 390 px,
+ * 16 px) quedaba recortada y asomaba una «E» pegada a la firma. Pasa en móvil con teclado y en
+ * escritorio con la letra del navegador grande.
+ */
+for (const { width, height, fontSize } of [
+  { width: 390, height: 844, fontSize: 0 },
+  { width: 320, height: 568, fontSize: 0 },
+  { width: 721, height: 900, fontSize: 24 },
+]) {
+  test.describe(`una sola tecla con teclado a ${width} × ${height}${fontSize ? ` con letra de ${fontSize} px` : ''}`, () => {
+    test.use({ viewport: { width, height } })
+
+    for (const { path, heading } of [
+      { path: '/entrar', heading: 'Entrar' },
+      { path: '/esto-no-existe', heading: 'Bonus stage' },
+    ]) {
+      test(`RD-VIS-02 e / RNF-A11Y-08: con los atajos de una tecla apagados, en ${path} «ESC VOLVER» se ve entera y no pisa la firma`, async ({
+        page,
+      }) => {
+        await page.addInitScript(() => localStorage.setItem('bb:shortcuts', 'off'))
+        if (fontSize) {
+          const cdp = await page.context().newCDPSession(page)
+          await cdp.send('Page.enable')
+          await cdp.send('Page.setFontSizes', { fontSizes: { standard: fontSize, fixed: fontSize } })
+        }
+        await open(page, path, heading)
+        await settle(page)
+        const { count, hidden } = await hiddenKeys(page)
+        expect(count, 'sin M, queda una tecla').toBe(1)
         expect(hidden).toEqual([])
       })
     }

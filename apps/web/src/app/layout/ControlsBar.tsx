@@ -188,10 +188,15 @@ function useBarLayout(
   }, [ref, keysRef, keyIds])
 }
 
-/** ¿Se ven las teclas (con teclado) y no caben en una línea en su columna? */
+/**
+ * ¿Se ven las teclas (con teclado) y no caben en una línea en su columna? O parten de línea (sobra alto)
+ * o una tecla sola es más ancha que la columna (sobra ancho): con una sola tecla no hay otra que baje de
+ * línea, y la columna la recortaba (revisión de L7: con los atajos de una tecla apagados, en /entrar a
+ * 390 px solo quedaba «ESC VOLVER» en una columna de 16 px y asomaba una «E»).
+ */
 function keysOverflow(keys: HTMLElement): boolean {
   const shown = getComputedStyle(keys).visibility === 'visible' && keys.getClientRects().length > 0
-  return shown && keys.scrollHeight > keys.clientHeight + 0.5
+  return shown && (keys.scrollHeight > keys.clientHeight + 0.5 || keys.scrollWidth > keys.clientWidth + 0.5)
 }
 
 /**
