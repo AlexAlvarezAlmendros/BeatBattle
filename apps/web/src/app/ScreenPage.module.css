@@ -283,6 +283,12 @@
  */
 @media (min-width: 721px) and (max-height: 899px) {
   .screen[data-layout="interior"] {
+    /*
+     * Con el pad de la 404 a 56 px por tecla (248 px), la columna de la pieza puede bajar a 18 rem y
+     * seguir a la cuña hasta ~1020 px de ancho: a 1024 × 768, con 20 rem, las placas del pie de «Cómo se
+     * juega» y el tablero de Opciones pisaban la diagonal (revisión de la 0.28).
+     */
+    --screen-piece: clamp(18rem, calc(var(--bb-split-x-left) - var(--bb-gutter) + var(--bb-space-4)), 36rem);
     row-gap: var(--bb-space-3);
     margin-block: calc(-1 * var(--bb-space-3)) calc(-1 * var(--bb-space-4));
   }

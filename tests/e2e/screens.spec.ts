@@ -572,29 +572,98 @@ async function diagonalAt(page: Page, y: number): Promise<number> {
   return 0.3 * width + (height - y) * Math.tan((17 * Math.PI) / 180)
 }
 
+/*
+ * Con la ventana baja de 1024 × 768 la columna de la pieza baja a 18 rem (el pad, a 56 px por tecla,
+ * cabe): con 20 rem, las placas del pie de «Cómo se juega» pisaban la diagonal 18 px y el tablero de
+ * Opciones, 10 (revisión de la 0.28).
+ */
 for (const viewport of [
   { width: 1440, height: 900 },
   { width: 1920, height: 1080 },
+  { width: 1280, height: 720 },
+  { width: 1024, height: 768 },
 ]) {
   test.describe(`${viewport.width} × ${viewport.height}, columnas`, () => {
     test.use({ viewport })
 
-    test('RD-VIS-02 e: la columna de «Cómo se juega» queda a la izquierda de la diagonal, también al pie (L1)', async ({
+    for (const { path, heading, boxes: selector } of [
+      { path: '/como-funciona', heading: 'Cómo se juega', boxes: 'ul > li > a' },
+      { path: '/ajustes/sonido', heading: 'Sonido y efectos', boxes: 'figure' },
+      { path: '/esto-no-existe', heading: 'Bonus stage', boxes: 'figure, a' },
+    ]) {
+      test(`RD-VIS-02 e: la columna de ${path} queda a la izquierda de la diagonal, también al pie (L1)`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        const plates = await page.evaluate(
+          ([piece, inner]) =>
+            [...document.querySelectorAll(`${piece} :is(${inner})`)].map((a) => {
+              const rect = a.getBoundingClientRect()
+              return { right: rect.right, bottom: rect.bottom }
+            }),
+          [PIECE, selector] as const,
+        )
+        expect(plates.length).toBeGreaterThan(0)
+        for (const plate of plates) {
+          const diagonal = await diagonalAt(page, plate.bottom)
+          expect(plate.right, `caja con pie en ${plate.bottom}`).toBeLessThanOrEqual(diagonal)
+        }
+      })
+    }
+  })
+}
+
+/**
+ * Las placas en vista previa de Opciones (§3.8.14, como las del menú en §3.3 «Nada se corta»): el nombre
+ * no pasa de dos líneas y todas las placas de un tablero miden lo mismo, sin pasar de 72 px. En un
+ * tablero estrecho, el nombre cede su anchura y el medidor baja a una segunda línea (a 1280 × 720 y a
+ * 1024 × 768, «TAMAÑO / DE / TEXTO» partía en tres).
+ */
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 1366, height: 657 },
+  { width: 1280, height: 900 },
+  { width: 1280, height: 720 },
+  { width: 1024, height: 768 },
+  { width: 961, height: 900 },
+]) {
+  test.describe(`${viewport.width} × ${viewport.height}, vista previa de Opciones`, () => {
+    test.use({ viewport })
+
+    test('RD-VIS-02 e: el nombre de cada placa en vista previa ocupa como mucho dos líneas y las placas miden lo mismo (§3.8.14)', async ({
       page,
     }) => {
-      await open(page, '/como-funciona', 'Cómo se juega')
-      await settle(page)
-      const plates = await page.evaluate(
-        (selector) =>
-          [...document.querySelectorAll(`${selector} ul > li > a`)].map((a) => {
-            const rect = a.getBoundingClientRect()
-            return { right: rect.right, bottom: rect.bottom }
-          }),
-        PIECE,
-      )
-      for (const plate of plates) {
-        const diagonal = await diagonalAt(page, plate.bottom)
-        expect(plate.right, `placa con pie en ${plate.bottom}`).toBeLessThanOrEqual(diagonal)
+      const sections = TAB_SCREENS[0]!.paths
+      await page.goto(sections[0]!)
+      for (const [index, path] of sections.entries()) {
+        if (index > 0) await page.keyboard.press('e')
+        await expect(page).toHaveURL(path)
+        await expect(
+          page.getByRole('navigation', { name: TAB_SCREENS[0]!.nav }).locator('a[aria-current="page"]'),
+        ).toHaveAttribute('href', path)
+        await settle(page)
+        const plates = await page.evaluate(
+          (piece) =>
+            [...document.querySelectorAll(`${piece} figure li`)].map((plate) => {
+              const label = plate.firstElementChild!
+              const range = document.createRange()
+              range.selectNodeContents(label)
+              return {
+                label: label.textContent ?? '',
+                lines: new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size,
+                height: Math.round(plate.getBoundingClientRect().height),
+              }
+            }),
+          PIECE,
+        )
+        const summary = plates
+          .map((plate) => `${plate.label}: ${plate.lines} l, ${plate.height} px`)
+          .join(' · ')
+        expect(plates.length, path).toBeGreaterThanOrEqual(2)
+        for (const plate of plates) expect(plate.lines, `${path}: ${summary}`).toBeLessThanOrEqual(2)
+        expect(new Set(plates.map((plate) => plate.height)).size, `${path}: ${summary}`).toBe(1)
+        expect(plates[0]!.height, `${path}: ${summary}`).toBeLessThanOrEqual(ROW_MAX)
       }
     })
   })

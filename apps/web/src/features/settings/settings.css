@@ -20,6 +20,7 @@
  */
 .settings-preview {
   --frame-fill: var(--bb-panel-veil);
+  container: preview / inline-size;
   display: grid;
   gap: var(--bb-space-3);
   width: 100%;
@@ -36,10 +37,11 @@
 }
 
 /*
- * Cada placa, a su alto natural y acotado: el de las placas del menú en reposo (70 px; 56 con la ventana
- * baja y 48 en móvil), nunca estirada para llenar la columna (§3.8.14 «Reparto del alto»). El nombre, en
- * display como las del menú, parte en dos líneas antes que cortarse; el valor o el medidor, a su lado,
- * más grandes que un rótulo y nunca más que el nombre.
+ * Cada placa, a su alto natural y acotado: el de las placas del menú en reposo (`--bb-plate-h`, 70 px; 56
+ * con la ventana baja y 48 en móvil), nunca estirada para llenar la columna (§3.8.14 «Reparto del
+ * alto»). El nombre, en display como las del menú, parte en dos líneas antes que cortarse (nunca en
+ * tres: en un tablero estrecho cede antes su anchura y después el valor baja de línea, abajo); el valor
+ * o el medidor, a su lado, más grandes que un rótulo y nunca más que el nombre.
  */
 .settings-preview-option {
   --frame-fill: var(--bb-panel-2);
@@ -121,6 +123,42 @@
 @media (forced-colors: active) {
   .settings-preview-arrow {
     color: CanvasText;
+  }
+}
+
+/*
+ * Tablero estrecho (el interior del tablero mide menos de 22 rem: la columna de la pieza de escritorio
+ * de 961 a ~1400 px, y el móvil; a 1440 mide 23 rem): como el rótulo de la placa del menú (§3.3 «Nada
+ * se corta»), el nombre cede su anchura, de 125 a 105 %, y así no pasa de dos líneas («TAMAÑO / DE /
+ * TEXTO» partía en tres a 1280).
+ */
+@container preview (width < 22rem) {
+  .settings-preview-label {
+    font-stretch: var(--bb-stretch-min);
+  }
+}
+
+/*
+ * Más estrecho (< 19 rem: la columna de 18 a 20 rem, de 961 a ~1150 px): las placas, con menos relleno
+ * a los lados (12 px), y cede el medidor, el valor más ancho (diez segmentos y su cifra): baja a una
+ * segunda línea bajo el nombre, como el dato en la lista estrecha del menú (§3.3), y el nombre tiene
+ * todo el ancho de la placa. Los conmutadores y las acciones, cortos, siguen al lado (bajarlos haría
+ * partir en dos «Avisos de la batalla», que ya no tendría el ancho de su valor y no cabría en el alto).
+ * Todas las placas siguen a su alto (70 px; 56 con la ventana baja y 48 en móvil): el nombre y el
+ * medidor, juntos (4 px), caben en él.
+ */
+@container preview (width < 19rem) {
+  .settings-preview-option {
+    column-gap: var(--bb-space-3);
+    padding-inline: var(--bb-space-3);
+  }
+
+  .settings-preview-option:has(.settings-preview-meter) {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    justify-items: start;
+    gap: var(--bb-space-1);
+    padding-block: var(--bb-space-1);
   }
 }
 
