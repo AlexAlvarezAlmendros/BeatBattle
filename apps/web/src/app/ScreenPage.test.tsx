@@ -151,22 +151,26 @@ describe('plantilla de pantalla interior (0.26, §3.8.14)', () => {
     await act(async () => {})
   })
 
-  it('RD-VIS-02 e / §3.8.11: el subtítulo de la 404 va con el titular y «Volver al menú» antes del pad, en el orden de lectura (y en móvil, en pantalla; L2)', async () => {
+  it('RD-VIS-02 e / §3.8.11: el orden de lectura y de foco de la 404 es titular, subtítulo, resumen, cómo se tocará, pad con su nota y «Volver al menú» (v0.6.7, P2)', async () => {
     renderAt('/legal/no-existe')
     const main = screen.getByRole('main')
     const heading = within(main).getByRole('heading', { level: 1 })
     const subtitle = within(main).getByText(t('pages.notFound.subtitle'))
+    const summary = within(main).getByText(t('pages.notFound.summary'))
     const pad = main.querySelector('figure')!
+    const caption = within(pad).getByText(t('pages.notFound.pad'))
     const back = within(main).getByRole('link', { name: t('screen.backToMenu') })
     const follows = (a: Node, b: Node) =>
       Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
     const legend = within(main).getByRole('region', { name: t('pages.notFound.legendTitle') })
-    // Titular → subtítulo → cómo se tocará → «Volver al menú» → pad: lo que se lee y el orden del foco,
-    // como se ve en móvil. La salida no queda detrás del pad decorativo (en escritorio va debajo del pad).
+    // Lo que se lee y el orden del foco (el del DOM): la nota del pad («El beat pad de 4 × 4 llega
+    // pronto.») va antes de la salida, no después. En móvil, el panel, el botón y el pad se colocan con
+    // CSS (el botón, al pie del panel o, en el móvil bajo, tras el resumen), sin cambiar este orden.
     expect(follows(heading, subtitle)).toBe(true)
-    expect(follows(subtitle, legend)).toBe(true)
-    expect(follows(legend, back)).toBe(true)
-    expect(follows(back, pad)).toBe(true)
+    expect(follows(subtitle, summary)).toBe(true)
+    expect(follows(summary, legend)).toBe(true)
+    expect(follows(legend, pad)).toBe(true)
+    expect(follows(caption, back)).toBe(true)
     expect(main.querySelector('[data-panel-first]')).not.toBeNull()
     await act(async () => {})
   })

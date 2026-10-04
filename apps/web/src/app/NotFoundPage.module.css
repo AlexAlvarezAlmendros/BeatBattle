@@ -24,10 +24,9 @@
 }
 
 /*
- * La columna del pad: «Volver al menú» y el pad con su nota, alineados a la izquierda entre ellos (la
- * columna, centrada en la de la pieza). «Volver al menú» va antes del pad en el orden de lectura y del
- * foco, y así en la columna única (al pie del panel, la única salida en táctil); en dos columnas, justo
- * debajo del pad y su nota, a `--bb-space-5` (§3.8.11).
+ * La columna del pad: el pad con su nota y «Volver al menú», alineados a la izquierda entre ellos (la
+ * columna, centrada en la de la pieza). En el DOM, el botón va después del pad y su nota, lo último del
+ * orden de lectura y del foco (§3.8.11 v0.6.7); en escritorio, justo debajo del pad, a `--bb-space-5`.
  */
 .padColumn {
   display: grid;
@@ -39,9 +38,70 @@
   display: flex;
 }
 
-@media (min-width: 961px) {
+/*
+ * Columna única (≤ 960 px): el botón sube antes del pad, al pie del panel (en táctil la barra no enseña
+ * Esc y es la única salida: no puede quedar detrás del pad decorativo). Solo cambia la colocación.
+ */
+@media (max-width: 960px) {
   .back {
-    order: 1;
+    order: -1;
+  }
+}
+
+/*
+ * Móvil bajo (≤ 720 px de ancho y ≤ 700 de alto; §3.8.11 v0.6.7): el botón sube justo después del resumen,
+ * antes de la leyenda, para que se vea sin desplazar (a 375 × 667 quedaba en 687–735 con la barra en 569;
+ * cuarto pase del jurado, P2). El orden del DOM no cambia: la pantalla reparte en una sola rejilla el
+ * subtítulo, el resumen, el botón, la leyenda y el pad. El panel abarca las filas del subtítulo a la
+ * leyenda (`subgrid`: sus hijos van en esas filas y su marco las envuelve, el botón incluido) y la pieza
+ * y su columna no hacen caja (`display: contents`): el pad y el botón son filas de la pantalla. El botón
+ * va dentro del marco del panel, con su relleno a los lados, y se pinta encima de él (posicionado y
+ * después en el DOM).
+ */
+@media (max-width: 720px) and (max-height: 700px) {
+  .screen[data-panel-first][data-piece] {
+    grid-template-rows: none;
+    grid-template-areas:
+      "head"
+      "subtitle"
+      "summary"
+      "back"
+      "legend"
+      "pad";
+  }
+
+  .screen [data-screen-part="panel"] {
+    display: grid;
+    grid-area: subtitle-start / 1 / legend-end / -1;
+    grid-template-rows: subgrid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .screen [data-screen-part="piece"],
+  .padColumn {
+    display: contents;
+  }
+
+  .subtitle {
+    grid-row: 1;
+  }
+
+  .summary {
+    grid-row: 2;
+  }
+
+  .legend {
+    grid-row: 4;
+  }
+
+  .back {
+    position: relative;
+    grid-area: back;
+    margin-inline: var(--bb-space-5);
+  }
+
+  .pad {
+    grid-area: pad;
   }
 }
 

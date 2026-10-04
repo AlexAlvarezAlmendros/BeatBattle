@@ -30,13 +30,17 @@ const LEGEND: readonly {
  * `*` — la 404 «BONUS STAGE» (guía §3.8.11): el titular es el momento de juego, «BONUS STAGE», con «Te
  * has perdido… pero ya que estás» de subtítulo. La pieza de la cuña es el beat pad de 4 × 4 (teclas de
  * chaflán `--bb-cut-md` de 72 px), quieto y decorativo hasta la Fase 8, con «Volver al menú [Esc]»
- * justo debajo del pad y su nota; el panel lleva el subtítulo arriba y, al pie, lo que traerá el pad cuando llegue (los chops
- * en la fila de arriba, la batería en las otras tres, el metrónomo y la grabación), en filas a su alto
- * natural. Es una pantalla de poco contenido: el bloque del pad y el panel, del mismo alto, va centrado
- * entre el HUD y la barra (§3.8.14 «Reparto del alto»). El panel va antes que
- * el pad en el orden de lectura y del foco (`panelFirst`), y «Volver al menú», entre los dos: en móvil,
- * el subtítulo sale con el titular, en la primera vista, la salida al pie del panel y el pad debajo;
- * en escritorio siguen el pad a la izquierda, con la salida debajo, y el panel a la derecha.
+ * justo debajo del pad y su nota; el panel lleva el subtítulo y el resumen arriba y, al pie, lo que
+ * traerá el pad cuando llegue (los chops en la fila de arriba, la batería en las otras tres, el metrónomo
+ * y la grabación), en filas a su alto natural. Es una pantalla de poco contenido: el bloque del pad y el
+ * panel, del mismo alto, va centrado entre el HUD y la barra (§3.8.14 «Reparto del alto»).
+ *
+ * Orden de lectura y de foco, el del DOM (v0.6.7): titular, subtítulo, resumen, cómo se tocará, pad con
+ * su nota y «Volver al menú» (el panel va antes que el pad: `panelFirst`). La colocación en móvil es de
+ * CSS, sin cambiar ese orden: el panel, el botón (al pie del panel; en el móvil bajo, ≤ 700 px de alto,
+ * justo después del resumen) y el pad debajo; en táctil la barra no enseña Esc y el botón es la única
+ * salida, así que se ve sin desplazar. En escritorio, el pad a la izquierda, con el botón debajo, y el
+ * panel a la derecha.
  *
  * También la pinta el límite de errores de las rutas cuando un loader responde 404 (un documento legal
  * que no existe): por eso pone su propia placa en el HUD, por encima de la de la ruta. La pestaña dice
@@ -60,16 +64,9 @@ export function NotFoundPage() {
         titleInHud
         panelFirst
         actions={null}
+        className={styles.screen}
         piece={
           <div className={styles.padColumn}>
-            {/*
-             * «Volver al menú» antes del pad en el orden de lectura y del foco: en la columna única va al
-             * pie del panel, antes del pad decorativo (en táctil la barra no enseña Esc y es la única
-             * salida); en dos columnas, justo debajo del pad y su nota, alineado con él (§3.8.11).
-             */}
-            <div className={styles.back}>
-              <BackToMenu start />
-            </div>
             <figure className={styles.pad}>
               <div className={styles.keys} aria-hidden="true">
                 {PAD_ROWS.flatMap((row) =>
@@ -82,6 +79,14 @@ export function NotFoundPage() {
               </div>
               <figcaption className={styles.caption}>{t('pages.notFound.pad')}</figcaption>
             </figure>
+            {/*
+             * «Volver al menú», lo último en el orden de lectura y del foco, después de la nota del pad. En
+             * escritorio va justo debajo del pad, alineado con él; en móvil, el CSS lo sube antes del pad (al
+             * pie del panel o, en el móvil bajo, tras el resumen; §3.8.11).
+             */}
+            <div className={styles.back}>
+              <BackToMenu start />
+            </div>
           </div>
         }
       >

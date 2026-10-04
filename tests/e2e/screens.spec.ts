@@ -955,20 +955,6 @@ test.describe('390 × 844', () => {
     await expect(subtitle).toBeInViewport({ ratio: 1 })
   })
 
-  test('RD-VIS-02 e / §3.8.11: en móvil, «Volver al menú» de la 404 va al pie del panel, antes del pad, y se ve sin desplazar (L2)', async ({
-    page,
-  }) => {
-    await open(page, '/esto-no-existe', 'Bonus stage')
-    await settle(page)
-    // En táctil la barra no enseña Esc: la única salida no puede quedar detrás del pad decorativo.
-    const back = page.getByRole('main').getByRole('link', { name: 'Volver al menú' })
-    const box = await boxes(page, { panel: PANEL, pad: 'main figure', back: 'main a[href="/"]' })
-    expect(box.back.top).toBeGreaterThanOrEqual(box.panel.bottom)
-    expect(box.back.bottom).toBeLessThanOrEqual(box.pad.top)
-    expect(box.back.bottom).toBeLessThanOrEqual(box.bar.top)
-    await expect(back).toBeInViewport({ ratio: 1 })
-  })
-
   for (const { path, heading, nav, kicker, title, tab } of [
     {
       path: '/ajustes/sonido',
@@ -1022,3 +1008,46 @@ test.describe('390 × 844', () => {
     })
   }
 })
+
+/**
+ * «Volver al menú» de la 404 en móvil (§3.8.11 v0.6.7; L2 y cuarto pase del jurado, P2): en táctil la barra
+ * no enseña Esc y es la única salida, así que se ve sin desplazar. En móvil va al pie del panel, antes del
+ * pad decorativo; en el móvil bajo (≤ 700 px de alto) sube justo después del resumen, antes de la leyenda
+ * (a 375 × 667 quedaba en 687–735 con la barra en 569, y a 320 × 568, en 732–780 con la barra en 470). La
+ * colocación es de CSS: el orden del DOM no cambia (titular, subtítulo, resumen, leyenda, pad y botón).
+ */
+for (const viewport of [
+  { width: 390, height: 844, low: false },
+  { width: 375, height: 667, low: true },
+  { width: 360, height: 640, low: true },
+  { width: 320, height: 568, low: true },
+]) {
+  test.describe(`404 a ${viewport.width} × ${viewport.height} táctil`, () => {
+    test.use({ viewport: { width: viewport.width, height: viewport.height }, isMobile: true, hasTouch: true })
+
+    test(`RD-VIS-02 e / §3.8.11: en móvil, «Volver al menú» de la 404 va ${viewport.low ? 'justo después del resumen, antes de la leyenda' : 'al pie del panel'} y del pad, y se ve sin desplazar (L2, P2)`, async ({
+      page,
+    }) => {
+      await open(page, '/esto-no-existe', 'Bonus stage')
+      await settle(page)
+      const back = page.getByRole('main').getByRole('link', { name: 'Volver al menú' })
+      const box = await boxes(page, {
+        panel: PANEL,
+        summary: `${PANEL} > p:nth-of-type(2)`,
+        legend: `${PANEL} section`,
+        pad: 'main figure',
+        back: 'main a[href="/"]',
+      })
+      if (viewport.low) {
+        expect(box.back.top, 'después del resumen').toBeGreaterThanOrEqual(box.summary.bottom)
+        expect(box.back.bottom, 'antes de la leyenda').toBeLessThanOrEqual(box.legend.top)
+      } else expect(box.back.top, 'al pie del panel').toBeGreaterThanOrEqual(box.panel.bottom)
+      expect(box.back.bottom, 'antes del pad').toBeLessThanOrEqual(box.pad.top)
+      expect(box.back.bottom, `botón hasta ${box.back.bottom}, barra en ${box.bar.top}`).toBeLessThanOrEqual(
+        box.bar.top,
+      )
+      await expect(back).toBeInViewport({ ratio: 1 })
+      expect(await page.evaluate(() => scrollY)).toBe(0)
+    })
+  })
+}
