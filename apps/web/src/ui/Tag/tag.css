@@ -44,3 +44,23 @@
 :where([data-tag-size="lg"]) {
   font-size: var(--bb-fs-md);
 }
+
+/*
+ * Contraste alto (`forced-colors: active`, RNF-A11Y-01; §3.3 «las etiquetas conservan su caja»): el modo
+ * quita el fondo, y la etiqueta (1P, NUEVO, RETO, EN JUEGO…) quedaba como texto suelto; el recorte en
+ * paralelogramo se comería además un borde por los lados. Conserva su caja: sin recorte y con borde
+ * `CanvasText`; la 1P del cursor, que ya va en `Highlight` (`cursor.css`), con el borde en `Highlight`. El
+ * borde se come el relleno: la etiqueta mide lo mismo y nada se mueve.
+ */
+@media (forced-colors: active) {
+  :where([data-tag]) {
+    padding: calc(var(--bb-space-1) + var(--bb-stroke-hair) - var(--bb-stroke))
+      calc(var(--tag-slant) + var(--bb-space-1) - var(--bb-stroke));
+    border: var(--bb-stroke) solid CanvasText;
+    clip-path: none;
+  }
+
+  :where([data-tag][data-cursor-player]) {
+    border-color: Highlight;
+  }
+}

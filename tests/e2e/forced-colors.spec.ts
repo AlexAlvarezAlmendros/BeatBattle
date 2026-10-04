@@ -193,6 +193,66 @@ test('RNF-A11Y-01: en contraste alto, la etiqueta girada del anunciador conserva
   expect(box.borders).toEqual(Array(4).fill(`ancho solid ${canvasText}`))
 })
 
+/** Las etiquetas visibles de `scope`: su texto, si es la 1P del cursor, su recorte, sus bordes y su tamaño. */
+function tagBoxes(page: Page, scope: string) {
+  return page.locator(`${scope} [data-tag]`).evaluateAll((tags) =>
+    tags
+      .filter((tag) => tag.getBoundingClientRect().width > 0)
+      .map((tag) => {
+        const style = getComputedStyle(tag)
+        const box = tag.getBoundingClientRect()
+        return {
+          text: tag.textContent ?? '',
+          cursor: tag.matches('[data-cursor-player]'),
+          clipPath: style.clipPath,
+          borders: [style.borderTop, style.borderRight, style.borderBottom, style.borderLeft].map((border) =>
+            border.replace(/^[\d.]+px/, (width) => (Number.parseFloat(width) > 0 ? 'ancho' : '0')),
+          ),
+          size: `${box.width.toFixed(1)} × ${box.height.toFixed(1)}`,
+        }
+      }),
+  )
+}
+
+/**
+ * Todas las etiquetas (`Tag`, §3.3 v0.6.6: «las etiquetas conservan su caja con borde `CanvasText`»): el
+ * arreglo de la ronda anterior estaba solo en el anunciador, y en contraste alto las demás (1P, NUEVO,
+ * RETO, EN JUEGO…) perdían el fondo y quedaban como texto suelto (`/dev/menu`). Ahora la caja es de
+ * `tag.css`: sin recorte y con borde `CanvasText`; la 1P del cursor, con borde `Highlight`. Mide lo mismo
+ * que sin contraste alto: el borde se come el relleno.
+ */
+test('RNF-A11Y-01: en contraste alto, todas las etiquetas conservan su caja (borde CanvasText; la 1P del cursor, Highlight), en /dev/menu y en la galería', async ({
+  page,
+}) => {
+  await open(page, '/dev/menu', 'Beat Battle')
+  const [canvasText, highlight] = await Promise.all(
+    ['CanvasText', 'Highlight'].map((name) => systemColor(page, name)),
+  )
+  const check = (tags: Awaited<ReturnType<typeof tagBoxes>>) => {
+    for (const tag of tags) {
+      expect(tag.clipPath, `«${tag.text}»: recorte`).toBe('none')
+      expect(tag.borders, `«${tag.text}»: borde`).toEqual(
+        Array(4).fill(`ancho solid ${tag.cursor ? highlight : canvasText}`),
+      )
+    }
+  }
+  // El cursor en una placa, para que se vea su 1P.
+  await page.keyboard.press('ArrowDown')
+  const menu = await tagBoxes(page, 'main')
+  expect(menu.map((tag) => tag.text)).toEqual(expect.arrayContaining(['1P', 'Reto', 'Nuevo']))
+  check(menu)
+
+  // Las primitivas de la galería: los tres tonos en los tres tamaños, y sin cambiar de tamaño.
+  await openGallery(page)
+  const scope = 'section#base-primitivas'
+  await page.locator(scope).scrollIntoViewIfNeeded()
+  const forced = await tagBoxes(page, scope)
+  expect(forced.length).toBeGreaterThanOrEqual(9)
+  check(forced)
+  await page.emulateMedia({ forcedColors: 'none' })
+  expect((await tagBoxes(page, scope)).map((tag) => tag.size)).toEqual(forced.map((tag) => tag.size))
+})
+
 /**
  * El medidor (§3.3; el de las opciones, la barra de XP) pintaba en contraste alto la pista en `GrayText` y
  * el relleno en `Highlight`: en el esquema claro, azul marino y rojo oscuro, casi iguales sobre blanco

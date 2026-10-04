@@ -36,6 +36,19 @@ describe('Tag (§3.3 «Etiqueta»)', () => {
     expect(css).toMatch(/font-style: italic/)
   })
 
+  it('RNF-A11Y-01: en contraste alto conserva su caja: sin recorte, borde CanvasText (Highlight en la 1P del cursor) y el mismo tamaño', () => {
+    const forced = /@media \(forced-colors: active\) \{([\s\S]*)\}\s*$/.exec(css)?.[1] ?? ''
+    expect(forced).toMatch(
+      /:where\(\[data-tag\]\) \{[^}]*border: var\(--bb-stroke\) solid CanvasText;[^}]*\}/,
+    )
+    expect(forced).toMatch(/:where\(\[data-tag\]\) \{[^}]*clip-path: none;[^}]*\}/)
+    // El borde se come el relleno: la caja mide lo mismo que sin contraste alto.
+    expect(forced).toMatch(
+      /:where\(\[data-tag\]\) \{[^}]*padding:[^;]*- var\(--bb-stroke\)\)[^;]*- var\(--bb-stroke\)\);/,
+    )
+    expect(forced).toMatch(/:where\(\[data-tag\]\[data-cursor-player\]\) \{\s*border-color: Highlight;/)
+  })
+
   it('RNF-A11Y-02: cada tono pone el texto que pide §3.2 (negro sobre blanco y rojo, blanco sobre cta), AA a cualquier tamaño', () => {
     expect(css).toMatch(/\[data-tag="red"\]\) \{\s*background: var\(--bb-red\);\s*color: var\(--bb-black\)/)
     expect(css).toMatch(
