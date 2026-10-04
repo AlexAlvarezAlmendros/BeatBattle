@@ -130,6 +130,12 @@
   --bb-gutter: 3rem; /* Medianil de pantalla: 48 px en escritorio, 16 px en móvil */
   --bb-target: 2.75rem; /* Objetivo táctil mínimo: 44 px (RNF-A11Y-09) */
   --bb-controls-h: 3.625rem; /* Barra de controles: 58 px (§3.4.1); margen de desplazamiento del foco */
+  /*
+   * Alcance del cursor de las placas del menú (§3.3 «Opción de menú»): la etiqueta 1P (≈ 44 px) va 32 px
+   * a la izquierda de la placa elegida; con 8 de aire, 84 px. Es el hueco mínimo entre las columnas del
+   * menú, para que el 1P nunca pise el título (jurado de la 0.28, tercer pase).
+   */
+  --bb-plate-cursor-reach: 5.25rem;
 
   /* ── Forma (sustituye a los radios; §3.2 «Forma») ────────────────────────────────────────── */
   /* Chaflán de dos esquinas opuestas (arriba-izquierda y abajo-derecha) */

@@ -724,3 +724,86 @@ for (const width of [721, 768]) {
     }
   })
 }
+
+/**
+ * Elige cada placa del menú y devuelve dónde el 1P o la flecha de su izquierda pisan algo de la columna
+ * del título: el lienzo del logo, la cinta, la pegatina OTP del lockup (la firma, `RF-OTP-01`) o la
+ * tarjeta de la semana. Las cajas cuentan enteras (el lienzo del logo, con su aire transparente).
+ */
+function cursorOverTitle(page: Page): Promise<string[]> {
+  return page.evaluate(async () => {
+    const frame = () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
+    const visible = (element: Element) => {
+      const style = getComputedStyle(element)
+      return style.display !== 'none' && style.visibility !== 'hidden'
+    }
+    const intersects = (a: DOMRect, b: DOMRect) =>
+      a.left < b.right - 0.5 && b.left < a.right - 0.5 && a.top < b.bottom - 0.5 && b.top < a.bottom - 0.5
+    const main = document.querySelector('main')!
+    const problems: string[] = []
+    for (const plate of main.querySelectorAll<HTMLElement>('[data-menu-plate]')) {
+      plate.focus()
+      await frame()
+      await new Promise((done) => setTimeout(done, 250))
+      await frame()
+      const logo = [...main.querySelectorAll('[data-game-logo] canvas')].find(
+        (canvas) => canvas.getBoundingClientRect().width > 0,
+      )
+      const title = {
+        logo: logo?.getBoundingClientRect(),
+        cinta: main.querySelector('[class*=lockup] p')?.getBoundingClientRect(),
+        pegatina: main.querySelector('[data-otp-signature] img')?.getBoundingClientRect(),
+        tarjeta: main.querySelector('article')?.getBoundingClientRect(),
+      }
+      const name = plate.querySelector('[data-plate-label]')?.textContent ?? '?'
+      for (const [what, piece] of [
+        ['1P', plate.querySelector('[data-cursor-player]')],
+        ['flecha', plate.querySelector('[class*=arrow]')],
+      ] as const) {
+        if (!piece || !visible(piece)) continue
+        const box = piece.getBoundingClientRect()
+        for (const [part, rect] of Object.entries(title))
+          if (rect && rect.width > 0 && intersects(box, rect))
+            problems.push(
+              `${name}: el ${what} (${Math.round(box.left)}–${Math.round(box.right)}) pisa ${part} (${Math.round(rect.left)}–${Math.round(rect.right)})`,
+            )
+      }
+    }
+    return problems
+  })
+}
+
+/**
+ * El cursor de las placas no pisa el título (jurado visual de la 0.28, tercer pase; guía §3.3 «Opción de
+ * menú», §3.8.3, `RD-VIS-02` e, `RF-OTP-01`): el 1P sale 76 px a la izquierda de la placa elegida, y de
+ * 721 a unos 1400 px el hueco entre las columnas era de 40. A 1024 × 768, con el cursor en JUGAR, el 1P
+ * tapaba la «E» de BATTLE, y en «/», con el cursor en JURADO, la pegatina OTP del lockup.
+ */
+for (const viewport of [
+  { width: 721, height: 900, touch: false },
+  { width: 900, height: 800, touch: false },
+  { width: 961, height: 900, touch: false },
+  { width: 1024, height: 768, touch: false },
+  { width: 1199, height: 900, touch: false },
+  { width: 1280, height: 800, touch: false },
+  { width: 1440, height: 900, touch: false },
+  { width: 844, height: 390, touch: true },
+]) {
+  test.describe(`cursor de las placas a ${viewport.width} × ${viewport.height}${viewport.touch ? ' táctil' : ''}`, () => {
+    test.use({
+      viewport: { width: viewport.width, height: viewport.height },
+      isMobile: viewport.touch,
+      hasTouch: viewport.touch,
+    })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`RD-VIS-02 e / RF-OTP-01: con el cursor en cada placa de ${path}, el 1P y la flecha no pisan el logo, el lockup ni la tarjeta`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        expect(await cursorOverTitle(page)).toEqual([])
+      })
+    }
+  })
+}

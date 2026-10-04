@@ -9,7 +9,13 @@
   grid-template-columns: minmax(0, 40rem) minmax(0, 35rem);
   justify-content: space-between;
   align-items: start;
-  gap: var(--bb-space-10);
+  /*
+   * Entre las columnas, como poco el alcance del cursor de las placas (`--bb-plate-cursor-reach`): el 1P y
+   * la flecha de la elegida salen por la izquierda de su columna y nunca pisan el logo, el lockup ni la
+   * tarjeta. A 1440 el hueco real es mayor (las columnas llegan a su máximo); de 721 a unos 1400 px, era de
+   * 40 y el 1P tapaba la «E» de BATTLE o la pegatina OTP (jurado de la 0.28, tercer pase).
+   */
+  gap: var(--bb-space-10) var(--bb-plate-cursor-reach);
   /*
    * Como en la maqueta, el título sube hasta el pie del reloj del HUD y la tarjeta del escenario llega a
    * la barra de controles: a 1440 × 900 la pantalla entera cabe sin desplazar.

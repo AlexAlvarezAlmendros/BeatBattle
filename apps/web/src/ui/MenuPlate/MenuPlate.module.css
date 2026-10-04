@@ -209,7 +209,10 @@
   text-transform: none;
 }
 
-/* El cursor de las placas: el 1P a la izquierda de la flecha. */
+/*
+ * El cursor de las placas: el 1P a la izquierda de la flecha. Lo que sale por la izquierda (≈ 76 px) cabe
+ * en `--bb-plate-cursor-reach`, el hueco mínimo entre las columnas del menú: si cambia, cambian los dos.
+ */
 .plate :global([data-cursor-player="left"]) {
   right: calc(100% + var(--bb-space-8));
 }
@@ -247,7 +250,7 @@
 }
 
 /*
- * ── Lista estrecha (la composición de dos columnas de 721 a unos 1150 px, o ampliada) ──────────
+ * ── Lista estrecha (la composición de dos columnas de 721 a unos 1200 px, o ampliada) ──────────
  * La lista de placas del menú es un contenedor (`menu-plates`; solo en la composición de dos columnas,
  * `MainMenu`): por debajo de 32 rem el dato y la tecla bajan a una segunda línea, bajo la etiqueta, en
  * vez de quitarle el sitio (jurado de la 0.28: de 721 a 900 px «JUGAR», «RESULTADOS» y «AJUSTES» se
@@ -291,24 +294,16 @@
 }
 
 /*
- * Lista muy estrecha (< 21 rem: de 721 a unos 800 px, tan estrecha como en un móvil): el índice ocupa
- * menos y, como en móvil, sin la flecha ni la etiqueta 1P a la izquierda (no caben: pisaban la tarjeta
- * de la semana); el cursor es el anillo. Así «SONIDO · MOVIMIENTO» cabe en su línea.
+ * Lista muy estrecha (< 21 rem: de 721 a unos 850 px, tan estrecha como en un móvil): el índice ocupa
+ * menos, para que «SONIDO · MOVIMIENTO» quepa en su línea. La flecha y el 1P se quedan: van en el hueco
+ * entre las columnas del menú, que mide como poco su alcance (`--bb-plate-cursor-reach`, `MainMenu`), así
+ * que no pisan la tarjeta de la semana ni el logo.
  */
 @container menu-plates (width < 21rem) {
   .plate,
   .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
     grid-template-columns: var(--bb-space-9) minmax(0, 1fr);
     column-gap: var(--bb-space-3);
-  }
-
-  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
-    .arrow {
-    display: none;
-  }
-
-  .plate :global([data-cursor-player="left"]) {
-    visibility: hidden;
   }
 }
 
