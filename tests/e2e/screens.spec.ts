@@ -10,11 +10,15 @@ import { open, settle } from './support'
  *   entre el HUD y la barra, con el pie del panel a la altura del lockup; en móvil, el panel anclado al
  *   pie, encima de la barra.
  * - **Pantallas con pieza** («Cómo se juega», la 404, Opciones): el panel de la derecha llega al pie
- *   de la pieza de la cuña.
- * - **404 en móvil**: el subtítulo va con el titular, antes del pad, y se ve sin desplazar.
- * - **Granate de la cuña** en Opciones, con su pieza encima, dentro del rango de las maquetas (§3.1:
- *   «unos 15 %»; como mucho el 24,5 % de `02-seleccion` en escritorio y el 18 % de las maquetas
- *   móviles), con el criterio del acta del jurado (grupo 24): r 25–110, g < 0,45 r, b < 0,6 r.
+ *   de la pieza de la cuña y, en escritorio, las dos columnas llegan a la barra con el contenido
+ *   repartido, sin huecos dentro (tercer pase, J2r y J3r); a 1920, de medianil a medianil (L1).
+ * - **404 en móvil**: el subtítulo va con el titular, antes del pad, y se ve sin desplazar, y «Volver al
+ *   menú» va antes del pad (L2).
+ * - **Pestañas**: [Q] y [E] a los lados, también cuando parten (L11).
+ * - **Granate de la cuña** en todas las secciones de Opciones y en los legales, con su pieza encima,
+ *   dentro del rango de las maquetas (§3.1: «unos 15 %»; como mucho el 24,5 % de `02-seleccion` en
+ *   escritorio y el 18 % de las maquetas móviles) y con un punto de margen (L-granate), con el criterio
+ *   del acta del jurado (grupo 24): r 25–110, g < 0,45 r, b < 0,6 r.
  */
 
 test.use({ reducedMotion: 'reduce' })
@@ -47,6 +51,18 @@ async function boxes<K extends string>(
 
 const PANEL = 'main [data-screen-part="panel"]'
 const PIECE = 'main [data-screen-part="piece"]'
+
+/**
+ * Las pantallas de Opciones (sus ocho secciones) y los cuatro legales: el granate de la cuña se mide en
+ * todas (tercer pase del jurado: Sesiones, Privacidad y Accesibilidad estaban a 0,2 puntos del techo sin
+ * test). Los legales van en el marco simple, sin cuña.
+ */
+const WINE_SCREENS = [
+  ...['sonido', 'movimiento', 'cuenta', 'perfil', 'emails', 'sesiones', 'privacidad', 'accesibilidad'].map(
+    (section) => `/ajustes/${section}`,
+  ),
+  ...['bases', 'terminos', 'privacidad', 'cookies'].map((doc) => `/legal/${doc}`),
+]
 
 /** Proporción de píxeles granate de una captura (criterio del acta, grupo 24), medida en el navegador. */
 async function wineShare(page: Page): Promise<number> {
@@ -245,15 +261,18 @@ test.describe('1440 × 900', () => {
     expect(Math.abs(box.panel.bottom - box.piece.bottom)).toBeLessThanOrEqual(2)
   })
 
-  for (const path of ['/ajustes', '/ajustes/cuenta']) {
-    test(`§3.1 / RD-VIS-02 e: la cuña de ${path} no pasa del granate de las maquetas (≤ 24,5 %)`, async ({
+  for (const path of WINE_SCREENS) {
+    test(`§3.1 / RD-VIS-02 e: la cuña de ${path} no pasa del granate de las maquetas (≤ 24,5 %, L-granate)`, async ({
       page,
     }) => {
       await page.goto(path)
       await expect(page.locator(PIECE)).toBeVisible()
       await settle(page)
       const share = await wineShare(page)
-      expect(share, `granate ${(share * 100).toFixed(1)} %`).toBeLessThanOrEqual(0.245)
+      test.info().annotations.push({ type: 'granate', description: `${path}: ${(share * 100).toFixed(2)} %` })
+      // Techo de las maquetas (24,5 %) con un punto de margen: a 0,2 puntos (Sesiones, Privacidad y
+      // Accesibilidad, en el tercer pase) cualquier cambio de letra o de ventana lo pasaría.
+      expect(share, `granate ${(share * 100).toFixed(1)} %`).toBeLessThanOrEqual(0.235)
     })
   }
 })
@@ -545,15 +564,17 @@ test.describe('390 × 844', () => {
     await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toBeInViewport({ ratio: 1 })
   })
 
-  for (const path of ['/ajustes', '/ajustes/cuenta']) {
-    test(`§3.1 / RD-VIS-02 e: en móvil, la cuña de ${path} no pasa del granate de las maquetas (≤ 18 %)`, async ({
+  for (const path of WINE_SCREENS) {
+    test(`§3.1 / RD-VIS-02 e: en móvil, la cuña de ${path} no pasa del granate de las maquetas (≤ 18 %, L-granate)`, async ({
       page,
     }) => {
       await page.goto(path)
       await expect(page.locator(PIECE)).toBeVisible()
       await settle(page)
       const share = await wineShare(page)
-      expect(share, `granate ${(share * 100).toFixed(1)} %`).toBeLessThanOrEqual(0.18)
+      test.info().annotations.push({ type: 'granate', description: `${path}: ${(share * 100).toFixed(2)} %` })
+      // Techo de las maquetas móviles (18 %) con un punto de margen.
+      expect(share, `granate ${(share * 100).toFixed(1)} %`).toBeLessThanOrEqual(0.17)
     })
   }
 })
