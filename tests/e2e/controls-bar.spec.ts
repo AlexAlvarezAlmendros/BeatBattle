@@ -152,12 +152,14 @@ function barShare(page: Page): Promise<{ height: number; share: number; pinned: 
  * enseñaba ninguna placa. En su revisión, lo mismo en una ventana estrecha más alta: a 390 × 844 medía
  * 158 px (18,7 %) y empezaba en mitad de «JUGAR». Con puntero fino y una ventana de 720 px de ancho o
  * menos o de 700 px de alto o menos, la barra se despega en cuanto pasa del 15 % de la ventana (en
- * táctil, del 25 %: allí no lleva teclas).
+ * táctil, del 25 %: allí no lleva teclas). También con el escritorio ampliado: a 823 × 514 (1440 × 900 al
+ * 175 %) la del menú mide 127 px y, pegada, tapaba «JUGAR» (ninguna placa entera en la primera vista).
  */
 for (const { width, height } of [
   { width: 360, height: 640 },
   { width: 375, height: 667 },
   { width: 390, height: 844 },
+  { width: 823, height: 514 },
 ]) {
   test.describe(`ventana pequeña con teclado a ${width} × ${height}`, () => {
     test.use({ viewport: { width, height } })
