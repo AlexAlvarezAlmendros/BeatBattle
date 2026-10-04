@@ -339,6 +339,8 @@
 @media (max-width: 720px) {
   .bar {
     --bar-gap: var(--bb-space-2);
+    /* Lo que baja el contenido de las piezas para ir centrado en la barra (más abajo, F5). */
+    --bar-nudge: calc(2 * var(--bar-ring) - var(--bb-stroke) - var(--bb-space-2));
     min-height: 0;
     /* Los mismos 8 px de aire que antes (la barra mide lo mismo y el menú cabe sin desplazar), con
        `--bar-ring` debajo para el anillo del foco y el resto encima. */
@@ -359,7 +361,7 @@
    */
   .signature,
   .legal {
-    padding-block-start: calc(2 * var(--bar-ring) - var(--bb-stroke) - var(--bb-space-2));
+    padding-block-start: var(--bar-nudge);
   }
 
   /* «Legal», al lado de la firma (con el filete delante), no al final de la barra. */
@@ -375,11 +377,14 @@
   /*
    * Filete entre la firma y «Legal»: pegado a la firma y con el mismo rótulo, se leía «Other People
    * Records Legal», como parte del nombre del sello (jurado de la 0.28, M3). Con el hueco de la rejilla
-   * delante y el suyo detrás.
+   * delante y el suyo detrás. Baja con los rótulos (`--bar-nudge`: centrado con su margen, baja la mitad,
+   * lo mismo que el contenido de una pieza con ese relleno), a la altura de «Other People Records» y de
+   * «Legal».
    */
   .rule {
     display: block;
     height: var(--bb-space-4);
+    margin-block-start: var(--bar-nudge);
     margin-inline-end: var(--bb-space-2);
     border-inline-start: var(--bb-stroke-hair) solid var(--bb-line);
   }
