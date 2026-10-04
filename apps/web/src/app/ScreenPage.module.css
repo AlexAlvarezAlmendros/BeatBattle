@@ -68,21 +68,35 @@
   letter-spacing: var(--bb-tracking-label-wide);
 }
 
-.title {
+/*
+ * Los títulos en display (el de la cabeza y el del panel) van en una línea mientras quepan: `ScreenPage`
+ * baja su anchura de 125 a 105 % (`useFitText`) y, si ni así caben, los deja partir por palabras (solo una
+ * palabra que no quepa entera se parte: nunca desborda). Partidos, el interlineado es 1 más lo que baja la
+ * sombra dura (`--bb-space-1`, 4 px: la de `--bb-shadow-hard`, y de sobra la de `-sm`), para que la sombra
+ * roja de una línea no toque las mayúsculas de la siguiente (sexto pase del jurado, G2: «BONUS / STAGE» a
+ * 320 px, «LETRA / PEQUEÑA» a 360 y 320). Con una línea mide lo de siempre (0,9): el margen negativo
+ * descuenta lo que el interlineado añade arriba y abajo, y los glifos se quedan donde estaban.
+ */
+.title,
+.panelTitle {
+  min-width: 0;
   max-width: 100%;
-  font-size: var(--bb-fs-title);
+  margin-block: calc((var(--bb-leading-display) * 1em - 1em - var(--bb-space-1)) / 2);
   font-stretch: var(--bb-stretch-plate);
-  text-shadow: var(--bb-shadow-hard);
-  /* Parte por palabras; solo una palabra que no quepa entera se parte (nunca desborda). */
+  line-height: calc(1em + var(--bb-space-1));
+  white-space: nowrap;
   overflow-wrap: break-word;
+}
+
+.title {
+  font-size: var(--bb-fs-title);
+  text-shadow: var(--bb-shadow-hard);
 }
 
 /* El título en el panel (los legales: el nombre completo del documento, §3.8.14). */
 .panelTitle {
   font-size: var(--bb-fs-2xl);
-  font-stretch: var(--bb-stretch-plate);
   text-shadow: var(--bb-shadow-hard-sm);
-  overflow-wrap: break-word;
 }
 
 .piece {

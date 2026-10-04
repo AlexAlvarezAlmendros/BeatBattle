@@ -3,6 +3,7 @@ import { t } from '../i18n'
 import { Button } from '../ui/Button'
 import { Frame } from '../ui/Frame'
 import { cx } from '../ui/forceState'
+import { type FitTextOptions, useFitText } from '../ui/hooks/useFitText'
 import { useIdleMenuKeys } from '../ui/hooks/useIdleMenuKeys'
 import { Stamp } from '../ui/Stamp'
 import { DocumentTitle } from './DocumentTitle'
@@ -214,6 +215,16 @@ function focusStart(element: HTMLElement) {
 }
 
 /**
+ * Ajuste del título en display (§3.8.14, `RD-VIS-05`; sexto pase del jurado, G2): en una línea mientras
+ * quepa, bajando la anchura de Anybody desde la de la placa (`--bb-stretch-plate`, 125 %) hasta
+ * `--bb-stretch-min` (105 %); si ni así cabe, parte por palabras con el interlineado que deja sitio a la
+ * sombra dura (`ScreenPage.module.css`). El cuerpo no baja (es el de la placa del HUD): solo una palabra
+ * que no quepa sola baja hasta 12 px antes que cortarse (`useFitText`). A 320 y 360 px «BONUS / STAGE»,
+ * «LETRA / PEQUEÑA» y «CÓMO SE / JUEGA» partían y la sombra roja de la primera línea tocaba la segunda.
+ */
+const TITLE_FIT: FitTextOptions = { fromStretch: '--bb-stretch-plate', minFontPx: Number.POSITIVE_INFINITY }
+
+/**
  * Plantilla de las pantallas interiores (guía §3.8.14; tareas 0.26 y 0.28): a la izquierda, sobre la
  * cuña, la **pieza** de la pantalla; a la derecha, el contenido en un panel opaco de chaflán grande con
  * «Volver al menú [ESC]» en su pie (Esc hace lo mismo desde cualquier sitio, `useFrameKeys`). El título
@@ -257,8 +268,15 @@ export function ScreenPage({
   )
   useIdleMenuKeys(start, 1, rootRef, { itemSelector: IDLE_START, activate: focusStart })
   useArenaGeometry(rootRef)
+  // El título que se ve: el `<h1>` (en la cabeza o en el panel) o, si va en otro sitio, el de la placa.
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  const plateTitleRef = useRef<HTMLParagraphElement>(null)
+  const plateTitle = screen.plate ? t(screen.plate.title) : title
+  useFitText(headingRef, titlePlacement === 'tabs' ? '' : title, TITLE_FIT)
+  useFitText(plateTitleRef, titlePlacement === 'head' ? '' : plateTitle, TITLE_FIT)
   const heading = (
     <h1
+      ref={headingRef}
       className={
         titlePlacement === 'tabs'
           ? 'sr-only'
@@ -306,7 +324,9 @@ export function ScreenPage({
           {titlePlacement === 'tabs' && heading}
           <div className={styles.head} data-screen-part="head" aria-hidden="true">
             <p className={cx('bb-label', styles.kicker)}>{screen.plate ? t(screen.plate.kicker) : kicker}</p>
-            <p className={cx('bb-display', styles.title)}>{screen.plate ? t(screen.plate.title) : title}</p>
+            <p ref={plateTitleRef} className={cx('bb-display', styles.title)}>
+              {plateTitle}
+            </p>
           </div>
         </>
       )}

@@ -1129,6 +1129,67 @@ for (const viewport of [
 }
 
 /**
+ * Títulos en display del móvil (`RD-VIS-05`, §3.8.14; sexto pase del jurado, G2): el de la cabeza (el de la
+ * placa del HUD, que en móvil se ve sobre un panel) va en una línea, bajando la anchura de Anybody antes
+ * de partir; y un título que aun así parte (el nombre completo del documento legal, en el panel) lleva el
+ * interlineado de 1 más lo que baja su sombra dura, para que la sombra roja de una línea no toque las
+ * mayúsculas de la siguiente. Con 0,9 tocaban: «BONUS / STAGE» a 320, «LETRA / PEQUEÑA» a 360 y 320 y
+ * «CÓMO SE / JUEGA» a 360. Nada se corta: el texto cabe en su caja.
+ */
+for (const viewport of [
+  { width: 320, height: 568 },
+  { width: 360, height: 640 },
+]) {
+  test.describe(`títulos a ${viewport.width} × ${viewport.height} táctil`, () => {
+    test.use({ viewport, isMobile: true, hasTouch: true })
+
+    for (const { path, heading } of [
+      { path: '/esto-no-existe', heading: 'Bonus stage' },
+      { path: '/legal/bases', heading: 'Bases de la competición' },
+      { path: '/como-funciona', heading: 'Cómo se juega' },
+    ])
+      test(`RD-VIS-05 / §3.8.14: en ${path}, el título de la cabeza va en una línea y, si un título parte, su sombra no toca la línea siguiente (G2)`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        const titles = await page.evaluate(() =>
+          [
+            ...document.querySelectorAll<HTMLElement>(
+              'main [data-screen-part="head"] .bb-display, main [data-screen-part="panel"] > .bb-display',
+            ),
+          ].map((title) => {
+            const style = getComputedStyle(title)
+            const range = document.createRange()
+            range.selectNodeContents(title)
+            const lines = new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size
+            const shadow = style.textShadow.match(/(-?[\d.]+)px\s+(-?[\d.]+)px/)
+            return {
+              text: title.textContent ?? '',
+              head: Boolean(title.closest('[data-screen-part="head"]')),
+              lines,
+              fontSize: Number.parseFloat(style.fontSize),
+              lineHeight: Number.parseFloat(style.lineHeight),
+              shadowY: shadow ? Number.parseFloat(shadow[2]!) : 0,
+              overflow: title.scrollWidth - title.clientWidth,
+            }
+          }),
+        )
+        expect(titles.filter((title) => title.head)).toHaveLength(1)
+        for (const title of titles) {
+          if (title.head) expect(title.lines, `«${title.text}» en una línea`).toBe(1)
+          expect(title.overflow, `«${title.text}» cabe en su caja`).toBeLessThanOrEqual(0.5)
+          if (title.lines > 1)
+            expect(
+              title.lineHeight - title.fontSize,
+              `«${title.text}»: interlineado de ${title.lineHeight} px con letra de ${title.fontSize} y sombra de ${title.shadowY}`,
+            ).toBeGreaterThanOrEqual(title.shadowY)
+        }
+      })
+  })
+}
+
+/**
  * Opciones por debajo de 360 px (§3.8.14 v0.6.7; cuarto pase del jurado, P3): las ocho pestañas ocupan
  * cinco o seis filas y la vista previa baja fuera de la primera vista, así que detrás de las pestañas
  * quedaba la cuña desnuda con su trama (granate de la primera vista: 25,4 % con teclado y 20,4 % en táctil
