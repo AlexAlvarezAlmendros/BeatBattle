@@ -1810,6 +1810,54 @@ for (const viewport of [
 }
 
 /**
+ * En la tableta vertical, lo que sobra de alto se reparte (§3.8.3 «lo que sobra de alto repartido…, no
+ * arriba»; jurado de la 0.28, ronda final, E5): con el logo en una línea, todo el sobrante quedaba en una
+ * franja de ~100 px entre el lockup y la tarjeta (a 820 × 1180, de 256 a 361). Ahora va a partes iguales entre
+ * el lockup y la tarjeta y entre la tarjeta y «ELIGE MODO»; con el logo en dos líneas (en «/» a 820 × 1180) se
+ * lo queda el logo, como antes.
+ */
+for (const viewport of [
+  { width: 820, height: 1180 },
+  { width: 768, height: 1024 },
+]) {
+  test.describe(`hueco de la tableta vertical a ${viewport.width} × ${viewport.height} táctil`, () => {
+    test.use({ viewport, isMobile: true, hasTouch: true })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`RD-VIS-02 e / §3.8.3: en ${path} lo que sobra de alto va a partes iguales entre el lockup y la tarjeta y entre la tarjeta y «ELIGE MODO»`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        const space = await tokenPx(page, '--bb-space-2')
+        // Los dos huecos, iguales (a `--bb-space-2` como mucho): si no, cuánto mide cada uno.
+        await expect
+          .poll(async () => {
+            const { lockupToCard, cardToModes } = await page.evaluate(() => {
+              const main = document.querySelector('main')!
+              const signature = main.querySelector('[data-otp-signature]')!
+              const lockup = Math.max(
+                signature.closest('section > div > *')!.getBoundingClientRect().bottom,
+                signature.querySelector('img')!.getBoundingClientRect().bottom,
+              )
+              const card = main.querySelector('article')!.getBoundingClientRect()
+              const head = main.querySelector('nav h2')!.parentElement!.getBoundingClientRect()
+              return { lockupToCard: card.top - lockup, cardToModes: head.top - card.bottom }
+            })
+            return Math.abs(lockupToCard - cardToModes) <= space
+              ? 'iguales'
+              : `${lockupToCard.toFixed(1)} px entre el lockup y la tarjeta, ${cardToModes.toFixed(1)} entre la tarjeta y «ELIGE MODO»`
+          })
+          .toBe('iguales')
+        expect(
+          await page.evaluate(() => document.scrollingElement!.scrollHeight - window.innerHeight),
+        ).toBeLessThanOrEqual(0)
+      })
+    }
+  })
+}
+
+/**
  * En la tableta vertical táctil, lo que no cabe se desplaza sin esconder nada (§3.8.3; WCAG 1.4.4, 1.4.12 y
  * 2.4.11; revisión del cierre de la 0.28, K2): el menú medía justo el hueco entre el HUD y la barra y, con el
  * espaciado de texto o la letra del navegador a 24 px, lo que no cabía se salía de su caja por debajo, bajo la

@@ -43,7 +43,8 @@ const bold = (text: ReactNode) => <b>{text}</b>
 
 /**
  * La proporción del logo en dos líneas, para que el lockup (fuera del logo) se mida con él, y la del logo en
- * una, para el alto mínimo del logo en la tableta vertical (§3.8.3).
+ * una, para el alto mínimo del logo en la tableta vertical y el reparto de lo que sobra (§3.8.3). Van en la
+ * columna del título: las leen el logo, el lockup y el hueco de debajo de la tarjeta.
  */
 const BRAND_STYLE = {
   '--game-logo-aspect': logoAspect(),
@@ -194,6 +195,7 @@ export function MainMenu({ model }: { model: MenuModel }) {
   const listRef = useRef<HTMLUListElement>(null)
   const helpRef = useRef<HTMLDivElement>(null)
   const brandRef = useRef<HTMLDivElement>(null)
+  const titleRef = useRef<HTMLElement>(null)
   const firstEnabled = Math.max(0, model.player?.uploaded ? 1 : entries.findIndex((entry) => !entry.disabled))
   const revealHelp = useRevealHelp(listRef, helpRef)
   const menu = useRovingMenu({
@@ -220,6 +222,9 @@ export function MainMenu({ model }: { model: MenuModel }) {
   const touch = useMediaQuery(TOUCH_QUERY)
   const modesFirst = narrow && !touch
   const card = <StageCard week={model.week} />
+  // En la tableta vertical, lo que sobra de alto se reparte alrededor de la tarjeta (CSS): necesita su alto. La
+  // tarjeta cambia de sitio (`modesFirst`) y de pieza (sin semana, la del calendario vacío).
+  useCardHeight(titleRef, `${modesFirst}|${Boolean(model.week)}`)
 
   const { week, player } = model
   // La crónica empieza por el crédito solo con la semana abierta a envíos; en `voting` la barra no invita
@@ -279,9 +284,9 @@ export function MainMenu({ model }: { model: MenuModel }) {
         </FrameSlot>
       )}
 
-      <section className={styles.title} aria-label={t('home.title.label')}>
+      <section ref={titleRef} className={styles.title} style={BRAND_STYLE} aria-label={t('home.title.label')}>
         {/* El logo y su lockup: con la ventana baja, el lockup se mide con el logo (proporción del lienzo). */}
-        <div ref={brandRef} className={styles.brand} style={BRAND_STYLE}>
+        <div ref={brandRef} className={styles.brand}>
           <GameLogo className={styles.logoFull} />
           <GameLogo className={styles.logoCompact} compact />
           <TitleLockup className={styles.lockup} />
@@ -390,10 +395,11 @@ function isPlateResize(animation: Animation): boolean {
 const LOCKUP_EXTENT_VAR = '--menu-lockup-extent'
 
 /**
- * Publica en la caja del logo (`.brand`) lo que ocupa de verdad el lockup (§3.1, §3.8.3): de su margen de
- * arriba al de abajo, contando la pegatina girada que cuelga de la fila. Con la ventana baja, el logo se
- * queda con el alto que sobra; si la cinta parte en dos líneas (el espaciado de texto de WCAG 1.4.12, la
- * letra ampliada), el logo baja y la tarjeta de la semana ya no tapa el pie de la pegatina. El ancho del
+ * Publica en la columna del título (la caja del logo, `.brand`, la hereda) lo que ocupa de verdad el lockup
+ * (§3.1, §3.8.3): de su margen de arriba al de abajo, contando la pegatina girada que cuelga de la fila. Con
+ * la ventana baja, el logo se queda con el alto que sobra; si la cinta parte en dos líneas (el espaciado de
+ * texto de WCAG 1.4.12, la letra ampliada), el logo baja y la tarjeta de la semana ya no tapa el pie de la
+ * pegatina. El ancho del
  * lockup no depende de esto (CSS), así que medirlo no cambia lo medido. Se vuelve a medir cuando cambia de
  * tamaño, en el fotograma siguiente.
  */
@@ -404,6 +410,8 @@ function useLockupExtent(brandRef: RefObject<HTMLElement | null>) {
       ?.querySelector<HTMLElement>('[data-otp-signature]')
       ?.closest<HTMLElement>(`.${styles.lockup}`)
     if (!brand || !lockup || typeof ResizeObserver === 'undefined') return
+    // En la columna del título: también la lee el hueco de debajo de la tarjeta (la tableta vertical).
+    const host = brand.parentElement ?? brand
     const update = () => {
       const box = lockup.getBoundingClientRect()
       if (box.height === 0) return
@@ -414,8 +422,8 @@ function useLockupExtent(brandRef: RefObject<HTMLElement | null>) {
       const bottom = Math.max(box.bottom + Number.parseFloat(style.marginBottom), sticker?.bottom ?? 0)
       // Redondeado hacia arriba, sin el ruido de coma flotante de las restas (72,0000001 → 72, no 73).
       const value = `${Math.ceil(Math.round((bottom - top) * 100) / 100)}px`
-      if (brand.style.getPropertyValue(LOCKUP_EXTENT_VAR) !== value)
-        brand.style.setProperty(LOCKUP_EXTENT_VAR, value)
+      if (host.style.getPropertyValue(LOCKUP_EXTENT_VAR) !== value)
+        host.style.setProperty(LOCKUP_EXTENT_VAR, value)
     }
     update()
     let frame = 0
@@ -429,4 +437,38 @@ function useLockupExtent(brandRef: RefObject<HTMLElement | null>) {
       observer.disconnect()
     }
   }, [brandRef])
+}
+
+/** Variable con el alto de la tarjeta de la semana en la columna del título (`MainMenu.module.css`). */
+const CARD_HEIGHT_VAR = '--menu-card-h'
+
+/**
+ * Publica en la columna del título el alto de la tarjeta de la semana (§3.8.3, tableta vertical; jurado de la
+ * 0.28, ronda final, E5): con el logo en una línea, lo que sobra de alto se reparte a partes iguales entre el
+ * lockup y la tarjeta y entre la tarjeta y «ELIGE MODO», y el CSS necesita saber cuánto sobra (el alto de la
+ * columna menos el de la tarjeta). El alto de la tarjeta no depende de ese reparto (solo de su ancho y su
+ * contenido): se actualiza dentro del aviso, sin bucle. Sin la tarjeta en la columna (la composición estrecha
+ * con teclado la saca, `modesFirst`), no hay variable y no se reparte nada. `card` cambia cuando la tarjeta
+ * cambia de sitio o de pieza: se vuelve a buscar.
+ */
+function useCardHeight(titleRef: RefObject<HTMLElement | null>, card: string) {
+  useLayoutEffect(() => {
+    // `card` solo está para volver a buscar la tarjeta cuando cambia de sitio o de pieza.
+    void card
+    const title = titleRef.current
+    const article = title?.querySelector<HTMLElement>(':scope > article')
+    if (!title || !article || typeof ResizeObserver === 'undefined') return
+    const update = () => {
+      const value = `${Math.round(article.getBoundingClientRect().height * 100) / 100}px`
+      if (title.style.getPropertyValue(CARD_HEIGHT_VAR) !== value)
+        title.style.setProperty(CARD_HEIGHT_VAR, value)
+    }
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(article)
+    return () => {
+      observer.disconnect()
+      title.style.removeProperty(CARD_HEIGHT_VAR)
+    }
+  }, [titleRef, card])
 }

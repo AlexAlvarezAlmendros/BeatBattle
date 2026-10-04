@@ -656,6 +656,45 @@
   }
 
   /*
+   * Lo que sobra de alto, repartido (§3.8.3; jurado de la 0.28, ronda final, E5): con el logo en una línea, todo
+   * el sobrante quedaba entre el lockup y la tarjeta (a 820 × 1180, una franja de ~100 px). Ahora la mitad va
+   * bajo la tarjeta (`::after`), hasta «ELIGE MODO», y la otra mitad se queda en la caja del logo, bajo el
+   * lockup: dos huecos iguales. Con el logo en dos líneas (la caja del logo da para él), no se reparte: se lo
+   * queda el logo, como antes (en «/» a 820 × 1180).
+   *
+   * - `--menu-tablet-free`: el alto de la columna que no ocupa la tarjeta (su alto, `--menu-card-h`, lo publica
+   *   `MainMenu`; sin él, nada que repartir).
+   * - `--menu-tablet-brand`: lo que ocupan el logo en una línea y el lockup (el alto mínimo de la caja del logo,
+   *   o lo que mide de verdad el lockup si es más, con el espaciado de WCAG 1.4.12: `--menu-lockup-extent`).
+   * - `--menu-tablet-two-lines`: el alto de la caja del logo desde el que va en dos líneas (la consulta
+   *   `menu-tablet-brand`, más abajo: 50 / 103 de su ancho).
+   *
+   * El hueco de debajo es la mitad de lo que sobra si la caja del logo, con todo, no llegaría a las dos líneas, y
+   * nada si llega: `clamp()` con una pendiente muy grande hace de interruptor.
+   */
+  .title {
+    --menu-tablet-free: calc(100% - var(--menu-card-h, 100%));
+    --menu-tablet-brand: calc(
+      100cqw /
+      var(--game-logo-aspect-compact) +
+      max(var(--bb-menu-lockup-h) + var(--bb-space-4), var(--menu-lockup-extent, 0px) - var(--bb-space-3))
+    );
+    --menu-tablet-two-lines: calc(100cqw * 50 / 103);
+  }
+
+  .title::after {
+    content: "";
+    flex: none;
+    height: clamp(
+      0px,
+      (var(--menu-tablet-two-lines) - var(--menu-tablet-free)) *
+      1000,
+      (var(--menu-tablet-free) - var(--menu-tablet-brand)) /
+      2
+    );
+  }
+
+  /*
    * Los modos, en las filas de la rejilla del menú: «ELIGE MODO», la lista de placas y la ayuda. Una subrejilla
    * no puede ser contenedor (la contención de diseño la saca de la rejilla del menú): aquí la lista es ancha
    * (de 625 a 1103 px), como en el móvil, y no hace falta.
