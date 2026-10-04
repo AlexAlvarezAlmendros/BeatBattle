@@ -1,0 +1,37 @@
+/* Iconos: 1 em por defecto, para que escalen con el texto de su pieza. */
+.icon {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 1em;
+  height: 1em;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: middle;
+}
+
+/* Formas macizas (play, pausa): relleno sin trazo. */
+.solid {
+  fill: currentcolor;
+  stroke: none;
+}
+
+/*
+ * Play ↔ pausa (Anexo E): el trazado se transforma (mismas órdenes en los dos, ver `PLAY_PATH`). Sin
+ * movimiento, cambio de icono directo. Donde el navegador no anima `d`, también cambia sin más.
+ */
+.morph {
+  transition: d var(--bb-dur-base) var(--bb-ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .morph {
+    transition: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .morph {
+  transition: none;
+}

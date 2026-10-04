@@ -1,0 +1,156 @@
+/*
+ * Orbes rojos del fondo (sello: `.listing-orb` de ListingPage.css, montados por SilkBackground). Mismos
+ * tamaños, posiciones, desenfoque, derivas y pulsos; los periodos salen de `--bb-loop-orb-*`. El pulso
+ * de opacidad es lento (9–14 s por ciclo): nada destella (RNF-A11Y-04).
+ */
+
+.ambient-orbs {
+  position: fixed;
+  inset: 0;
+  z-index: var(--bb-z-stage);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ambient-orbs__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(var(--bb-blur-orb));
+}
+
+.ambient-orbs__orb--1 {
+  top: -10vh;
+  left: -15vw;
+  width: 70vw;
+  height: 70vw;
+  background: radial-gradient(circle, var(--bb-red) 0%, transparent 60%);
+  animation:
+    ambient-orb-drift-1 var(--bb-loop-orb-drift-1) var(--bb-ease-in-out) infinite,
+    ambient-orb-pulse-1 var(--bb-loop-orb-pulse-1) var(--bb-ease-in-out) infinite;
+}
+
+.ambient-orbs__orb--2 {
+  right: -15vw;
+  bottom: -5vh;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, var(--bb-red-press) 0%, transparent 60%);
+  animation:
+    ambient-orb-drift-2 var(--bb-loop-orb-drift-2) var(--bb-ease-in-out) infinite,
+    ambient-orb-pulse-2 var(--bb-loop-orb-pulse-2) var(--bb-ease-in-out) infinite;
+}
+
+.ambient-orbs__orb--3 {
+  top: 40vh;
+  left: 25vw;
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, var(--bb-red) 0%, transparent 65%);
+  animation:
+    ambient-orb-drift-3 var(--bb-loop-orb-drift-3) var(--bb-ease-in-out) infinite,
+    ambient-orb-pulse-3 var(--bb-loop-orb-pulse-3) var(--bb-ease-in-out) infinite;
+}
+
+@keyframes ambient-orb-drift-1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(45vw, 30vh) scale(1.15);
+  }
+  66% {
+    transform: translate(60vw, -20vh) scale(0.85);
+  }
+}
+
+@keyframes ambient-orb-drift-2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-50vw, -35vh) scale(1.2);
+  }
+  66% {
+    transform: translate(-25vw, 30vh) scale(0.9);
+  }
+}
+
+@keyframes ambient-orb-drift-3 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-40vw, -45vh) scale(1.25);
+  }
+}
+
+@keyframes ambient-orb-pulse-1 {
+  0%,
+  100% {
+    opacity: 0.03;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes ambient-orb-pulse-2 {
+  0%,
+  100% {
+    opacity: 0.14;
+  }
+  50% {
+    opacity: 0.02;
+  }
+}
+
+@keyframes ambient-orb-pulse-3 {
+  0%,
+  100% {
+    opacity: 0.02;
+  }
+  50% {
+    opacity: 0.1;
+  }
+}
+
+/*
+ * «Reducir movimiento»: orbes quietos en su sitio, con la opacidad media de su pulso. (El sello les quita
+ * la animación y se quedan a opacidad 1, mucho más rojos que en movimiento.)
+ */
+@media (prefers-reduced-motion: reduce) {
+  .ambient-orbs__orb {
+    animation: none;
+  }
+
+  .ambient-orbs__orb--1 {
+    opacity: 0.12;
+  }
+
+  .ambient-orbs__orb--2 {
+    opacity: 0.08;
+  }
+
+  .ambient-orbs__orb--3 {
+    opacity: 0.06;
+  }
+}
+
+:root[data-motion="reduced"] .ambient-orbs__orb {
+  animation: none;
+}
+
+:root[data-motion="reduced"] .ambient-orbs__orb--1 {
+  opacity: 0.12;
+}
+
+:root[data-motion="reduced"] .ambient-orbs__orb--2 {
+  opacity: 0.08;
+}
+
+:root[data-motion="reduced"] .ambient-orbs__orb--3 {
+  opacity: 0.06;
+}

@@ -1,0 +1,29 @@
+{
+  "name": "beatbattle",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @beatbattle/web dev",
+    "dev:server": "pnpm --filter @beatbattle/server dev",
+    "dev:all": "pnpm --parallel --filter @beatbattle/web --filter @beatbattle/server dev",
+    "build": "pnpm --filter @beatbattle/web build && pnpm --filter @beatbattle/server build",
+    "check": "biome check . && pnpm lint:tokens && pnpm lint:purity",
+    "lint:tokens": "node tools/lint/check-tokens.mjs",
+    "lint:purity": "pnpm --filter @beatbattle/rules lint:purity",
+    "fix": "biome check --write .",
+    "typecheck": "pnpm -r typecheck && tsc -p tsconfig.json",
+    "test": "pnpm -r test",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@biomejs/biome": "2.5.15",
+    "@playwright/test": "1.63.0",
+    "@types/node": "22.20.4",
+    "typescript": "7.0.2"
+  }
+}

@@ -1,0 +1,43 @@
+# Servicios locales de desarrollo de BeatBattle (guía §4.15, §4.19.1). No es el despliegue: la API y
+# la web se arrancan con `pnpm dev:all`.
+#
+#   docker compose up -d                  # Mailpit: SMTP en 127.0.0.1:1025, bandeja web en http://localhost:8025
+#   docker compose --profile sqld up -d   # además, sqld (libSQL por HTTP, como Turso) en 127.0.0.1:8080
+#   docker compose down                   # parar (añade -v para borrar también los datos de sqld)
+#
+# Con Mailpit, la API envía con SMTP_URL=smtp://127.0.0.1:1025 (Fase 2): ningún email sale de la
+# máquina. Con sqld, DATABASE_URL=http://127.0.0.1:8080 reproduce el comportamiento de Turso por
+# HTTP (p. ej. que `PRAGMA foreign_keys` no se mantiene entre peticiones, guía §4.11).
+#
+# Los puertos solo escuchan en 127.0.0.1 y se pueden cambiar si chocan con otro servicio, con
+# variables del shell o de un `.env` junto a este fichero (no el de apps/server):
+#   MAILPIT_SMTP_PORT (1025), MAILPIT_WEB_PORT (8025), SQLD_PORT (8080)
+# p. ej. `MAILPIT_SMTP_PORT=2025 docker compose up -d`; entonces SMTP_URL=smtp://127.0.0.1:2025.
+# Imágenes en `latest` mientras sea solo para desarrollo; fija la versión cuando lo use la CI.
+name: beatbattle
+
+services:
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "127.0.0.1:${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "127.0.0.1:${MAILPIT_WEB_PORT:-8025}:8025"
+    environment:
+      # acepta cualquier usuario y contraseña SMTP sin TLS: el transporte de local puede autenticarse
+      # igual que el de Gmail sin que Mailpit rechace nada
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+      MP_MAX_MESSAGES: "5000"
+    restart: unless-stopped
+
+  sqld:
+    profiles: ["sqld"]
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    ports:
+      - "127.0.0.1:${SQLD_PORT:-8080}:8080"
+    volumes:
+      - sqld_data:/var/lib/sqld
+    restart: unless-stopped
+
+volumes:
+  sqld_data:

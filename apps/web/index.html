@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Negro desde el primer fotograma, como la web del sello: sin destello blanco al cargar. -->
+    <style>
+      html {
+        background-color: #000;
+        color-scheme: dark;
+      }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#000000" />
+    <!-- Icono de la pestaña: el logo del sello, como en otherpeople.es. Sin él, el navegador pide
+         /favicon.ico y recibe un 404. Los iconos de la PWA (manifest) llegan con §4.7.8. -->
+    <link rel="icon" type="image/webp" href="/img/otp-logo.webp" />
+    <title>Beat Battle · Other People</title>
+    <meta
+      name="description"
+      content="Cada lunes, un sample nuevo. Flipéalo, sube tu beat y deja que la comunidad vote. La batalla semanal de productores de Other People Records."
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

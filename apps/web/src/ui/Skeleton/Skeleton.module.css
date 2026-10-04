@@ -1,0 +1,61 @@
+/*
+ * Esqueleto (§3.3): el barrido diagonal del sello (`Skeleton.css`: 110°, #1a1a1a → #2a2a2a → #1a1a1a,
+ * 1,5 s), con los grises de los tokens.
+ *
+ * El brillo es un pseudoelemento que se desplaza con `transform`, que el navegador compone fuera del
+ * hilo principal. El del sello animaba `background-position`, que no se compone: cada esqueleto
+ * recalculaba el estilo y repintaba 60 veces por segundo justo mientras se cargan datos (INP, §4.17).
+ */
+.skeleton {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--bb-ink-800);
+}
+
+.skeleton::after {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(110deg, transparent 8%, var(--bb-ink-600) 18%, transparent 33%);
+  content: "";
+  transform: translateX(-100%);
+  animation: shimmer var(--bb-loop-shimmer) var(--bb-ease-in-out) infinite;
+}
+
+.block {
+  height: var(--bb-space-12);
+  border-radius: var(--bb-radius-sm);
+}
+
+.text {
+  height: 1em;
+  border-radius: var(--bb-radius-xs);
+}
+
+.circle {
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.group {
+  display: grid;
+  gap: var(--bb-space-2);
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Sin movimiento (Anexo E): gris fijo. */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    display: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .skeleton::after {
+  display: none;
+}

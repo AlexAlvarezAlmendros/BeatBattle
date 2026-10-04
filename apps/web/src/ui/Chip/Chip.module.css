@@ -1,0 +1,140 @@
+/*
+ * Chip (§3.3): los chips de género del sello (`BeatsFilterBar.css`, `otp-metrics.json`): píldora de
+ * 28 px con borde de 1 px, texto gris 500; hover con borde gris y texto blanco; activo en rojo
+ * macizo con sombra roja (con `--bb-red-cta` por contraste AA, §3.1).
+ */
+.chip {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-1);
+  padding: var(--bb-space-chip);
+  border: 1px solid var(--bb-ink-600);
+  border-radius: var(--bb-radius-pill);
+  background-color: transparent;
+  color: var(--bb-text-3);
+  font-family: var(--bb-font-body);
+  font-size: var(--bb-font-size-xs);
+  font-weight: var(--bb-weight-medium);
+  line-height: var(--bb-leading-snug);
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    border-color var(--bb-dur-fast) var(--bb-ease-out),
+    color var(--bb-dur-fast) var(--bb-ease-out),
+    background-color var(--bb-dur-fast) var(--bb-ease-out),
+    box-shadow var(--bb-dur-fast) var(--bb-ease-out);
+}
+
+/* Área táctil de 44 px de alto como mínimo, invisible (RNF-A11Y-09). */
+.chip::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: max(100%, var(--bb-space-11));
+  translate: 0 -50%;
+}
+
+/*
+ * Relleno rojo que crece desde el punto del clic (Anexo E). Va por debajo del texto (`isolation` en
+ * el chip) y se recorta con un círculo, sin `overflow: hidden` para no recortar el área táctil.
+ */
+.chip::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background-color: var(--bb-red-cta);
+  clip-path: circle(0 at var(--chip-x, 50%) var(--chip-y, 50%));
+}
+
+.icon {
+  font-size: 1.1em;
+}
+
+.chip:hover,
+.chip[data-force-state="hover"] {
+  border-color: var(--bb-text-4);
+  color: var(--bb-text);
+}
+
+.chip:active,
+.chip[data-force-state="pressed"] {
+  background-color: var(--bb-fill-hover);
+}
+
+.chip[aria-pressed="true"] {
+  border-color: var(--bb-red-cta);
+  color: var(--bb-text);
+  box-shadow: var(--bb-shadow-chip);
+}
+
+/* Solo se anima al activar (al desactivar, cambio de color): el origen se mueve sin transición. */
+.chip[aria-pressed="true"]::after {
+  clip-path: circle(150% at var(--chip-x, 50%) var(--chip-y, 50%));
+  transition: clip-path var(--bb-dur-base) var(--bb-ease-out);
+}
+
+.chip[aria-pressed="true"]:active,
+.chip[aria-pressed="true"][data-force-state="pressed"] {
+  border-color: var(--bb-red-press);
+}
+
+.chip[aria-pressed="true"]:active::after,
+.chip[aria-pressed="true"][data-force-state="pressed"]::after {
+  background-color: var(--bb-red-press);
+}
+
+.chip:focus-visible,
+.chip[data-force-state="focus"] {
+  outline: var(--bb-focus-width) solid var(--bb-focus-color);
+  outline-offset: var(--bb-focus-offset);
+  box-shadow: var(--bb-focus-halo);
+}
+
+.chip:disabled {
+  border-color: var(--bb-ink-700);
+  color: var(--bb-text-4);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.chip[aria-pressed="true"]:disabled::after {
+  background-color: var(--bb-ink-600);
+}
+
+@media (max-width: 480px) {
+  .chip {
+    padding: var(--bb-space-chip-compact);
+  }
+}
+
+/* ── Grupo que salta de línea (ChipGroup) ─────────────────────────────────────────────────── */
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-2);
+}
+
+/* Táctil: filas separadas para que las áreas de 44 px no se solapen (RNF-A11Y-09). */
+@media (pointer: coarse) {
+  .group {
+    row-gap: var(--bb-chip-row-gap-touch);
+  }
+}
+
+/* Sin movimiento (Anexo E): cambio de color, sin relleno que crece. */
+@media (prefers-reduced-motion: reduce) {
+  .chip[aria-pressed="true"]::after {
+    transition: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .chip[aria-pressed="true"]::after {
+  transition: none;
+}

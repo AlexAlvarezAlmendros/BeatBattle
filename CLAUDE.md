@@ -28,20 +28,18 @@ tools/shot       capturas y bancos (de Orchard) · tools/seed  datos de prueba
 
 ## Comandos
 
-El repo es greenfield: los comandos existen a partir de la tarea 0.1. Hasta entonces, no los des
-por buenos.
-
 ```bash
 pnpm install
 pnpm dev                 # web en http://localhost:5173 (Vite reenvía /api)
 pnpm dev:all             # web + API (apps/server en :3000)
-pnpm check               # Biome (lint + formato); pnpm fix aplica arreglos
+pnpm check               # Biome + lint de tokens + pureza de packages/rules; pnpm fix aplica arreglos de Biome
 pnpm typecheck           # TypeScript en todos los paquetes
 pnpm test                # Vitest en todos los paquetes
 pnpm e2e                 # Playwright (almacenamiento falso, reloj de prueba, Mailer en memoria)
 pnpm emails:dev          # visor de plantillas de email (React Email)
 node tools/shot/shot.mjs <url> <png> [--eval=expr]   # captura con la GPU real
 node tools/shot/bench.mjs <url> [segundos]           # FPS y peor fotograma
+node tools/shot/ab.mjs [--otp-live]                  # A/B de la prueba del sello (docs/planning/evidence/f0/ab)
 ```
 
 ## Reglas

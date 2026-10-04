@@ -1,0 +1,36 @@
+/*
+ * Marco de todas las páginas (tarea 0.7): capas y medidas del contenido. La isla, el pie y el fondo
+ * llevan su propio CSS junto a su componente.
+ *
+ * Capas (§3.2): fondo (orbes, y el Escenario en la Fase 1) en `--bb-z-stage`, contenido y pie en
+ * `--bb-z-content` y la isla por encima, en `--bb-z-island`.
+ */
+
+.site-main,
+.site-footer {
+  position: relative;
+  z-index: var(--bb-z-content);
+}
+
+.site-main {
+  /*
+   * Relleno del contenido: el del `.container` del sello (`index.css`: `padding: 2rem`, sin ancho
+   * máximo), a 32 px de los bordes en escritorio y en móvil; el título de `/beats` queda a 32 px bajo
+   * la isla y a 32 px del borde. Cada página pone su ancho máximo si lo necesita. Lo leen también los
+   * bloques que suben hasta el borde (`.bleed-top`).
+   */
+  --site-main-pad: var(--bb-space-8);
+  min-height: 60vh;
+  padding: var(--site-main-pad);
+}
+
+/*
+ * Bloque a sangre que sube hasta el borde superior, por debajo de la isla (el hero, como en el sello:
+ * Hero.css niega el espacio en flujo de la isla, `--nav-flow`, y el relleno del contenido). Ocupa todo
+ * el ancho de la ventana aunque esté dentro del contenido centrado.
+ */
+.bleed-top {
+  width: 100vw;
+  margin-top: calc(-1 * (var(--nav-flow) + var(--site-main-pad, 0px)));
+  margin-inline: calc(50% - 50vw);
+}

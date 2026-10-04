@@ -1,0 +1,32 @@
+/*
+ * Cristal de `GlassSurface` (guía §3.1 y §3.3), portado de `GlassSurface.css` del sello. Solo se
+ * aplica con capacidad (`data-glass="on"`): sustituye la «pintura» de la pieza (fondo y
+ * `backdrop-filter`) y deja su disposición, borde y sombra a su propio CSS.
+ *
+ * El selector lleva clase + atributo (especificidad 0,2,0) para ganar a la clase de la pieza sin
+ * `!important` (el sello lo necesitaba porque no controlaba el orden de sus hojas).
+ */
+
+/* En :where() (especificidad 0) para no pisar el posicionamiento propio de la pieza (el sticky de la
+   isla): solo da contexto al SVG del filtro cuando la pieza es estática. */
+:where(.bb-glass[data-glass="on"]) {
+  position: relative;
+}
+
+.bb-glass[data-glass="on"] {
+  background: var(--bb-glass-tint, var(--bb-glass-card));
+  -webkit-backdrop-filter: var(--bb-glass-filter) saturate(var(--bb-glass-saturation, 1))
+    blur(var(--bb-glass-backdrop-blur, 0px));
+  backdrop-filter: var(--bb-glass-filter) saturate(var(--bb-glass-saturation, 1))
+    blur(var(--bb-glass-backdrop-blur, 0px));
+}
+
+.bb-glass__filter {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}

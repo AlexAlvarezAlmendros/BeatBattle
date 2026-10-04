@@ -1,0 +1,10 @@
+{
+  "name": "@beatbattle/shot",
+  "private": true,
+  "type": "module",
+  "description": "Capturas, banco de FPS, referencia del sello y A/B de la prueba del sello con el Chrome del sistema (shot y bench portados de Orchard; tarea 0.14)",
+  "scripts": {
+    "typecheck": "echo skip",
+    "test": "echo skip"
+  }
+}

@@ -1,0 +1,102 @@
+/*
+ * Modal (§3.3): fondo oscurecido al 70 % con desenfoque y, encima, la pieza de cristal de las tarjetas
+ * del sello (`--bb-glass-card` + desenfoque, borde al 18 %, sombra flotante). Radio `md` (§3.2).
+ */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--bb-z-modal);
+  display: grid;
+  place-items: center;
+  padding: var(--bb-space-4);
+  overflow-y: auto;
+  background-color: var(--bb-scrim);
+  backdrop-filter: blur(var(--bb-scrim-blur));
+  -webkit-backdrop-filter: blur(var(--bb-scrim-blur));
+}
+
+.frame {
+  width: min(100%, 32rem);
+}
+
+.surface {
+  display: grid;
+  gap: var(--bb-space-4);
+  width: 100%;
+  padding: var(--bb-space-6);
+  border: 1px solid var(--bb-line-strong);
+  border-radius: var(--bb-radius-md);
+  box-shadow: var(--bb-shadow-float);
+  color: var(--bb-text);
+}
+
+/* Alternativa sin capacidad de cristal; con ella, GlassSurface pinta fondo y `backdrop-filter`. */
+.glass {
+  background-color: var(--bb-glass-card);
+  backdrop-filter: blur(var(--bb-glass-blur));
+  -webkit-backdrop-filter: blur(var(--bb-glass-blur));
+}
+
+.solid {
+  background-color: var(--bb-ink-800);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--bb-space-4);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-font-size-xl);
+  font-weight: var(--bb-weight-extrabold);
+  line-height: var(--bb-leading-snug);
+}
+
+.close {
+  flex-shrink: 0;
+  margin: calc(-1 * var(--bb-space-2)) calc(-1 * var(--bb-space-2)) 0 0;
+}
+
+.description {
+  color: var(--bb-text-2);
+}
+
+.body {
+  min-width: 0;
+}
+
+/* Cuerpo que no ha cargado: mensaje con el icono de peligro (nunca solo el color). */
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--bb-space-2);
+  margin: 0;
+  color: var(--bb-text-2);
+}
+
+.errorIcon {
+  flex-shrink: 0;
+  margin-top: var(--bb-space-1);
+  color: var(--bb-danger);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--bb-space-3);
+}
+
+@media (max-width: 480px) {
+  .surface {
+    padding: var(--bb-space-5);
+  }
+
+  .footer > * {
+    flex: 1 1 auto;
+  }
+}

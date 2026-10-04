@@ -1,0 +1,45 @@
+/* Marco provisional de ajustes (0.10): navegación lateral en escritorio, arriba en móvil. */
+.settings-layout {
+  display: grid;
+  gap: var(--bb-space-8);
+}
+
+@media (min-width: 768px) {
+  .settings-layout {
+    grid-template-columns: minmax(12rem, 16rem) 1fr;
+  }
+}
+
+.settings-layout__label {
+  margin-bottom: var(--bb-space-2);
+  color: var(--bb-text-3);
+  font-size: var(--bb-font-size-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-caps);
+  text-transform: uppercase;
+}
+
+.settings-layout nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-1) var(--bb-space-4);
+}
+
+@media (min-width: 768px) {
+  .settings-layout nav ul {
+    flex-direction: column;
+  }
+}
+
+.settings-layout nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bb-space-11);
+  color: var(--bb-text-2);
+  text-decoration: none;
+}
+
+.settings-layout nav a[aria-current="page"] {
+  color: var(--bb-text);
+  font-weight: var(--bb-weight-semibold);
+}
