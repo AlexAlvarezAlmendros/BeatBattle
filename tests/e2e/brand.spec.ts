@@ -292,6 +292,29 @@ test.describe('móvil táctil (390 × 844): la firma centrada y «Legal» debajo
     await expectLegalBelow(page)
   })
 
+  /**
+   * Cuarto pase del jurado de la 0.28, F5: en móvil las piezas iban 3 px por debajo del borde de la barra
+   * y 7 por encima de su pie (el aire del anillo del foco). La pegatina va centrada en vertical en la
+   * barra, con el mismo alto de barra (54 px) y la caja de 44 px entera dentro de la ventana.
+   */
+  test('RD-VIS-02 e / RF-OTP-01: en el menú, la pegatina de la firma va centrada en vertical en la barra', async ({
+    page,
+  }) => {
+    await page.goto('/dev/menu')
+    await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toBeAttached()
+    await settle(page)
+    const { above, below, height } = await page.getByRole('contentinfo').evaluate((footer) => {
+      const bar = footer.getBoundingClientRect()
+      const sticker = footer.querySelector('[data-otp-signature] img')!.getBoundingClientRect()
+      return { above: sticker.top - bar.top, below: bar.bottom - sticker.bottom, height: bar.height }
+    })
+    expect(
+      Math.abs(above - below),
+      `${above.toFixed(1)} px arriba y ${below.toFixed(1)} abajo`,
+    ).toBeLessThanOrEqual(1)
+    expect(height, 'la barra no crece').toBeLessThanOrEqual(54.5)
+  })
+
   test('RD-VIS-02 e / RF-OTP-01: en el menú, sin «Legal», la firma va centrada', async ({ page }) => {
     await page.goto('/dev/menu')
     await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toBeAttached()

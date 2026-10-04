@@ -260,7 +260,7 @@
  * automática las lleva a la primera fila libre). Van después de las reglas de arriba: mandan sobre ellas.
  */
 .bar[data-unpinned] > .signature,
-.bar[data-unpinned] .right {
+.bar[data-unpinned]:not([data-right-row]) .right {
   grid-row: 1;
 }
 
@@ -335,6 +335,18 @@
 
   .bar::before {
     display: none;
+  }
+
+  /*
+   * Las piezas (44 px) quedan 3 px por debajo del borde de arriba (filete y relleno) y con `--bar-ring`
+   * (7 px) debajo, para que el anillo del foco no se corte al pie de la ventana; centrar sus cajas haría
+   * crecer la barra o cortaría el anillo. Lo que baja es su contenido, la mitad de esa diferencia: la
+   * pegatina y los rótulos van centrados en la barra (13 px arriba y 13 abajo) con la caja, el anillo y el
+   * alto de la barra de siempre (cuarto pase del jurado de la 0.28, F5).
+   */
+  .signature,
+  .legal {
+    padding-block-start: calc(2 * var(--bar-ring) - var(--bb-stroke) - var(--bb-space-2));
   }
 
   /* «Legal», al lado de la firma (con el filete delante), no al final de la barra. */
