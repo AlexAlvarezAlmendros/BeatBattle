@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
 import { useLoops } from '../../ui/loops'
-import { Chronicle } from './Chronicle'
+import { Chronicle, CreditLine } from './Chronicle'
 
 const MESSAGES = ['Próximo drop en el horno', 'Un sample cada lunes', 'La comunidad vota'] as const
 
@@ -105,5 +105,15 @@ describe('crónica de la arena (§3.8.3)', () => {
     document.documentElement.setAttribute('data-motion', 'reduced')
     render(<Chronicle messages={[MESSAGES[0]]} label="Crónica de la arena" loops />)
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
+  })
+
+  it('RD-VIS-02 e / WCAG 1.4.4: el crédito, en dos líneas, solo parte por el «·» y no antes de él', () => {
+    // Revisión del cuarto pase del jurado de la 0.28 (F6): con la letra a 24 px partía en «Inserta tu
+    // beat» / «· Crédito 01». Los demás espacios son de no separación: «Inserta tu beat ·» / «Crédito 01».
+    const { container, rerender } = render(<CreditLine inside={false} />)
+    const text = () => container.querySelector('[data-credit]')?.textContent
+    expect(text()).toBe('Inserta\u00a0tu\u00a0beat\u00a0· Crédito\u00a001')
+    rerender(<CreditLine inside />)
+    expect(text()).toBe('Crédito\u00a000\u00a0· ya\u00a0estás\u00a0dentro')
   })
 })

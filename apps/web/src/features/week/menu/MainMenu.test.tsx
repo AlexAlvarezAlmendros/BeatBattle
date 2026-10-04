@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, getDefaultNormalizer, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -84,8 +84,11 @@ describe('MainMenu (0.24, §3.8.3)', () => {
     expect(within(hud).getByText(t('home.hud.streakValue', { count: 3 }))).toBeInTheDocument()
     expect(document.querySelector('[data-frame-slot="arena"]')).toHaveTextContent('41')
     // La crónica, en la barra de controles, con el crédito delante: «Inserta tu beat» (que respira) y
-    // el crédito en Oxanium rojo, en caja mixta (§3.8.3).
-    const credit = within(screen.getByRole('contentinfo')).getByText(t('home.chronicle.insertAction'))
+    // el crédito en Oxanium rojo, en caja mixta (§3.8.3). Sus palabras van unidas por espacios de no
+    // separación (parte por el «·»): se compara sin convertirlos en espacios normales.
+    const credit = within(screen.getByRole('contentinfo')).getByText(t('home.chronicle.insertAction'), {
+      normalizer: getDefaultNormalizer({ collapseWhitespace: false }),
+    })
     expect(credit.closest('[data-credit]')).toHaveTextContent(/Inserta tu beat · Crédito 01/)
     expect(credit.closest('[data-credit]')?.querySelector('em')).toHaveTextContent('01')
   })

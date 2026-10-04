@@ -35,7 +35,10 @@
  * Una línea mientras quepa en su hueco; si no (la letra del navegador a 24 px a 1440 px, una ventana
  * estrecha), parte en dos antes que cortarse en «Crédit…» (WCAG 1.4.4; cuarto pase del jurado de la 0.28,
  * F6). Dos líneas caben siempre en el alto del botón de pausa (las dos medidas van en `rem`), así que la
- * barra no cambia de alto al rotar. Solo un mensaje más largo que dos líneas acaba en «…».
+ * barra no cambia de alto al rotar. Solo un mensaje más largo que dos líneas acaba en «…». El crédito
+ * parte por el «·» y no antes de él («Inserta tu beat ·» / «Crédito 01»: espacios de no separación en
+ * `home.chronicle.*`); si un trozo así no cabe ni solo en su línea, parte donde haga falta antes que
+ * cortarse (`overflow-wrap`).
  */
 .chronicle {
   display: -webkit-box;
@@ -48,6 +51,7 @@
   font-size: var(--bb-fs-xs);
   font-weight: var(--bb-weight-bold);
   letter-spacing: var(--bb-tracking-label);
+  overflow-wrap: break-word;
   text-overflow: ellipsis;
   text-transform: uppercase;
   text-wrap: balance;

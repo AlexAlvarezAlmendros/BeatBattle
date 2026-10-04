@@ -109,9 +109,9 @@
       "streakValue": "×{count}"
     },
     "chronicle": {
-      "insert": "{action} · Crédito {credit}",
-      "insertAction": "Inserta tu beat",
-      "inside": "Crédito {credit} · ya estás dentro",
+      "insert": "{action}\u00a0· Crédito\u00a0{credit}",
+      "insertAction": "Inserta\u00a0tu\u00a0beat",
+      "inside": "Crédito\u00a0{credit}\u00a0· ya\u00a0estás\u00a0dentro",
       "credit": "{count}",
       "idle": {
         "nextDrop": "Próximo drop en el horno",
