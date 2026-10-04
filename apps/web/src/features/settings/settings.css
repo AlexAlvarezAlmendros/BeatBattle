@@ -5,7 +5,6 @@
   display: grid;
   justify-items: start;
   gap: var(--bb-space-2);
-  margin-bottom: var(--bb-space-5);
 }
 
 .settings-option-help {
@@ -205,6 +204,41 @@
 
   .settings-help-index {
     font-size: var(--bb-fs-2xl);
+  }
+}
+
+/*
+ * Ventana baja (≥ 721 px de ancho y < 900 de alto; §3.8.14): se aprieta por altura, sin esconder nada.
+ * Placas de 56 px en un tablero con 12 px de relleno, filas de la ayuda a 56 px y el conmutador de los
+ * atajos con su explicación al lado, si cabe.
+ */
+@media (min-width: 721px) and (max-height: 899px) {
+  .settings-preview {
+    gap: var(--bb-space-2);
+    padding: var(--bb-space-3);
+  }
+
+  .settings-preview-option {
+    min-height: var(--bb-space-14);
+  }
+
+  .settings-help {
+    gap: var(--bb-space-2);
+  }
+
+  .settings-help-row {
+    padding-block: var(--bb-space-2);
+  }
+
+  .settings-option {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--bb-space-2) var(--bb-space-4);
+  }
+
+  .settings-option-help {
+    flex: 1 1 24rem;
   }
 }
 

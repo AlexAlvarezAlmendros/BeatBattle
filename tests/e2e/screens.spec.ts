@@ -257,6 +257,61 @@ test.describe('1440 × 900', () => {
 })
 
 /**
+ * Ventana baja (§3.8.14, como el menú en §3.8.3): con ≥ 721 px de ancho y < 900 de alto las interiores
+ * de poco contenido se aprietan por altura (filas, separaciones y el pad a 56 px) sin esconder nada. A
+ * 1366 × 657 y 1440 × 789 (la ventana real de una pantalla de 1440 × 900) caben sin desplazar y la barra
+ * no tapa ningún control.
+ */
+const LOW_SCREENS = [
+  { path: '/como-funciona', heading: 'Cómo se juega' },
+  { path: '/ajustes/sonido', heading: 'Sonido y efectos' },
+  { path: '/ajustes/accesibilidad', heading: 'Accesibilidad' },
+  { path: '/esto-no-existe', heading: 'Bonus stage' },
+]
+
+for (const viewport of [
+  { width: 1366, height: 657 },
+  { width: 1440, height: 789 },
+]) {
+  test.describe(`${viewport.width} × ${viewport.height}, ventana baja`, () => {
+    test.use({ viewport })
+
+    for (const { path, heading } of LOW_SCREENS) {
+      test(`RD-VIS-02 e: ${path} cabe sin desplazar y la barra no tapa ningún control (§3.8.14)`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        const fit = await page.evaluate(() => {
+          const bar = document.querySelector('.game-frame > footer')!.getBoundingClientRect()
+          const visible = (element: Element) => {
+            const rect = element.getBoundingClientRect()
+            return rect.width > 0 && rect.height > 0 && getComputedStyle(element).visibility !== 'hidden'
+          }
+          const controls = [...document.querySelectorAll('main :is(a[href], button, [tabindex="0"])')].filter(
+            visible,
+          )
+          return {
+            overflow: document.documentElement.scrollHeight - window.innerHeight,
+            covered: controls
+              .filter((control) => control.getBoundingClientRect().bottom > bar.top + 0.5)
+              .map((control) => control.textContent?.trim()),
+            // Nada escondido: todas las filas y los párrafos de la pantalla se pintan.
+            hidden: [...document.querySelectorAll('main :is(li, p)')]
+              .filter((element) => !element.closest('.sr-only, [data-screen-part="head"]'))
+              .filter((element) => !visible(element))
+              .map((element) => element.textContent?.trim()),
+          }
+        })
+        expect(fit.overflow, `${fit.overflow} px de desplazamiento`).toBeLessThanOrEqual(0)
+        expect(fit.covered, 'controles bajo la barra').toEqual([])
+        expect(fit.hidden, 'filas o párrafos escondidos').toEqual([])
+      })
+    }
+  })
+}
+
+/**
  * ¿Pisa la caja la diagonal de la cuña? La arena de cuña a la izquierda (`ArenaBackdrop`) corta el pie
  * de la ventana en el 30 % del ancho y sube hacia la derecha a 17° de la vertical; el borde derecho de
  * una placa de la cuña, a su pie, no puede pasar de ahí.

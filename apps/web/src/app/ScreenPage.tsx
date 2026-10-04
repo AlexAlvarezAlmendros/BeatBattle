@@ -96,8 +96,12 @@ export function ScreenPage({
   const inHud = titleInHud ?? Boolean(screen.plate)
   const panel = (
     <Frame cut="lg" className={styles.panel} data-screen-part="panel">
-      {badge}
-      {summary && <p className={styles.summary}>{summary}</p>}
+      {(badge || summary) && (
+        <div className={styles.intro}>
+          {badge}
+          {summary && <p className={styles.summary}>{summary}</p>}
+        </div>
+      )}
       {children}
       {actions !== null && <div className={styles.actions}>{actions ?? <BackToMenu />}</div>}
     </Frame>
