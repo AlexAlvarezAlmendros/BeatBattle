@@ -31,12 +31,25 @@ describe('crónica de la arena (§3.8.3)', () => {
     expect(line).toHaveTextContent('Crónica de la arena:')
   })
 
-  it('RNF-A11Y-03: con «reducir movimiento» se queda quieta en el primer mensaje', () => {
+  it('RNF-A11Y-03: con «reducir movimiento» sigue rotando cada 5 s, sin fundido (la crónica es información, §3.6)', () => {
     document.documentElement.setAttribute('data-motion', 'reduced')
     render(<Chronicle messages={MESSAGES} label="Crónica de la arena" />)
-    act(() => vi.advanceTimersByTime(loop.chronicle * 3))
-    expect(screen.getByText(MESSAGES[0])).toBeInTheDocument()
     expect(screen.getByText(MESSAGES[0]).closest('p')).toHaveAttribute('data-static', 'true')
+    act(() => vi.advanceTimersByTime(loop.chronicle))
+    expect(screen.getByText(MESSAGES[1])).toBeInTheDocument()
+    expect(screen.getByText(MESSAGES[1]).closest('p')).toHaveAttribute('data-static', 'true')
+  })
+
+  it('RNF-A11Y-03 / WCAG 2.2.2: con «reducir movimiento» el botón «Pausar las animaciones» sigue ahí y la para', () => {
+    document.documentElement.setAttribute('data-motion', 'reduced')
+    render(<Chronicle messages={MESSAGES} label="Crónica de la arena" loops />)
+    const pause = screen.getByRole('button', { name: t('frame.controls.loopsPause') })
+    act(() => vi.advanceTimersByTime(loop.chronicle))
+    expect(screen.getByText(MESSAGES[1])).toBeInTheDocument()
+    fireEvent.click(pause)
+    expect(pause).toHaveAttribute('aria-pressed', 'true')
+    act(() => vi.advanceTimersByTime(loop.chronicle * 3))
+    expect(screen.getByText(MESSAGES[1])).toBeInTheDocument()
   })
 
   it('WCAG 2.2.2: un botón de 44 px con aria-pressed («Pausar las animaciones») la pausa y la reanuda', () => {
@@ -88,9 +101,9 @@ describe('crónica de la arena (§3.8.3)', () => {
     expect(screen.getByRole('button', { name: t('frame.controls.loopsPause') })).toBeInTheDocument()
   })
 
-  it('RNF-A11Y-03: con «reducir movimiento» los bucles ya están parados: sin botón', () => {
+  it('RNF-A11Y-03: con «reducir movimiento» y un solo mensaje, los bucles ya están parados: sin botón', () => {
     document.documentElement.setAttribute('data-motion', 'reduced')
-    render(<Chronicle messages={MESSAGES} label="Crónica de la arena" loops />)
+    render(<Chronicle messages={[MESSAGES[0]]} label="Crónica de la arena" loops />)
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 })

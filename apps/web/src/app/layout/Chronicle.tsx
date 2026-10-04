@@ -18,8 +18,12 @@ import styles from './Chronicle.module.css'
  *   la pantalla (el vinilo-sol, el respiro de «Inserta tu beat», el latido del reloj; `ui/loops.ts`)
  *   hasta que se vuelve a pulsar. La crónica se para además sola con el ratón encima y con el foco
  *   dentro (teclado). El botón está si hay algo que pausar: más de un mensaje o, con `loops`, otros
- *   bucles en la pantalla. Con «reducir movimiento» los bucles ya están parados (§3.6): se queda el
- *   primer mensaje y no hay botón.
+ *   bucles en la pantalla.
+ * - **«Reducir movimiento»** (`RNF-A11Y-03`, §3.6 v0.6.6): la crónica es información (el recuento de
+ *   votos, lo que queda de semana, quién ha entrado fuera del voto ciego), no un bucle decorativo: sigue
+ *   cambiando cada 5 s, sin fundido (`data-static`), y el botón sigue ahí si hay más de un mensaje (WCAG
+ *   2.2.2; cuarto pase del jurado de la 0.28, F4). Los demás bucles ya están parados: con un solo mensaje,
+ *   no hay botón.
  * - No es una región viva (`aria-live="off"`): cambiar cada 5 s no se anuncia; quien lo recorre lee el
  *   mensaje del momento.
  */
@@ -39,9 +43,11 @@ export function Chronicle({
   const [index, setIndex] = useState(0)
   const [hovered, setHovered] = useState(false)
   const [focused, setFocused] = useState(false)
-  const canRotate = !reduced && messages.length > 1
+  // La rotación es información, no un bucle decorativo (§3.6): sigue con «reducir movimiento».
+  const canRotate = messages.length > 1
   const rotates = canRotate && !hovered && !focused && !paused
-  const canPause = !reduced && (messages.length > 1 || loops)
+  // Con «reducir movimiento» los bucles decorativos ya están parados: el botón queda si la crónica rota.
+  const canPause = canRotate || (!reduced && loops)
 
   useEffect(() => {
     if (!rotates) return

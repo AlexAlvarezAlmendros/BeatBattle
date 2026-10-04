@@ -130,10 +130,44 @@ test.describe('con «reducir movimiento» del sistema', () => {
       expect(recorded.filter((a) => a.iterations === Infinity)).toEqual([])
       expect(recorded.filter((a) => a.moves)).toEqual([])
       expect(recorded.filter((a) => a.duration > 200)).toEqual([])
-      // La crónica de la arena se queda quieta (Anexo E).
+      // La crónica de la arena cambia sin fundido (Anexo E, §3.6).
       await expect(page.locator('[data-chronicle]')).toHaveAttribute('data-static', 'true')
     })
   }
+
+  /**
+   * La crónica es información, no un bucle decorativo (§3.6 v0.6.6; cuarto pase del jurado de la 0.28, F4):
+   * con «reducir movimiento» se quedaba para siempre en «Inserta tu beat · Crédito 01» y el recuento de
+   * votos («340 votos esta semana») no estaba en ninguna otra parte. Sigue rotando cada 5 s, sin fundido,
+   * y el botón «Pausar las animaciones» sigue ahí y la para (WCAG 2.2.2). Con el reloj de la página falso.
+   */
+  test('RNF-A11Y-03 / WCAG 2.2.2: en /dev/menu la crónica sigue rotando sin fundido y el botón de pausa la para', async ({
+    page,
+  }) => {
+    await page.clock.install()
+    await open(page, '/dev/menu', 'Beat Battle')
+    await page.mouse.move(0, 0)
+    const bar = page.getByRole('contentinfo')
+    const chronicle = bar.locator('[data-chronicle]')
+    await expect(chronicle).toHaveAttribute('data-static', 'true')
+    await expect(chronicle).toContainText('Inserta tu beat')
+    await page.clock.runFor(5_000)
+    await expect(chronicle).toContainText('Nueva entrada')
+    expect(await chronicle.evaluate((element) => element.getAnimations({ subtree: true }).length)).toBe(0)
+    await page.clock.runFor(10_000)
+    await expect(chronicle).toContainText('votos esta semana')
+
+    const pause = bar.getByRole('button', { name: 'Pausar las animaciones' })
+    await expect(pause).toHaveAttribute('aria-pressed', 'false')
+    await pause.click()
+    await expect(pause).toHaveAttribute('aria-pressed', 'true')
+    // Sin el ratón encima ni el foco dentro: lo que la para es el botón.
+    await page.mouse.move(0, 0)
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    const paused = await chronicle.textContent()
+    await page.clock.runFor(15_000)
+    await expect(chronicle).toHaveText(paused ?? '')
+  })
 
   test('RNF-A11Y-03: cambiar de pantalla es un fundido, sin barrido de la diagonal', async ({ page }) => {
     await page.addInitScript(recordAnimations)
