@@ -241,3 +241,71 @@ for (const { width, height } of [
     }
   })
 }
+
+/**
+ * El anillo del foco tampoco se corta por el borde de arriba de la ventana (§3.3 v0.6.7: «ni cortado por
+ * el borde de la ventana», `scroll-padding` arriba; tercer pase del jurado sobre la v0.6.6, B2). A
+ * 1024 × 768 en /dev/menu, al dar la vuelta con Tab de la barra a «Saltar al contenido» y al botón de
+ * sonido del HUD, el navegador desplazaba lo justo para enseñar el botón (scrollY 22) y lo dejaba en
+ * top 0, con el borde de arriba de su anillo (3 + 4 px) y el halo fuera de la ventana. Pasa siempre que
+ * el control enfocado asoma a medias por arriba: el navegador lo alinea con el borde. Los controles del
+ * contenido llevan su `scroll-margin-top`; los del HUD, no.
+ */
+test.describe('anillo del foco por arriba a 1024 × 768 con teclado', () => {
+  test.use({ viewport: { width: 1024, height: 768 } })
+
+  for (const scrolled of [10, 22, 44]) {
+    test(`RNF-A11Y-01 / §3.3 / WCAG 2.4.11: en /dev/menu desplazado ${scrolled} px, al volver con Tab al botón de sonido del HUD su anillo y su halo caben en la ventana`, async ({
+      page,
+    }) => {
+      await open(page, '/dev/menu', 'Beat Battle')
+      const sound = page.locator('header').getByRole('button', { name: /^Sonido/ })
+      // Con el teclado ya en uso: «Saltar al contenido» y el botón de sonido.
+      await page.keyboard.press('Tab')
+      await page.keyboard.press('Tab')
+      await expect(sound).toBeFocused()
+      // La pantalla, algo desplazada (con la rueda, o al volver de la barra) y Tab desde «Saltar al
+      // contenido», que va fijo y no desplaza.
+      await page.evaluate((top) => window.scrollTo(0, top), scrolled)
+      await page.keyboard.press('Shift+Tab')
+      await page.keyboard.press('Tab')
+      await expect(sound).toBeFocused()
+      await nextFrame(page)
+      const state = await sound.evaluate(measureFocus)
+      expect(state.focusVisible).toBe(true)
+      expect(state.ringInside, `anillo ${state.ring}; botón ${state.where}`).toBe(true)
+    })
+  }
+
+  test('RNF-A11Y-01 / §3.3 / WCAG 2.4.11: en /dev/menu, dando dos vueltas con Tab, ningún anillo se corta por arriba', async ({
+    page,
+  }) => {
+    await open(page, '/dev/menu', 'Beat Battle')
+    const problems: string[] = []
+    let rounds = 0
+    for (let step = 0; step < 40 && rounds < 2; step++) {
+      await page.keyboard.press('Tab')
+      await nextFrame(page)
+      if (await page.evaluate(() => !document.activeElement || document.activeElement === document.body)) {
+        rounds++
+        continue
+      }
+      const state = await page.evaluate(() => {
+        const element = document.activeElement as Element
+        const style = getComputedStyle(element)
+        const px = (value: string) => Number.parseFloat(value) || 0
+        const outline = style.outlineStyle === 'none' ? 0 : px(style.outlineOffset) + px(style.outlineWidth)
+        const spread =
+          style.boxShadow === 'none' ? 0 : px(style.boxShadow.match(/(-?[\d.]+)px\s*$/)?.[1] ?? '0')
+        const top = element.getBoundingClientRect().top - Math.max(outline, spread)
+        return {
+          top,
+          label: (element.getAttribute('aria-label') ?? element.textContent ?? '').trim().slice(0, 32),
+        }
+      })
+      if (state.top < -0.5) problems.push(`${state.label}: anillo desde ${state.top.toFixed(1)}`)
+    }
+    expect(rounds, 'dos vueltas').toBe(2)
+    expect(problems).toEqual([])
+  })
+})

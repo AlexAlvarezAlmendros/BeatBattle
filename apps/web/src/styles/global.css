@@ -21,6 +21,15 @@ html {
   color-scheme: dark;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /*
+   * Ningún elemento enfocado queda cortado por el borde de arriba de la ventana (§3.3 v0.6.7): al
+   * desplazarse para enseñarlo, el navegador deja el alto del anillo (4 + 3 px) y su halo. Sin él, un
+   * control que asomaba a medias por arriba (el botón de sonido del HUD, al dar la vuelta con Tab desde la
+   * barra) quedaba en top 0 con el borde de su anillo fuera (tercer pase del jurado sobre la v0.6.6, B2).
+   * Abajo lo cubre el margen del foco (`scroll-margin-block-end`, más abajo): un `scroll-padding-bottom`
+   * se sumaría al de las piezas de la barra pegada y la pantalla saltaría al llegar a ellas con Tab.
+   */
+  scroll-padding-top: calc(var(--bb-cursor-gap) + var(--bb-stroke-cursor) + var(--bb-focus-halo-spread));
 }
 
 body {
