@@ -162,8 +162,11 @@ requisito, `RD-VIS-02`, con cinco partes que se pueden suspender:
 Las partes a–d corren en cada `pnpm e2e` y `pnpm check`. El primer pase del jurado
 ([acta](docs/planning/evidence/f0/arena/jurado.md)) aprobó la marca y suspendió el juego y la
 accesibilidad: 39 discrepancias en 24 problemas, como placas que cortaban su tecla, tildes recortadas en
-los títulos o pantallas interiores que parecían una web con adornos. Las altas y medias están
-corregidas, cada una con su commit; falta un segundo pase sobre el estado nuevo.
+los títulos o pantallas interiores que parecían una web con adornos. Después vinieron un segundo pase y
+seis rondas de arreglos con el jurado mirando también ventanas reales (un portátil de 1366×768, una
+tableta en vertical, un móvil de 320 px, el escritorio al 175 %). Cuando dos pases se contradecían, la
+regla se escribió primero en la guía y se juzgó contra ella. La verificación final pasa en las tres
+lentes.
 
 Dos reglas lo sostienen en el día a día:
 
@@ -195,7 +198,7 @@ escenario; las reglas siguen siendo las de arriba.
 BeatBattle se construye con **Spec-Driven Development**: primero se especifica, luego se planifica y
 al final se programa contra la especificación.
 
-- **La [guía maestra](docs/guia-maestra.md) es la especificación** (v0.6.5): comportamiento, diseño
+- **La [guía maestra](docs/guia-maestra.md) es la especificación** (v0.6.8): comportamiento, diseño
   visual, de movimiento y de sonido, y arquitectura. Cada requisito tiene un id estable y un criterio
   de aceptación redactado para convertirse en un test.
 - **El [roadmap](docs/planning/ROADMAP.md) la reparte en 10 fases**, y cada fase tiene su plan en
@@ -220,9 +223,8 @@ pnpm --filter @beatbattle/rules test -- -t 'RF-RES-01'    # y solo sus tests
 ## Estado: Fase 0 de 10
 
 **Todavía no se puede jugar.** No hay cuentas, ni semanas, ni samples, ni subida, ni reproductor, ni
-votos. La Fase 0 se reabrió para el cambio de dirección de arte y se está cerrando en la rama
-`feat/f0-fundaciones`: de su última tarea (0.28) solo queda el segundo pase del jurado visual. Lo que
-hay:
+votos. La Fase 0 se reabrió para el cambio de dirección de arte y se cerró el 2026-10-04 en la rama
+`feat/f0-fundaciones` (PR #1, pendiente de revisión). Lo que hay:
 
 | | Qué funciona hoy |
 |---|---|

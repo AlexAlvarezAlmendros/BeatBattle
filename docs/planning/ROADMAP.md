@@ -1,6 +1,6 @@
 # BeatBattle — Roadmap del proyecto
 
-> Última actualización: 2026-10-03
+> Última actualización: 2026-10-04
 
 Competición semanal de beats a partir de un sample, con la estética de **Other People Records** y
 alma de videojuego: cada lunes cae un sample, los productores suben su *flip* y la comunidad vota
@@ -28,7 +28,7 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 
 | # | Fase | Estado | Plan | Hito |
 |---|------|--------|------|------|
-| 0 | Fundaciones | 🔄 Reabierta por el cambio de dirección de arte (0.21–0.28) | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes de la arena (guía v0.6 §3); marco de juego y menú principal navegables con teclado; prueba de marca y de juego (`RD-VIS-02`) |
+| 0 | Fundaciones | ✅ Cerrada (2026-10-04, con la dirección «Arena»; PR nueva pendiente de revisión) | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes de la arena (guía v0.6 §3); marco de juego y menú principal navegables con teclado; prueba de marca y de juego (`RD-VIS-02`) |
 | 1 | Spike de sensación y audio | ⬜ Lista (1.1, 1.4 y 1.9 se pueden empezar) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio; efectos < 30 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
 | 2 | Cuentas y base de email | 🔒 Bloqueada (F0, GO de F1) | — (se crea al llegar) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, preferencias, consentimientos y bajas |
 | 3 | Semanas y samples | 🔒 Bloqueada (F2) | — | 3 semanas programadas; cambio de semana en la frontera con reloj simulado; email del drop (también sin cuenta) |
@@ -43,17 +43,14 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 
 ## Foco actual
 
-**Rediseño de la Fase 0** con la nueva dirección de arte de **arena de lucha** (tareas 0.21–0.28). La
-0.21 está hecha: guía v0.6 (§3) y maquetas aprobadas en `docs/planning/evidence/f0/arena/`. La 0.22
-también (guía v0.6.2): fuentes, tokens, lint de tokens y piezas prohibidas, base global, primitivas
-(`Frame`, `Key`, `Tag`, `Cursor`, `OtpSlap`), foco itinerante, limitador de destellos, modo serio y galería
-por secciones. Del 0.23 al 0.27 también (guía v0.6.3): marco de juego, componentes con todos sus
-estados, menú principal como pantalla de título, pantallas interiores y retirada de lo copiado del sello
-(lista de excepciones del lint vacía, E2E de marca y de juego en verde). La 0.28 está en curso: el
-jurado visual ya pasó (acta en `docs/planning/evidence/f0/arena/jurado.md`, guía v0.6.4) y sus
-discrepancias altas y medias están corregidas; la revisión adversarial también (16 hallazgos confirmados
-y arreglados, guía v0.6.5); quedan el README y un segundo pase del jurado.
-La Fase 1 espera a que termine, porque su Escenario (1.1) dependía del Silk del sello.
+**Fase 1, spike GO/NO-GO** ([plan 01](plans/01-spike-sensacion-audio.md), replanificado para la Arena):
+1.1 (la arena en *shader*), 1.4 (motor de audio) y 1.9 (port del motor de análisis) se pueden empezar;
+1.7–1.8 crean recursos en la nube y esperan la decisión de la cuenta de Cloudinary.
+
+La **Fase 0** se cerró el 2026-10-04 con la dirección de arte «Arena» (tareas 0.21–0.28; guía v0.6.8;
+acta del jurado en `docs/planning/evidence/f0/arena/jurado.md`). La PR #1 se mezcló el 2026-10-04 con el
+estado anterior a la Arena (`3e34a3c`, la versión que copiaba la web del sello), así que `main` lleva esa
+versión hasta que se mezcle la PR nueva de `feat/f0-fundaciones` con el rediseño.
 
 ## Grafo de dependencias
 
@@ -157,6 +154,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 | Premios | Sin premio material; visibilidad y Elección del sello | Antes de la beta | Con premios, revisar bases y fiscalidad |
 | Origen y licencia de los samples | Del sello o de sus productores, con licencia escrita | Antes de F3 | — |
 | Nombre de marca | «Beat Battle · un juego de Other People» | F0 (0.24) | Logo, lockup «by [OTP.]» y textos |
+| Móviles de 781 a ~840 px de alto (360×800, 375×812, 393×786) | El menú con todos los datos se desplaza 35–94 px (la placa enfocada siempre se ve) | Antes de la beta | Opciones: subir el móvil bajo hasta ~840 px (cabe, con una franja vacía de ~180 px a 375×812) o un paso intermedio con el logo en una línea y la tarjeta sin plegar. Acta de la 0.28 |
 | Dorado como excepción | No: medallas y semana dorada en la paleta | Antes de F6 | Si se aprueba, `#f5c542` solo para el 1.º, la carta de campeón y la semana dorada (guía §3.2, §7) |
 | Pase de la carta | Cinta propia con física | F7 | Alternativa: expositor giratorio si se percibe como pieza del sello (guía §3.4.4) |
 | Modelo de semana | Envíos y votos a la vez | Tras la beta | Revisar con datos de participación |
@@ -167,6 +165,8 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-04 | F0 | **Fase 0 cerrada.** 0.28 hecha: segundo pase del jurado, seis rondas de arreglos (143 commits) y verificación final en verde en las tres lentes; guía v0.6.6–v0.6.8 con las reglas que fijó el jurado; `e2e` 980/980 en local. La PR #1 se había mezclado con el estado anterior a la Arena; el rediseño va en una PR nueva. Fase 1 lista. Nueva decisión abierta: móviles de 781 a ~840 px de alto. |
+| 2026-10-04 | F1 | Plan 01 replanificado para la Arena (1.1 arena en *shader*, 1.3 vinilo-sol y limitador, 1.5 estrellas con medidor, 1.6 reactividad sobre el tamaño de punto, 1.11–1.12 jurado visual; 1.1 depende también de la 0.23). |
 | 2026-10-03 | F0 | 0.28: revisión adversarial de la Arena hecha (16 hallazgos confirmados de accesibilidad, rendimiento, código e integridad, arreglados en 14 commits `fix(0.22)`…`fix(0.27)` con su test); guía v0.6.5; LCP de la home 1,75 s; `check`, `typecheck`, `test`, `build` y `e2e` 170/170 en verde. Quedan el README y el segundo pase del jurado. |
 | 2026-10-03 | F0 | 0.28 en curso: jurado visual de la Arena (juego ❌, marca ✅, accesibilidad ❌) y sus 24 problemas corregidos o aplazados con motivo (`fix(0.23)`, `fix(0.24)`, `fix(0.26)`, `fix(0.25)`); guía v0.6.4; `check`, `typecheck`, `test`, `build` y `e2e` 155/155 en verde. Nueva tarea 1.13 (puerta de entrada completa) en el plan 01. |
 | 2026-10-03 | F0 | 0.22–0.27 hechas: base de la arena, marco de juego, componentes, menú principal, pantallas interiores y retirada de lo copiado del sello (guía v0.6.3; `check`, `typecheck`, `test`, `build` y `e2e` en verde). Lista la 0.28. |
