@@ -23,16 +23,19 @@ function background(locator: Locator, pseudo?: '::before' | '::after') {
   )
 }
 
-/** El color del lienzo (`Canvas`) tal y como lo resuelve el navegador en el modo forzado. */
-function canvasColor(page: Page) {
-  return page.evaluate(() => {
+/**
+ * Un color del sistema (`Canvas`, `CanvasText`, `Highlight`…) tal y como lo resuelve el navegador en el
+ * modo forzado: el fondo de una sonda que el modo no adapta.
+ */
+function systemColor(page: Page, name: string) {
+  return page.evaluate((keyword) => {
     const probe = document.createElement('span')
-    probe.style.cssText = 'position:absolute;forced-color-adjust:none;background:Canvas'
+    probe.style.cssText = `position:absolute;forced-color-adjust:none;background:${keyword}`
     document.body.append(probe)
     const color = getComputedStyle(probe).backgroundColor
     probe.remove()
     return color
-  })
+  }, name)
 }
 
 /** El cursor de juego de `item` se ve y no es del color del lienzo. */
@@ -40,7 +43,7 @@ async function expectRingVisible(page: Page, item: Locator) {
   await expect(item).toBeFocused()
   const ring = item.locator(':scope > [data-cursor-ring]')
   await expect(ring).toBeVisible()
-  const canvas = await canvasColor(page)
+  const canvas = await systemColor(page, 'Canvas')
   expect(await background(ring)).not.toBe(canvas)
   expect(await ring.evaluate((element) => getComputedStyle(element).forcedColorAdjust)).toBe('none')
 }
@@ -81,7 +84,7 @@ test('RNF-A11Y-01: en contraste alto, los marcos, el medidor de XP y la barra de
   page,
 }) => {
   await open(page, '/dev/menu', 'Beat Battle')
-  const canvas = await canvasColor(page)
+  const canvas = await systemColor(page, 'Canvas')
   // El borde de un marco (la capa `::before` recortada en chaflán).
   const frame = page.getByRole('main').locator('[data-frame]').first()
   expect(await background(frame, '::before')).not.toBe(canvas)
@@ -105,7 +108,7 @@ test('RNF-A11Y-01: en contraste alto, el conmutador «SÍ | NO» enseña su esta
   page,
 }) => {
   await open(page, '/ajustes/accesibilidad', 'Accesibilidad')
-  const canvas = await canvasColor(page)
+  const canvas = await systemColor(page, 'Canvas')
   const toggle = page.getByRole('main').getByRole('button', { name: /Atajos de una tecla/ })
   await expect(toggle).toHaveAttribute('aria-pressed', 'true')
   // Encendido: «SÍ» resaltada (no del color del lienzo) y «NO» no.
@@ -137,7 +140,7 @@ test('RNF-A11Y-01: en contraste alto, los interruptores de la galería enseñan 
   page,
 }) => {
   await openGallery(page)
-  const canvas = await canvasColor(page)
+  const canvas = await systemColor(page, 'Canvas')
   const serious = page.getByRole('switch', { name: /Modo serio/ })
   await expect(serious).toHaveAttribute('aria-checked', 'false')
   // Apagado: «NO» resaltada (no del color del lienzo) y «SÍ» no.
@@ -155,18 +158,6 @@ test('RNF-A11Y-01: en contraste alto, los interruptores de la galería enseñan 
   await expect(reduced).toHaveAttribute('aria-checked', 'false')
   expect(await yesNo(reduced)).toEqual(off)
 })
-
-/** Un color del sistema (`CanvasText`, `Highlight`…) tal y como lo resuelve el navegador en el modo forzado. */
-function systemColor(page: Page, name: string) {
-  return page.evaluate((keyword) => {
-    const probe = document.createElement('span')
-    probe.style.cssText = `position:absolute;forced-color-adjust:none;background:${keyword}`
-    document.body.append(probe)
-    const color = getComputedStyle(probe).backgroundColor
-    probe.remove()
-    return color
-  }, name)
-}
 
 /**
  * La etiqueta girada del anunciador es un paralelogramo de fondo (`Tag`): el modo quita el fondo y el
