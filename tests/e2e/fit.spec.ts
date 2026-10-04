@@ -2484,3 +2484,49 @@ for (const viewport of [
     }
   })
 }
+
+/**
+ * La tarjeta plegada del móvil bajo táctil deja `--bb-space-2` dentro de su marco arriba y abajo, como la
+ * maqueta `01-menu-375x667` (8–10 px; jurado de la 0.28, cierre, R7: con 4 px, «SEMANA 41 · ESCENARIO» iba
+ * pegado al filete y el play a unos 2 px del de abajo). A 360 × 640 no cabe (con la semana en juego y el
+ * jugador en el HUD sobran 3,4 px bajo el anillo de la placa 06 y harían falta 8) y se queda en `--bb-space-1`.
+ */
+for (const viewport of [
+  { width: 375, height: 667 },
+  { width: 320, height: 568 },
+  { width: 414, height: 736 },
+]) {
+  test.describe(`tarjeta plegada a ${viewport.width} × ${viewport.height} táctil`, () => {
+    test.use({ viewport, isMobile: true, hasTouch: true })
+
+    for (const path of ['/dev/menu', '/dev/menu?estado=vacio', '/']) {
+      test(`RD-VIS-02 e / §3.8.3: en ${path} la tarjeta plegada deja --bb-space-2 dentro del marco arriba y abajo`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        const space2 = await tokenPx(page, '--bb-space-2')
+        const card = await page.evaluate(() => {
+          const article = document.querySelector('main article')!
+          const box = article.getBoundingClientRect()
+          // La caja del rótulo (no la de su texto, que con la altura de la fuente sobresale del interlineado).
+          const label = article.querySelector('p .bb-label')
+          const kicker = label?.checkVisibility() ? label.getBoundingClientRect().top - box.top : null
+          const play = article.querySelector('button')?.getBoundingClientRect()
+          const style = getComputedStyle(article)
+          return {
+            paddingTop: Number.parseFloat(style.paddingTop),
+            paddingBottom: Number.parseFloat(style.paddingBottom),
+            kicker,
+            play: play && play.height > 0 ? box.bottom - play.bottom : null,
+          }
+        })
+        expect(card.paddingTop, 'relleno de arriba').toBeGreaterThanOrEqual(space2 - 0.5)
+        expect(card.paddingBottom, 'relleno de abajo').toBeGreaterThanOrEqual(space2 - 0.5)
+        if (card.kicker !== null)
+          expect(card.kicker, 'rótulo bajo el borde').toBeGreaterThanOrEqual(space2 - 0.5)
+        if (card.play !== null) expect(card.play, 'play sobre el borde').toBeGreaterThanOrEqual(space2 - 0.5)
+      })
+    }
+  })
+}

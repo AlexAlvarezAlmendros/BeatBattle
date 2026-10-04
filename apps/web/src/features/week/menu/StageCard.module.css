@@ -373,9 +373,10 @@
  * junto al reloj, como en la maqueta `01-menu-375x667` (jurado de la 0.28, cierre: a 375 × 667 y
  * 360 × 640 partía en dos líneas, y a 320 × 568 en tres). El rótulo no parte; si con el reloj no cabe en
  * la fila (por debajo de unos 350 px), los dígitos bajan debajo de él. Para que quepa a 360 px, la tarjeta
- * aprieta sus rellenos de los lados y la separación del play. Arriba y abajo, 4 px dentro del marco: deja
- * ese alto a la franja de «ELIGE MODO», que lleva aire (`MainMenu`), y a 360 × 640 todo sigue cabiendo. Solo
- * en táctil: con teclado el rótulo no se pliega y necesita su sitio (más arriba).
+ * aprieta sus rellenos de los lados y la separación del play. Arriba y abajo, `--bb-space-2` dentro del marco,
+ * como la maqueta `01-menu-375x667` (8–10 px; jurado de la 0.28, cierre, R7: con 4, «SEMANA 41 · ESCENARIO»
+ * iba pegado al filete y el play a unos 2 px del de abajo); a 360 × 640, 4 (más abajo). Solo en táctil: con
+ * teclado el rótulo no se pliega y necesita su sitio (más arriba).
  */
 @media (max-width: 720px) and (max-height: 780px) and (hover: none),
   (max-width: 720px) and (max-height: 780px) and (pointer: coarse) {
@@ -384,7 +385,7 @@
   }
 
   .card {
-    padding: var(--bb-space-1) var(--bb-space-3);
+    padding: var(--bb-space-2) var(--bb-space-3);
   }
 
   /*
@@ -413,6 +414,20 @@
 
   .play .mobileClock [role="timer"] > p[aria-hidden] {
     white-space: nowrap;
+  }
+}
+
+/*
+ * Móvil bajo de 650 px de alto o menos y 360 px de ancho o más (360 × 640): arriba y abajo, 4 px dentro del
+ * marco. Con 8 no cabe sin desplazar: con la semana en juego y el jugador en el HUD sobran 3,4 px bajo el
+ * anillo de la placa 06 elegida y harían falta 8 (jurado de la 0.28, cierre, R7). Esos 4 px quedan para la
+ * franja de «ELIGE MODO», que lleva aire (`MainMenu`). Por debajo de 360 px la pantalla ya se desplaza
+ * (§3.8.3) y lleva los 8.
+ */
+@media (min-width: 360px) and (max-width: 720px) and (max-height: 650px) and (hover: none),
+  (min-width: 360px) and (max-width: 720px) and (max-height: 650px) and (pointer: coarse) {
+  .card {
+    padding-block: var(--bb-space-1);
   }
 }
 
