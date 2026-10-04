@@ -1536,6 +1536,48 @@ for (const viewport of [
 }
 
 /**
+ * Las provisionales con el sello «EN OBRAS» como pieza, a 1440 × 900 (§3.1, §3.8.14; sexto pase del jurado,
+ * G6): la cuña sigue a la pieza desde 1200 px, con el mismo cálculo que en la ventana grande. Llegaban al
+ * 30,4–31,1 % de granate en la primera vista (el techo de las maquetas es el 24,5 % de `02-seleccion`) y
+ * saltaban al 22,8 % entre 1599 y 1600 px.
+ */
+test.describe('granate de las provisionales a 1440 × 900', () => {
+  for (const { path, heading } of [
+    { path: '/subir', heading: 'Subir mi beat' },
+    { path: '/jurado', heading: 'Modo Jurado' },
+    { path: '/semanas', heading: 'Semanas' },
+    { path: '/semana/2026-41', heading: 'Semana' },
+    { path: '/semana/2026-41/resultados', heading: 'Resultados' },
+    { path: '/e/0192f3a1', heading: 'Entrada' },
+  ])
+    test(`§3.1 / §3.8.14: en ${path}, la cuña sigue al sello y el granate no pasa del 24,5 % (G6)`, async ({
+      page,
+    }) => {
+      await open(page, path, heading)
+      await settle(page)
+      const share = await wineShare(page)
+      test.info().annotations.push({ type: 'granate', description: `${path}: ${(share * 100).toFixed(2)} %` })
+      expect(share, `granate ${(share * 100).toFixed(1)} %`).toBeLessThanOrEqual(0.245)
+    })
+
+  test('§3.1 / §3.8.14: el granate de una provisional no salta entre 1599 y 1600 px (G6)', async ({
+    page,
+  }) => {
+    const shares: number[] = []
+    for (const width of [1599, 1600]) {
+      await page.setViewportSize({ width, height: 900 })
+      await open(page, '/semanas', 'Semanas')
+      await settle(page)
+      shares.push(await wineShare(page))
+    }
+    expect(
+      Math.abs(shares[0]! - shares[1]!),
+      `granate ${shares.map((share) => (share * 100).toFixed(1)).join(' → ')} %`,
+    ).toBeLessThanOrEqual(0.01)
+  })
+})
+
+/**
  * El centro de los rayos es el de la pieza (lo que lleva su columna: en dos columnas va centrado en ella,
  * así que es el de la columna; en una, el sello «EN OBRAS» va a la izquierda), a ±2 px. El centro del
  * estallido (`--burst-x`, `--burst-y`) está en la caja del estallido, más grande que la ventana: una sonda

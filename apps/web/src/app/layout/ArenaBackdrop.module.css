@@ -83,8 +83,14 @@
  * más lo que sube la inclinación, `(100vh − pie) · tan(17°)`. Nunca más allá del 30 % de siempre
  * (`--bb-split-x-left`): en las pantallas de contenido, cuya columna llega a la barra, la cuña es la de
  * siempre. Sin pieza publicada, también.
+ *
+ * Desde 1200 px (sexto pase del jurado, G6): las provisionales con el sello «EN OBRAS» como pieza llegaban
+ * al 30,4–31,1 % de granate a 1440 × 900 y saltaban al 22,8 % entre 1599 y 1600 px. Con la pieza grande (la
+ * lista de «Cómo se juega», el tablero de Opciones) la esquina cae más allá del 30 % y la cuña es la de
+ * siempre; la 404 sigue a su pad. Por debajo, de 961 a 1199 px, la columna de la pieza ya va a su mínimo
+ * (20 rem; 18 con la ventana baja) y la cuña es la de siempre.
  */
-@media (min-width: 1600px) {
+@media (min-width: 1200px) {
   .arena[data-wedge="left"] {
     --split-x: min(
       var(--bb-split-x-left),
