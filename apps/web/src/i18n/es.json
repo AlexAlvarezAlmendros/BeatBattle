@@ -710,10 +710,11 @@
           "slapBarAfter": "Other People Records"
         },
         "cursor": {
-          "intro": "El foco es el cursor (§3.3): marco blanco de 3\u00a0px a 4\u00a0px de la pieza, que sigue su forma, con la etiqueta 1P en las listas. Una sola parada de tabulación por grupo; el ratón también mueve el cursor.",
+          "intro": "El foco es el cursor (§3.3): marco blanco de 3\u00a0px a 4\u00a0px de la pieza, que sigue su forma, con la etiqueta 1P en las listas. Una sola parada de tabulación por grupo; el ratón también mueve el cursor. Con el foco fuera del grupo, la elegida conserva el cursor: entero si el foco no está en ningún control, apagado si está en otro.",
           "static": "Cursor forzado",
           "staticSlant": "Paralelogramo con 1P a la izquierda",
           "staticCut": "Chaflán con 1P encima",
+          "staticAway": "Elegida con el foco en otro control: apagado, sin 1P",
           "menuTitle": "useRovingMenu · ↑↓ en bucle, Inicio/Fin, letra inicial, Intro",
           "menuLabel": "Menú de prueba",
           "menuIndex": "0{index}",

@@ -531,6 +531,27 @@ function CursorBlock() {
             </div>
           </div>
         </Specimen>
+        {/* §3.3 v0.6.7: la elegida con el foco en otro control, apagada (sin 1P). */}
+        <Specimen label={t('dev.gallery.base.cursor.staticAway')} token={'data-force-state="away"'}>
+          <div className={styles.cursorStage}>
+            <div
+              className={styles.plate}
+              data-cursor=""
+              data-cursor-active="true"
+              data-force-state="away"
+              aria-hidden="true"
+            >
+              <Cursor shape="slant" player />
+              <span className={styles.plateIndex}>
+                {t('dev.gallery.base.cursor.menuIndex', { index: 2 })}
+              </span>
+              <span className={styles.plateLabel}>{t('dev.gallery.base.cursor.menu.jury')}</span>
+              <Key tone="light" className={styles.plateKey}>
+                {t('dev.gallery.base.primitives.keys.enter')}
+              </Key>
+            </div>
+          </div>
+        </Specimen>
       </GalleryRow>
       <MenuDemo />
       <GridDemo />

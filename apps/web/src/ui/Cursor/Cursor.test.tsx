@@ -69,6 +69,20 @@ describe('Cursor (§3.3 «El foco es el cursor», RD-MOT-05)', () => {
     )
   })
 
+  it('RNF-A11Y-01 / RD-MOT-05: con el foco en otro control, la elegida se apaga (--bb-line-strong, sin 1P; GrayText en contraste alto)', () => {
+    // «Otro control»: algo enfocado que no es `body` ni un destino de foco programático (el <main>).
+    const away =
+      ':where(:root:has(:focus:not(body, [data-focus-target])) [data-cursor-group]:not(:focus-within) [data-cursor][data-cursor-active="true"], [data-cursor][data-force-state="away"])'
+    expect(css).toContain(
+      `${away} > [data-cursor-ring] { display: block; background: var(--bb-line-strong); }`,
+    )
+    expect(css).toContain(`${away} > [data-cursor-player] { display: none; }`)
+    const forced = /@media \(forced-colors: active\) \{([\s\S]*)\}\s*$/.exec(css)?.[1] ?? ''
+    expect(forced).toContain(`${away} > [data-cursor-ring] { background: GrayText; }`)
+    // Ni halo ni sombra en el cursor: el halo es del foco genérico.
+    expect(css).not.toMatch(/box-shadow/)
+  })
+
   it('RNF-A11Y-03: el salto del cursor se multiplica por --bb-motion (sin movimiento, salto instantáneo)', () => {
     expect(css).toMatch(/animation: bb-cursor-in var\(--bb-dur-tick\) var\(--bb-ease-snap\)/)
     expect(css).toMatch(/scale: calc\(1 \+ 0\.06 \* var\(--bb-motion\)\)/)

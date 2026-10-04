@@ -101,9 +101,11 @@ describe('galería /dev/galeria (0.9, 0.22, 0.25)', { timeout: 15_000 }, () => {
     expect(primitives.querySelectorAll('kbd[data-key]').length).toBeGreaterThanOrEqual(9)
     expect(primitives.querySelectorAll('[data-tag]').length).toBeGreaterThanOrEqual(9)
     expect(within(primitives).getAllByRole('link', { name: t('ui.otpSlap.label') }).length).toBeGreaterThan(0)
-    // Cursor: forzado y en los tres grupos de foco itinerante.
+    // Cursor: forzado (entero y, §3.3 v0.6.7, el apagado de la elegida con el foco en otro control) y
+    // en los tres grupos de foco itinerante.
     const cursor = document.getElementById('base-cursor')!
     expect(cursor.querySelectorAll('[data-force-state="focus"] [data-cursor-ring]')).toHaveLength(2)
+    expect(cursor.querySelectorAll('[data-force-state="away"] [data-cursor-ring]')).toHaveLength(1)
     expect(within(cursor).getByRole('menu')).toBeInTheDocument()
     expect(within(cursor).getByRole('listbox')).toBeInTheDocument()
     expect(within(cursor).getByRole('tablist')).toBeInTheDocument()

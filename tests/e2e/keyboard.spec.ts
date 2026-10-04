@@ -364,3 +364,159 @@ test('RNF-A11Y-01: la ventana de juego atrapa el foco, Esc la cierra y el foco v
   // Esc en la ventana no saca de la pantalla.
   await expect(page).toHaveURL(/\/dev\/galeria/)
 })
+
+/**
+ * La selección con el foco en otro control (§3.3 v0.6.7): el cursor de la elegida se ve también con el
+ * foco fuera de su grupo, para que la selección no desaparezca; pero si el foco está en **otro control**,
+ * se pinta apagado (marco `--bb-line-strong`, sin la 1P ni halo), para que no haya dos anillos que
+ * parezcan foco. Con el foco en el grupo, o en ningún control (la página recién cargada, el `<main>`),
+ * va entero y blanco, como en las maquetas.
+ */
+function cursorColors(page: Page): Promise<{ on: string; dim: string }> {
+  return page.evaluate(() => {
+    const probe = document.createElement('div')
+    document.body.append(probe)
+    const resolve = (token: string) => {
+      probe.style.backgroundColor = `var(${token})`
+      return getComputedStyle(probe).backgroundColor
+    }
+    const colors = { on: resolve('--bb-white'), dim: resolve('--bb-line-strong') }
+    probe.remove()
+    return colors
+  })
+}
+
+/** Cómo se pinta el cursor de una pieza: el color del marco (`null` si no se ve), si enseña la 1P y su sombra. */
+function cursorPaint(piece: Locator) {
+  return piece.evaluate((element) => {
+    const ring = element.querySelector(':scope > [data-cursor-ring]')
+    const player = element.querySelector(':scope > [data-cursor-player]')
+    const style = ring ? getComputedStyle(ring) : null
+    return {
+      ring: style && style.display !== 'none' ? style.backgroundColor : null,
+      player: player ? getComputedStyle(player).display !== 'none' : null,
+      halo: style ? style.boxShadow : null,
+    }
+  })
+}
+
+/** ¿El foco está en ningún control (la página recién cargada o el `<main>`)? */
+const focusOnNoControl = (page: Page) =>
+  page.evaluate(() => document.activeElement?.matches('body, [data-focus-target]') ?? true)
+
+test('RNF-A11Y-01 / RD-MOT-05: en el menú, el cursor de la elegida va entero sin foco o con el foco en el menú, y apagado con el foco en otro control', async ({
+  page,
+}) => {
+  await open(page, '/', 'Beat Battle')
+  const { on, dim } = await cursorColors(page)
+  const chosen = plate(page, 'Jurado')
+  const whole = { ring: on, player: true, halo: 'none' }
+  const off = { ring: dim, player: false, halo: 'none' }
+
+  // Al cargar, el foco no está en ningún control: entero, como en 01-menu.
+  await expect(page.locator('body')).toBeFocused()
+  await expect(chosen).toHaveAttribute('data-cursor-active', 'true')
+  await expect.poll(() => cursorPaint(chosen)).toEqual(whole)
+
+  // Tab lleva el foco a «Saltar al contenido», otro control fuera del menú: apagado.
+  await page.keyboard.press('Tab')
+  await expectVisibleFocus(page.getByRole('link', { name: 'Saltar al contenido' }))
+  await expect.poll(() => cursorPaint(chosen)).toEqual(off)
+
+  // Con el foco en el <main> (ningún control), entero otra vez.
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('main')).toBeFocused()
+  await expect.poll(() => cursorPaint(chosen)).toEqual(whole)
+
+  // En el menú, entero; Tab sale a otro control (apagado) y Mayús+Tab vuelve (entero).
+  await tabTo(page, chosen)
+  await expectCursor(chosen)
+  await expect.poll(() => cursorPaint(chosen)).toEqual(whole)
+  await page.keyboard.press('Tab')
+  await expect(menu(page).getByRole('menuitem').and(page.locator(':focus'))).toHaveCount(0)
+  expect(await focusOnNoControl(page)).toBe(false)
+  await expect.poll(() => cursorPaint(chosen)).toEqual(off)
+  await page.keyboard.press('Shift+Tab')
+  await expectCursor(chosen)
+  await expect.poll(() => cursorPaint(chosen)).toEqual(whole)
+})
+
+for (const screen of [
+  {
+    name: 'Opciones',
+    path: '/ajustes/accesibilidad',
+    heading: 'Accesibilidad',
+    nav: 'Secciones de ajustes',
+    current: /^Accesibilidad$/,
+    away: (page: Page) => page.getByRole('main').getByRole('button', { name: /Atajos de una tecla/ }),
+  },
+  {
+    name: 'los legales',
+    path: '/legal/bases',
+    heading: 'Bases de la competición',
+    nav: 'Documentos legales',
+    current: /^Bases/,
+    away: (page: Page) =>
+      page.getByRole('contentinfo').getByRole('link', { name: /Un juego de Other People Records/ }),
+  },
+]) {
+  test(`RNF-A11Y-01 / RD-MOT-05: en las pestañas de ${screen.name} (390 × 844 con teclado), la sección actual lleva el cursor entero al cargar o con el foco en ellas, y apagado con el foco en otro control`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await open(page, screen.path, screen.heading)
+    const { on, dim } = await cursorColors(page)
+    const whole = { ring: on, player: null, halo: 'none' }
+    const tab = page.getByRole('navigation', { name: screen.nav }).getByRole('link', { name: screen.current })
+    await expect(tab).toHaveAttribute('aria-current', 'page')
+
+    // Al cargar (el foco en ningún control), entero.
+    expect(await focusOnNoControl(page)).toBe(true)
+    await expect.poll(() => cursorPaint(tab)).toEqual(whole)
+
+    // Con el foco en la pestaña, entero.
+    await tabTo(page, tab)
+    await expectCursor(tab)
+    await expect.poll(() => cursorPaint(tab)).toEqual(whole)
+
+    // Con el foco en otro control (el conmutador «Atajos», con su cursor; la firma, con el foco
+    // genérico), apagado: un solo anillo que parece foco.
+    const away = screen.away(page)
+    await tabTo(page, away)
+    if ((await away.getAttribute('data-cursor')) === null) await expectVisibleFocus(away)
+    else await expectCursor(away)
+    await expect.poll(() => cursorPaint(tab)).toEqual({ ring: dim, player: null, halo: 'none' })
+
+    // De vuelta en las pestañas, entero.
+    for (let presses = 0; presses < 40; presses++) {
+      if (await tab.evaluate((element) => element === document.activeElement)) break
+      await page.keyboard.press('Shift+Tab')
+    }
+    await expectCursor(tab)
+    await expect.poll(() => cursorPaint(tab)).toEqual(whole)
+  })
+}
+
+test('RNF-A11Y-01 / RD-MOT-05: en contraste alto, la elegida con el foco en otro control se apaga en GrayText (entera, en Highlight)', async ({
+  page,
+}) => {
+  await page.emulateMedia({ forcedColors: 'active', colorScheme: 'dark' })
+  await open(page, '/ajustes/accesibilidad', 'Accesibilidad')
+  const system = (name: string) =>
+    page.evaluate((keyword) => {
+      const probe = document.createElement('span')
+      probe.style.cssText = `position:absolute;forced-color-adjust:none;background:${keyword}`
+      document.body.append(probe)
+      const color = getComputedStyle(probe).backgroundColor
+      probe.remove()
+      return color
+    }, name)
+  const [highlight, grayText, canvas] = await Promise.all(['Highlight', 'GrayText', 'Canvas'].map(system))
+  expect(grayText).not.toBe(canvas)
+  const tab = page
+    .getByRole('navigation', { name: 'Secciones de ajustes' })
+    .getByRole('link', { name: 'Accesibilidad' })
+  await expect.poll(async () => (await cursorPaint(tab)).ring).toBe(highlight)
+  await tabTo(page, page.getByRole('main').getByRole('button', { name: /Atajos de una tecla/ }))
+  await expect.poll(async () => (await cursorPaint(tab)).ring).toBe(grayText)
+})

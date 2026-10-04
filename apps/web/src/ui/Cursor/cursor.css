@@ -15,7 +15,10 @@
  *
  * El cursor se ve en el elemento enfocado (también con el ratón: en un menú de juego el ratón mueve el
  * cursor, ver `useRovingMenu`) y, si el foco está fuera del grupo, en la opción elegida, para que la
- * selección no desaparezca. El foco genérico (contorno) se apaga en [data-cursor] (global.css).
+ * selección no desaparezca: entero si el foco no está en ningún control y apagado si está en otro
+ * (§3.3 v0.6.7). El foco genérico (contorno) se apaga en [data-cursor] (global.css).
+ *
+ *   [data-cursor][data-force-state="focus|away"]   cursor entero o apagado forzado (la galería)
  *
  * El anillo es un único polígono con un hueco (`evenodd`): el exterior está a 7 px de la pieza (hueco
  * de 4 + trazo de 3) y el interior a 4. Los chaflanes salen del de la pieza con `calc()` sobre los
@@ -139,6 +142,34 @@
 }
 
 /*
+ * La elegida con el foco en **otro control** (§3.3 v0.6.7): apagada, para que no haya dos anillos que
+ * parezcan foco (el de la elegida y el del control enfocado). Marco `--bb-line-strong`, sin la 1P ni
+ * halo. «Otro control» es cualquier elemento enfocado fuera del grupo menos los que no lo son: `body` (la
+ * página recién cargada) y los destinos de foco programático (`[data-focus-target]`: el `<main>`, el
+ * diálogo); con el foco en ellos, o en el grupo, la elegida va entera y blanca, como en las maquetas.
+ * `data-force-state="away"` lo fuerza en una pieza suelta (la galería).
+ */
+:where(
+  :root:has(:focus:not(body, [data-focus-target]))
+    [data-cursor-group]:not(:focus-within)
+    [data-cursor][data-cursor-active="true"],
+  [data-cursor][data-force-state="away"]
+) > [data-cursor-ring] {
+  display: block;
+  background: var(--bb-line-strong);
+}
+
+:where(
+    :root:has(:focus:not(body, [data-focus-target]))
+      [data-cursor-group]:not(:focus-within)
+      [data-cursor][data-cursor-active="true"],
+    [data-cursor][data-force-state="away"]
+  )
+  > [data-cursor-player] {
+  display: none;
+}
+
+/*
  * El cursor salta a la opción (Anexo E): aparece un pelo más grande y se asienta en `--bb-dur-tick`.
  * Con «reducir movimiento», `--bb-motion` es 0: salto instantáneo con el cursor visible.
  */
@@ -184,5 +215,15 @@
     forced-color-adjust: none;
     background: Highlight;
     color: HighlightText;
+  }
+
+  /* La elegida con el foco en otro control, apagada: en `GrayText`, el color del sistema para lo inactivo. */
+  :where(
+    :root:has(:focus:not(body, [data-focus-target]))
+      [data-cursor-group]:not(:focus-within)
+      [data-cursor][data-cursor-active="true"],
+    [data-cursor][data-force-state="away"]
+  ) > [data-cursor-ring] {
+    background: GrayText;
   }
 }
