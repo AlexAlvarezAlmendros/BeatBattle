@@ -126,6 +126,19 @@ describe('i18n: es.json', () => {
       ).toBe(true)
     }
   })
+
+  /*
+   * Una cifra (o la variable que la pone) y su unidad no se separan al partir la línea (jurado de la 0.28,
+   * cierre: «45 s» partía entre «45» y «s» en «Cómo se juega» a 390 × 844 y en la ayuda del menú).
+   */
+  it('RD-VIS-02 e / WCAG 1.4.10: número y unidad (s, min, h, BPM, px, XP, %…) van unidos por un espacio de no separación', () => {
+    const unit = /(?:\d|\})[ \t](?:ms|s|min|h|BPM|px|XP|PTS|%|días?|horas?|minutos?|segundos?)(?![\p{L}\d])/u
+    const split = leaves
+      .filter(([, value]) => unit.test(value as string))
+      .map(([key, value]) => `${key}: ${value}`)
+    expect(split).toEqual([])
+    expect(t('home.modes.jury.helpVisitor')).toContain('45 s')
+  })
 })
 
 describe('i18n: fechas y números', () => {

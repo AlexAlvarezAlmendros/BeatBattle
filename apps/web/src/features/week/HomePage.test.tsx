@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { getDefaultNormalizer, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { renderInRouter } from '../../app/layout/testing'
 import { DROP_ALERT_ID, OTHER_PEOPLE_URL } from '../../app/paths'
@@ -44,7 +44,12 @@ describe('HomePage: menú principal en «calendario vacío» y visitante (0.24, 
     expect(items[1]).toHaveAttribute('href', '/entrar')
     expect(items[1]).toHaveAttribute('data-cursor-active', 'true')
     expect(items.filter((item) => item.tabIndex === 0)).toEqual([items[1]])
-    // El panel de ayuda describe el modo elegido (región viva educada).
-    expect(screen.getByText(t('home.modes.jury.helpVisitor'))).toHaveAttribute('aria-live', 'polite')
+    // El panel de ayuda describe el modo elegido (región viva educada). «45 s» va unido por un espacio de no
+    // separación: se compara sin convertirlo en un espacio normal.
+    expect(
+      screen.getByText(t('home.modes.jury.helpVisitor'), {
+        normalizer: getDefaultNormalizer({ collapseWhitespace: false }),
+      }),
+    ).toHaveAttribute('aria-live', 'polite')
   })
 })

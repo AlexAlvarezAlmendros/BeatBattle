@@ -36,16 +36,18 @@ describe('FighterCard (§3.3 «Ficha de luchador», 0.25)', () => {
 
   it('RF-VOTE-04: el umbral de escucha es min(45 s, 50 % de la duración), con la regla de @beatbattle/rules', () => {
     const { rerender } = render(<FighterCard entry={{ ...ENTRY, durationSeconds: 60 }} />)
+    // Con `textContent`: «30 s» va unido por un espacio de no separación (es.json) y `toHaveTextContent` lo
+    // convertiría en uno normal.
     const card = () => screen.getByRole('region', { name: 'Tigre Púrpura' })
-    expect(card()).toHaveTextContent(t('ui.fighterCard.listenHint', { seconds: 30 }))
+    expect(card().textContent).toContain(t('ui.fighterCard.listenHint', { seconds: 30 }))
     rerender(<FighterCard entry={{ ...ENTRY, durationSeconds: 171 }} />)
-    expect(card()).toHaveTextContent(t('ui.fighterCard.listenHint', { seconds: 45 }))
+    expect(card().textContent).toContain(t('ui.fighterCard.listenHint', { seconds: 45 }))
     // Duraciones impares: se redondea hacia arriba (con 61 s hacen falta 30,5 s → «31 s»).
     rerender(<FighterCard entry={{ ...ENTRY, durationSeconds: 61 }} />)
-    expect(card()).toHaveTextContent(t('ui.fighterCard.listenHint', { seconds: 31 }))
+    expect(card().textContent).toContain(t('ui.fighterCard.listenHint', { seconds: 31 }))
     // El servidor manda: si da el umbral, se usa ese.
     rerender(<FighterCard entry={{ ...ENTRY, durationSeconds: 60 }} listenSeconds={20} />)
-    expect(card()).toHaveTextContent(t('ui.fighterCard.listenHint', { seconds: 20 }))
+    expect(card().textContent).toContain(t('ui.fighterCard.listenHint', { seconds: 20 }))
   })
 
   it('cargando: esqueleto con aria-busy; error: aviso de papel y reintentar', () => {

@@ -33,11 +33,11 @@ describe('EntryCell (§3.3 «Casilla de entrada», 0.25)', () => {
   it('se anuncia con alias, tempo, tonalidad y tu estado (§3.8.13)', () => {
     render(<Grid />)
     expect(
-      screen.getByRole('option', { name: 'Tigre Púrpura, 94 BPM, Re menor, sin votar' }),
+      screen.getByRole('option', { name: 'Tigre Púrpura, 94\u00a0BPM, Re menor, sin votar' }),
     ).toBeInTheDocument()
     expect(
       screen.getByRole('option', {
-        name: `Cobra Lunar, 88 BPM, La menor, ${t('ui.entryCell.votedState', { vote: 4 })}`,
+        name: `Cobra Lunar, 88\u00a0BPM, La menor, ${t('ui.entryCell.votedState', { vote: 4 })}`,
       }),
     ).toHaveAttribute('data-voted', 'true')
     expect(screen.getByRole('option', { name: t('ui.entryCell.randomLabel') })).toHaveAttribute(
