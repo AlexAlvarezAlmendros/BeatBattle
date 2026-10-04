@@ -1496,3 +1496,84 @@ for (const viewport of [
     }
   })
 }
+
+/** El reloj de la tarjeta plegada y la franja de «ELIGE MODO» en móvil, medidos en la página. */
+function mobileHead(page: Page) {
+  return page.evaluate(() => {
+    const main = document.querySelector('main')!
+    const card = main.querySelector('article')!.getBoundingClientRect()
+    const timer = main.querySelector<HTMLElement>('article [data-variant="inline"] [role="timer"]')
+    const label = timer?.querySelector<HTMLElement>('p[aria-hidden]')
+    let clock = null
+    if (timer && label) {
+      const range = document.createRange()
+      range.selectNodeContents(label)
+      const digits = timer.querySelector('div')!.getBoundingClientRect()
+      const text = range.getBoundingClientRect()
+      clock = {
+        lines: new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size,
+        // En la fila de los dígitos: el rótulo empieza antes de que acaben.
+        sameRow: text.top < digits.bottom && digits.top < text.bottom,
+      }
+    }
+    const head = main.querySelector('nav h2')!
+    const band = head.parentElement!
+    const style = getComputedStyle(band)
+    const title = document.createRange()
+    title.selectNodeContents(head)
+    const plate = main.querySelector('[data-menu-plate]')!.getBoundingClientRect()
+    return {
+      clock,
+      font: Number.parseFloat(getComputedStyle(head).fontSize),
+      padding: [Number.parseFloat(style.paddingTop), Number.parseFloat(style.paddingBottom)],
+      // Del pie de la tarjeta al texto de «ELIGE MODO», y del pie de la franja a la primera placa.
+      fromCard: title.getBoundingClientRect().top - card.bottom,
+      toPlates: plate.top - band.getBoundingClientRect().bottom,
+    }
+  })
+}
+
+/**
+ * Móvil y móvil bajo (jurado de la 0.28, cierre; guía §3.8.3, maquetas `01-menu-375x667` y
+ * `01-menu-360x640`): en la tarjeta plegada, «CIERRE DE ENVÍOS» va en una línea junto al reloj (partía en
+ * dos a 375 y 360 px, y en tres a 320, donde ahora los dígitos bajan debajo); «ELIGE MODO» va a 18 px
+ * (se veía de 15–16) sobre una franja con aire arriba y abajo, y bajo ella queda sitio para el anillo del
+ * cursor de la primera placa (`--bb-cursor-gap` + `--bb-stroke-cursor`) y algo más: a 720 × 450 la trama
+ * quedaba a 1–2 px de las mayúsculas y a 320 × 568 el anillo de JUGAR tocaba «INTRO PARA ENTRAR».
+ */
+for (const viewport of [
+  { width: 375, height: 667, touch: true, row: true },
+  { width: 360, height: 640, touch: true, row: true },
+  { width: 320, height: 568, touch: true, row: false },
+  { width: 390, height: 844, touch: true, row: true },
+  { width: 320, height: 568, touch: false, row: false },
+  { width: 720, height: 450, touch: false, row: false },
+]) {
+  test.describe(`cabecera del menú a ${viewport.width} × ${viewport.height}${viewport.touch ? ' táctil' : ' con teclado'}`, () => {
+    test.use({
+      viewport: { width: viewport.width, height: viewport.height },
+      isMobile: viewport.touch,
+      hasTouch: viewport.touch,
+    })
+
+    test('§3.8.3 / RD-VIS-05: «CIERRE DE ENVÍOS» en una línea y «ELIGE MODO» sobre su franja, con aire para el cursor', async ({
+      page,
+    }) => {
+      await open(page, '/dev/menu', 'Beat Battle')
+      await settle(page)
+      const head = await mobileHead(page)
+      if (viewport.touch && viewport.height <= 700) {
+        expect(head.clock?.lines).toBe(1)
+        if (viewport.row) expect(head.clock?.sameRow).toBe(true)
+        expect(head.font).toBeGreaterThanOrEqual(18)
+      }
+      expect(Math.min(...head.padding)).toBeGreaterThanOrEqual(4)
+      // Separación y relleno de la franja (8 px en el móvil bajo, 12 en el móvil); la caja del texto en display
+      // empieza un poco por encima de las mayúsculas (antes, 3 px).
+      expect(head.fromCard).toBeGreaterThanOrEqual(6)
+      // El anillo del cursor sale 7 px de la placa (`--bb-cursor-gap` + `--bb-stroke-cursor`): bajo la franja,
+      // eso y aire.
+      expect(head.toPlates).toBeGreaterThanOrEqual(8)
+    })
+  })
+}

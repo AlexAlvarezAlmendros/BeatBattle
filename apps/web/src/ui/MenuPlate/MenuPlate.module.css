@@ -443,14 +443,14 @@
   }
 }
 
-/* Móvil bajo (≤ 700 px de alto): placas de 44 px (§3.8.3). */
+/* Móvil bajo (≤ 700 px de alto): placas de 44 px (§3.8.3) y 48 la elegida. */
 @media (max-width: 720px) and (max-height: 700px) {
   .plate {
     height: var(--bb-target);
   }
 
   .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
-    height: calc(var(--bb-space-12) + var(--bb-stroke));
+    height: var(--bb-space-12);
   }
 }
 

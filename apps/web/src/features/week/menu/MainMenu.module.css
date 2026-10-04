@@ -393,11 +393,12 @@
 
 /* ── Móvil (≤ 720 px): apilado; placas de 48 px; sin número gigante ───────────────────────── */
 @media (max-width: 720px) {
+  /* Entre la tarjeta y la franja de «ELIGE MODO», 8 px (y los 4 de relleno de la franja, más abajo). */
   .menu {
     --menu-s: 1;
     grid-template-columns: minmax(0, 1fr);
     align-content: start;
-    gap: var(--bb-space-3);
+    gap: var(--bb-space-2);
     margin-top: calc(-1 * var(--bb-space-3));
     margin-bottom: 0;
   }
@@ -406,9 +407,13 @@
     container-type: normal;
   }
 
+  /*
+   * El lienzo del logo en dos líneas deja unos 18 px transparentes por arriba: sube `--bb-space-2` hacia el
+   * HUD (sus letras quedan a 10 px de él) y deja ese alto a la franja de «ELIGE MODO» (§3.8.3).
+   */
   .logoFull {
     width: 100%;
-    margin: 0;
+    margin: calc(-1 * var(--bb-space-2)) 0 0;
   }
 
   /*
@@ -432,9 +437,15 @@
     padding-block: 0;
   }
 
+  /*
+   * La franja de «ELIGE MODO», con aire arriba y abajo (§3.8.3): la trama y la diagonal pasan por detrás
+   * sin tocar las mayúsculas (a 720 × 450 quedaban a 1–2 px), y por debajo deja sitio al anillo del cursor
+   * de la primera placa (`--bb-cursor-gap` + `--bb-stroke-cursor`) y un poco más: a 320 × 568 el anillo de
+   * JUGAR tocaba «INTRO PARA ENTRAR» (jurado de la 0.28, cierre).
+   */
   .head {
-    margin: 0 0 var(--bb-space-2);
-    padding: 0 calc(var(--bb-slant) + var(--bb-space-1));
+    margin: 0 0 calc(var(--bb-cursor-gap) + var(--bb-stroke-cursor) + var(--bb-space-1));
+    padding: var(--bb-space-1) calc(var(--bb-slant) + var(--bb-space-1));
   }
 
   .headTitle {
@@ -580,12 +591,17 @@
     gap: var(--bb-space-1);
   }
 
+  /*
+   * «ELIGE MODO» a 18 px, como en la maqueta (a 16 se veía más pequeño, jurado de la 0.28, cierre). Bajo la
+   * franja, 8 px: el anillo del cursor de la primera placa (7) y 1 de aire, más los 4 de relleno de la
+   * franja hasta el texto; con los 11 del móvil, 360 × 640 se desplazaba 1 px.
+   */
   .head {
-    margin-bottom: var(--bb-space-1);
+    margin-bottom: var(--bb-space-2);
   }
 
   .headTitle {
-    font-size: var(--bb-fs-md);
+    font-size: calc((var(--bb-fs-md) + var(--bb-fs-lg)) / 2);
   }
 }
 

@@ -76,6 +76,7 @@ export function StageCard({ week }: { week: MenuWeek | null }) {
       </div>
       <div className={styles.play}>
         <Button
+          className={styles.playButton}
           variant="white"
           iconOnly
           icon="triangleRight"
