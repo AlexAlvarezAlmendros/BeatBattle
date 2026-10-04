@@ -75,25 +75,36 @@ export interface ScreenPageProps {
   titleInHud?: boolean
   /** Las acciones del pie del panel; por defecto, «Volver al menú [ESC]». `null`, ninguna. */
   actions?: ReactNode
+  /**
+   * «Volver al menú» del pie es el **primer elemento de juego** de la pantalla (§3.8.14): lleva el
+   * cursor al cargar y ↑↓ e Intro van a él con el foco en ningún control. Lo dice cada pantalla, no se
+   * deduce: solo las que no tienen otro (las provisionales y la pantalla de error). Las que tienen
+   * pestañas, su propio menú o un formulario no lo llevan: su primer elemento de juego es la pestaña
+   * actual, el primer movimiento o el primer campo (la autenticación de la Fase 2).
+   */
+  backIsStart?: boolean
   children?: ReactNode
   className?: string
 }
 
 /**
  * El primer elemento de juego de la pantalla (§3.8.14): la pestaña de la sección actual (Opciones, los
- * legales) o, si no hay pestañas, el que se marca con `data-idle-start` («Volver al menú» en la
- * autenticación, la 404 y las provisionales). Las pantallas con su propio menú de juego («Cómo se juega»)
- * no marcan nada: sus flechas las lleva su menú.
+ * legales) o el que se marca con `data-idle-start` («Volver al menú» en la 404, en la pantalla de error
+ * y en las provisionales sin pestañas, la autenticación incluida mientras no tenga formulario:
+ * `backIsStart`). Las pantallas con su propio menú de juego («Cómo se juega») no marcan nada: sus flechas
+ * las lleva su menú.
  */
 const IDLE_START = '[data-screen-part="tabs"] [aria-current="page"], [data-idle-start]'
 
 /**
- * Intro con el foco en ningún control: entra en el primer elemento de juego (el clic), salvo si es la
- * pestaña de la sección en la que ya se está, que solo se enfoca (entrar sería recargarla).
+ * Intro con el foco en ningún control **enfoca** el primer elemento de juego, como ↑↓ (§3.8.14: «van al
+ * primer elemento de juego… y lo marcan con el cursor»); no lo acciona. La Intro siguiente, ya con el
+ * foco en él, lo acciona de forma nativa. Accionarlo rebotaba entre pantallas: al cambiar de pantalla
+ * el foco va al `<main>`, que cuenta como reposo, y una segunda Intro (o la tecla mantenida) volvía al
+ * menú (revisión de la 0.28).
  */
-function activateStart(element: HTMLElement) {
-  if (element.getAttribute('aria-current') === 'page') element.focus()
-  else element.click()
+function focusStart(element: HTMLElement) {
+  element.focus()
 }
 
 /**
@@ -106,7 +117,8 @@ function activateStart(element: HTMLElement) {
  *
  * Teclado (§3.8.14, `RD-VIS-02` d): el primer elemento de juego (`IDLE_START`) lleva el cursor al
  * cargar, sin robar el foco (el primer Tab sigue siendo «Saltar al contenido»), y con el foco en ningún
- * control ↑↓, Inicio y Fin van a él e Intro lo acciona, como en el menú (`useIdleMenuKeys`).
+ * control ↑↓, Inicio, Fin e Intro van a él y lo marcan con el cursor (`useIdleMenuKeys`); Intro no lo
+ * acciona (`focusStart`).
  */
 export function ScreenPage({
   title,
@@ -122,6 +134,7 @@ export function ScreenPage({
   titleInHud,
   titlePlacement = 'head',
   actions,
+  backIsStart = false,
   children,
   className,
 }: ScreenPageProps) {
@@ -136,7 +149,7 @@ export function ScreenPage({
     }),
     [],
   )
-  useIdleMenuKeys(start, 1, rootRef, { itemSelector: IDLE_START, activate: activateStart })
+  useIdleMenuKeys(start, 1, rootRef, { itemSelector: IDLE_START, activate: focusStart })
   const heading = (
     <h1
       className={
@@ -158,7 +171,9 @@ export function ScreenPage({
         </div>
       )}
       {children}
-      {actions !== null && <div className={styles.actions}>{actions ?? <BackToMenu start={!tabs} />}</div>}
+      {actions !== null && (
+        <div className={styles.actions}>{actions ?? <BackToMenu start={backIsStart} />}</div>
+      )}
     </Frame>
   )
   return (
@@ -206,7 +221,7 @@ export function ScreenPage({
 
 /**
  * «Volver al menú [ESC]» (§3.4.1: la tecla de volver de la barra de controles). `start`: es el primer
- * elemento de juego de la pantalla (§3.8.14; la autenticación, la 404 y las provisionales): lleva el
+ * elemento de juego de la pantalla (§3.8.14; la 404, las provisionales y la pantalla de error): lleva el
  * cursor mientras el foco no esté en él, como la opción elegida de un menú, y ↑↓ e Intro van a él con el
  * foco en ningún control (`ScreenPage`).
  */

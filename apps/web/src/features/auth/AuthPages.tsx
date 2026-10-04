@@ -9,7 +9,9 @@ import styles from './AuthPages.module.css'
  * (maqueta `00-titulo`) —«CONTINUAR PARTIDA» (entrar) y «NUEVO JUGADOR» (registro) en la placa del
  * HUD—, con el logo y su lockup «TORNEO SEMANAL DE PRODUCTORES by [OTP.]» a la izquierda, sobre los
  * rayos, y el panel opaco a la derecha. Van juntas en un mismo trozo: quien abre una suele pasar a otra
- * (entrar → recuperar, registro → verificar). Provisionales.
+ * (entrar → recuperar, registro → verificar). Provisionales: mientras no tienen formulario, su primer
+ * elemento de juego es «Volver al menú» (`PlaceholderPage`, §3.8.14); con el de la Fase 2 será el primer
+ * campo, para que ↑↓ desde el `<main>` no lleven a la salida ni el cursor se quede en ella al escribir.
  */
 
 /** El logo del juego con el mismo lockup que el menú (§3.1 «La firma»: autenticación). */

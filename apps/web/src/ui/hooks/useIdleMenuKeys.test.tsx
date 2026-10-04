@@ -96,6 +96,16 @@ describe('useIdleMenuKeys (§3.8.3: con el foco en ningún control, las flechas 
     expect(activate).toHaveBeenCalledWith(screen.getByRole('link', { name: 'Volver al menú' }))
   })
 
+  it('RD-VIS-02 d: Intro mantenida entra una sola vez (las repeticiones de la tecla no cuentan)', () => {
+    const onActivate = vi.fn()
+    render(<Screen onActivate={onActivate} />)
+    screen.getByRole('main').focus()
+    fireEvent.keyDown(screen.getByRole('main'), { key: 'Enter', repeat: true })
+    expect(onActivate).not.toHaveBeenCalled()
+    fireEvent.keyDown(screen.getByRole('main'), { key: 'Enter' })
+    expect(onActivate).toHaveBeenCalledTimes(1)
+  })
+
   it('RNF-A11Y-01: con una ventana abierta, tampoco cuenta como reposo el foco en <body>', () => {
     const onActivate = vi.fn()
     render(<Screen onActivate={onActivate} dialog />)

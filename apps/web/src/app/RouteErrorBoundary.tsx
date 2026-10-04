@@ -9,7 +9,8 @@ const NotFoundPage = lazy(() => import('./NotFoundPage').then((m) => ({ default:
 /**
  * Límite de errores de las pantallas: se pinta dentro del marco (el HUD y la barra siguen ahí).
  * - Un 404 lanzado por un loader (`throw data(null, { status: 404 })`) pinta la 404.
- * - Cualquier otro error, la pantalla de error de §2.19 («Se ha rayado el disco»), con «Volver al menú».
+ * - Cualquier otro error, la pantalla de error de §2.19 («Se ha rayado el disco»), con «Volver al menú»
+ *   como primer elemento de juego (`backIsStart`, §3.8.14).
  *   En desarrollo, además, el mensaje del error.
  */
 export function RouteErrorBoundary() {
@@ -24,7 +25,7 @@ export function RouteErrorBoundary() {
   }
 
   return (
-    <ScreenPage title={t('pages.error.title')} summary={t('pages.error.summary')}>
+    <ScreenPage title={t('pages.error.title')} summary={t('pages.error.summary')} backIsStart>
       {import.meta.env.DEV && <pre className={styles.detail}>{describeError(error)}</pre>}
     </ScreenPage>
   )

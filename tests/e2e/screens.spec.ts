@@ -439,9 +439,9 @@ for (const viewport of [
 /**
  * Teclado de recreativa en las interiores sin menú propio (§3.8.14, v0.6.6): al cargar, el primer
  * elemento de juego lleva el cursor sin robar el foco (la pestaña actual en Opciones y en los legales,
- * «Volver al menú» en la autenticación y en la 404); con el foco en ningún control, ↑↓ van a él e Intro
- * lo acciona (la pestaña actual, que ya es la sección, se queda enfocada). El primer Tab sigue siendo
- * «Saltar al contenido».
+ * «Volver al menú» en la 404 y en las provisionales, la autenticación incluida); con el foco en ningún
+ * control, ↑↓ e Intro van a él y lo marcan con el cursor. Intro no lo acciona: lo hace la siguiente, ya
+ * con el foco en él. El primer Tab sigue siendo «Saltar al contenido».
  */
 for (const { path, heading, start, enter } of [
   {
@@ -460,7 +460,7 @@ for (const { path, heading, start, enter } of [
   { path: '/entrar', heading: 'Entrar', start: 'Volver al menú', enter: '/' },
   { path: '/registro', heading: 'Crear cuenta', start: 'Volver al menú', enter: '/' },
 ]) {
-  test(`RD-VIS-02 d: en ${path}, el cursor empieza en «${start}» y ↑↓ e Intro van a él con el foco en ningún control (§3.8.14)`, async ({
+  test(`RD-VIS-02 d: en ${path}, el cursor empieza en «${start}» y ↑↓ e Intro van a él (sin accionarlo) con el foco en ningún control (§3.8.14)`, async ({
     page,
   }) => {
     await open(page, path, heading)
@@ -475,14 +475,68 @@ for (const { path, heading, start, enter } of [
     await page.getByRole('main').focus()
     await page.keyboard.press('ArrowUp')
     await expectCursor(target)
-    // Intro, con el foco en ningún control, lo acciona.
+    // Intro, con el foco en ningún control, lo enfoca sin accionarlo; la siguiente, ya en él, lo acciona.
     await page.getByRole('main').focus()
+    await page.keyboard.press('Enter')
+    await expectCursor(target)
+    await expect(page).toHaveURL(path)
     await page.keyboard.press('Enter')
     await expect(page).toHaveURL(enter)
     // El primer Tab de una carga nueva sigue siendo «Saltar al contenido».
     await open(page, path, heading)
     await page.keyboard.press('Tab')
     await expect(page.getByRole('link', { name: 'Saltar al contenido' })).toBeFocused()
+  })
+}
+
+/**
+ * Intro no rebota entre pantallas (revisión de la 0.28): al cambiar de pantalla el foco va al `<main>`,
+ * que cuenta como reposo. Si Intro accionara el primer elemento de juego, dos Intro seguidas desde el
+ * menú volvían al menú; y con la tecla mantenida, sus repeticiones entraban en la opción elegida de la
+ * pantalla nueva («Pilla el sample», en «Cómo se juega», lleva al menú) y rebotaban entre pantallas
+ * unas diez veces por segundo. Desde el menú, el cursor está en «Jurado», que sin sesión lleva a
+ * «/entrar».
+ */
+test('RD-VIS-02 d: dos Intro seguidas desde el menú se quedan en la pantalla nueva (la segunda solo lleva el cursor a «Volver al menú», §3.8.14)', async ({
+  page,
+}) => {
+  await open(page, '/', 'Beat Battle')
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL('/entrar')
+  await expect(page.getByRole('main')).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expectCursor(page.getByRole('main').getByRole('link', { name: 'Volver al menú', exact: true }))
+  await page.waitForTimeout(300)
+  await expect(page).toHaveURL('/entrar')
+})
+
+for (const { name, select, enter } of [
+  { name: 'Jurado (en reposo)', select: [] as string[], enter: '/entrar' },
+  { name: 'Cómo se juega', select: ['End', 'ArrowUp'], enter: '/como-funciona' },
+]) {
+  test(`RD-VIS-02 d: Intro mantenida en «${name}» entra una sola vez y no vuelve al menú`, async ({
+    page,
+  }) => {
+    await open(page, '/', 'Beat Battle')
+    for (const key of select) await page.keyboard.press(key)
+    const visited: string[] = []
+    page.on('framenavigated', (frame) => {
+      if (frame === page.mainFrame()) visited.push(new URL(frame.url()).pathname)
+    })
+    // La tecla mantenida: repeticiones cada 35 ms durante ~1 s.
+    await page.keyboard.down('Enter')
+    await expect(page).toHaveURL(enter)
+    for (let repeat = 0; repeat < 30; repeat++) {
+      await page.keyboard.down('Enter')
+      await page.waitForTimeout(35)
+    }
+    await page.keyboard.up('Enter')
+    await page.waitForTimeout(300)
+    await expect(page).toHaveURL(enter)
+    expect(
+      visited.filter((path) => path !== enter),
+      `recorrido: ${visited.join(' → ')}`,
+    ).toEqual([])
   })
 }
 

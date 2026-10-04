@@ -8,6 +8,7 @@ import { RootLayout } from './layout/RootLayout'
 import { interiorScreen, simpleScreen } from './layout/screen'
 import { NotFoundPage } from './NotFoundPage'
 import { PlaceholderPage } from './PlaceholderPage'
+import { ScreenPage } from './ScreenPage'
 
 function renderAt(path: string) {
   const router = createMemoryRouter(
@@ -31,6 +32,13 @@ function renderAt(path: string) {
               ]),
             },
             element: <LegalPage />,
+          },
+          {
+            // Una pantalla con formulario (la autenticación de la Fase 2): «Volver al menú» no es su
+            // primer elemento de juego si no lo dice.
+            path: 'formulario',
+            handle: { screen: interiorScreen({ kicker: 'frame.plates.weeks', title: 'pages.weeks.title' }) },
+            element: <ScreenPage title="Formulario" />,
           },
           {
             path: '*',
@@ -92,7 +100,7 @@ describe('plantilla de pantalla interior (0.26, §3.8.14)', () => {
     await act(async () => {})
   })
 
-  it('RD-VIS-02 d / §3.8.14: el primer elemento de juego lleva el cursor sin robar el foco; ↓ e Intro van a él', async () => {
+  it('RD-VIS-02 d / §3.8.14: el primer elemento de juego lleva el cursor sin robar el foco; ↓ e Intro van a él sin accionarlo', async () => {
     const user = userEvent.setup()
     const router = renderAt('/semanas')
     const main = screen.getByRole('main')
@@ -104,9 +112,24 @@ describe('plantilla de pantalla interior (0.26, §3.8.14)', () => {
     main.focus()
     await user.keyboard('{ArrowDown}')
     expect(back).toHaveFocus()
+    // Intro lo enfoca, no lo acciona (si lo accionara, al volver al <main> de la pantalla nueva otra
+    // Intro, o la tecla mantenida, rebotaba entre pantallas).
     main.focus()
     await user.keyboard('{Enter}')
-    expect(router.state.location.pathname).toBe('/')
+    expect(back).toHaveFocus()
+    expect(router.state.location.pathname).toBe('/semanas')
+  })
+
+  it('RD-VIS-02 d / §3.8.14: «Volver al menú» solo es el primer elemento de juego si la pantalla lo dice (`backIsStart`)', async () => {
+    const user = userEvent.setup()
+    renderAt('/formulario')
+    const main = screen.getByRole('main')
+    const back = within(main).getByRole('link', { name: t('screen.backToMenu') })
+    expect(back).not.toHaveAttribute('data-cursor-active')
+    expect(back).not.toHaveAttribute('data-idle-start')
+    main.focus()
+    await user.keyboard('{ArrowDown}')
+    expect(back).not.toHaveFocus()
   })
 
   it('la 404 «BONUS STAGE» pone su propia placa en el HUD y el pad decorativo de 4 × 4', async () => {

@@ -30,6 +30,10 @@ interface PlaceholderPageProps {
  * Pantalla provisional (tareas 0.10, 0.26 y 0.28): la plantilla de pantalla interior de la arena con su
  * título, una línea sobre lo que será y el sello «EN OBRAS» como pieza de la cuña (o arriba del panel,
  * si la pantalla trae su propia pieza). Cada fase la sustituye por la pantalla real de su ruta.
+ *
+ * Sin pestañas, la provisional no tiene más elemento de juego que «Volver al menú»: es el primero
+ * (`backIsStart`, §3.8.14). La pantalla real de cada fase decide el suyo (en la autenticación, el primer
+ * campo del formulario).
  */
 export function PlaceholderPage({
   title,
@@ -55,6 +59,7 @@ export function PlaceholderPage({
       tabs={tabs}
       fill={fill}
       titlePlacement={titlePlacement}
+      backIsStart={!tabs}
     >
       {children}
     </ScreenPage>
