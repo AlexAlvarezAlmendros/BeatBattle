@@ -48,6 +48,25 @@ describe('Opciones (§3.8.14)', () => {
   })
 })
 
+describe('Opciones → qué hará cada opción (J3r)', () => {
+  it('RD-VIS-02 e / RNF-A11Y-08: el panel cuenta en filas con índice qué hará cada opción de la vista previa, en su orden', () => {
+    const { container } = renderInRouter(<SoundSettingsPage />, '/ajustes/sonido')
+    const panel = container.querySelector('[data-screen-part="panel"]') as HTMLElement
+    const help = within(panel).getByRole('region', { name: t('settings.preview.helpTitle') })
+    const rows = within(help).getAllByRole('listitem')
+    // Las mismas opciones que las placas de la cuña (que son dibujo), con su explicación en palabras.
+    const plates = [...container.querySelectorAll('[data-settings-preview] li')].map(
+      (plate) => plate.querySelector('.settings-preview-label')?.textContent,
+    )
+    expect(rows.map((row) => row.querySelector('b')?.textContent)).toEqual(plates.map((label) => `${label}.`))
+    expect(rows[0]).toHaveTextContent(t('settings.preview.help.effects'))
+    expect(rows[3]).toHaveTextContent(t('settings.preview.help.mute'))
+    // «Volver al menú», al pie del panel, después de las filas.
+    const back = within(panel).getByRole('link', { name: t('screen.backToMenu') })
+    expect(help.compareDocumentPosition(back) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+})
+
 describe('Opciones → Accesibilidad (§3.8.14, RNF-A11Y-08)', () => {
   it('RNF-A11Y-08 / WCAG 2.1.4: «Atajos de una tecla [SÍ/NO]» apaga y enciende los atajos y se guarda', async () => {
     const user = userEvent.setup()

@@ -96,18 +96,21 @@ describe('plantilla de pantalla interior (0.26, §3.8.14)', () => {
     await act(async () => {})
   })
 
-  it('§3.8.11 / RD-VIS-02 e: el panel de la 404 cuenta cómo se tocará el pad (chops arriba, batería debajo)', async () => {
+  it('§3.8.11 / RD-VIS-02 e: el panel de la 404 cuenta lo que traerá el pad (chops arriba, batería debajo, metrónomo y grabación)', async () => {
     renderAt('/legal/no-existe')
     const main = screen.getByRole('main')
     const legend = within(main).getByRole('region', { name: t('pages.notFound.legendTitle') })
     const rows = within(legend).getAllByRole('listitem')
-    expect(rows).toHaveLength(2)
+    expect(rows).toHaveLength(3)
     expect(rows[0]).toHaveTextContent(
       `${t('pages.notFound.legend.chops.keysLabel')} ${t('pages.notFound.legend.chops.text')}`,
     )
     expect(rows[1]).toHaveTextContent(
       `${t('pages.notFound.legend.drums.keysLabel')} ${t('pages.notFound.legend.drums.text')}`,
     )
+    // El metrónomo opcional y la grabación de 4 compases (§3.8.11), sin tecla propia.
+    expect(rows[2]).toHaveTextContent(t('pages.notFound.legend.extras.text'))
+    expect(rows[2]!.querySelector('kbd')).toBeNull()
     // Las teclas se ven, pero se leen en palabras («Teclas del 1 al 4:»).
     expect(rows[0]!.querySelectorAll('[aria-hidden="true"] kbd[data-key="marked"]')).toHaveLength(4)
     await act(async () => {})

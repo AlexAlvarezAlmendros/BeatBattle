@@ -35,6 +35,11 @@
   .back {
     order: 1;
   }
+
+  /* La pantalla llena el alto (`fill`): la salida, al pie de la columna, como en `05-perfil`. */
+  .back {
+    margin-top: auto;
+  }
 }
 
 /* El pie del pad va sobre un panel: la cuña lleva trama (`RD-VIS-05`). */
@@ -76,9 +81,11 @@
   border-top: var(--bb-stroke-hair) solid var(--bb-line);
 }
 
+/* Índice, sus teclas y qué traerá (el metrónomo y la grabación no tienen tecla propia). */
 .legendRow {
   display: grid;
-  grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+  grid-template-columns: var(--bb-space-10) minmax(0, 8rem) minmax(0, 1fr);
+  grid-template-areas: "index keys text";
   align-items: center;
   gap: var(--bb-space-3);
   padding: var(--bb-space-3) 0;
@@ -88,11 +95,61 @@
   font-weight: var(--bb-weight-bold);
 }
 
+.legendIndex {
+  grid-area: index;
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-lg);
+  font-weight: var(--bb-weight-extrabold);
+  line-height: 1;
+}
+
+.legendText {
+  grid-area: text;
+}
+
 /* Las teclas de la fila, en las filas del pad: la batería, en tres (Q W E R / A S D F / Z X C V). */
 .legendKeys {
+  grid-area: keys;
   display: grid;
   justify-items: start;
   gap: var(--bb-space-1);
+}
+
+/*
+ * Escritorio: la pantalla llena el alto hasta la barra (`fill`, tercer pase del jurado, J3r) y las
+ * filas de la leyenda se reparten el del panel, como las reglas de «Cómo se juega».
+ */
+@media (min-width: 961px) {
+  .legend {
+    flex: 1;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .legendList {
+    grid-auto-rows: minmax(0, 1fr);
+  }
+}
+
+/* Pantalla grande (≥ 1600 px): la letra de la leyenda crece con el panel, como la de «Cómo se juega». */
+@media (min-width: 1600px) {
+  .legendRow {
+    font-size: var(--bb-fs-md);
+  }
+
+  .legendIndex {
+    font-size: var(--bb-fs-2xl);
+  }
+}
+
+/* Móvil: las teclas, debajo del texto. */
+@media (max-width: 720px) {
+  .legendRow {
+    grid-template-columns: var(--bb-space-10) minmax(0, 1fr);
+    grid-template-areas:
+      "index text"
+      ". keys";
+  }
 }
 
 .keyRow {

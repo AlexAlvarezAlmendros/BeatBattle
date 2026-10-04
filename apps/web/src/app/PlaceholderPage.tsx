@@ -19,6 +19,8 @@ interface PlaceholderPageProps {
   layout?: ScreenPageProps['layout']
   /** Las pestañas de la pantalla (`ScreenPage`): las secciones de Opciones. */
   tabs?: ReactNode
+  /** La pantalla llena el alto entre el HUD y la barra (`ScreenPage`): Opciones. */
+  fill?: boolean
   children?: ReactNode
 }
 
@@ -35,6 +37,7 @@ export function PlaceholderPage({
   piece,
   layout,
   tabs,
+  fill,
   children,
 }: PlaceholderPageProps) {
   return (
@@ -47,6 +50,7 @@ export function PlaceholderPage({
       badge={piece ? <UnderConstruction /> : undefined}
       layout={layout}
       tabs={tabs}
+      fill={fill}
     >
       {children}
     </ScreenPage>

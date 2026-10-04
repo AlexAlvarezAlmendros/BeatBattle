@@ -74,6 +74,29 @@ async function wineShare(page: Page): Promise<number> {
  */
 const BAR_GAP = 48
 
+/** Las interiores con pieza que llenan la pantalla (`ScreenPage` con `fill`). */
+const FILL_SCREENS = [
+  { path: '/como-funciona', heading: 'Cómo se juega' },
+  { path: '/ajustes', heading: 'Sonido y efectos' },
+  { path: '/ajustes/sesiones', heading: 'Sesiones' },
+  { path: '/esto-no-existe', heading: 'Bonus stage' },
+]
+
+/**
+ * Huecos entre los hijos visibles de una caja, de arriba abajo (sin los que van fuera del flujo, como
+ * el `<h1>` solo para lectores de pantalla): dentro de un panel o de una columna, nada de huecos vacíos.
+ */
+async function innerGaps(page: Page, selector: string): Promise<number[]> {
+  return page.evaluate((sel) => {
+    const rects = [...document.querySelector(sel)!.children]
+      .filter((child) => getComputedStyle(child).position !== 'absolute')
+      .map((child) => child.getBoundingClientRect())
+      .filter((rect) => rect.height > 0)
+      .sort((a, b) => a.top - b.top)
+    return rects.slice(1).map((rect, index) => Math.round(rect.top - rects[index]!.bottom))
+  }, selector)
+}
+
 /** Baja hasta el final de la página (en ventanas bajas, lo que no cabe se desplaza). */
 async function scrollToEnd(page: Page): Promise<void> {
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
@@ -144,6 +167,59 @@ test.describe('1440 × 900', () => {
     for (const gap of gaps) expect(gap, `huecos entre placas: ${gaps.join(', ')}`).toBeLessThanOrEqual(24)
   })
 
+  for (const { path, heading } of FILL_SCREENS.filter((screen) => screen.path !== '/como-funciona')) {
+    test(`RD-VIS-02 e: ${path} llena el alto entre el HUD y la barra, sin huecos dentro del panel (J3r)`, async ({
+      page,
+    }) => {
+      await open(page, path, heading)
+      await settle(page)
+      const box = await boxes(page, { panel: PANEL, piece: PIECE })
+      for (const name of ['panel', 'piece'] as const) {
+        expect(box[name].bottom, `pie de «${name}» y barra`).toBeLessThanOrEqual(box.bar.top)
+        expect(box.bar.top - box[name].bottom, `hueco bajo «${name}»`).toBeLessThanOrEqual(BAR_GAP)
+      }
+      // El contenido del panel se reparte: lo suyo arriba, filas que comparten el alto, acciones al pie.
+      const gaps = await innerGaps(page, PANEL)
+      for (const gap of gaps) expect(gap, `huecos en el panel: ${gaps.join(', ')}`).toBeLessThanOrEqual(40)
+      // Y el de la última lista del panel (reglas, opciones, leyenda) llega a su pie.
+      const lastRow = await page.evaluate((sel) => {
+        const rows = document.querySelectorAll(`${sel} section li`)
+        return rows[rows.length - 1]?.getBoundingClientRect().bottom ?? 0
+      }, PANEL)
+      const listEnd = await page.evaluate(
+        (sel) => document.querySelector(`${sel} section`)!.getBoundingClientRect().bottom,
+        PANEL,
+      )
+      expect(listEnd - lastRow, 'hueco bajo la última fila').toBeLessThanOrEqual(2)
+    })
+  }
+
+  test('RD-VIS-02 e: en Opciones, la vista previa de la cuña llena la columna, con su pie abajo (J3r)', async ({
+    page,
+  }) => {
+    for (const { path, heading } of FILL_SCREENS.filter((screen) => screen.path.startsWith('/ajustes'))) {
+      await open(page, path, heading)
+      await settle(page)
+      // Las placas, seguidas y más altas que en la columna suelta (56 px), sin pasar del doble.
+      const gaps = await innerGaps(page, `${PIECE} figure ul`)
+      for (const gap of gaps)
+        expect(gap, `${path}: huecos entre placas ${gaps.join(', ')}`).toBeLessThanOrEqual(24)
+      const heights = await page.evaluate(
+        (sel) =>
+          [...document.querySelectorAll(`${sel} figure li`)].map((li) => li.getBoundingClientRect().height),
+        PIECE,
+      )
+      for (const height of heights) {
+        expect(height, `${path}: placas de ${heights.join(', ')} px`).toBeGreaterThan(56)
+        expect(height, `${path}: placas de ${heights.join(', ')} px`).toBeLessThanOrEqual(112)
+      }
+      // Y el pie de la vista previa, al pie de la columna, que llega a la barra.
+      const box = await boxes(page, { piece: PIECE, caption: `${PIECE} figcaption` })
+      expect(box.piece.bottom - box.caption.bottom, `${path}: pie de la columna`).toBeLessThanOrEqual(2)
+      expect(box.bar.top - box.piece.bottom, `${path}: hueco bajo la columna`).toBeLessThanOrEqual(BAR_GAP)
+    }
+  })
+
   test('RD-VIS-02 e: la 404 estira el panel del subtítulo hasta el pie del pad', async ({ page }) => {
     await open(page, '/esto-no-existe', 'Bonus stage')
     await settle(page)
@@ -189,8 +265,8 @@ for (const viewport of [
   test.describe(`${viewport.width} × ${viewport.height}`, () => {
     test.use({ viewport })
 
-    for (const { path, heading } of [{ path: '/como-funciona', heading: 'Cómo se juega' }]) {
-      test(`RD-VIS-02 e: ${path} llena el alto y, si no cabe, se desplaza sin pisar la barra (J2r)`, async ({
+    for (const { path, heading } of FILL_SCREENS) {
+      test(`RD-VIS-02 e: ${path} llena el alto y, si no cabe, se desplaza sin pisar la barra (J2r, J3r)`, async ({
         page,
       }) => {
         await open(page, path, heading)
@@ -205,13 +281,6 @@ for (const viewport of [
     }
   })
 }
-
-/** Las interiores con pieza que llenan la pantalla (`ScreenPage` con `fill`). */
-const FILL_SCREENS = [
-  { path: '/como-funciona', heading: 'Cómo se juega' },
-  { path: '/ajustes', heading: 'Sonido y efectos' },
-  { path: '/esto-no-existe', heading: 'Bonus stage' },
-]
 
 /**
  * ¿Pisa la caja la diagonal de la cuña? La arena de cuña a la izquierda (`ArenaBackdrop`) corta el pie

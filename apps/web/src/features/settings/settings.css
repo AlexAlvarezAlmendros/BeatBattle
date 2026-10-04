@@ -95,6 +95,98 @@
   font-size: var(--bb-fs-sm);
 }
 
+/*
+ * Qué hará cada opción (en el panel): filas con índice, como las reglas de «Cómo se juega». En
+ * escritorio, el panel llega a la barra (`ScreenPage` con `fill`) y las filas se reparten su alto.
+ */
+.settings-help {
+  display: grid;
+  gap: var(--bb-space-3);
+}
+
+.settings-help-title {
+  color: var(--bb-red);
+}
+
+.settings-help-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  border-top: var(--bb-stroke-hair) solid var(--bb-line);
+  list-style: none;
+}
+
+.settings-help-row {
+  display: grid;
+  grid-template-columns: var(--bb-space-10) minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--bb-space-3);
+  padding: var(--bb-space-3) 0;
+  border-bottom: var(--bb-stroke-hair) solid var(--bb-line);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+.settings-help-row b {
+  color: var(--bb-white);
+}
+
+.settings-help-index {
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-lg);
+  font-weight: var(--bb-weight-extrabold);
+  line-height: 1;
+}
+
+/* La última fila no lleva filete: debajo va el de las acciones del panel. */
+.settings-help-row:last-child {
+  border-bottom: 0;
+}
+
+/*
+ * Escritorio (tercer pase del jurado, J3r): la pantalla llena el alto hasta la barra. En la cuña, las
+ * placas de la vista previa crecen con la columna hasta el doble de su alto (con el nombre y el control
+ * centrados: más, con dos opciones, serían cajas huecas) y el pie va abajo, al pie de la columna; en el
+ * panel, las filas de la ayuda se reparten su alto, con «Volver al menú» al pie.
+ */
+@media (min-width: 961px) {
+  .settings-preview {
+    flex: 1 0 auto;
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .settings-preview-list {
+    grid-auto-rows: minmax(var(--bb-space-14), calc(2 * var(--bb-space-14)));
+    align-content: start;
+  }
+
+  .settings-help {
+    flex: 1;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .settings-help-list {
+    grid-auto-rows: minmax(0, 1fr);
+  }
+
+  .settings-help-row {
+    align-content: center;
+  }
+}
+
+/* Pantalla grande (≥ 1600 px): la letra de la ayuda crece con el panel, como la de «Cómo se juega». */
+@media (min-width: 1600px) {
+  .settings-help-row {
+    font-size: var(--bb-fs-md);
+  }
+
+  .settings-help-index {
+    font-size: var(--bb-fs-2xl);
+  }
+}
+
 @media (max-width: 720px) {
   .settings-preview-option {
     min-height: var(--bb-space-12);

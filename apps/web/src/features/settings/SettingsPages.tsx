@@ -5,7 +5,7 @@ import { t } from '../../i18n'
 import { FilterChip } from '../../ui/Chip'
 import { useShortcuts } from '../../ui/shortcuts'
 import { SettingsTabs } from './SettingsLayout'
-import { SettingsPreview } from './SettingsPreview'
+import { SettingsOptionsHelp, SettingsPreview } from './SettingsPreview'
 
 /*
  * Secciones de `/ajustes/*` (Opciones, §3.8.14; §2.3, §2.12.4, RNF-A11Y-08), en el orden de sus pestañas:
@@ -42,8 +42,11 @@ function SettingsSectionPlaceholder({
       // Las secciones, después del rótulo y del título (en móvil, la pantalla abre con su título).
       tabs={<SettingsTabs />}
       documentTitle={t('settings.pageTitle', { section: title })}
+      // En escritorio, del HUD a la barra: la vista previa y la ayuda de cada opción se reparten el alto.
+      fill
     >
       {children}
+      <SettingsOptionsHelp section={section} />
     </PlaceholderPage>
   )
 }

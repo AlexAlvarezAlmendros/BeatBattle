@@ -201,6 +201,9 @@
         "drums": {
           "text": "Tocarás una batería sintetizada",
           "keysLabel": "Las otras tres filas, teclas Q W E R, A S D F y Z X C V:"
+        },
+        "extras": {
+          "text": "Metrónomo, si lo quieres, y grabación de 4 compases"
         }
       }
     },
@@ -251,6 +254,33 @@
     },
     "preview": {
       "caption": "Vista previa: así serán las opciones de esta sección. Todavía no hacen nada.",
+      "helpTitle": "Qué hará cada opción",
+      "help": {
+        "effects": "Los sonidos del juego: el cursor, los sellos, los rótulos y las ceremonias.",
+        "music": "Un bucle lo-fi en la tonalidad y el tempo del sample de la semana; calla cuando suena una entrada.",
+        "entries": "Los beats que escuchas en el jurado y en las fichas.",
+        "mute": "Lo calla todo de una vez, como la tecla M.",
+        "reduceMotion": "Quita desplazamientos y temblores, además de lo que ya pida tu sistema.",
+        "serious": "Sin anunciador, estampas, rayos, temblores ni sorpresas: se pierde espectáculo, nunca información.",
+        "quality": "En baja, fondo fijo y carta plana, para equipos modestos.",
+        "email": "La dirección con la que entras y a la que te escribimos.",
+        "password": "La de entrar con tu email; cámbiala cuando quieras.",
+        "google": "Entra con tu cuenta de Google, sin contraseña.",
+        "discord": "Entra con tu cuenta de Discord, sin contraseña.",
+        "name": "Cómo te llamas en tu carta de productor.",
+        "avatar": "La imagen de tu carta de productor.",
+        "links": "Instagram, SoundCloud, YouTube, Spotify o BeatStars, en tu perfil.",
+        "accent": "El color de tu carta, dentro de la paleta del juego.",
+        "battleAlerts": "Un interruptor por cada aviso de la batalla, y el del lunes junto o por separado.",
+        "marketing": "Novedades y campañas, solo si das tu permiso; te das de baja en un clic.",
+        "quietHours": "Nada que no sea de servicio entre las 22:00 y las 08:00 (hora de Madrid).",
+        "activeSessions": "Dónde tienes la cuenta abierta: el navegador y su última actividad.",
+        "closeOthers": "Cierra todas las demás de una vez si ves una que no es tuya.",
+        "export": "Un archivo con tu perfil, tus entradas, tus votos, tu XP y tus logros.",
+        "deleteAccount": "Borra tu perfil y lo que no se ha sellado; en las semanas selladas quedas como «Productor eliminado».",
+        "textSize": "Agranda el texto de toda la web.",
+        "gate": "La pantalla «PULSA PARA EMPEZAR» de cada visita; apágala para ir directo al menú."
+      },
       "meterValue": "{value} de {max}",
       "values": {
         "yes": "Sí",
