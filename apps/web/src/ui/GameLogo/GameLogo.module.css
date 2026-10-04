@@ -1,8 +1,8 @@
 /*
- * Logo del juego (§3.2 «Trazos», §3.8.1): un canvas 2D que ocupa el ancho de su caja; la proporción la
- * pone el componente desde el lienzo de cada composición. Los colores salen del espejo en TS de los
- * tokens (`@beatbattle/shared/tokens`); las caras son mezclas de la paleta (`--bb-face-*`) dentro del
- * triángulo negro–rojo–blanco que mide `RD-VIS-02` a.
+ * Logo del juego (§3.2 «Trazos», §3.8.1): un canvas 2D que ocupa el ancho de su caja; la proporción
+ * (`--game-logo-aspect`) la pone el componente desde el lienzo de cada composición. Los colores salen
+ * del espejo en TS de los tokens (`@beatbattle/shared/tokens`); las caras son mezclas de la paleta
+ * (`--bb-face-*`) dentro del triángulo negro–rojo–blanco que mide `RD-VIS-02` a.
  */
 .logo {
   display: block;
@@ -13,4 +13,5 @@
   display: block;
   width: 100%;
   height: auto;
+  aspect-ratio: var(--game-logo-aspect);
 }

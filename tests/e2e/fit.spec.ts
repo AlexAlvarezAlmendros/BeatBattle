@@ -807,3 +807,94 @@ for (const viewport of [
     }
   })
 }
+
+/**
+ * Lo que la barra de controles pegada tapa del menú: placas, el panel de ayuda y los textos y controles
+ * de la tarjeta de la semana (título, créditos, chips, play, reto, entradas, aviso) que acaban por
+ * debajo de su borde de arriba (el filete rojo; la línea discontinua de encima es decoración).
+ */
+function underControls(page: Page): Promise<string[]> {
+  return page.evaluate(() => {
+    const bar = document.querySelector('footer')!.getBoundingClientRect().top
+    const main = document.querySelector('main')!
+    const under: string[] = []
+    const visible = (element: Element) => {
+      const style = getComputedStyle(element)
+      return style.display !== 'none' && style.visibility !== 'hidden' && !element.closest('.sr-only')
+    }
+    for (const plate of main.querySelectorAll('[data-menu-plate]'))
+      if (plate.getBoundingClientRect().bottom > bar + 0.5)
+        under.push(`placa ${plate.querySelector('[data-plate-label]')?.textContent}`)
+    const help = main.querySelector('nav [aria-live]')
+    if (help && help.getBoundingClientRect().bottom > bar + 0.5) under.push('panel de ayuda')
+    for (const piece of main.querySelectorAll('article :is(h2, h3, p, button, [data-frame])')) {
+      if (!visible(piece)) continue
+      const box = piece.getBoundingClientRect()
+      if (box.height > 0 && box.bottom > bar + 0.5)
+        under.push(`tarjeta: «${(piece.textContent ?? '').trim().slice(0, 30) || piece.tagName}»`)
+    }
+    return under
+  })
+}
+
+/**
+ * Compactación por altura del menú de escritorio (jurado visual de la 0.28, tercer pase; guía §3.8.3):
+ * con la ventana baja de un portátil (1366 × 657, la de una pantalla de 1366 × 768; 1280 × 720;
+ * 1536 × 730; 1440 × 789, la de la pantalla de 1440 × 900 de las maquetas), el menú medía unos 900 px y
+ * se desplazaba como una web: a 1366 × 657 la barra tapaba las opciones 05 y 06 y cortaba el título de
+ * la tarjeta. Ahora logo, placas y tarjeta bajan con la altura y la pantalla cabe sin desplazar, sin
+ * esconder nada (con teclado y ratón no hay pliegues que escondan).
+ */
+for (const viewport of [
+  { width: 1440, height: 789 },
+  { width: 1366, height: 657 },
+  { width: 1536, height: 730 },
+  { width: 1280, height: 720 },
+  { width: 1920, height: 955 },
+]) {
+  test.describe(`menú con la ventana baja a ${viewport.width} × ${viewport.height}`, () => {
+    test.use({ viewport })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`§3.8.3 / RD-VIS-02: el menú de ${path} cabe sin desplazar y la barra no tapa ninguna placa ni la tarjeta`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        const { scroll, view } = await page.evaluate(() => ({
+          scroll: document.scrollingElement!.scrollHeight,
+          view: window.innerHeight,
+        }))
+        expect(scroll).toBeLessThanOrEqual(view)
+        expect(await underControls(page)).toEqual([])
+        // Nada se esconde: los cuatro chips, la ayuda y la crónica siguen ahí.
+        if (path === '/dev/menu') {
+          const card = page.getByRole('main').getByRole('article', { name: 'Lluvia en Gràcia' })
+          for (const chip of [/92\s*BPM/i, /Re menor/, /1:12\s*min/i, /Boom bap/])
+            await expect(card.getByText(chip).first()).toBeVisible()
+          await expect(card.getByText(/Usa solo el primer compás/)).toBeVisible()
+        }
+        await expect(page.getByRole('main').locator('nav [aria-live="polite"]')).toBeVisible()
+      })
+    }
+  })
+}
+
+/** A 1440 × 900 (la maqueta) la compactación no entra: placas de 70 px (84 la elegida) y logo de 640. */
+test('§3.8.3: a 1440 × 900 el menú es el de la maqueta (placas de 70 y 84 px, logo de 640)', async ({
+  page,
+}) => {
+  await open(page, '/dev/menu', 'Beat Battle')
+  await settle(page)
+  const sizes = await page.evaluate(() => ({
+    plates: [...document.querySelectorAll('main [data-menu-plate]')].map((plate) =>
+      Math.round(plate.getBoundingClientRect().height),
+    ),
+    logo: Math.round(
+      [...document.querySelectorAll('main [data-game-logo]')]
+        .map((logo) => logo.getBoundingClientRect().width)
+        .find((width) => width > 0) ?? 0,
+    ),
+  }))
+  expect(sizes).toEqual({ plates: [84, 70, 70, 70, 70, 70], logo: 640 })
+})

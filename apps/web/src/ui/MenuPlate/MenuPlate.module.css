@@ -13,6 +13,9 @@
   --plate-fill: var(--bb-panel-veil);
   --plate-shift: var(--bb-space-7);
   --plate-pad-end: var(--bb-space-8);
+  /* Alto en reposo (70 px) y elegida (84); con la ventana baja de escritorio bajan con ella (más abajo). */
+  --plate-h: calc(var(--bb-space-16) + var(--bb-space-1) + var(--bb-stroke));
+  --plate-h-on: calc(var(--bb-space-16) + var(--bb-space-5));
   position: relative;
   isolation: isolate;
   display: grid;
@@ -20,7 +23,7 @@
   grid-template-areas: "index label detail";
   align-items: center;
   column-gap: var(--bb-space-4);
-  height: calc(var(--bb-space-16) + var(--bb-space-1) + var(--bb-stroke));
+  height: var(--plate-h);
   margin-left: var(--plate-shift);
   padding: 0 var(--plate-pad-end) 0 calc(var(--bb-space-8) + var(--bb-stroke));
   color: var(--bb-white);
@@ -178,7 +181,7 @@
   --plate-fill: var(--bb-red-cta);
   --plate-shift: 0px;
   grid-template-columns: var(--bb-space-14) minmax(0, 1fr) max-content;
-  height: calc(var(--bb-space-16) + var(--bb-space-5));
+  height: var(--plate-h-on);
 }
 
 .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
@@ -266,7 +269,7 @@
     align-content: center;
     row-gap: var(--bb-space-1);
     height: auto;
-    min-height: calc(var(--bb-space-16) + var(--bb-space-1) + var(--bb-stroke));
+    min-height: var(--plate-h);
     padding-block: var(--bb-space-2);
     transition:
       margin-left var(--bb-dur-tick) var(--bb-ease-snap),
@@ -276,7 +279,7 @@
   .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
     grid-template-columns: var(--bb-space-14) minmax(0, 1fr);
     height: auto;
-    min-height: calc(var(--bb-space-16) + var(--bb-space-5));
+    min-height: var(--plate-h-on);
   }
 
   /* El dato, en su línea: si sus piezas (cifra o etiqueta, dato largo, tecla) no caben, parten en dos. */
@@ -304,6 +307,20 @@
   .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
     grid-template-columns: var(--bb-space-9) minmax(0, 1fr);
     column-gap: var(--bb-space-3);
+  }
+}
+
+/*
+ * ── Ventana baja de escritorio (≥ 721 px de ancho y < 900 de alto; §3.8.3) ───────────────────
+ * Las placas bajan con el alto de la ventana (`--bb-plate-h-low`): 70 px a 900 de alto, 44 a 640 (nunca
+ * menos que el objetivo táctil); la elegida, un 20 % más, como a todo alto (70 → 84). Así el menú cabe
+ * sin desplazar en la ventana de un portátil (1366 × 657) sin esconder nada. En la lista estrecha son el
+ * alto mínimo: con el dato en una segunda línea, la placa crece con su texto.
+ */
+@media (min-width: 721px) and (max-height: 899px) {
+  .plate {
+    --plate-h: var(--bb-plate-h-low);
+    --plate-h-on: calc(var(--bb-plate-h-low) * 1.2);
   }
 }
 

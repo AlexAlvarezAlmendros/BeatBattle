@@ -136,6 +136,14 @@
    * menú, para que el 1P nunca pise el título (jurado de la 0.28, tercer pase).
    */
   --bb-plate-cursor-reach: 5.25rem;
+  /*
+   * Ventana baja de escritorio (≥ 721 px de ancho y < 900 de alto; §3.8.3): las placas del menú bajan con
+   * el alto de la ventana, lineal de 640 a 900 px de alto (a 900 valen lo de la maqueta), y el logo ocupa
+   * el alto que le dejan, para caber sin desplazar en la ventana de un portátil (1366 × 657).
+   */
+  --bb-plate-h-low: clamp(2.75rem, 10dvh - 1.25rem, 4.375rem); /* Placa: 44 → 70 px (≥ --bb-target) */
+  --bb-plate-gap-low: clamp(0.25rem, 3dvh - 0.9375rem, 0.75rem); /* Entre placas: 4 → 12 px */
+  --bb-menu-logo-h-min: 6rem; /* Alto mínimo del logo del menú (≈ 227 px de ancho): por debajo, se desplaza */
 
   /* ── Forma (sustituye a los radios; §3.2 «Forma») ────────────────────────────────────────── */
   /* Chaflán de dos esquinas opuestas (arriba-izquierda y abajo-derecha) */

@@ -1,5 +1,5 @@
 import { color, font, logo } from '@beatbattle/shared/tokens'
-import { useEffect, useRef } from 'react'
+import { type CSSProperties, useEffect, useRef } from 'react'
 import { t } from '../../i18n'
 import { cx } from '../forceState'
 import styles from './GameLogo.module.css'
@@ -186,6 +186,9 @@ export interface GameLogoProps {
  * LCP: el LCP de la home tiene que ser un texto (`RNF-PERF-02`, §3.5), y el SVG con `<text>` lo era. Se
  * pinta cuando la fuente del display está lista (sin un fotograma con la de reserva), y de nuevo al
  * cambiar de tamaño o de DPR. Decorativo: el nombre del juego lo lleva el `<h1>` de la pantalla.
+ *
+ * Mide lo que le dé de ancho quien lo usa; su proporción (ancho / alto del lienzo de su composición) va en
+ * `--game-logo-aspect`, para quien lo quiera dimensionar por el alto (el menú con la ventana baja, §3.8.3).
  */
 export function GameLogo({ compact = false, className }: GameLogoProps) {
   const ref = useRef<HTMLCanvasElement>(null)
@@ -233,17 +236,15 @@ export function GameLogo({ compact = false, className }: GameLogoProps) {
     }
   }, [layout, wordsKey])
 
+  const aspect = { '--game-logo-aspect': layout.box[2] / layout.box[3] } as CSSProperties
   return (
     <span
       className={cx(styles.logo, className)}
+      style={aspect}
       aria-hidden="true"
       data-game-logo={compact ? 'compact' : 'full'}
     >
-      <canvas
-        ref={ref}
-        className={styles.canvas}
-        style={{ aspectRatio: `${layout.box[2]} / ${layout.box[3]}` }}
-      />
+      <canvas ref={ref} className={styles.canvas} />
     </span>
   )
 }

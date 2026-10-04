@@ -24,6 +24,19 @@ describe('GameLogo (§3.2 «Trazos», §3.8.1; 0.24)', () => {
     expect(container.querySelector('svg, text')).toBeNull()
   })
 
+  it('§3.8.3: expone la proporción de su lienzo en --game-logo-aspect (el menú lo mide por el alto)', () => {
+    const { container } = render(
+      <>
+        <GameLogo />
+        <GameLogo compact />
+      </>,
+    )
+    const aspects = [...container.querySelectorAll<HTMLElement>('[data-game-logo]')].map((element) =>
+      Number(element.style.getPropertyValue('--game-logo-aspect')),
+    )
+    expect(aspects).toEqual([LOGO_LAYOUTS.full, LOGO_LAYOUTS.compact].map(({ box }) => box[2] / box[3]))
+  })
+
   it('cada palabra, con su extrusión, su contorno y su filete, cabe en el lienzo de su composición', () => {
     const depthX = logo.depth * logo.stepX
     const depthY = logo.depth * logo.stepY

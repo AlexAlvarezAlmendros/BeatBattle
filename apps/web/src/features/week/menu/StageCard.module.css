@@ -193,6 +193,58 @@
 }
 
 /*
+ * ── Ventana baja de escritorio (≥ 721 px de ancho y < 900 de alto; §3.8.3, `MainMenu`) ──────────
+ * La misma tarjeta, apretada: menos relleno y separación, el vinilo de 64 px (decorativo: repite la
+ * semana y el BPM) y las entradas a 20 px. Si el reto no cabe junto a las entradas, parte su texto en
+ * vez de mandarlas a otra fila. No se va nada: chips, play con la onda, reto y entradas siguen ahí.
+ */
+@media (min-width: 721px) and (max-height: 899px) {
+  .card {
+    gap: var(--bb-space-2);
+    padding: var(--bb-space-2) var(--bb-space-5);
+  }
+
+  .top {
+    gap: var(--bb-space-4);
+  }
+
+  .vinyl {
+    width: var(--bb-space-16);
+  }
+
+  .heading {
+    gap: var(--bb-space-1);
+  }
+
+  .chips {
+    margin-top: 0;
+  }
+
+  .foot {
+    flex-wrap: nowrap;
+    padding-top: var(--bb-space-2);
+  }
+
+  .challenge {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .entries {
+    flex: none;
+  }
+
+  .entries b {
+    font-size: var(--bb-fs-lg);
+  }
+
+  .alert {
+    margin-top: 0;
+    padding-top: var(--bb-space-2);
+  }
+}
+
+/*
  * ── Móvil: compacta, con el reloj en línea en lugar de la onda ────────────────────────────
  * Por ancho solo cambia la composición y se van las piezas que repiten algo (el vinilo, la onda, el
  * «0:00 / 1:12»). Lo que **informa** (créditos, género, semana, reto, entradas, aviso) solo se pliega en
