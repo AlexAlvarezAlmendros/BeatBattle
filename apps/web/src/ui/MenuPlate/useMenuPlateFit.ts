@@ -1,4 +1,5 @@
 import { type CSSProperties, type RefObject, useLayoutEffect, useState } from 'react'
+import { onTextStyleChange } from '../hooks/useFitText'
 
 /** Cuerpo mínimo del rótulo común, en px (el de `MenuPlate`; `RD-VIS-05`: nunca por debajo de 12). */
 export const MENU_LABEL_MIN_PX = 16
@@ -41,7 +42,8 @@ function rootNumber(name: string): number {
  * (`useFitText`) desde el cuerpo nuevo. Mide al montar y, en el fotograma siguiente, solo cuando cambia algo
  * de lo que depende: el ancho de la lista (columnas, escala de la ventana grande, zoom), el tamaño de la
  * ventana (el alto de las placas sigue al de la ventana baja; las consultas de táctil y móvil), el contenido
- * de las placas (etiquetas y datos: el estado de la semana y del jugador) y la fuente web al llegar. No al
+ * de las placas (etiquetas y datos: el estado de la semana y del jugador), la fuente web al llegar y el estilo
+ * del texto (`onTextStyleChange`: el espaciado de WCAG 1.4.12 aplicado con la página ya cargada). No al
  * mover el cursor: la medida ya es en reposo para todas (revisión del cierre de la 0.28: medir en cada
  * render del menú, con las transiciones de la elegida, tardaba segundos en asentarse con la máquina
  * cargada). Sin `ResizeObserver` (jsdom) no hace nada.
@@ -75,6 +77,9 @@ export function useMenuPlateFit(listRef: RefObject<HTMLElement | null>): MenuPla
     // Texto y piezas de las placas; no sus atributos (la elegida, los estilos del ajuste de cada etiqueta).
     const content = new MutationObserver(later)
     content.observe(list, { childList: true, characterData: true, subtree: true })
+    // El estilo del texto (el espaciado de WCAG 1.4.12 aplicado con la página ya cargada): ya en el fotograma
+    // siguiente al cambio.
+    const offStyle = onTextStyleChange(update)
     let active = true
     void document.fonts?.ready.then(() => {
       if (active) update()
@@ -84,6 +89,7 @@ export function useMenuPlateFit(listRef: RefObject<HTMLElement | null>): MenuPla
       cancelAnimationFrame(frame)
       resize.disconnect()
       content.disconnect()
+      offStyle()
       window.removeEventListener('resize', later)
     }
   }, [listRef])

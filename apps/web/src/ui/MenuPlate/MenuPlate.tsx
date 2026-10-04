@@ -11,7 +11,7 @@ import { Link, type To } from 'react-router'
 import { t } from '../../i18n'
 import { Cursor } from '../Cursor'
 import { cx, forceStateAttr, type InteractionState } from '../forceState'
-import { useFitText } from '../hooks/useFitText'
+import { onTextStyleChange, useFitText } from '../hooks/useFitText'
 import { Icon } from '../Icon'
 import { Key } from '../Key'
 import styles from './MenuPlate.module.css'
@@ -160,7 +160,8 @@ const STACK_ATTR = 'data-plate-stack'
  * (`MENU_LABEL_MIN_PX`) con la anchura mínima del display (`--bb-stretch-min`), el dato baja a una segunda
  * línea, bajo la etiqueta. Se mide en la propia placa, con el dato al lado (quitando un momento el atributo y
  * el ajuste de `useFitText`, sin pintar nada en medio), cuando cambian su ancho, su etiqueta, su estado
- * (`state`: la elegida enseña su tecla), el texto del dato y la fuente web. Donde el dato ya va debajo (la
+ * (`state`: la elegida enseña su tecla), el texto del dato, la fuente web y el estilo del texto
+ * (`onTextStyleChange`: el espaciado de WCAG 1.4.12 aplicado con la página ya cargada). Donde el dato ya va debajo (la
  * lista estrecha del menú, por debajo de 360 px) o no hay dato, no hace nada. Solo baja lo que no cabe: la
  * deshabilitada «RESULTADOS · Aún nada sellado» en una placa de 313 px (la galería; jurado de la 0.28, cierre:
  * la etiqueta quedaba en 12–21 px de ancho, recortada), no «JUGAR [INTRO]», que cabe al lado (revisión del
@@ -213,6 +214,9 @@ function useStackWhenCramped(
     resize.observe(plate)
     const content = new MutationObserver(later)
     content.observe(detail, { childList: true, characterData: true, subtree: true })
+    // El estilo del texto (el espaciado de WCAG 1.4.12 aplicado con la página ya cargada) cambia lo que mide
+    // la etiqueta en la misma placa.
+    const offStyle = onTextStyleChange(check)
     let active = true
     void document.fonts?.ready.then(() => {
       if (active) check()
@@ -222,6 +226,7 @@ function useStackWhenCramped(
       cancelAnimationFrame(frame)
       resize.disconnect()
       content.disconnect()
+      offStyle()
     }
   }, [labelRef, detailRef, state])
   return stacked

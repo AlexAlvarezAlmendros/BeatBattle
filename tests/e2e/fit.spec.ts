@@ -358,6 +358,49 @@ test.describe('espaciado de texto (WCAG 1.4.12) a 390 × 844 táctil', () => {
   }
 })
 
+/** Etiquetas de las placas y título de la tarjeta de la semana que desbordan su caja (se recortan). */
+function clippedFitTexts(page: Page): Promise<string[]> {
+  return page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>('main [data-plate-label], main article h2')]
+      .filter((element) => element.scrollWidth > element.clientWidth + 0.5)
+      .map((element) => `«${element.textContent}» ${element.scrollWidth} > ${element.clientWidth}`),
+  )
+}
+
+/**
+ * El espaciado de texto de WCAG 1.4.12 aplicado **con la página ya cargada** (un marcador o una extensión;
+ * jurado de la 0.28, ronda final, E1): el ajuste de las etiquetas (`useFitText`) solo se repetía si cambiaba
+ * el ancho de su caja o al llegar la fuente, así que las etiquetas se quedaban con el ajuste de antes y se
+ * recortaban (a 1440 × 900, «RESULTADOS» desbordaba 31 px y el título «LLUVIA EN GRÀCIA» 99). Ahora se
+ * reajustan al cambiar el estilo del texto, y el ajuste común de las placas y su segunda línea también.
+ */
+for (const viewport of [
+  { width: 1440, height: 900, touch: false },
+  { width: 390, height: 844, touch: true },
+  { width: 320, height: 568, touch: true },
+]) {
+  test.describe(`espaciado de texto aplicado después de cargar a ${viewport.width} × ${viewport.height}${viewport.touch ? ' táctil' : ''}`, () => {
+    test.use({
+      viewport: { width: viewport.width, height: viewport.height },
+      isMobile: viewport.touch,
+      hasTouch: viewport.touch,
+    })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`RD-VIS-05 / WCAG 1.4.12 / §3.3: con el espaciado de texto aplicado a ${path} ya cargado, ni las etiquetas de las placas ni el título de la tarjeta se recortan`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        expect(await clippedFitTexts(page), 'antes del espaciado').toEqual([])
+        await page.addStyleTag({ content: TEXT_SPACING })
+        expect(await page.evaluate(() => getComputedStyle(document.body).letterSpacing)).not.toBe('normal')
+        await expect.poll(() => clippedFitTexts(page)).toEqual([])
+      })
+    }
+  })
+}
+
 /** La cinta del lockup: su texto visible y en cuántas líneas va. */
 function ribbonLines(page: Page): Promise<{ text: string; lines: number }> {
   return page.evaluate(() => {
