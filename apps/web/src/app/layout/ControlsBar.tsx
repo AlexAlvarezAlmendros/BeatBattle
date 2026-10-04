@@ -43,7 +43,7 @@ export const CONTROL_KEYS: Readonly<
  * la firma con un filete en medio si cabe y, si no, debajo). La firma va siempre centrada. En táctil y
  * en móvil las teclas desaparecen y queda la firma. Con teclado, si las teclas no caben al lado de la
  * firma, van en su propia fila encima (`useBarLayout`). Va pegada al pie de la ventana con su alto real
- * como margen del foco, salvo en ventanas bajas, donde se despega.
+ * como margen del foco, salvo si ocupa demasiado de la ventana, donde se despega.
  */
 export function ControlsBar({ screen }: { screen: ScreenConfig }) {
   // Con los atajos de una tecla apagados (WCAG 2.1.4), M no hace nada: no se enseña.
@@ -97,25 +97,30 @@ export function ControlsBar({ screen }: { screen: ScreenConfig }) {
 export const CONTROLS_MAX_VIEWPORT_SHARE = 0.25
 
 /**
- * La misma parte con teclado y ratón en una ventana baja (`SHORT_WINDOW_QUERY`): ahí la barra lleva las
- * teclas en su fila (y en móvil, la crónica en otra) y, pegada, se comía la primera vista (jurado de la
- * 0.28, L8: a 360 × 640 medía 154 px, el 24 %, y el menú no enseñaba ninguna placa). En táctil no lleva
- * teclas y sigue el límite general.
+ * La misma parte con teclado y ratón en una ventana pequeña (`SMALL_WINDOW_QUERY`): ahí la barra lleva
+ * las teclas en su fila (y en el menú, la crónica en otra) y, pegada, se comía la primera vista (jurado
+ * de la 0.28, L8: a 360 × 640 medía 154 px, el 24 %, y el menú no enseñaba ninguna placa; en su
+ * revisión, a 390 × 844 medía 158 px, el 18,7 %, y la barra empezaba en mitad de «JUGAR»). En táctil no
+ * lleva teclas y sigue el límite general.
  */
-export const CONTROLS_MAX_VIEWPORT_SHARE_SHORT = 0.15
+export const CONTROLS_MAX_VIEWPORT_SHARE_SMALL = 0.15
 
-/** Ventana baja: 700 px de alto o menos, el corte del «móvil bajo» (§3.8.3). */
-export const SHORT_WINDOW_QUERY = '(max-height: 700px)'
+/**
+ * Ventana pequeña: estrecha (720 px de ancho o menos, la composición de móvil), sea cual sea su alto, o
+ * baja (700 px de alto o menos, el corte del «móvil bajo» de §3.8.3; también el escritorio ampliado al
+ * 175 % o más). En una ventana de escritorio de tamaño normal (1024 × 768) la barra sigue pegada.
+ */
+export const SMALL_WINDOW_QUERY = '(max-width: 720px), (max-height: 700px)'
 
 /** Táctil (sin teclas en la barra): el mismo criterio que su CSS. */
 const TOUCH_QUERY = '(hover: none), (pointer: coarse)'
 
-/** El límite que toca ahora: el de las ventanas bajas con teclado o el general. */
+/** El límite que toca ahora: el de las ventanas pequeñas con teclado o el general. */
 function maxViewportShare(): number {
   if (typeof window.matchMedia !== 'function') return CONTROLS_MAX_VIEWPORT_SHARE
   const keyboard = !window.matchMedia(TOUCH_QUERY).matches
-  return keyboard && window.matchMedia(SHORT_WINDOW_QUERY).matches
-    ? CONTROLS_MAX_VIEWPORT_SHARE_SHORT
+  return keyboard && window.matchMedia(SMALL_WINDOW_QUERY).matches
+    ? CONTROLS_MAX_VIEWPORT_SHARE_SMALL
     : CONTROLS_MAX_VIEWPORT_SHARE
 }
 
@@ -138,8 +143,8 @@ export const CONTROLS_HEIGHT_VAR = '--controls-pinned-h'
  *   del menú no se mide: llena su columna y acaba en «…», y por debajo de 1200 px va siempre en su fila.
  * - **Alto real** en `CONTROLS_HEIGHT_VAR`, para que ningún control enfocado quede debajo de la barra
  *   (§3.3): con las teclas en su fila crece y un margen fijo no basta. Si la barra pasa de
- *   `CONTROLS_MAX_VIEWPORT_SHARE` del alto de la ventana (`CONTROLS_MAX_VIEWPORT_SHARE_SHORT` con teclado
- *   en una ventana baja), se despega (`data-unpinned`): va al final de la pantalla y el margen vuelve a
+ *   `CONTROLS_MAX_VIEWPORT_SHARE` del alto de la ventana (`CONTROLS_MAX_VIEWPORT_SHARE_SMALL` con teclado
+ *   en una ventana pequeña), se despega (`data-unpinned`): va al final de la pantalla y el margen vuelve a
  *   ser el de siempre.
  *
  * Cuando cambia el tamaño de la barra, de una tecla, de la firma o del dato (la letra que llega, una

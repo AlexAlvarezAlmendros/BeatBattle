@@ -159,12 +159,17 @@ interface Box {
   bottom: number
 }
 
-/** Cajas de la firma, del texto de «Legal» (no de su objetivo de 44 px) y del filete, si se ve. */
+/**
+ * Cajas de la firma, del texto de «Legal» (no de su objetivo de 44 px) y del filete, si se ve. Si la barra
+ * va despegada (con teclado en una ventana pequeña, §3.4.1), se baja hasta ella: lo que cuenta aquí es
+ * cómo se compone al llegar.
+ */
 async function legalLayout(page: Page): Promise<{ signature: Box; legal: Box; rule: Box | null }> {
   const bar = page.getByRole('contentinfo')
   await expect(bar.getByRole('link', { name: 'Legal' })).toBeVisible()
   await settle(page)
   return bar.evaluate((footer) => {
+    if (footer.hasAttribute('data-unpinned')) footer.scrollIntoView({ block: 'end' })
     const box = ({ left, right, top, bottom }: DOMRect) => ({ left, right, top, bottom })
     const signature = footer.querySelector('[data-otp-signature]')!
     const legal = footer.querySelector('a[href^="/legal/"]')!

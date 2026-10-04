@@ -149,14 +149,17 @@ function barShare(page: Page): Promise<{ height: number; share: number; pinned: 
 /**
  * L8: en una ventana baja con teclado y ratón (360 × 640, 375 × 667), la barra pegada al pie medía 154 px
  * (teclas en dos filas, firma, crónica y pausa), el 24 % de la ventana, y en el menú la primera vista no
- * enseñaba ninguna placa. Con puntero fino y la ventana de 700 px de alto o menos, la barra se despega
- * en cuanto pasa del 15 % de la ventana (en táctil, del 25 %: allí no lleva teclas).
+ * enseñaba ninguna placa. En su revisión, lo mismo en una ventana estrecha más alta: a 390 × 844 medía
+ * 158 px (18,7 %) y empezaba en mitad de «JUGAR». Con puntero fino y una ventana de 720 px de ancho o
+ * menos o de 700 px de alto o menos, la barra se despega en cuanto pasa del 15 % de la ventana (en
+ * táctil, del 25 %: allí no lleva teclas).
  */
 for (const { width, height } of [
   { width: 360, height: 640 },
   { width: 375, height: 667 },
+  { width: 390, height: 844 },
 ]) {
-  test.describe(`ventana baja con teclado a ${width} × ${height}`, () => {
+  test.describe(`ventana pequeña con teclado a ${width} × ${height}`, () => {
     test.use({ viewport: { width, height } })
 
     for (const { path, heading } of [
@@ -205,20 +208,34 @@ for (const { width, height } of [
   })
 }
 
-/** Lo que no cambia: en táctil y en ventanas altas la barra sigue pegada (la firma se ve al abrir). */
+/**
+ * Lo que no cambia: en táctil y en una ventana de escritorio de tamaño normal la barra sigue pegada (la
+ * firma se ve al abrir). A 1024 × 768 con teclado, la del menú (teclas, firma y crónica en tres filas)
+ * mide el 16,5 %: por debajo del cuarto de la ventana, que es el límite fuera de las ventanas pequeñas.
+ */
 for (const { width, height, touch } of [
   { width: 360, height: 640, touch: true },
-  { width: 390, height: 844, touch: false },
+  { width: 390, height: 844, touch: true },
+  { width: 1024, height: 768, touch: false },
   { width: 1280, height: 720, touch: false },
 ]) {
   test.describe(`barra pegada a ${width} × ${height}${touch ? ' táctil' : ' con teclado'}`, () => {
     test.use({ viewport: { width, height }, isMobile: touch, hasTouch: touch })
 
-    test('§3.4.1 / RF-OTP-01: la barra va pegada al pie con la firma a la vista', async ({ page }) => {
-      await open(page, '/como-funciona', 'Cómo se juega')
-      await settle(page)
-      expect((await barShare(page)).pinned).toBe(true)
-      await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({ ratio: 1 })
-    })
+    for (const { path, heading } of [
+      { path: '/como-funciona', heading: 'Cómo se juega' },
+      { path: '/dev/menu', heading: 'Beat Battle' },
+    ]) {
+      test(`§3.4.1 / RF-OTP-01: en ${path} la barra va pegada al pie con la firma a la vista`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        expect((await barShare(page)).pinned).toBe(true)
+        await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({
+          ratio: 1,
+        })
+      })
+    }
   })
 }
