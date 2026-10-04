@@ -37,7 +37,8 @@
 
 /*
  * Despegada (`data-unpinned`, la pone `ControlsBar` si la barra pasa de un cuarto del alto de la
- * ventana): al final de la pantalla, para no tapar el contenido en una ventana baja (WCAG 1.4.10).
+ * ventana, o del 15 % con teclado en una ventana de 700 px de alto o menos): al final de la pantalla,
+ * para no tapar el contenido en una ventana baja (WCAG 1.4.10).
  */
 .bar[data-unpinned] {
   position: relative;

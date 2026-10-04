@@ -96,6 +96,29 @@ export function ControlsBar({ screen }: { screen: ScreenConfig }) {
  */
 export const CONTROLS_MAX_VIEWPORT_SHARE = 0.25
 
+/**
+ * La misma parte con teclado y ratón en una ventana baja (`SHORT_WINDOW_QUERY`): ahí la barra lleva las
+ * teclas en su fila (y en móvil, la crónica en otra) y, pegada, se comía la primera vista (jurado de la
+ * 0.28, L8: a 360 × 640 medía 154 px, el 24 %, y el menú no enseñaba ninguna placa). En táctil no lleva
+ * teclas y sigue el límite general.
+ */
+export const CONTROLS_MAX_VIEWPORT_SHARE_SHORT = 0.15
+
+/** Ventana baja: 700 px de alto o menos, el corte del «móvil bajo» (§3.8.3). */
+export const SHORT_WINDOW_QUERY = '(max-height: 700px)'
+
+/** Táctil (sin teclas en la barra): el mismo criterio que su CSS. */
+const TOUCH_QUERY = '(hover: none), (pointer: coarse)'
+
+/** El límite que toca ahora: el de las ventanas bajas con teclado o el general. */
+function maxViewportShare(): number {
+  if (typeof window.matchMedia !== 'function') return CONTROLS_MAX_VIEWPORT_SHARE
+  const keyboard = !window.matchMedia(TOUCH_QUERY).matches
+  return keyboard && window.matchMedia(SHORT_WINDOW_QUERY).matches
+    ? CONTROLS_MAX_VIEWPORT_SHARE_SHORT
+    : CONTROLS_MAX_VIEWPORT_SHARE
+}
+
 /** Variable con el alto real de la barra pegada: el margen del foco de `global.css` (0 si no va pegada). */
 export const CONTROLS_HEIGHT_VAR = '--controls-pinned-h'
 
@@ -115,8 +138,9 @@ export const CONTROLS_HEIGHT_VAR = '--controls-pinned-h'
  *   del menú no se mide: llena su columna y acaba en «…», y por debajo de 1200 px va siempre en su fila.
  * - **Alto real** en `CONTROLS_HEIGHT_VAR`, para que ningún control enfocado quede debajo de la barra
  *   (§3.3): con las teclas en su fila crece y un margen fijo no basta. Si la barra pasa de
- *   `CONTROLS_MAX_VIEWPORT_SHARE` del alto de la ventana, se despega (`data-unpinned`): va al final de la
- *   pantalla y el margen vuelve a ser el de siempre.
+ *   `CONTROLS_MAX_VIEWPORT_SHARE` del alto de la ventana (`CONTROLS_MAX_VIEWPORT_SHARE_SHORT` con teclado
+ *   en una ventana baja), se despega (`data-unpinned`): va al final de la pantalla y el margen vuelve a
+ *   ser el de siempre.
  *
  * Cuando cambia el tamaño de la barra, de una tecla, de la firma o del dato (la letra que llega, una
  * pantalla que reclama el hueco) se vuelve a medir en el fotograma siguiente: dentro del aviso de
@@ -141,7 +165,7 @@ function useBarLayout(
       bar.toggleAttribute('data-keys-row', !!keys && keysOverflow(keys))
       bar.toggleAttribute('data-right-row', !!signature && !!right && rightOverflows(bar, signature, right))
       const height = bar.getBoundingClientRect().height
-      const unpinned = height > window.innerHeight * CONTROLS_MAX_VIEWPORT_SHARE
+      const unpinned = height > window.innerHeight * maxViewportShare()
       bar.toggleAttribute('data-unpinned', unpinned)
       root.style.setProperty(CONTROLS_HEIGHT_VAR, `${unpinned ? 0 : Math.ceil(height)}px`)
     }

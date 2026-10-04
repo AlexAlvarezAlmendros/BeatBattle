@@ -8,10 +8,12 @@ import { open, settle } from './support'
 
 /**
  * Teclas de la barra que no se ven enteras: fuera de la ventana o recortadas por un antepasado que
- * recorta (`overflow`, `clip-path`, `contain: paint`). Devuelve también cuántas hay en la lista.
+ * recorta (`overflow`, `clip-path`, `contain: paint`). Devuelve también cuántas hay en la lista. Si la
+ * barra va despegada (ventana baja), se baja hasta ella: lo que cuenta es que se vean al llegar.
  */
 function hiddenKeys(page: Page): Promise<{ count: number; hidden: string[] }> {
   return page.evaluate(() => {
+    document.querySelector('footer')?.scrollIntoView({ block: 'end' })
     const list = document.querySelector('footer ul')
     const keys = [...(list?.children ?? [])] as HTMLElement[]
     const hidden: string[] = []
@@ -78,5 +80,99 @@ for (const { width, height } of [
         expect(hidden).toEqual([])
       })
     }
+  })
+}
+
+/** Alto de la barra, si va pegada al pie y cuántas placas del menú se ven enteras sin que la barra las tape. */
+function barShare(page: Page): Promise<{ height: number; share: number; pinned: boolean; plates: number }> {
+  return page.evaluate(() => {
+    const bar = document.querySelector('footer')!
+    const box = bar.getBoundingClientRect()
+    const position = getComputedStyle(bar).position
+    const pinned = position === 'sticky' || position === 'fixed'
+    // Lo que tapa la barra: lo que queda bajo su borde de arriba si va pegada; si no, nada.
+    const limit = pinned ? box.top : innerHeight
+    const plates = [...document.querySelectorAll('main [data-menu-plate]')].filter((plate) => {
+      const rect = plate.getBoundingClientRect()
+      return rect.top >= 0 && rect.bottom <= Math.min(limit, innerHeight)
+    }).length
+    return { height: box.height, share: box.height / innerHeight, pinned, plates }
+  })
+}
+
+/**
+ * L8: en una ventana baja con teclado y ratón (360 × 640, 375 × 667), la barra pegada al pie medía 154 px
+ * (teclas en dos filas, firma, crónica y pausa), el 24 % de la ventana, y en el menú la primera vista no
+ * enseñaba ninguna placa. Con puntero fino y la ventana de 700 px de alto o menos, la barra se despega
+ * en cuanto pasa del 15 % de la ventana (en táctil, del 25 %: allí no lleva teclas).
+ */
+for (const { width, height } of [
+  { width: 360, height: 640 },
+  { width: 375, height: 667 },
+]) {
+  test.describe(`ventana baja con teclado a ${width} × ${height}`, () => {
+    test.use({ viewport: { width, height } })
+
+    for (const { path, heading } of [
+      { path: '/dev/menu', heading: 'Beat Battle' },
+      { path: '/', heading: 'Beat Battle' },
+      { path: '/como-funciona', heading: 'Cómo se juega' },
+      { path: '/ajustes', heading: 'Sonido y efectos' },
+    ]) {
+      test(`§3.4.1 / WCAG 1.4.10: en ${path} la barra no se queda pegada ocupando más del 15 % de la ventana`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        const { share, pinned, plates } = await barShare(page)
+        if (pinned) expect(share).toBeLessThanOrEqual(0.15)
+        if (path === '/dev/menu' || path === '/')
+          expect(plates, 'placas en la primera vista').toBeGreaterThan(0)
+      })
+    }
+
+    test('§3.3 / WCAG 2.4.11: recorriendo el menú con ↓, ninguna placa enfocada queda bajo la barra ni fuera de la ventana', async ({
+      page,
+    }) => {
+      await open(page, '/dev/menu', 'Beat Battle')
+      const problems: string[] = []
+      for (let step = 0; step < 6; step++) {
+        await page.keyboard.press('ArrowDown')
+        await page.evaluate(
+          () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+        )
+        const problem = await page.evaluate(() => {
+          const focused = document.activeElement as HTMLElement
+          const bar = document.querySelector('footer')!
+          const box = focused.getBoundingClientRect()
+          const sticky = getComputedStyle(bar).position === 'sticky'
+          const covered = sticky ? Math.max(0, box.bottom - bar.getBoundingClientRect().top) : 0
+          const inside = box.top >= 0 && box.bottom <= innerHeight
+          return covered > 0.5 || !inside
+            ? `${focused.textContent?.slice(0, 20)}: tapado ${covered}, entero=${inside}`
+            : null
+        })
+        if (problem) problems.push(problem)
+      }
+      expect(problems).toEqual([])
+    })
+  })
+}
+
+/** Lo que no cambia: en táctil y en ventanas altas la barra sigue pegada (la firma se ve al abrir). */
+for (const { width, height, touch } of [
+  { width: 360, height: 640, touch: true },
+  { width: 390, height: 844, touch: false },
+  { width: 1280, height: 720, touch: false },
+]) {
+  test.describe(`barra pegada a ${width} × ${height}${touch ? ' táctil' : ' con teclado'}`, () => {
+    test.use({ viewport: { width, height }, isMobile: touch, hasTouch: touch })
+
+    test('§3.4.1 / RF-OTP-01: la barra va pegada al pie con la firma a la vista', async ({ page }) => {
+      await open(page, '/como-funciona', 'Cómo se juega')
+      await settle(page)
+      expect((await barShare(page)).pinned).toBe(true)
+      await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({ ratio: 1 })
+    })
   })
 }
