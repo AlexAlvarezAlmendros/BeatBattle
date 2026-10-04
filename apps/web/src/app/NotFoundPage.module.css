@@ -84,12 +84,13 @@
 
 /*
  * Las columnas de la lista (índice, texto y teclas) las comparten sus filas (`subgrid`): las teclas de
- * los chops y las de la batería empiezan a la misma altura.
+ * los chops y las de la batería empiezan a la misma altura. Una cuarta columna, vacía, se queda con lo
+ * que sobra del ancho: las teclas siguen al texto y los filetes de las filas llegan, como el de arriba
+ * de la lista, al borde del panel (en un panel ancho, a 1920, terminaban al final de las teclas).
  */
 .legendList {
   display: grid;
-  grid-template-columns: var(--bb-space-10) minmax(0, 26rem) max-content;
-  justify-content: start;
+  grid-template-columns: var(--bb-space-10) minmax(0, 26rem) max-content minmax(0, 1fr);
   column-gap: var(--bb-space-3);
   border-top: var(--bb-stroke-hair) solid var(--bb-line);
 }
@@ -98,7 +99,7 @@
   display: grid;
   grid-column: 1 / -1;
   grid-template-columns: subgrid;
-  grid-template-areas: "index text keys";
+  grid-template-areas: "index text keys .";
   align-items: center;
   gap: var(--bb-space-2) var(--bb-space-3);
   padding: var(--bb-space-3) 0;
@@ -109,7 +110,7 @@
 }
 
 .legendRow:not(:has(.legendKeys)) {
-  grid-template-areas: "index text text";
+  grid-template-areas: "index text text .";
 }
 
 .legendIndex {

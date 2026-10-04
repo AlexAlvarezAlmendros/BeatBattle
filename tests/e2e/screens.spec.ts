@@ -433,6 +433,28 @@ for (const viewport of [
       expect(gap, `${gap} px entre la nota del pad y el botón`).toBeLessThanOrEqual(24)
       expect(Math.abs(box.back.left - box.pad.left), 'alineado con el pad').toBeLessThanOrEqual(2)
     })
+
+    test('RD-VIS-02 e: los filetes de las filas de «Cuando llegue el pad» llegan, como el de la lista, al borde del panel', async ({
+      page,
+    }) => {
+      await open(page, '/esto-no-existe', 'Bonus stage')
+      await settle(page)
+      const edges = await page.evaluate((panel) => {
+        const list = document.querySelector(`${panel} section ul`)!.getBoundingClientRect()
+        return {
+          list: list.right,
+          rows: [...document.querySelectorAll(`${panel} section li`)].map(
+            (row) => row.getBoundingClientRect().right,
+          ),
+        }
+      }, PANEL)
+      expect(edges.rows).toHaveLength(3)
+      for (const right of edges.rows)
+        expect(
+          Math.abs(right - edges.list),
+          `fila hasta ${right}, lista hasta ${edges.list}`,
+        ).toBeLessThanOrEqual(1)
+    })
   })
 }
 
