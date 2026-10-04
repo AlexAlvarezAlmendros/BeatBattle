@@ -671,6 +671,57 @@ for (const viewport of [
   })
 }
 
+/**
+ * Lo que costaba K6 en el móvil bajo (revisión del cierre de la 0.28): para seguir cabiendo, el logo subía
+ * `--bb-space-1` hacia el HUD y su contorno quedaba a ~5 px del medidor de XP también a 375 × 667, donde
+ * sobra sitio (la maqueta deja ~10–15). Ahora solo sube a 650 px de alto o menos (360 × 640, donde sin eso no
+ * cabe): a 375 × 667 la tinta del logo queda a `--bb-space-2` del medidor como poco, y a 360 × 640 no lo toca
+ * (`--bb-space-1`).
+ */
+for (const viewport of [
+  { width: 375, height: 667, space: '--bb-space-2' },
+  { width: 360, height: 640, space: '--bb-space-1' },
+]) {
+  test.describe(`logo y medidor de XP a ${viewport.width} × ${viewport.height} táctil`, () => {
+    test.use({ viewport: { width: viewport.width, height: viewport.height }, isMobile: true, hasTouch: true })
+
+    test(`RD-VIS-02 e / §3.8.3: en /dev/menu la tinta del logo queda a ${viewport.space} del medidor de XP del HUD como poco, sin desplazar`, async ({
+      page,
+    }) => {
+      await open(page, '/dev/menu', 'Beat Battle')
+      await settle(page)
+      // El logo se pinta cuando la fuente del display está lista: hasta entonces el canvas está vacío.
+      await page.waitForFunction(() => {
+        const canvas = [...document.querySelectorAll<HTMLCanvasElement>('main [data-game-logo] canvas')].find(
+          (element) => element.getBoundingClientRect().width > 0,
+        )
+        const pixels = canvas?.getContext('2d')?.getImageData(0, 0, canvas.width, canvas.height).data
+        return pixels?.some((value, index) => index % 4 === 3 && value > 0) ?? false
+      })
+      const gap = await page.evaluate(() => {
+        const meter = document.querySelector('header [role="meter"]')!.getBoundingClientRect()
+        const canvas = [...document.querySelectorAll<HTMLCanvasElement>('main [data-game-logo] canvas')].find(
+          (element) => element.getBoundingClientRect().width > 0,
+        )!
+        const box = canvas.getBoundingClientRect()
+        const pixels = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data
+        // La primera fila del lienzo con tinta (alfa ≥ ½: el contorno blanco del logo).
+        for (let y = 0; y < canvas.height; y++)
+          for (let x = 0; x < canvas.width; x++)
+            if (pixels[(y * canvas.width + x) * 4 + 3]! >= 128)
+              return box.top + (y * box.height) / canvas.height - meter.bottom
+        return Number.NaN
+      })
+      expect(gap, `${gap.toFixed(1)} px de la tinta del logo al medidor`).toBeGreaterThanOrEqual(
+        (await tokenPx(page, viewport.space)) - 0.5,
+      )
+      expect(
+        await page.evaluate(() => document.scrollingElement!.scrollHeight - window.innerHeight),
+      ).toBeLessThanOrEqual(0)
+    })
+  })
+}
+
 test('RD-VIS-05: las tildes en display de la galería (la muestra «ÀÓÚ», placas y alias) salen enteras', async ({
   page,
 }) => {
