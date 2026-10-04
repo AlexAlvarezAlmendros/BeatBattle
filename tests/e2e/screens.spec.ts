@@ -136,7 +136,9 @@ test.describe('1440 × 900', () => {
     expect(box.panel.bottom - box.lastRule.bottom).toBeLessThanOrEqual(48)
     // Sin hueco dentro de la lista: los movimientos se reparten el alto, «Volver al menú» al pie.
     const gaps = await page.evaluate((selector) => {
-      const items = [...document.querySelectorAll(`${selector} ul > li > a`)].map((a) => a.getBoundingClientRect())
+      const items = [...document.querySelectorAll(`${selector} ul > li > a`)].map((a) =>
+        a.getBoundingClientRect(),
+      )
       return items.slice(1).map((rect, index) => rect.top - items[index]!.bottom)
     }, PIECE)
     for (const gap of gaps) expect(gap, `huecos entre placas: ${gaps.join(', ')}`).toBeLessThanOrEqual(24)
@@ -149,7 +151,9 @@ test.describe('1440 × 900', () => {
     expect(Math.abs(box.panel.bottom - box.piece.bottom)).toBeLessThanOrEqual(2)
   })
 
-  test('RD-VIS-02 e / §3.8.11: en escritorio, «Volver al menú» de la 404 sigue debajo del pad', async ({ page }) => {
+  test('RD-VIS-02 e / §3.8.11: en escritorio, «Volver al menú» de la 404 sigue debajo del pad', async ({
+    page,
+  }) => {
     await open(page, '/esto-no-existe', 'Bonus stage')
     await settle(page)
     const box = await boxes(page, { pad: 'main figure', back: 'main a[href="/"]' })
@@ -201,6 +205,81 @@ for (const viewport of [
     }
   })
 }
+
+/** Las interiores con pieza que llenan la pantalla (`ScreenPage` con `fill`). */
+const FILL_SCREENS = [
+  { path: '/como-funciona', heading: 'Cómo se juega' },
+  { path: '/ajustes', heading: 'Sonido y efectos' },
+  { path: '/esto-no-existe', heading: 'Bonus stage' },
+]
+
+/**
+ * ¿Pisa la caja la diagonal de la cuña? La arena de cuña a la izquierda (`ArenaBackdrop`) corta el pie
+ * de la ventana en el 30 % del ancho y sube hacia la derecha a 17° de la vertical; el borde derecho de
+ * una placa de la cuña, a su pie, no puede pasar de ahí.
+ */
+async function diagonalAt(page: Page, y: number): Promise<number> {
+  const { width, height } = page.viewportSize()!
+  return 0.3 * width + (height - y) * Math.tan((17 * Math.PI) / 180)
+}
+
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 1920, height: 1080 },
+]) {
+  test.describe(`${viewport.width} × ${viewport.height}, columnas`, () => {
+    test.use({ viewport })
+
+    test('RD-VIS-02 e: la columna de «Cómo se juega» queda a la izquierda de la diagonal, también al pie (L1)', async ({
+      page,
+    }) => {
+      await open(page, '/como-funciona', 'Cómo se juega')
+      await settle(page)
+      const plates = await page.evaluate(
+        (selector) =>
+          [...document.querySelectorAll(`${selector} ul > li > a`)].map((a) => {
+            const rect = a.getBoundingClientRect()
+            return { right: rect.right, bottom: rect.bottom }
+          }),
+        PIECE,
+      )
+      for (const plate of plates) {
+        const diagonal = await diagonalAt(page, plate.bottom)
+        expect(plate.right, `placa con pie en ${plate.bottom}`).toBeLessThanOrEqual(diagonal)
+      }
+    })
+  })
+}
+
+test.describe('1920 × 1080', () => {
+  test.use({ viewport: { width: 1920, height: 1080 } })
+
+  for (const { path, heading } of FILL_SCREENS) {
+    test(`RD-VIS-02 e: a 1920 × 1080, ${path} llena el ancho, centrada con la placa del HUD (L1)`, async ({
+      page,
+    }) => {
+      await open(page, path, heading)
+      await settle(page)
+      const box = await boxes(page, {
+        panel: PANEL,
+        piece: PIECE,
+        plate: '.game-frame > header [data-frame="title"]',
+      })
+      // El bloque de dos columnas va de medianil a medianil (48 px), como el menú: centrado con la placa.
+      const gutter = 48
+      expect(box.piece.left, 'a la izquierda').toBeLessThanOrEqual(gutter + 1)
+      expect(1920 - gutter - box.panel.right, 'a la derecha').toBeLessThanOrEqual(8)
+      const center = (box.piece.left + box.panel.right) / 2
+      const plateCenter = (box.plate.left + box.plate.right) / 2
+      expect(
+        Math.abs(center - plateCenter),
+        `bloque en ${center}, placa en ${plateCenter}`,
+      ).toBeLessThanOrEqual(8)
+      // La columna de la pieza crece con la cuña (a 1440 mide 400 px).
+      expect(box.piece.right - box.piece.left).toBeGreaterThanOrEqual(500)
+    })
+  }
+})
 
 test.describe('390 × 844', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })

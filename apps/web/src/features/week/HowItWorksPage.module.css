@@ -210,6 +210,34 @@
   }
 }
 
+/*
+ * Pantalla grande (≥ 1600 px): la columna de la pieza y el panel crecen con la ventana (`ScreenPage`,
+ * tercer pase del jurado, L1); la letra de los movimientos y de las reglas crece con ellos, para que
+ * las placas y las filas no se queden en aire.
+ */
+@media (min-width: 1600px) {
+  .move {
+    grid-template-columns: var(--bb-space-10) minmax(0, 1fr);
+  }
+
+  .number {
+    font-size: var(--bb-fs-3xl);
+  }
+
+  .moveTitle {
+    font-size: var(--bb-fs-xl);
+  }
+
+  .moveText,
+  .rule {
+    font-size: var(--bb-fs-md);
+  }
+
+  .ruleIndex {
+    font-size: var(--bb-fs-2xl);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .move:active,
   .option:active {
