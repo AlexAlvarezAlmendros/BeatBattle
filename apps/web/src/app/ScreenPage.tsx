@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo, useRef } from 'react'
+import { type ReactNode, type RefObject, useLayoutEffect, useMemo, useRef } from 'react'
 import { t } from '../i18n'
 import { Button } from '../ui/Button'
 import { Frame } from '../ui/Frame'
@@ -97,6 +97,51 @@ export interface ScreenPageProps {
 const IDLE_START = '[data-screen-part="tabs"] [aria-current="page"], [data-idle-start]'
 
 /**
+ * Variables con la geometría de la pantalla que lee la arena (`ArenaBackdrop.module.css`), en px desde la
+ * esquina de arriba a la izquierda de la página (con la página sin desplazar, que es cuando la arena fija
+ * y la pantalla coinciden):
+ *
+ * - `--screen-tabs-bottom`: el pie de las pestañas. Por debajo de 360 px, donde ocupan varias filas, la
+ *   cuña empieza bajo ellas (§3.8.14 v0.6.7; cuarto pase del jurado, P3).
+ *
+ * Sin pestañas, la variable no se publica y la arena usa su valor de siempre. Se quita al salir de la
+ * pantalla.
+ */
+export const SCREEN_TABS_BOTTOM_VAR = '--screen-tabs-bottom'
+
+/** Publica en `<html>` la geometría de las pestañas de la pantalla (ver arriba). */
+function useArenaGeometry(rootRef: RefObject<HTMLDivElement | null>) {
+  useLayoutEffect(() => {
+    const root = rootRef.current
+    if (!root) return
+    const html = document.documentElement
+    const part = (name: string) => root.querySelector<HTMLElement>(`:scope > [data-screen-part="${name}"]`)
+    const set = (name: string, value: number) => html.style.setProperty(name, `${Math.round(value)}px`)
+    const clear = (names: readonly string[]) => {
+      for (const name of names) html.style.removeProperty(name)
+    }
+    const update = () => {
+      const tabs = part('tabs')?.getBoundingClientRect()
+      if (tabs && tabs.height >= 1) set(SCREEN_TABS_BOTTOM_VAR, tabs.bottom + window.scrollY)
+      else clear([SCREEN_TABS_BOTTOM_VAR])
+    }
+    update()
+    // Cambiar las variables no cambia el tamaño de la pantalla: se puede actualizar dentro del aviso. La
+    // pantalla cambia de tamaño con la letra, la ventana o el contenido.
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(update)
+    observer?.observe(root)
+    const tabs = part('tabs')
+    if (tabs) observer?.observe(tabs)
+    window.addEventListener('resize', update)
+    return () => {
+      observer?.disconnect()
+      window.removeEventListener('resize', update)
+      clear([SCREEN_TABS_BOTTOM_VAR])
+    }
+  }, [rootRef])
+}
+
+/**
  * Intro con el foco en ningún control **enfoca** el primer elemento de juego, como ↑↓ (§3.8.14: «van al
  * primer elemento de juego… y lo marcan con el cursor»); no lo acciona. La Intro siguiente, ya con el
  * foco en él, lo acciona de forma nativa. Accionarlo rebotaba entre pantallas: al cambiar de pantalla
@@ -150,6 +195,7 @@ export function ScreenPage({
     [],
   )
   useIdleMenuKeys(start, 1, rootRef, { itemSelector: IDLE_START, activate: focusStart })
+  useArenaGeometry(rootRef)
   const heading = (
     <h1
       className={

@@ -203,6 +203,42 @@
 }
 
 /*
+ * Interiores por debajo de 360 px (§3.8.14 v0.6.7; cuarto pase del jurado, P3): las pestañas de Opciones
+ * ocupan cinco o seis filas, así que la cuña empieza bajo ellas. Su lado alto (el derecho, al 40 % de la
+ * ventana) baja hasta `--bb-space-4` por debajo del pie de las pestañas, que publica la pantalla
+ * (`--screen-tabs-bottom`, `ScreenPage`), y la banda y el filete bajan con ella; la inclinación es la de
+ * siempre. Sin pestañas, la variable no existe y la cuña queda donde estaba. La pantalla publica el pie con
+ * la página sin desplazar, como se ve la primera vista.
+ */
+@media (max-width: 359px) {
+  .arena[data-wedge="left"] {
+    --wedge-top: max(40%, var(--screen-tabs-bottom, 0px) + var(--bb-space-4));
+  }
+
+  .arena[data-wedge="left"] .wedge {
+    clip-path: polygon(0 calc(var(--wedge-top) + 16%), 100% var(--wedge-top), 100% 100%, 0 100%);
+  }
+
+  .arena[data-wedge="left"] .band {
+    clip-path: polygon(
+      0 calc(var(--wedge-top) + 15.3%),
+      100% calc(var(--wedge-top) - 0.7%),
+      100% calc(var(--wedge-top) + 0.1%),
+      0 calc(var(--wedge-top) + 16.1%)
+    );
+  }
+
+  .arena[data-wedge="left"] .rule {
+    clip-path: polygon(
+      0 calc(var(--wedge-top) + 14.3%),
+      100% calc(var(--wedge-top) - 1.7%),
+      100% calc(var(--wedge-top) - 1.4%),
+      0 calc(var(--wedge-top) + 14.6%)
+    );
+  }
+}
+
+/*
  * Tableta vertical (de 721 a 1199 px de ancho y como mucho 3:4): el menú va apilado como en el móvil
  * (`MainMenu`, §3.8.3) y su cuña también va abajo, detrás de las placas. Las interiores no cambian.
  */

@@ -67,24 +67,33 @@ const WINE_SCREENS = [
   ...['bases', 'terminos', 'privacidad', 'cookies'].map((doc) => `/legal/${doc}`),
 ]
 
-/** Proporción de píxeles granate de una captura (criterio del acta, grupo 24), medida en el navegador. */
-async function wineShare(page: Page): Promise<number> {
+/**
+ * Proporción de píxeles granate de una captura (criterio del acta, grupo 24), medida en el navegador. Con
+ * `rows`, la de esa franja de filas de la ventana (`[desde, hasta)`, en px).
+ */
+async function wineShare(page: Page, rows?: readonly [number, number]): Promise<number> {
   const png = await page.screenshot()
-  return page.evaluate(async (data) => {
-    const image = new Image()
-    image.src = `data:image/png;base64,${data}`
-    await image.decode()
-    const canvas = new OffscreenCanvas(image.width, image.height)
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })!
-    ctx.drawImage(image, 0, 0)
-    const { data: px } = ctx.getImageData(0, 0, image.width, image.height)
-    let wine = 0
-    for (let i = 0; i < px.length; i += 4) {
-      const r = px[i]!
-      if (r >= 25 && r <= 110 && px[i + 1]! < 0.45 * r && px[i + 2]! < 0.6 * r) wine += 1
-    }
-    return wine / (px.length / 4)
-  }, png.toString('base64'))
+  return page.evaluate(
+    async ({ data, rows }) => {
+      const image = new Image()
+      image.src = `data:image/png;base64,${data}`
+      await image.decode()
+      const canvas = new OffscreenCanvas(image.width, image.height)
+      const ctx = canvas.getContext('2d', { willReadFrequently: true })!
+      ctx.drawImage(image, 0, 0)
+      const [from, to] = rows ?? [0, image.height]
+      const top = Math.max(0, Math.round(from))
+      const height = Math.min(image.height, Math.round(to)) - top
+      const { data: px } = ctx.getImageData(0, top, image.width, height)
+      let wine = 0
+      for (let i = 0; i < px.length; i += 4) {
+        const r = px[i]!
+        if (r >= 25 && r <= 110 && px[i + 1]! < 0.45 * r && px[i + 2]! < 0.6 * r) wine += 1
+      }
+      return wine / (px.length / 4)
+    },
+    { data: png.toString('base64'), rows },
+  )
 }
 
 /**
@@ -1049,5 +1058,39 @@ for (const viewport of [
       await expect(back).toBeInViewport({ ratio: 1 })
       expect(await page.evaluate(() => scrollY)).toBe(0)
     })
+  })
+}
+
+/**
+ * Opciones por debajo de 360 px (§3.8.14 v0.6.7; cuarto pase del jurado, P3): las ocho pestañas ocupan
+ * cinco o seis filas y la vista previa baja fuera de la primera vista, así que detrás de las pestañas
+ * quedaba la cuña desnuda con su trama (granate de la primera vista: 25,4 % con teclado y 20,4 % en táctil
+ * en Sonido; 24,6 y 19,6 en Privacidad). La cuña empieza bajo las pestañas: ningún granate a su altura, y
+ * el de la primera vista dentro del de las maquetas móviles (≤ 18 %, con un punto de margen).
+ */
+for (const touch of [false, true]) {
+  test.describe(`Opciones a 320 × 568 ${touch ? 'en táctil' : 'con teclado'}`, () => {
+    test.use({ viewport: { width: 320, height: 568 }, isMobile: touch, hasTouch: touch })
+
+    for (const path of ['/ajustes', '/ajustes/privacidad']) {
+      test(`§3.1 / §3.8.14 / RD-VIS-02 e: en ${path}, la cuña empieza bajo las pestañas y el granate no pasa del de las maquetas móviles (≤ 18 %, P3)`, async ({
+        page,
+      }) => {
+        await page.goto(path)
+        await expect(page.locator(PIECE)).toBeAttached()
+        await settle(page)
+        const tabs = await page.evaluate(() => {
+          const box = document.querySelector('main [data-screen-part="tabs"]')!.getBoundingClientRect()
+          return [box.top, box.bottom] as const
+        })
+        const behindTabs = await wineShare(page, tabs)
+        expect(behindTabs, `granate a la altura de las pestañas: ${(behindTabs * 100).toFixed(2)} %`).toBe(0)
+        const share = await wineShare(page)
+        test
+          .info()
+          .annotations.push({ type: 'granate', description: `${path}: ${(share * 100).toFixed(2)} %` })
+        expect(share, `granate ${(share * 100).toFixed(1)} %`).toBeLessThanOrEqual(0.17)
+      })
+    }
   })
 }
