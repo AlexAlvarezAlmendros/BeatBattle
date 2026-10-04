@@ -214,7 +214,8 @@
  * - El lockup nunca es más ancho que el logo (acaba donde acaba su lienzo): si el logo baja, el lockup
  *   pasa a sus pasos estrechos (`TitleLockup`) y BEAT BATTLE sigue mandando sobre «TORNEO SEMANAL…» (jurado
  *   de la 0.28, tercer pase: a 1366 × 657 con el reloj, el logo medía 291 px y el lockup, 577).
- * - Las placas y su separación bajan con el alto de la ventana (`--bb-plate-h-low`, `--bb-plate-gap-low`).
+ * - Las placas y su separación bajan con el alto de la ventana (`--bb-plate-h-low`, `--bb-plate-gap-low`),
+ *   solo las de este menú.
  * - La tarjeta de la semana se aprieta (`StageCard`) y los márgenes entre piezas bajan a 8 px.
  * - El menú sube hasta el pie del HUD: el lienzo del logo ya deja aire por arriba, y «ELIGE MODO» guarda
  *   su margen.
@@ -276,7 +277,15 @@
     margin-bottom: var(--bb-space-2);
   }
 
+  /*
+   * Las placas bajan con el alto de la ventana (`--bb-plate-h-low`): 70 px a 900 de alto, 44 a 640 (nunca
+   * menos que el objetivo táctil); la elegida, `--bb-plate-on-scale` más (como 70 → 84). En la lista
+   * estrecha son el alto mínimo: con el dato en una segunda línea, la placa crece con su texto. Solo en
+   * este menú (`--menu-plate-h`, `MenuPlate`): las placas de la galería no cambian.
+   */
   .plates {
+    --menu-plate-h: var(--bb-plate-h-low);
+    --menu-plate-h-on: calc(var(--bb-plate-h-low) * var(--bb-plate-on-scale));
     gap: var(--bb-plate-gap-low);
   }
 

@@ -338,7 +338,7 @@ for (const width of [1000, 1024, 1040]) {
   test.describe(`cinta de /entrar a ${width} × 768`, () => {
     test.use({ viewport: { width, height: 768 } })
 
-    test('§3.1 / §3.8.14: la cinta del lockup de /entrar va entera, en una línea y sin cortarse', async ({
+    test('RD-VIS-02 e / §3.8.14: la cinta del lockup de /entrar va entera, en una línea y sin cortarse', async ({
       page,
     }) => {
       await open(page, '/entrar', 'Entrar')
@@ -1089,7 +1089,7 @@ for (const { path, heading, viewport } of [
 }
 
 /** A 1440 × 900 (la maqueta) la compactación no entra: placas de 70 px (84 la elegida) y logo de 640. */
-test('§3.8.3: a 1440 × 900 el menú es el de la maqueta (placas de 70 y 84 px, logo de 640)', async ({
+test('RD-VIS-02 e / §3.8.3: a 1440 × 900 el menú es el de la maqueta (placas de 70 y 84 px, logo de 640)', async ({
   page,
 }) => {
   await open(page, '/dev/menu', 'Beat Battle')
@@ -1105,4 +1105,23 @@ test('§3.8.3: a 1440 × 900 el menú es el de la maqueta (placas de 70 y 84 px,
     ),
   }))
   expect(sizes).toEqual({ plates: [84, 70, 70, 70, 70, 70], logo: 640 })
+})
+
+/**
+ * La compactación por altura es del menú principal, no de la placa (revisión de la 0.28, tercer pase): era
+ * una media query sobre `.plate` y encogía también las placas de la galería, que es la referencia. Ahora
+ * la pone el menú (`--menu-plate-h`) y en la galería a 1440 × 789 miden lo de la maqueta.
+ */
+test.describe('galería con la ventana baja a 1440 × 789', () => {
+  test.use({ viewport: { width: 1440, height: 789 } })
+
+  test('RD-VIS-02 e: las placas de la galería miden 70 px en reposo y 84 la elegida', async ({ page }) => {
+    await openGallery(page)
+    const heights = await page.evaluate(() =>
+      [...document.querySelectorAll('#opcion-menu [data-menu-plate]:not([data-force-state="pressed"])')].map(
+        (plate) => Math.round(plate.getBoundingClientRect().height),
+      ),
+    )
+    expect(new Set(heights)).toEqual(new Set([70, 84]))
+  })
 })
