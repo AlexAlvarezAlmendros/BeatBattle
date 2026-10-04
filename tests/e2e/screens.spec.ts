@@ -1139,3 +1139,34 @@ for (const { path, heading, entry, list, viewports } of [
         expect(gap, `${gap} px entre la entrada y la lista`).toBeLessThanOrEqual(24)
       })
     })
+
+/**
+ * Pestañas con relleno opaco (§3.3 v0.6.7, `--bb-panel-2`; cuarto pase del jurado, P5): la fila de
+ * pestañas cruza la diagonal en Opciones y en los legales, y con el relleno translúcido la banda roja y el
+ * filete blanco se veían bajo el texto (EMAILS a 1440 × 900, PERFIL a 1024 × 768, PRIVACIDAD a 1920 ×
+ * 1080). Cada pestaña (la activa, blanca) pinta su relleno sin transparencia.
+ */
+for (const { path, heading, viewport } of [
+  { path: '/ajustes/emails', heading: 'Emails', viewport: { width: 1440, height: 900 } },
+  { path: '/ajustes/perfil', heading: 'Perfil', viewport: { width: 1024, height: 768 } },
+  { path: '/ajustes/privacidad', heading: 'Privacidad', viewport: { width: 1920, height: 1080 } },
+  { path: '/legal/bases', heading: 'Bases de la competición', viewport: { width: 1440, height: 900 } },
+])
+  test.describe(`pestañas de ${path} a ${viewport.width} × ${viewport.height}`, () => {
+    test.use({ viewport })
+
+    test(`RD-VIS-05 / §3.3: en ${path}, las pestañas tienen relleno opaco y la diagonal no se ve bajo su texto (P5)`, async ({
+      page,
+    }) => {
+      await open(page, path, heading)
+      await settle(page)
+      const fills = await page.evaluate(() =>
+        [...document.querySelectorAll('main [data-screen-part="tabs"] li > a')].map((tab) => ({
+          tab: tab.textContent?.trim(),
+          fill: getComputedStyle(tab, '::after').backgroundColor,
+        })),
+      )
+      expect(fills.length).toBeGreaterThanOrEqual(4)
+      for (const { tab, fill } of fills) expect(fill, `relleno de ${tab}`).toMatch(/^rgb\(\d+, \d+, \d+\)$/)
+    })
+  })

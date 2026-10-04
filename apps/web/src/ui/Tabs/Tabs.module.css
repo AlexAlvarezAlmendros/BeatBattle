@@ -57,10 +57,12 @@
 /*
  * La etiqueta va en una línea mientras quepa; si no cabe en la columna del centro (una etiqueta larga en
  * una ventana estrecha), parte en dos líneas equilibradas y la pestaña crece (44 px como poco): nunca
- * queda bajo [Q] o [E] (§3.3 «Pestañas», v0.6.6; `RD-VIS-05`).
+ * queda bajo [Q] o [E] (§3.3 «Pestañas», v0.6.6; `RD-VIS-05`). Relleno opaco (`--bb-panel-2`, §3.3
+ * v0.6.7): la fila cruza la diagonal en Opciones y en los legales, y con el velo translúcido la banda roja
+ * y el filete blanco se veían bajo el texto (cuarto pase del jurado, P5).
  */
 .tab {
-  --tab-fill: var(--bb-panel-veil);
+  --tab-fill: var(--bb-panel-2);
   --tab-border: var(--bb-line-strong);
   position: relative;
   isolation: isolate;
