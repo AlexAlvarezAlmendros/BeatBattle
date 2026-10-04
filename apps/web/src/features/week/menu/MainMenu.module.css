@@ -2,11 +2,19 @@
  * Menú principal (§3.8.3; maqueta `01-menu.html`): dos columnas a los lados de la diagonal, el título
  * con la tarjeta del escenario a la izquierda y «ELIGE MODO» a la derecha, sobre la cuña. En móvil, todo
  * apilado sin desplazar (la cuña pasa abajo).
+ *
+ * `--menu-s`: la escala de la ventana grande (`--bb-menu-scale`, de 1 a 1,33; §3.8.3). Multiplica el logo y
+ * su lockup, el alto y el rótulo de las placas, los cuerpos en display, las columnas y las separaciones; el
+ * texto de lectura y el marco (HUD y barra) no cambian. Vale 1 hasta 1440 × 900: la maqueta, la ventana
+ * baja, la composición intermedia y el móvil son los de siempre.
  */
 .menu {
+  --menu-s: var(--bb-menu-scale);
   display: grid;
   flex: 1 0 auto;
-  grid-template-columns: minmax(0, var(--bb-menu-logo-w-max)) minmax(0, 35rem);
+  grid-template-columns:
+    minmax(0, calc(var(--bb-menu-logo-w-max) * var(--menu-s)))
+    minmax(0, calc(var(--bb-menu-modes-w-max) * var(--menu-s)));
   justify-content: space-between;
   align-items: start;
   /*
@@ -15,7 +23,7 @@
    * tarjeta. A 1440 el hueco real es mayor (las columnas llegan a su máximo); de 721 a unos 1400 px, era de
    * 40 y el 1P tapaba la «E» de BATTLE o la pegatina OTP (jurado de la 0.28, tercer pase).
    */
-  gap: var(--bb-space-10) var(--bb-plate-cursor-reach);
+  gap: calc(var(--bb-space-10) * var(--menu-s)) calc(var(--bb-plate-cursor-reach) * var(--menu-s));
   /*
    * Como en la maqueta, el título sube hasta el pie del reloj del HUD y la tarjeta del escenario llega a
    * la barra de controles: a 1440 × 900 la pantalla entera cabe sin desplazar.
@@ -26,22 +34,21 @@
 
 /*
  * ── Título: logo y lockup ──────────────────────────────────────────────────────────────────
- * La columna ocupa todo el alto y la tarjeta de la semana se ancla al pie (llega a la barra de
- * controles, como en la maqueta), también cuando es la corta del calendario vacío. Es un contenedor
- * (`menu-title`) en la composición de dos columnas; en móvil, no (más abajo).
+ * La columna ocupa todo el alto y su contenido va al pie: la tarjeta de la semana llega a la barra de
+ * controles (como en la maqueta), también cuando es la corta del calendario vacío, y el logo con su
+ * lockup va justo encima. Si sobra alto (sin el reloj en el HUD, o en la ventana grande cuando la escala
+ * llega a su tope), sobra arriba, como en la columna de modos: las dos columnas se asientan en la barra y
+ * el logo no se queda colgado a 200 px de la tarjeta (jurado de la 0.28, ventana grande). A 1440 × 900
+ * con la semana en juego no sobra nada. Es un contenedor (`menu-title`) en la composición de dos columnas;
+ * en móvil, no (más abajo).
  */
 .title {
   container: menu-title / inline-size;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto auto auto 1fr;
+  align-content: end;
   align-self: stretch;
   min-width: 0;
-}
-
-.title > article {
-  grid-row: 4;
-  align-self: end;
 }
 
 /*
@@ -53,17 +60,18 @@
 }
 
 .logoFull {
-  width: min(100%, var(--bb-menu-logo-w-max));
-  margin-left: calc(-1 * var(--bb-space-3));
+  width: min(100%, calc(var(--bb-menu-logo-w-max) * var(--menu-s)));
+  margin-left: calc(-1 * var(--bb-space-3) * var(--menu-s));
 }
 
 .logoCompact {
   display: none;
 }
 
-/* El lockup (`TitleLockup`), pegado al pie del logo. */
+/* El lockup (`TitleLockup`), pegado al pie del logo y escalado con él (`--lockup-scale`). */
 .lockup {
-  margin: calc(-1 * var(--bb-space-1)) 0 0 var(--bb-space-2);
+  --lockup-scale: var(--menu-s);
+  margin: calc(-1 * var(--bb-space-1) * var(--menu-s)) 0 0 calc(var(--bb-space-2) * var(--menu-s));
 }
 
 /*
@@ -79,7 +87,7 @@
 }
 
 .title > article {
-  margin-top: var(--bb-space-5);
+  margin-top: calc(var(--bb-space-5) * var(--menu-s));
 }
 
 /*
@@ -88,13 +96,20 @@
  * segunda línea (`MenuPlate`), y en una muy estrecha (< 21 rem) las placas en reposo salen menos a la
  * izquierda, y la cabecera y la ayuda con ellas (más abajo). Solo en la composición de dos columnas; en
  * móvil, no (más abajo).
+ *
+ * Ocupa todo el alto, como la columna del título, y su contenido va al pie (§3.8.3): en todos los estados
+ * la ayuda acaba a la altura de la tarjeta de la semana, junto a la barra, con `--bb-space-6` de aire (lo
+ * que deja la maqueta). Con el reloj en el HUD (la semana en juego) la columna ya llenaba el alto y no se
+ * mueve; sin él (el calendario vacío), antes se quedaba arriba y dejaba 130 px vacíos hasta la barra.
  */
 .modes {
   container: menu-plates / inline-size;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  align-content: end;
+  align-self: stretch;
   min-width: 0;
-  padding-top: var(--bb-space-2);
+  padding-block: calc(var(--bb-space-2) * var(--menu-s)) calc(var(--bb-space-6) * var(--menu-s));
 }
 
 /*
@@ -108,15 +123,15 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0 var(--bb-space-4);
-  margin: 0 0 var(--bb-space-3) var(--bb-space-7);
-  padding: var(--bb-space-2) calc(var(--bb-slant) + var(--bb-space-3)) var(--bb-space-2)
-    calc(var(--bb-slant) + var(--bb-space-2));
+  margin: 0 0 calc(var(--bb-space-3) * var(--menu-s)) var(--bb-space-7);
+  padding: calc(var(--bb-space-2) * var(--menu-s)) calc(var(--bb-slant) + var(--bb-space-3))
+    calc(var(--bb-space-2) * var(--menu-s)) calc(var(--bb-slant) + var(--bb-space-2));
   background: var(--bb-panel-veil);
   clip-path: polygon(var(--bb-slant) 0, 100% 0, calc(100% - var(--bb-slant)) 100%, 0 100%);
 }
 
 .headTitle {
-  font-size: var(--bb-fs-xl);
+  font-size: calc(var(--bb-fs-xl) * var(--menu-s));
   font-stretch: var(--bb-stretch-plate);
   white-space: nowrap;
 }
@@ -142,10 +157,12 @@
   }
 }
 
+/* Las placas escalan su alto y su rótulo con la ventana grande (`--menu-plate-scale`, `MenuPlate`). */
 .plates {
+  --menu-plate-scale: var(--menu-s);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--bb-space-3);
+  gap: calc(var(--bb-space-3) * var(--menu-s));
   margin: 0;
   padding: 0;
   list-style: none;
@@ -157,8 +174,8 @@
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
   gap: var(--bb-space-1) var(--bb-space-4);
-  margin: var(--bb-space-5) 0 0 var(--bb-space-7);
-  padding: var(--bb-space-3) var(--bb-space-5);
+  margin: calc(var(--bb-space-5) * var(--menu-s)) 0 0 var(--bb-space-7);
+  padding: calc(var(--bb-space-3) * var(--menu-s)) var(--bb-space-5);
 }
 
 .helpKicker {
@@ -189,13 +206,17 @@
   }
 }
 
-/* El número de semana gigante, en contorno blanco al 7 % dentro de la cuña (§3.2 «Texturas»). */
+/*
+ * El número de semana gigante, en contorno blanco al 7 % dentro de la cuña (§3.2 «Texturas»). Va en la
+ * arena (fuera de `.menu`): lee la escala del token.
+ */
 .giant {
+  --giant-s: var(--bb-menu-scale);
   position: absolute;
-  right: calc(-1 * var(--bb-space-10));
-  bottom: calc(-1 * var(--bb-space-8));
+  right: calc(-1 * var(--bb-space-10) * var(--giant-s));
+  bottom: calc(-1 * var(--bb-space-8) * var(--giant-s));
   color: transparent;
-  font-size: var(--bb-tex-giant-size);
+  font-size: calc(var(--bb-tex-giant-size) * var(--giant-s));
   letter-spacing: -0.04em;
   line-height: 0.8;
   -webkit-text-stroke: var(--bb-stroke) var(--bb-tex-giant-ink);
@@ -279,6 +300,11 @@
     margin-top: auto;
   }
 
+  /* Sin aire bajo la ayuda: con la ventana baja, la columna de modos acaba con la tarjeta, en la barra. */
+  .modes {
+    padding-bottom: 0;
+  }
+
   .head {
     margin-bottom: var(--bb-space-2);
   }
@@ -342,6 +368,7 @@
 /* ── Móvil (≤ 720 px): apilado; placas de 48 px; sin número gigante ───────────────────────── */
 @media (max-width: 720px) {
   .menu {
+    --menu-s: 1;
     grid-template-columns: minmax(0, 1fr);
     align-content: start;
     gap: var(--bb-space-3);
@@ -376,7 +403,7 @@
   }
 
   .modes {
-    padding-top: 0;
+    padding-block: 0;
   }
 
   .head {

@@ -21,8 +21,9 @@
   width: 120px;
 }
 
+/* En la ventana grande del menú crece con el lockup (`--lockup-scale`), sin pasar de la del título. */
 .menu {
-  width: 104px;
+  width: min(calc(104px * var(--lockup-scale, 1)), 120px);
 }
 
 .bar {

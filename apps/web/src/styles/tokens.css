@@ -146,6 +146,20 @@
   --bb-plate-on-scale: 1.2; /* La placa elegida mide un 20 % más que en reposo, a todo alto (84 / 70 px) */
   --bb-plate-gap-low: clamp(0.25rem, 3dvh - 0.9375rem, 0.75rem); /* Entre placas: 4 → 12 px */
   --bb-menu-logo-w-max: 40rem; /* Logo del menú de la maqueta: 640 px de ancho (y la columna del título) */
+  --bb-menu-modes-w-max: 35rem; /* Columna de «ELIGE MODO» de la maqueta: 560 px */
+  /*
+   * Ventana grande (§3.8.3): la composición del menú escala con `min(100vw / 1440, 100dvh / 900)`, acotado
+   * entre 1 y 1,33 (logo, placas, cuerpos en display, columnas y separaciones). Es un número: `tan(atan2(a,
+   * b))` es a / b sin unidades (la división de longitudes aún no la entiende todo navegador). Vale 1 en
+   * cuanto la ventana mide 1440 px de ancho o 900 de alto o menos: la maqueta, la ventana baja y el móvil
+   * no cambian.
+   */
+  --bb-menu-scale: clamp(1, min(tan(atan2(100vw, 1440px)), tan(atan2(100dvh, 900px))), 1.33);
+  /*
+   * La cuña del menú sigue a la columna de modos (§3.8.3): su pie corta la ventana a esta distancia a la
+   * izquierda de la columna (256 px a 1440 × 900, el 40 % de la maqueta), escalada con el menú.
+   */
+  --bb-menu-split-lead: 16rem;
   /* Alto mínimo del logo del menú: ≈ 265 px de ancho, lo que pide debajo el lockup más corto; por debajo, se desplaza */
   --bb-menu-logo-h-min: 7rem;
   /*

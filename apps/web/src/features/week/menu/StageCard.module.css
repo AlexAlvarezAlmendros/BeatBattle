@@ -2,12 +2,17 @@
  * Tarjeta del escenario (§3.8.3; maqueta `01-menu.html` `.stage`): marco rojo de chaflán `--bb-cut-lg`
  * sobre `--bb-wine-3`, con la trama granate que crece hacia la derecha pintada en un canvas.
  */
+/*
+ * `--menu-s` (`MainMenu`): la escala de la ventana grande (de 1 a 1,33). Crecen los rellenos, las
+ * separaciones, el vinilo y el título en display; el texto de lectura y los controles, no.
+ */
 .card {
+  --card-s: var(--menu-s, 1);
   --frame-fill: var(--bb-wine-3);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--bb-space-3);
-  padding: var(--bb-space-5) var(--bb-space-6);
+  gap: calc(var(--bb-space-3) * var(--card-s));
+  padding: calc(var(--bb-space-5) * var(--card-s)) calc(var(--bb-space-6) * var(--card-s));
 }
 
 /* La trama, dentro del relleno: metida el trazo del marco y con su mismo chaflán. */
@@ -31,7 +36,11 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: var(--bb-space-5);
+  gap: calc(var(--bb-space-5) * var(--card-s));
+}
+
+.vinyl {
+  width: calc(var(--bb-space-16) * 1.625 * var(--card-s));
 }
 
 .heading {
@@ -75,7 +84,7 @@
   overflow-x: clip;
   overflow-y: visible;
   padding-top: var(--bb-space-1);
-  font-size: var(--bb-fs-title);
+  font-size: calc(var(--bb-fs-title) * var(--card-s));
   white-space: nowrap;
 }
 
@@ -85,7 +94,7 @@
  * ensancharía la ventana).
  */
 .emptyTitle {
-  font-size: var(--bb-fs-2xl);
+  font-size: calc(var(--bb-fs-2xl) * var(--card-s));
   line-height: 1;
   white-space: normal;
   overflow-wrap: anywhere;

@@ -22,6 +22,23 @@
   contain: strict;
 }
 
+/*
+ * La cuña del menú (a la derecha) sigue a la columna de modos (§3.8.3, ventana grande): su pie corta la
+ * ventana `--bb-menu-split-lead` a la izquierda de la columna, que va pegada al medianil derecho y escala
+ * con el menú (`--bb-menu-scale`). Hasta 1440 px de ancho eso cae a la izquierda del 40 % de la maqueta y
+ * manda `--bb-split-x-right`; a partir de ahí la cuña ya no crece con la ventana, y el granate no pasa del
+ * ~24 % de la pantalla (a 1920 × 1080 llegaba al 32 %).
+ */
+.arena[data-wedge="right"] {
+  --split-x: max(
+    var(--bb-split-x-right),
+    100vw -
+    var(--bb-gutter) -
+    (var(--bb-menu-modes-w-max) + var(--bb-menu-split-lead)) *
+    var(--bb-menu-scale)
+  );
+}
+
 .arena[data-wedge="left"] {
   --split-x: var(--bb-split-x-left);
   --burst-x: 18%;

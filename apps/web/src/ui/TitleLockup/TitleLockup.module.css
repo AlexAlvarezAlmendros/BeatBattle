@@ -21,12 +21,17 @@
  * líneas: nunca se corta con «…», y nunca es más estrecha que su palabra más larga (el chaflán no
  * corta letras).
  *
+ * `--lockup-scale` (por defecto 1): multiplica la cinta, sus separaciones y la firma (la pegatina, hasta los
+ * 120 px de §3.1). Lo pone el menú principal en la ventana grande, para que el lockup crezca con el logo
+ * (§3.8.3); los pasos siguen dependiendo del ancho real del lockup.
+ *
  * `--lockup-signature-hang` (margen inferior de la firma; por defecto 0): con un valor negativo, la
  * firma cuelga de la fila. Su objetivo táctil de 44 px y la pegatina sobresalen por arriba y por abajo
  * sin hacer la fila más alta que la cinta, y la pegatina queda centrada en ella (el menú en móvil, para
  * que la pegatina no pise el logo; §3.1, margen alrededor de la pegatina).
  */
 .lockup {
+  --lockup-s: var(--lockup-scale, 1);
   container: title-lockup / inline-size;
   min-width: 0;
 }
@@ -35,16 +40,17 @@
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: var(--bb-space-4);
+  gap: calc(var(--bb-space-4) * var(--lockup-s));
 }
 
 .ribbon {
   min-width: min-content;
-  padding: var(--bb-space-2) var(--bb-space-5) var(--bb-space-2) var(--bb-space-4);
+  padding: calc(var(--bb-space-2) * var(--lockup-s)) calc(var(--bb-space-5) * var(--lockup-s))
+    calc(var(--bb-space-2) * var(--lockup-s)) calc(var(--bb-space-4) * var(--lockup-s));
   background: var(--bb-white);
   color: var(--bb-black);
   font-family: var(--bb-font-display);
-  font-size: var(--bb-fs-sm);
+  font-size: calc(var(--bb-fs-sm) * var(--lockup-s));
   font-style: italic;
   font-weight: var(--bb-weight-extrabold);
   font-stretch: var(--bb-stretch-plate);
@@ -59,12 +65,12 @@
   display: inline-flex;
   flex: none;
   align-items: center;
-  gap: var(--bb-space-2);
+  gap: calc(var(--bb-space-2) * var(--lockup-s));
   min-height: var(--bb-target);
-  margin-top: calc(-1 * var(--bb-space-2));
+  margin-top: calc(-1 * var(--bb-space-2) * var(--lockup-s));
   margin-bottom: var(--lockup-signature-hang, 0);
   color: var(--bb-white);
-  font-size: var(--bb-fs-md);
+  font-size: calc(var(--bb-fs-md) * var(--lockup-s));
   font-style: italic;
   font-weight: var(--bb-weight-bold);
   letter-spacing: var(--bb-tracking-label);

@@ -1158,3 +1158,124 @@ test.describe('galería con la ventana baja a 1440 × 789', () => {
     expect(new Set(heights)).toEqual(new Set([70, 84]))
   })
 })
+
+/** Proporción de píxeles granate de una captura (criterio del acta, grupo 24), medida en el navegador. */
+async function wineShare(page: Page): Promise<number> {
+  const png = await page.screenshot()
+  return page.evaluate(async (data) => {
+    const image = new Image()
+    image.src = `data:image/png;base64,${data}`
+    await image.decode()
+    const canvas = new OffscreenCanvas(image.width, image.height)
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })!
+    ctx.drawImage(image, 0, 0)
+    const { data: px } = ctx.getImageData(0, 0, image.width, image.height)
+    let wine = 0
+    for (let i = 0; i < px.length; i += 4) {
+      const r = px[i]!
+      if (r >= 25 && r <= 110 && px[i + 1]! < 0.45 * r && px[i + 2]! < 0.6 * r) wine += 1
+    }
+    return wine / (px.length / 4)
+  }, png.toString('base64'))
+}
+
+/** Las piezas que miden la composición del menú: logo, columna de modos, placas, tarjeta, ayuda y barra. */
+function menuBoxes(page: Page) {
+  return page.evaluate(() => {
+    const main = document.querySelector('main')!
+    const box = (element: Element | null | undefined) => {
+      const rect = element!.getBoundingClientRect()
+      return { top: rect.top, bottom: rect.bottom, left: rect.left, width: rect.width, height: rect.height }
+    }
+    return {
+      logo: box(
+        [...main.querySelectorAll('[data-game-logo] canvas')].find(
+          (canvas) => canvas.getBoundingClientRect().width > 0,
+        ),
+      ),
+      modes: box(main.querySelector('nav')),
+      plates: [...main.querySelectorAll('[data-menu-plate]')].map((plate) => box(plate).height),
+      card: box(main.querySelector('article')),
+      help: box(main.querySelector('nav [aria-live]')!.parentElement),
+      bar: box(document.querySelector('footer')),
+      scroll: document.scrollingElement!.scrollHeight - window.innerHeight,
+    }
+  })
+}
+
+/** La escala de la ventana grande (§3.8.3): `min(ancho / 1440, alto / 900)`, entre 1 y 1,33. */
+const menuScale = (width: number, height: number) =>
+  Math.min(1.33, Math.max(1, Math.min(width / 1440, height / 900)))
+
+/**
+ * Ventana grande (jurado de la 0.28, cierre; guía §3.8.3): a 1920 × 1080 todo medía lo mismo que a
+ * 1440 × 900 (placas de 70 px, columna de 560), entre la ayuda y la barra quedaban 205 px vacíos y la cuña
+ * llegaba al 32 % de granate. Ahora la composición escala con `min(100vw / 1440, 100dvh / 900)`, acotado
+ * entre 1 y 1,33, y la cuña sigue a la columna de modos.
+ */
+for (const viewport of [
+  { width: 1920, height: 1080 },
+  { width: 2560, height: 1440 },
+]) {
+  test.describe(`menú en la ventana grande a ${viewport.width} × ${viewport.height}`, () => {
+    test.use({ viewport })
+    const scale = menuScale(viewport.width, viewport.height)
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`RD-VIS-02 e / §3.8.3: el menú de ${path} escala ×${scale.toFixed(2)} (logo, placas y columna de modos) y cabe sin desplazar`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        const box = await menuBoxes(page)
+        expect(box.scroll).toBeLessThanOrEqual(0)
+        expect(Math.abs(box.logo.width - 640 * scale)).toBeLessThanOrEqual(2)
+        expect(Math.abs(box.modes.width - 560 * scale)).toBeLessThanOrEqual(2)
+        const sorted = [...box.plates].sort((a, b) => a - b)
+        for (const height of sorted.slice(0, 5)) expect(Math.abs(height - 70 * scale)).toBeLessThanOrEqual(1)
+        expect(Math.abs(sorted[5]! - 84 * scale)).toBeLessThanOrEqual(1)
+        expect(await underControls(page)).toEqual([])
+      })
+    }
+
+    test('§3.8.3 / RD-VIS-02 e: la cuña sigue a la columna de modos y el granate no pasa del 24 %', async ({
+      page,
+    }) => {
+      await open(page, '/dev/menu', 'Beat Battle')
+      await settle(page)
+      const share = await wineShare(page)
+      test.info().annotations.push({ type: 'granate', description: `${(share * 100).toFixed(2)} %` })
+      expect(share, `granate ${(share * 100).toFixed(1)} %`).toBeLessThanOrEqual(0.24)
+    })
+  })
+}
+
+/**
+ * La columna de «ELIGE MODO» y la tarjeta de la semana acaban a la misma altura, junto a la barra, en todos
+ * los estados (§3.8.3): en «/» (calendario vacío, sin reloj en el HUD) la columna de modos se quedaba
+ * arriba y dejaba 130 px vacíos hasta la barra a 1440 × 900. La ayuda deja sobre la barra el aire de la
+ * maqueta (`--bb-space-6`, escalado en la ventana grande).
+ */
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 1920, height: 1080 },
+  { width: 2560, height: 1440 },
+]) {
+  test.describe(`pie del menú a ${viewport.width} × ${viewport.height}`, () => {
+    test.use({ viewport })
+    const air = 24 * menuScale(viewport.width, viewport.height)
+
+    for (const path of ['/dev/menu', '/', '/dev/menu?estado=vacio', '/dev/menu?estado=votacion&visitante']) {
+      test(`§3.8.3: en ${path} la ayuda de «ELIGE MODO» y la tarjeta de la semana acaban junto a la barra`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        const box = await menuBoxes(page)
+        expect(Math.abs(box.card.bottom - box.bar.top)).toBeLessThanOrEqual(1)
+        expect(box.bar.top - box.help.bottom).toBeGreaterThanOrEqual(air - 2)
+        expect(box.bar.top - box.help.bottom).toBeLessThanOrEqual(air + 2)
+      })
+    }
+  })
+}
