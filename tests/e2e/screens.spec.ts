@@ -1170,3 +1170,47 @@ for (const { path, heading, viewport } of [
       for (const { tab, fill } of fills) expect(fill, `relleno de ${tab}`).toMatch(/^rgb\(\d+, \d+, \d+\)$/)
     })
   })
+
+/**
+ * La vista previa de Opciones → Sonido en un tablero estrecho (§3.8.14; cuarto pase del jurado, P6): de
+ * ~1190 a ~1230 px de ancho (ventana baja) y alrededor de 1260 × 900, «ENTRADAS» llegaba al medidor
+ * (−1,7 px de hueco a 1200 × 800, 13 a 1250). El medidor baja bajo el nombre antes de pisarlo: o va en la
+ * línea de debajo, o entre el nombre y él quedan al menos 12 px.
+ */
+for (const viewport of [
+  { width: 1200, height: 800 },
+  { width: 1210, height: 800 },
+  { width: 1230, height: 800 },
+  { width: 1250, height: 800 },
+  { width: 1260, height: 900 },
+]) {
+  test.describe(`vista previa de Sonido a ${viewport.width} × ${viewport.height}`, () => {
+    test.use({ viewport })
+
+    test('RD-VIS-02 e / §3.8.14: el nombre de cada placa no pisa su medidor (P6)', async ({ page }) => {
+      await open(page, '/ajustes/sonido', 'Sonido y efectos')
+      await settle(page)
+      const rows = await page.evaluate((piece) => {
+        const result: { label: string; below: boolean; gap: number }[] = []
+        for (const meter of document.querySelectorAll(`${piece} li [role="meter"]`)) {
+          const option = meter.closest('li')!
+          const label = option.querySelector(':scope > :first-child')!
+          const range = document.createRange()
+          range.selectNodeContents(label)
+          const text = [...range.getClientRects()]
+          const box = meter.closest('li > :last-child')!.getBoundingClientRect()
+          result.push({
+            label: label.textContent ?? '',
+            below: box.top >= Math.max(...text.map((rect) => rect.bottom)) - 1,
+            gap: box.left - Math.max(...text.map((rect) => rect.right)),
+          })
+        }
+        return result
+      }, PIECE)
+      expect(rows.length).toBeGreaterThanOrEqual(3)
+      for (const row of rows)
+        if (!row.below)
+          expect(row.gap, `«${row.label}»: ${row.gap} px hasta el medidor`).toBeGreaterThanOrEqual(12)
+    })
+  })
+}

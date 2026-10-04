@@ -139,15 +139,17 @@
 }
 
 /*
- * Más estrecho (< 19 rem: la columna de 18 a 20 rem, de 961 a ~1150 px): las placas, con menos relleno
- * a los lados (12 px), y cede el medidor, el valor más ancho (diez segmentos y su cifra): baja a una
- * segunda línea bajo el nombre, como el dato en la lista estrecha del menú (§3.3), y el nombre tiene
- * todo el ancho de la placa. Los conmutadores y las acciones, cortos, siguen al lado (bajarlos haría
- * partir en dos «Avisos de la batalla», que ya no tendría el ancho de su valor y no cabría en el alto).
- * Todas las placas siguen a su alto (70 px; 56 con la ventana baja y 48 en móvil): el nombre y el
- * medidor, juntos (4 px), caben en él.
+ * Más estrecho (< 20 rem: la columna de 18 a ~21 rem, de 961 a ~1250 px con la ventana baja y a ~1280
+ * con la normal): las placas, con menos relleno a los lados (12 px), y cede el medidor, el valor más
+ * ancho (diez segmentos y su cifra): baja a una segunda línea bajo el nombre, como el dato en la lista
+ * estrecha del menú (§3.3), y el nombre tiene todo el ancho de la placa. El corte va donde «ENTRADAS»
+ * (la palabra más ancha que va junto a un medidor) aún deja 14 px hasta él: con 19 rem, de ~1200 a
+ * ~1230 px (ventana baja) y hacia 1260 × 900 llegaba a pisarlo (cuarto pase del jurado, P6). Los
+ * conmutadores y las acciones, cortos, siguen al lado (bajarlos haría partir en dos «Avisos de la
+ * batalla», que ya no tendría el ancho de su valor y no cabría en el alto). Todas las placas siguen a su
+ * alto (70 px; 56 con la ventana baja y 48 en móvil): el nombre y el medidor, juntos (4 px), caben en él.
  */
-@container preview (width < 19rem) {
+@container preview (width < 20rem) {
   .settings-preview-option {
     column-gap: var(--bb-space-3);
     padding-inline: var(--bb-space-3);
