@@ -29,6 +29,10 @@
  * firma cuelga de la fila. Su objetivo táctil de 44 px y la pegatina sobresalen por arriba y por abajo
  * sin hacer la fila más alta que la cinta, y la pegatina queda centrada en ella (el menú en móvil, para
  * que la pegatina no pise el logo; §3.1, margen alrededor de la pegatina).
+ *
+ * `--lockup-signature-lift` (por defecto 0): sube la firma (el «by» y la pegatina) sobre la fila sin
+ * cambiar lo que mide la fila, como en la maqueta de móvil, donde la pegatina va más alta que la cinta y
+ * deja unos 12 px hasta la tarjeta de la semana (§3.1: `--bb-space-2` como poco).
  */
 .lockup {
   --lockup-s: var(--lockup-scale, 1);
@@ -67,8 +71,8 @@
   align-items: center;
   gap: calc(var(--bb-space-2) * var(--lockup-s));
   min-height: var(--bb-target);
-  margin-top: calc(-1 * var(--bb-space-2) * var(--lockup-s));
-  margin-bottom: var(--lockup-signature-hang, 0);
+  margin-top: calc(-1 * var(--bb-space-2) * var(--lockup-s) - var(--lockup-signature-lift, 0px));
+  margin-bottom: calc(var(--lockup-signature-hang, 0px) + var(--lockup-signature-lift, 0px));
   color: var(--bb-white);
   font-size: calc(var(--bb-fs-md) * var(--lockup-s));
   font-style: italic;

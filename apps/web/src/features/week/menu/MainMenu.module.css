@@ -453,9 +453,14 @@
    * líneas deja unos 7 px transparentes al pie, así que basta con separarlo `--bb-space-1`; entre el
    * lockup y la tarjeta va lo que cuelga la firma y `--bb-space-1` de aire (`--bb-space-3`). Todo en la
    * escala de espaciado (jurado de la 0.28, tercer pase: antes, 2 y 10 px de sumas de trazos).
+   *
+   * La firma sube `--bb-space-1` sobre la fila (`--lockup-signature-lift`), como en la maqueta: centrada en
+   * la cinta, la tinta de la pegatina (con su sombra) quedaba a 5 px de la tarjeta y §3.1 pide
+   * `--bb-space-2` como poco (jurado de la 0.28, cierre, K6). La fila mide lo mismo: todo sigue cabiendo.
    */
   .lockup {
     --lockup-signature-hang: calc(-1 * var(--bb-space-2));
+    --lockup-signature-lift: var(--bb-space-1);
     margin: var(--bb-space-1) 0 0;
   }
 
@@ -547,6 +552,7 @@
   /* El lockup, debajo de la zona opaca del logo y no más ancho que él (como en el móvil). */
   .lockup {
     --lockup-signature-hang: calc(-1 * var(--bb-space-2));
+    --lockup-signature-lift: var(--bb-space-1);
     width: min(100%, var(--bb-menu-logo-w-tablet));
     margin: var(--bb-space-1) 0 0;
   }
@@ -602,10 +608,12 @@
 
 /*
  * Móvil bajo (≤ 700 px de alto): logo en una línea y todo más junto (§3.8.3). Ese lienzo casi no deja
- * aire transparente al pie, así que el lockup baja `--bb-space-2` para que la pegatina y la cinta queden
- * debajo de la extrusión (§3.1; jurado de la 0.28). Para que la pantalla siga cabiendo sin desplazar a
- * 360 × 640, el logo se pega al HUD (su lienzo ya deja aire transparente por arriba) y «ELIGE MODO» se
- * acerca a la tarjeta y a las placas (`--bb-space-1`, la separación entre placas en móvil).
+ * aire transparente al pie, así que el lockup baja `--bb-space-3` para que la pegatina (que sube
+ * `--bb-space-1` sobre la cinta, más arriba) y la cinta queden debajo de la extrusión (§3.1; jurado de la
+ * 0.28). Para que la pantalla siga cabiendo sin desplazar a 360 × 640, el logo se pega al HUD y sube
+ * `--bb-space-1` (su lienzo deja unos 10 px transparentes por arriba: las letras quedan a 9 px del medidor
+ * de XP) y «ELIGE MODO» se acerca a la tarjeta y a las placas (`--bb-space-1`, la separación entre placas en
+ * móvil). Así la pegatina queda a 9 px de tinta de la tarjeta (antes, 5; jurado de la 0.28, cierre, K6).
  */
 @media (max-width: 720px) and (max-height: 700px) {
   .logoFull {
@@ -615,10 +623,11 @@
   .logoCompact {
     display: block;
     width: 100%;
+    margin-top: calc(-1 * var(--bb-space-1));
   }
 
   .lockup {
-    margin-top: var(--bb-space-2);
+    margin-top: var(--bb-space-3);
   }
 
   .menu {

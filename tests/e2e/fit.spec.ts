@@ -520,6 +520,78 @@ for (const viewport of [
   })
 }
 
+/**
+ * Distancia de la tinta de la pegatina del lockup (su imagen girada, alfa ≥ ½, sombra incluida) al borde de
+ * arriba de la tarjeta de la semana, que va debajo.
+ */
+function stickerInkToCard(page: Page): Promise<number> {
+  return page.evaluate(async () => {
+    const main = document.querySelector('main')!
+    const img = main.querySelector<HTMLImageElement>('[data-otp-signature] img')!
+    await img.decode()
+    const sticker = document.createElement('canvas')
+    sticker.width = img.naturalWidth
+    sticker.height = img.naturalHeight
+    const context = sticker.getContext('2d')!
+    context.drawImage(img, 0, 0)
+    const alpha = context.getImageData(0, 0, sticker.width, sticker.height).data
+    let angle = 0
+    for (let node: HTMLElement | null = img; node; node = node.parentElement) {
+      const transform = getComputedStyle(node).transform
+      if (transform !== 'none') {
+        const matrix = new DOMMatrix(transform)
+        angle += Math.atan2(matrix.b, matrix.a)
+      }
+    }
+    const box = img.getBoundingClientRect()
+    const centerY = box.top + box.height / 2
+    const [width, height] = [img.offsetWidth, img.offsetHeight]
+    let bottom = Number.NEGATIVE_INFINITY
+    for (let v = 0; v < sticker.height; v++)
+      for (let u = 0; u < sticker.width; u++) {
+        if (alpha[(v * sticker.width + u) * 4 + 3]! < 128) continue
+        const x = ((u + 0.5) / sticker.width) * width - width / 2
+        const y = ((v + 0.5) / sticker.height) * height - height / 2
+        bottom = Math.max(bottom, centerY + x * Math.sin(angle) + y * Math.cos(angle))
+      }
+    return main.querySelector('article')!.getBoundingClientRect().top - bottom
+  })
+}
+
+/**
+ * La pegatina del lockup y la tarjeta de la semana en móvil y en la tableta vertical (§3.1 v0.6.7: hacia la
+ * tarjeta, `--bb-space-2` como poco; la maqueta deja unos 12 px; jurado de la 0.28, cierre, K6): con la
+ * firma centrada en la cinta, la pegatina de 62 px quedaba a unos 5 px de tinta de la tarjeta (su caja
+ * girada, a 1,4). Y el menú sigue cabiendo sin desplazar en táctil.
+ */
+for (const viewport of [
+  { width: 390, height: 844 },
+  { width: 375, height: 667 },
+  { width: 360, height: 640 },
+  { width: 768, height: 1024 },
+]) {
+  test.describe(`pegatina y tarjeta a ${viewport.width} × ${viewport.height} táctil`, () => {
+    test.use({ viewport, isMobile: true, hasTouch: true })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`RF-OTP-01 / RD-VIS-02 e (§3.1): en ${path} la pegatina queda a --bb-space-2 de tinta de la tarjeta, sin pisar el logo y sin desplazar`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        const gap = await stickerInkToCard(page)
+        expect(gap, `${gap.toFixed(1)} px de tinta`).toBeGreaterThanOrEqual(
+          (await tokenPx(page, '--bb-space-2')) - 0.5,
+        )
+        expect(await lockupOverLogo(page)).toEqual({ sticker: 0, ribbon: 0 })
+        expect(
+          await page.evaluate(() => document.scrollingElement!.scrollHeight - window.innerHeight),
+        ).toBeLessThanOrEqual(0)
+      })
+    }
+  })
+}
+
 test('RD-VIS-05: las tildes en display de la galería (la muestra «ÀÓÚ», placas y alias) salen enteras', async ({
   page,
 }) => {
