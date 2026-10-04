@@ -7,9 +7,7 @@ import { useFitText } from '../hooks/useFitText'
 import { Icon } from '../Icon'
 import { Key } from '../Key'
 import styles from './MenuPlate.module.css'
-
-/** Cuerpo mínimo de la etiqueta al ajustarla a su hueco, en px (`RD-VIS-05`: nunca por debajo de 12). */
-const LABEL_MIN_FONT_PX = 16
+import { MENU_LABEL_MIN_PX } from './useMenuPlateFit'
 
 /**
  * Props que pone el menú (`useRovingMenu().getItemProps(i)`): rol, `tabIndex`, `data-cursor*`,
@@ -47,6 +45,11 @@ export interface MenuPlateProps {
   itemProps: MenuPlateItemProps
   /** Estado forzado para la galería. */
   state?: InteractionState
+  /**
+   * La clave del ajuste común del menú (`useMenuPlateFit`): cuando cambia el cuerpo común de las placas, la
+   * etiqueta vuelve a ajustar su anchura desde él.
+   */
+  fitKey?: string
   className?: string
 }
 
@@ -72,6 +75,7 @@ export function MenuPlate({
   to,
   itemProps,
   state,
+  fitKey,
   className,
 }: MenuPlateProps) {
   const { ref, ...item } = itemProps
@@ -80,14 +84,14 @@ export function MenuPlate({
   const labelRef = useRef<HTMLSpanElement>(null)
   useFitText(labelRef, label, {
     fromStretch: '--bb-stretch-plate',
-    minFontPx: LABEL_MIN_FONT_PX,
-    state: chosen,
+    minFontPx: MENU_LABEL_MIN_PX,
+    state: `${chosen}|${fitKey ?? ''}`,
   })
   const body = (
     <>
       <Cursor shape="slant" player />
       <span className={styles.texture} aria-hidden="true" />
-      <span className={styles.arrow} aria-hidden="true" />
+      <span className={styles.arrow} aria-hidden="true" data-plate-arrow="" />
       <span className={styles.index} aria-hidden="true">
         {t('ui.menuPlate.index', { index: String(index).padStart(2, '0') })}
       </span>

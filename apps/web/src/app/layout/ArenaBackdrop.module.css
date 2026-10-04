@@ -201,3 +201,30 @@
     clip-path: polygon(0 54.3%, 100% 38.3%, 100% 38.6%, 0 54.6%);
   }
 }
+
+/*
+ * Tableta vertical (de 721 a 1199 px de ancho y como mucho 3:4): el menú va apilado como en el móvil
+ * (`MainMenu`, §3.8.3) y su cuña también va abajo, detrás de las placas. Las interiores no cambian.
+ */
+@media (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) {
+  .arena[data-wedge="right"] .wedge,
+  .arena[data-wedge="right"] .straight,
+  .arena[data-wedge="right"] .band,
+  .arena[data-wedge="right"] .rule {
+    left: 0;
+    width: 100%;
+    transform: none;
+  }
+
+  .arena[data-wedge="right"] .wedge {
+    clip-path: polygon(0 56%, 100% 40%, 100% 100%, 0 100%);
+  }
+
+  .arena[data-wedge="right"] .band {
+    clip-path: polygon(0 55.3%, 100% 39.3%, 100% 40.1%, 0 56.1%);
+  }
+
+  .arena[data-wedge="right"] .rule {
+    clip-path: polygon(0 54.3%, 100% 38.3%, 100% 38.6%, 0 54.6%);
+  }
+}

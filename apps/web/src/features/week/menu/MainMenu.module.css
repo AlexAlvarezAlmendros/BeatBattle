@@ -142,6 +142,11 @@
   white-space: nowrap;
 }
 
+/* El reloj del HUD, sin caja propia (en la tableta vertical se esconde: va en la tarjeta). */
+.hudClock {
+  display: contents;
+}
+
 /* El rótulo de la pista, según el tipo de entrada (no según el ancho). */
 .hintTouch {
   display: none;
@@ -176,6 +181,8 @@
   gap: var(--bb-space-1) var(--bb-space-4);
   margin: calc(var(--bb-space-5) * var(--menu-s)) 0 0 var(--bb-space-7);
   padding: calc(var(--bb-space-3) * var(--menu-s)) var(--bb-space-5);
+  /* Al mover el cursor, la ayuda se trae a la vista por encima de la barra pegada (`revealHelp`). */
+  scroll-margin-block-end: calc(var(--controls-pinned-h, var(--bb-controls-h)) + var(--bb-space-4));
 }
 
 .helpKicker {
@@ -442,6 +449,88 @@
  * debajo de las placas: ampliar no quita información (WCAG 1.4.4 y 1.4.10).
  */
 @media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse) {
+  .help {
+    display: none;
+  }
+}
+
+/*
+ * ── Tableta vertical (de 721 a 1199 px de ancho, en vertical: 768 × 1024, 820 × 1180) ─────────────
+ * La composición apilada del móvil a escala de tableta (§3.8.3): en dos columnas, la tarjeta de la semana
+ * iba en una de 290 px (título en tres líneas, créditos en cuatro, chips en tres filas), la barra la
+ * cortaba y la pantalla se desplazaba 110 px (jurado de la 0.28, cierre). Apilado: el logo de tableta
+ * (`--bb-menu-logo-w-tablet`) con su lockup, la tarjeta a todo el ancho (plegada en táctil, como en el
+ * móvil: `StageCard`), «ELIGE MODO» y las seis placas en la lista ancha, con el dato al lado, y la cuña
+ * abajo (`ArenaBackdrop`). Las letras y las placas son las de escritorio (los tokens de móvil son solo de
+ * ≤ 720 px), y el reloj del HUD pasa a la tarjeta, como en el móvil: el HUD queda en una fila. El 1P y la
+ * flecha de la elegida no caben a la izquierda (la placa empieza en el medianil): queda el anillo.
+ * Se mide por la proporción (como mucho 3:4), no por el ancho.
+ */
+@media (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) {
+  /* Lo que sobra de alto (820 × 1180, «/» sin reloj) queda arriba: las placas, sobre la cuña y la barra. */
+  .menu {
+    --menu-s: 1;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: end;
+    gap: var(--bb-space-3);
+    margin-top: calc(-1 * var(--bb-space-3));
+    margin-bottom: calc(-1 * var(--bb-space-6));
+  }
+
+  .logoFull {
+    width: min(100%, var(--bb-menu-logo-w-tablet));
+    margin: 0;
+  }
+
+  /* El lockup, debajo de la zona opaca del logo y no más ancho que él (como en el móvil). */
+  .lockup {
+    --lockup-signature-hang: calc(-1 * var(--bb-space-2));
+    width: min(100%, var(--bb-menu-logo-w-tablet));
+    margin: var(--bb-space-1) 0 0;
+  }
+
+  .title > article {
+    margin-top: var(--bb-space-3);
+  }
+
+  .modes {
+    padding-block: 0;
+  }
+
+  .head,
+  .help {
+    margin-left: 0;
+  }
+
+  .head {
+    margin-bottom: var(--bb-space-2);
+  }
+
+  /* Las placas del móvil (48 px, 56 la elegida) con el rótulo de escritorio. */
+  .plates {
+    --menu-plate-h: var(--bb-space-12);
+    --menu-plate-h-on: var(--bb-space-14);
+    gap: var(--bb-space-2);
+  }
+
+  .plates :global([data-cursor-player="left"]),
+  .plates :global([data-plate-arrow]) {
+    visibility: hidden;
+  }
+
+  .giant,
+  .hudClock {
+    display: none;
+  }
+
+  .help {
+    margin-top: var(--bb-space-4);
+  }
+}
+
+/* Tableta vertical táctil: sin panel de ayuda, como en el móvil táctil (y lo lee igual el lector). */
+@media (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) and (hover: none),
+  (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) and (pointer: coarse) {
   .help {
     display: none;
   }

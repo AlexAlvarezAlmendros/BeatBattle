@@ -270,7 +270,9 @@
  * columnas, `MainMenu`): por debajo de 32 rem el dato y la tecla bajan a una segunda línea, bajo la etiqueta, en
  * vez de quitarle el sitio (jurado de la 0.28: de 721 a 900 px «JUGAR», «RESULTADOS» y «AJUSTES» se
  * quedaban sin ancho). La placa no cambia de alto (70 px, 84 la elegida): las dos líneas caben dentro;
- * si la etiqueta parte en dos, crece con ella.
+ * si la etiqueta parte en dos, crece con ella. Las de un mismo menú en reposo miden todas lo de la más alta
+ * (`--menu-plate-h-fit`, que mide el menú con `useMenuPlateFit`), lleven dato o no (§3.3; jurado de la
+ * 0.28, cierre: a 1024 × 768 medían de 50 a 67 px).
  */
 @container menu-plates (width < 32rem) {
   .plate {
@@ -281,8 +283,9 @@
     align-content: center;
     row-gap: var(--bb-space-1);
     height: auto;
-    min-height: var(--plate-h);
-    padding-block: var(--bb-space-2);
+    min-height: max(var(--plate-h), var(--menu-plate-h-fit, 0px));
+    /* 4 px de aire dentro del borde: con el mismo alto para todas, la más alta (la etiqueta NUEVO) manda. */
+    padding-block: calc(var(--bb-space-1) + var(--bb-stroke));
     transition:
       margin-left var(--bb-dur-tick) var(--bb-ease-snap),
       min-height var(--bb-dur-tick) var(--bb-ease-snap);
@@ -291,7 +294,8 @@
   .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
     grid-template-columns: var(--bb-space-14) minmax(0, 1fr);
     height: auto;
-    min-height: var(--plate-h-on);
+    /* Nunca más baja que las de reposo. */
+    min-height: max(var(--plate-h-on), var(--menu-plate-h-fit, 0px));
   }
 
   /*
@@ -418,7 +422,7 @@
     align-content: center;
     row-gap: var(--bb-space-1);
     height: auto;
-    min-height: var(--bb-target);
+    min-height: max(var(--bb-target), var(--menu-plate-h-fit, 0px));
     padding-block: var(--bb-space-2);
   }
 

@@ -301,7 +301,8 @@ function ribbonLines(page: Page): Promise<{ text: string; lines: number }> {
  */
 for (const viewport of [
   { width: 721, height: 900, touch: false, short: true },
-  { width: 768, height: 1024, touch: true, short: true },
+  // En la tableta vertical el menú va apilado (§3.8.3): el lockup mide lo que el logo y la cinta va entera.
+  { width: 768, height: 1024, touch: true, short: false },
   { width: 823, height: 514, touch: false, short: true },
   // Por debajo de 1200 px y hasta 968 de alto, la ventana es baja para el menú (la barra lleva las teclas y
   // la crónica en sus filas, `MainMenu`): el logo baja con el alto y el lockup, con él.
@@ -1277,5 +1278,132 @@ for (const viewport of [
         expect(box.bar.top - box.help.bottom).toBeLessThanOrEqual(air + 2)
       })
     }
+  })
+}
+
+/**
+ * Tableta vertical (jurado de la 0.28, cierre; guía §3.8.3): a 768 × 1024 la tarjeta de la semana iba en
+ * una columna de 290 px (título en tres líneas, créditos en cuatro, chips en tres filas), la barra la
+ * cortaba y la pantalla se desplazaba 110 px. Ahora es la composición apilada del móvil a escala de
+ * tableta: la tarjeta a todo el ancho, con el título y los chips en una línea, las placas debajo y todo
+ * sin desplazar.
+ */
+for (const viewport of [
+  { width: 768, height: 1024 },
+  { width: 820, height: 1180 },
+  { width: 744, height: 1133 },
+]) {
+  test.describe(`tableta vertical a ${viewport.width} × ${viewport.height} táctil`, () => {
+    test.use({ viewport, isMobile: true, hasTouch: true })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`RD-VIS-02 e / §3.8.3: el menú de ${path} va apilado (la tarjeta a todo el ancho) y cabe sin desplazar`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        const box = await menuBoxes(page)
+        expect(box.scroll).toBeLessThanOrEqual(0)
+        expect(await underControls(page)).toEqual([])
+        // Apilado: la tarjeta ocupa el ancho de la pantalla (menos el medianil) y las placas van debajo.
+        expect(box.card.width).toBeGreaterThanOrEqual(viewport.width - 2 * 48 - 1)
+        expect(box.modes.top).toBeGreaterThanOrEqual(box.card.bottom)
+        // El título del escenario y los chips, cada uno en una línea.
+        const lines = await page.evaluate(() => {
+          const card = document.querySelector('main article')!
+          const rows = (elements: Element[]) =>
+            new Set(
+              elements
+                .filter((element) => element.getBoundingClientRect().width > 0)
+                .map((element) => Math.round(element.getBoundingClientRect().top)),
+            ).size
+          const range = document.createRange()
+          range.selectNodeContents(card.querySelector('h2')!)
+          return {
+            title: new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size,
+            // Los chips de dato (`DataChip`): marcos de chaflán pequeño.
+            chips: rows([...card.querySelectorAll('[data-frame-cut="sm"]')]),
+          }
+        })
+        // Sin semana, el título es una frase («El próximo drop está en el horno»): puede ir en dos líneas.
+        if (path === '/dev/menu') expect(lines.title).toBe(1)
+        expect(lines.chips).toBeLessThanOrEqual(1)
+      })
+    }
+  })
+}
+
+/** Los altos y el cuerpo del rótulo de las placas en reposo del menú. */
+function restPlates(page: Page): Promise<{ heights: number[]; fonts: number[] }> {
+  return page.evaluate(() => {
+    const plates = [...document.querySelectorAll<HTMLElement>('main [data-menu-plate]')].filter(
+      (plate) => plate.getAttribute('data-cursor-active') !== 'true',
+    )
+    return {
+      heights: plates.map((plate) => Math.round(plate.getBoundingClientRect().height * 2) / 2),
+      fonts: plates.map((plate) =>
+        Number.parseFloat(getComputedStyle(plate.querySelector('[data-plate-label]')!).fontSize),
+      ),
+    }
+  })
+}
+
+/**
+ * Composición intermedia (jurado de la 0.28, cierre; guía §3.3 y §3.8.3): todas las placas en reposo con
+ * el mismo cuerpo de rótulo (el menor que necesite cualquiera, calculado en el menú) y el mismo alto, lleven
+ * dato o no: a 1024 × 768 «Salón de la fama» iba a 17 px y «Cómo se juega» a 20 frente a 25 el resto, y las
+ * placas medían de 50 a 67 px. Y al mover el cursor con las flechas, el panel de ayuda queda a la vista
+ * por encima de la barra (a 1024 × 768 quedaba entero debajo).
+ */
+for (const viewport of [
+  { width: 1024, height: 768 },
+  { width: 900, height: 700 },
+  { width: 823, height: 514 },
+  { width: 768, height: 1024, touch: true },
+  { width: 390, height: 844, touch: true },
+]) {
+  test.describe(`placas del menú a ${viewport.width} × ${viewport.height}${viewport.touch ? ' táctil' : ''}`, () => {
+    test.use({
+      viewport: { width: viewport.width, height: viewport.height },
+      isMobile: Boolean(viewport.touch),
+      hasTouch: Boolean(viewport.touch),
+    })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`§3.3 / RD-VIS-02 e: en ${path} todas las placas en reposo llevan el mismo cuerpo de rótulo y miden lo mismo`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        // El ajuste de las etiquetas va un fotograma después de la fuente.
+        await page.waitForTimeout(300)
+        const rest = await restPlates(page)
+        expect(rest.heights).toHaveLength(5)
+        expect(Math.max(...rest.fonts) - Math.min(...rest.fonts)).toBeLessThanOrEqual(0.25)
+        expect(Math.max(...rest.heights) - Math.min(...rest.heights)).toBeLessThanOrEqual(0.5)
+        expect(await plateCuts(page)).toEqual([])
+      })
+    }
+
+    if (!viewport.touch)
+      test('§3.8.3: al mover el cursor con las flechas, el panel de ayuda queda a la vista por encima de la barra', async ({
+        page,
+      }) => {
+        await open(page, '/dev/menu', 'Beat Battle')
+        await settle(page)
+        for (const key of ['ArrowDown', 'ArrowDown', 'End']) {
+          await page.keyboard.press(key)
+          // La placa elegida crece con su transición (`--bb-dur-tick`) y empuja la ayuda.
+          await page.waitForTimeout(400)
+          const { help, bar, plate } = await page.evaluate(() => ({
+            help: document.querySelector('main nav [aria-live]')!.parentElement!.getBoundingClientRect()
+              .bottom,
+            bar: document.querySelector('footer')!.getBoundingClientRect().top,
+            plate: document.activeElement!.getBoundingClientRect().top,
+          }))
+          expect(help, `ayuda tras ${key}`).toBeLessThanOrEqual(bar + 1)
+          expect(plate, `placa elegida tras ${key}`).toBeGreaterThanOrEqual(0)
+        }
+      })
   })
 }

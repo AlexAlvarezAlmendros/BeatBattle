@@ -9,6 +9,12 @@ import { FrameSlotTarget } from './slots'
 export const MOBILE_QUERY = '(max-width: 720px)'
 
 /**
+ * El menú va apilado, con la cuña abajo como en el móvil, también en una tableta vertical (§3.8.3): de 721
+ * a 1199 px de ancho y como mucho 3:4 (`MainMenu`, `ArenaBackdrop.module.css`).
+ */
+export const STACKED_MENU_QUERY = `${MOBILE_QUERY}, (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3/4)`
+
+/**
  * La arena detrás de cada pantalla (guía §3.5, capa 0; tarea 0.23), en su versión estática (calidad
  * «Apagada»: el Escenario de WebGL llega con la Fase 1 y pinta esto mismo con *shader*). Fija a la
  * ventana y decorativa (`aria-hidden`):
@@ -29,8 +35,9 @@ export const MOBILE_QUERY = '(max-width: 720px)'
  */
 export function ArenaBackdrop({ wedge, rays = true }: { wedge: ArenaWedge; rays?: boolean }) {
   const mobile = useMediaQuery(MOBILE_QUERY)
+  const stackedMenu = useMediaQuery(STACKED_MENU_QUERY) && wedge === 'right'
   const cell = mobile ? textureMobile.halftoneCell : texture.halftoneCell
-  const shape = mobile ? 'menuWedgeMobile' : wedge === 'right' ? 'menuWedge' : 'interiorWedge'
+  const shape = mobile || stackedMenu ? 'menuWedgeMobile' : wedge === 'right' ? 'menuWedge' : 'interiorWedge'
   return (
     <div className={styles.arena} data-wedge={wedge} aria-hidden="true">
       {rays && (

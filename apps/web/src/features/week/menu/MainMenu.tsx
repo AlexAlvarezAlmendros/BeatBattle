@@ -10,7 +10,7 @@ import { cx } from '../../../ui/forceState'
 import { GameLogo, logoAspect } from '../../../ui/GameLogo'
 import { useIdleMenuKeys } from '../../../ui/hooks/useIdleMenuKeys'
 import { useRovingMenu } from '../../../ui/hooks/useRovingMenu'
-import { MenuPlate } from '../../../ui/MenuPlate'
+import { MenuPlate, useMenuPlateFit } from '../../../ui/MenuPlate'
 import { RoundClock } from '../../../ui/RoundClock'
 import { Tag } from '../../../ui/Tag'
 import { TitleLockup } from '../../../ui/TitleLockup'
@@ -173,14 +173,18 @@ export function MainMenu({ model }: { model: MenuModel }) {
   const titleId = useId()
   const helpId = useId()
   const listRef = useRef<HTMLUListElement>(null)
+  const helpRef = useRef<HTMLDivElement>(null)
   const firstEnabled = Math.max(0, model.player?.uploaded ? 1 : entries.findIndex((entry) => !entry.disabled))
   const menu = useRovingMenu({
     count: entries.length,
     initialIndex: firstEnabled,
     isDisabled: (index) => Boolean(entries[index]?.disabled),
     getLabel: (index) => t(`home.modes.${MENU_MODES[index]!}.label`),
+    onMove: () => requestAnimationFrame(() => revealHelp(listRef.current, helpRef.current)),
   })
   const active = entries[menu.activeIndex] ?? entries[0]!
+  // Un mismo cuerpo de rótulo y un mismo alto para todas las placas en reposo (§3.3).
+  const fit = useMenuPlateFit(listRef)
 
   // Las flechas e Intro, con el foco en ningún control (la página recién cargada), van al menú.
   useIdleMenuKeys(menu, entries.length, listRef)
@@ -201,12 +205,15 @@ export function MainMenu({ model }: { model: MenuModel }) {
       )}
       {week && (
         <FrameSlot name="hudCenter">
-          <RoundClock
-            target={week.closesAt}
-            label={t(week.phase === 'open' ? 'home.clock.closes' : 'home.clock.votes')}
-            when={week.clockWhen}
-            week={week.weekBar}
-          />
+          {/* En la tableta vertical, el reloj va en la tarjeta de la semana, como en el móvil (CSS). */}
+          <div className={styles.hudClock}>
+            <RoundClock
+              target={week.closesAt}
+              label={t(week.phase === 'open' ? 'home.clock.closes' : 'home.clock.votes')}
+              when={week.clockWhen}
+              week={week.weekBar}
+            />
+          </div>
         </FrameSlot>
       )}
       {player && (player.season || player.streak) && (
@@ -256,6 +263,7 @@ export function MainMenu({ model }: { model: MenuModel }) {
           {...menu.getContainerProps({ 'aria-labelledby': titleId })}
           aria-describedby={helpId}
           className={styles.plates}
+          style={fit.style}
         >
           {entries.map((entry, index) => (
             <li key={entry.mode} role="none">
@@ -267,11 +275,12 @@ export function MainMenu({ model }: { model: MenuModel }) {
                 disabled={entry.disabled}
                 to={entry.to}
                 itemProps={menu.getItemProps(index)}
+                fitKey={fit.key}
               />
             </li>
           ))}
         </ul>
-        <Frame cut="base" className={styles.help}>
+        <Frame ref={helpRef} cut="base" className={styles.help}>
           <span className={cx('bb-label', styles.helpKicker)} aria-hidden="true">
             {t(`home.modes.${active.mode}.label`)}
           </span>
@@ -283,3 +292,29 @@ export function MainMenu({ model }: { model: MenuModel }) {
     </div>
   )
 }
+
+/**
+ * Al mover el cursor con el teclado (o el mando), el panel de ayuda de debajo de las placas (la región viva
+ * que describe el modo) queda también a la vista, por encima de la barra de controles (§3.8.3, composición
+ * intermedia; jurado de la 0.28, cierre: a 1024 × 768 quedaba entero bajo la barra). El navegador ya ha
+ * desplazado la pantalla hasta la placa enfocada; aquí se desplaza lo justo para la ayuda (su
+ * `scroll-margin` es el alto real de la barra) y, si las dos no caben juntas, manda la placa. La elegida
+ * crece con una transición (`--bb-dur-tick`) que empuja la ayuda hacia abajo: se repite al acabar. Con el
+ * ratón no se mueve nada: solo cuenta el foco que se ve (`:focus-visible`), el del teclado.
+ */
+function revealHelp(list: HTMLElement | null, help: HTMLElement | null) {
+  const focused = document.activeElement
+  if (!list || !help || !(focused instanceof HTMLElement) || !list.contains(focused)) return
+  if (!focused.matches(':focus-visible')) return
+  const reveal = () => {
+    help.scrollIntoView({ block: 'nearest' })
+    focused.scrollIntoView({ block: 'nearest' })
+  }
+  reveal()
+  focused.addEventListener('transitionend', reveal, { once: true })
+  // Sin transición (sin movimiento), el aviso no llega: no se deja esperando a la siguiente.
+  setTimeout(() => focused.removeEventListener('transitionend', reveal), REVEAL_WAIT_MS)
+}
+
+/** Lo que se espera al final de la transición de la placa elegida (`--bb-dur-tick`, 90 ms) antes de soltarla. */
+const REVEAL_WAIT_MS = 500

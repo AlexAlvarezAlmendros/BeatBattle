@@ -260,9 +260,10 @@
  * Por ancho solo cambia la composición y se van las piezas que repiten algo (el vinilo, la onda, el
  * «0:00 / 1:12»). Lo que **informa** (créditos, género, semana, reto, entradas, aviso) solo se pliega en
  * un móvil táctil, como en la maqueta: en escritorio con zoom (1280 × 720 al 200 % = 640 × 360) la
- * pantalla se desplaza en vez de esconder (WCAG 1.4.4 y 1.4.10).
+ * pantalla se desplaza en vez de esconder (WCAG 1.4.4 y 1.4.10). La tableta vertical (`MainMenu`) lleva
+ * esta misma tarjeta, con el título y los rellenos de escritorio (más abajo).
  */
-@media (max-width: 720px) {
+@media (max-width: 720px), (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) {
   .card {
     gap: var(--bb-space-2);
     padding: var(--bb-space-3) var(--bb-space-4);
@@ -306,8 +307,23 @@
   }
 }
 
-/* Móvil táctil: la tarjeta plegada de la maqueta (las entradas pasan a un chip). */
-@media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse) {
+/* Tableta vertical: la tarjeta del móvil a escala de tableta. */
+@media (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) {
+  .card {
+    gap: var(--bb-space-3);
+    padding: var(--bb-space-3) var(--bb-space-5);
+  }
+
+  .title,
+  .emptyTitle {
+    font-size: var(--bb-fs-title);
+  }
+}
+
+/* Móvil táctil (y tableta vertical táctil): la tarjeta plegada de la maqueta (las entradas, en un chip). */
+@media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse),
+  (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) and (hover: none),
+  (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) and (pointer: coarse) {
   .emptyKickers,
   .credits,
   .foot,
