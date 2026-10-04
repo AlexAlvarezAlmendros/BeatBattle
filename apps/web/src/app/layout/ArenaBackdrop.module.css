@@ -70,7 +70,7 @@
 /*
  * Ventana grande (≥ 1600 px; §3.8.14 v0.6.7, P8): la cuña de las interiores sigue a la columna de la pieza
  * y el granate no pasa del ~24 % (la 404 llegaba al 25,8 % a 1920 × 1080 y al 26,5 % a 2560 × 1440: la
- * pieza no crece con la ventana y la cuña, sí). La diagonal pasa `--bb-space-8` a la derecha de la esquina
+ * pieza no crece con la ventana y la cuña, sí). La diagonal pasa `--bb-space-2` a la derecha de la esquina
  * de abajo de la columna (`--screen-piece-right/bottom`, `ScreenPage`): a la altura de esa esquina corta la
  * ventana en `--split-x` más lo que sube la inclinación, `(100vh − pie) · tan(17°)`. Nunca más allá del
  * 30 % de siempre (`--bb-split-x-left`): en las pantallas de contenido, cuya columna llega a la barra, la

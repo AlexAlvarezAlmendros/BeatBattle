@@ -591,6 +591,23 @@ async function diagonalAt(page: Page, y: number): Promise<number> {
   return split + (height - y) * Math.tan((17 * Math.PI) / 180)
 }
 
+/** Las cajas `selector` de la columna de la pieza quedan a la izquierda de la diagonal, cada una a su pie. */
+async function expectLeftOfDiagonal(page: Page, selector: string): Promise<void> {
+  const plates = await page.evaluate(
+    ([piece, inner]) =>
+      [...document.querySelectorAll(`${piece} :is(${inner})`)].map((a) => {
+        const rect = a.getBoundingClientRect()
+        return { right: rect.right, bottom: rect.bottom }
+      }),
+    [PIECE, selector] as const,
+  )
+  expect(plates.length).toBeGreaterThan(0)
+  for (const plate of plates) {
+    const diagonal = await diagonalAt(page, plate.bottom)
+    expect(plate.right, `caja con pie en ${plate.bottom}`).toBeLessThanOrEqual(diagonal)
+  }
+}
+
 /*
  * Con la ventana baja de 1024 × 768 la columna de la pieza baja a 18 rem (el pad, a 56 px por tecla,
  * cabe): con 20 rem, las placas del pie de «Cómo se juega» pisaban la diagonal 18 px y el tablero de
@@ -616,19 +633,7 @@ for (const viewport of [
       }) => {
         await open(page, path, heading)
         await settle(page)
-        const plates = await page.evaluate(
-          ([piece, inner]) =>
-            [...document.querySelectorAll(`${piece} :is(${inner})`)].map((a) => {
-              const rect = a.getBoundingClientRect()
-              return { right: rect.right, bottom: rect.bottom }
-            }),
-          [PIECE, selector] as const,
-        )
-        expect(plates.length).toBeGreaterThan(0)
-        for (const plate of plates) {
-          const diagonal = await diagonalAt(page, plate.bottom)
-          expect(plate.right, `caja con pie en ${plate.bottom}`).toBeLessThanOrEqual(diagonal)
-        }
+        await expectLeftOfDiagonal(page, selector)
       })
     }
   })
@@ -1306,6 +1311,29 @@ for (const viewport of [
 }
 
 /**
+ * El centro de los rayos es el de la columna de la pieza, a ±2 px. El centro del estallido (`--burst-x`,
+ * `--burst-y`) está en la caja del estallido, más grande que la ventana: una sonda en esa posición dice
+ * dónde cae en la ventana.
+ */
+async function expectRaysFromPiece(page: Page): Promise<void> {
+  const center = await page.evaluate(() => {
+    const burst = document.querySelector<HTMLElement>('[data-fx] > div')!
+    const probe = document.createElement('div')
+    probe.style.cssText = 'position:absolute;left:var(--burst-x);top:var(--burst-y);width:0;height:0'
+    burst.append(probe)
+    const at = probe.getBoundingClientRect()
+    probe.remove()
+    const piece = document.querySelector('main [data-screen-part="piece"]')!.getBoundingClientRect()
+    return {
+      burst: { x: at.left, y: at.top },
+      piece: { x: piece.left + piece.width / 2, y: piece.top + piece.height / 2 },
+    }
+  })
+  expect(Math.abs(center.burst.x - center.piece.x), `rayos en x ${center.burst.x}`).toBeLessThanOrEqual(2)
+  expect(Math.abs(center.burst.y - center.piece.y), `rayos en y ${center.burst.y}`).toBeLessThanOrEqual(2)
+}
+
+/**
  * El centro de los rayos sigue a la pieza (§3.8.14 v0.6.7; P8): era un punto fijo de la ventana (el 26 % ×
  * 34 % en el marco simple, el 18 % × 46 % en las interiores) y en los legales caía ~200 px por encima del
  * sello «EN OBRAS», y en /entrar a 1920 × 1080, arriba a la izquierda del logo. En dos columnas, el centro
@@ -1323,23 +1351,79 @@ for (const { path, heading, viewport } of [
     test(`§3.2 / §3.8.14: el centro de los rayos de ${path} es el de su pieza (P8)`, async ({ page }) => {
       await open(page, path, heading)
       await settle(page)
-      const center = await page.evaluate(() => {
-        // El centro del estallido (`--burst-x`, `--burst-y`) está en la caja del estallido, más grande que
-        // la ventana: una sonda en esa posición dice dónde cae en la ventana.
-        const burst = document.querySelector<HTMLElement>('[data-fx] > div')!
-        const probe = document.createElement('div')
-        probe.style.cssText = 'position:absolute;left:var(--burst-x);top:var(--burst-y);width:0;height:0'
-        burst.append(probe)
-        const at = probe.getBoundingClientRect()
-        probe.remove()
-        const piece = document.querySelector('main [data-screen-part="piece"]')!.getBoundingClientRect()
-        return {
-          burst: { x: at.left, y: at.top },
-          piece: { x: piece.left + piece.width / 2, y: piece.top + piece.height / 2 },
-        }
-      })
-      expect(Math.abs(center.burst.x - center.piece.x), `rayos en x ${center.burst.x}`).toBeLessThanOrEqual(2)
-      expect(Math.abs(center.burst.y - center.piece.y), `rayos en y ${center.burst.y}`).toBeLessThanOrEqual(2)
+      await expectRaysFromPiece(page)
     })
   })
 }
+
+/**
+ * La arena sigue a la pantalla ya en su sitio, también tras navegar dentro de la app con movimiento (§3.8.14
+ * v0.6.7; quinto pase del jurado, P8). La entrada de pantalla (`bb-screen-in`) desliza la pantalla desde
+ * −40 px y la pieza se medía a mitad de camino: al acabar, nada cambiaba de tamaño y la geometría se quedaba
+ * 30–40 px a la izquierda (a 1920 × 1080, del menú a «Cómo se juega», los rayos salían 40 px a la izquierda
+ * de la pieza y la diagonal pasaba 32 px a la izquierda del pie de su columna). Las cargas directas (todo lo
+ * de arriba) no lo veían.
+ */
+test.describe('arena tras navegar con movimiento', () => {
+  test.use({ reducedMotion: 'no-preference' })
+
+  test.describe('1920 × 1080', () => {
+    test.use({ viewport: { width: 1920, height: 1080 } })
+
+    test('§3.2 / §3.8.14: del menú a «Cómo se juega», la columna queda a la izquierda de la diagonal y los rayos salen de la pieza (P8)', async ({
+      page,
+    }) => {
+      await page.goto('/')
+      await page
+        .getByRole('menu', { name: 'Elige modo' })
+        .getByRole('menuitem', { name: /^Cómo se juega/ })
+        .click()
+      await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toHaveText('Cómo se juega')
+      await settle(page)
+      await expectLeftOfDiagonal(page, 'ul > li > a')
+      await expectRaysFromPiece(page)
+    })
+
+    test('§3.2 / §3.8.14: con E entre las secciones de Opciones, el tablero queda a la izquierda de la diagonal y los rayos salen de la pieza (P8)', async ({
+      page,
+    }) => {
+      for (const [from, fromHeading, to, heading] of [
+        ['/ajustes/sonido', 'Sonido y efectos', '/ajustes/movimiento', 'Movimiento'],
+        ['/ajustes/sesiones', 'Sesiones', '/ajustes/privacidad', 'Privacidad'],
+      ] as const) {
+        await open(page, from, fromHeading)
+        await settle(page)
+        await page.keyboard.press('e')
+        await expect(page).toHaveURL(to)
+        await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toHaveText(heading)
+        await settle(page)
+        await expectLeftOfDiagonal(page, 'figure')
+        await expectRaysFromPiece(page)
+      }
+    })
+  })
+
+  test.describe('1440 × 900', () => {
+    test.use({ viewport: { width: 1440, height: 900 } })
+
+    test('§3.2 / §3.8.14: con el enlace «Legal» de la barra y con Q/E entre los legales, los rayos salen de la pieza (P8)', async ({
+      page,
+    }) => {
+      await open(page, '/como-funciona', 'Cómo se juega')
+      await settle(page)
+      await page.locator('.game-frame > footer a[href="/legal/bases"]').click()
+      await expect(page).toHaveURL('/legal/bases')
+      await settle(page)
+      await expectRaysFromPiece(page)
+      for (const [key, path] of [
+        ['e', '/legal/terminos'],
+        ['q', '/legal/bases'],
+      ] as const) {
+        await page.keyboard.press(key)
+        await expect(page).toHaveURL(path)
+        await settle(page)
+        await expectRaysFromPiece(page)
+      }
+    })
+  })
+})

@@ -111,8 +111,9 @@ const IDLE_START = '[data-screen-part="tabs"] [aria-current="page"], [data-idle-
  *   ventana grande (≥ 1600 px) la cuña de las interiores sigue a la columna: su diagonal pasa a la derecha
  *   de esa esquina y el granate no pasa del ~24 % (P8).
  *
- * Sin pestañas o sin pieza (o sin caja: la pieza del móvil bajo de la 404 no hace caja), la variable no se
- * publica y la arena usa su valor de siempre. Se quitan al salir de la pantalla.
+ * Las medidas son las de la pantalla ya en su sitio: descuentan el desplazamiento de la entrada de
+ * pantalla (`entryShift`). Sin pestañas o sin pieza (o sin caja: la pieza del móvil bajo de la 404 no hace
+ * caja), la variable no se publica y la arena usa su valor de siempre. Se quitan al salir de la pantalla.
  */
 export const SCREEN_TABS_BOTTOM_VAR = '--screen-tabs-bottom'
 export const SCREEN_PIECE_X_VAR = '--screen-piece-x'
@@ -121,6 +122,27 @@ export const SCREEN_PIECE_RIGHT_VAR = '--screen-piece-right'
 export const SCREEN_PIECE_BOTTOM_VAR = '--screen-piece-bottom'
 
 const PIECE_VARS = [SCREEN_PIECE_X_VAR, SCREEN_PIECE_Y_VAR, SCREEN_PIECE_RIGHT_VAR, SCREEN_PIECE_BOTTOM_VAR]
+
+/**
+ * Lo que la pantalla está desplazada ahora mismo por un `translate` suyo o de sus antecesores: la entrada de
+ * pantalla (`bb-screen-in`, `layout.css`) desliza `.game-screen` desde −40 px. La arena es la de la
+ * pantalla ya en su sitio, así que las medidas lo descuentan. Medida a mitad de la entrada, tras navegar
+ * con movimiento (del menú a «Cómo se juega», Q/E en Opciones o en los legales), la geometría se quedaba
+ * 30–40 px a la izquierda: al acabar la entrada nada cambia de tamaño y no se volvía a medir (quinto pase
+ * del jurado). Solo cuenta lo que va en px (la entrada no usa porcentajes).
+ */
+function entryShift(element: Element): { x: number; y: number } {
+  let x = 0
+  let y = 0
+  for (let node: Element | null = element; node; node = node.parentElement) {
+    const translate = getComputedStyle(node).translate
+    if (!translate || translate === 'none') continue
+    const [tx = '0px', ty = '0px'] = translate.split(' ')
+    if (tx.endsWith('px')) x += Number.parseFloat(tx)
+    if (ty.endsWith('px')) y += Number.parseFloat(ty)
+  }
+  return { x, y }
+}
 
 /** Publica en `<html>` la geometría de las pestañas y de la pieza de la pantalla (ver arriba). */
 function useArenaGeometry(rootRef: RefObject<HTMLDivElement | null>) {
@@ -134,15 +156,19 @@ function useArenaGeometry(rootRef: RefObject<HTMLDivElement | null>) {
       for (const name of names) html.style.removeProperty(name)
     }
     const update = () => {
+      // De la ventana a la página, con la pantalla en su sitio.
+      const shift = entryShift(root)
+      const dx = window.scrollX - shift.x
+      const dy = window.scrollY - shift.y
       const tabs = part('tabs')?.getBoundingClientRect()
-      if (tabs && tabs.height >= 1) set(SCREEN_TABS_BOTTOM_VAR, tabs.bottom + window.scrollY)
+      if (tabs && tabs.height >= 1) set(SCREEN_TABS_BOTTOM_VAR, tabs.bottom + dy)
       else clear([SCREEN_TABS_BOTTOM_VAR])
       const piece = part('piece')?.getBoundingClientRect()
       if (piece && piece.width >= 1 && piece.height >= 1) {
-        set(SCREEN_PIECE_X_VAR, piece.left + piece.width / 2 + window.scrollX)
-        set(SCREEN_PIECE_Y_VAR, piece.top + piece.height / 2 + window.scrollY)
-        set(SCREEN_PIECE_RIGHT_VAR, piece.right + window.scrollX)
-        set(SCREEN_PIECE_BOTTOM_VAR, piece.bottom + window.scrollY)
+        set(SCREEN_PIECE_X_VAR, piece.left + piece.width / 2 + dx)
+        set(SCREEN_PIECE_Y_VAR, piece.top + piece.height / 2 + dy)
+        set(SCREEN_PIECE_RIGHT_VAR, piece.right + dx)
+        set(SCREEN_PIECE_BOTTOM_VAR, piece.bottom + dy)
       } else clear(PIECE_VARS)
     }
     update()
