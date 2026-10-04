@@ -45,6 +45,18 @@
   list-style: none;
 }
 
+/* Cada pestaña cabe en la columna del centro: si su etiqueta no cabe, parte (abajo), nunca se sale. */
+.list > li {
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/*
+ * La etiqueta va en una línea mientras quepa; si no cabe en la columna del centro (una etiqueta larga en
+ * una ventana estrecha), parte en dos líneas equilibradas y la pestaña crece (44 px como poco): nunca
+ * queda bajo [Q] o [E] (§3.3 «Pestañas», v0.6.6; `RD-VIS-05`).
+ */
 .tab {
   --tab-fill: var(--bb-panel-veil);
   --tab-border: var(--bb-line-strong);
@@ -52,16 +64,19 @@
   isolation: isolate;
   display: inline-flex;
   align-items: center;
+  max-width: 100%;
   min-height: var(--bb-target);
-  padding: 0 calc(var(--bb-slant-sm) + var(--bb-space-4));
+  padding: var(--bb-space-1) calc(var(--bb-slant-sm) + var(--bb-space-4));
   border: 0;
   background: transparent;
   color: var(--bb-text-2);
   font-size: var(--bb-fs-xs);
   font-weight: var(--bb-weight-bold);
   letter-spacing: var(--bb-tracking-label);
+  line-height: var(--bb-leading-label);
   text-transform: uppercase;
-  white-space: nowrap;
+  text-wrap: balance;
+  white-space: normal;
 }
 
 /* Dos capas en paralelogramo: borde y relleno (como el marco, pero inclinado). */

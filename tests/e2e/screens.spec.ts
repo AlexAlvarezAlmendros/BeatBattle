@@ -417,6 +417,69 @@ for (const { viewport, path, heading, nav } of [
 }
 
 /**
+ * Pestañas en una ventana estrecha con teclado (§3.3 «Pestañas», v0.6.6): la etiqueta que no cabe en la
+ * columna del centro de `[Q] · pestañas · [E]` parte en dos líneas (44 px como poco) y ninguna pestaña
+ * queda bajo una tecla. Se prueba con las etiquetas de la pantalla y con una larga a propósito en la
+ * pestaña elegida (el componente tiene que aguantarla aunque hoy los rótulos sean cortos).
+ */
+async function tabsUnderKeys(page: Page, nav: string): Promise<string[]> {
+  return page.evaluate((selector) => {
+    const row = document.querySelector(selector)!
+    const [q, e] = [...row.querySelectorAll(':scope > [data-key]')].map((key) => key.getBoundingClientRect())
+    const overlaps = (a: DOMRect, b: DOMRect) =>
+      a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom
+    return [...row.querySelectorAll('a')]
+      .map((tab) => ({ tab, rect: tab.getBoundingClientRect() }))
+      .filter(
+        ({ rect }) =>
+          overlaps(rect, q!) || overlaps(rect, e!) || rect.right > e!.left || rect.left < q!.right,
+      )
+      .map(({ tab, rect }) => `${tab.textContent} (${Math.round(rect.left)}–${Math.round(rect.right)})`)
+  }, nav)
+}
+
+for (const viewport of [
+  { width: 320, height: 568 },
+  { width: 360, height: 640 },
+]) {
+  test.describe(`pestañas a ${viewport.width} px con teclado`, () => {
+    test.use({ viewport })
+
+    for (const { path, heading, nav } of [
+      {
+        path: '/legal/bases',
+        heading: 'Bases de la competición',
+        nav: 'main nav[aria-label="Documentos legales"]',
+      },
+      { path: '/ajustes', heading: 'Sonido y efectos', nav: 'main nav[aria-label="Secciones de ajustes"]' },
+    ]) {
+      test(`RD-VIS-05 / §3.3: en ${path}, ninguna pestaña queda bajo [Q] o [E]; la que no cabe parte en dos líneas`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        expect(await tabsUnderKeys(page, nav)).toEqual([])
+        // Una etiqueta larga en la pestaña elegida: parte en líneas dentro de su columna, a 44 px o más.
+        const tab = page.locator(`${nav} a[aria-current="page"]`)
+        await tab.evaluate((element) => {
+          element.lastChild!.textContent = 'Bases de la competición y otras letras pequeñas'
+        })
+        expect(await tabsUnderKeys(page, nav)).toEqual([])
+        const lines = await tab.evaluate((element) => {
+          const range = document.createRange()
+          range.selectNodeContents(element.lastChild!)
+          return new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size
+        })
+        expect(lines, 'la etiqueta larga parte en líneas').toBeGreaterThanOrEqual(2)
+        const box = (await tab.boundingBox())!
+        expect(box.height, 'objetivo de 44 px').toBeGreaterThanOrEqual(44)
+        expect(box.x + box.width, 'dentro de la ventana').toBeLessThanOrEqual(viewport.width)
+      })
+    }
+  })
+}
+
+/**
  * Proporción de píxeles de «tinta» en una caja de la pantalla: los que se apartan (más de 48 en algún
  * canal) del color más repetido de la caja, que es su fondo. Una flecha que no se pinta da 0.
  */
