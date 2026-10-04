@@ -60,8 +60,12 @@ dd {
   margin: 0;
 }
 
-ul[role="list"],
-ol[role="list"] {
+/*
+ * Listas sin viñetas (`role="list"`, que Safari quita con `list-style: none`). Con especificidad 0
+ * (`:where`): cualquier clase de una pieza manda sobre el reset. Antes (0,1,1) ganaba a una clase sola y
+ * borraba, por ejemplo, el `--bar-gap` que reservan las teclas de la barra antes de la firma (§3.4.1).
+ */
+:where(ul[role="list"], ol[role="list"]) {
   margin: 0;
   padding: 0;
   list-style: none;

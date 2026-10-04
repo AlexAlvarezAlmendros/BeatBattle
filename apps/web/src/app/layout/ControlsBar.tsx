@@ -130,8 +130,10 @@ export const CONTROLS_HEIGHT_VAR = '--controls-pinned-h'
 /**
  * Compone y mide la barra (§3.4.1):
  *
- * - **Teclas en su fila** (`data-keys-row`): con teclado, si las teclas no caben en una línea en su
- *   columna, al lado de la firma, van en su propia fila encima y parten si hace falta (jurado de la
+ * - **Teclas apretadas** (`data-keys-tight`) **o en su fila** (`data-keys-row`): con teclado, si las teclas
+ *   no caben en una línea en su columna, al lado de la firma y con `--bar-gap` antes de ella, primero se
+ *   aprietan sus huecos y, si aun así no caben, van en su propia fila encima y parten si hace falta
+ *   (cuarto pase del jurado, F1: de ~1362 a ~1407 px «M SONIDO» se pegaba a la firma; jurado de la
  *   0.28, L7: antes, las que no cabían pasaban a una línea oculta y, de 721 a unos 1400 px, faltaban
  *   «ESC VOLVER» o «M SONIDO»). Depende de lo que cabe de verdad (las teclas de la pantalla, la letra,
  *   el zoom), no de un ancho fijo: se mide en la composición de una fila (sin el atributo) y se vuelve a
@@ -165,9 +167,17 @@ function useBarLayout(
     const right = bar.querySelector<HTMLElement>('[data-frame-slot="controlsRight"]')
     const root = document.documentElement
     const update = () => {
+      bar.removeAttribute('data-keys-tight')
       bar.removeAttribute('data-keys-row')
       bar.removeAttribute('data-right-row')
-      bar.toggleAttribute('data-keys-row', !!keys && keysOverflow(keys))
+      if (keys && keysOverflow(keys)) {
+        // Primero se aprietan; si aun así no caben, a su fila (con sus huecos de siempre).
+        bar.setAttribute('data-keys-tight', '')
+        if (keysOverflow(keys)) {
+          bar.removeAttribute('data-keys-tight')
+          bar.setAttribute('data-keys-row', '')
+        }
+      }
       bar.toggleAttribute('data-right-row', !!signature && !!right && rightOverflows(bar, signature, right))
       const height = bar.getBoundingClientRect().height
       const unpinned = height > window.innerHeight * maxViewportShare()

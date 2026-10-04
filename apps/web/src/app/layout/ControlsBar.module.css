@@ -61,10 +61,12 @@
 }
 
 /*
- * Las teclas, en una fila de 44 px a la izquierda de la firma. Si no caben en una línea (lo mide
- * `ControlsBar`: aquí, la segunda línea, o una tecla sola más ancha que la columna, queda recortada), la
- * barra pone `data-keys-row` y van en su propia fila (más abajo): nunca se ve una tecla cortada por la
- * mitad ni falta ninguna.
+ * Las teclas, en una fila de 44 px a la izquierda de la firma, con `--bar-gap` reservado antes de ella
+ * (`padding-inline-end`: la última tecla nunca se pega a «UN JUEGO DE»). Si no caben en una línea (lo mide
+ * `ControlsBar`: aquí, la segunda línea, o una tecla sola más ancha que la columna, queda recortada),
+ * primero se aprietan sus huecos (`data-keys-tight`) y, si aun así no caben, la barra pone
+ * `data-keys-row` y van en su propia fila (más abajo): nunca se ve una tecla cortada por la mitad ni falta
+ * ninguna (§3.4.1).
  */
 .keys {
   grid-column: 1;
@@ -96,6 +98,16 @@
 
 .control > span:last-child {
   margin-left: var(--bb-space-1);
+}
+
+/*
+ * Teclas apretadas (`data-keys-tight`): el hueco entre grupos baja de 16 a 8 px antes de mandarlas a su
+ * fila (§3.4.1). De ~1360 a ~1410 px de ancho siguen así en la fila de la firma, con su `--bar-gap`: en
+ * su fila, la barra crecería 26 px y el menú de 1366 × 657 dejaría de caber sin desplazar (cuarto pase
+ * del jurado de la 0.28, F1). A 1440 × 900 caben con su hueco de siempre y la barra es la de la maqueta.
+ */
+.bar[data-keys-tight] .keys {
+  gap: var(--bb-space-2);
 }
 
 /* ── La firma ───────────────────────────────────────────────────────────────────────────── */

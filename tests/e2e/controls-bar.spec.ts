@@ -92,6 +92,74 @@ for (const { width, height } of [
 }
 
 /**
+ * Hueco entre la última tecla y la firma (§3.4.1 v0.6.6: «entre la última tecla y la firma queda siempre
+ * `--bar-gap`»). Mide el texto de la última tecla y el del primer rótulo de la firma («UN JUEGO DE») y lo
+ * compara con `--bar-gap` resuelto en la barra. Dice también si van en la misma fila.
+ */
+function keysToSignature(page: Page): Promise<{ gap: number; barGap: number; sameRow: boolean }> {
+  return page.evaluate(() => {
+    const bar = document.querySelector('footer')!
+    const last = bar.querySelector('ul')!.lastElementChild!
+    const text = document.createRange()
+    text.selectNodeContents(last)
+    const key = text.getBoundingClientRect()
+    const signature = bar.querySelector('[data-otp-signature] > span')!.getBoundingClientRect()
+    const probe = document.createElement('div')
+    probe.style.cssText = 'position:absolute;visibility:hidden;width:var(--bar-gap)'
+    bar.append(probe)
+    const barGap = probe.getBoundingClientRect().width
+    probe.remove()
+    const middle = (box: DOMRect) => (box.top + box.bottom) / 2
+    return {
+      gap: signature.left - key.right,
+      barGap,
+      sameRow: Math.abs(middle(key) - middle(signature)) <= 2,
+    }
+  })
+}
+
+/**
+ * Las teclas no se pegan a la firma (cuarto pase del jurado de la 0.28, F1): de ~1362 a ~1407 px «M
+ * SONIDO» acababa a 1 px de «UN JUEGO DE» y se leía «SONIDOUN JUEGO DE». El `padding-inline-end` de las
+ * teclas, que reserva `--bar-gap`, perdía frente al reset de las listas de `global.css` y la barra no veía
+ * el choque. Ahora, si no caben con su hueco, primero se aprietan y, solo si aun así no caben, van a su
+ * fila: a 1366 × 657 siguen en una fila (si fueran a la suya, la barra crecería 26 px y el menú dejaría de
+ * caber sin desplazar, `fit.spec.ts`).
+ */
+for (const { width, height } of [
+  { width: 1366, height: 657 },
+  { width: 1370, height: 768 },
+  { width: 1380, height: 700 },
+  { width: 1400, height: 800 },
+  { width: 1440, height: 900 },
+]) {
+  test.describe(`hueco de las teclas a ${width} × ${height} con teclado`, () => {
+    test.use({ viewport: { width, height } })
+
+    for (const { path, heading } of [
+      { path: '/dev/menu', heading: 'Beat Battle' },
+      { path: '/', heading: 'Beat Battle' },
+      { path: '/como-funciona', heading: 'Cómo se juega' },
+    ]) {
+      test(`RD-VIS-02 e / RF-OTP-01 (§3.4.1): en ${path} la última tecla queda a --bar-gap de la firma, en su fila`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        const { gap, barGap, sameRow } = await keysToSignature(page)
+        expect(barGap, '--bar-gap resuelto').toBeGreaterThan(0)
+        expect(sameRow, 'las teclas, en la fila de la firma').toBe(true)
+        expect(gap, `hueco de ${gap.toFixed(1)} px entre la última tecla y la firma`).toBeGreaterThanOrEqual(
+          barGap - 0.5,
+        )
+        const { hidden } = await hiddenKeys(page)
+        expect(hidden).toEqual([])
+      })
+    }
+  })
+}
+
+/**
  * Revisión de L7: con una sola tecla en la barra no hay otra que baje de línea, así que «no cabe» no se
  * notaba en el alto. Con los atajos de una tecla apagados (WCAG 2.1.4, `RNF-A11Y-08`), las pantallas
  * por defecto solo enseñan «ESC VOLVER»; en una columna más estrecha que ella (en /entrar a 390 px,
