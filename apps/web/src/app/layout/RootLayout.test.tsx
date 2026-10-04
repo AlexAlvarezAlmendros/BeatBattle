@@ -219,12 +219,14 @@ describe('RootLayout: zona de avisos del marco (§3.3)', () => {
     expect(regions()).toEqual([zone])
   })
 
+  // La parte animada de la zona de avisos llega en diferido (un `import()` con Motion): con la máquina
+  // cargada tarda más del segundo por defecto de `findBy*`. Se espera más, y el test, más aún.
   it('RNF-A11Y-07: un aviso lanzado desde cualquier página sale en la zona del marco', async () => {
     renderFrame('/jurado')
     act(() => {
       toast.success('Beat subido')
     })
     const polite = regions()[0]!.querySelector<HTMLElement>('[aria-live="polite"]')!
-    expect(await within(polite).findByText('Beat subido')).toBeInTheDocument()
-  })
+    expect(await within(polite).findByText('Beat subido', {}, { timeout: 10_000 })).toBeInTheDocument()
+  }, 20_000)
 })
