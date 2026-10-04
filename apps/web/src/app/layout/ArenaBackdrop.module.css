@@ -9,7 +9,7 @@
  * contrario del interior (`.straight`) lo endereza del todo.
  */
 .arena {
-  --split-x: 40vw;
+  --split-x: var(--bb-split-x-right);
   --burst-x: 26%;
   --burst-y: 34%;
   --skew: calc(-1 * var(--bb-split-angle));
@@ -23,7 +23,7 @@
 }
 
 .arena[data-wedge="left"] {
-  --split-x: 30vw;
+  --split-x: var(--bb-split-x-left);
   --burst-x: 18%;
   --burst-y: 46%;
 }

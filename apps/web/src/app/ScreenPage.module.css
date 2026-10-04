@@ -7,13 +7,13 @@
 .screen {
   /*
    * La columna de la pieza sigue a la cuña (tercer pase del jurado, L1): la diagonal de la arena de
-   * interiores corta el pie de la ventana en el 30 % del ancho (`ArenaBackdrop`, `--split-x`), así que
+   * interiores corta el pie de la ventana en `--bb-split-x-left` (30 % del ancho; `ArenaBackdrop`), así que
    * la columna mide ese 30 % menos el medianil y un poco de aire (400 px a 1440, como la de
    * `05-perfil`; 544 a 1920) y su pie no pisa la diagonal. El panel llega al medianil de la derecha: el
    * bloque va de lado a lado, centrado con la placa del HUD, en vez de quedarse con el tamaño de 1440
    * anclado a la izquierda. Entre 961 y ~1230 px no baja de 20 rem (cabe el pad de la 404).
    */
-  --screen-piece: clamp(20rem, calc(30vw - var(--bb-gutter) + var(--bb-space-4)), 36rem);
+  --screen-piece: clamp(20rem, calc(var(--bb-split-x-left) - var(--bb-gutter) + var(--bb-space-4)), 36rem);
   display: grid;
   grid-template-columns: minmax(0, var(--screen-piece)) minmax(0, 1fr);
   grid-template-rows: auto 1fr;

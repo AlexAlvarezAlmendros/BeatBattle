@@ -171,6 +171,10 @@
   --bb-split-band: 12px;
   --bb-split-rule: 3px;
   --bb-split-gap: 14px;
+  /* Dónde corta la diagonal el pie de la ventana: cuña a la derecha (menú) y a la izquierda (interiores).
+     Lo leen la arena (`ArenaBackdrop`) y las columnas que siguen a la cuña (`ScreenPage`). */
+  --bb-split-x-right: 40vw;
+  --bb-split-x-left: 30vw;
   /* Inclinaciones */
   --bb-tilt-sticker: -7deg; /* Pegatina OTP (±2° como mucho) */
   --bb-tilt-card: -3deg; /* Carta de luchador */
