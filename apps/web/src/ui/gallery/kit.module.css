@@ -27,6 +27,24 @@
   font-size: var(--bb-fs-title);
 }
 
+/*
+ * Con la placa del HUD («DESARROLLO · GALERÍA», desde 721 px) el título ya se ve ahí: el `<h1>` queda para
+ * los lectores de pantalla, como en las pantallas interiores (`ScreenPage`; acta de la 0.28, grupo 8). El
+ * rótulo y el resumen se siguen viendo. En móvil el HUD no lleva placa y el `<h1>` se ve.
+ */
+@media (min-width: 721px) {
+  .title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
 .summary {
   max-width: 64ch;
   color: var(--bb-text-2);

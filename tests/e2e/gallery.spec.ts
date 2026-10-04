@@ -53,7 +53,8 @@ test('RD-VIS-03: la galería pinta todas sus secciones y bloques, en el orden de
   await openGallery(page)
   await expect(page).toHaveTitle('Galería · Beat Battle')
   const main = page.getByRole('main')
-  await expect(main.getByRole('heading', { level: 1, name: 'Galería' })).toBeVisible()
+  // En escritorio el título se ve en la placa del HUD y el `<h1>` es para los lectores de pantalla.
+  await expect(main.getByRole('heading', { level: 1, name: 'Galería' })).toBeAttached()
 
   // El índice enlaza exactamente estas anclas, en este orden: una sección nueva sin test hace fallar.
   const index = main.getByRole('navigation', { name: 'Índice de la galería' })
@@ -85,6 +86,35 @@ test('RD-VIS-03: la galería pinta todas sus secciones y bloques, en el orden de
   await expect(main.locator('section#reloj')).toBeInViewport()
   expect(errors).toEqual([])
 })
+
+/**
+ * El título de la galería sale una sola vez (acta del jurado de la 0.28, grupo 8; tercer pase, L4): con
+ * la placa del HUD («DESARROLLO · GALERÍA», desde 721 px) el `<h1>` queda para los lectores de pantalla,
+ * como en las pantallas interiores; el rótulo y el resumen se siguen viendo. En móvil el HUD no lleva
+ * placa y el `<h1>` se ve.
+ */
+for (const viewport of [
+  { width: 1440, height: 900, plate: true },
+  { width: 721, height: 900, plate: true },
+  { width: 390, height: 844, plate: false },
+]) {
+  test(`RD-VIS-02 e: el título de la galería sale una sola vez (${viewport.width} px)`, async ({ page }) => {
+    await page.setViewportSize(viewport)
+    await openGallery(page)
+    const main = page.getByRole('main')
+    const heading = main.getByRole('heading', { level: 1, name: 'Galería' })
+    await expect(heading).toBeAttached()
+    const box = (await heading.boundingBox())!
+    if (viewport.plate) {
+      await expect(page.getByRole('banner').locator('[data-frame="title"]')).toContainText('Galería')
+      expect(box.width * box.height, 'el <h1> se ve además de la placa del HUD').toBeLessThanOrEqual(1)
+    } else {
+      expect(box.height, 'sin placa en el HUD, el <h1> se ve').toBeGreaterThan(20)
+    }
+    await expect(main.getByText('Beat Battle · banco de pruebas de la arena')).toBeVisible()
+    await expect(main.getByText(/^La base de la arena \(paleta/)).toBeVisible()
+  })
+}
 
 test('RD-MOT-03: el interruptor «Reducir movimiento» pone data-motion="reduced" y se deshace al salir', async ({
   page,
