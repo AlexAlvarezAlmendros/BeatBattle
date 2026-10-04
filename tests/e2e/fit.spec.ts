@@ -255,7 +255,7 @@ for (const touch of [true, false]) {
     test.use({ viewport: { width: 320, height: 568 }, isMobile: touch, hasTouch: touch })
 
     for (const path of ['/dev/menu', '/']) {
-      test(`§3.8.3 / WCAG 2.4.11: en ${path} la barra va pegada y, recorriendo las seis placas, cada una queda entera por encima de ella`, async ({
+      test(`RNF-A11Y-01 / RD-VIS-02 e / §3.8.3: en ${path} la barra va pegada y, recorriendo las seis placas, cada una queda entera por encima de ella`, async ({
         page,
       }) => {
         await open(page, path, 'Beat Battle')
