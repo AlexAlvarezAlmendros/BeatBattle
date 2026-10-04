@@ -71,6 +71,14 @@
   overflow-wrap: break-word;
 }
 
+/* El título en el panel (los legales: el nombre completo del documento, §3.8.14). */
+.panelTitle {
+  font-size: var(--bb-fs-2xl);
+  font-stretch: var(--bb-stretch-plate);
+  text-shadow: var(--bb-shadow-hard-sm);
+  overflow-wrap: break-word;
+}
+
 .piece {
   grid-area: piece;
   display: grid;
@@ -167,6 +175,11 @@
     align-self: stretch;
     align-content: center;
     justify-items: center;
+  }
+
+  /* El sello de las provisionales y de los legales, centrado en su columna (sin el margen de móvil). */
+  .stampBig {
+    margin: 0;
   }
 
   /*

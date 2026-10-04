@@ -97,6 +97,7 @@ const FEW_SCREENS = [
   { path: '/ajustes/sesiones', heading: 'Sesiones' },
   { path: '/ajustes/privacidad', heading: 'Privacidad' },
   { path: '/esto-no-existe', heading: 'Bonus stage' },
+  { path: '/legal/bases', heading: 'Bases de la competición' },
   { path: '/semanas', heading: 'Semanas' },
 ]
 
@@ -308,6 +309,54 @@ for (const viewport of [
         expect(fit.hidden, 'filas o párrafos escondidos').toEqual([])
       })
     }
+  })
+}
+
+/**
+ * Los legales (§3.8.14 «Admin y legales», v0.6.6) usan la plantilla de las interiores: el sello «EN
+ * OBRAS» en la columna de la pieza, centrado en ella, el bloque centrado entre el HUD y la barra y las
+ * pestañas en una fila de rótulos cortos, con el nombre completo en el título del panel.
+ */
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 1366, height: 657 },
+  { width: 1024, height: 768 },
+]) {
+  test.describe(`${viewport.width} × ${viewport.height}, legales`, () => {
+    test.use({ viewport })
+
+    test('RD-VIS-02 e: /legal/bases usa la plantilla de las interiores: sello en la columna de la pieza, bloque centrado y pestañas cortas en una fila (§3.8.14)', async ({
+      page,
+    }) => {
+      await open(page, '/legal/bases', 'Bases de la competición')
+      await settle(page)
+      const box = await block(page)
+      expect(
+        Math.abs(box.above - box.below),
+        `arriba ${box.above} px · abajo ${box.below} px`,
+      ).toBeLessThanOrEqual(24)
+      expect(
+        Math.abs(box.piece.bottom - box.panel.bottom),
+        'pieza y panel, del mismo alto',
+      ).toBeLessThanOrEqual(2)
+      // El sello, dentro de la columna de la pieza y centrado en ella.
+      const stamp = await boxes(page, { stamp: `${PIECE} [data-stamp]` })
+      const pieceMiddle = (box.piece.top + box.piece.bottom) / 2
+      const stampMiddle = (stamp.stamp.top + stamp.stamp.bottom) / 2
+      expect(Math.abs(pieceMiddle - stampMiddle), 'sello centrado en vertical').toBeLessThanOrEqual(8)
+      expect(stamp.stamp.left).toBeGreaterThanOrEqual(box.piece.left)
+      expect(stamp.stamp.right).toBeLessThanOrEqual(box.piece.right + 8)
+      // Las pestañas: rótulos cortos en una fila, con [E] justo después de la última.
+      const nav = 'main nav[aria-label="Documentos legales"]'
+      const tabs = page.locator(`${nav} a`)
+      await expect(tabs).toHaveText(['Bases', 'Términos', 'Privacidad', 'Cookies'])
+      const keys = await tabKeys(page, nav)
+      expect(keys.lines, 'pestañas en una fila').toBe(1)
+      expect(keys.e.left - keys.lastRight).toBeLessThanOrEqual(16)
+      // El nombre completo, en el título del panel (el <h1>).
+      await expect(page.locator(`${PANEL} h1`)).toHaveText('Bases de la competición')
+      await expect(page.locator(`${PANEL} h1`)).toBeVisible()
+    })
   })
 }
 

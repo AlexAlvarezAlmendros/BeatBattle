@@ -2,8 +2,9 @@ import { act, render, screen, within } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../i18n'
+import { LegalPage } from './LegalPage'
 import { RootLayout } from './layout/RootLayout'
-import { interiorScreen } from './layout/screen'
+import { interiorScreen, simpleScreen } from './layout/screen'
 import { NotFoundPage } from './NotFoundPage'
 import { PlaceholderPage } from './PlaceholderPage'
 
@@ -17,6 +18,18 @@ function renderAt(path: string) {
             path: 'semanas',
             handle: { screen: interiorScreen({ kicker: 'frame.plates.weeks', title: 'pages.weeks.title' }) },
             element: <PlaceholderPage title="Semanas" summary="Aquí irá el archivo." />,
+          },
+          {
+            // Los legales, en otra ruta que la de la 404 de abajo (`/legal/no-existe`).
+            path: 'documentos/:doc',
+            handle: {
+              screen: simpleScreen({ kicker: 'frame.plates.legal', title: 'frame.plates.legalTitle' }, [
+                'section',
+                'back',
+                'sound',
+              ]),
+            },
+            element: <LegalPage />,
           },
           {
             path: '*',
@@ -54,6 +67,27 @@ describe('plantilla de pantalla interior (0.26, §3.8.14)', () => {
     expect(screen.getByRole('banner').querySelector('[data-frame="title"]')).toHaveTextContent(
       t('pages.weeks.title'),
     )
+    await act(async () => {})
+  })
+
+  it('RD-VIS-02 e / §3.8.14: los legales llevan el sello en la columna de la pieza, las pestañas en rótulos cortos y el nombre completo como título del panel', async () => {
+    renderAt('/documentos/bases')
+    const main = screen.getByRole('main')
+    const panel = main.querySelector('[data-screen-part="panel"]') as HTMLElement
+    // El <h1> es el título del panel, con el nombre completo del documento.
+    expect(within(panel).getByRole('heading', { level: 1 })).toHaveTextContent(t('legal.docs.bases'))
+    // El sello «EN OBRAS», en la columna de la pieza (no en el panel).
+    const piece = main.querySelector('[data-screen-part="piece"]') as HTMLElement
+    expect(within(piece).getByText(t('screen.underConstruction'))).toHaveAttribute('data-stamp', 'red')
+    // Las pestañas, en su zona de la plantilla: rótulos cortos con el nombre completo como nombre accesible.
+    const nav = within(main).getByRole('navigation', { name: t('legal.navLabel') })
+    expect(nav.closest('[data-screen-part="tabs"]')).not.toBeNull()
+    const links = within(nav).getAllByRole('link')
+    expect(links.map((link) => link.textContent)).toEqual(
+      (['bases', 'terminos', 'privacidad', 'cookies'] as const).map((doc) => t(`legal.tabs.${doc}`)),
+    )
+    expect(links[0]).toHaveAccessibleName(t('legal.docs.bases'))
+    expect(links[2]).toHaveAccessibleName(t('legal.docs.privacidad'))
     await act(async () => {})
   })
 

@@ -57,6 +57,14 @@ export interface ScreenPageProps {
    */
   panelFirst?: boolean
   /**
+   * Dónde va el `<h1>` (§3.8.14). `head` (por defecto): en la cabeza, con su rótulo; en escritorio, si
+   * la ruta tiene placa en el HUD, solo para los lectores de pantalla. `panel`: el título del panel, a
+   * la vista (los legales: sus pestañas son rótulos cortos y el nombre completo va aquí). En los dos
+   * casos que no son `head`, la cabeza de móvil (donde el HUD no lleva placa) enseña el rótulo y el
+   * título de la placa del HUD («LEGAL · LETRA PEQUEÑA»), antes de las pestañas.
+   */
+  titlePlacement?: 'head' | 'panel'
+  /**
    * ¿El título ya se ve en la placa del HUD? Entonces el `<h1>` queda solo para los lectores de
    * pantalla en escritorio (en móvil el HUD no lleva placa y el título se ve). Por defecto, si la ruta
    * declara placa (`handle.screen.plate`).
@@ -88,14 +96,21 @@ export function ScreenPage({
   fill = false,
   panelFirst = false,
   titleInHud,
+  titlePlacement = 'head',
   actions,
   children,
   className,
 }: ScreenPageProps) {
   const screen = useScreen()
   const inHud = titleInHud ?? Boolean(screen.plate)
+  const heading = (
+    <h1 className={cx('bb-display', titlePlacement === 'panel' ? styles.panelTitle : styles.title)}>
+      {title}
+    </h1>
+  )
   const panel = (
     <Frame cut="lg" className={styles.panel} data-screen-part="panel">
+      {titlePlacement === 'panel' && heading}
       {(badge || summary) && (
         <div className={styles.intro}>
           {badge}
@@ -117,10 +132,18 @@ export function ScreenPage({
       data-panel-first={panelFirst || undefined}
     >
       <DocumentTitle page={documentTitle ?? undefined} />
-      <div className={styles.head} data-screen-part="head">
-        {kicker && <p className={cx('bb-label', styles.kicker)}>{kicker}</p>}
-        <h1 className={cx('bb-display', styles.title)}>{title}</h1>
-      </div>
+      {titlePlacement === 'head' ? (
+        <div className={styles.head} data-screen-part="head">
+          {kicker && <p className={cx('bb-label', styles.kicker)}>{kicker}</p>}
+          {heading}
+        </div>
+      ) : (
+        // La placa del HUD, en la cabeza de móvil: dibujo, como la placa (el <h1> va en otro sitio).
+        <div className={styles.head} data-screen-part="head" aria-hidden="true">
+          <p className={cx('bb-label', styles.kicker)}>{screen.plate ? t(screen.plate.kicker) : kicker}</p>
+          <p className={cx('bb-display', styles.title)}>{screen.plate ? t(screen.plate.title) : title}</p>
+        </div>
+      )}
       {tabs && (
         <div className={styles.tabs} data-screen-part="tabs">
           {tabs}

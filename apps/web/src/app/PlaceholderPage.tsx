@@ -21,6 +21,8 @@ interface PlaceholderPageProps {
   tabs?: ReactNode
   /** La pantalla llena el alto entre el HUD y la barra (`ScreenPage`): solo las de contenido. */
   fill?: boolean
+  /** Dónde va el `<h1>` (`ScreenPage`): `panel` en los legales. */
+  titlePlacement?: ScreenPageProps['titlePlacement']
   children?: ReactNode
 }
 
@@ -38,6 +40,7 @@ export function PlaceholderPage({
   layout,
   tabs,
   fill,
+  titlePlacement,
   children,
 }: PlaceholderPageProps) {
   return (
@@ -51,6 +54,7 @@ export function PlaceholderPage({
       layout={layout}
       tabs={tabs}
       fill={fill}
+      titlePlacement={titlePlacement}
     >
       {children}
     </ScreenPage>

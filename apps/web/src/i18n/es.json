@@ -331,7 +331,13 @@
       "privacidad": "Política de privacidad",
       "cookies": "Política de cookies"
     },
-    "navLabel": "Documentos legales"
+    "navLabel": "Documentos legales",
+    "tabs": {
+      "bases": "Bases",
+      "terminos": "Términos",
+      "privacidad": "Privacidad",
+      "cookies": "Cookies"
+    }
   },
   "ui": {
     "button": {

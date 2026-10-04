@@ -18,7 +18,13 @@ import styles from './Tabs.module.css'
 
 export interface TabLink {
   to: string
+  /** Lo que se ve en la pestaña (un rótulo corto, como «BASES»). */
   label: string
+  /**
+   * Nombre accesible completo, si el rótulo es una abreviatura («Bases de la competición»). Contiene lo
+   * que se ve, para que el control por voz la encuentre por su rótulo (WCAG 2.5.3).
+   */
+  name?: string
 }
 
 /**
@@ -142,7 +148,13 @@ export function TabLinks({
       <ul role="list" className={styles.list} onKeyDown={roving.onKeyDown} onBlur={onBlur}>
         {links.map((link, index) => (
           <li key={link.to}>
-            <NavLink {...roving.getItemBaseProps(index)} to={link.to} className={styles.tab} end>
+            <NavLink
+              {...roving.getItemBaseProps(index)}
+              to={link.to}
+              className={styles.tab}
+              aria-label={link.name}
+              end
+            >
               <Cursor shape="slant" slant="sm" />
               {link.label}
             </NavLink>
