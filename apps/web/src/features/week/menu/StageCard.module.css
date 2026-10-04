@@ -343,13 +343,28 @@
 }
 
 /*
- * Móvil bajo (≤ 700 px de alto): todo más junto. Arriba y abajo, 4 px dentro del marco: deja ese alto a la
- * franja de «ELIGE MODO», que lleva aire (`MainMenu`), y a 360 × 640 todo sigue cabiendo.
+ * Móvil con teclado y ratón: el rótulo de arriba («SEMANA 41 · ESCENARIO», «PRÓXIMO DROP») no se pliega y
+ * empieza en la esquina del chaflán `--bb-cut-lg`. Va `--bb-space-3` por debajo del borde y, de lado, a la
+ * medida del chaflán como poco: con 16 px la «P» cruzaba el chaflán y, con los 4 px del móvil bajo, la tilde
+ * de la «Ó» tocaba el borde rojo (jurado de la 0.28, cierre, K7: «/» a 720 × 450 y 320 × 568). En táctil, la
+ * de la maqueta (más abajo).
  */
+@media (max-width: 720px) {
+  .card {
+    padding-inline: var(--bb-cut-lg);
+  }
+}
+
+@media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse) {
+  .card {
+    padding-inline: var(--bb-space-4);
+  }
+}
+
+/* Móvil bajo (≤ 700 px de alto): todo más junto. */
 @media (max-width: 720px) and (max-height: 700px) {
   .card {
     gap: var(--bb-space-1);
-    padding: var(--bb-space-1) var(--bb-space-4);
   }
 }
 
@@ -358,7 +373,9 @@
  * junto al reloj, como en la maqueta `01-menu-375x667` (jurado de la 0.28, cierre: a 375 × 667 y
  * 360 × 640 partía en dos líneas, y a 320 × 568 en tres). El rótulo no parte; si con el reloj no cabe en
  * la fila (por debajo de unos 350 px), los dígitos bajan debajo de él. Para que quepa a 360 px, la tarjeta
- * aprieta sus rellenos de los lados y la separación del play.
+ * aprieta sus rellenos de los lados y la separación del play. Arriba y abajo, 4 px dentro del marco: deja
+ * ese alto a la franja de «ELIGE MODO», que lleva aire (`MainMenu`), y a 360 × 640 todo sigue cabiendo. Solo
+ * en táctil: con teclado el rótulo no se pliega y necesita su sitio (más arriba).
  */
 @media (max-width: 720px) and (max-height: 700px) and (hover: none),
   (max-width: 720px) and (max-height: 700px) and (pointer: coarse) {
@@ -367,7 +384,7 @@
   }
 
   .card {
-    padding-inline: var(--bb-space-3);
+    padding: var(--bb-space-1) var(--bb-space-3);
   }
 
   .play {

@@ -1673,3 +1673,59 @@ for (const viewport of [
     })
   })
 }
+
+/** Un token de longitud resuelto en píxeles (`--bb-space-3`, `--bb-cut-lg`). */
+function tokenPx(page: Page, token: string): Promise<number> {
+  return page.evaluate((name) => {
+    const probe = document.createElement('div')
+    probe.style.cssText = `position:absolute;visibility:hidden;width:var(${name})`
+    document.body.append(probe)
+    const width = probe.getBoundingClientRect().width
+    probe.remove()
+    return width
+  }, token)
+}
+
+/**
+ * El rótulo de arriba de la tarjeta de la semana con teclado y ratón en la composición de móvil (jurado de
+ * la 0.28, cierre, K7): en «/» a 720 × 450 y 320 × 568, «PRÓXIMO DROP» empezaba 4 px bajo el borde del
+ * marco (la tilde de la «Ó» tocaba el borde rojo y la «P» cruzaba el chaflán de arriba a la izquierda): la
+ * regla del móvil bajo apretaba el relleno también con teclado, donde el rótulo no se pliega. Con el rótulo
+ * a la vista, el relleno de arriba es `--bb-space-3` como poco y la sangría, la del chaflán (`--bb-cut-lg`).
+ */
+for (const viewport of [
+  { width: 720, height: 450 },
+  { width: 320, height: 568 },
+  { width: 360, height: 640 },
+  { width: 390, height: 844 },
+]) {
+  test.describe(`rótulo de la tarjeta a ${viewport.width} × ${viewport.height} con teclado`, () => {
+    test.use({ viewport })
+
+    for (const path of ['/', '/dev/menu']) {
+      test(`RD-VIS-02 e / RD-VIS-05 (§3.8.3): en ${path} el rótulo de la tarjeta de la semana va bajo el borde y fuera del chaflán`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        const [space3, cut] = [await tokenPx(page, '--bb-space-3'), await tokenPx(page, '--bb-cut-lg')]
+        const kicker = await page.evaluate(() => {
+          const card = document.querySelector('main article')!
+          const label = card.querySelector('p .bb-label')!
+          const range = document.createRange()
+          range.selectNodeContents(label)
+          const text = range.getBoundingClientRect()
+          const box = card.getBoundingClientRect()
+          return {
+            visible: label.checkVisibility(),
+            paddingTop: Number.parseFloat(getComputedStyle(card).paddingTop),
+            indent: text.left - box.left,
+          }
+        })
+        expect(kicker.visible, 'con teclado el rótulo no se pliega').toBe(true)
+        expect(kicker.paddingTop).toBeGreaterThanOrEqual(space3 - 0.5)
+        expect(kicker.indent, `sangría de ${kicker.indent.toFixed(1)} px`).toBeGreaterThanOrEqual(cut - 0.5)
+      })
+    }
+  })
+}
