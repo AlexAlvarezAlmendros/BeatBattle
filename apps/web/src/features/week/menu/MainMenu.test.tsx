@@ -2,9 +2,11 @@ import { act, fireEvent, getDefaultNormalizer, render, screen, within } from '@t
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { MOBILE_QUERY } from '../../../app/layout/ArenaBackdrop'
 import { RootLayout } from '../../../app/layout/RootLayout'
 import { MENU_SCREEN } from '../../../app/layout/screen'
 import { t } from '../../../i18n'
+import { mockMatchMedia } from '../../../ui/hooks/mockMatchMedia'
 import { MainMenu } from './MainMenu'
 import type { MenuModel } from './model'
 
@@ -140,6 +142,25 @@ describe('MainMenu (0.24, §3.8.3)', () => {
     expect(screen.getByRole('contentinfo').querySelector('[data-chronicle] [data-credit]')).toHaveTextContent(
       /Inserta tu beat · Crédito 01/,
     )
+  })
+
+  it('RD-VIS-02 e / §3.8.3: en la composición estrecha con teclado y ratón, «ELIGE MODO» y sus placas van antes que la tarjeta (también en el DOM); en táctil, después', () => {
+    const media = mockMatchMedia({ [MOBILE_QUERY]: true })
+    try {
+      renderMenu()
+      const nav = screen.getByRole('navigation', { name: t('home.menu.title') })
+      const card = screen.getByRole('article', { name: WEEK.title })
+      const precedes = (a: Node, b: Node) =>
+        Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
+      expect(precedes(nav, card)).toBe(true)
+      // La tarjeta sale de la sección del título (el logo y el lockup siguen ahí, antes que las placas).
+      expect(screen.getByRole('region', { name: t('home.title.label') })).not.toContainElement(card)
+      // En táctil, el orden de la maqueta: la tarjeta antes que las placas.
+      act(() => media.set('(hover: none), (pointer: coarse)', true))
+      expect(precedes(screen.getByRole('article', { name: WEEK.title }), nav)).toBe(true)
+    } finally {
+      media.restore()
+    }
   })
 
   it('RD-MOT-05: con el foco en ningún control, ↓ lleva el cursor al menú e Intro entra', async () => {

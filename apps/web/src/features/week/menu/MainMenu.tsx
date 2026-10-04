@@ -7,6 +7,7 @@ import {
   useLayoutEffect,
   useRef,
 } from 'react'
+import { MOBILE_QUERY } from '../../../app/layout/ArenaBackdrop'
 import { Chronicle, CreditLine } from '../../../app/layout/Chronicle'
 import { HudStat, PlayerCard } from '../../../app/layout/PlayerCard'
 import { FrameSlot } from '../../../app/layout/slots'
@@ -17,6 +18,7 @@ import { Frame } from '../../../ui/Frame'
 import { cx } from '../../../ui/forceState'
 import { GameLogo, logoAspect } from '../../../ui/GameLogo'
 import { useIdleMenuKeys } from '../../../ui/hooks/useIdleMenuKeys'
+import { useMediaQuery } from '../../../ui/hooks/useMediaQuery'
 import { useRovingMenu } from '../../../ui/hooks/useRovingMenu'
 import { MenuPlate, useMenuPlateFit } from '../../../ui/MenuPlate'
 import { RoundClock } from '../../../ui/RoundClock'
@@ -41,6 +43,9 @@ const bold = (text: ReactNode) => <b>{text}</b>
 
 /** La proporción del logo en dos líneas, para que el lockup (fuera del logo) se mida con él (§3.8.3). */
 const BRAND_STYLE = { '--game-logo-aspect': logoAspect() } as CSSProperties
+
+/** Táctil: el mismo criterio que el CSS de los pliegues del móvil (`hover: none` o `pointer: coarse`). */
+const TOUCH_QUERY = '(hover: none), (pointer: coarse)'
 
 /**
  * Qué hace cada modo según la semana y el jugador (§3.8.3): a dónde lleva, su dato, si está
@@ -201,6 +206,15 @@ export function MainMenu({ model }: { model: MenuModel }) {
   // Las flechas e Intro, con el foco en ningún control (la página recién cargada), van al menú.
   useIdleMenuKeys(menu, entries.length, listRef)
 
+  // Composición estrecha con teclado y ratón (≤ 720 px sin táctil; §3.8.3 v0.6.7): no se pliega nada y la
+  // tarjeta entera iba antes que las placas, así que el menú abría sin ninguna a la vista. Ahí «ELIGE MODO»,
+  // sus placas y su ayuda van antes que la tarjeta, en la pantalla y en el DOM (el orden de lectura y de
+  // Tab sigue al que se ve). En táctil, el orden de la maqueta.
+  const narrow = useMediaQuery(MOBILE_QUERY)
+  const touch = useMediaQuery(TOUCH_QUERY)
+  const modesFirst = narrow && !touch
+  const card = <StageCard week={model.week} />
+
   const { week, player } = model
   // La crónica empieza por el crédito solo con la semana abierta a envíos; en `voting` la barra no invita
   // a subir y empieza por el cierre (§3.8.3 v0.6.7).
@@ -211,7 +225,11 @@ export function MainMenu({ model }: { model: MenuModel }) {
       : [t('home.chronicle.closed'), ...model.chronicle]
 
   return (
-    <div className={styles.menu} data-week={week ? week.phase : 'empty'}>
+    <div
+      className={styles.menu}
+      data-week={week ? week.phase : 'empty'}
+      data-modes-first={modesFirst || undefined}
+    >
       <h1 className="sr-only">{t('pages.home.title')}</h1>
 
       {player && (
@@ -262,7 +280,7 @@ export function MainMenu({ model }: { model: MenuModel }) {
           <GameLogo className={styles.logoCompact} compact />
           <TitleLockup className={styles.lockup} />
         </div>
-        <StageCard week={week} />
+        {!modesFirst && card}
       </section>
 
       <nav className={styles.modes} aria-labelledby={titleId}>
@@ -305,6 +323,7 @@ export function MainMenu({ model }: { model: MenuModel }) {
           </p>
         </Frame>
       </nav>
+      {modesFirst && card}
     </div>
   )
 }

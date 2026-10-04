@@ -511,6 +511,26 @@
 }
 
 /*
+ * Composición estrecha con teclado y ratón (≤ 720 px con puntero fino; `MainMenu` pone `data-modes-first` y
+ * saca la tarjeta de la sección del título): el logo con su lockup, «ELIGE MODO» con sus placas y su ayuda,
+ * y después la tarjeta entera (§3.8.3 v0.6.7). Con la tarjeta primero, el menú abría sin ninguna placa a la
+ * vista (jurado de la 0.28, L8 y cierre, K3). Bajo el lockup, lo mismo que dejaba la tarjeta
+ * (`--bb-space-3`: la pegatina cuelga de la fila y su tinta queda a `--bb-space-2` de la franja); entre la
+ * ayuda y la tarjeta, `--bb-space-4`.
+ */
+.menu[data-modes-first] {
+  row-gap: 0;
+}
+
+.menu[data-modes-first] > .modes {
+  margin-top: var(--bb-space-3);
+}
+
+.menu[data-modes-first] > article {
+  margin-top: var(--bb-space-4);
+}
+
+/*
  * Móvil táctil: sin panel de ayuda, como en la maqueta (lo sigue leyendo el lector de pantalla por el
  * `aria-describedby` de cada opción). Con teclado y ratón en una ventana estrecha o ampliada se queda
  * debajo de las placas: ampliar no quita información (WCAG 1.4.4 y 1.4.10).

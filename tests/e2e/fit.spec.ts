@@ -1732,12 +1732,26 @@ function mobileHead(page: Page) {
     const title = document.createRange()
     title.selectNodeContents(head)
     const plate = main.querySelector('[data-menu-plate]')!.getBoundingClientRect()
+    // Lo que va justo encima de la franja: la tarjeta o, en la composición estrecha con teclado (las placas
+    // antes que la tarjeta, §3.8.3 v0.6.7), el lockup con la pegatina que cuelga de su fila.
+    const modesFirst = Boolean(
+      head.compareDocumentPosition(main.querySelector('article')!) & Node.DOCUMENT_POSITION_FOLLOWING,
+    )
+    const lockup = main.querySelector('[data-otp-signature]')!
+    const above = modesFirst
+      ? Math.max(
+          lockup.closest('section > div > *')!.getBoundingClientRect().bottom,
+          lockup.querySelector('img')!.getBoundingClientRect().bottom,
+        )
+      : card.bottom
     return {
       clock,
+      modesFirst,
       font: Number.parseFloat(getComputedStyle(head).fontSize),
       padding: [Number.parseFloat(style.paddingTop), Number.parseFloat(style.paddingBottom)],
-      // Del pie de la tarjeta al texto de «ELIGE MODO», y del pie de la franja a la primera placa.
-      fromCard: title.getBoundingClientRect().top - card.bottom,
+      // Del pie de la pieza de encima (la tarjeta o el lockup) al texto de «ELIGE MODO», y del pie de la franja
+      // a la primera placa.
+      fromCard: title.getBoundingClientRect().top - above,
       toPlates: plate.top - band.getBoundingClientRect().bottom,
     }
   })
@@ -1784,7 +1798,68 @@ for (const viewport of [
       // El anillo del cursor sale 7 px de la placa (`--bb-cursor-gap` + `--bb-stroke-cursor`): bajo la franja,
       // eso y aire.
       expect(head.toPlates).toBeGreaterThanOrEqual(8)
+      // Con teclado, la franja va justo bajo el lockup (las placas antes que la tarjeta, §3.8.3 v0.6.7).
+      expect(head.modesFirst).toBe(!viewport.touch)
     })
+  })
+}
+
+/**
+ * Composición estrecha con teclado y ratón (§3.8.3 v0.6.7; jurado de la 0.28, L8 y cierre, K3): con la
+ * tarjeta entera antes que las placas, a 390 × 844, 375 × 667, 360 × 640, 320 × 568 y 720 × 450 el menú
+ * abría sin ninguna placa a la vista. Ahora van el logo y el lockup, «ELIGE MODO» con sus placas y su
+ * ayuda, y después la tarjeta entera, en la pantalla y en el DOM: la placa 01 se ve entera al abrir, por
+ * encima de lo que la barra deja pegado al pie. En táctil no cambia nada (la tarjeta va antes, como en la
+ * maqueta `01-menu-390x844`).
+ */
+for (const viewport of [
+  { width: 360, height: 640, touch: false },
+  { width: 375, height: 667, touch: false },
+  { width: 390, height: 844, touch: false },
+  { width: 320, height: 568, touch: false },
+  { width: 720, height: 450, touch: false },
+  { width: 390, height: 844, touch: true },
+]) {
+  test.describe(`orden del menú a ${viewport.width} × ${viewport.height}${viewport.touch ? ' táctil' : ' con teclado'}`, () => {
+    test.use({
+      viewport: { width: viewport.width, height: viewport.height },
+      isMobile: viewport.touch,
+      hasTouch: viewport.touch,
+    })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`RD-VIS-02 e / §3.8.3: en ${path} la placa 01 se ve al abrir${viewport.touch ? '' : ', con «ELIGE MODO» y sus placas antes que la tarjeta (también en el DOM)'}`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        const view = await page.evaluate(() => {
+          window.scrollTo(0, 0)
+          const main = document.querySelector('main')!
+          const bar = document.querySelector('footer')!
+          const pinned = /sticky|fixed/.test(getComputedStyle(bar).position)
+          const nav = main.querySelector('nav')!
+          const card = main.querySelector('article')!
+          const plate = main.querySelector('[data-menu-plate]')!.getBoundingClientRect()
+          return {
+            // Lo que tapa la barra al abrir: lo que queda bajo su borde de arriba si va pegada (despegada, la
+            // fila de la firma sigue pegada al pie y su borde es el de esa fila).
+            limit: pinned
+              ? Math.min(bar.getBoundingClientRect().top, window.innerHeight)
+              : window.innerHeight,
+            plate: { top: plate.top, bottom: plate.bottom },
+            modesFirst: Boolean(nav.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING),
+            cardAbove: card.getBoundingClientRect().bottom <= nav.getBoundingClientRect().top + 0.5,
+          }
+        })
+        expect(view.modesFirst, 'las placas antes que la tarjeta en el DOM').toBe(!viewport.touch)
+        expect(view.cardAbove, 'la tarjeta, encima de las placas en la pantalla').toBe(viewport.touch)
+        expect(view.plate.top, 'la placa 01 empieza en la ventana').toBeGreaterThanOrEqual(0)
+        expect(view.plate.bottom, 'la placa 01 acaba por encima de la barra').toBeLessThanOrEqual(
+          view.limit + 0.5,
+        )
+      })
+    }
   })
 }
 
