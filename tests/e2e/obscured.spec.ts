@@ -25,6 +25,75 @@ function focusedVersusBar(page: Page) {
   })
 }
 
+/**
+ * Lo que se sale de la ventana del foco de cada control de la barra de controles (jurado de la 0.28,
+ * L6): el contorno (3 px a 4 px de la caja) y el halo (`--bb-focus-halo`, 10 px), con lo que de ellos
+ * deje ver un `clip-path` del propio control. Se enfoca cada uno con el teclado ya en uso (Tab antes),
+ * para que sea `:focus-visible`.
+ */
+async function barRingsOutsideWindow(page: Page): Promise<string[]> {
+  await page.keyboard.press('Tab')
+  const controls = page.getByRole('contentinfo').locator('a[href], button')
+  const outside: string[] = []
+  for (const control of await controls.all()) {
+    if (!(await control.isVisible())) continue
+    await control.focus()
+    const result = await control.evaluate((element) => {
+      const style = getComputedStyle(element)
+      const px = (value: string) => Number.parseFloat(value) || 0
+      const outline = style.outlineStyle === 'none' ? 0 : px(style.outlineOffset) + px(style.outlineWidth)
+      // Extensión de la sombra (el último valor en px de `box-shadow`) y lo que deja ver un `inset()`.
+      const spread =
+        style.boxShadow === 'none' ? 0 : px(style.boxShadow.match(/(-?[\d.]+)px\s*$/)?.[1] ?? '0')
+      const clip = style.clipPath.startsWith('inset(')
+        ? -px(style.clipPath.slice(6))
+        : Number.POSITIVE_INFINITY
+      const extent = Math.max(outline, Math.min(spread, clip))
+      const box = element.getBoundingClientRect()
+      const ring = {
+        left: box.left - extent,
+        top: box.top - extent,
+        right: box.right + extent,
+        bottom: box.bottom + extent,
+      }
+      const inside =
+        ring.left >= -0.5 &&
+        ring.top >= -0.5 &&
+        ring.right <= window.innerWidth + 0.5 &&
+        ring.bottom <= window.innerHeight + 0.5
+      return {
+        focusVisible: element.matches(':focus-visible'),
+        inside,
+        label: (element.getAttribute('aria-label') ?? element.textContent ?? '').trim().slice(0, 32),
+        ring: `${ring.left.toFixed(1)},${ring.top.toFixed(1)} → ${ring.right.toFixed(1)},${ring.bottom.toFixed(1)}`,
+      }
+    })
+    if (!result.focusVisible) outside.push(`${result.label}: sin :focus-visible`)
+    else if (!result.inside) outside.push(`${result.label}: ${result.ring}`)
+  }
+  return outside
+}
+
+for (const { width, height, touch, paths } of [
+  { width: 1440, height: 900, touch: false, paths: ['/dev/menu', '/como-funciona'] },
+  { width: 1024, height: 768, touch: false, paths: ['/dev/menu', '/como-funciona'] },
+  { width: 390, height: 844, touch: false, paths: ['/dev/menu', '/como-funciona'] },
+  { width: 390, height: 844, touch: true, paths: ['/como-funciona'] },
+]) {
+  test.describe(`barra de controles a ${width} × ${height}${touch ? ' táctil' : ''}`, () => {
+    test.use({ viewport: { width, height }, isMobile: touch, hasTouch: touch })
+
+    for (const path of paths) {
+      test(`RNF-A11Y-01 / WCAG 2.4.11: en ${path}, el anillo y el halo del foco de cada pieza de la barra caben en la ventana`, async ({
+        page,
+      }) => {
+        await open(page, path, path === '/como-funciona' ? 'Cómo se juega' : 'Beat Battle')
+        expect(await barRingsOutsideWindow(page)).toEqual([])
+      })
+    }
+  })
+}
+
 for (const viewport of [
   { width: 320, height: 256, name: '1280 px al 400 %' },
   { width: 640, height: 360, name: '1280 × 720 al 200 %' },

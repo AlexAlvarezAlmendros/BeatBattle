@@ -3,8 +3,14 @@
  * 2 px y línea discontinua encima. Pegada al pie de la ventana mientras se desplaza la pantalla
  * (`sticky`), con su alto real como margen del foco (`--controls-pinned-h`, que mide `ControlsBar`;
  * global.css). Tres columnas: teclas, firma centrada y dato.
+ *
+ * Las piezas (44 px) van centradas en los 58 px de la barra contando el filete (7 px encima y 7 debajo),
+ * y por debajo queda siempre `--bar-ring`, lo que el anillo del foco se sale de la pieza (4 + 3 px): pegada
+ * al pie de la ventana, el anillo de la firma, de «Legal» o de la pausa ya no se corta por abajo (jurado
+ * de la 0.28, L6).
  */
 .bar {
+  --bar-ring: calc(var(--bb-cursor-gap) + var(--bb-stroke-cursor));
   position: sticky;
   bottom: 0;
   z-index: var(--bb-z-controls);
@@ -12,10 +18,18 @@
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: var(--bb-space-5);
-  height: var(--bb-controls-h);
-  padding: 0 var(--bb-gutter);
+  min-height: var(--bb-controls-h);
+  padding: calc(var(--bar-ring) - var(--bb-stroke)) var(--bb-gutter) var(--bar-ring);
   border-top: var(--bb-stroke) solid var(--bb-red);
   background: var(--bb-black);
+}
+
+/*
+ * El halo del foco (`--bb-focus-halo`, 10 px) no pasa del anillo dentro de la barra: con 7 px de aire
+ * bajo la pieza, los 3 px de más se saldrían de la ventana. El anillo se ve entero, como en todas partes.
+ */
+.bar :focus-visible {
+  clip-path: inset(calc(-1 * var(--bar-ring)));
 }
 
 /*
@@ -130,9 +144,7 @@
   .bar:has(.right[data-claimed]) {
     grid-template-rows: auto auto;
     row-gap: 0;
-    height: auto;
-    min-height: var(--bb-controls-h);
-    padding-block: var(--bb-space-1);
+    padding-block: var(--bb-space-1) var(--bar-ring);
   }
 
   .right[data-claimed] {
@@ -194,9 +206,10 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 0 var(--bb-space-5);
-    height: auto;
-    min-height: calc(var(--bb-target) + var(--bb-space-2));
-    padding: var(--bb-space-1) var(--bb-gutter);
+    min-height: 0;
+    /* Los mismos 8 px de aire que antes (la barra mide lo mismo y el menú cabe sin desplazar), con
+       `--bar-ring` debajo para el anillo del foco y el resto encima. */
+    padding: calc(var(--bb-space-2) - var(--bar-ring)) var(--bb-gutter) var(--bar-ring);
     border-top-color: var(--bb-line);
   }
 
