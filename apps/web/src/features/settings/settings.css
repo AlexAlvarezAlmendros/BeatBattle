@@ -158,13 +158,20 @@
  * panel, las filas de la ayuda se reparten su alto, con «Volver al menú» al pie.
  */
 @media (min-width: 961px) {
+  /*
+   * La vista previa crece con lo que deja la columna (base 0), no con su alto natural: con `auto`, las
+   * placas medían ya el doble y alargaban la pantalla, que en ventanas bajas (1440 × 789) se desplazaba
+   * aunque el panel cupiera. Si la columna es más baja, las placas vuelven a su alto (nunca menos que
+   * su contenido).
+   */
   .settings-preview {
-    flex: 1 0 auto;
+    flex: 1 1 0;
+    min-height: 0;
     grid-template-rows: minmax(0, 1fr) auto;
   }
 
   .settings-preview-list {
-    grid-auto-rows: minmax(var(--bb-space-14), calc(2 * var(--bb-space-14)));
+    grid-auto-rows: minmax(auto, calc(2 * var(--bb-space-14)));
     align-content: start;
   }
 

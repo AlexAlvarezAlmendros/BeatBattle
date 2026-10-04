@@ -339,6 +339,22 @@ for (const viewport of [
   })
 }
 
+test.describe('1440 × 789, Opciones', () => {
+  test.use({ viewport: { width: 1440, height: 789 } })
+
+  test('RD-VIS-02 e: Opciones cabe sin desplazar cuando cabe su panel: las placas de la vista previa no alargan la pantalla (J3r)', async ({
+    page,
+  }) => {
+    await open(page, '/ajustes', 'Sonido y efectos')
+    await settle(page)
+    const overflow = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight)
+    expect(overflow, `${overflow} px de desplazamiento`).toBeLessThanOrEqual(1)
+    const box = await boxes(page, { panel: PANEL, piece: PIECE })
+    expect(box.panel.bottom).toBeLessThanOrEqual(box.bar.top)
+    expect(box.bar.top - box.piece.bottom).toBeLessThanOrEqual(BAR_GAP)
+  })
+})
+
 /**
  * Las pestañas con teclas (§3.3 «Pestañas»): [Q] y [E] a los lados de la fila y, si parte, las líneas
  * entre [Q] y [E], nunca una tecla sola en su línea encima o debajo.
