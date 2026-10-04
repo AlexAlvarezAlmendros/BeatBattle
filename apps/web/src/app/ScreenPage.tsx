@@ -59,11 +59,13 @@ export interface ScreenPageProps {
   /**
    * Dónde va el `<h1>` (§3.8.14). `head` (por defecto): en la cabeza, con su rótulo; en escritorio, si
    * la ruta tiene placa en el HUD, solo para los lectores de pantalla. `panel`: el título del panel, a
-   * la vista (los legales: sus pestañas son rótulos cortos y el nombre completo va aquí). En los dos
-   * casos que no son `head`, la cabeza de móvil (donde el HUD no lleva placa) enseña el rótulo y el
-   * título de la placa del HUD («LEGAL · LETRA PEQUEÑA»), antes de las pestañas.
+   * la vista (los legales: sus pestañas son rótulos cortos y el nombre completo va aquí). `tabs`: solo
+   * para los lectores de pantalla, delante de las pestañas, porque la pestaña elegida ya nombra la
+   * sección (Opciones). En los dos casos que no son `head`, la cabeza de móvil (donde el HUD no lleva
+   * placa) enseña el rótulo y el título de la placa del HUD («OPCIONES · AJUSTES», «LEGAL · LETRA
+   * PEQUEÑA»), antes de las pestañas: el título de móvil no repite la pestaña elegida.
    */
-  titlePlacement?: 'head' | 'panel'
+  titlePlacement?: 'head' | 'panel' | 'tabs'
   /**
    * ¿El título ya se ve en la placa del HUD? Entonces el `<h1>` queda solo para los lectores de
    * pantalla en escritorio (en móvil el HUD no lleva placa y el título se ve). Por defecto, si la ruta
@@ -104,7 +106,13 @@ export function ScreenPage({
   const screen = useScreen()
   const inHud = titleInHud ?? Boolean(screen.plate)
   const heading = (
-    <h1 className={cx('bb-display', titlePlacement === 'panel' ? styles.panelTitle : styles.title)}>
+    <h1
+      className={
+        titlePlacement === 'tabs'
+          ? 'sr-only'
+          : cx('bb-display', titlePlacement === 'panel' ? styles.panelTitle : styles.title)
+      }
+    >
       {title}
     </h1>
   )
@@ -139,10 +147,13 @@ export function ScreenPage({
         </div>
       ) : (
         // La placa del HUD, en la cabeza de móvil: dibujo, como la placa (el <h1> va en otro sitio).
-        <div className={styles.head} data-screen-part="head" aria-hidden="true">
-          <p className={cx('bb-label', styles.kicker)}>{screen.plate ? t(screen.plate.kicker) : kicker}</p>
-          <p className={cx('bb-display', styles.title)}>{screen.plate ? t(screen.plate.title) : title}</p>
-        </div>
+        <>
+          {titlePlacement === 'tabs' && heading}
+          <div className={styles.head} data-screen-part="head" aria-hidden="true">
+            <p className={cx('bb-label', styles.kicker)}>{screen.plate ? t(screen.plate.kicker) : kicker}</p>
+            <p className={cx('bb-display', styles.title)}>{screen.plate ? t(screen.plate.title) : title}</p>
+          </div>
+        </>
       )}
       {tabs && (
         <div className={styles.tabs} data-screen-part="tabs">

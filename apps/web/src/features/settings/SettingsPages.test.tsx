@@ -1,6 +1,8 @@
-import { screen, within } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
+import { interiorScreen } from '../../app/layout/screen'
 import { renderInRouter } from '../../app/layout/testing'
 import { t } from '../../i18n'
 import { SHORTCUTS_STORAGE_KEY, useShortcuts } from '../../ui/shortcuts'
@@ -12,19 +14,35 @@ afterEach(() => {
 })
 
 describe('Opciones (§3.8.14)', () => {
-  it('RD-VIS-02 e: el título de cada sección lleva el rótulo «Opciones» encima, como las demás interiores en móvil', () => {
-    renderInRouter(<SoundSettingsPage />, '/ajustes/sonido')
+  it('RD-VIS-02 e: la cabeza de móvil enseña la placa de escritorio, «OPCIONES · AJUSTES», y no repite la pestaña elegida (§3.8.14)', () => {
+    // Con la placa de la ruta de Opciones, como en la app.
+    const router = createMemoryRouter(
+      [
+        {
+          path: '*',
+          handle: { screen: interiorScreen({ kicker: 'frame.plates.settings', title: 'settings.title' }) },
+          element: <SoundSettingsPage />,
+        },
+      ],
+      { initialEntries: ['/ajustes/sonido'] },
+    )
+    const { container } = render(<RouterProvider router={router} />)
+    const head = container.querySelector('[data-screen-part="head"]') as HTMLElement
+    expect(head).toHaveTextContent(`${t('frame.plates.settings')}${t('settings.title')}`)
+    expect(head).not.toHaveTextContent(t('settings.sound.title'))
+    // La cabeza es dibujo, como la placa del HUD; el <h1> es la sección, para los lectores de pantalla.
+    expect(head).toHaveAttribute('aria-hidden', 'true')
     const heading = screen.getByRole('heading', { level: 1, name: t('settings.sound.title') })
-    const head = heading.parentElement!
-    const kicker = within(head).getByText(t('frame.plates.settings'))
-    expect(kicker.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(heading).toHaveClass('sr-only')
   })
 
-  it('RD-VIS-02 e: la cabeza (rótulo y título) va antes de las pestañas en el orden de lectura, como en las demás interiores (L3)', () => {
+  it('RD-VIS-02 e: la cabeza y el <h1> van antes de las pestañas en el orden de lectura, como en las demás interiores (L3)', () => {
     renderInRouter(<SoundSettingsPage />, '/ajustes/sonido')
     const heading = screen.getByRole('heading', { level: 1, name: t('settings.sound.title') })
     const tabs = screen.getByRole('navigation', { name: t('settings.navLabel') })
     expect(heading.compareDocumentPosition(tabs) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    const head = document.querySelector('[data-screen-part="head"]')!
+    expect(head.compareDocumentPosition(tabs) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
     // Las pestañas, en la pantalla (su zona de la plantilla), antes que la pieza y el panel.
     expect(tabs.closest('[data-screen-part="tabs"]')).not.toBeNull()
   })

@@ -34,8 +34,10 @@ function SettingsSectionPlaceholder({
   return (
     <PlaceholderPage
       title={title}
-      // En móvil, donde el HUD no lleva placa, «OPCIONES» encima del título, como las otras interiores.
       kicker={t('frame.plates.settings')}
+      // El <h1> (la sección) solo para lectores: la pestaña elegida ya la nombra. En móvil, donde el HUD
+      // no lleva placa, la cabeza enseña la de escritorio, «OPCIONES · AJUSTES», antes de las pestañas.
+      titlePlacement="tabs"
       summary={t(`settings.${section}.summary`)}
       // La pieza de la cuña: las placas de la sección en vista previa (el sello «EN OBRAS» pasa al panel).
       piece={<SettingsPreview section={section} />}

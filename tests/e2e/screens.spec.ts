@@ -673,18 +673,44 @@ test.describe('390 × 844', () => {
     await expect(back).toBeInViewport({ ratio: 1 })
   })
 
-  test('RD-VIS-02 e: en móvil, Opciones abre con su rótulo y su título, antes de las pestañas (L3)', async ({
-    page,
-  }) => {
-    await open(page, '/ajustes', 'Sonido y efectos')
-    await settle(page)
-    const box = await boxes(page, {
-      head: 'main [data-screen-part="head"]',
-      tabs: 'main nav[aria-label="Secciones de ajustes"]',
+  for (const { path, heading, nav, kicker, title, tab } of [
+    {
+      path: '/ajustes/sonido',
+      heading: 'Sonido y efectos',
+      nav: 'Secciones de ajustes',
+      kicker: 'Opciones',
+      title: 'Ajustes',
+      tab: 'Sonido y efectos',
+    },
+    {
+      path: '/legal/bases',
+      heading: 'Bases de la competición',
+      nav: 'Documentos legales',
+      kicker: 'Legal',
+      title: 'Letra pequeña',
+      tab: 'Bases',
+    },
+  ]) {
+    test(`RD-VIS-02 e: en móvil, ${path} abre con el rótulo y el título de la placa («${kicker} · ${title}»), antes de las pestañas, sin repetir la elegida (L3, §3.8.14)`, async ({
+      page,
+    }) => {
+      await open(page, path, heading)
+      await settle(page)
+      const head = page.locator('main [data-screen-part="head"]')
+      await expect(head).toBeInViewport({ ratio: 1 })
+      await expect(head).toHaveText(new RegExp(`^${kicker}\\s*${title}$`, 'i'))
+      const box = await boxes(page, {
+        head: 'main [data-screen-part="head"]',
+        tabs: `main nav[aria-label="${nav}"]`,
+      })
+      expect(box.head.bottom).toBeLessThanOrEqual(box.tabs.top)
+      // La pestaña elegida nombra la sección; la cabeza no la repite.
+      await expect(head).not.toContainText(tab)
+      await expect(page.getByRole('navigation', { name: nav }).locator('a[aria-current="page"]')).toHaveText(
+        tab,
+      )
     })
-    expect(box.head.bottom).toBeLessThanOrEqual(box.tabs.top)
-    await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toBeInViewport({ ratio: 1 })
-  })
+  }
 
   for (const path of WINE_SCREENS) {
     test(`§3.1 / RD-VIS-02 e: en móvil, la cuña de ${path} no pasa del granate de las maquetas (≤ 18 %, L-granate)`, async ({
