@@ -10,6 +10,14 @@ describe('Announcer (§3.3, §3.9; 0.25)', () => {
     expect(screen.getByRole('status')).toHaveAttribute('aria-live', 'polite')
   })
 
+  it('RD-VIS-02 e: la etiqueta girada lleva el tono de su evento (03-jurado: «¡A escuchar!» blanca, «¡Voto guardado!» roja)', () => {
+    const { container, rerender } = render(<Announcer text="¡A escuchar!" variant="tag" silent />)
+    expect(container.querySelector('[data-tag]')).toHaveAttribute('data-tag', 'white')
+    rerender(<Announcer text="¡Voto guardado!" variant="tag" tone="red" silent />)
+    expect(container.querySelector('[data-tag]')).toHaveAttribute('data-tag', 'red')
+    expect(container.querySelector('[data-tag]')).toHaveTextContent('¡Voto guardado!')
+  })
+
   it('en modo serio el rótulo desaparece (global.css) y la región viva se queda', () => {
     document.documentElement.setAttribute('data-serious', '')
     render(<Announcer text="Ronda 01" />)

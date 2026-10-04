@@ -149,6 +149,25 @@ test('RD-VIS-03: el modo serio quita el espectáculo (anunciador, rayos) y deja 
   await expect(page.locator('section#anunciador').getByText('La región viva lee: «Ronda 01»')).toBeVisible()
 })
 
+/**
+ * La etiqueta girada del anunciador, como en la maqueta `03-jurado` (`03b-jurado-votado-1440x900.png`,
+ * `.ptag--red`): «¡VOTO GUARDADO!» va en la etiqueta roja con texto negro (5,32:1), no en la blanca
+ * (esa es la de «¡A ESCUCHAR!», `03-jurado-escuchando`).
+ */
+test('RD-VIS-02 e: la etiqueta girada del anunciador («¡VOTO GUARDADO!») es roja con texto negro, como en 03-jurado', async ({
+  page,
+}) => {
+  await openGallery(page)
+  const tag = page.locator('section#anunciador [data-announcer="tag"] [data-tag]')
+  await expect(tag).toHaveText('¡Voto guardado!')
+  await expect(tag).toHaveAttribute('data-tag', 'red')
+  const paint = await tag.evaluate((element) => {
+    const style = getComputedStyle(element)
+    return { background: style.backgroundColor, color: style.color }
+  })
+  expect(paint).toEqual({ background: 'rgb(255, 0, 60)', color: 'rgb(0, 0, 0)' })
+})
+
 test('RNF-A11Y-01: el anillo de foco del título de una fila de entrada se ve entero', async ({ page }) => {
   await openGallery(page)
   const link = page.locator('section#fila').getByRole('link', { name: 'Neón en Sants' }).first()

@@ -9,6 +9,12 @@ export interface AnnouncerProps {
   text: string
   /** `display` (blanco con extrusión y contorno) o `tag` (etiqueta grande girada −6°). */
   variant?: 'display' | 'tag'
+  /**
+   * Tono de la etiqueta girada (`variant="tag"`), los de `Tag` con texto negro. Como en la maqueta
+   * `03-jurado`: blanca para lo que invita («¡A ESCUCHAR!») y roja para lo que confirma
+   * («¡VOTO GUARDADO!»).
+   */
+  tone?: 'white' | 'red'
   /** Sin la región viva (la galería, que enseña varios a la vez). */
   silent?: boolean
   className?: string
@@ -16,7 +22,7 @@ export interface AnnouncerProps {
 
 /**
  * Anunciador (guía §3.3, §3.9): un rótulo de una a tres palabras en display, blanco con extrusión de
- * trama y contorno, o la etiqueta grande girada −6°. **Uno por evento**, nunca encadenados, y repetido
+ * trama y contorno, o la etiqueta grande girada −6° (blanca o roja, `tone`). **Uno por evento**, nunca encadenados, y repetido
  * en una región viva educada. Es espectáculo: el modo serio lo quita (`data-fx`) y deja la región viva.
  * Entra estampado (escala 1,12 → 1, `--bb-dur-slam`); sin movimiento, aparece montado.
  *
@@ -28,7 +34,13 @@ export interface AnnouncerProps {
  *
  * Los textos salen de `ann.*` (§3.9); nunca los prohibidos («FIGHT!», «K.O.»…).
  */
-export function Announcer({ text, variant = 'display', silent = false, className }: AnnouncerProps) {
+export function Announcer({
+  text,
+  variant = 'display',
+  tone = 'white',
+  silent = false,
+  className,
+}: AnnouncerProps) {
   const wordRef = useRef<HTMLParagraphElement>(null)
   useFitText(wordRef, variant === 'display' ? text : '')
   return (
@@ -36,7 +48,7 @@ export function Announcer({ text, variant = 'display', silent = false, className
       <div className={styles.visual} data-fx="" aria-hidden="true">
         {variant === 'tag' ? (
           <span className={styles.tilted}>
-            <Tag tone="white" size="lg" className={styles.tag}>
+            <Tag tone={tone} size="lg" className={styles.tag}>
               {text}
             </Tag>
           </span>

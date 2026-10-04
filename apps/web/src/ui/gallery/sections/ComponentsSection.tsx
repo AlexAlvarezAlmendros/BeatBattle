@@ -668,7 +668,8 @@ function AnnouncerBlock() {
           {serious && <AnnouncerSeriousNote text={round} />}
         </StateCell>
         <StateCell label={t('dev.gallery.arena.announcer.tagLabel')}>
-          <Announcer text={voteSaved} variant="tag" silent />
+          {/* Roja con texto negro, como en la maqueta `03-jurado` (`03b-jurado-votado`). */}
+          <Announcer text={voteSaved} variant="tag" tone="red" silent />
           {serious && <AnnouncerSeriousNote text={voteSaved} />}
         </StateCell>
       </GalleryRow>

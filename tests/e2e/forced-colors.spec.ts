@@ -169,6 +169,31 @@ function systemColor(page: Page, name: string) {
 }
 
 /**
+ * La etiqueta girada del anunciador es un paralelogramo de fondo (`Tag`): el modo quita el fondo y el
+ * recorte se comería un borde, así que quedaba texto girado suelto (tercer pase del jurado). En contraste
+ * alto conserva su caja: sin recorte y con borde `CanvasText`.
+ */
+test('RNF-A11Y-01: en contraste alto, la etiqueta girada del anunciador conserva su caja (borde CanvasText)', async ({
+  page,
+}) => {
+  await openGallery(page)
+  const canvasText = await systemColor(page, 'CanvasText')
+  const tag = page.locator('section#anunciador [data-announcer="tag"] [data-tag]')
+  await tag.scrollIntoViewIfNeeded()
+  const box = await tag.evaluate((element) => {
+    const style = getComputedStyle(element)
+    return {
+      clipPath: style.clipPath,
+      borders: [style.borderTop, style.borderRight, style.borderBottom, style.borderLeft].map((border) =>
+        border.replace(/^[\d.]+px/, (width) => (Number.parseFloat(width) > 0 ? 'ancho' : '0')),
+      ),
+    }
+  })
+  expect(box.clipPath).toBe('none')
+  expect(box.borders).toEqual(Array(4).fill(`ancho solid ${canvasText}`))
+})
+
+/**
  * El medidor (§3.3; el de las opciones, la barra de XP) pintaba en contraste alto la pista en `GrayText` y
  * el relleno en `Highlight`: en el esquema claro, azul marino y rojo oscuro, casi iguales sobre blanco
  * (tercer pase del jurado, L13b). Ahora se distinguen por la forma: los segmentos vacíos son solo un borde

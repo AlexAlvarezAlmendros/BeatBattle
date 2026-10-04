@@ -40,6 +40,18 @@
   white-space: normal;
 }
 
+/*
+ * Contraste alto (`forced-colors: active`, RNF-A11Y-01): la etiqueta es un paralelogramo de fondo, y el
+ * modo quita el fondo: quedaba texto girado suelto. Conserva su caja con un borde `CanvasText`, sin el
+ * recorte en paralelogramo, que se lo comería por los lados.
+ */
+@media (forced-colors: active) {
+  .tag {
+    clip-path: none;
+    border: var(--bb-stroke) solid CanvasText;
+  }
+}
+
 @keyframes bb-announcer-slam {
   from {
     opacity: 0;
