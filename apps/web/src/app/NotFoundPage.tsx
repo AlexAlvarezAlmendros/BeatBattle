@@ -25,9 +25,10 @@ const LEGEND = [
  * has perdido… pero ya que estás» de subtítulo. La pieza de la cuña es el beat pad de 4 × 4 (teclas de
  * chaflán `--bb-cut-md` de 72 px), quieto y decorativo hasta la Fase 8, con «Volver al menú [Esc]»
  * debajo; el panel, estirado hasta el pie del pad, lleva el subtítulo arriba y abajo cómo se tocará
- * cuando llegue (los chops en la fila de arriba, la batería en las otras tres). El panel va antes que el pad en el orden de
- * lectura y del foco (`panelFirst`): en móvil, el subtítulo sale con el titular, en la primera vista,
- * y el pad debajo; en escritorio siguen el pad a la izquierda y el panel a la derecha.
+ * cuando llegue (los chops en la fila de arriba, la batería en las otras tres). El panel va antes que
+ * el pad en el orden de lectura y del foco (`panelFirst`), y «Volver al menú», entre los dos: en móvil,
+ * el subtítulo sale con el titular, en la primera vista, la salida al pie del panel y el pad debajo;
+ * en escritorio siguen el pad a la izquierda, con la salida debajo, y el panel a la derecha.
  *
  * También la pinta el límite de errores de las rutas cuando un loader responde 404 (un documento legal
  * que no existe): por eso pone su propia placa en el HUD, por encima de la de la ruta. La pestaña dice
@@ -53,6 +54,14 @@ export function NotFoundPage() {
         actions={null}
         piece={
           <>
+            {/*
+             * «Volver al menú» antes del pad en el orden de lectura y del foco: en la columna única va al
+             * pie del panel, antes del pad decorativo (en táctil la barra no enseña Esc y es la única
+             * salida); en dos columnas, debajo del pad (§3.8.11).
+             */}
+            <div className={styles.back}>
+              <BackToMenu />
+            </div>
             <figure className={styles.pad}>
               <div className={styles.keys} aria-hidden="true">
                 {PAD_ROWS.flatMap((row) =>
@@ -65,7 +74,6 @@ export function NotFoundPage() {
               </div>
               <figcaption className={styles.caption}>{t('pages.notFound.pad')}</figcaption>
             </figure>
-            <BackToMenu />
           </>
         }
       >

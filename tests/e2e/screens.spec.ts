@@ -110,6 +110,14 @@ test.describe('1440 × 900', () => {
     expect(Math.abs(box.panel.bottom - box.piece.bottom)).toBeLessThanOrEqual(2)
   })
 
+  test('RD-VIS-02 e / §3.8.11: en escritorio, «Volver al menú» de la 404 sigue debajo del pad', async ({ page }) => {
+    await open(page, '/esto-no-existe', 'Bonus stage')
+    await settle(page)
+    const box = await boxes(page, { pad: 'main figure', back: 'main a[href="/"]' })
+    expect(box.back.top).toBeGreaterThanOrEqual(box.pad.bottom)
+    expect(box.back.left).toBeLessThan(box.pad.right)
+  })
+
   test('RD-VIS-02 e: Opciones lleva su pieza en la cuña y el panel llega a su pie', async ({ page }) => {
     await open(page, '/ajustes', 'Sonido y efectos')
     await settle(page)
@@ -162,6 +170,20 @@ test.describe('390 × 844', () => {
     expect(box.subtitle.bottom).toBeLessThanOrEqual(box.pad.top)
     expect(box.subtitle.bottom).toBeLessThanOrEqual(box.bar.top)
     await expect(subtitle).toBeInViewport({ ratio: 1 })
+  })
+
+  test('RD-VIS-02 e / §3.8.11: en móvil, «Volver al menú» de la 404 va al pie del panel, antes del pad, y se ve sin desplazar (L2)', async ({
+    page,
+  }) => {
+    await open(page, '/esto-no-existe', 'Bonus stage')
+    await settle(page)
+    // En táctil la barra no enseña Esc: la única salida no puede quedar detrás del pad decorativo.
+    const back = page.getByRole('main').getByRole('link', { name: 'Volver al menú' })
+    const box = await boxes(page, { panel: PANEL, pad: 'main figure', back: 'main a[href="/"]' })
+    expect(box.back.top).toBeGreaterThanOrEqual(box.panel.bottom)
+    expect(box.back.bottom).toBeLessThanOrEqual(box.pad.top)
+    expect(box.back.bottom).toBeLessThanOrEqual(box.bar.top)
+    await expect(back).toBeInViewport({ ratio: 1 })
   })
 
   for (const path of ['/ajustes', '/ajustes/cuenta']) {

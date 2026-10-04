@@ -76,7 +76,7 @@ describe('plantilla de pantalla interior (0.26, §3.8.14)', () => {
     await act(async () => {})
   })
 
-  it('RD-VIS-02 e / §3.8.11: el subtítulo de la 404 va con el titular, antes del pad, en el orden de lectura (y en móvil, en pantalla)', async () => {
+  it('RD-VIS-02 e / §3.8.11: el subtítulo de la 404 va con el titular y «Volver al menú» antes del pad, en el orden de lectura (y en móvil, en pantalla; L2)', async () => {
     renderAt('/legal/no-existe')
     const main = screen.getByRole('main')
     const heading = within(main).getByRole('heading', { level: 1 })
@@ -85,10 +85,13 @@ describe('plantilla de pantalla interior (0.26, §3.8.14)', () => {
     const back = within(main).getByRole('link', { name: t('screen.backToMenu') })
     const follows = (a: Node, b: Node) =>
       Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
-    // Titular → subtítulo → pad → «Volver al menú»: lo que se lee y el orden del foco, como se ve en móvil.
+    const legend = within(main).getByRole('region', { name: t('pages.notFound.legendTitle') })
+    // Titular → subtítulo → cómo se tocará → «Volver al menú» → pad: lo que se lee y el orden del foco,
+    // como se ve en móvil. La salida no queda detrás del pad decorativo (en escritorio va debajo del pad).
     expect(follows(heading, subtitle)).toBe(true)
-    expect(follows(subtitle, pad)).toBe(true)
-    expect(follows(pad, back)).toBe(true)
+    expect(follows(subtitle, legend)).toBe(true)
+    expect(follows(legend, back)).toBe(true)
+    expect(follows(back, pad)).toBe(true)
     expect(main.querySelector('[data-panel-first]')).not.toBeNull()
     await act(async () => {})
   })
