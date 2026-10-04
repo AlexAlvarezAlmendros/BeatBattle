@@ -208,6 +208,85 @@ for (const touch of [false, true]) {
 }
 
 /**
+ * Dónde queda la opción de menú enfocada respecto a la ventana y a lo que la barra deja pegado al pie (la
+ * barra entera o, despegada, su fila de la firma), cuando han acabado las transiciones (la elegida crece) y
+ * el desplazamiento que las sigue.
+ */
+async function focusedPlate(page: Page) {
+  await page.evaluate(async () => {
+    const frame = () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
+    await frame()
+    await Promise.allSettled(
+      document
+        .getAnimations()
+        .filter((animation) => animation.effect?.getTiming().iterations !== Number.POSITIVE_INFINITY)
+        .map((animation) => animation.finished),
+    )
+    await frame()
+  })
+  return page.evaluate(() => {
+    const focused = document.activeElement as HTMLElement
+    const bar = document.querySelector('footer')!
+    const box = focused.getBoundingClientRect()
+    const pinned = /sticky|fixed/.test(getComputedStyle(bar).position)
+    const limit = pinned ? Math.min(bar.getBoundingClientRect().top, window.innerHeight) : window.innerHeight
+    return {
+      item: focused.getAttribute('role') === 'menuitem',
+      label: focused.querySelector('[data-plate-label]')?.textContent ?? '',
+      pinned,
+      top: box.top,
+      bottom: box.bottom,
+      limit,
+    }
+  })
+}
+
+/**
+ * Por debajo de 360 px de ancho el menú no cabe sin desplazar (§3.8.3 v0.6.7: el alto automático de las
+ * placas, el mismo alto en reposo y «cabe sin desplazar» no se pueden cumplir a la vez a 320 × 568; decisión
+ * del 2026-10-04): la pantalla se desplaza, con la barra pegada y la placa enfocada siempre entera a la
+ * vista (jurado de la 0.28, cierre, K1). Se entra al menú como un usuario (con Tab; en táctil, con ↓ sin
+ * foco, como un teclado conectado al móvil) y se recorren las seis placas con ↓: cada una queda entera
+ * dentro de la ventana y por encima de la barra (su margen de desplazamiento es el alto real de la barra,
+ * `--controls-pinned-h`; `global.css`).
+ */
+for (const touch of [true, false]) {
+  test.describe(`recorrido del menú a 320 × 568 ${touch ? 'en táctil' : 'con teclado'}`, () => {
+    test.use({ viewport: { width: 320, height: 568 }, isMobile: touch, hasTouch: touch })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`§3.8.3 / WCAG 2.4.11: en ${path} la barra va pegada y, recorriendo las seis placas, cada una queda entera por encima de ella`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        if (touch) await page.keyboard.press('ArrowDown')
+        else
+          for (let step = 0; step < 12; step++) {
+            await page.keyboard.press('Tab')
+            if (await page.evaluate(() => document.activeElement?.getAttribute('role') === 'menuitem')) break
+          }
+        const seen = new Set<string>()
+        const problems: string[] = []
+        for (let step = 0; step < 6; step++) {
+          if (step > 0) await page.keyboard.press('ArrowDown')
+          const plate = await focusedPlate(page)
+          expect(plate.item, 'el foco está en una opción del menú').toBe(true)
+          expect(plate.pinned, 'la barra va pegada al pie').toBe(true)
+          seen.add(plate.label)
+          if (plate.top < -0.5 || plate.bottom > plate.limit + 0.5)
+            problems.push(
+              `${plate.label}: ${plate.top.toFixed(1)}–${plate.bottom.toFixed(1)}, barra en ${plate.limit.toFixed(1)}`,
+            )
+        }
+        expect(seen.size, 'las seis placas recorridas').toBe(6)
+        expect(problems).toEqual([])
+      })
+    }
+  })
+}
+
+/**
  * Espaciado de texto de WCAG 1.4.12 (interlineado 1,5, letras 0,12 em, palabras 0,16 em, párrafos 2 em),
  * con `!important` en todo, como lo aplica quien lo necesita (una hoja de estilo propia o un
  * marcador).
