@@ -30,7 +30,7 @@ const LEGEND: readonly {
  * `*` — la 404 «BONUS STAGE» (guía §3.8.11): el titular es el momento de juego, «BONUS STAGE», con «Te
  * has perdido… pero ya que estás» de subtítulo. La pieza de la cuña es el beat pad de 4 × 4 (teclas de
  * chaflán `--bb-cut-md` de 72 px), quieto y decorativo hasta la Fase 8, con «Volver al menú [Esc]»
- * debajo; el panel lleva el subtítulo arriba y, al pie, lo que traerá el pad cuando llegue (los chops
+ * justo debajo del pad y su nota; el panel lleva el subtítulo arriba y, al pie, lo que traerá el pad cuando llegue (los chops
  * en la fila de arriba, la batería en las otras tres, el metrónomo y la grabación), en filas a su alto
  * natural. Es una pantalla de poco contenido: el bloque del pad y el panel, del mismo alto, va centrado
  * entre el HUD y la barra (§3.8.14 «Reparto del alto»). El panel va antes que
@@ -61,11 +61,11 @@ export function NotFoundPage() {
         panelFirst
         actions={null}
         piece={
-          <>
+          <div className={styles.padColumn}>
             {/*
              * «Volver al menú» antes del pad en el orden de lectura y del foco: en la columna única va al
              * pie del panel, antes del pad decorativo (en táctil la barra no enseña Esc y es la única
-             * salida); en dos columnas, debajo del pad (§3.8.11).
+             * salida); en dos columnas, justo debajo del pad y su nota, alineado con él (§3.8.11).
              */}
             <div className={styles.back}>
               <BackToMenu />
@@ -82,7 +82,7 @@ export function NotFoundPage() {
               </div>
               <figcaption className={styles.caption}>{t('pages.notFound.pad')}</figcaption>
             </figure>
-          </>
+          </div>
         }
       >
         <p className={styles.subtitle}>{t('pages.notFound.subtitle')}</p>

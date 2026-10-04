@@ -231,16 +231,6 @@ test.describe('1440 × 900', () => {
     }
   })
 
-  test('RD-VIS-02 e / §3.8.11: en escritorio, «Volver al menú» de la 404 sigue debajo del pad', async ({
-    page,
-  }) => {
-    await open(page, '/esto-no-existe', 'Bonus stage')
-    await settle(page)
-    const box = await boxes(page, { pad: 'main figure', back: 'main a[href="/"]' })
-    expect(box.back.top).toBeGreaterThanOrEqual(box.pad.bottom)
-    expect(box.back.left).toBeLessThan(box.pad.right)
-  })
-
   for (const path of WINE_SCREENS) {
     test(`§3.1 / RD-VIS-02 e: la cuña de ${path} no pasa del granate de las maquetas (≤ 24,5 %, L-granate)`, async ({
       page,
@@ -356,6 +346,35 @@ for (const viewport of [
       // El nombre completo, en el título del panel (el <h1>).
       await expect(page.locator(`${PANEL} h1`)).toHaveText('Bases de la competición')
       await expect(page.locator(`${PANEL} h1`)).toBeVisible()
+    })
+  })
+}
+
+/**
+ * La 404 en escritorio (§3.8.11, v0.6.6): «Volver al menú [Esc]» va justo debajo del pad y su nota, a
+ * `--bb-space-5` (20 px), alineado con el pad: no al pie de la columna, como un botón suelto.
+ */
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 1920, height: 1080 },
+]) {
+  test.describe(`${viewport.width} × ${viewport.height}, 404`, () => {
+    test.use({ viewport })
+
+    test('RD-VIS-02 e / §3.8.11: «Volver al menú» va justo debajo del pad y su nota, alineado con el pad', async ({
+      page,
+    }) => {
+      await open(page, '/esto-no-existe', 'Bonus stage')
+      await settle(page)
+      const box = await boxes(page, {
+        pad: 'main figure',
+        caption: 'main figure figcaption',
+        back: 'main a[href="/"]',
+      })
+      const gap = box.back.top - box.caption.bottom
+      expect(gap, `${gap} px entre la nota del pad y el botón`).toBeGreaterThanOrEqual(16)
+      expect(gap, `${gap} px entre la nota del pad y el botón`).toBeLessThanOrEqual(24)
+      expect(Math.abs(box.back.left - box.pad.left), 'alineado con el pad').toBeLessThanOrEqual(2)
     })
   })
 }

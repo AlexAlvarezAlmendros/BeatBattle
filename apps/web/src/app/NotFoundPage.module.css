@@ -24,9 +24,17 @@
 }
 
 /*
- * «Volver al menú»: antes del pad en el orden de lectura y del foco, y así en la columna única (al pie
- * del panel, la única salida en táctil); en dos columnas, debajo del pad (§3.8.11).
+ * La columna del pad: «Volver al menú» y el pad con su nota, alineados a la izquierda entre ellos (la
+ * columna, centrada en la de la pieza). «Volver al menú» va antes del pad en el orden de lectura y del
+ * foco, y así en la columna única (al pie del panel, la única salida en táctil); en dos columnas, justo
+ * debajo del pad y su nota, a `--bb-space-5` (§3.8.11).
  */
+.padColumn {
+  display: grid;
+  justify-items: start;
+  gap: var(--bb-space-5);
+}
+
 .back {
   display: flex;
 }
@@ -34,11 +42,6 @@
 @media (min-width: 961px) {
   .back {
     order: 1;
-  }
-
-  /* La pantalla llena el alto (`fill`): la salida, al pie de la columna, como en `05-perfil`. */
-  .back {
-    margin-top: auto;
   }
 }
 
@@ -79,16 +82,23 @@
   color: var(--bb-red);
 }
 
+/*
+ * Las columnas de la lista (índice, texto y teclas) las comparten sus filas (`subgrid`): las teclas de
+ * los chops y las de la batería empiezan a la misma altura.
+ */
 .legendList {
   display: grid;
+  grid-template-columns: var(--bb-space-10) minmax(0, 26rem) max-content;
+  justify-content: start;
+  column-gap: var(--bb-space-3);
   border-top: var(--bb-stroke-hair) solid var(--bb-line);
 }
 
 .legendRow {
   display: grid;
-  grid-template-columns: var(--bb-space-10) minmax(0, 26rem) max-content;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   grid-template-areas: "index text keys";
-  justify-content: start;
   align-items: center;
   gap: var(--bb-space-2) var(--bb-space-3);
   padding: var(--bb-space-3) 0;
@@ -140,8 +150,11 @@
  * cuando «Legal» va debajo de la firma y la barra mide 98 px (a 390 × 844 táctil; M3r).
  */
 @container legend (width < 50rem) {
-  .legendRow {
+  .legendList {
     grid-template-columns: var(--bb-space-10) minmax(0, 1fr);
+  }
+
+  .legendRow {
     grid-template-areas:
       "index text"
       ". keys";
