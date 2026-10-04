@@ -57,10 +57,13 @@
 }
 
 /*
- * Las teclas, en una fila de 44 px: las que no caben pasan a una segunda fila que queda oculta, así que
- * nunca se ve una tecla cortada por la mitad (antes, de 721 a unos 1300 px, «[ESC] V…» o «[E»).
+ * Las teclas, en una fila de 44 px a la izquierda de la firma. Si no caben en una línea (lo mide
+ * `ControlsBar`: aquí, la segunda línea queda recortada por la columna), la barra pone `data-keys-row` y
+ * van en su propia fila (más abajo): nunca se ve una tecla cortada por la mitad ni falta ninguna.
  */
 .keys {
+  grid-column: 1;
+  grid-row: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -112,6 +115,8 @@
 
 /* ── Dato de la derecha ─────────────────────────────────────────────────────────────────── */
 .right {
+  grid-column: 3;
+  grid-row: 1;
   justify-self: end;
   display: flex;
   align-items: center;
@@ -134,17 +139,48 @@
   justify-content: flex-end;
 }
 
+.bar > .signature {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+/*
+ * ── Teclas en su propia fila (`data-keys-row`) ─────────────────────────────────────────────
+ * Con teclado, cuando no caben al lado de la firma (de 721 a unos 1400 px según la pantalla; antes, las
+ * que no cabían se ocultaban y faltaban «ESC VOLVER» o «M SONIDO», jurado de la 0.28, L7): encima de la
+ * firma y del dato, centradas, en filas compactas que parten si hace falta, como en móvil.
+ */
+.bar[data-keys-row] {
+  row-gap: 0;
+}
+
+.bar[data-keys-row] .keys {
+  grid-column: 1 / -1;
+  justify-content: center;
+  gap: var(--bb-space-1) var(--bb-space-4);
+  height: auto;
+  overflow: visible;
+}
+
+.bar[data-keys-row] .control {
+  min-height: 0;
+}
+
+.bar[data-keys-row] > .signature,
+.bar[data-keys-row] .right {
+  grid-row: 2;
+}
+
 /*
  * ── Composición intermedia (721–1199 px) con la crónica ─────────────────────────────────────
  * La crónica no cabe al lado de la firma centrada sin cortarse: baja a su propia fila, centrada bajo la
  * firma, como en móvil (jurado de la 0.28: de 721 a 900 px «Inserta tu beat» pisaba «Other People
- * Records», la firma de `RF-OTP-01`). Las teclas y la firma siguen en la fila de arriba.
+ * Records», la firma de `RF-OTP-01`). Las teclas van al lado de la firma o, si no caben, en su fila.
  */
 @media (min-width: 721px) and (max-width: 1199px) {
   .bar:has(.right[data-claimed]) {
-    grid-template-rows: auto auto;
     row-gap: 0;
-    padding-block: var(--bb-space-1) var(--bar-ring);
+    padding-top: var(--bb-space-1);
   }
 
   .right[data-claimed] {
@@ -152,6 +188,11 @@
     grid-column: 1 / -1;
     justify-self: center;
     max-width: 100%;
+  }
+
+  /* Con las teclas en su fila, la crónica va en la tercera, bajo la firma. */
+  .bar[data-keys-row] .right[data-claimed] {
+    grid-row: 3;
   }
 }
 
