@@ -170,12 +170,14 @@
 
 /*
  * El dato de la pantalla (la crónica del menú) no pasa de su columna: antes, más ancho que ella, se
- * salía hacia la izquierda y pisaba la firma (jurado de la 0.28). Si un mensaje no cabe, la crónica lo
- * acaba en «…» (`Chronicle`); por debajo de 1200 px va en su propia fila (más abajo).
+ * salía hacia la izquierda y pisaba la firma (jurado de la 0.28). Si un mensaje no cabe en una línea, la
+ * crónica parte en dos, alineadas a la derecha, junto a su botón (`Chronicle`; F6); por debajo de 1200 px
+ * va en su propia fila, centrada (más abajo).
  */
 .right[data-claimed] {
   justify-self: stretch;
   justify-content: flex-end;
+  text-align: end;
 }
 
 .bar > .signature {
@@ -222,6 +224,7 @@
     justify-content: center;
     max-width: 100%;
     padding-inline-start: 0;
+    text-align: center;
   }
 
   /* Con las teclas en su fila, la crónica va en la tercera, bajo la firma. */

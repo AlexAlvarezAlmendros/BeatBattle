@@ -341,3 +341,49 @@ for (const { width, height, touch } of [
     }
   })
 }
+
+/**
+ * La crónica con la letra del navegador grande (cuarto pase del jurado de la 0.28, F6): a 1440 × 900 con
+ * la letra por defecto a 24 px iba en la columna de la derecha y acababa en «Inserta tu beat · Crédit…»
+ * (WCAG 1.4.4). Ahora, si un mensaje no cabe en una línea, parte en dos; dos líneas caben en el alto del
+ * botón de pausa, así que la barra no cambia de alto al rotar. Se recorren los cuatro mensajes con el reloj
+ * de la página falso.
+ */
+for (const { width, height, fontSize } of [
+  { width: 1440, height: 900, fontSize: 24 },
+  { width: 1440, height: 900, fontSize: 20 },
+  { width: 1024, height: 768, fontSize: 24 },
+  { width: 390, height: 844, fontSize: 24 },
+]) {
+  test.describe(`crónica con letra de ${fontSize} px a ${width} × ${height}`, () => {
+    test.use({ viewport: { width, height } })
+
+    test('RD-VIS-02 e / §3.8.3 (WCAG 1.4.4): ningún mensaje de la crónica se corta y la barra no cambia de alto al rotar', async ({
+      page,
+    }) => {
+      const cdp = await page.context().newCDPSession(page)
+      await cdp.send('Page.enable')
+      await cdp.send('Page.setFontSizes', { fontSizes: { standard: fontSize, fixed: fontSize } })
+      await page.clock.install()
+      await open(page, '/dev/menu', 'Beat Battle')
+      await page.mouse.move(0, 0)
+      const chronicle = page.getByRole('contentinfo').locator('[data-chronicle]')
+      const seen = new Set<string>()
+      const heights = new Set<number>()
+      for (let step = 0; step < 4; step++) {
+        await expect(chronicle).not.toContainText([...seen].at(-1) ?? '\u0000')
+        const state = await chronicle.evaluate((line) => ({
+          text: line.lastElementChild?.textContent ?? '',
+          cut: line.scrollHeight > line.clientHeight + 1 || line.scrollWidth > line.clientWidth + 1,
+          bar: Math.round(line.closest('footer')!.getBoundingClientRect().height),
+        }))
+        expect(state.cut, `«${state.text}» se corta`).toBe(false)
+        seen.add(state.text)
+        heights.add(state.bar)
+        await page.clock.runFor(5_000)
+      }
+      expect(seen.size, 'los cuatro mensajes').toBe(4)
+      expect([...heights], 'un solo alto de barra').toHaveLength(1)
+    })
+  })
+}

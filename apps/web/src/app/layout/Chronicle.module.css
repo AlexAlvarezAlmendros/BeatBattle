@@ -31,9 +31,18 @@
   color: var(--bb-white);
 }
 
+/*
+ * Una línea mientras quepa en su hueco; si no (la letra del navegador a 24 px a 1440 px, una ventana
+ * estrecha), parte en dos antes que cortarse en «Crédit…» (WCAG 1.4.4; cuarto pase del jurado de la 0.28,
+ * F6). Dos líneas caben siempre en el alto del botón de pausa (las dos medidas van en `rem`), así que la
+ * barra no cambia de alto al rotar. Solo un mensaje más largo que dos líneas acaba en «…».
+ */
 .chronicle {
+  display: -webkit-box;
   margin: 0;
   overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   color: var(--bb-white);
   font-family: var(--bb-font-ui);
   font-size: var(--bb-fs-xs);
@@ -41,7 +50,8 @@
   letter-spacing: var(--bb-tracking-label);
   text-overflow: ellipsis;
   text-transform: uppercase;
-  white-space: nowrap;
+  text-wrap: balance;
+  white-space: normal;
 }
 
 .message {
