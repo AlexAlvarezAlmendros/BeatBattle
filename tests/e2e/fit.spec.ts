@@ -230,12 +230,17 @@ async function focusedPlate(page: Page) {
     const box = focused.getBoundingClientRect()
     const pinned = /sticky|fixed/.test(getComputedStyle(bar).position)
     const limit = pinned ? Math.min(bar.getBoundingClientRect().top, window.innerHeight) : window.innerHeight
+    // El anillo del cursor (`--bb-cursor-gap` + `--bb-stroke-cursor` por fuera de la placa), si se ve.
+    const ring = focused.querySelector('[data-cursor-ring]')?.getBoundingClientRect()
+    const shown = ring && ring.height > 0 ? ring : box
     return {
       item: focused.getAttribute('role') === 'menuitem',
       label: focused.querySelector('[data-plate-label]')?.textContent ?? '',
       pinned,
       top: box.top,
       bottom: box.bottom,
+      ringTop: shown.top,
+      ringBottom: shown.bottom,
       limit,
     }
   })
@@ -248,11 +253,22 @@ async function focusedPlate(page: Page) {
  * vista (jurado de la 0.28, cierre, K1). Se entra al menú como un usuario (con Tab; en táctil, con ↓ sin
  * foco, como un teclado conectado al móvil) y se recorren las seis placas con ↓: cada una queda entera
  * dentro de la ventana y por encima de la barra (su margen de desplazamiento es el alto real de la barra,
- * `--controls-pinned-h`; `global.css`).
+ * `--controls-pinned-h`; `global.css`), **con su anillo** (jurado de la 0.28, ronda final, E3: con la placa
+ * 06 enfocada, la placa quedaba entera, 510 < 514, pero el trazo de abajo del anillo llegaba a 517, bajo la
+ * barra; y a 360 × 640, sin desplazar, a 587 con la barra en 586).
  */
-for (const touch of [true, false]) {
-  test.describe(`recorrido del menú a 320 × 568 ${touch ? 'en táctil' : 'con teclado'}`, () => {
-    test.use({ viewport: { width: 320, height: 568 }, isMobile: touch, hasTouch: touch })
+for (const viewport of [
+  { width: 320, height: 568, touch: true },
+  { width: 320, height: 568, touch: false },
+  { width: 360, height: 640, touch: true },
+]) {
+  const { touch } = viewport
+  test.describe(`recorrido del menú a ${viewport.width} × ${viewport.height} ${touch ? 'en táctil' : 'con teclado'}`, () => {
+    test.use({
+      viewport: { width: viewport.width, height: viewport.height },
+      isMobile: touch,
+      hasTouch: touch,
+    })
 
     for (const path of ['/dev/menu', '/']) {
       test(`RNF-A11Y-01 / RD-VIS-02 e / §3.8.3: en ${path} la barra va pegada y, recorriendo las seis placas, cada una queda entera por encima de ella`, async ({
@@ -274,9 +290,9 @@ for (const touch of [true, false]) {
           expect(plate.item, 'el foco está en una opción del menú').toBe(true)
           expect(plate.pinned, 'la barra va pegada al pie').toBe(true)
           seen.add(plate.label)
-          if (plate.top < -0.5 || plate.bottom > plate.limit + 0.5)
+          if (plate.ringTop < -0.5 || plate.ringBottom > plate.limit + 0.5)
             problems.push(
-              `${plate.label}: ${plate.top.toFixed(1)}–${plate.bottom.toFixed(1)}, barra en ${plate.limit.toFixed(1)}`,
+              `${plate.label}: placa ${plate.top.toFixed(1)}–${plate.bottom.toFixed(1)}, anillo ${plate.ringTop.toFixed(1)}–${plate.ringBottom.toFixed(1)}, barra en ${plate.limit.toFixed(1)}`,
             )
         }
         expect(seen.size, 'las seis placas recorridas').toBe(6)

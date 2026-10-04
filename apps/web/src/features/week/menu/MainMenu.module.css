@@ -539,6 +539,21 @@
   .help {
     display: none;
   }
+
+  /*
+   * Sin la ayuda, la última placa es lo último del menú: bajo ella queda sitio para su anillo del cursor
+   * (`--bb-cursor-gap` + `--bb-stroke-cursor`), que así no pasa bajo la barra pegada (§3.3; jurado de la 0.28,
+   * ronda final, E3: con la placa 06 enfocada a 320 × 568 el trazo de abajo del anillo quedaba 3 px bajo la
+   * barra, y a 360 × 640, 1 px). Ese sitio sustituye al relleno de abajo del contenido en el móvil
+   * (`--bb-space-1`, `.game-main`), que el menú se come: a 360 × 640 y 375 × 667 sigue cabiendo sin desplazar.
+   */
+  .menu {
+    margin-bottom: calc(-1 * var(--bb-space-1));
+  }
+
+  .plates {
+    padding-bottom: calc(var(--bb-cursor-gap) + var(--bb-stroke-cursor));
+  }
 }
 
 /*

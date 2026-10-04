@@ -387,6 +387,15 @@
     padding: var(--bb-space-1) var(--bb-space-3);
   }
 
+  /*
+   * Entre el rótulo de la semana y el título, `--bb-space-1` (como con la ventana baja de escritorio): deja ese
+   * alto al sitio del anillo de la última placa (`MainMenu`, jurado de la 0.28, ronda final, E3) y la pantalla
+   * sigue cabiendo a 360 × 640. Las tildes del título siguen teniendo su margen de arriba.
+   */
+  .heading {
+    gap: var(--bb-space-1);
+  }
+
   .play {
     gap: var(--bb-space-2);
   }
