@@ -40,10 +40,10 @@ export const CONTROL_KEYS: Readonly<
  * discontinua encima. A la izquierda, las teclas de la pantalla; en el centro, la **firma** («Un juego
  * de [OTP.] Other People Records», enlazada al sello, `RF-OTP-01`); a la derecha, un dato (hueco
  * `controlsRight`: la crónica de la arena en el menú; «Legal» por defecto, que en móvil va al lado de
- * la firma con un filete en medio). En táctil y en móvil las teclas desaparecen y queda la firma. Con
- * teclado, si las teclas no caben al lado de la firma, van en su propia fila encima (`useBarLayout`). Va
- * pegada al pie de la ventana con su alto real como margen del foco, salvo en ventanas bajas, donde se
- * despega.
+ * la firma con un filete en medio si cabe y, si no, debajo). La firma va siempre centrada. En táctil y
+ * en móvil las teclas desaparecen y queda la firma. Con teclado, si las teclas no caben al lado de la
+ * firma, van en su propia fila encima (`useBarLayout`). Va pegada al pie de la ventana con su alto real
+ * como margen del foco, salvo en ventanas bajas, donde se despega.
  */
 export function ControlsBar({ screen }: { screen: ScreenConfig }) {
   // Con los atajos de una tecla apagados (WCAG 2.1.4), M no hace nada: no se enseña.
@@ -109,13 +109,18 @@ export const CONTROLS_HEIGHT_VAR = '--controls-pinned-h'
  *   el zoom), no de un ancho fijo: se mide en la composición de una fila (sin el atributo) y se vuelve a
  *   poner en el mismo paso, sin pintar entre medias, como el HUD (`useHudStack`). En táctil las teclas
  *   no se ven y no cuentan.
+ * - **Dato debajo** (`data-right-row`): si lo que va a la derecha («Legal» con su filete) no cabe en su
+ *   columna al lado de la firma centrada, baja a su propia fila, centrado (jurado de la 0.28, M3r: en
+ *   móvil se centraba el grupo y la firma quedaba descentrada). Igual: lo que cabe de verdad. La crónica
+ *   del menú no se mide: llena su columna y acaba en «…», y por debajo de 1200 px va siempre en su fila.
  * - **Alto real** en `CONTROLS_HEIGHT_VAR`, para que ningún control enfocado quede debajo de la barra
  *   (§3.3): con las teclas en su fila crece y un margen fijo no basta. Si la barra pasa de
  *   `CONTROLS_MAX_VIEWPORT_SHARE` del alto de la ventana, se despega (`data-unpinned`): va al final de la
  *   pantalla y el margen vuelve a ser el de siempre.
  *
- * Cuando cambia el tamaño de la barra o de una tecla (la letra que llega) se vuelve a medir en el
- * fotograma siguiente: dentro del aviso de `ResizeObserver` cambiaría lo observado en el mismo fotograma.
+ * Cuando cambia el tamaño de la barra, de una tecla, de la firma o del dato (la letra que llega, una
+ * pantalla que reclama el hueco) se vuelve a medir en el fotograma siguiente: dentro del aviso de
+ * `ResizeObserver` cambiaría lo observado en el mismo fotograma.
  */
 function useBarLayout(
   ref: { current: HTMLElement | null },
@@ -127,12 +132,14 @@ function useBarLayout(
     const bar = ref.current
     if (!bar) return
     const keys = keysRef.current
+    const signature = bar.querySelector<HTMLElement>('[data-otp-signature]')
+    const right = bar.querySelector<HTMLElement>('[data-frame-slot="controlsRight"]')
     const root = document.documentElement
     const update = () => {
       bar.removeAttribute('data-keys-row')
-      const shown =
-        !!keys && getComputedStyle(keys).visibility === 'visible' && keys.getClientRects().length > 0
-      bar.toggleAttribute('data-keys-row', shown && keys.scrollHeight > keys.clientHeight + 0.5)
+      bar.removeAttribute('data-right-row')
+      bar.toggleAttribute('data-keys-row', !!keys && keysOverflow(keys))
+      bar.toggleAttribute('data-right-row', !!signature && !!right && rightOverflows(bar, signature, right))
       const height = bar.getBoundingClientRect().height
       const unpinned = height > window.innerHeight * CONTROLS_MAX_VIEWPORT_SHARE
       bar.toggleAttribute('data-unpinned', unpinned)
@@ -145,8 +152,8 @@ function useBarLayout(
       frame = requestAnimationFrame(update)
     }
     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(later)
-    observer?.observe(bar)
-    for (const key of keys?.children ?? []) observer?.observe(key)
+    for (const piece of [bar, signature, right, ...(keys?.children ?? [])])
+      if (piece) observer?.observe(piece)
     window.addEventListener('resize', later)
     return () => {
       cancelAnimationFrame(frame)
@@ -155,6 +162,26 @@ function useBarLayout(
       root.style.removeProperty(CONTROLS_HEIGHT_VAR)
     }
   }, [ref, keysRef, keyIds])
+}
+
+/** ¿Se ven las teclas (con teclado) y no caben en una línea en su columna? */
+function keysOverflow(keys: HTMLElement): boolean {
+  const shown = getComputedStyle(keys).visibility === 'visible' && keys.getClientRects().length > 0
+  return shown && keys.scrollHeight > keys.clientHeight + 0.5
+}
+
+/**
+ * ¿El dato de la derecha se sale de su columna? Pisa la firma (con el hueco entre columnas) o pasa del
+ * borde de la barra. No cuenta si está vacío o lo ha reclamado la pantalla (la crónica).
+ */
+function rightOverflows(bar: HTMLElement, signature: HTMLElement, right: HTMLElement): boolean {
+  if (right.hasAttribute('data-claimed') || right.getClientRects().length === 0) return false
+  const box = right.getBoundingClientRect()
+  if (box.width < 1) return false
+  const style = getComputedStyle(bar)
+  const end = bar.getBoundingClientRect().right - Number.parseFloat(style.paddingRight)
+  const gap = Number.parseFloat(style.columnGap) || 0
+  return box.left < signature.getBoundingClientRect().right + gap - 0.5 || box.right > end + 0.5
 }
 
 /** La firma de la barra (§3.1 «La firma»): pegatina de 30 px (24 en móvil) enlazada al sello. */

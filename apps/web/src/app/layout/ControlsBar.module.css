@@ -17,7 +17,10 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  gap: var(--bb-space-5);
+  /* Sin hueco de rejilla: lo lleva cada lado (`--bar-gap`), para que la firma sola en su fila pueda
+     usar todo el ancho (con huecos, a 320 px partía en dos líneas). */
+  --bar-gap: var(--bb-space-5);
+  gap: 0;
   min-height: var(--bb-controls-h);
   padding: calc(var(--bar-ring) - var(--bb-stroke)) var(--bb-gutter) var(--bar-ring);
   border-top: var(--bb-stroke) solid var(--bb-red);
@@ -65,6 +68,7 @@
   grid-column: 1;
   grid-row: 1;
   display: flex;
+  padding-inline-end: var(--bar-gap);
   flex-wrap: wrap;
   align-items: center;
   align-content: flex-start;
@@ -93,6 +97,11 @@
 }
 
 /* ── La firma ───────────────────────────────────────────────────────────────────────────── */
+/*
+ * En una línea mientras quepa (la columna central mide lo que pide la firma). Si no cabe ni a todo el
+ * ancho de la barra (la letra del navegador a 20 o 24 px en un móvil), sus dos rótulos parten en dos
+ * líneas a cada lado de la pegatina antes que salirse de la ventana (jurado de la 0.28, M3r).
+ */
 .signature {
   display: inline-flex;
   align-items: center;
@@ -106,7 +115,14 @@
   line-height: 1;
   text-decoration: none;
   text-transform: uppercase;
-  white-space: nowrap;
+}
+
+.signature > span:first-child {
+  text-align: end;
+}
+
+.signature > span:last-child {
+  text-align: start;
 }
 
 .signature:hover {
@@ -118,6 +134,7 @@
   grid-column: 3;
   grid-row: 1;
   justify-self: end;
+  padding-inline-start: var(--bar-gap);
   display: flex;
   align-items: center;
   min-width: 0;
@@ -150,15 +167,12 @@
  * que no cabían se ocultaban y faltaban «ESC VOLVER» o «M SONIDO», jurado de la 0.28, L7): encima de la
  * firma y del dato, centradas, en filas compactas que parten si hace falta, como en móvil.
  */
-.bar[data-keys-row] {
-  row-gap: 0;
-}
-
 .bar[data-keys-row] .keys {
   grid-column: 1 / -1;
   justify-content: center;
   gap: var(--bb-space-1) var(--bb-space-4);
   height: auto;
+  padding-inline-end: 0;
   overflow: visible;
 }
 
@@ -172,28 +186,49 @@
 }
 
 /*
- * ── Composición intermedia (721–1199 px) con la crónica ─────────────────────────────────────
+ * ── Por debajo de 1200 px, la crónica en su fila ────────────────────────────────────────────
  * La crónica no cabe al lado de la firma centrada sin cortarse: baja a su propia fila, centrada bajo la
- * firma, como en móvil (jurado de la 0.28: de 721 a 900 px «Inserta tu beat» pisaba «Other People
- * Records», la firma de `RF-OTP-01`). Las teclas van al lado de la firma o, si no caben, en su fila.
+ * firma, también en móvil con teclado (jurado de la 0.28: de 721 a 900 px «Inserta tu beat» pisaba
+ * «Other People Records», la firma de `RF-OTP-01`). Las teclas van al lado de la firma o, si no caben,
+ * en su fila.
  */
-@media (min-width: 721px) and (max-width: 1199px) {
-  .bar:has(.right[data-claimed]) {
-    row-gap: 0;
-    padding-top: var(--bb-space-1);
-  }
-
+@media (max-width: 1199px) {
   .right[data-claimed] {
     grid-row: 2;
     grid-column: 1 / -1;
     justify-self: center;
+    justify-content: center;
     max-width: 100%;
+    padding-inline-start: 0;
   }
 
   /* Con las teclas en su fila, la crónica va en la tercera, bajo la firma. */
   .bar[data-keys-row] .right[data-claimed] {
     grid-row: 3;
   }
+}
+
+@media (min-width: 721px) and (max-width: 1199px) {
+  .bar:has(.right[data-claimed]) {
+    padding-top: var(--bb-space-1);
+  }
+}
+
+/*
+ * ── Dato en su propia fila (`data-right-row`) ───────────────────────────────────────────────
+ * Si «Legal» (con su filete) no cabe en su columna al lado de la firma centrada (en móvil, por debajo de
+ * unos 450 px: lo mide `ControlsBar`), va debajo de la firma, centrado y sin filete. La firma no se
+ * descentra nunca (jurado de la 0.28, M3r).
+ */
+.bar[data-right-row] .right {
+  grid-row: 2;
+  grid-column: 1 / -1;
+  justify-self: center;
+  padding-inline-start: 0;
+}
+
+.bar[data-keys-row][data-right-row] .right {
+  grid-row: 3;
 }
 
 /* «Legal»: un rótulo más de la barra (no un enlace subrayado de web); el foco es el genérico. */
@@ -236,17 +271,14 @@
 
 /*
  * Móvil (≤ 720 px): la barra sigue pegada al pie de la ventana (la firma se ve siempre, también en una
- * pantalla más alta que la ventana) y lleva la firma centrada (maqueta `01-menu-390x844`) o, en las
- * pantallas con «Legal», la firma, un filete y «Legal» en una fila. En táctil, el dato de la pantalla
- * (la crónica del menú) se va; con teclado y ratón, las teclas van en una fila de encima que parte de
- * línea si no cabe y el dato, debajo.
+ * pantalla más alta que la ventana), con la misma rejilla: la firma centrada (maqueta `01-menu-390x844`)
+ * y, en las pantallas con «Legal», «Legal» pegado a su derecha con un filete en medio si cabe o, si no,
+ * debajo (`data-right-row`). En táctil, el dato de la pantalla (la crónica del menú) se va; con teclado
+ * y ratón, las teclas van en una fila de encima (`data-keys-row`) y la crónica, debajo de la firma.
  */
 @media (max-width: 720px) {
   .bar {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0 var(--bb-space-5);
+    --bar-gap: var(--bb-space-2);
     min-height: 0;
     /* Los mismos 8 px de aire que antes (la barra mide lo mismo y el menú cabe sin desplazar), con
        `--bar-ring` debajo para el anillo del foco y el resto encima. */
@@ -258,62 +290,30 @@
     display: none;
   }
 
-  /* El dato de la pantalla (la crónica del menú), en su propia fila debajo de la firma. */
-  .right[data-claimed] {
-    order: 3;
-    flex-basis: 100%;
-    justify-content: center;
+  /* «Legal», al lado de la firma (con el filete delante), no al final de la barra. */
+  .right {
+    justify-self: start;
   }
 
-  .keys {
-    flex-basis: 100%;
-    flex-wrap: wrap;
-    justify-content: center;
+  .bar[data-keys-row] .keys {
     gap: var(--bb-space-1) var(--bb-space-3);
-    height: auto;
     padding-top: var(--bb-space-1);
   }
 
-  .control {
-    min-height: 0;
-  }
-
   /*
-   * Con «Legal» al lado (pantallas interiores, autenticación, 404), la firma se aprieta para que quepan
-   * en una fila y un filete vertical los separa, con un hueco a cada lado (jurado de la 0.28: pegado a
-   * la firma y con el mismo rótulo, se leía «Other People Records Legal», como parte del nombre del
-   * sello). La firma no va centrada en la ventana: centrarla con «Legal» a un lado pide 280 + 2 × (44 +
-   * hueco) px y no caben en 358; va centrado el grupo.
+   * Filete entre la firma y «Legal»: pegado a la firma y con el mismo rótulo, se leía «Other People
+   * Records Legal», como parte del nombre del sello (jurado de la 0.28, M3). Con el hueco de la rejilla
+   * delante y el suyo detrás.
    */
-  .bar:has(.legal) {
-    gap: 0 var(--bb-space-2);
-  }
-
-  .bar:has(.legal) .signature {
-    gap: var(--bb-space-2);
-    letter-spacing: var(--bb-tracking-button);
-  }
-
   .rule {
     display: block;
     height: var(--bb-space-4);
     margin-inline-end: var(--bb-space-2);
     border-inline-start: var(--bb-stroke-hair) solid var(--bb-line);
   }
-}
 
-/*
- * Si firma, filete y «Legal» no caben en una fila (por debajo de 373 px con la letra por defecto: 280 +
- * 8 + 9 + 44 px más los medianiles), «Legal» baja a la suya, centrado y sin filete. En `em` para que
- * siga al tamaño de letra del navegador, como la firma y «Legal» (en `rem`).
- */
-@media (max-width: 23.25em) {
-  .bar:has(.legal) .right {
-    flex-basis: 100%;
-    justify-content: center;
-  }
-
-  .rule {
+  /* «Legal» solo, debajo de la firma: sin filete. */
+  .bar[data-right-row] .rule {
     display: none;
   }
 }
