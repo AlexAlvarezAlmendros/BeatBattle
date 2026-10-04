@@ -23,7 +23,9 @@
  * que las WebP son sin pérdida y que en las PNG todo rojo opaco del borde es `--bb-red` exacto
  * (`RD-VIS-02` a); el E2E `tests/e2e/otp-slap.spec.ts`, lo mismo con lo que decodifica el navegador.
  */
+import { execFileSync } from 'node:child_process'
 import { readFile, writeFile } from 'node:fs/promises'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from '@playwright/test'
@@ -33,6 +35,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '.
 const LOGO = path.join(ROOT, 'apps/web/public/img/otp-logo.webp')
 const OUT_DIR = path.join(ROOT, 'apps/web/public/img')
 const MANIFEST = path.join(ROOT, 'apps/web/src/ui/OtpSlap/otp-slap.json')
+/** El Biome del repo (el de `pnpm check`), que da el formato al manifiesto. */
+const BIOME = createRequire(import.meta.url).resolve('@biomejs/biome/bin/biome')
 
 /** Parámetros de la pegatina a 1× (px CSS). */
 export const SLAP = {
@@ -175,12 +179,11 @@ try {
     shadow: [SLAP.shadowX, SLAP.shadowY],
     files,
   }
-  // Las listas cortas en una línea, como las deja Biome: si no, `pnpm check` falla tras regenerar.
-  const json = JSON.stringify(manifest, null, 2).replace(
-    /\[\n\s+([^\]]*?)\n\s*\]/g,
-    (_, items) => `[${items.split(/,\n\s+/).join(', ')}]`,
-  )
-  await writeFile(MANIFEST, `${json}\n`)
+  // JSON válido sea cual sea su forma (listas de objetos, anidadas…), y el formato lo da el propio Biome
+  // con la configuración del repo (listas en una línea si caben, ancho de línea): así `pnpm check` pasa
+  // tras regenerar sin copiar a mano sus reglas.
+  await writeFile(MANIFEST, `${JSON.stringify(manifest, null, 2)}\n`)
+  execFileSync(process.execPath, [BIOME, 'format', '--write', MANIFEST], { cwd: ROOT, stdio: 'pipe' })
   console.log(`otp-slap.json  ${result.width}×${result.height} a 1×`)
 } finally {
   await browser.close()
