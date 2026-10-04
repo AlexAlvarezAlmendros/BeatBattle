@@ -15,5 +15,13 @@ export type PluralMessageKey = PluralKeys<Messages>
 
 export const t = createTranslator(es, { strict: import.meta.env.DEV })
 
-export { DATE_FORMATS, type DateFormatOptions, formatDate, formatNumber, LOCALE, TIME_ZONE } from './format'
+export {
+  DATE_FORMATS,
+  type DateFormatOptions,
+  formatDate,
+  formatDuration,
+  formatNumber,
+  LOCALE,
+  TIME_ZONE,
+} from './format'
 export { createTranslator, type MessageVars, type Translator } from './translator'

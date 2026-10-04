@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// HERRAMIENTA HISTÓRICA (tarea 0.27, guía v0.6): la «prueba del sello» se abandonó el 2026-10-03, cuando
+// la dirección de arte pasó a ser la «Arena» (§3). Se conserva para poder regenerar la evidencia de
+// `docs/planning/evidence/f0/otp/` (histórico), no como prueba de la interfaz actual: lo que mide
+// (isla, hero, pie del sello…) ya no existe en BeatBattle. La prueba vigente es la de marca y de juego
+// (`RD-VIS-02`, `tests/e2e/brand.spec.ts`).
+//
 // Capturas y medidas de referencia de la web del sello (otherpeople.es) para la «prueba del sello»
 // (guía §3.1, `RD-VIS-02`, tarea 0.14). Captura la home (arriba, lanzamientos y últimos beats),
 // `/beats` en lista y la ficha de un beat a 1440×900 y 390×844, y escribe `otp-metrics.json` con

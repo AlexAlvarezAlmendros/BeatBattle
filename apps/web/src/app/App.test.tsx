@@ -13,6 +13,9 @@ describe('App', () => {
 
   it('monta la home', async () => {
     render(<App />)
-    expect(await screen.findByRole('heading', { level: 1, name: 'Beat Battle' })).toBeInTheDocument()
+    // La home llega en su trozo diferido: con toda la batería en paralelo puede tardar más de 1 s.
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Beat Battle' }, { timeout: 5000 }),
+    ).toBeInTheDocument()
   })
 })

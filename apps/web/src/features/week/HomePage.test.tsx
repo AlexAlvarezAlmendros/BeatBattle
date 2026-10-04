@@ -1,90 +1,55 @@
-import { screen, within } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { getDefaultNormalizer, screen, within } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
 import { renderInRouter } from '../../app/layout/testing'
-import { DROP_ALERT_ID } from '../../app/paths'
+import { DROP_ALERT_ID, OTHER_PEOPLE_URL } from '../../app/paths'
 import { t } from '../../i18n'
-import buttonStyles from '../../ui/Button/Button.module.css'
-import { HomePage, IDLE_TICKER } from './HomePage'
+import { HomePage } from './HomePage'
 
-const hero = () => screen.getByRole('region', { name: t('pages.home.title') })
-
-describe('HomePage: hero en «calendario vacío» (0.7, guía §3.8.3 y §2.19)', () => {
-  afterEach(() => {
-    delete document.documentElement.dataset.motion
+describe('HomePage: menú principal en «calendario vacío» y visitante (0.24, §3.8.3, §2.19)', () => {
+  it('el <h1> es el nombre del juego (el logo es decorativo) y el título lleva la firma del sello', () => {
+    renderInRouter(<HomePage />)
+    expect(screen.getByRole('heading', { level: 1, name: t('pages.home.title') })).toBeInTheDocument()
+    const logos = document.querySelectorAll('[data-game-logo]')
+    expect(logos).toHaveLength(2)
+    for (const logo of logos) expect(logo).toHaveAttribute('aria-hidden', 'true')
+    const signature = screen.getByRole('link', { name: t('ui.otpSlap.label') })
+    expect(signature).toHaveAttribute('href', `${OTHER_PEOPLE_URL}/`)
+    expect(signature).toHaveAttribute('data-otp-signature')
   })
 
-  it('el titular «BEAT / BATTLE» es el <h1> de la página y da nombre al hero', () => {
+  it('§2.19: sin semana, «El próximo drop está en el horno» y el hueco de «Avísame del próximo drop»', () => {
     renderInRouter(<HomePage />)
-    const heading = screen.getByRole('heading', { level: 1 })
-    expect(heading).toHaveAccessibleName(t('pages.home.title'))
-    expect(heading).toHaveTextContent(`${t('home.hero.titleSolid')} ${t('home.hero.titleOutline')}`)
-    expect(hero()).toContainElement(heading)
+    const stage = screen.getByRole('article', { name: t('home.empty.title') })
+    const alert = within(stage).getByRole('region', { name: new RegExp(t('home.dropAlert.title')) })
+    expect(alert).toHaveAttribute('id', DROP_ALERT_ID)
+    expect(alert).toHaveTextContent(t('home.dropAlert.summary'))
+    // Reloj oculto: sin semana no hay temporizador.
+    expect(screen.queryByRole('timer')).toBeNull()
   })
 
-  it('pinta los textos del hero por i18n: rótulos, subtítulo y estado del calendario vacío', () => {
+  it('RD-MOT-05: «ELIGE MODO» con seis placas; Jugar y Resultados deshabilitados con su motivo y el cursor en Jurado', () => {
     renderInRouter(<HomePage />)
-    for (const key of [
-      'home.hero.sideWeek',
-      'home.hero.sideSeason',
-      'home.hero.subtitle',
-      'home.hero.emptyCalendar',
-    ] as const) {
-      expect(within(hero()).getByText(t(key))).toBeInTheDocument()
-    }
-    expect(t('home.hero.emptyCalendar')).toBe('El próximo drop está en el horno.')
-    expect(t('home.hero.subtitle')).toBe('Sample · Flip · Vota · Repite')
-  })
-
-  it('botones: «Avísame del próximo drop» (CTA rojo, a la sección de la alerta) y «Cómo funciona» (contorno)', () => {
-    renderInRouter(<HomePage />)
-    // El `Button` base en su tamaño `hero`; el contorno, sobre cristal (`glass`).
-    const notify = within(hero()).getByRole('link', { name: t('home.hero.notify') })
-    expect(notify).toHaveAttribute('href', `/#${DROP_ALERT_ID}`)
-    expect(notify).toHaveAttribute('data-variant', 'cta')
-    expect(notify).toHaveClass(buttonStyles.hero!)
-    const howItWorks = within(hero()).getByRole('link', { name: t('home.hero.howItWorks') })
-    expect(howItWorks).toHaveAttribute('href', '/como-funciona')
-    expect(howItWorks).toHaveAttribute('data-variant', 'outline')
-    expect(howItWorks).toHaveClass(buttonStyles.hero!, buttonStyles.glass!)
-  })
-
-  it('§2.12.3: el destino del CTA existe en la home, la sección «Avísame del próximo drop» con su título', () => {
-    renderInRouter(<HomePage />)
-    const section = screen.getByRole('region', { name: t('home.dropAlert.title') })
-    expect(section).toHaveAttribute('id', DROP_ALERT_ID)
-    expect(document.getElementById(DROP_ALERT_ID)).toBe(section)
-    expect(within(section).getByRole('heading', { level: 2 })).toHaveTextContent(t('home.dropAlert.title'))
-    expect(within(section).getByText(t('home.dropAlert.summary'))).toBeInTheDocument()
-    // Fuera del hero: es una sección de la home, debajo (§3.8.3).
-    expect(hero()).not.toContainElement(section)
-  })
-
-  it('no hay cuenta atrás con el calendario vacío (§2.19)', () => {
-    renderInRouter(<HomePage />)
-    expect(screen.queryByRole('timer')).not.toBeInTheDocument()
-  })
-
-  it('debajo, la banda de marquee con las palabras del teletipo en reposo', () => {
-    renderInRouter(<HomePage />)
-    const band = within(hero()).getByRole('marquee', { name: t('home.ticker.label') })
-    const words = within(band)
-      .getAllByRole('listitem')
-      .map((li) => li.textContent)
-    expect(words).toEqual(IDLE_TICKER.map((key) => t(key)))
-  })
-
-  it('RNF-A11Y-01 (WCAG 2.2.2): la banda lleva su botón de pausa, con nombre por i18n', () => {
-    renderInRouter(<HomePage />)
-    const band = within(hero()).getByRole('marquee', { name: t('home.ticker.label') })
-    expect(within(band).getByRole('button', { name: t('home.ticker.pause') })).toHaveAttribute(
-      'aria-pressed',
-      'false',
+    const menu = screen.getByRole('menu', { name: t('home.menu.title') })
+    const items = within(menu).getAllByRole('menuitem')
+    expect(items.map((item) => item.querySelector('[class*="label"]')?.textContent)).toEqual(
+      ['play', 'jury', 'results', 'hallOfFame', 'howItWorks', 'settings'].map((mode) =>
+        t(`home.modes.${mode as 'play'}.label`),
+      ),
     )
-  })
-
-  it('RNF-A11Y-03: con «reducir movimiento», el teletipo es la lista estática', () => {
-    document.documentElement.dataset.motion = 'reduced'
-    renderInRouter(<HomePage />)
-    expect(within(hero()).getByRole('marquee')).toHaveAttribute('data-static', 'true')
+    expect(items[0]).toHaveAttribute('aria-disabled', 'true')
+    expect(items[0]).toHaveTextContent(t('home.modes.play.empty'))
+    expect(items[2]).toHaveAttribute('aria-disabled', 'true')
+    expect(items[2]).toHaveTextContent(t('home.modes.results.none'))
+    // Visitante: Jurado lleva a entrar (§3.8.3) y es la primera opción disponible.
+    expect(items[1]).toHaveAttribute('href', '/entrar')
+    expect(items[1]).toHaveAttribute('data-cursor-active', 'true')
+    expect(items.filter((item) => item.tabIndex === 0)).toEqual([items[1]])
+    // El panel de ayuda describe el modo elegido (región viva educada). «45 s» va unido por un espacio de no
+    // separación: se compara sin convertirlo en un espacio normal.
+    expect(
+      screen.getByText(t('home.modes.jury.helpVisitor'), {
+        normalizer: getDefaultNormalizer({ collapseWhitespace: false }),
+      }),
+    ).toHaveAttribute('aria-live', 'polite')
   })
 })

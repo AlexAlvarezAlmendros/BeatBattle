@@ -1,6 +1,7 @@
 /*
- * Modal (§3.3): fondo oscurecido al 70 % con desenfoque y, encima, la pieza de cristal de las tarjetas
- * del sello (`--bb-glass-card` + desenfoque, borde al 18 %, sombra flotante). Radio `md` (§3.2).
+ * Modal, la ventana de juego (§3.3): sobre `--bb-scrim`, sin desenfoque (paneles opacos, §3.1), un
+ * panel casi opaco con marco blanco y chaflán `--bb-cut-lg` (`[data-frame="title"]`), título en display
+ * y las acciones en el pie.
  */
 .scrim {
   position: fixed;
@@ -11,34 +12,19 @@
   padding: var(--bb-space-4);
   overflow-y: auto;
   background-color: var(--bb-scrim);
-  backdrop-filter: blur(var(--bb-scrim-blur));
-  -webkit-backdrop-filter: blur(var(--bb-scrim-blur));
 }
 
 .frame {
-  width: min(100%, 32rem);
+  width: min(100%, 34rem);
 }
 
 .surface {
+  --frame-fill: var(--bb-panel-veil);
   display: grid;
   gap: var(--bb-space-4);
   width: 100%;
   padding: var(--bb-space-6);
-  border: 1px solid var(--bb-line-strong);
-  border-radius: var(--bb-radius-md);
-  box-shadow: var(--bb-shadow-float);
   color: var(--bb-text);
-}
-
-/* Alternativa sin capacidad de cristal; con ella, GlassSurface pinta fondo y `backdrop-filter`. */
-.glass {
-  background-color: var(--bb-glass-card);
-  backdrop-filter: blur(var(--bb-glass-blur));
-  -webkit-backdrop-filter: blur(var(--bb-glass-blur));
-}
-
-.solid {
-  background-color: var(--bb-ink-800);
 }
 
 .header {
@@ -50,15 +36,12 @@
 
 .title {
   margin: 0;
-  font-family: var(--bb-font-display);
-  font-size: var(--bb-font-size-xl);
-  font-weight: var(--bb-weight-extrabold);
-  line-height: var(--bb-leading-snug);
+  font-size: var(--bb-fs-xl);
+  font-stretch: var(--bb-stretch-plate);
 }
 
 .close {
   flex-shrink: 0;
-  margin: calc(-1 * var(--bb-space-2)) calc(-1 * var(--bb-space-2)) 0 0;
 }
 
 .description {
@@ -69,19 +52,21 @@
   min-width: 0;
 }
 
-/* Cuerpo que no ha cargado: mensaje con el icono de peligro (nunca solo el color). */
+/* Cuerpo que no ha cargado: aviso de papel (§3.2 «Estados»: blanco con texto negro e icono). */
 .error {
   display: flex;
   align-items: flex-start;
   gap: var(--bb-space-2);
   margin: 0;
-  color: var(--bb-text-2);
+  padding: var(--bb-space-3) var(--bb-space-4);
+  background: var(--bb-white);
+  color: var(--bb-black);
+  font-weight: var(--bb-weight-semibold);
 }
 
 .errorIcon {
   flex-shrink: 0;
   margin-top: var(--bb-space-1);
-  color: var(--bb-danger);
 }
 
 .footer {
@@ -89,6 +74,8 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--bb-space-3);
+  padding-top: var(--bb-space-4);
+  border-top: var(--bb-stroke-hair) solid var(--bb-line);
 }
 
 @media (max-width: 480px) {

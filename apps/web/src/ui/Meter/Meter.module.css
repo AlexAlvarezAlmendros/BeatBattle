@@ -1,0 +1,132 @@
+/*
+ * Medidor (§3.3; maquetas `final.css` `.meter`): paralelogramo de 10 px de alto, pista `--bb-ink-4`,
+ * relleno rojo y segmentos de 9 px con hueco negro de 2 px pintados encima.
+ */
+.meter {
+  display: grid;
+  gap: var(--bb-space-1);
+  width: var(--meter-width, 100%);
+  max-width: 100%;
+}
+
+.track {
+  position: relative;
+  height: calc(var(--bb-space-2) + var(--bb-stroke));
+  overflow: hidden;
+  background: var(--bb-ink-4);
+  clip-path: polygon(
+    calc(var(--bb-slant-sm) - var(--bb-stroke)) 0,
+    100% 0,
+    calc(100% - var(--bb-slant-sm) + var(--bb-stroke)) 100%,
+    0 100%
+  );
+}
+
+/* Los huecos negros entre segmentos, por encima del relleno y de la pista. */
+.track::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 calc(var(--bb-space-2) + var(--bb-stroke-hair)),
+    var(--bb-black) calc(var(--bb-space-2) + var(--bb-stroke-hair))
+      calc(var(--bb-space-2) + var(--bb-stroke-hair) + var(--bb-stroke))
+  );
+  pointer-events: none;
+}
+
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--meter-ratio) * 100%);
+  overflow: hidden;
+  background: var(--bb-red);
+  transition: width var(--bb-dur-reward) var(--bb-ease-out);
+}
+
+/* Al subir: un brillo blanco recorre el relleno una vez (sin movimiento, no hay brillo). */
+.shine {
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, var(--bb-white), transparent);
+  opacity: 0.55;
+  /* Su sitio natural es fuera, a la derecha: la pasada termina ahí sin quedarse «en efecto». */
+  translate: 250% 0;
+  animation: bb-meter-shine var(--bb-dur-reward) var(--bb-ease-out) 1;
+}
+
+.meter[data-force-state="gain"] .shine {
+  translate: 80% 0;
+  animation: none;
+}
+
+@keyframes bb-meter-shine {
+  from {
+    translate: -100% 0;
+  }
+}
+
+.caption {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--bb-space-3);
+  color: var(--bb-text-3);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-semibold);
+  letter-spacing: var(--bb-tracking-button);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill {
+    transition: none;
+  }
+
+  .shine {
+    display: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .fill {
+  transition: none;
+}
+
+:global(:root[data-motion="reduced"]) .shine {
+  display: none;
+}
+
+/*
+ * Contraste alto (`forced-colors: active`, RNF-A11Y-01): pista, relleno y huecos son fondos que el modo
+ * quitaría. Con la pista en `GrayText` y el relleno en `Highlight`, en el esquema claro salían azul
+ * marino y rojo oscuro, casi iguales sobre blanco. Ahora se distinguen por la forma y no solo por el
+ * tono: los segmentos vacíos son solo borde (`CanvasText`) sin relleno (la pista, `Canvas`, con su
+ * contorno por dentro, sin cambiar su tamaño, y los huecos en `CanvasText`) y los llenos, macizos en
+ * `Highlight`. La pista va sin el corte en paralelogramo, que se comería el contorno de los extremos.
+ */
+@media (forced-colors: active) {
+  .track {
+    forced-color-adjust: none;
+    background: Canvas;
+    outline: var(--bb-stroke-hair) solid CanvasText;
+    outline-offset: calc(-1 * var(--bb-stroke-hair));
+    clip-path: none;
+  }
+
+  .track::after {
+    background: repeating-linear-gradient(
+      90deg,
+      transparent 0 calc(var(--bb-space-2) + var(--bb-stroke-hair)),
+      CanvasText calc(var(--bb-space-2) + var(--bb-stroke-hair))
+        calc(var(--bb-space-2) + var(--bb-stroke-hair) + var(--bb-stroke))
+    );
+  }
+
+  .fill {
+    forced-color-adjust: none;
+    background: Highlight;
+  }
+}

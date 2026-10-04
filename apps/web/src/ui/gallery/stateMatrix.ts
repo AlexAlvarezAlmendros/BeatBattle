@@ -1,17 +1,15 @@
-import type { ComponentKey } from './anchors'
+import type { MatrixComponentKey } from './anchors'
 
 /**
- * Matriz de estados de §3.3 por componente (`RD-VIS-03`). La guía pide que cada componente tenga
- * definidos reposo, hover, foco, pulsado, cargando, deshabilitado, éxito y error; no todos tienen
- * sentido en todos (un rótulo no se pulsa, un esqueleto solo existe cargando). Aquí queda escrito,
- * para cada componente de la galería, qué estados enseña y cuáles no aplican o se aplazan, con su
- * motivo (`dev.gallery.matrix.reasons.*`). La galería pinta una celda por cada estado que no enseña
- * y el test recorre cada bloque contra esta matriz.
+ * Matriz de estados de §3.3 por componente (`RD-VIS-03`): reposo, hover, foco, pulsado, cargando,
+ * deshabilitado, éxito y error. «S» se enseña (una celda con `data-state`); «NA» no aplica, con su
+ * motivo (`dev.gallery.matrix.reasons.*`). Es la tabla de la guía, componente a componente; el test de
+ * la galería recorre cada bloque contra ella.
  *
  * Falta «Estrellas» (§3.8.4): llega con la tarea 1.5 de la Fase 1, con sus estados.
  */
 
-export const SEAL_STATES = [
+export const STATES = [
   'rest',
   'hover',
   'focus',
@@ -21,167 +19,182 @@ export const SEAL_STATES = [
   'success',
   'error',
 ] as const
-export type SealState = (typeof SEAL_STATES)[number]
+export type ComponentState = (typeof STATES)[number]
 
-/** Motivos de «no aplica» o «aplazado», claves de `dev.gallery.matrix.reasons`. */
+/** Motivos de «no aplica», claves de `dev.gallery.matrix.reasons`. */
 export type StateReason =
+  | 'menuInstant'
+  | 'menuNoResult'
+  | 'tabsInstant'
   | 'chipInstant'
-  | 'cardNotControl'
-  | 'cardContent'
-  | 'tileData'
-  | 'tileNoResult'
-  | 'staticText'
-  | 'wavePlayer'
-  | 'waveData'
+  | 'fighterNotControl'
+  | 'fighterOwnState'
+  | 'cellNoResult'
   | 'rowPlaying'
+  | 'tileData'
+  | 'waveNoResult'
   | 'modalButtons'
   | 'modalClose'
   | 'modalToast'
+  | 'announcerOnce'
   | 'toastPast'
   | 'toastDismiss'
-  | 'notInteractive'
-  | 'xpData'
+  | 'meterData'
   | 'skeletonOnly'
-  | 'countdownCalendar'
+  | 'clockData'
 
-export type StateCoverage =
-  /** El bloque enseña el estado (una celda con `data-state`). */
-  | { kind: 'shown' }
-  /** No tiene sentido en este componente. */
-  | { kind: 'notApplicable'; reason: StateReason }
-  /** Tiene sentido, pero llega con otra fase. */
-  | { kind: 'deferred'; reason: StateReason }
+export type StateCoverage = { kind: 'shown' } | { kind: 'notApplicable'; reason: StateReason }
 
-const shown: StateCoverage = { kind: 'shown' }
-const na = (reason: StateReason): StateCoverage => ({ kind: 'notApplicable', reason })
-const later = (reason: StateReason): StateCoverage => ({ kind: 'deferred', reason })
+const S: StateCoverage = { kind: 'shown' }
+const NA = (reason: StateReason): StateCoverage => ({ kind: 'notApplicable', reason })
 
-export const STATE_MATRIX: Record<ComponentKey, Record<SealState, StateCoverage>> = {
-  button: {
-    rest: shown,
-    hover: shown,
-    focus: shown,
-    pressed: shown,
-    loading: shown,
-    disabled: shown,
-    success: shown,
-    error: shown,
+export const STATE_MATRIX: Record<MatrixComponentKey, Record<ComponentState, StateCoverage>> = {
+  button: { rest: S, hover: S, focus: S, pressed: S, loading: S, disabled: S, success: S, error: S },
+  menuPlate: {
+    rest: S,
+    hover: S,
+    focus: S,
+    pressed: S,
+    loading: NA('menuInstant'),
+    disabled: S,
+    success: NA('menuNoResult'),
+    error: NA('menuNoResult'),
   },
-  chip: {
-    rest: shown,
-    hover: shown,
-    focus: shown,
-    pressed: shown,
-    loading: na('chipInstant'),
-    disabled: shown,
-    success: na('chipInstant'),
-    error: na('chipInstant'),
+  tabs: {
+    rest: S,
+    hover: S,
+    focus: S,
+    pressed: S,
+    loading: NA('tabsInstant'),
+    disabled: S,
+    success: NA('tabsInstant'),
+    error: NA('tabsInstant'),
   },
-  card: {
-    rest: shown,
-    hover: shown,
-    focus: shown,
-    pressed: na('cardNotControl'),
-    loading: shown,
-    disabled: shown,
-    success: na('cardContent'),
-    error: na('cardContent'),
+  filterChip: {
+    rest: S,
+    hover: S,
+    focus: S,
+    pressed: S,
+    loading: NA('chipInstant'),
+    disabled: S,
+    success: NA('chipInstant'),
+    error: NA('chipInstant'),
   },
-  dataTile: {
-    rest: shown,
-    hover: shown,
-    focus: na('tileData'),
-    pressed: na('tileData'),
-    loading: shown,
-    disabled: na('tileData'),
-    success: na('tileNoResult'),
-    error: na('tileNoResult'),
+  fighterCard: {
+    rest: S,
+    hover: NA('fighterNotControl'),
+    focus: NA('fighterNotControl'),
+    pressed: NA('fighterNotControl'),
+    loading: S,
+    disabled: NA('fighterNotControl'),
+    success: NA('fighterOwnState'),
+    error: S,
   },
-  sectionLabel: {
-    rest: shown,
-    hover: na('staticText'),
-    focus: na('staticText'),
-    pressed: na('staticText'),
-    loading: na('staticText'),
-    disabled: na('staticText'),
-    success: na('staticText'),
-    error: na('staticText'),
-  },
-  waveform: {
-    rest: shown,
-    hover: later('wavePlayer'),
-    focus: later('wavePlayer'),
-    pressed: later('wavePlayer'),
-    loading: na('waveData'),
-    disabled: later('wavePlayer'),
-    success: na('waveData'),
-    error: na('waveData'),
+  entryCell: {
+    rest: S,
+    hover: S,
+    focus: S,
+    pressed: S,
+    loading: S,
+    disabled: S,
+    success: NA('cellNoResult'),
+    error: S,
   },
   entryRow: {
-    rest: shown,
-    hover: shown,
-    focus: shown,
-    pressed: shown,
-    loading: shown,
-    disabled: shown,
-    success: na('rowPlaying'),
-    error: shown,
+    rest: S,
+    hover: S,
+    focus: S,
+    pressed: S,
+    loading: S,
+    disabled: S,
+    success: NA('rowPlaying'),
+    error: S,
+  },
+  tile: {
+    rest: S,
+    hover: NA('tileData'),
+    focus: NA('tileData'),
+    pressed: NA('tileData'),
+    loading: S,
+    disabled: NA('tileData'),
+    success: NA('tileData'),
+    error: NA('tileData'),
+  },
+  waveform: {
+    rest: S,
+    hover: S,
+    focus: S,
+    pressed: S,
+    loading: S,
+    disabled: S,
+    success: NA('waveNoResult'),
+    error: S,
   },
   modal: {
-    rest: shown,
-    hover: na('modalButtons'),
-    focus: shown,
-    pressed: na('modalButtons'),
-    loading: shown,
-    disabled: na('modalClose'),
-    success: na('modalToast'),
-    error: shown,
+    rest: S,
+    hover: NA('modalButtons'),
+    focus: S,
+    pressed: NA('modalButtons'),
+    loading: S,
+    disabled: NA('modalClose'),
+    success: NA('modalToast'),
+    error: S,
+  },
+  announcer: {
+    rest: S,
+    hover: NA('announcerOnce'),
+    focus: NA('announcerOnce'),
+    pressed: NA('announcerOnce'),
+    loading: NA('announcerOnce'),
+    disabled: NA('announcerOnce'),
+    success: NA('announcerOnce'),
+    error: NA('announcerOnce'),
   },
   toast: {
-    rest: shown,
-    hover: shown,
-    focus: shown,
-    pressed: shown,
-    loading: na('toastPast'),
-    disabled: na('toastDismiss'),
-    success: shown,
-    error: shown,
+    rest: S,
+    hover: S,
+    focus: S,
+    pressed: S,
+    loading: NA('toastPast'),
+    disabled: NA('toastDismiss'),
+    success: S,
+    error: S,
   },
-  xpBar: {
-    rest: shown,
-    hover: na('notInteractive'),
-    focus: na('notInteractive'),
-    pressed: na('notInteractive'),
-    loading: na('xpData'),
-    disabled: na('notInteractive'),
-    success: shown,
-    error: na('xpData'),
+  meter: {
+    rest: S,
+    hover: NA('meterData'),
+    focus: NA('meterData'),
+    pressed: NA('meterData'),
+    loading: NA('meterData'),
+    disabled: NA('meterData'),
+    success: S,
+    error: NA('meterData'),
   },
   skeleton: {
-    rest: na('skeletonOnly'),
-    hover: na('notInteractive'),
-    focus: na('notInteractive'),
-    pressed: na('notInteractive'),
-    loading: shown,
-    disabled: na('notInteractive'),
-    success: na('skeletonOnly'),
-    error: na('skeletonOnly'),
+    rest: NA('skeletonOnly'),
+    hover: NA('skeletonOnly'),
+    focus: NA('skeletonOnly'),
+    pressed: NA('skeletonOnly'),
+    loading: S,
+    disabled: NA('skeletonOnly'),
+    success: NA('skeletonOnly'),
+    error: NA('skeletonOnly'),
   },
-  countdown: {
-    rest: shown,
-    hover: na('notInteractive'),
-    focus: na('notInteractive'),
-    pressed: na('notInteractive'),
-    loading: na('countdownCalendar'),
-    disabled: na('notInteractive'),
-    success: na('countdownCalendar'),
-    error: na('countdownCalendar'),
+  roundClock: {
+    rest: S,
+    hover: NA('clockData'),
+    focus: NA('clockData'),
+    pressed: NA('clockData'),
+    loading: NA('clockData'),
+    disabled: NA('clockData'),
+    success: NA('clockData'),
+    error: S,
   },
 }
 
-/** Estados de un componente que la galería no enseña (no aplican o se aplazan), en el orden de §3.3. */
-export function uncoveredStates(component: ComponentKey) {
-  return SEAL_STATES.flatMap((state) => {
+/** Estados de un componente que la galería no enseña, en el orden de §3.3. */
+export function uncoveredStates(component: MatrixComponentKey) {
+  return STATES.flatMap((state) => {
     const coverage = STATE_MATRIX[component][state]
     return coverage.kind === 'shown' ? [] : [{ state, coverage }]
   })

@@ -1,11 +1,14 @@
 /* Fixture: todo sale de los tokens; nada de esto debe fallar. #fff en un comentario no cuenta. */
 #contenido,
 .card {
+  --card-cut-inner: calc(var(--bb-cut) - var(--bb-stroke) * 0.586);
   color: var(--bb-text);
-  background: var(--bb-ink-800);
-  border: 1px solid var(--bb-line);
-  border-radius: var(--bb-radius-md);
-  box-shadow: var(--bb-shadow-card);
+  background: var(--bb-panel-2);
+  border: var(--bb-stroke-hair) solid var(--bb-line);
+  border-radius: 0;
+  box-shadow: var(--bb-shadow-hard);
+  clip-path: polygon(var(--bb-cut) 0, 100% 0, 100% calc(100% - var(--bb-cut)), 0 100%);
+  transform: rotate(var(--bb-tilt-sticker)) translateX(calc(var(--bb-space-3) * -1));
   transition:
     transform var(--bb-dur-fast) var(--bb-ease-out),
     opacity var(--bb-dur-fast) linear;
@@ -14,18 +17,20 @@
 
 .card:hover {
   border-color: rgb(from var(--bb-red) r g b / var(--card-veil));
-  background-image: linear-gradient(to bottom, var(--bb-ink-800), transparent);
+  background-image: linear-gradient(to bottom, var(--bb-panel-2), transparent);
   outline-color: color-mix(in srgb, var(--bb-red) 50%, transparent);
-  box-shadow: var(--bb-focus-halo), var(--bb-shadow-glow-red);
+  box-shadow: var(--bb-focus-halo), var(--bb-shadow-hard);
   animation: spin var(--bb-dur-slow) steps(4) 0s infinite;
 }
 
 .avatar {
   border-radius: 50%;
   fill: currentcolor;
+  transform: rotate(90deg);
 }
 
 .flat {
+  border: 0;
   border-radius: 0;
   box-shadow: none;
 }

@@ -1,0 +1,8 @@
+{
+  "$comment": "Generado por tools/brand/otp-slap.mjs: no se edita a mano.",
+  "width": 120,
+  "height": 82,
+  "cut": 4,
+  "shadow": [3, 3],
+  "files": ["otp-slap.png", "otp-slap.webp", "otp-slap@2x.png", "otp-slap@2x.webp"]
+}

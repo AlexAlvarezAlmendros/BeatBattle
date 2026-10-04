@@ -1,0 +1,152 @@
+/*
+ * Lockup del título (§3.1, §3.8.3; maqueta `01-menu.html` `.lockup`): cinta blanca en display 800 con
+ * los extremos en chaflán y la firma «by [OTP.]». En una fila siempre: la cinta se encoge (y en muy
+ * estrecho pierde «de productores»), la firma nunca.
+ *
+ * Cuánto se encoge lo decide el sitio real del lockup, no el ancho de la ventana: el lockup es un
+ * contenedor (`title-lockup`) y cada paso entra cuando el anterior ya no cabe en una línea (medido con
+ * Anybody; los cortes en `rem`, para que sigan a la letra del navegador). Entre 721 y unos 1000 px la
+ * columna del título es tan estrecha como un móvil (jurado de la 0.28: a 721 px la cinta partía en
+ * cuatro líneas y el chaflán cortaba «PRODUCTORES»):
+ *
+ * | Ancho del lockup | Cinta                                   | Firma            | Ejemplo        |
+ * |------------------|-----------------------------------------|------------------|----------------|
+ * | ≥ 36 rem         | la de la maqueta (14 px, 125 %, rótulo) | 104 px           | 1280–1440 px   |
+ * | < 36 rem         | estrecha (105 %, sin espaciado)         | 104 px           | 1150 px        |
+ * | < 29,75 rem      | estrecha y a 12 px                      | 104 px           | 1024–1100 px   |
+ * | < 27 rem         | la del móvil                            | la del móvil, 62 | 900 px, 390 px |
+ * | < 22 rem         | la del móvil, sin «de productores»      | la del móvil, 62 | 721–823 px     |
+ *
+ * Si aun así no cabe (el espaciado de texto de WCAG 1.4.12, la letra ampliada), la cinta parte en dos
+ * líneas: nunca se corta con «…», y nunca es más estrecha que su palabra más larga (el chaflán no
+ * corta letras).
+ *
+ * `--lockup-scale` (por defecto 1): multiplica la cinta, sus separaciones y la firma (la pegatina, hasta los
+ * 120 px de §3.1). Lo pone el menú principal en la ventana grande, para que el lockup crezca con el logo
+ * (§3.8.3); los pasos siguen dependiendo del ancho real del lockup.
+ *
+ * `--lockup-signature-hang` (margen inferior de la firma; por defecto 0): con un valor negativo, la
+ * firma cuelga de la fila. Su objetivo táctil de 44 px y la pegatina sobresalen por arriba y por abajo
+ * sin hacer la fila más alta que la cinta, y la pegatina queda centrada en ella (el menú en móvil, para
+ * que la pegatina no pise el logo; §3.1, margen alrededor de la pegatina).
+ *
+ * `--lockup-signature-lift` (por defecto 0): sube la firma (el «by» y la pegatina) sobre la fila sin
+ * cambiar lo que mide la fila, como en la maqueta de móvil, donde la pegatina va más alta que la cinta y
+ * deja unos 12 px hasta la tarjeta de la semana (§3.1: `--bb-space-2` como poco).
+ */
+.lockup {
+  --lockup-s: var(--lockup-scale, 1);
+  container: title-lockup / inline-size;
+  min-width: 0;
+}
+
+.row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: calc(var(--bb-space-4) * var(--lockup-s));
+}
+
+.ribbon {
+  min-width: min-content;
+  padding: calc(var(--bb-space-2) * var(--lockup-s)) calc(var(--bb-space-5) * var(--lockup-s))
+    calc(var(--bb-space-2) * var(--lockup-s)) calc(var(--bb-space-4) * var(--lockup-s));
+  background: var(--bb-white);
+  color: var(--bb-black);
+  font-family: var(--bb-font-display);
+  font-size: calc(var(--bb-fs-sm) * var(--lockup-s));
+  font-style: italic;
+  font-weight: var(--bb-weight-extrabold);
+  font-stretch: var(--bb-stretch-plate);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1;
+  text-transform: uppercase;
+  text-wrap: balance;
+  clip-path: polygon(var(--bb-cut-md) 0, 100% 0, calc(100% - var(--bb-cut-md)) 100%, 0 100%);
+}
+
+.signature {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: calc(var(--bb-space-2) * var(--lockup-s));
+  min-height: var(--bb-target);
+  margin-top: calc(-1 * var(--bb-space-2) * var(--lockup-s) - var(--lockup-signature-lift, 0px));
+  margin-bottom: calc(var(--lockup-signature-hang, 0px) + var(--lockup-signature-lift, 0px));
+  color: var(--bb-white);
+  font-size: calc(var(--bb-fs-md) * var(--lockup-s));
+  font-style: italic;
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-decoration: none;
+}
+
+/*
+ * El «by» va sobre un velo (`--bb-panel-veil`) en paralelogramo, como las etiquetas (`--bb-slant-sm`), no
+ * directamente sobre los rayos de la arena (`RD-VIS-05`; jurado de la 0.28, tercer pase). Sobre el negro
+ * casi no se ve: la composición de la maqueta no cambia. El relleno (el del paralelogramo de una
+ * etiqueta) sale por los lados con margen negativo, así que el lockup mide lo mismo; por la derecha
+ * queda bajo la pegatina, que se pinta encima.
+ */
+.by {
+  --by-pad: calc(var(--bb-slant-sm) + var(--bb-space-1));
+  margin-inline: calc(-1 * var(--by-pad));
+  padding-inline: var(--by-pad);
+  background: var(--bb-panel-veil);
+  clip-path: polygon(var(--bb-slant-sm) 0, 100% 0, calc(100% - var(--bb-slant-sm)) 100%, 0 100%);
+}
+
+@container title-lockup (width < 36rem) {
+  .ribbon {
+    font-stretch: var(--bb-stretch-min);
+    letter-spacing: 0;
+  }
+}
+
+@container title-lockup (width < 29.75rem) {
+  .ribbon {
+    font-size: var(--bb-fs-xs);
+  }
+}
+
+/* La del móvil (la pegatina pasa a 62 px en `OtpSlap`, con el mismo corte). */
+@container title-lockup (width < 27rem) {
+  .row {
+    gap: var(--bb-space-2);
+  }
+
+  .ribbon {
+    padding: var(--bb-space-2);
+  }
+
+  .signature {
+    gap: var(--bb-space-1);
+    font-size: var(--bb-fs-sm);
+  }
+}
+
+/* Móvil (≤ 720 px): la del móvil a cualquier ancho del lockup. */
+@media (max-width: 720px) {
+  .row {
+    gap: var(--bb-space-2);
+  }
+
+  .ribbon {
+    padding: var(--bb-space-2);
+    font-size: var(--bb-fs-xs);
+    font-stretch: var(--bb-stretch-min);
+    letter-spacing: 0;
+  }
+
+  .signature {
+    gap: var(--bb-space-1);
+    font-size: var(--bb-fs-sm);
+  }
+}
+
+/* Muy estrecho (a 380 px de ventana o menos en móvil; en la columna del título de 721 a 823 px). */
+@container title-lockup (width < 22rem) {
+  .ribbonEnd {
+    display: none;
+  }
+}

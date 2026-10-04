@@ -1,4 +1,10 @@
 #!/usr/bin/env node
+// HERRAMIENTA HISTÓRICA (tarea 0.27, guía v0.6): la «prueba del sello» se abandonó el 2026-10-03, cuando
+// la dirección de arte pasó a ser la «Arena» (§3). Las piezas que comparaba (isla, hero, pie, cristal)
+// ya no existen en la app: ejecutarla hoy no da una A/B válida. Se conserva junto a su evidencia de
+// `docs/planning/evidence/f0/ab/` (histórico). La prueba vigente es la de marca y de juego
+// (`RD-VIS-02`, `tests/e2e/brand.spec.ts`).
+//
 // Evidencia A/B de la «prueba del sello» (guía §3.1, `RD-VIS-02`, criterio 3 del plan 00): captura
 // BeatBattle a 1440×900 y 390×844 (la home arriba, una página interior, el pie y, de la galería, las
 // piezas equivalentes a las del sello), lo mide con las mismas propiedades que `otp.mjs` recoge del

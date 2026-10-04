@@ -1,178 +1,72 @@
 /*
- * Tesela de dato (§3.3). Medidas de la ficha del sello (`otp-metrics.json`, `.beat-detail__info-item`):
- * 136×75 px, radio 8, fondo `#111`, borde de 1 px `#1e1e1e`, relleno 10×12, hueco 4; icono rojo de
- * 12 px; etiqueta de 11,2 px en mayúsculas con interletraje 0,05 em; valor en negrita.
+ * Tesela (§3.3; maquetas `final.css` `.tile`): marco `--bb-cut-md` con relleno `--bb-panel`, rótulo de
+ * 12 px y valor en Oxanium de 24 px. En móvil, la lista pasa a filas de clave y valor.
  */
 .list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
-  gap: var(--bb-space-2);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr));
+  gap: var(--bb-space-3);
   margin: 0;
 }
 
-/* Plegada por el rótulo (`DataTileSection`, en móvil). */
-.list[hidden] {
-  display: none;
-}
-
 .tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--bb-space-1);
-  min-width: 0;
-  padding: var(--bb-space-tile-y) var(--bb-space-3);
-  border: 1px solid var(--bb-ink-700);
-  border-radius: var(--bb-radius-sm);
-  background-color: var(--bb-ink-850);
-  text-align: center;
-  transition: border-color var(--bb-dur-fast) var(--bb-ease-out);
+  --frame-fill: var(--bb-panel);
+  display: grid;
+  align-content: start;
+  gap: var(--bb-space-2);
+  padding: var(--bb-space-3) var(--bb-space-4);
 }
 
-.tile:hover,
-.tile[data-force-state="hover"] {
-  border-color: var(--bb-ink-600);
-}
-
-.term {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--bb-space-1);
-}
-
-.icon {
-  color: var(--bb-red);
-  font-size: var(--bb-font-size-xs);
+.hot {
+  --frame-border: var(--bb-red);
 }
 
 .label {
   color: var(--bb-text-3);
-  font-size: var(--bb-font-size-2xs);
-  /* Interlineado de etiqueta (el `normal` del sello), no el de párrafo del cuerpo. */
-  line-height: var(--bb-leading-snug);
-  letter-spacing: var(--bb-tracking-meta);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .value {
-  display: flex;
-  justify-content: center;
-  min-height: 1.2em;
   margin: 0;
-  color: var(--bb-text);
-  font-size: var(--bb-font-size-md);
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xl);
+  font-weight: var(--bb-weight-extrabold);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.word {
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-lg);
   font-weight: var(--bb-weight-bold);
-  line-height: var(--bb-leading-snug);
-  overflow-wrap: anywhere;
 }
 
-.mono {
-  font-family: var(--bb-font-mono);
-  font-variant-numeric: tabular-nums;
+.unit {
+  color: var(--bb-text-3);
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-semibold);
 }
 
-/* ── Rótulo de la sección (`DataTileSection`) ─────────────────────────────────────────────── */
-.section {
-  display: grid;
-  gap: var(--bb-space-3);
-}
-
-/*
- * En móvil, el rótulo pliega la lista: el botón ocupa el resto de la fila (el chevron a la derecha,
- * como en el sello) con el texto del rótulo tal cual. El rótulo mide unos 14 px de alto: el objetivo
- * táctil sube a 44 px con un pseudoelemento invisible (RNF-A11Y-09), sin mover nada.
- */
-.sectionHeading {
-  position: relative;
-}
-
-.sectionToggle {
-  position: relative;
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--bb-space-2);
-  min-width: 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  letter-spacing: inherit;
-  text-align: start;
-  text-transform: inherit;
-}
-
-.sectionToggle::after {
-  content: "";
-  position: absolute;
-  inset: calc((100% - var(--bb-space-11)) / 2) 0;
-}
-
-.chevron {
-  font-size: var(--bb-font-size-2xs);
-  transition: rotate var(--bb-dur-fast) var(--bb-ease-out);
-}
-
-.sectionToggle[aria-expanded="true"] .chevron {
-  rotate: 180deg;
-}
-
-/*
- * ── Móvil: lista de clave y valor ───────────────────────────────────────────────────────────
- * Como la ficha del sello por debajo de 768 px (`BeatDetalle.css`): una columna, sin fondo, borde ni
- * icono, filete `#1a1a1a` entre filas, relleno 10×0, etiqueta a la izquierda (13 px) y valor a la
- * derecha (14 px). La etiqueta sigue en `--bb-text-3` (el `#888` del sello, sin el fondo de la tesela,
- * da 5,9:1 sobre negro pero 4,3:1 sobre el granate del Silk).
- */
-@media (max-width: 768px) {
+@media (max-width: 720px) {
   .list {
-    grid-template-columns: 1fr;
-    gap: 0;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--bb-space-1);
   }
 
   .tile {
-    flex-direction: row;
-    justify-content: space-between;
-    gap: var(--bb-space-2);
-    padding: var(--bb-space-tile-y) 0;
-    border: 0;
-    border-bottom: 1px solid var(--bb-ink-800);
-    border-radius: 0;
-    background-color: transparent;
-    text-align: start;
-  }
-
-  .tile:last-child {
-    border-bottom: 0;
-  }
-
-  .term {
-    flex-direction: row;
-  }
-
-  .icon {
-    display: none;
-  }
-
-  .label {
-    font-size: var(--bb-font-size-tile-key);
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    padding: var(--bb-space-2) var(--bb-space-3);
   }
 
   .value {
-    font-size: var(--bb-font-size-sm);
-    text-align: end;
+    font-size: var(--bb-fs-lg);
   }
-}
-
-/* Sin movimiento (Anexo E): el chevron cambia de sentido sin girar. */
-@media (prefers-reduced-motion: reduce) {
-  .chevron {
-    transition: none;
-  }
-}
-
-:global(:root[data-motion="reduced"]) .chevron {
-  transition: none;
 }

@@ -1,0 +1,222 @@
+/*
+ * Pestañas (§3.3; maquetas `final.css` `.seg__t`): paralelogramos de 44 px (`--bb-slant-sm`) en
+ * rótulo de 12 px, con las teclas Q y E a los lados. La activa, blanca con texto negro.
+ */
+.tabs {
+  display: grid;
+  gap: var(--bb-space-4);
+}
+
+/*
+ * [Q] pestañas [E] (§3.3 «Pestañas»; tercer pase del jurado, L11): una rejilla con las teclas en las
+ * columnas de los lados y las pestañas en la del centro, que parte en varias líneas si no caben (las
+ * líneas, entre [Q] y [E]; antes, con flex, cada tecla podía quedarse sola en una línea encima y
+ * debajo). La columna del centro mide lo que las pestañas, hasta lo que haya: en una línea, [E] sigue a
+ * la última pestaña. Las teclas, centradas en la primera línea (pestañas de 44 px, `--bb-target`). Vale
+ * igual en móvil: nunca una fila que se desplaza en horizontal (la activa salía cortada y el foco casi
+ * fuera de la ventana, WCAG 1.4.10 y 2.4.11).
+ */
+.row {
+  display: grid;
+  grid-template-columns: auto minmax(0, max-content) auto;
+  justify-content: start;
+  align-items: start;
+  gap: var(--bb-space-2);
+}
+
+.row > [data-key] {
+  margin-top: calc((var(--bb-target) - var(--bb-space-6) - var(--bb-stroke)) / 2);
+}
+
+.row > [data-key]:first-child {
+  grid-column: 1;
+}
+
+.row > [data-key]:last-child {
+  grid-column: 3;
+}
+
+.list {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-3) var(--bb-space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cada pestaña cabe en la columna del centro: si su etiqueta no cabe, parte (abajo), nunca se sale. */
+.list > li {
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/*
+ * La etiqueta va en una línea mientras quepa; si no cabe en la columna del centro (una etiqueta larga en
+ * una ventana estrecha), parte en dos líneas equilibradas y la pestaña crece (44 px como poco): nunca
+ * queda bajo [Q] o [E] (§3.3 «Pestañas», v0.6.6; `RD-VIS-05`). Relleno opaco (`--bb-panel-2`, §3.3
+ * v0.6.7): la fila cruza la diagonal en Opciones y en los legales, y con el velo translúcido la banda roja
+ * y el filete blanco se veían bajo el texto (cuarto pase del jurado, P5).
+ */
+.tab {
+  --tab-fill: var(--bb-panel-2);
+  --tab-border: var(--bb-line-strong);
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-height: var(--bb-target);
+  padding: var(--bb-space-1) calc(var(--bb-slant-sm) + var(--bb-space-4));
+  border: 0;
+  background: transparent;
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: var(--bb-leading-label);
+  text-transform: uppercase;
+  text-wrap: balance;
+  white-space: normal;
+}
+
+/* Dos capas en paralelogramo: borde y relleno (como el marco, pero inclinado). */
+.tab::before,
+.tab::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  clip-path: polygon(var(--bb-slant-sm) 0, 100% 0, calc(100% - var(--bb-slant-sm)) 100%, 0 100%);
+}
+
+.tab::before {
+  inset: 0;
+  background: var(--tab-border);
+}
+
+.tab::after {
+  inset: var(--bb-stroke);
+  background: var(--tab-fill);
+}
+
+.tab:hover,
+.tab[data-force-state="hover"] {
+  --tab-border: var(--bb-white);
+  color: var(--bb-white);
+}
+
+.tab:active,
+.tab[data-force-state="pressed"] {
+  scale: 0.97;
+}
+
+.tab {
+  text-decoration: none;
+}
+
+.tab[aria-selected="true"],
+.tab[aria-current="page"] {
+  --tab-fill: var(--bb-white);
+  --tab-border: var(--bb-white);
+  color: var(--bb-black);
+}
+
+.tab[aria-disabled="true"] {
+  color: var(--bb-text-4);
+  cursor: not-allowed;
+}
+
+.panel:focus-visible {
+  outline-offset: var(--bb-cursor-gap);
+}
+
+/*
+ * Rótulos cortos en móvil (≤ 720 px; los legales, §3.8.14 v0.6.7): las cuatro pestañas van en una fila de
+ * 360 a 390 px de ancho en táctil (a 390 × 844 «COOKIES» quedaba sola en otra fila; cuarto pase del
+ * jurado, P7). El rótulo sigue a 12 px y la pestaña a 44 px de alto; ceden el relleno de los lados (el
+ * de la inclinación y `--bb-space-1`) y el interletraje. Más estrecho, o con [Q] y [E] a los lados,
+ * parten en filas como siempre.
+ */
+@media (max-width: 720px) {
+  .row[data-short] .tab {
+    padding-inline: calc(var(--bb-slant-sm) + var(--bb-space-1));
+    letter-spacing: 0;
+  }
+}
+
+/*
+ * Con teclado y ratón en la composición estrecha (≤ 720 px; sexto pase del jurado, G3), [Q] y [E] van a los
+ * lados y «COOKIES» bajaba a otra fila a 390, 375 y 360 px. Para que [Q] · las cuatro pestañas · [E] quepan
+ * en una fila a 360 px: las teclas, en su variante estrecha (sin ancho mínimo y con `--bb-space-1` a los
+ * lados: 16 px en vez de 28), las pestañas, con el relleno de la inclinación (`--bb-slant-sm`: el rótulo no
+ * pasa del corte del paralelogramo) y a `--bb-space-1` entre ellas. Entre las teclas y las pestañas sigue
+ * `--bb-space-2`: el cursor de la pestaña de un extremo (7 px por fuera) no llega a la tecla, y entre dos
+ * pestañas el anillo queda a 4 px de la vecina. El rótulo sigue a 12 px y la pestaña, a 44 de alto.
+ */
+@media (max-width: 720px) and (hover: hover) and (pointer: fine) {
+  .row[data-short] > [data-key] {
+    min-width: 0;
+    padding-inline: var(--bb-space-1);
+  }
+
+  .row[data-short] .list {
+    column-gap: var(--bb-space-1);
+  }
+
+  .row[data-short] .tab {
+    padding-inline: var(--bb-slant-sm);
+  }
+}
+
+/* Desde 390 px (el móvil de la guía) sobra sitio para un trazo más de aire a cada lado del rótulo. */
+@media (min-width: 390px) and (max-width: 720px) and (hover: hover) and (pointer: fine) {
+  .row[data-short] .tab {
+    padding-inline: calc(var(--bb-slant-sm) + var(--bb-stroke));
+  }
+}
+
+/* Táctil: sin las teclas Q/E (no hay teclado, §3.3), y las pestañas, a todo lo ancho; depende del tipo
+ * de entrada, no del ancho. */
+@media (hover: none), (pointer: coarse) {
+  .row {
+    grid-template-columns: minmax(0, max-content);
+  }
+
+  .row > [data-key] {
+    display: none;
+  }
+
+  .list {
+    grid-column: 1;
+  }
+}
+
+/*
+ * Contraste alto (`forced-colors: active`): borde `CanvasText` y relleno `Canvas`; la pestaña activa, en
+ * `Highlight` con su texto en `HighlightText` (en reposo es blanca con texto negro).
+ */
+@media (forced-colors: active) {
+  .tab::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .tab::after {
+    forced-color-adjust: none;
+    background: Canvas;
+  }
+
+  .tab[aria-selected="true"],
+  .tab[aria-current="page"] {
+    forced-color-adjust: none;
+    color: HighlightText;
+  }
+
+  .tab[aria-selected="true"]::after,
+  .tab[aria-current="page"]::after {
+    background: Highlight;
+  }
+}

@@ -4,12 +4,12 @@
  */
 export type WaveformPeak = readonly [min: number, max: number]
 
-/** Ancho de barra y hueco en píxeles CSS (§3.3: «barras de 2 px con 1 px de hueco»). */
-export const WAVE_BAR_WIDTH = 2
-export const WAVE_BAR_GAP = 1
+/** Ancho de barra y hueco en píxeles CSS (§3.3: «barras de 3 px con 2 px de hueco»). */
+export const WAVE_BAR_WIDTH = 3
+export const WAVE_BAR_GAP = 2
 export const WAVE_BAR_STEP = WAVE_BAR_WIDTH + WAVE_BAR_GAP
 
-/** Cuántas barras caben en un ancho: `n` barras ocupan `3n − 1` px. Al menos una. */
+/** Cuántas barras caben en un ancho: `n` barras ocupan `5n − 2` px. Al menos una. */
 export function barsForWidth(width: number): number {
   return Math.max(1, Math.floor((width + WAVE_BAR_GAP) / WAVE_BAR_STEP))
 }

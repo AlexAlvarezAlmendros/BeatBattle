@@ -1,36 +1,130 @@
 /*
- * Marco de todas las páginas (tarea 0.7): capas y medidas del contenido. La isla, el pie y el fondo
- * llevan su propio CSS junto a su componente.
- *
- * Capas (§3.2): fondo (orbes, y el Escenario en la Fase 1) en `--bb-z-stage`, contenido y pie en
- * `--bb-z-content` y la isla por encima, en `--bb-z-island`.
+ * Marco de juego (guía §3.4.1, §3.6; tarea 0.23): la pantalla es una rejilla de HUD, contenido y barra
+ * de controles sobre la arena fija. Capas (§3.2): arena en `--bb-z-stage`, contenido en
+ * `--bb-z-content`, HUD en `--bb-z-hud` y barra en `--bb-z-controls`.
  */
-
-.site-main,
-.site-footer {
+.game-frame {
   position: relative;
-  z-index: var(--bb-z-content);
-}
-
-.site-main {
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto;
   /*
-   * Relleno del contenido: el del `.container` del sello (`index.css`: `padding: 2rem`, sin ancho
-   * máximo), a 32 px de los bordes en escritorio y en móvil; el título de `/beats` queda a 32 px bajo
-   * la isla y a 32 px del borde. Cada página pone su ancho máximo si lo necesita. Lo leen también los
-   * bloques que suben hasta el borde (`.bleed-top`).
+   * Con la barra despegada (§3.4.1 v0.6.7), la pantalla desborda como poco lo que cuelga de ella
+   * (`--bar-tail`, que publica `ControlsBar`; 0 si va pegada): lo de antes de la barra mide como poco el
+   * alto de la ventana menos la fila de la firma y, al abrir, solo se ve esa fila, entera y pegada al pie.
+   * Sin esto, en una pantalla solo un poco más alta que la ventana la barra `sticky` no podía bajar de su
+   * sitio y asomaban cortadas las filas de debajo de la firma («LEGAL» a 360 × 640 táctil en /entrar, la
+   * fila de las teclas a 900 × 700 en «/»; ronda final de la 0.28, D1).
    */
-  --site-main-pad: var(--bb-space-8);
-  min-height: 60vh;
-  padding: var(--site-main-pad);
+  min-height: calc(100dvh + var(--bar-tail, 0px));
+  /*
+   * Nada se sale de lado: el cursor de juego de una opción pegada al borde (7 px por fuera de la pieza)
+   * ensancharía la ventana en móvil al cargar. `clip` no crea contenedor de desplazamiento (el HUD y la
+   * barra pegada siguen funcionando) y deja ver el cursor dentro del medianil.
+   */
+  overflow-x: clip;
 }
 
 /*
- * Bloque a sangre que sube hasta el borde superior, por debajo de la isla (el hero, como en el sello:
- * Hero.css niega el espacio en flujo de la isla, `--nav-flow`, y el relleno del contenido). Ocupa todo
- * el ancho de la ventana aunque esté dentro del contenido centrado.
+ * El contenido llena el alto que dejan el HUD y la barra (columna flexible): una pantalla puede anclar
+ * algo al pie (la tarjeta de la semana del menú llega a la barra de controles, como en la maqueta).
  */
-.bleed-top {
-  width: 100vw;
-  margin-top: calc(-1 * (var(--nav-flow) + var(--site-main-pad, 0px)));
-  margin-inline: calc(50% - 50vw);
+.game-main {
+  position: relative;
+  z-index: var(--bb-z-content);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--bb-space-6) var(--bb-gutter) var(--bb-space-8);
+}
+
+.game-screen {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .game-main {
+    padding-block: var(--bb-space-3) var(--bb-space-1);
+  }
+}
+
+/* Ningún control enfocado queda tapado por el HUD al desplazarse para enseñarlo (§3.3). */
+.game-main :is(a[href], button, input, select, textarea, summary, [tabindex], [id]) {
+  scroll-margin-top: var(--bb-space-6);
+}
+
+/*
+ * ── Transición de pantalla (§3.6) ─────────────────────────────────────────────────────────
+ * El contenido nuevo entra deslizándose desde la diagonal (`--bb-dur-slam`) mientras la diagonal barre
+ * la pantalla (`--bb-dur-base`, `--bb-ease-in-out`). Con «reducir movimiento»: fundido de 150 ms, sin
+ * desplazamiento ni barrido. Navegar no destella nunca: la diagonal es una banda de 12 px.
+ */
+.game-screen[data-entering] {
+  animation: bb-screen-in var(--bb-dur-slam) var(--bb-ease-out);
+}
+
+@keyframes bb-screen-in {
+  from {
+    opacity: 0;
+    translate: calc(-1 * var(--bb-space-10)) 0;
+  }
+}
+
+@keyframes bb-screen-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.screen-sweep {
+  position: fixed;
+  inset-block: 0;
+  left: 0;
+  z-index: var(--bb-z-player);
+  width: var(--bb-split-band);
+  background: var(--bb-red);
+  pointer-events: none;
+  transform: skewX(calc(-1 * var(--bb-split-angle)));
+  transform-origin: 0 100%;
+  /* Su sitio natural es fuera, a la derecha: el barrido termina ahí sin quedarse «en efecto» (§4.17). */
+  translate: 130vw 0;
+  animation: bb-screen-sweep var(--bb-dur-base) var(--bb-ease-in-out);
+}
+
+/* El filete blanco que acompaña a la banda roja de la diagonal. */
+.screen-sweep::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  right: calc(100% + var(--bb-split-gap));
+  width: var(--bb-split-rule);
+  background: var(--bb-white);
+}
+
+@keyframes bb-screen-sweep {
+  from {
+    translate: -30vw 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-screen[data-entering] {
+    animation-name: bb-screen-fade;
+  }
+
+  .screen-sweep {
+    display: none;
+  }
+}
+
+:root[data-motion="reduced"] .game-screen[data-entering] {
+  animation-name: bb-screen-fade;
+}
+
+:root[data-motion="reduced"] .screen-sweep {
+  display: none;
 }

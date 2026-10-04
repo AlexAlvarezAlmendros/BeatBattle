@@ -1,6 +1,0 @@
-export { HeroGrid, Vignette } from './HeroBackdrop'
-export { HeroSection } from './HeroSection'
-export { HeroActions, HeroDivider, HeroNote, HeroSubtitle, HeroTitle } from './HeroTitle'
-export { MarqueeBand } from './MarqueeBand'
-export { heroRevealVariants, useHeroReveal } from './reveal'
-export { SideLabel } from './SideLabel'

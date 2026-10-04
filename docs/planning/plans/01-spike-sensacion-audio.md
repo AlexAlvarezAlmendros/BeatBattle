@@ -1,10 +1,15 @@
 # Plan 01 — Spike de sensación y audio (GO/NO-GO)
 
 > Fase: 1 de 10 | Estado: ⬜ Pendiente | Iniciado: — | Cerrado: —
-> Hito del roadmap: Silk + vista 3D + partículas a 60 fps en escritorio con GPU integrada y ≥ 45 fps
-> en un Android de gama media; efectos con < 30 ms de latencia; analizador de Web Audio funcionando
-> sobre un MP3 firmado de Cloudinary; ffmpeg mide la sonoridad de un WAV de 50 MB en Vercel en < 8 s.
-> **Puerta GO/NO-GO** para empezar la Fase 2.
+> Hito del roadmap: arena (trama en *shader*) + vista 3D + partículas a 60 fps en escritorio con GPU
+> integrada y ≥ 45 fps en un Android de gama media; efectos con < 30 ms de latencia; analizador de Web
+> Audio funcionando sobre un MP3 firmado de Cloudinary; ffmpeg mide la sonoridad de un WAV de 50 MB en
+> Vercel en < 8 s. **Puerta GO/NO-GO** para empezar la Fase 2.
+>
+> **Replanificado para la dirección «Arena» (guía v0.6, 2026-10-03).** El Escenario pinta la arena (§3.5:
+> cuña granate con trama en *shader*, diagonal y rayos; la reactividad al audio solo cambia el tamaño de
+> punto), las estrellas duermen con un medidor (§3.8.4) y todo destello pasa por el limitador
+> (`RD-MOT-04`). La referencia visual son las maquetas de `docs/planning/evidence/f0/arena/`.
 
 Valida las dos apuestas que pueden tumbar el proyecto: que la capa de juego (Escenario, partículas y
 sonido) **se sienta bien y vaya fluida en un móvil normal**, y que **Cloudinary + Web Audio +
@@ -16,7 +21,7 @@ ya dentro del monorepo (`apps/web/src/stage`, `apps/web/src/audio`, `packages/au
 
 ## Dependencia con otras fases
 
-- **Requiere:** 0.1 (scaffold) y 0.4 (tokens).
+- **Requiere:** 0.1 (scaffold), 0.4 (tokens) y, para el Escenario, la arena estática y los tokens de la Arena (0.22–0.23).
 - **Habilita:** Fase 2 y, con ella, todo lo demás.
 
 ---
@@ -27,17 +32,18 @@ ya dentro del monorepo (`apps/web/src/stage`, `apps/web/src/audio`, `packages/au
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 1.1 | Canvas R3F único detrás del contenido (`eventSource` en `body`) con la capa Silk portada de `ReactOtpWeb/frontend/src/components/SilkBackground` (mismos parámetros: `#4A0D1C`, velocidad 2,5, escala 1,1, ruido 1,2, 30 fps, dpr 0,75) y los orbes CSS como respaldo y como *placeholder* mientras carga el trozo | ⬜ Listo | 0.1, 0.4 | §3.5 · `RNF-PERF-04` |
+| 1.1 | Canvas R3F único detrás del contenido (`eventSource` en `body`) con la **capa 0 de la arena** (§3.5): fondo negro, cuña granate con **trama roja en *shader***, diagonal roja con filete blanco, estallido de rayos, número de semana en contorno y viñeta, con la posición de la cuña por pantalla; el `ArenaBackdrop` estático de la 0.23 como alternativa y *placeholder* mientras carga el trozo. La pantalla tiene que verse igual con la arena en WebGL que con el fondo estático | ⬜ Listo | 0.1, 0.4, 0.23 | §3.5 · `RNF-PERF-04` · Referencia: maquetas de `docs/planning/evidence/f0/arena/` |
 | 1.2 | Sonda de rendimiento de 2 s y niveles de calidad (alta, media, baja, apagada), con `prefers-reduced-motion`, sin WebGL y ahorro de datos → apagada; pausa con `visibilitychange` | 🔒 Bloqueado | 1.1 | §3.5 · `RNF-PERF-05`, `RNF-A11Y-03` |
-| 1.3 | Vista anclada (`View` de drei) con un vinilo 3D provisional pegado a un elemento del DOM + sistema de partículas (chispas y confeti) con presupuesto por nivel | 🔒 Bloqueado | 1.1 | §3.5, §4.17 |
+| 1.3 | Vista anclada (`View` de drei) con el **vinilo-sol** de la semana (gira una vuelta por compás al BPM) pegado a la tarjeta del escenario + sistema de partículas (chispas rojas y blancas, confeti en la paleta) con presupuesto por nivel y **siempre a través del limitador de destellos** (`flash.request`) | 🔒 Bloqueado | 1.1 | §3.5, §4.17 · `RD-MOT-04` |
 
 ### Audio en el cliente
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 1.4 | Motor de audio: `AudioContext` en la primera interacción (puerta mínima), buses (música, efectos, ambiente), compresor y limitador, síntesis de `SfxDef` (modelo de Orchard) y los efectos `ui.enter`, `ui.hover`, `ui.press`, `star.hover.1–5`, `star.vote.1–5`, `vote.locked`, `xp.gain`, `level.up` | ⬜ Listo | 0.1 | §3.7 · Anexo D · `RD-SND-01..03` |
-| 1.5 | Componente de estrellas completo (§3.8.4): dormidas con anillo, despertar, hover sonoro en pentatónica, voto con *squish*, chispas, vibración y variante sin movimiento; accesible como grupo de radio. Con su bloque en la galería (`/dev/galeria`) y sus estados de §3.3 en la matriz de la galería (`ui/gallery/stateMatrix.ts`) | 🔒 Bloqueado | 1.3, 1.4 | `RD-SND-04`, `RNF-A11Y-06`, `RF-VOTE-10`, `RD-VIS-03` (las Estrellas son el único componente de §3.3 que falta en la galería de la Fase 0) |
-| 1.6 | Reactividad: analizador (FFT 1024) → bandas y RMS suavizados → uniformes del Silk; limitador de luminancia (≤ 15 %, paso bajo 3 Hz) y medición de destellos con un beat a 160 BPM | 🔒 Bloqueado | 1.1, 1.4 | §3.5 · `RNF-A11Y-04` |
+| 1.4 | Motor de audio: `AudioContext` en la primera interacción (puerta mínima; la puerta completa es la 1.13), buses (música, efectos, ambiente), compresor y limitador, síntesis de `SfxDef` (modelo de Orchard) y los efectos `ui.enter`, `ui.hover`, `ui.press`, `star.hover.1–5`, `star.vote.1–5`, `vote.locked`, `xp.gain`, `level.up` | ⬜ Listo | 0.1 | §3.7 · Anexo D · `RD-SND-01..03` |
+| 1.5 | Estrellas completas (§3.8.4): **dormidas con su medidor de escucha y el motivo** (no con anillo), despertar con un barrido y «¡VOTO LISTO!», hover sonoro en pentatónica, voto con *hit-stop*, aplastado, chispas y vibración, confirmación en texto y región viva, variante sin movimiento y modo serio; grupo de radio con 1–5. Con su bloque en la galería y su fila de la matriz de estados de §3.3 | 🔒 Bloqueado | 1.3, 1.4 | `RD-SND-04`, `RNF-A11Y-06`, `RF-VOTE-10`, `RD-VIS-03` (las Estrellas son el único componente de §3.3 que falta en la galería de la Fase 0) |
+| 1.6 | Reactividad: analizador (FFT 1024) → bandas y RMS suavizados → **tamaño de punto de la trama** de la arena (≤ 15 %, paso bajo ≤ 2 Hz), **nunca** la luminancia del rojo ni el brillo de un área grande; medición de luminancia y de destellos con un beat a 160 BPM | 🔒 Bloqueado | 1.1, 1.4 | §3.5 · `RNF-A11Y-04`, `RD-MOT-04` |
+| 1.13 | Puerta de entrada completa (§3.8.1; maqueta `00-titulo`): arranque «[OTP.] PRESENTA», logo que cae con su extrusión y el lockup, vinilo-sol de la semana partido por la diagonal y girando al BPM, «◀ PULSA PARA EMPEZAR ▶» que respira con «Entrar sin sonido [S]», campeón vigente y cartel EN JUEGO; al pulsar, `AudioContext`, `ui.enter` y la diagonal que abre el menú. Saltable, con su variante sin movimiento y desactivable en Opciones; no aparece en autenticación, admin ni legales | 🔒 Bloqueado | 1.4 | §3.8.1 · `RD-SND-01`, `RD-MOT-01`, `RD-MOT-03` · Sale del jurado visual de la Arena (0.28, `docs/planning/evidence/f0/arena/jurado.md`): la home entra directa al menú y falta el momento de «inserta moneda» |
 
 ### Audio en la nube ⚠️ crea recursos externos: pedir confirmación antes
 
@@ -57,14 +63,14 @@ ya dentro del monorepo (`apps/web/src/stage`, `apps/web/src/audio`, `packages/au
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 1.11 | Banco: `tools/shot/bench.mjs` en escritorio (GPU integrada AMD del portátil) con Silk + vista + 4.000 partículas; en Android de gama media (dispositivo real del usuario o, si no hay, emulación con limitación de CPU, dejándolo marcado como evidencia parcial). Latencia de efectos medida | 🔒 Bloqueado | 1.3, 1.5, 1.6 | §4.17 · `RNF-PERF-03`, `RD-SND-05` |
-| 1.12 | Informe GO/NO-GO en este plan con evidencia (capturas, GIF y números en `docs/planning/evidence/f1/`); desviaciones llevadas a la guía con registro de cambios; decisión anotada en el roadmap | 🔒 Bloqueado | 1.7, 1.8, 1.10, 1.11 | — · Incluye repetir la prueba del sello con el Silk (`node tools/shot/ab.mjs`) para cerrar `RD-VIS-02` y decidir las propuestas del jurado de la Fase 0 (guía §7) |
+| 1.11 | Banco: `tools/shot/bench.mjs` en escritorio (GPU integrada AMD del portátil) con la arena en *shader* + vinilo-sol + 4.000 partículas; en Android de gama media (dispositivo real del usuario o, si no hay, emulación con limitación de CPU, dejándolo marcado como evidencia parcial). Latencia de efectos medida | 🔒 Bloqueado | 1.3, 1.5, 1.6 | §4.17 · `RNF-PERF-03`, `RD-SND-05` |
+| 1.12 | Informe GO/NO-GO en este plan con evidencia (capturas, GIF y números en `docs/planning/evidence/f1/`); desviaciones llevadas a la guía con registro de cambios; decisión anotada en el roadmap | 🔒 Bloqueado | 1.7, 1.8, 1.10, 1.11 | — · Incluye un pase del **jurado visual** de la arena con el Escenario WebGL frente al fondo estático (`RD-VIS-02` e) y el test de paleta de `RD-VIS-02` a con la arena en *shader* |
 
 ---
 
 ## Entregable
 
-Una página de prueba (`/dev/spike`) con el Silk reactivo a un beat alojado en Cloudinary, un vinilo
+Una página de prueba (`/dev/spike`) con la arena reactiva a un beat alojado en Cloudinary, un vinilo
 3D anclado, estrellas completas con sonido y partículas, el selector de calidad y los números del
 banco; más la función de medición de sonoridad desplegada en una *preview*.
 
@@ -89,5 +95,7 @@ repite el banco antes de seguir. **NO-GO** en 4 o 5 → se replantea el almacena
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-03 | — | Replanificado para la dirección «Arena»: 1.1 (arena en *shader* en lugar del Silk; depende también de la 0.23), 1.3 (vinilo-sol y limitador), 1.5 (estrellas con medidor), 1.6 (reactividad sobre el tamaño de punto), 1.11 y 1.12 (jurado visual en lugar de la prueba del sello). |
+| 2026-10-03 | 1.13 | Nueva tarea, del jurado visual de la Arena (0.28): la puerta de entrada completa con la pantalla de título `00-titulo` (§3.8.1). La 1.4 se queda con la puerta mínima (el desbloqueo del `AudioContext`). |
 | 2026-10-02 | 1.5 | Revisión adversarial de la Fase 0 (sdd-2): la 1.5 cierra también `RD-VIS-03` (Estrellas en la galería con sus estados). |
 | 2026-10-02 | — | Plan creado. |

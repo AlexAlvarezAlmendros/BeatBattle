@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import es from './es.json'
+import { formatDuration } from './format'
 import { createTranslator, DATE_FORMATS, formatDate, formatNumber, t } from './index'
 
 const messages = {
@@ -21,7 +22,6 @@ describe('i18n: t()', () => {
   it('traduce claves anidadas con puntos e interpola {variables}', () => {
     expect(strict('greeting', { name: 'Aina' })).toBe('Hola, Aina')
     expect(t('app.pageTitle', { page: 'Semanas' })).toBe('Semanas · Beat Battle')
-    expect(t('app.name')).toBe('Beat Battle')
   })
 
   it('formatea en castellano los números interpolados', () => {
@@ -69,7 +69,7 @@ describe('i18n: t()', () => {
     const link = { element: 'a' }
     expect(strict.parts('greeting', { name: link })).toEqual(['Hola, ', link])
     expect(strict.parts('week.votes', { count: 12345 })).toEqual(['12.345', ' votos'])
-    expect(t.parts('footer.credit', { brand: 'B', otherPeople: link })).toEqual(['B', ' · ', link])
+    expect(t.parts('app.pageTitle', { page: link })).toEqual([link, ' · Beat Battle'])
     expect(() => strict.parts('greeting', {})).toThrow(/Falta la variable «name»/)
     expect(lenient.parts('greeting', {})).toEqual(['Hola, ', '{name}'])
     // @ts-expect-error: clave inexistente a propósito
@@ -126,6 +126,19 @@ describe('i18n: es.json', () => {
       ).toBe(true)
     }
   })
+
+  /*
+   * Una cifra (o la variable que la pone) y su unidad no se separan al partir la línea (jurado de la 0.28,
+   * cierre: «45 s» partía entre «45» y «s» en «Cómo se juega» a 390 × 844 y en la ayuda del menú).
+   */
+  it('RD-VIS-02 e / WCAG 1.4.10: número y unidad (s, min, h, BPM, px, XP, %…) van unidos por un espacio de no separación', () => {
+    const unit = /(?:\d|\})[ \t](?:ms|s|min|h|BPM|px|XP|PTS|%|días?|horas?|minutos?|segundos?)(?![\p{L}\d])/u
+    const split = leaves
+      .filter(([, value]) => unit.test(value as string))
+      .map(([key, value]) => `${key}: ${value}`)
+    expect(split).toEqual([])
+    expect(t('home.modes.jury.helpVisitor')).toContain('45 s')
+  })
 })
 
 describe('i18n: fechas y números', () => {
@@ -167,5 +180,15 @@ describe('i18n: fechas y números', () => {
     expect(formatNumber(10000)).toBe('10.000')
     expect(formatNumber(4.256, { maximumFractionDigits: 2 })).toBe('4,26')
     expect(formatNumber(0.42, { style: 'percent' })).toMatch(/^42\s%$/u)
+  })
+})
+
+describe('formatDuration', () => {
+  it('minutos y segundos con dos cifras, sin negativos ni NaN', () => {
+    expect(formatDuration(72)).toBe('1:12')
+    expect(formatDuration(171.9)).toBe('2:51')
+    expect(formatDuration(5)).toBe('0:05')
+    expect(formatDuration(-3)).toBe('0:00')
+    expect(formatDuration(Number.NaN)).toBe('0:00')
   })
 })

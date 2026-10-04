@@ -1,0 +1,323 @@
+/*
+ * La arena estática (guía §3.5 capa 0, §3.2 «Texturas» y «Forma»; maquetas `01-menu.html`,
+ * `02-seleccion.html`, `05-perfil.html`). Fija a la ventana, detrás de todo (`--bb-z-stage`).
+ *
+ * `--split-x` es dónde corta la diagonal el pie de la ventana (en `vw`: la cuña y su interior lo leen
+ * desde cajas de distinto ancho). Con `skewX(-17°)` y el origen abajo, la diagonal sube hacia la derecha
+ * en cualquier proporción de ventana (a 1440 × 900, del 40 % abajo al 59 % arriba, como la maqueta).
+ * El `skewX` no depende del origen horizontal, solo del vertical: con el mismo origen abajo, el giro
+ * contrario del interior (`.straight`) lo endereza del todo.
+ */
+.arena {
+  --split-x: var(--bb-split-x-right);
+  --burst-x: 26%;
+  --burst-y: 34%;
+  --skew: calc(-1 * var(--bb-split-angle));
+  position: fixed;
+  inset: 0;
+  z-index: var(--bb-z-stage);
+  overflow: hidden;
+  pointer-events: none;
+  /* Lo que se sale (los rayos, la cuña inclinada) nunca cuenta como desbordamiento de la página. */
+  contain: strict;
+}
+
+/*
+ * La cuña del menú (a la derecha) sigue a la columna de modos (§3.8.3, ventana grande): su pie corta la
+ * ventana `--bb-menu-split-lead` a la izquierda de la columna, que va pegada al medianil derecho y escala
+ * con el menú (`--bb-menu-scale`). Hasta 1440 px de ancho eso cae a la izquierda del 40 % de la maqueta y
+ * manda `--bb-split-x-right`; a partir de ahí la cuña ya no crece con la ventana, y el granate no pasa del
+ * ~24 % de la pantalla (a 1920 × 1080 llegaba al 32 %).
+ */
+.arena[data-wedge="right"] {
+  --split-x: max(
+    var(--bb-split-x-right),
+    100vw -
+    var(--bb-gutter) -
+    (var(--bb-menu-modes-w-max) + var(--bb-menu-split-lead)) *
+    var(--bb-menu-scale)
+  );
+}
+
+.arena[data-wedge="left"] {
+  --split-x: var(--bb-split-x-left);
+  --burst-x: 18%;
+  --burst-y: 46%;
+}
+
+/*
+ * El centro de los rayos sigue a la pieza (§3.8.14 v0.6.7; cuarto pase del jurado, P8): en dos columnas
+ * (≥ 961 px), las pantallas con pieza (las interiores, los legales, la autenticación) publican el centro
+ * de su columna (`--screen-piece-x/y`, `ScreenPage`) y el estallido sale de ahí. Era un punto fijo de la
+ * ventana: en los legales caía ~200 px por encima del sello «EN OBRAS» y en /entrar a 1920 × 1080, arriba
+ * a la izquierda del logo. El estallido es la capa de los rayos con un 20 % más por cada lado (`.burst`,
+ * `inset: -20%`, 1,4 veces la ventana): lo que sobresale, el 20 % de la ventana, es 1/7 de su caja, y los
+ * porcentajes de `--burst-x/y` se resuelven en esa caja. Sin pieza publicada, el punto de siempre (el
+ * respaldo de `var()` deja el mismo porcentaje). El menú (la cuña a la derecha) no cambia.
+ */
+@media (min-width: 961px) {
+  .arena[data-wedge="left"] {
+    --burst-x: calc(var(--screen-piece-x, 18% - 100% / 7) + 100% / 7);
+    --burst-y: calc(var(--screen-piece-y, 46% - 100% / 7) + 100% / 7);
+  }
+}
+
+/*
+ * En el marco simple (sin cuña: la autenticación, los legales), también en una columna (≤ 960 px; sexto
+ * pase del jurado, G5): en la autenticación el logo es la pieza de la primera vista, y el estallido volvía
+ * al punto fijo aunque la pantalla publicaba el centro de la pieza (en /entrar a 820 × 1180, los rayos en
+ * (134, 326) y el logo en (398, 467); a 960 × 800, en (157, 221) y (468, 322)). Las interiores en una
+ * columna (la cuña abajo en el móvil) siguen con el punto de siempre.
+ */
+.arena[data-wedge="none"] {
+  --burst-x: calc(var(--screen-piece-x, 26% - 100% / 7) + 100% / 7);
+  --burst-y: calc(var(--screen-piece-y, 34% - 100% / 7) + 100% / 7);
+}
+
+/*
+ * Ventana grande (≥ 1600 px; §3.8.14 v0.6.7, P8): la cuña de las interiores sigue a la pieza y el granate
+ * no pasa del ~24 % (la 404 llegaba al 25,8 % a 1920 × 1080 y al 26,5 % a 2560 × 1440: la pieza no crece
+ * con la ventana y la cuña, sí; las provisionales, al 26,5 % a 1920 × 1080). La diagonal pasa
+ * `--bb-space-8` a la derecha de la esquina de abajo de lo que lleva la columna de la pieza
+ * (`--screen-piece-right/bottom`, `ScreenPage`): a la altura de esa esquina corta la ventana en `--split-x`
+ * más lo que sube la inclinación, `(100vh − pie) · tan(17°)`. Nunca más allá del 30 % de siempre
+ * (`--bb-split-x-left`): en las pantallas de contenido, cuya columna llega a la barra, la cuña es la de
+ * siempre. Sin pieza publicada, también.
+ *
+ * Desde 1200 px (sexto pase del jurado, G6): las provisionales con el sello «EN OBRAS» como pieza llegaban
+ * al 30,4–31,1 % de granate a 1440 × 900 y saltaban al 22,8 % entre 1599 y 1600 px. Con la pieza grande (la
+ * lista de «Cómo se juega», el tablero de Opciones) la esquina cae más allá del 30 % y la cuña es la de
+ * siempre; la 404 sigue a su pad. Por debajo, de 961 a 1199 px, la columna de la pieza ya va a su mínimo
+ * (20 rem; 18 con la ventana baja) y la cuña es la de siempre.
+ */
+@media (min-width: 1200px) {
+  .arena[data-wedge="left"] {
+    --split-x: min(
+      var(--bb-split-x-left),
+      var(--screen-piece-right, 100vw) +
+      var(--bb-space-8) -
+      (100vh - var(--screen-piece-bottom, 0px)) *
+      tan(var(--bb-split-angle))
+    );
+  }
+}
+
+/*
+ * ── Estallido de rayos (§3.2): blanco al 4,5 %, rayo de 1,2° cada 6°, con máscara radial ─────
+ * La capa de los rayos (`.rays`, del tamaño de la ventana) los apaga bajo el jugador del HUD (la caja
+ * que publica `Hud`: `--hud-player-right` × `--hud-player-bottom`, desde la esquina de arriba a la
+ * izquierda) y los deja volver en 32 px: ningún texto del HUD («LILBRU», «NV 7 · BEATMAKER», el XP, «1P ·
+ * PULSA PARA UNIRTE») va directamente sobre ellos (`RD-VIS-05`, §3.2; jurado de la 0.28, L12). Las
+ * demás piezas del HUD van en su panel. Son dos capas sumadas: se ven a la derecha de la caja o debajo
+ * de ella. El estallido no cambia de sitio ni de forma: sigue detrás del logo y llega arriba entre el
+ * jugador y el reloj, como en la maqueta.
+ */
+.rays {
+  /* Sin jugador (marco simple), la caja queda fuera de la ventana y los rayos se ven enteros. */
+  --rays-x: var(--hud-player-right, calc(-1 * var(--bb-space-8)));
+  --rays-y: var(--hud-player-bottom, calc(-1 * var(--bb-space-8)));
+  position: absolute;
+  inset: 0;
+  mask:
+    linear-gradient(
+      to right,
+      transparent var(--rays-x),
+      var(--bb-black) calc(var(--rays-x) + var(--bb-space-8))
+    ),
+    linear-gradient(
+      to bottom,
+      transparent var(--rays-y),
+      var(--bb-black) calc(var(--rays-y) + var(--bb-space-8))
+    );
+}
+
+.burst {
+  position: absolute;
+  inset: -20%;
+  background: repeating-conic-gradient(
+    from 0deg at var(--burst-x) var(--burst-y),
+    var(--bb-tex-ray-ink) 0 var(--bb-tex-ray-width),
+    transparent var(--bb-tex-ray-width) var(--bb-tex-ray-step)
+  );
+  mask: radial-gradient(circle at var(--burst-x) var(--burst-y), var(--bb-black) 18%, transparent 55%);
+}
+
+/* ── Cuña granate con su trama ──────────────────────────────────────────────────────────── */
+.wedge {
+  position: absolute;
+  inset-block: 0;
+  overflow: hidden;
+  background: var(--bb-wine-2);
+  transform: skewX(var(--skew));
+  transform-origin: 0 100%;
+}
+
+.straight {
+  position: absolute;
+  inset-block: 0;
+  width: 100vw;
+  transform: skewX(var(--bb-split-angle));
+  transform-origin: 0 100%;
+}
+
+.arena[data-wedge="right"] .wedge {
+  left: var(--split-x);
+  width: 200vw;
+}
+
+.arena[data-wedge="right"] .straight {
+  left: calc(-1 * var(--split-x));
+}
+
+.arena[data-wedge="left"] .wedge {
+  left: -100vw;
+  width: calc(100vw + var(--split-x));
+}
+
+.arena[data-wedge="left"] .straight {
+  left: 100vw;
+}
+
+.halftone {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.extras {
+  position: absolute;
+  inset: 0;
+}
+
+/* ── Diagonal: banda roja de 12 px junto a la cuña y filete blanco de 3 px a 14 px ──────────── */
+.band,
+.rule {
+  position: absolute;
+  inset-block: 0;
+  transform: skewX(var(--skew));
+  transform-origin: 0 100%;
+}
+
+.band {
+  width: var(--bb-split-band);
+  background: var(--bb-red);
+}
+
+.rule {
+  width: var(--bb-split-rule);
+  background: var(--bb-white);
+}
+
+.arena[data-wedge="right"] .band {
+  left: calc(var(--split-x) - var(--bb-split-band));
+}
+
+.arena[data-wedge="right"] .rule {
+  left: calc(var(--split-x) - var(--bb-split-band) - var(--bb-split-gap) - var(--bb-split-rule));
+}
+
+.arena[data-wedge="left"] .band {
+  left: var(--split-x);
+}
+
+.arena[data-wedge="left"] .rule {
+  left: calc(var(--split-x) + var(--bb-split-band) + var(--bb-split-gap));
+}
+
+/* ── Viñeta: radial negra al 75 % en el borde ───────────────────────────────────────────── */
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, var(--bb-tex-vignette-ink) 100%);
+}
+
+/*
+ * Móvil (≤ 720 px): la diagonal pasa a horizontal inclinada y la cuña va abajo (maqueta móvil del
+ * menú). Las medidas son porcentajes de la ventana, como en la maqueta.
+ */
+@media (max-width: 720px) {
+  .arena[data-wedge] .wedge,
+  .arena[data-wedge] .straight,
+  .arena[data-wedge] .band,
+  .arena[data-wedge] .rule {
+    left: 0;
+    width: 100%;
+    transform: none;
+  }
+
+  .arena[data-wedge] .wedge {
+    clip-path: polygon(0 56%, 100% 40%, 100% 100%, 0 100%);
+  }
+
+  .arena[data-wedge] .band {
+    clip-path: polygon(0 55.3%, 100% 39.3%, 100% 40.1%, 0 56.1%);
+  }
+
+  .arena[data-wedge] .rule {
+    clip-path: polygon(0 54.3%, 100% 38.3%, 100% 38.6%, 0 54.6%);
+  }
+}
+
+/*
+ * Interiores por debajo de 360 px (§3.8.14 v0.6.7; cuarto pase del jurado, P3): las pestañas de Opciones
+ * ocupan cinco o seis filas, así que la cuña empieza bajo ellas. Su lado alto (el derecho, al 40 % de la
+ * ventana) baja hasta `--bb-space-4` por debajo del pie de las pestañas, que publica la pantalla
+ * (`--screen-tabs-bottom`, `ScreenPage`), y la banda y el filete bajan con ella; la inclinación es la de
+ * siempre. Sin pestañas, la variable no existe y la cuña queda donde estaba. La pantalla publica el pie con
+ * la página sin desplazar, como se ve la primera vista.
+ */
+@media (max-width: 359px) {
+  .arena[data-wedge="left"] {
+    --wedge-top: max(40%, var(--screen-tabs-bottom, 0px) + var(--bb-space-4));
+  }
+
+  .arena[data-wedge="left"] .wedge {
+    clip-path: polygon(0 calc(var(--wedge-top) + 16%), 100% var(--wedge-top), 100% 100%, 0 100%);
+  }
+
+  .arena[data-wedge="left"] .band {
+    clip-path: polygon(
+      0 calc(var(--wedge-top) + 15.3%),
+      100% calc(var(--wedge-top) - 0.7%),
+      100% calc(var(--wedge-top) + 0.1%),
+      0 calc(var(--wedge-top) + 16.1%)
+    );
+  }
+
+  .arena[data-wedge="left"] .rule {
+    clip-path: polygon(
+      0 calc(var(--wedge-top) + 14.3%),
+      100% calc(var(--wedge-top) - 1.7%),
+      100% calc(var(--wedge-top) - 1.4%),
+      0 calc(var(--wedge-top) + 14.6%)
+    );
+  }
+}
+
+/*
+ * Tableta vertical (de 721 a 1199 px de ancho y como mucho 3:4): el menú va apilado como en el móvil
+ * (`MainMenu`, §3.8.3) y su cuña también va abajo, detrás de las placas. Las interiores no cambian.
+ */
+@media (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) {
+  .arena[data-wedge="right"] .wedge,
+  .arena[data-wedge="right"] .straight,
+  .arena[data-wedge="right"] .band,
+  .arena[data-wedge="right"] .rule {
+    left: 0;
+    width: 100%;
+    transform: none;
+  }
+
+  .arena[data-wedge="right"] .wedge {
+    clip-path: polygon(0 56%, 100% 40%, 100% 100%, 0 100%);
+  }
+
+  .arena[data-wedge="right"] .band {
+    clip-path: polygon(0 55.3%, 100% 39.3%, 100% 40.1%, 0 56.1%);
+  }
+
+  .arena[data-wedge="right"] .rule {
+    clip-path: polygon(0 54.3%, 100% 38.3%, 100% 38.6%, 0 54.6%);
+  }
+}

@@ -1,0 +1,77 @@
+/*
+ * Pegatina OTP (§3.1 «La firma», §3.3): imagen generada en el build, girada −7° (`--bb-tilt-sticker`),
+ * nunca recoloreada ni deformada. Tamaños de §3.1: lockup de la pantalla de título 120 px de ancho,
+ * del menú 104 px (62 px en móvil; en la ventana grande del menú crece con el lockup hasta 120); en la
+ * barra de controles y la ceremonia, 30 px de alto (24 px en móvil). Margen mínimo alrededor: la altura
+ * de su «O». §3.1 la da como «unas 0,44 veces el alto de la imagen»; medida en `otp-slap@2x.png`, la «O»
+ * blanca (sin el contorno rojo ni la sombra) ocupa 76 de sus 164 px de alto con el blanco puro y 77 con el
+ * borde suavizado: 0,46–0,47. Quien guarde el margen, que cuente con el mayor, 0,47 (antes decía «un
+ * cuarto», que se quedaba corto).
+ * Ningún estilo de aquí lo aplica: lo guarda quien pone la pegatina (en el lockup, hacia el logo del juego
+ * no se aplica, pero la pegatina nunca lo pisa; §3.1).
+ */
+.slap {
+  display: inline-block;
+  flex: none;
+  transform: rotate(var(--bb-tilt-sticker));
+  line-height: 0;
+}
+
+.slap img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.title {
+  width: 120px;
+}
+
+/* En la ventana grande del menú crece con el lockup (`--lockup-scale`), sin pasar de la del título. */
+.menu {
+  width: min(calc(104px * var(--lockup-scale, 1)), 120px);
+}
+
+.bar {
+  width: auto;
+}
+
+.bar img {
+  width: auto;
+  height: 30px;
+}
+
+@media (max-width: 720px) {
+  .title,
+  .menu {
+    width: 62px;
+  }
+
+  .bar img {
+    height: 24px;
+  }
+}
+
+/*
+ * En el lockup del título (`TitleLockup`, contenedor `title-lockup`), la de móvil también cuando el
+ * lockup es tan estrecho como en un móvil (la columna del título de 721 a unos 1000 px): con 104 px no
+ * cabía la cinta ni en su versión corta.
+ */
+@container title-lockup (width < 27rem) {
+  .title,
+  .menu {
+    width: 62px;
+  }
+}
+
+/* Enlace: el objetivo táctil llega a 44 px sin mover la pegatina (RNF-A11Y-09). */
+.link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--bb-target);
+  min-height: var(--bb-target);
+  color: inherit;
+  text-decoration: none;
+}

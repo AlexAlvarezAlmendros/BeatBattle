@@ -1,0 +1,109 @@
+/* Sección «Componentes» de la galería (0.25): escenarios de las muestras. */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bb-space-3);
+}
+
+.stack {
+  display: grid;
+  justify-items: start;
+  gap: var(--bb-space-3);
+}
+
+.fill {
+  width: 100%;
+  min-width: 0;
+}
+
+.note {
+  max-width: 72ch;
+  color: var(--bb-text-2);
+}
+
+/* Las placas necesitan sitio a la izquierda para su flecha y su 1P. */
+.menuStage {
+  width: 100%;
+  max-width: 34rem;
+  padding: var(--bb-space-3) 0 var(--bb-space-3) var(--bb-space-16);
+}
+
+.menu {
+  display: grid;
+  gap: var(--bb-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.help {
+  margin-top: var(--bb-space-4);
+  color: var(--bb-text-2);
+}
+
+.panelText {
+  color: var(--bb-text-2);
+}
+
+.cellStage {
+  width: 8rem;
+  padding-top: var(--bb-space-6);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 8rem);
+  gap: var(--bb-space-8) var(--bb-space-4);
+  padding-top: var(--bb-space-6);
+}
+
+.tiles {
+  width: 100%;
+}
+
+/*
+ * Filas de entrada: la fila es un contenedor (`container-type: inline-size`) y no toma el ancho de su
+ * contenido, así que la tesela se lo da, el de la lista del historial de la maqueta `05-perfil`; en móvil,
+ * el de la tesela (estrecha: el resultado en una segunda fila).
+ */
+.rows {
+  width: 100%;
+  max-width: 44rem;
+}
+
+/* XP flotante (§3.4.2): cifra y signo en Oxanium rojo. */
+.xpAmount {
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-style: normal;
+  font-weight: var(--bb-weight-extrabold);
+}
+
+.cover {
+  width: 10rem;
+}
+
+/* Anunciador en modo serio: la nota que ocupa la tesela en lugar del rótulo (en el panel, sin trama). */
+.seriousNote {
+  display: grid;
+  gap: var(--bb-space-2);
+  max-width: 72ch;
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-sm);
+  text-align: center;
+}
+
+.liveText {
+  color: var(--bb-text-2);
+}
+
+@media (max-width: 720px) {
+  .menuStage {
+    padding-left: 0;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

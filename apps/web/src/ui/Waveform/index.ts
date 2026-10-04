@@ -7,4 +7,4 @@ export {
   WAVE_BAR_WIDTH,
   type WaveformPeak,
 } from './peaks'
-export { Waveform, type WaveformProps } from './Waveform'
+export { SEEK_STEP_S, Waveform, type WaveformProps } from './Waveform'

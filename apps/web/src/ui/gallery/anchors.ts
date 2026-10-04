@@ -1,48 +1,31 @@
 /**
- * Anclas de la galería para el índice. Van aparte de las secciones para que la cabecera de la página
- * (título, ajustes e índice) se pinte sin esperar a cargar los componentes.
+ * Bloques de la sección «Componentes» de la galería (tarea 0.25), en el orden de §3.3. `matrix` dice si
+ * el componente está en la matriz de estados de §3.3 (`stateMatrix.ts`): los que no (chip de dato,
+ * sello, placa, portada y medalla) no son interactivos y se enseñan en sus variantes.
  */
-
-/** Secciones, en orden (los componentes y las piezas del layout cuelgan de la suya). */
-export const SECTION_ANCHORS = [
-  { id: 'color', key: 'color' },
-  { id: 'tipografia', key: 'typography' },
-  { id: 'espaciado', key: 'spacing' },
-  { id: 'radios', key: 'radii' },
-  { id: 'sombras', key: 'shadows' },
-  { id: 'movimiento', key: 'motion' },
-  { id: 'componentes', key: 'components' },
-  { id: 'layout', key: 'layout' },
-] as const
-
-/** Componentes, en el orden de §3.3. */
 export const COMPONENT_ANCHORS = [
-  { id: 'boton', key: 'button' },
-  { id: 'chip', key: 'chip' },
-  { id: 'tarjeta', key: 'card' },
-  { id: 'tesela', key: 'dataTile' },
-  { id: 'rotulo', key: 'sectionLabel' },
-  { id: 'onda', key: 'waveform' },
-  { id: 'fila', key: 'entryRow' },
-  { id: 'modal', key: 'modal' },
-  { id: 'aviso', key: 'toast' },
-  { id: 'xp', key: 'xpBar' },
-  { id: 'esqueleto', key: 'skeleton' },
-  { id: 'cuenta-atras', key: 'countdown' },
+  { id: 'boton', key: 'button', matrix: true },
+  { id: 'opcion-menu', key: 'menuPlate', matrix: true },
+  { id: 'pestanas', key: 'tabs', matrix: true },
+  { id: 'chip-dato', key: 'dataChip', matrix: false },
+  { id: 'chip-filtro', key: 'filterChip', matrix: true },
+  { id: 'sello', key: 'stamp', matrix: false },
+  { id: 'ficha', key: 'fighterCard', matrix: true },
+  { id: 'casilla', key: 'entryCell', matrix: true },
+  { id: 'fila', key: 'entryRow', matrix: true },
+  { id: 'tesela', key: 'tile', matrix: true },
+  { id: 'onda', key: 'waveform', matrix: true },
+  { id: 'ventana', key: 'modal', matrix: true },
+  { id: 'anunciador', key: 'announcer', matrix: true },
+  { id: 'aviso', key: 'toast', matrix: true },
+  { id: 'medidor', key: 'meter', matrix: true },
+  { id: 'esqueleto', key: 'skeleton', matrix: true },
+  { id: 'reloj', key: 'roundClock', matrix: true },
+  { id: 'placa', key: 'titlePlate', matrix: false },
+  { id: 'portada', key: 'cover', matrix: false },
 ] as const
 
 export type ComponentKey = (typeof COMPONENT_ANCHORS)[number]['key']
 
-/** Piezas del layout del sello (tarea 0.7): marco de la página y hero. */
-export const LAYOUT_ANCHORS = [
-  { id: 'isla', key: 'island' },
-  { id: 'pie', key: 'footer' },
-  { id: 'titular', key: 'heroTitle' },
-  { id: 'rotulos', key: 'sideLabel' },
-  { id: 'rejilla', key: 'backdrop' },
-  { id: 'marquee', key: 'marquee' },
-  { id: 'orbes', key: 'orbs' },
-  { id: 'cristal', key: 'glassSurface' },
-] as const
-
-export type LayoutKey = (typeof LAYOUT_ANCHORS)[number]['key']
+/** Componentes de la matriz de §3.3 (Estrellas llega con la tarea 1.5). */
+export type MatrixComponentKey = Extract<(typeof COMPONENT_ANCHORS)[number], { matrix: true }>['key']

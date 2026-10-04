@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beat Battle · Elige entrada</title>
+<link rel="stylesheet" href="final.css">
+<style>
+  .wedge{inset:0;clip-path:polygon(0 0,43.6% 0,40.2% 100%,0 100%)}
+  .wedge .bg__scan{clip-path:inherit}
+  .slash--r{background:var(--bb-red);clip-path:polygon(43.6% 0,44.3% 0,40.9% 100%,40.2% 100%)}
+  .slash--w{background:rgba(255,255,255,.85);clip-path:polygon(44.8% 0,45% 0,41.6% 100%,41.4% 100%)}
+  .clock{min-width:300px;padding:9px 22px 11px}
+  .clock__grp b{font-size:30px}
+  .clock__sep{font-size:24px;padding-bottom:16px}
+
+  .sel{display:grid;grid-template-columns:520px minmax(0,1fr);gap:76px;padding:0 48px;position:relative;z-index:var(--bb-z-content)}
+  .head h1{font-size:42px;font-stretch:128%;margin-top:-4px;white-space:nowrap}
+  .head p{font:500 14px/1.4 var(--bb-font-ui);color:var(--bb-text-2);margin-top:8px;max-width:520px}
+  .head p b{color:var(--bb-white)}
+
+  /* ficha del seleccionado */
+  .pick{margin-top:20px}
+  .pick__top{display:grid;grid-template-columns:300px 204px;gap:16px}
+  .portrait{width:300px;height:300px;--fc:var(--bb-white);--ff:var(--bb-black);--c:var(--bb-cut-lg);padding:6px;position:relative}
+  .portrait canvas{width:288px;height:288px;display:block;clip-path:polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px)}
+  .portrait .stamp{position:absolute;right:-14px;bottom:26px;transform:rotate(-6deg);background:var(--bb-black)}
+  .stats{display:grid;gap:10px;align-content:start}
+  .stats .tile{padding:11px 14px}
+  .stats .tile b{font-size:22px}
+  .stats .tile b.w{font:700 18px/1 var(--bb-font-ui)}
+  .banner{position:relative;margin-top:16px;height:74px;display:flex;align-items:center;padding:0 22px 0 30px;isolation:isolate}
+  .banner::before{content:"";position:absolute;inset:0;z-index:-1;background:var(--bb-black);clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%);box-shadow:inset 0 0 0 2px var(--bb-white)}
+  .banner::after{content:"";position:absolute;left:0;top:0;bottom:0;width:30px;z-index:-1;background:var(--bb-red);clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%)}
+  .info{margin-top:12px;padding:12px 18px 16px;--ff:rgba(6,6,8,.95);--fc:var(--bb-line-strong);--c:var(--bb-cut)}
+  .info .pick__title{margin-top:0}
+  .alias{font:italic 900 46px/1 var(--bb-font-display);text-transform:uppercase;letter-spacing:-.01em;text-shadow:4px 4px 0 var(--bb-red-cta);white-space:nowrap;padding-left:16px}
+  .pick__title{display:flex;align-items:baseline;gap:12px;margin-top:14px}
+  .pick__title b{font:700 19px/1.2 var(--bb-font-ui)}
+  .pick__state{display:flex;align-items:center;gap:12px;margin-top:12px;font:500 14px/1.3 var(--bb-font-ui);color:var(--bb-text-2)}
+  .pick__prev{display:flex;align-items:center;gap:12px;margin-top:14px}
+  .pick__prev .wave{flex:1;height:34px}
+  .pick__prev canvas{height:34px}
+  .pick__prev .t{font:700 13px/1 var(--bb-font-num);color:var(--bb-text-3)}
+  .pick__btns{display:flex;gap:14px;margin-top:14px}
+  .pick__top .stats{width:204px}
+
+  /* plantilla de luchadores */
+  .roster{padding-top:2px}
+  .tools{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .tools__l{display:flex;align-items:center;gap:6px}
+  .tools .seg__t{padding:0 12px;letter-spacing:.1em}
+  .fchip--sm{height:36px;padding:0 6px 0 12px}
+  .count{display:flex;justify-content:space-between;align-items:center;margin:10px 0 12px;font:500 13px/1.3 var(--bb-font-ui);color:var(--bb-text-2)}
+  .count b{color:var(--bb-white)}
+  .grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px 12px}
+  .cell{position:relative;display:grid;gap:6px;align-content:start;outline:none}
+  .cell__art{position:relative;aspect-ratio:1;--fc:rgba(255,255,255,.22);--ff:var(--bb-black);--c:12px;padding:3px}
+  .cell__art canvas{width:100%;height:100%;display:block;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px)}
+  .cell__n{font:700 12px/1.2 var(--bb-font-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--bb-text-2);min-height:29px;padding:0 2px}
+  .cell .cursor{inset:-7px -7px auto -7px;height:calc(100% + 14px);--c:18px}
+  .cell .tag1p{left:-10px;top:-17px}
+  .cell:focus .cell__art,.cell:hover .cell__art{--fc:var(--bb-red)}
+  .cell:focus .cell__n,.cell:hover .cell__n{color:var(--bb-white)}
+  .cell[data-voted] .cell__art canvas{opacity:.42}
+  .cell[data-voted] .cell__n{color:var(--bb-text-3)}
+  .cell .stamp{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) rotate(-9deg);background:rgba(0,0,0,.82);font-size:12px;padding:5px 8px 4px;border-width:2px}
+  .cell--rnd .cell__art{--ff:var(--bb-wine-2)}
+  .cell--rnd .q{position:absolute;inset:0;display:grid;place-items:center;font:italic 900 64px/1 var(--bb-font-display);font-stretch:130%;color:var(--bb-white);text-shadow:4px 4px 0 var(--bb-red-cta)}
+  .legend{display:flex;gap:18px;margin-top:12px;font:500 13px/1.3 var(--bb-font-ui);color:var(--bb-text-3)}
+</style>
+</head>
+<body>
+<main class="screen" aria-labelledby="t">
+  <div class="bg" aria-hidden="true">
+    <div class="bg__burst" style="--bx:20%;--by:48%"></div>
+    <div class="bg__wedge wedge"><canvas id="ht"></canvas><div class="bg__scan"></div></div>
+    <div class="slash slash--w"></div><div class="slash slash--r"></div>
+    <div class="bg__vig"></div>
+  </div>
+
+  <header class="hud">
+    <div class="p1">
+      <span class="p1__tag" aria-hidden="true">1P</span>
+      <span class="avatar frame" aria-hidden="true">LB</span>
+      <div><div class="p1__name">LilBru</div><div class="p1__rank">Nv <b>7</b> · Jurado</div>
+        <div class="meter" role="meter" aria-label="Experiencia: 2.980 de 3.350 para el nivel 8" aria-valuemin="2650" aria-valuemax="3350" aria-valuenow="2980"><i style="width:47%"></i></div></div>
+    </div>
+    <div class="clock frame" role="timer" aria-label="Cierre de envíos en 4 días y 7 horas: domingo 11 a las 20:00">
+      <div class="clock__lab">Tiempo <span>·</span> cierre de envíos</div>
+      <div class="clock__digits" aria-hidden="true">
+        <div class="clock__grp"><b>04</b><small>DÍAS</small></div><span class="clock__sep">:</span>
+        <div class="clock__grp"><b>07</b><small>HORAS</small></div><span class="clock__sep">:</span>
+        <div class="clock__grp"><b>12</b><small>MIN</small></div><span class="clock__sep">:</span>
+        <div class="clock__grp"><b>45</b><small>SEG</small></div>
+      </div>
+    </div>
+    <div class="hud-r">
+      <div class="chipbox frame"><small>Semana 41</small><b>Lluvia en Gràcia</b></div>
+      <button class="iconbtn frame" aria-label="Sonido de efectos (M)" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#fff"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+    </div>
+  </header>
+
+  <div class="sel">
+    <section class="pick-col" aria-labelledby="t">
+      <div class="head">
+        <h1 id="t" class="display">Elige entrada</h1>
+        <p><b>23 entradas</b> · voto ciego: nadie sabe de quién es cada beat hasta el <b>domingo 11 a las 23:59</b>.</p>
+      </div>
+      <article class="pick" aria-live="polite" aria-atomic="true" id="pick">
+        <div class="pick__top">
+          <div class="portrait frame"><canvas id="big" width="288" height="288" aria-hidden="true"></canvas><span class="stamp stamp--white">Autoría oculta</span></div>
+          <div class="stats">
+            <div class="tile frame"><small>Tempo</small><b id="p-bpm">94 <span>BPM</span></b></div>
+            <div class="tile frame"><small>Tonalidad</small><b class="w" id="p-key">Re menor</b></div>
+            <div class="tile frame"><small>Duración</small><b id="p-dur">2:51</b></div>
+            <div class="tile frame"><small>Género</small><b class="w" id="p-gen">Boom bap · Jersey</b></div>
+          </div>
+        </div>
+        <div class="banner"><h2 class="alias" id="p-alias" data-fit="450" data-min="30">Tigre Púrpura</h2></div>
+        <div class="info frame">
+        <div class="pick__title"><span class="kicker">Título</span><b id="p-title">Charcos en Verdi</b></div>
+        <div class="pick__state"><span class="stamp stamp--white" id="p-stamp">Sin votar</span><span id="p-state">Escucha 45 s y desbloqueas las estrellas.</span></div>
+        <div class="pick__prev"><span class="kicker">Previa</span><div class="wave"><canvas id="p-wave" data-wave="e3" data-played=".24" data-off="rgba(255,255,255,.35)" aria-hidden="true"></canvas></div><span class="t">0:41 / <span id="p-dur2">2:51</span></span></div>
+        <div class="pick__btns">
+          <button class="btn btn--red frame" type="button">▶ Escuchar <span class="kbd kbd--red">INTRO</span></button>
+          <button class="btn frame" type="button">Al jurado <span class="kbd">J</span></button>
+        </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="roster" aria-label="Entradas de la semana 41">
+      <div class="tools">
+        <div class="tools__l" role="tablist" aria-label="Orden de la lista">
+          <span class="kbd" aria-hidden="true">Q</span>
+          <button class="seg__t frame" role="tab" aria-selected="true">Ronda justa</button>
+          <button class="seg__t frame" role="tab" aria-selected="false" tabindex="-1">Recién subidas</button>
+          <button class="seg__t frame" role="tab" aria-selected="false" tabindex="-1">Aleatorio</button>
+          <span class="kbd" aria-hidden="true">E</span>
+        </div>
+        <button class="fchip frame" aria-pressed="false" type="button">Solo sin votar <span class="yn" aria-hidden="true"><span>Sí</span><span class="on">No</span></span></button>
+      </div>
+      <div class="count"><span><b>23</b> entradas · <b>16</b> sin votar · tus votadas van al final · orden de escucha, no clasificación</span><button class="fchip fchip--sm frame" type="button">Filtros <span class="kbd" aria-hidden="true">F</span></button></div>
+      <div class="grid" role="listbox" aria-label="Entradas" aria-orientation="horizontal" id="grid"></div>
+      <p class="legend"><span>Ronda justa: primero, las que menos votos llevan (nadie ve cuántos).</span><span>Notas y autoría, el domingo.</span></p>
+    </section>
+  </div>
+
+  <footer class="ctrl">
+    <div class="ctrl__keys" aria-label="Controles">
+      <span class="ctrl__k"><span class="kbd">←</span><span class="kbd">↑</span><span class="kbd">↓</span><span class="kbd">→</span> Mover</span>
+      <span class="ctrl__k"><span class="kbd">INTRO</span> Escuchar</span>
+      <span class="ctrl__k"><span class="kbd">J</span> Jurado</span>
+      <span class="ctrl__k"><span class="kbd">Q</span><span class="kbd">E</span> Orden</span>
+      <span class="ctrl__k"><span class="kbd">F</span> Filtros</span>
+      <span class="ctrl__k"><span class="kbd">ESC</span> Volver</span>
+    </div>
+    <a class="firma" data-otp-signature href="https://www.otherpeople.es">Un juego de <img src="img/otp-slap.png" alt="Other People"> Other People Records</a>
+  </footer>
+  <div id="anunciador" class="sr" role="status" aria-live="polite"></div>
+</main>
+<script src="final.js"></script>
+<script>
+  const E = [
+    ['Lince Eléctrico','Nube de Sants',140,'Do menor','2:38','Drill'],
+    ['Cobra Lunar','Polaroid',88,'La menor','3:02','Boom bap'],
+    ['Tigre Púrpura','Charcos en Verdi',94,'Re menor','2:51','Boom bap · Jersey'],
+    ['Faro Nocturno','Última línea',150,'Fa menor','2:20','Jersey'],
+    ['Medusa Hipnótica','Azulejo',102,'Sol menor','2:44','Afro'],
+    ['Cuervo Cromado','Marina baja',72,'Mi menor','3:30','Trap'],
+    ['Sirena Fantasma','Vapor',128,'Si bemol menor','2:12','Club'],
+    ['Volcán Lento','Lunes 4 a. m.',84,'Re menor','2:58','Boom bap'],
+    ['Galgo Salvaje','Persiana',142,'Do sostenido menor','2:31','Drill'],
+    ['Aurora Glaciar','Fichas',96,'La menor','2:47','Reggaetón'],
+    ['Trueno Magnético','Tormenta seca',160,'Fa sostenido menor','2:05','Jersey'],
+    ['Brasa Errante','Sol de invierno',90,'Mi bemol mayor','3:10','Boom bap'],
+    ['Satélite Turbio','Antena',110,'Sol menor','2:40','Electronic'],
+    ['Pantera Oxidada','Cromo',145,'Do menor','2:22','Hoodtrap'],
+    ['Relámpago Feroz','Chispa',150,'Mi menor','2:15','Jersey'],
+    ['Marea Callejera','Paseo',98,'Re menor','2:55','Dancehall'],
+    ['Neón Infinito','Rótulo',92,'Re menor','2:49','Boom bap',4],
+    ['Bruma Ácida','Niebla',130,'La menor','2:26','Club',3],
+    ['Cometa Rojo','Fugaz',140,'Do menor','2:33','Drill',5],
+    ['Eclipse Oxidado','Medio día',86,'Si menor','3:05','Boom bap',2],
+    ['Faro Ácido','Señal',124,'Sol menor','2:36','Amapiano',4],
+    ['Cuervo Glaciar','Hielo',70,'Mi menor','3:21','Trap',3],
+    ['Medusa Roja','Coral',100,'Fa menor','2:42','Afro',4],
+  ];
+  const keyIdx = (k) => ['Do','Do sostenido','Re','Mi bemol','Mi','Fa','Fa sostenido','Sol','La bemol','La','Si bemol','Si'].indexOf(k.replace(/ (menor|mayor)$/, ''));
+  const grid = document.getElementById('grid');
+  E.forEach((e, i) => {
+    const voted = e[6], id = 'e' + (i + 1);
+    grid.insertAdjacentHTML('beforeend', `<div class="cell" role="option" data-cursor tabindex="-1" ${i === 2 ? 'data-start' : ''} ${voted ? `data-voted="${voted}"` : ''} data-i="${i}"
+      aria-label="${e[0]}, ${e[2]} BPM, ${e[3]}, ${voted ? 'votada: tu nota ' + voted + ' de 5' : 'sin votar'}">
+      <span class="tag1p" aria-hidden="true">1P</span><span class="cursor" aria-hidden="true"></span>
+      <div class="cell__art frame" aria-hidden="true"><canvas data-cover="${id}" data-bpm="${e[2]}" data-key="${Math.max(0, keyIdx(e[3]))}"></canvas>${voted ? `<span class="stamp stamp--white">✓ Votada ${voted}/5</span>` : ''}</div>
+      <div class="cell__n" aria-hidden="true">${e[0]}</div></div>`);
+  });
+  grid.insertAdjacentHTML('beforeend', `<div class="cell cell--rnd" role="option" data-cursor tabindex="-1" aria-label="Aleatorio: una entrada sin votar al azar"><span class="tag1p" aria-hidden="true">1P</span><span class="cursor" aria-hidden="true"></span><div class="cell__art frame" aria-hidden="true"><canvas id="rnd"></canvas><span class="q">?</span></div><div class="cell__n" aria-hidden="true">Aleatorio</div></div>`);
+
+  window.paintScreen = function () {
+    Arena.halftone(document.getElementById('ht'), { cell: 11, angle: 30, color: '#ff003c', bg: '#2b0711', max: .7,
+      fn: (u, v) => v < 0.25 || v > 0.6 ? 0 : Math.pow(Math.max(0, 1 - u * 2.3), 1.2) * Math.sin(Math.PI * (v - 0.25) / 0.35) * 0.95 });
+    Arena.halftone(document.getElementById('rnd'), { cell: 7, angle: 45, color: '#ff003c', bg: '#1a040a', max: .5, fn: (u, v) => 0.15 + 0.5 * Math.hypot(u - .5, v - .5) });
+    const $ = (id) => document.getElementById(id);
+    Arena.roving(grid, { items: '[role=option]', mode: 'grid', cols: 6, autofocus: true,
+      onMove: (el) => {
+        const i = el.dataset.i; if (i == null) return;
+        const e = E[+i], id = 'e' + (+i + 1);
+        Arena.cover($('big'), id, { bpm: e[2], key: Math.max(0, keyIdx(e[3])), size: 288 });
+        $('p-alias').textContent = e[0]; $('p-alias').style.fontSize = ''; Arena.fit($('p-alias'));
+        $('p-title').textContent = e[1]; $('p-bpm').innerHTML = e[2] + ' <span>BPM</span>'; $('p-key').textContent = e[3];
+        $('p-dur').textContent = e[4]; $('p-dur2').textContent = e[4]; $('p-gen').textContent = e[5];
+        $('p-stamp').textContent = e[6] ? '✓ Votada' : 'Sin votar';
+        $('p-state').textContent = e[6] ? `Tu nota: ${e[6]} de 5. Puedes cambiarla hasta el cierre.` : 'Escucha 45 s y desbloqueas las estrellas.';
+        Arena.wave($('p-wave'), id, { played: .24, off: 'rgba(255,255,255,.35)' });
+      },
+      onActivate: (el) => Arena.say('Escuchando ' + (el.dataset.i ? E[+el.dataset.i][0] : 'una entrada al azar')) });
+    const tabs = [...document.querySelectorAll('[role=tab]')];
+    let t = 0; const setTab = (n) => { t = (n + tabs.length) % tabs.length; tabs.forEach((b, j) => { b.setAttribute('aria-selected', String(j === t)); b.tabIndex = j === t ? 0 : -1; }); Arena.say('Orden: ' + tabs[t].textContent); };
+    Arena.keys({ q: () => setTab(t - 1), e: () => setTab(t + 1), j: () => Arena.say('Modo Jurado'), f: () => Arena.say('Filtros') });
+  };
+</script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+/*
+ * Sello de goma (§3.3; maquetas `final.css` `.stamp`): display cursiva 900 en mayúsculas dentro de un
+ * borde del color del texto, con la máscara de ruido (`--arena-stamp-noise`, `noise.ts`) y girado una
+ * fracción del máximo (`--bb-tilt-stamp`).
+ */
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+  padding: calc(var(--bb-space-1) + var(--bb-stroke)) var(--bb-space-3) var(--bb-space-1);
+  border: var(--bb-stroke-stamp) solid currentcolor;
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-sm);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-button);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  rotate: calc(var(--bb-tilt-stamp) * var(--stamp-turn, 0));
+  mask: var(--arena-stamp-noise, none) center / var(--bb-tex-noise-size) var(--bb-tex-noise-size);
+}
+
+.sm {
+  border-width: var(--bb-stroke-stamp-sm);
+  font-size: var(--bb-fs-xs);
+}
+
+.white {
+  color: var(--bb-white);
+}
+
+.red {
+  color: var(--bb-red);
+}
+
+.black {
+  color: var(--bb-black);
+}

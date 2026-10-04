@@ -1,0 +1,261 @@
+/*
+ * La 404 «BONUS STAGE» (§3.8.11): el beat pad de 4 × 4 como pieza de la cuña (teclas de chaflán
+ * `--bb-cut-md` de 72 px, quietas hasta la Fase 8) y el subtítulo en el panel.
+ */
+.pad {
+  --pad-key: calc(var(--bb-space-16) + var(--bb-space-2));
+  display: grid;
+  justify-items: start;
+  gap: var(--bb-space-3);
+  margin: 0;
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(4, var(--pad-key));
+  gap: var(--bb-space-2);
+}
+
+.key {
+  --key-cut: var(--bb-cut-md);
+  width: var(--pad-key);
+  height: var(--pad-key);
+  font-size: var(--bb-fs-xl);
+}
+
+/*
+ * La columna del pad: el pad con su nota y «Volver al menú», alineados a la izquierda entre ellos (la
+ * columna, centrada en la de la pieza). En el DOM, el botón va después del pad y su nota, lo último del
+ * orden de lectura y del foco (§3.8.11 v0.6.7); en escritorio, justo debajo del pad, a `--bb-space-5`.
+ */
+.padColumn {
+  display: grid;
+  justify-items: start;
+  gap: var(--bb-space-5);
+}
+
+.back {
+  display: flex;
+}
+
+/*
+ * Columna única (≤ 960 px): el botón sube antes del pad, al pie del panel (en táctil la barra no enseña
+ * Esc y es la única salida: no puede quedar detrás del pad decorativo). Solo cambia la colocación.
+ */
+@media (max-width: 960px) {
+  .back {
+    order: -1;
+  }
+}
+
+/*
+ * Móvil bajo (≤ 720 px de ancho y ≤ 700 de alto; §3.8.11 v0.6.7): el botón sube justo después del resumen,
+ * antes de la leyenda, para que se vea sin desplazar (a 375 × 667 quedaba en 687–735 con la barra en 569;
+ * cuarto pase del jurado, P2). El orden del DOM no cambia: la pantalla reparte en una sola rejilla el
+ * subtítulo, el resumen, el botón, la leyenda y el pad. El panel abarca las filas del subtítulo a la
+ * leyenda (`subgrid`: sus hijos van en esas filas y su marco las envuelve, el botón incluido) y la pieza
+ * y su columna no hacen caja (`display: contents`): el pad y el botón son filas de la pantalla. El botón
+ * va dentro del marco del panel, con su relleno a los lados, y se pinta encima de él (posicionado y
+ * después en el DOM).
+ */
+@media (max-width: 720px) and (max-height: 700px) {
+  .screen[data-panel-first][data-piece] {
+    grid-template-rows: none;
+    grid-template-areas:
+      "head"
+      "subtitle"
+      "summary"
+      "back"
+      "legend"
+      "pad";
+  }
+
+  .screen [data-screen-part="panel"] {
+    display: grid;
+    grid-area: subtitle-start / 1 / legend-end / -1;
+    grid-template-rows: subgrid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .screen [data-screen-part="piece"],
+  .padColumn {
+    display: contents;
+  }
+
+  .subtitle {
+    grid-row: 1;
+  }
+
+  .summary {
+    grid-row: 2;
+  }
+
+  .legend {
+    grid-row: 4;
+  }
+
+  .back {
+    position: relative;
+    grid-area: back;
+    margin-inline: var(--bb-space-5);
+  }
+
+  .pad {
+    grid-area: pad;
+  }
+}
+
+/* El pie del pad va sobre un panel: la cuña lleva trama (`RD-VIS-05`). */
+.caption {
+  max-width: calc(4 * var(--pad-key) + 3 * var(--bb-space-2));
+  padding: var(--bb-space-2) var(--bb-space-3);
+  background: var(--bb-panel-veil);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.subtitle {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-xl);
+  font-weight: var(--bb-weight-bold);
+  line-height: var(--bb-leading-label);
+}
+
+.summary {
+  color: var(--bb-text-2);
+}
+
+/*
+ * Cómo se tocará, justo debajo del resumen (§3.8.14 v0.6.7: «la lista va justo debajo de la entrada»; lo
+ * que sobra del alto, al pie del panel: quedaban ~140 px entre el resumen y la leyenda; cuarto pase del
+ * jurado, P4): filas densas con índice, como las reglas de «Cómo se juega», a
+ * su alto natural (§3.8.14): el índice, qué traerá y sus teclas, en las filas del pad y en una sola línea
+ * (la batería, Q W E R · A S D F · Z X C V). El metrónomo y la grabación no tienen tecla propia: su texto
+ * ocupa también la columna de las teclas. Si el panel es estrecho, las teclas van debajo del texto.
+ */
+.legend {
+  container: legend / inline-size;
+  display: grid;
+  gap: var(--bb-space-3);
+}
+
+.legendTitle {
+  color: var(--bb-red);
+}
+
+/*
+ * Las columnas de la lista (índice, texto y teclas) las comparten sus filas (`subgrid`): las teclas de
+ * los chops y las de la batería empiezan a la misma altura. Una cuarta columna, vacía, se queda con lo
+ * que sobra del ancho: las teclas siguen al texto y los filetes de las filas llegan, como el de arriba
+ * de la lista, al borde del panel (en un panel ancho, a 1920, terminaban al final de las teclas).
+ */
+.legendList {
+  display: grid;
+  grid-template-columns: var(--bb-space-10) minmax(0, 26rem) max-content minmax(0, 1fr);
+  column-gap: var(--bb-space-3);
+  border-top: var(--bb-stroke-hair) solid var(--bb-line);
+}
+
+.legendRow {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  grid-template-areas: "index text keys .";
+  align-items: center;
+  gap: var(--bb-space-2) var(--bb-space-3);
+  padding: var(--bb-space-3) 0;
+  border-bottom: var(--bb-stroke-hair) solid var(--bb-line);
+  color: var(--bb-white);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-bold);
+}
+
+.legendRow:not(:has(.legendKeys)) {
+  grid-template-areas: "index text text .";
+}
+
+.legendIndex {
+  grid-area: index;
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-lg);
+  font-weight: var(--bb-weight-extrabold);
+  line-height: 1;
+}
+
+.legendText {
+  grid-area: text;
+}
+
+/* Las teclas de la fila, en las filas del pad, seguidas: la batería, Q W E R · A S D F · Z X C V. */
+.legendKeys {
+  grid-area: keys;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-1) var(--bb-space-3);
+}
+
+/* Pantalla grande (≥ 1600 px): la letra de la leyenda crece con el panel, como la de «Cómo se juega». */
+@media (min-width: 1600px) {
+  .legendRow {
+    font-size: var(--bb-fs-md);
+  }
+
+  .legendIndex {
+    font-size: var(--bb-fs-2xl);
+  }
+}
+
+/*
+ * Panel estrecho (escritorio de 961 a ~1300 px, móvil): las teclas, debajo del texto, y las filas más
+ * juntas (8 px). Así «Volver al menú» queda encima de la barra en la primera vista del móvil (L2) también
+ * cuando «Legal» va debajo de la firma y la barra mide 98 px (a 390 × 844 táctil; M3r).
+ */
+@container legend (width < 50rem) {
+  .legendList {
+    grid-template-columns: var(--bb-space-10) minmax(0, 1fr);
+  }
+
+  .legendRow {
+    grid-template-areas:
+      "index text"
+      ". keys";
+  }
+
+  .legendRow:not(:has(.legendKeys)) {
+    grid-template-areas: "index text";
+  }
+}
+
+@media (max-width: 720px) {
+  .legendRow {
+    padding-block: var(--bb-space-2);
+  }
+}
+
+/*
+ * Ventana baja (≥ 721 px de ancho y < 900 de alto; §3.8.14): se aprieta por altura, sin esconder nada.
+ * El pad, con teclas de 56 px, y las filas de la leyenda, con 8 px de relleno.
+ */
+@media (min-width: 721px) and (max-height: 899px) {
+  .pad {
+    --pad-key: var(--bb-space-14);
+  }
+
+  .legendRow {
+    padding-block: var(--bb-space-2);
+  }
+}
+
+.keyRow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-1);
+}
+
+/* Muy estrecho (< 360 px): teclas de 60 px para que el pad quepa. */
+@media (max-width: 359px) {
+  .pad {
+    --pad-key: var(--bb-space-15);
+  }
+}

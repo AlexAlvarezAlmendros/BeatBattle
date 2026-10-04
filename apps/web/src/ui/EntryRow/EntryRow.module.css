@@ -1,289 +1,279 @@
 /*
- * Fila de entrada (§3.3). Medidas de la lista de `/beats` del sello (`otp-metrics.json`,
- * `BeatListRow.css`): fila de radio 8 con borde transparente, relleno 10,4×12 y hueco de 16 px;
- * portada de 48 px; play redondo; título 14,4 px 600; productor 12,5 px; chip de género con radio 12;
- * filete `#111` entre filas. Con los grises de AA (§3.1): productor, BPM y tonalidad en `--bb-text-3`.
+ * Fila de entrada (§3.3; maquetas `05-perfil.html`, «historial de combates»): marcador de 58 px en un
+ * marco de chaflán `--bb-cut-md` con portada de 44 px en chaflán `--bb-cut-sm` (el play va dentro),
+ * título y subtítulo, y a la derecha la posición en display, la nota en Oxanium y la medalla (solo tras
+ * el sellado).
+ *
+ * **Fila estrecha** (§3.3 v0.6.6; WCAG 1.4.10 y 1.4.12): la fila es un contenedor (`entry-row`) y su
+ * cuerpo, la rejilla. Título y subtítulo parten en líneas en vez de cortarse con «…» (en cualquier fila:
+ * el CSS no sabe si hay espaciado de 1.4.12, y un «…» se come el título), y si la fila es estrecha el
+ * resultado baja a una segunda fila, bajo el título. Como contenedor, su ancho lo pone quien la contiene
+ * (una lista, una columna), no su contenido.
  */
 .list {
+  display: grid;
+  gap: var(--bb-space-2);
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-.item + .item {
-  border-top: 1px solid var(--bb-ink-850);
 }
 
 .row {
-  display: flex;
-  align-items: center;
-  gap: var(--bb-space-4);
-  min-width: 0;
-  padding: var(--bb-space-row-y) var(--bb-space-3);
-  border: 1px solid transparent;
-  border-radius: var(--bb-radius-sm);
-  transition:
-    background-color var(--bb-dur-fast) var(--bb-ease-out),
-    border-color var(--bb-dur-fast) var(--bb-ease-out);
+  --frame-cut: var(--bb-cut-md);
+  --row-pad-block: var(--bb-space-1);
+  /* Lo que el foco genérico (anillo y halo) necesita entre la caja del enlace y el borde de la fila. */
+  --row-focus-air: calc(var(--bb-focus-halo-spread) + var(--bb-stroke-hair));
+  position: relative;
+  isolation: isolate;
+  container: entry-row / inline-size;
+  display: grid;
+  align-content: center;
+  min-height: calc(var(--bb-space-14) + var(--bb-stroke));
+  padding: var(--row-pad-block) var(--bb-space-4) var(--row-pad-block) var(--bb-space-2);
 }
 
-.row:hover,
-.row[data-force-state="hover"],
-.row:focus-within,
-.row[data-force-state="focus"] {
-  background-color: var(--bb-ink-700);
-}
-
-.row[data-playing] {
-  border-color: var(--bb-red-wash);
-  background-color: var(--bb-red-wash);
-}
-
-/* Error de carga (RF-PLAY-09): aviso con icono bajo el título (nunca solo el color). */
-.error {
-  display: flex;
-  align-items: center;
-  gap: var(--bb-space-1);
-  margin: 0;
-  color: var(--bb-danger);
-  font-size: var(--bb-font-size-xs);
-  font-weight: var(--bb-weight-semibold);
-}
-
-.errorIcon {
-  flex-shrink: 0;
-}
-
-/* ── Portada ───────────────────────────────────────────────────────────────────────────── */
-.thumb {
-  flex-shrink: 0;
-  width: var(--bb-space-12);
-  height: var(--bb-space-12);
-  overflow: hidden;
-  border-radius: var(--bb-radius-sm);
-  background-color: var(--bb-ink-800);
-}
-
-.thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Sin portada propia (las generativas llegan con `packages/covers`): un degradado de la marca. */
-.coverFallback {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background-image: radial-gradient(
-    circle at 30% 25%,
-    var(--bb-red) 0%,
-    var(--bb-wine) 55%,
-    var(--bb-black) 100%
-  );
-}
-
-/* ── Play: el botón icono; sonando, en rojo ────────────────────────────────────────────── */
-.play {
-  flex-shrink: 0;
-}
-
-.row[data-playing] .play {
-  border-color: var(--bb-red);
-  background-color: var(--bb-red-wash);
-  color: var(--bb-red);
-}
-
-/* ── Centro: datos y mini onda ─────────────────────────────────────────────────────────── */
-.center {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  gap: var(--bb-space-2);
-  min-width: 0;
-}
-
-.info {
-  display: flex;
-  flex-direction: column;
-  gap: var(--bb-space-row-lines);
-  min-width: 0;
-}
-
-/*
- * El título no recorta (`overflow` visible): la elipsis la pone su texto (`.titleText`), y así el anillo
- * de foco del enlace se ve entero. Con `overflow: hidden` en el encabezado, el anillo de 2 px y el halo
- * quedaban recortados por tres lados (RNF-A11Y-01).
- */
-.title {
-  min-width: 0;
-  margin: 0;
-  color: var(--bb-text);
-  font-family: var(--bb-font-body);
-  font-size: var(--bb-font-size-sm);
-  font-weight: var(--bb-weight-semibold);
-  line-height: var(--bb-leading-snug);
-}
-
-/* Ancho del texto hasta el de la columna, con elipsis: el anillo abraza el título y no toda la fila. */
-.titleText {
-  display: inline-block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  vertical-align: top;
-}
-
-.titleLink {
-  color: inherit;
-  text-decoration: none;
-  transition: color var(--bb-dur-fast) var(--bb-ease-out);
-}
-
-.titleLink:hover {
-  color: var(--bb-red-text);
-}
-
-/* El foco real lo pinta global.css (`:focus-visible`); el forzado de la galería, igual. */
-.titleLink[data-force-state="focus"] {
-  outline: var(--bb-focus-width) solid var(--bb-focus-color);
-  outline-offset: var(--bb-focus-offset);
-  box-shadow: var(--bb-focus-halo);
-}
-
-.meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--bb-space-2);
-  min-width: 0;
-  color: var(--bb-text-3);
-  font-size: var(--bb-font-size-xs);
-}
-
-.alias {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.tags {
-  display: flex;
-  gap: var(--bb-space-1);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.tag {
-  padding: var(--bb-space-tag);
-  border: 1px solid var(--bb-ink-600);
-  border-radius: var(--bb-radius-md);
-  background-color: var(--bb-ink-800);
-  font-size: var(--bb-font-size-2xs);
-  line-height: var(--bb-leading-snug);
-  white-space: nowrap;
-}
-
-.data {
-  font-family: var(--bb-font-mono);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.data::before {
-  content: "·" / "";
-  margin-right: var(--bb-space-2);
-  color: var(--bb-text-4);
-}
-
-/* Mini onda: «respira» al pasar por encima (Anexo E). */
-.wave {
-  transform-origin: center;
-}
-
-.row:hover .wave,
-.row[data-force-state="hover"] .wave {
-  animation: breathe var(--bb-loop-breathe) var(--bb-ease-in-out) infinite;
-}
-
-@keyframes breathe {
-  50% {
-    transform: scaleY(0.72);
-  }
-}
-
-.actions {
-  display: flex;
-  flex-shrink: 0;
+.body {
+  display: grid;
+  grid-template-columns: var(--bb-target) minmax(0, 1fr) auto auto;
+  grid-template-areas: "cover info result actions";
   align-items: center;
   gap: var(--bb-space-3);
 }
 
-/*
- * Deshabilitada (no se puede reproducir): portada y onda (decorativas) apagadas y en gris; el texto
- * conserva su contraste AA (§3.1) y el play va deshabilitado.
- */
-.row[data-disabled] .thumb,
-.row[data-disabled] .wave {
-  filter: grayscale(1);
+/* Dos capas recortadas (borde y relleno), como el marco. */
+.row::before,
+.row::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  clip-path: polygon(
+    var(--frame-cut) 0,
+    100% 0,
+    100% calc(100% - var(--frame-cut)),
+    calc(100% - var(--frame-cut)) 100%,
+    0 100%,
+    0 var(--frame-cut)
+  );
+}
+
+.row::before {
+  inset: 0;
+  background: var(--bb-line-strong);
+}
+
+.row::after {
+  inset: var(--bb-stroke-hair);
+  background: var(--bb-panel);
+  transition: background-color var(--bb-dur-fast) var(--bb-ease-out);
+}
+
+.row:hover::after,
+.row[data-force-state="hover"]::after {
+  background: var(--bb-panel-2);
+}
+
+.row[data-playing]::before {
+  background: var(--bb-red);
+}
+
+.row[data-disabled] {
   opacity: 0.45;
 }
 
-.row[data-disabled] .title {
-  color: var(--bb-text-2);
+/* Portada en chaflán con el play encima, en la misma celda. */
+.coverPlay {
+  grid-area: cover;
+  display: grid;
+  width: var(--bb-target);
+  height: var(--bb-target);
+}
+
+.coverPlay > * {
+  grid-area: 1 / 1;
+}
+
+.cover {
+  width: var(--bb-target);
+  clip-path: polygon(
+    var(--bb-cut-sm) 0,
+    100% 0,
+    100% calc(100% - var(--bb-cut-sm)),
+    calc(100% - var(--bb-cut-sm)) 100%,
+    0 100%,
+    0 var(--bb-cut-sm)
+  );
+}
+
+/* El play deja ver la portada debajo (velo del fondo de los modales); sonando, rojo. */
+.row .play:not([data-variant="cta"]) {
+  --frame-border: var(--bb-line-strong);
+  --frame-fill: var(--bb-scrim);
+  --frame-cut: var(--bb-cut-sm);
+}
+
+.info {
+  grid-area: info;
+  display: grid;
+  gap: var(--bb-space-1);
+  min-width: 0;
 }
 
 /*
- * ── Móvil: como el sello, sin chips ni datos ───────────────────────────────────────────────
- * La portada se queda en 48 px (el sello no la encoge) y el play, en su círculo de 36: el objetivo
- * táctil de 44 px lo pone el botón icono sin agrandar el círculo (`Button.module.css`).
+ * El enlace a la ficha (título y subtítulo) y su foco (§3.3 v0.6.6: «su anillo de foco cabe dentro de la
+ * fila»). Con la caja a 44 px en la fila de 58, el anillo (4 + 3 px) quedaba encima del borde de la fila
+ * y el halo de 10 px asomaba 3 px por fuera. Ahora:
+ *
+ * - la caja es la de su texto (≈ 35 px, el título y el subtítulo a `--bb-leading-label`) y del ancho de
+ *   su texto, para que el anillo rodee título y subtítulo y no la columna entera;
+ * - su objetivo sigue midiendo 44 px de alto como poco (RNF-A11Y-09), por pseudoelemento, como el
+ *   botón `sm`;
+ * - el margen en vertical deja, con el relleno de la fila, el aire del anillo y el halo hasta el borde
+ *   (`--row-focus-air`), también cuando el texto parte en líneas (fila estrecha, espaciado de 1.4.12) y la
+ *   fila crece con él. Con una línea de título, la fila sigue midiendo 58 px.
  */
-@media (max-width: 768px) {
-  .row {
-    gap: var(--bb-space-3);
-    padding: var(--bb-space-2);
+.infoLink {
+  position: relative;
+  justify-self: start;
+  margin-block: calc(var(--row-focus-air) - var(--row-pad-block));
+  color: inherit;
+  text-decoration: none;
+}
+
+.infoLink::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: max(100%, var(--bb-target));
+  translate: 0 -50%;
+}
+
+.infoLink[data-force-state="focus"] {
+  outline: var(--bb-stroke-cursor) solid var(--bb-white);
+  outline-offset: var(--bb-cursor-gap);
+  box-shadow: var(--bb-focus-halo);
+}
+
+/*
+ * Título y subtítulo parten en líneas (también dentro de una palabra que no cabe) en vez de cortarse
+ * con «…»: nada recorta, así que el anillo de foco del enlace tampoco.
+ */
+.title {
+  min-width: 0;
+  color: var(--bb-white);
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-semibold);
+  line-height: var(--bb-leading-label);
+  overflow-wrap: anywhere;
+}
+
+.infoLink:hover .titleText {
+  text-decoration: underline;
+}
+
+.subtitle {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-semibold);
+  line-height: var(--bb-leading-label);
+  letter-spacing: var(--bb-tracking-button);
+  overflow-wrap: anywhere;
+}
+
+/* Error de audio (`RF-PLAY-09`): aviso de papel en pequeño, con icono y texto. */
+.error {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: var(--bb-space-1);
+  padding: 0 var(--bb-space-2);
+  background: var(--bb-white);
+  color: var(--bb-black);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  line-height: var(--bb-leading-label);
+}
+
+.result {
+  grid-area: result;
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-4);
+}
+
+/* La posición en display blanco con sombra dura roja (maqueta `05-perfil`). */
+.position {
+  min-width: 3ch;
+  color: var(--bb-white);
+  font-size: var(--bb-fs-xl);
+  text-align: right;
+  text-shadow: var(--bb-shadow-hard-sm);
+}
+
+.score {
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-bold);
+}
+
+.medal {
+  width: var(--bb-space-8);
+  height: var(--bb-space-8);
+}
+
+.actions {
+  grid-area: actions;
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+}
+
+/*
+ * Fila estrecha (§3.3 v0.6.6): por debajo de 26 rem de contenido el título no tenía ni 10 rem al lado
+ * de posición, nota y medalla (a 320 px, 46 px para «Neón en Sants»). El resultado baja a una segunda
+ * fila, bajo el título (la portada se queda en la primera), y las acciones, a su lado. La segunda fila
+ * es implícita: sin resultado ni acciones no existe, y la fila sigue siendo el marcador de 58 px.
+ */
+@container entry-row (width < 26rem) {
+  .body {
+    grid-template-columns: var(--bb-target) minmax(0, 1fr) auto;
+    grid-template-areas: "cover info info";
+    row-gap: var(--bb-space-2);
   }
 
-  .tags,
-  .data {
+  .result {
+    grid-area: 2 / 2;
+    justify-self: start;
+  }
+
+  .actions {
+    grid-area: 2 / 3;
+  }
+
+  .position {
+    text-align: left;
+  }
+}
+
+/* En móvil, el relleno del final es el aire del foco: un título largo llega hasta él. */
+@media (max-width: 720px) {
+  .row {
+    padding-inline: var(--bb-space-2) var(--row-focus-air);
+  }
+
+  .result {
+    gap: var(--bb-space-2);
+  }
+}
+
+/*
+ * La medalla solo se oculta en el móvil táctil (§3.3 v0.6.6): con teclado y ratón, en una ventana
+ * estrecha o ampliada al 200 %, se ve (WCAG 1.4.4 y 1.4.10). Por tipo de entrada, como las teclas.
+ */
+@media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse) {
+  .medal {
     display: none;
   }
-}
-
-/*
- * Puntero grueso (RNF-A11Y-09, objetivos de 44 px): el título mide unos 17 px de alto, así que su
- * enlace se estira a toda la fila (≥ 48 px) con un pseudoelemento; el play y las acciones quedan
- * encima. Con ratón se queda como en el sello: solo el título enlaza.
- */
-@media (hover: none), (pointer: coarse) {
-  .row {
-    position: relative;
-  }
-
-  .titleLink::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-  }
-
-  .play,
-  .actions {
-    position: relative;
-    z-index: 1;
-  }
-}
-
-/* Sin movimiento (Anexo E): solo el fondo. */
-@media (prefers-reduced-motion: reduce) {
-  .row:hover .wave,
-  .row[data-force-state="hover"] .wave {
-    animation: none;
-  }
-}
-
-:global(:root[data-motion="reduced"]) .row:hover .wave,
-:global(:root[data-motion="reduced"]) .row[data-force-state="hover"] .wave {
-  animation: none;
 }

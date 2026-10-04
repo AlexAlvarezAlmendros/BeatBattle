@@ -1,0 +1,183 @@
+/*
+ * HUD superior (guía §3.4.1): rejilla de tres columnas con el medianil de pantalla, como en las
+ * maquetas (`final.css` `.hud`, `.p1`, `.iconbtn`). En móvil se compacta en una fila (jugador y
+ * sonido) y el centro baja a la pantalla (el reloj, a la tarjeta de la semana).
+ *
+ * Los lados nunca miden menos que su contenido (`minmax(max-content, 1fr)`): si uno es más ancho, el
+ * centro se aparta un poco en vez de pisarlo. Si las tres piezas no caben en una fila, el HUD se apila
+ * (`data-stacked`, lo pone `Hud`): arriba el jugador y la derecha, debajo el centro (jurado de la 0.28: de
+ * 721 a unos 1000 px el reloj pisaba la ficha del jugador y la temporada; la placa de título, «1P ·
+ * PULSA PARA UNIRTE»).
+ */
+.hud {
+  position: relative;
+  z-index: var(--bb-z-hud);
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr);
+  grid-template-areas: "player center right";
+  align-items: start;
+  gap: var(--bb-space-6);
+  padding: var(--bb-space-5) var(--bb-gutter) 0;
+}
+
+.player {
+  grid-area: player;
+  justify-self: start;
+  min-width: 0;
+}
+
+.center {
+  grid-area: center;
+  justify-self: center;
+}
+
+.right {
+  grid-area: right;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+}
+
+@media (min-width: 721px) {
+  .hud[data-stacked] {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "player right"
+      "center center";
+    row-gap: var(--bb-space-3);
+  }
+}
+
+.extras {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+}
+
+/* ── «1P · PULSA PARA UNIRTE» ───────────────────────────────────────────────────────────── */
+.join {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-3);
+  min-height: var(--bb-target);
+  color: var(--bb-text);
+  text-decoration: none;
+}
+
+.p1 {
+  color: var(--bb-red);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-xl);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-display);
+  line-height: 1;
+}
+
+.joinAvatar {
+  --frame-border: var(--bb-red);
+  --frame-fill: var(--bb-wine);
+  display: grid;
+  place-items: center;
+  width: var(--bb-target);
+  height: var(--bb-target);
+  font-size: var(--bb-fs-lg);
+}
+
+.joinText {
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label-wide);
+  text-transform: uppercase;
+}
+
+/* Hover: el avatar se enciende (como la placa elegida del menú). */
+.join:hover .joinAvatar {
+  --frame-fill: var(--bb-red-cta);
+}
+
+/* ── Botón de sonido ────────────────────────────────────────────────────────────────────── */
+.sound {
+  --frame-fill: var(--bb-panel-veil);
+  display: grid;
+  place-items: center;
+  width: var(--bb-target);
+  height: var(--bb-target);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bb-white);
+  font-size: var(--bb-fs-lg);
+}
+
+.sound:hover {
+  --frame-border: var(--bb-white);
+}
+
+.sound[aria-pressed="false"] {
+  color: var(--bb-text-3);
+}
+
+/*
+ * Móvil (≤ 720 px): una fila, jugador y derecha; el centro baja a la pantalla. Con teclado y ratón la
+ * derecha lleva también la temporada y la racha (el pliegue que las quita es del móvil táctil, §3.4.1
+ * v0.6.6) y cada lado mide como poco su contenido: si no caben al lado del jugador, el HUD se apila
+ * (`data-stacked`, lo mide `Hud`) con el jugador y el sonido arriba y las teselas en una segunda fila, a la
+ * derecha, bajo el sonido (cuarto pase del jurado de la 0.28, F3).
+ */
+@media (max-width: 720px) {
+  .hud {
+    grid-template-columns: minmax(max-content, 1fr) auto;
+    grid-template-areas: "player right";
+    gap: var(--bb-space-3);
+    padding: var(--bb-space-3) var(--bb-gutter) 0;
+  }
+
+  .hud[data-stacked] {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "player sound"
+      "extras extras";
+  }
+
+  .hud[data-stacked] .right {
+    display: contents;
+  }
+
+  /* El jugador ocupa su columna: si no cabe (320 px), su medidor se estrecha en vez de pisar el sonido. */
+  .hud[data-stacked] .player {
+    justify-self: stretch;
+  }
+
+  .hud[data-stacked] .extras {
+    grid-area: extras;
+    justify-self: end;
+  }
+
+  .hud[data-stacked] .sound {
+    grid-area: sound;
+  }
+
+  .center {
+    display: none;
+  }
+
+  .p1 {
+    display: none;
+  }
+}
+
+/* Móvil táctil: la fila compacta de la maqueta `01-menu-390x844` (el jugador cede si no cabe). */
+@media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse) {
+  .hud {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+/* Móvil bajo (≤ 780 px de alto; `MainMenu`): el HUD, más pegado arriba (§3.8.3). */
+@media (max-width: 720px) and (max-height: 780px) {
+  .hud {
+    padding-top: var(--bb-space-2);
+  }
+}

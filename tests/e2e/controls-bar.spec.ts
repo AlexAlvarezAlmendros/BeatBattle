@@ -1,0 +1,710 @@
+import { expect, type Page, test } from '@playwright/test'
+import { open, openGallery, settle } from './support'
+
+/**
+ * La barra de controles con teclado y ratón (guía §3.4.1 y §3.8.3; WCAG 1.4.4 y 1.4.10; tercer pase del
+ * jurado de la 0.28): **no se esconde nada que informe**. Los pliegues que esconden son del móvil táctil.
+ */
+
+/**
+ * Teclas de la barra que no se ven enteras: fuera de la ventana, recortadas por un antepasado que
+ * recorta (`overflow`, `clip-path`, `contain: paint`) o encima de la firma. Devuelve también cuántas hay
+ * en la lista. Si la barra va despegada (ventana baja), se baja hasta el final de la pantalla: lo que
+ * cuenta es que se vean al llegar (la barra despegada sigue `sticky` con su fila de la firma pegada, así
+ * que `scrollIntoView` no la trae entera).
+ */
+function hiddenKeys(page: Page): Promise<{ count: number; hidden: string[] }> {
+  return page.evaluate(() => {
+    window.scrollTo(0, document.scrollingElement!.scrollHeight)
+    const list = document.querySelector('footer ul')
+    const keys = [...(list?.children ?? [])] as HTMLElement[]
+    const signature = document.querySelector('footer [data-otp-signature]')?.getBoundingClientRect()
+    const hidden: string[] = []
+    for (const key of keys) {
+      const box = key.getBoundingClientRect()
+      const name = key.textContent?.trim() ?? '?'
+      if (!key.checkVisibility({ visibilityProperty: true }) || box.width < 1 || box.height < 1) {
+        hidden.push(`${name}: no se ve`)
+        continue
+      }
+      if (box.left < -0.5 || box.top < -0.5 || box.right > innerWidth + 0.5 || box.bottom > innerHeight + 0.5)
+        hidden.push(`${name}: fuera de la ventana`)
+      if (
+        signature &&
+        Math.min(box.right, signature.right) - Math.max(box.left, signature.left) > 0.5 &&
+        Math.min(box.bottom, signature.bottom) - Math.max(box.top, signature.top) > 0.5
+      )
+        hidden.push(`${name}: pisa la firma`)
+      for (let node = key.parentElement; node && node !== document.body; node = node.parentElement) {
+        const style = getComputedStyle(node)
+        const clips =
+          style.overflowX !== 'visible' ||
+          style.overflowY !== 'visible' ||
+          style.clipPath !== 'none' ||
+          /paint|strict|content/.test(style.contain)
+        if (!clips) continue
+        const rect = node.getBoundingClientRect()
+        if (
+          box.left < rect.left - 0.5 ||
+          box.top < rect.top - 0.5 ||
+          box.right > rect.right + 0.5 ||
+          box.bottom > rect.bottom + 0.5
+        )
+          hidden.push(`${name}: recortada por ${node.tagName}`)
+      }
+    }
+    return { count: keys.length, hidden }
+  })
+}
+
+/**
+ * L7: de 721 a unos 1400 px con teclado, las teclas que no cabían en su columna pasaban a una fila
+ * oculta (a 823 × 514, 1440 al 175 %, solo se veía «↑↓ ELEGIR»; a 1280, faltaba «M SONIDO»). Ahora, si
+ * no caben al lado de la firma, van en su propia fila encima y parten si hace falta.
+ */
+for (const { width, height } of [
+  { width: 721, height: 900 },
+  { width: 823, height: 514 },
+  { width: 900, height: 700 },
+  { width: 1024, height: 768 },
+  { width: 1280, height: 800 },
+  { width: 1366, height: 768 },
+  { width: 1440, height: 900 },
+]) {
+  test.describe(`barra con teclado a ${width} × ${height}`, () => {
+    test.use({ viewport: { width, height } })
+
+    for (const { path, heading, keys } of [
+      { path: '/dev/menu', heading: 'Beat Battle', keys: 4 },
+      { path: '/como-funciona', heading: 'Cómo se juega', keys: 4 },
+      { path: '/ajustes', heading: 'Sonido y efectos', keys: 3 },
+    ]) {
+      test(`RD-VIS-02 e / WCAG 1.4.10: en ${path} se ven enteras todas las teclas de la barra`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        const { count, hidden } = await hiddenKeys(page)
+        expect(count).toBe(keys)
+        expect(hidden).toEqual([])
+      })
+    }
+  })
+}
+
+/**
+ * Hueco entre la última tecla y la firma (§3.4.1 v0.6.6: «entre la última tecla y la firma queda siempre
+ * `--bar-gap`»). Mide el texto de la última tecla y el del primer rótulo de la firma («UN JUEGO DE») y lo
+ * compara con `--bar-gap` resuelto en la barra. Dice también si van en la misma fila.
+ */
+function keysToSignature(page: Page): Promise<{ gap: number; barGap: number; sameRow: boolean }> {
+  return page.evaluate(() => {
+    const bar = document.querySelector('footer')!
+    const last = bar.querySelector('ul')!.lastElementChild!
+    const text = document.createRange()
+    text.selectNodeContents(last)
+    const key = text.getBoundingClientRect()
+    const signature = bar.querySelector('[data-otp-signature] > span')!.getBoundingClientRect()
+    const probe = document.createElement('div')
+    probe.style.cssText = 'position:absolute;visibility:hidden;width:var(--bar-gap)'
+    bar.append(probe)
+    const barGap = probe.getBoundingClientRect().width
+    probe.remove()
+    const middle = (box: DOMRect) => (box.top + box.bottom) / 2
+    return {
+      gap: signature.left - key.right,
+      barGap,
+      sameRow: Math.abs(middle(key) - middle(signature)) <= 2,
+    }
+  })
+}
+
+/**
+ * Las teclas no se pegan a la firma (cuarto pase del jurado de la 0.28, F1): de ~1362 a ~1407 px «M
+ * SONIDO» acababa a 1 px de «UN JUEGO DE» y se leía «SONIDOUN JUEGO DE». El `padding-inline-end` de las
+ * teclas, que reserva `--bar-gap`, perdía frente al reset de las listas de `global.css` y la barra no veía
+ * el choque. Ahora, si no caben con su hueco, primero se aprietan y, solo si aun así no caben, van a su
+ * fila: a 1366 × 657 siguen en una fila (si fueran a la suya, la barra crecería 26 px y el menú dejaría de
+ * caber sin desplazar, `fit.spec.ts`).
+ */
+for (const { width, height } of [
+  { width: 1366, height: 657 },
+  { width: 1370, height: 768 },
+  { width: 1380, height: 700 },
+  { width: 1400, height: 800 },
+  { width: 1440, height: 900 },
+]) {
+  test.describe(`hueco de las teclas a ${width} × ${height} con teclado`, () => {
+    test.use({ viewport: { width, height } })
+
+    for (const { path, heading } of [
+      { path: '/dev/menu', heading: 'Beat Battle' },
+      { path: '/', heading: 'Beat Battle' },
+      { path: '/como-funciona', heading: 'Cómo se juega' },
+    ]) {
+      test(`RD-VIS-02 e / RF-OTP-01 (§3.4.1): en ${path} la última tecla queda a --bar-gap de la firma, en su fila`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        const { gap, barGap, sameRow } = await keysToSignature(page)
+        expect(barGap, '--bar-gap resuelto').toBeGreaterThan(0)
+        expect(sameRow, 'las teclas, en la fila de la firma').toBe(true)
+        expect(gap, `hueco de ${gap.toFixed(1)} px entre la última tecla y la firma`).toBeGreaterThanOrEqual(
+          barGap - 0.5,
+        )
+        const { hidden } = await hiddenKeys(page)
+        expect(hidden).toEqual([])
+      })
+    }
+  })
+}
+
+/**
+ * Revisión de L7: con una sola tecla en la barra no hay otra que baje de línea, así que «no cabe» no se
+ * notaba en el alto. Con los atajos de una tecla apagados (WCAG 2.1.4, `RNF-A11Y-08`), las pantallas
+ * por defecto solo enseñan «ESC VOLVER»; en una columna más estrecha que ella (en /entrar a 390 px,
+ * 16 px) quedaba recortada y asomaba una «E» pegada a la firma. Pasa en móvil con teclado y en
+ * escritorio con la letra del navegador grande.
+ */
+for (const { width, height, fontSize } of [
+  { width: 390, height: 844, fontSize: 0 },
+  { width: 320, height: 568, fontSize: 0 },
+  { width: 721, height: 900, fontSize: 24 },
+]) {
+  test.describe(`una sola tecla con teclado a ${width} × ${height}${fontSize ? ` con letra de ${fontSize} px` : ''}`, () => {
+    test.use({ viewport: { width, height } })
+
+    for (const { path, heading } of [
+      { path: '/entrar', heading: 'Entrar' },
+      { path: '/esto-no-existe', heading: 'Bonus stage' },
+    ]) {
+      test(`RD-VIS-02 e / RNF-A11Y-08: con los atajos de una tecla apagados, en ${path} «ESC VOLVER» se ve entera y no pisa la firma`, async ({
+        page,
+      }) => {
+        await page.addInitScript(() => localStorage.setItem('bb:shortcuts', 'off'))
+        if (fontSize) {
+          const cdp = await page.context().newCDPSession(page)
+          await cdp.send('Page.enable')
+          await cdp.send('Page.setFontSizes', { fontSizes: { standard: fontSize, fixed: fontSize } })
+        }
+        await open(page, path, heading)
+        await settle(page)
+        const { count, hidden } = await hiddenKeys(page)
+        expect(count, 'sin M, queda una tecla').toBe(1)
+        expect(hidden).toEqual([])
+      })
+    }
+  })
+}
+
+/**
+ * Lo que la barra tapa al abrir (sin desplazar): el alto de su parte pegada al pie de la ventana (la barra
+ * entera o, despegada, la fila de la firma, §3.4.1 v0.6.6), si va pegada, si va entera y de cuántas placas
+ * del menú se lee el rótulo («JUGAR») entero por encima de ella (la fila de la firma, pegada, puede tapar
+ * el pie de la primera placa, nunca su rótulo).
+ */
+function barShare(
+  page: Page,
+): Promise<{ height: number; share: number; pinned: boolean; whole: boolean; plates: number }> {
+  return page.evaluate(() => {
+    window.scrollTo(0, 0)
+    const bar = document.querySelector('footer')!
+    const box = bar.getBoundingClientRect()
+    const position = getComputedStyle(bar).position
+    const pinned = position === 'sticky' || position === 'fixed'
+    // Lo que tapa la barra: lo que queda bajo su borde de arriba si va pegada; si no, nada.
+    const limit = pinned ? box.top : innerHeight
+    const visible = pinned ? Math.max(0, Math.min(box.bottom, innerHeight) - Math.max(box.top, 0)) : 0
+    const plates = [...document.querySelectorAll('main [data-menu-plate] [data-plate-label]')].filter(
+      (label) => {
+        const text = document.createRange()
+        text.selectNodeContents(label)
+        const rect = text.getBoundingClientRect()
+        return rect.top >= 0 && rect.bottom <= Math.min(limit, innerHeight)
+      },
+    ).length
+    return {
+      height: visible,
+      share: visible / innerHeight,
+      pinned,
+      whole: box.bottom <= innerHeight + 0.5,
+      plates,
+    }
+  })
+}
+
+/**
+ * L8: en una ventana baja con teclado y ratón (360 × 640, 375 × 667), la barra pegada al pie medía 154 px
+ * (teclas en dos filas, firma, crónica y pausa), el 24 % de la ventana, y en el menú la primera vista no
+ * enseñaba ninguna placa. En su revisión, lo mismo en una ventana estrecha más alta: a 390 × 844 medía
+ * 158 px (18,7 %) y empezaba en mitad de «JUGAR». La barra se despega en cuanto pasa del 15 % de la
+ * ventana (desde la v0.6.7, en cualquier ventana y con cualquier entrada). También con el escritorio
+ * ampliado: a 823 × 514 (1440 × 900 al
+ * 175 %) la del menú mide 127 px y, pegada, tapaba «JUGAR» (ninguna placa entera en la primera vista).
+ * Despegada, la fila de la firma sigue pegada al pie (§3.4.1 v0.6.6, cuarto pase, F2): lo que queda pegado
+ * es esa fila, que no pasa del 15 %, y la firma se ve al abrir.
+ */
+for (const { width, height } of [
+  { width: 360, height: 640 },
+  { width: 375, height: 667 },
+  { width: 390, height: 844 },
+  { width: 823, height: 514 },
+]) {
+  test.describe(`ventana pequeña con teclado a ${width} × ${height}`, () => {
+    test.use({ viewport: { width, height } })
+
+    for (const { path, heading } of [
+      { path: '/dev/menu', heading: 'Beat Battle' },
+      { path: '/', heading: 'Beat Battle' },
+      { path: '/como-funciona', heading: 'Cómo se juega' },
+      { path: '/ajustes', heading: 'Sonido y efectos' },
+    ]) {
+      test(`§3.4.1 / WCAG 1.4.10 / RF-OTP-01: en ${path} lo pegado de la barra no pasa del 15 % de la ventana y la firma se ve`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        const { share, pinned, plates } = await barShare(page)
+        if (pinned) expect(share).toBeLessThanOrEqual(0.15)
+        // Despegada, la fila de la firma sigue pegada al pie (v0.6.6).
+        await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({
+          ratio: 1,
+        })
+        // En el menú, «ELIGE MODO» y sus placas van antes que la tarjeta con teclado y ratón en la
+        // composición estrecha (§3.8.3 v0.6.7; jurado de la 0.28, L8 y cierre, K3): hay placas a la vista al
+        // abrir también por debajo de 700 px de alto.
+        if (path === '/dev/menu' || path === '/')
+          expect(plates, 'rótulos de placa en la primera vista').toBeGreaterThan(0)
+      })
+    }
+
+    test('§3.3 / WCAG 2.4.11: recorriendo el menú con ↓, ninguna placa enfocada queda bajo la barra ni fuera de la ventana', async ({
+      page,
+    }) => {
+      await open(page, '/dev/menu', 'Beat Battle')
+      const problems: string[] = []
+      for (let step = 0; step < 6; step++) {
+        await page.keyboard.press('ArrowDown')
+        await page.evaluate(
+          () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
+        )
+        const problem = await page.evaluate(() => {
+          const focused = document.activeElement as HTMLElement
+          const bar = document.querySelector('footer')!
+          const box = focused.getBoundingClientRect()
+          const sticky = getComputedStyle(bar).position === 'sticky'
+          const covered = sticky ? Math.max(0, box.bottom - bar.getBoundingClientRect().top) : 0
+          const inside = box.top >= 0 && box.bottom <= innerHeight
+          return covered > 0.5 || !inside
+            ? `${focused.textContent?.slice(0, 20)}: tapado ${covered}, entero=${inside}`
+            : null
+        })
+        if (problem) problems.push(problem)
+      }
+      expect(problems).toEqual([])
+    })
+  })
+}
+
+/**
+ * Lo que no cambia: mientras la barra no pase del 15 % de la ventana va pegada entera (la firma se ve al
+ * abrir). En táctil, la del menú es solo la firma; a 390 × 844, la de las interiores (firma y «Legal»
+ * debajo) mide el 11,6 %; a 1280 × 720 con teclado, la del menú (teclas en su fila) mide 84 px, el 11,7 %.
+ */
+for (const { width, height, touch, paths } of [
+  { width: 360, height: 640, touch: true, paths: ['/dev/menu'] },
+  { width: 390, height: 844, touch: true, paths: ['/como-funciona', '/dev/menu'] },
+  { width: 1280, height: 720, touch: false, paths: ['/como-funciona', '/dev/menu'] },
+  { width: 1440, height: 900, touch: false, paths: ['/como-funciona', '/dev/menu'] },
+]) {
+  test.describe(`barra pegada a ${width} × ${height}${touch ? ' táctil' : ' con teclado'}`, () => {
+    test.use({ viewport: { width, height }, isMobile: touch, hasTouch: touch })
+
+    for (const { path, heading } of [
+      { path: '/como-funciona', heading: 'Cómo se juega' },
+      { path: '/dev/menu', heading: 'Beat Battle' },
+    ].filter(({ path }) => paths.includes(path))) {
+      test(`§3.4.1 / RF-OTP-01: en ${path} la barra va pegada al pie con la firma a la vista`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        const { pinned, whole } = await barShare(page)
+        expect(pinned).toBe(true)
+        expect(whole, 'la barra entera, no solo la fila de la firma').toBe(true)
+        await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({
+          ratio: 1,
+        })
+      })
+    }
+  })
+}
+
+/**
+ * Lo pegado de la barra al abrir y lo que va al final de la pantalla: si va despegada, su alto pegado
+ * (`--controls-pinned-h`, el margen del foco) y las cajas de la firma, de las teclas, del dato de la
+ * derecha y de «Legal» (null si no se ven), sin desplazar y al final de la pantalla. `cover` es por
+ * dónde empezaría a tapar el contenido una pieza de la barra: el pie de la ventana o, si la pantalla
+ * acaba antes (la barra, en su sitio al final, no va encima de nada), el pie del `<main>`.
+ */
+function unpinnedLayout(page: Page) {
+  return page.evaluate(() => {
+    const bar = document.querySelector('footer')!
+    const box = (element: Element | null) => {
+      if (!element || element.getClientRects().length === 0) return null
+      const { top, bottom, left, right } = element.getBoundingClientRect()
+      return bottom - top < 1 || right - left < 1 ? null : { top, bottom }
+    }
+    const pieces = () => ({
+      signature: box(bar.querySelector('[data-otp-signature]')),
+      keys:
+        getComputedStyle(bar.querySelector('ul')!).visibility === 'visible'
+          ? box(bar.querySelector('ul'))
+          : null,
+      right: box(bar.querySelector('[data-frame-slot="controlsRight"]')),
+      legal: box(bar.querySelector('a[href^="/legal/"]')),
+      barBottom: bar.getBoundingClientRect().bottom,
+      cover: Math.min(innerHeight, document.querySelector('main')!.getBoundingClientRect().bottom),
+    })
+    window.scrollTo(0, 0)
+    const atTop = pieces()
+    const pinned = Number.parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--controls-pinned-h'),
+    )
+    window.scrollTo(0, document.scrollingElement!.scrollHeight)
+    const atEnd = pieces()
+    window.scrollTo(0, 0)
+    return { unpinned: bar.hasAttribute('data-unpinned'), pinned, height: innerHeight, atTop, atEnd }
+  })
+}
+
+/**
+ * Tercer pase del jurado sobre la v0.6.6 (B1): la barra solo se despegaba pasado el 15 % con teclado en
+ * una ventana pequeña (720 px de ancho o menos, 700 de alto o menos); en el resto, pasado el 25 %. A
+ * 1024 × 768 con teclado la del menú lleva tres filas (teclas, firma y crónica), mide 127 px (16,5 %) e iba
+ * pegada entera: tapaba el dato de la placa 06, el panel de ayuda y el play, la onda y el reto de la
+ * tarjeta. Lo mismo a 1024 × 820, 1100 × 800 y 1199 × 840. En táctil, la de las interiores (firma y
+ * «Legal» debajo) mide 98 px, el 15,3 % a 360 × 640 y el 17,3 % a 320 × 568, y tampoco se despegaba.
+ * §3.4.1 v0.6.7: el 15 % vale en cualquier ventana y con cualquier entrada; despegada, la fila de la
+ * firma sigue pegada al pie y lo demás («Legal», las teclas, la crónica) va al final de la pantalla.
+ */
+for (const { width, height } of [
+  { width: 1024, height: 768 },
+  { width: 1024, height: 820 },
+  { width: 1100, height: 800 },
+  { width: 1199, height: 840 },
+]) {
+  test.describe(`barra despegada a ${width} × ${height} con teclado`, () => {
+    test.use({ viewport: { width, height } })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`§3.4.1 v0.6.7 / RF-OTP-01 / WCAG 1.4.10: en ${path}, pasado el 15 %, la barra se despega salvo la fila de la firma`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        const { unpinned, pinned, atTop, atEnd } = await unpinnedLayout(page)
+        expect(unpinned, 'la barra, despegada').toBe(true)
+        expect(pinned / height, 'lo pegado, ≤ 15 % de la ventana').toBeLessThanOrEqual(0.15)
+        // Al abrir, la firma entera al pie; las teclas y la crónica, al final de la pantalla: por
+        // debajo de la ventana o, si la pantalla acaba antes, después del contenido (no encima de él).
+        expect(atTop.signature, 'la firma se ve al abrir').not.toBeNull()
+        expect(atTop.signature!.bottom).toBeLessThanOrEqual(height + 0.5)
+        expect(atTop.keys!.top, 'las teclas, al final de la pantalla').toBeGreaterThanOrEqual(
+          atTop.cover - 0.5,
+        )
+        expect(atTop.right!.top, 'la crónica, al final de la pantalla').toBeGreaterThanOrEqual(
+          atTop.cover - 0.5,
+        )
+        await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({
+          ratio: 1,
+        })
+        // Al final de la pantalla, la barra entera.
+        expect(atEnd.barBottom).toBeLessThanOrEqual(height + 0.5)
+        expect(atEnd.keys!.bottom).toBeLessThanOrEqual(height + 0.5)
+        const { hidden } = await hiddenKeys(page)
+        expect(hidden).toEqual([])
+      })
+    }
+  })
+}
+
+for (const { width, height } of [
+  { width: 360, height: 640 },
+  { width: 320, height: 568 },
+]) {
+  test.describe(`barra despegada a ${width} × ${height} táctil`, () => {
+    test.use({ viewport: { width, height }, isMobile: true, hasTouch: true })
+
+    test('§3.4.1 v0.6.7 / RF-OTP-01 / WCAG 1.4.10: en /como-funciona «Legal» va al final de la pantalla y la firma sigue pegada al pie', async ({
+      page,
+    }) => {
+      await open(page, '/como-funciona', 'Cómo se juega')
+      await settle(page)
+      const { unpinned, pinned, atTop, atEnd } = await unpinnedLayout(page)
+      expect(unpinned, 'la barra, despegada').toBe(true)
+      expect(pinned / height, 'lo pegado, ≤ 15 % de la ventana').toBeLessThanOrEqual(0.15)
+      expect(atTop.signature, 'la firma se ve al abrir').not.toBeNull()
+      expect(atTop.signature!.bottom).toBeLessThanOrEqual(height + 0.5)
+      expect(atTop.legal!.top, '«Legal», al final de la pantalla').toBeGreaterThanOrEqual(atTop.cover - 0.5)
+      await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({
+        ratio: 1,
+      })
+      // Al final de la pantalla, «Legal» entero, debajo de la firma.
+      expect(atEnd.legal!.bottom).toBeLessThanOrEqual(height + 0.5)
+      expect(atEnd.legal!.top).toBeGreaterThanOrEqual(atEnd.signature!.bottom - 0.5)
+      await page.evaluate(() => window.scrollTo(0, document.scrollingElement!.scrollHeight))
+      await expect(page.getByRole('contentinfo').getByRole('link', { name: 'Legal' })).toBeInViewport({
+        ratio: 1,
+      })
+    })
+  })
+}
+
+/**
+ * Lo que se ve de la barra despegada al abrir (sin desplazar): si va despegada, la caja de la firma y las
+ * piezas de las filas de debajo de la suya (teclas, «Legal», la crónica y su pausa) que asoman por encima
+ * del pie de la ventana, con dónde empiezan. Y, al final de la pantalla, el pie de la barra.
+ */
+function signatureRowAtTop(page: Page) {
+  return page.evaluate(() => {
+    window.scrollTo(0, 0)
+    const bar = document.querySelector('footer')!
+    const signature = bar.querySelector('[data-otp-signature]')!.getBoundingClientRect()
+    const peeking: string[] = []
+    for (const piece of bar.querySelectorAll('ul > li, a[href], button, [data-chronicle]')) {
+      if (piece.closest('[data-otp-signature]')) continue
+      if (!piece.checkVisibility({ visibilityProperty: true })) continue
+      const box = piece.getBoundingClientRect()
+      if (box.width < 1 || box.height < 1) continue
+      // Al lado de la firma (en su fila) no cuenta: va pegado con ella.
+      if (box.top < signature.bottom - 0.5) continue
+      if (box.top < innerHeight - 0.5)
+        peeking.push(
+          `${piece.textContent?.trim().slice(0, 20) || piece.tagName}: desde ${box.top.toFixed(1)}`,
+        )
+    }
+    const top = { top: signature.top, bottom: signature.bottom }
+    window.scrollTo(0, document.scrollingElement!.scrollHeight)
+    const barBottom = bar.getBoundingClientRect().bottom
+    window.scrollTo(0, 0)
+    return { unpinned: bar.hasAttribute('data-unpinned'), signature: top, peeking, barBottom }
+  })
+}
+
+/**
+ * Ronda final de la 0.28 (D1): con la barra despegada y la pantalla solo un poco más alta que la ventana
+ * (menos que lo que cuelga de la barra, `--bar-tail`), la barra no podía bajar de su sitio (`sticky` con
+ * `bottom` negativo solo la sube) y al abrir asomaban cortadas las filas de debajo de la firma: a 360 × 640
+ * táctil, «LEGAL» en /entrar, /legal/bases, /legal/cookies y /registro; a 900 × 700 con teclado, en «/», la
+ * fila de las teclas por la mitad; a 823 × 514 en /legal/bases, la parte de arriba de [Q]/[E]. §3.4.1
+ * v0.6.7: despegada, la barra va al final de la pantalla salvo la fila de la firma, que es lo único que se
+ * ve al abrir, entera y pegada al pie.
+ */
+for (const { width, height, touch, routes } of [
+  {
+    width: 360,
+    height: 640,
+    touch: true,
+    routes: [
+      { path: '/entrar', heading: 'Entrar' },
+      { path: '/legal/bases', heading: 'Bases de la competición' },
+      { path: '/legal/cookies', heading: 'Política de cookies' },
+      { path: '/registro', heading: 'Crear cuenta' },
+    ],
+  },
+  { width: 900, height: 700, touch: false, routes: [{ path: '/', heading: 'Beat Battle' }] },
+  {
+    width: 823,
+    height: 514,
+    touch: false,
+    routes: [{ path: '/legal/bases', heading: 'Bases de la competición' }],
+  },
+]) {
+  test.describe(`fila de la firma al abrir a ${width} × ${height}${touch ? ' táctil' : ' con teclado'}`, () => {
+    test.use({ viewport: { width, height }, isMobile: touch, hasTouch: touch })
+
+    for (const { path, heading } of routes) {
+      test(`RF-OTP-01 / §3.4.1 v0.6.7: en ${path}, con la barra despegada, al abrir solo se ve la fila de la firma, entera, sin asomar las de debajo`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        const { unpinned, signature, peeking, barBottom } = await signatureRowAtTop(page)
+        expect(unpinned, 'la barra, despegada').toBe(true)
+        expect(signature.top, 'la firma, entera en la ventana').toBeGreaterThanOrEqual(-0.5)
+        expect(signature.bottom, 'la firma, entera en la ventana').toBeLessThanOrEqual(height + 0.5)
+        await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({
+          ratio: 1,
+        })
+        expect(peeking, 'piezas de las filas de debajo de la firma que asoman al abrir').toEqual([])
+        // Al final de la pantalla, la barra entera.
+        expect(barBottom).toBeLessThanOrEqual(height + 0.5)
+      })
+    }
+  })
+}
+
+/**
+ * La crónica con la letra del navegador grande (cuarto pase del jurado de la 0.28, F6): a 1440 × 900 con
+ * la letra por defecto a 24 px iba en la columna de la derecha y acababa en «Inserta tu beat · Crédit…»
+ * (WCAG 1.4.4). Ahora, si un mensaje no cabe en una línea, parte en dos; dos líneas caben en el alto del
+ * botón de pausa, así que la barra no cambia de alto al rotar. Se recorren los cuatro mensajes con el reloj
+ * de la página falso.
+ */
+for (const { width, height, fontSize } of [
+  { width: 1440, height: 900, fontSize: 24 },
+  { width: 1440, height: 900, fontSize: 20 },
+  { width: 1024, height: 768, fontSize: 24 },
+  { width: 390, height: 844, fontSize: 24 },
+]) {
+  test.describe(`crónica con letra de ${fontSize} px a ${width} × ${height}`, () => {
+    test.use({ viewport: { width, height } })
+
+    test('RD-VIS-02 e / §3.8.3 (WCAG 1.4.4): ningún mensaje de la crónica se corta y la barra no cambia de alto al rotar', async ({
+      page,
+    }) => {
+      const cdp = await page.context().newCDPSession(page)
+      await cdp.send('Page.enable')
+      await cdp.send('Page.setFontSizes', { fontSizes: { standard: fontSize, fixed: fontSize } })
+      await page.clock.install()
+      await open(page, '/dev/menu', 'Beat Battle')
+      await page.mouse.move(0, 0)
+      const chronicle = page.getByRole('contentinfo').locator('[data-chronicle]')
+      const seen = new Set<string>()
+      const heights = new Set<number>()
+      for (let step = 0; step < 4; step++) {
+        await expect(chronicle).not.toContainText([...seen].at(-1) ?? '\u0000')
+        const state = await chronicle.evaluate((line) => ({
+          text: line.lastElementChild?.textContent ?? '',
+          cut: line.scrollHeight > line.clientHeight + 1 || line.scrollWidth > line.clientWidth + 1,
+          bar: Math.round(line.closest('footer')!.getBoundingClientRect().height),
+        }))
+        expect(state.cut, `«${state.text}» se corta`).toBe(false)
+        seen.add(state.text)
+        heights.add(state.bar)
+        await page.clock.runFor(5_000)
+      }
+      expect(seen.size, 'los cuatro mensajes').toBe(4)
+      expect([...heights], 'un solo alto de barra').toHaveLength(1)
+    })
+  })
+}
+
+/** Espaciado de texto de WCAG 1.4.12, con `!important` (como en `fit.spec.ts`). */
+const TEXT_SPACING = `*, *::before, *::after { line-height: 1.5 !important; letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important; } p { margin-bottom: 2em !important; }`
+
+/**
+ * La crónica va centrada en vertical con su botón de pausa, también con el espaciado de texto de WCAG 1.4.12
+ * (jurado de la 0.28, cierre, R5: a 1440 × 900, con el espaciado, el texto de una línea iba de 851 a 865 px
+ * con la pausa en 849–893, pegado arriba: el margen de párrafo del espaciado, `p { margin-bottom: 2em }`,
+ * contaba al centrarla). Se mira cada mensaje (reloj falso) con el espaciado aplicado después de cargar y,
+ * con la letra a 24 px, que las dos líneas siguen dentro del alto de la pausa.
+ */
+for (const { width, height, fontSize } of [
+  { width: 1440, height: 900, fontSize: 16 },
+  { width: 1280, height: 720, fontSize: 16 },
+  { width: 1024, height: 768, fontSize: 16 },
+  { width: 390, height: 844, fontSize: 16 },
+  { width: 1440, height: 900, fontSize: 24 },
+]) {
+  test.describe(`crónica con el espaciado de texto a ${width} × ${height}${fontSize === 16 ? '' : ` con letra de ${fontSize} px`}`, () => {
+    test.use({ viewport: { width, height } })
+
+    test('§3.4.1 / WCAG 1.4.12: cada mensaje de la crónica va centrado con el botón de pausa y dentro de su alto', async ({
+      page,
+    }) => {
+      if (fontSize !== 16) {
+        const cdp = await page.context().newCDPSession(page)
+        await cdp.send('Page.enable')
+        await cdp.send('Page.setFontSizes', { fontSizes: { standard: fontSize, fixed: fontSize } })
+      }
+      await page.clock.install()
+      await open(page, '/dev/menu', 'Beat Battle')
+      await page.mouse.move(0, 0)
+      await page.addStyleTag({ content: TEXT_SPACING })
+      const chronicle = page.getByRole('contentinfo').locator('[data-chronicle]')
+      const seen = new Set<string>()
+      const problems: string[] = []
+      for (let step = 0; step < 4; step++) {
+        await expect(chronicle).not.toContainText([...seen].at(-1) ?? '\u0000')
+        const state = await chronicle.evaluate((line) => {
+          const message = line.lastElementChild!
+          const range = document.createRange()
+          range.selectNodeContents(message)
+          const text = range.getBoundingClientRect()
+          const pause = line.parentElement!.querySelector('button')!.getBoundingClientRect()
+          return {
+            message: message.textContent ?? '',
+            offset: (text.top + text.bottom) / 2 - (pause.top + pause.bottom) / 2,
+            inside: text.top >= pause.top - 0.5 && text.bottom <= pause.bottom + 0.5,
+            text: `${text.top.toFixed(1)}–${text.bottom.toFixed(1)}`,
+            pause: `${pause.top.toFixed(1)}–${pause.bottom.toFixed(1)}`,
+          }
+        })
+        seen.add(state.message)
+        if (Math.abs(state.offset) > 1.5 || !state.inside)
+          problems.push(`«${state.message}»: texto en ${state.text}, pausa en ${state.pause}`)
+        await page.clock.runFor(5_000)
+      }
+      expect(seen.size, 'los cuatro mensajes').toBe(4)
+      expect(problems).toEqual([])
+    })
+  })
+}
+
+/** Bucles infinitos en marcha (CSS y Web Animations), por su nombre. */
+function runningLoops(page: Page): Promise<string[]> {
+  return page.evaluate(() =>
+    document
+      .getAnimations()
+      .filter((a) => a.playState === 'running' && a.effect?.getTiming().iterations === Infinity)
+      .map(
+        (a) =>
+          (a as CSSAnimation).animationName ?? String((a.effect as KeyframeEffect | null)?.target?.className),
+      ),
+  )
+}
+
+/**
+ * El botón de pausa aparece en las pantallas con bucles (§3.6 y §3.4.1 v0.6.7; tercer pase del jurado
+ * sobre la v0.6.6, B3). La galería tiene más de 40 bucles infinitos (los barridos del esqueleto, los
+ * cargadores de onda de los botones, el latido del reloj) y la barra no enseñaba «Pausar las animaciones»
+ * (ni a 1440 ni a 390 táctil): solo lo llevaba la crónica del menú. Ahora la pantalla lo declara en su
+ * ruta (`loops`) y la barra lo pone al lado de «Legal»; el botón los para todos (`data-loops="paused"`).
+ */
+for (const { width, height, touch } of [
+  { width: 1440, height: 900, touch: false },
+  { width: 390, height: 844, touch: true },
+]) {
+  test.describe(`pausa de los bucles de la galería a ${width} × ${height}${touch ? ' táctil' : ''}`, () => {
+    test.use({
+      viewport: { width, height },
+      isMobile: touch,
+      hasTouch: touch,
+      reducedMotion: 'no-preference',
+    })
+
+    test('§3.6 / WCAG 2.2.2: en /dev/galeria la barra lleva «Pausar las animaciones» y el botón para todos los bucles', async ({
+      page,
+    }) => {
+      await openGallery(page)
+      await settle(page)
+      expect((await runningLoops(page)).length, 'bucles en marcha').toBeGreaterThan(0)
+      const pause = page.getByRole('contentinfo').getByRole('button', { name: 'Pausar las animaciones' })
+      await pause.scrollIntoViewIfNeeded()
+      await expect(pause).toBeVisible()
+      await expect(pause).toHaveAttribute('aria-pressed', 'false')
+      await pause.click()
+      await expect(pause).toHaveAttribute('aria-pressed', 'true')
+      await expect(page.locator('html')).toHaveAttribute('data-loops', 'paused')
+      await expect.poll(() => runningLoops(page), { timeout: 10_000 }).toEqual([])
+      // Al reanudar, vuelven.
+      await pause.click()
+      await expect(page.locator('html')).not.toHaveAttribute('data-loops', 'paused')
+      await expect.poll(async () => (await runningLoops(page)).length).toBeGreaterThan(0)
+    })
+  })
+}

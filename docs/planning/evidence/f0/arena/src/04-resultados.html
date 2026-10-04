@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beat Battle · Resultados semana 40</title>
+<link rel="stylesheet" href="final.css">
+<style>
+  .floor{position:absolute;left:0;right:0;top:560px;bottom:0;background:var(--bb-wine-3)}
+  .floor canvas{inset:0;width:100%;height:100%}
+  .floor::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--bb-red)}
+  .beam{position:absolute;top:-20px;height:720px;pointer-events:none;
+    background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.05) 70%,rgba(255,255,255,0));
+    clip-path:polygon(46% 0,54% 0,100% 100%,0 100%)}
+  .beam--1{left:520px;width:400px;background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.07) 70%,rgba(255,255,255,0))}
+  .beam--2{left:250px;width:350px;opacity:.8}
+  .beam--3{left:840px;width:350px;opacity:.8}
+  .glow{position:absolute;left:470px;top:500px;width:500px;height:120px;background:radial-gradient(closest-side,rgba(255,0,60,.35),transparent);}
+
+  .tbox{--fc:var(--bb-white);--ff:rgba(6,6,8,.95);--c:16px;padding:10px 24px 12px;text-align:center;min-width:340px}
+  .tbox .kicker{color:var(--bb-text-2)}
+  .tbox h1{font-size:30px;font-stretch:130%;margin-top:6px;white-space:nowrap}
+  .sealed{position:absolute;right:-84px;top:16px;transform:rotate(9deg);background:var(--bb-black);font-size:16px}
+
+  .sub{position:relative;z-index:var(--bb-z-content);display:flex;justify-content:space-between;align-items:center;padding:14px 48px 0}
+  .sub p{font:500 14px/1.3 var(--bb-font-ui);color:var(--bb-text-2)}
+  .sub p b{color:var(--bb-white)}
+
+  .podium{position:absolute;left:0;right:0;top:0;bottom:0;z-index:var(--bb-z-content);pointer-events:none}
+  .podium>*{pointer-events:auto}
+  .spot{position:absolute;display:grid;justify-items:center;text-align:center}
+  .spot--1{left:570px;width:300px;top:138px}
+  .spot--2{left:280px;width:270px;top:262px}
+  .spot--3{left:890px;width:270px;top:290px}
+  .crown{width:92px;margin-bottom:-6px;position:relative;z-index:2}
+  .champ{margin-bottom:10px;transform:rotate(-3deg)}
+  .champ .ptag{font-size:15px;padding:7px 14px 7px 12px}
+  .art{position:relative;--fc:var(--bb-white);--ff:var(--bb-black);--c:16px;padding:5px}
+  .art canvas{display:block;clip-path:polygon(13px 0,100% 0,100% calc(100% - 13px),calc(100% - 13px) 100%,0 100%,0 13px)}
+  .spot--1 .art canvas{width:204px;height:204px}
+  .spot--2 .art canvas,.spot--3 .art canvas{width:176px;height:176px}
+  .spot--1 .art{--fc:var(--bb-red)}
+  /* restos del sello «Autoría oculta» arrancado en la ceremonia */
+  .torn{position:absolute;text-transform:uppercase;font:italic 900 12px/1 var(--bb-font-display);font-stretch:118%;letter-spacing:.06em;color:var(--bb-white);background:var(--bb-black);border:3px solid var(--bb-white);padding:5px 8px 4px;white-space:nowrap;
+    -webkit-mask:var(--noise) center/180px 180px;mask:var(--noise) center/180px 180px}
+  .torn--a{left:-16px;top:14px;transform:rotate(-14deg);clip-path:polygon(0 0,100% 0,92% 30%,100% 55%,90% 78%,96% 100%,0 100%)}
+  .torn--b{right:-20px;bottom:18px;transform:rotate(16deg);clip-path:polygon(8% 0,100% 0,100% 100%,0 100%,9% 72%,2% 45%,10% 22%)}
+  .name{margin-top:12px;display:grid;justify-items:center;gap:4px}
+  .alias-x{font:700 13px/1 var(--bb-font-ui);letter-spacing:.12em;text-transform:uppercase;color:var(--bb-red);text-decoration:line-through;text-decoration-thickness:2px;background:var(--bb-black);padding:3px 6px}
+  .prod{font:italic 900 34px/1 var(--bb-font-display);font-stretch:125%;text-transform:uppercase;letter-spacing:-.01em;text-shadow:4px 4px 0 var(--bb-red-cta);white-space:nowrap}
+  .spot--2 .prod,.spot--3 .prod{font-size:28px}
+  .score{display:flex;align-items:center;gap:10px;margin-top:6px;background:rgba(0,0,0,.85);padding:6px 12px 6px 8px}
+  .score b{font:800 24px/1 var(--bb-font-num)}
+  .score span{font:600 12px/1.25 var(--bb-font-ui);color:var(--bb-text-2);text-align:left;letter-spacing:.04em}
+  .score .medal{width:38px;height:38px}
+  .label-pick{position:absolute;right:-74px;top:-56px;display:grid;justify-items:center;gap:2px;transform:rotate(8deg)}
+  .label-pick img{width:70px}
+  .label-pick span{font:italic 900 12px/1 var(--bb-font-display);font-stretch:115%;background:var(--bb-white);color:var(--bb-black);padding:4px 7px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+
+  /* peanas */
+  .ped{position:absolute;display:grid;justify-items:center}
+  .ped__top{width:100%;height:16px;background:#2a2a2d;clip-path:polygon(4% 0,96% 0,100% 100%,0 100%)}
+  .ped__front{width:100%;display:grid;place-items:center;background:linear-gradient(180deg,#0f0f11,#050506);border-top:2px solid var(--bb-white);position:relative;overflow:hidden}
+  .ped__front b{font:italic 900 96px/1 var(--bb-font-display);font-stretch:130%;color:var(--bb-white);text-shadow:6px 6px 0 var(--bb-red-cta)}
+  .ped__front b small{font-size:.42em;vertical-align:.95em;margin-left:2px}
+  .ped--1{left:560px;width:320px;top:556px}.ped--1 .ped__front{height:150px;background:linear-gradient(180deg,var(--bb-red),#b0002c)}
+  .ped--1 .ped__front b{color:var(--bb-black);text-shadow:6px 6px 0 rgba(255,255,255,.9)}
+  .ped--2{left:270px;width:290px;top:600px}.ped--2 .ped__front{height:106px}
+  .ped--3{left:880px;width:290px;top:622px}.ped--3 .ped__front{height:84px}
+  .ped--3 .ped__front b{font-size:76px}
+
+  /* tu resultado */
+  .mine{position:absolute;left:48px;right:48px;top:726px;height:96px;z-index:var(--bb-z-content);display:flex;align-items:center;gap:26px;padding:0 22px 0 26px;--ff:rgba(6,6,8,.96);--fc:var(--bb-red);--c:var(--bb-cut)}
+  .mine .ptag{font-size:16px;padding:8px 14px 8px 12px}
+  .mine .tile{--fc:transparent;--ff:transparent;padding:0}
+  .mine .tile b{font-size:24px}
+  .mine__btns{margin-left:auto;display:flex;gap:12px}
+</style>
+</head>
+<body>
+<main class="screen" aria-labelledby="t">
+  <div class="bg" aria-hidden="true">
+    <div class="bg__burst" style="--bx:50%;--by:30%"></div>
+    <div class="floor"><canvas id="fl"></canvas></div>
+    <div class="beam beam--2"></div><div class="beam beam--3"></div><div class="beam beam--1"></div>
+    <div class="glow"></div>
+    <div class="bg__vig"></div>
+  </div>
+
+  <header class="hud">
+    <div class="p1">
+      <span class="p1__tag" aria-hidden="true">1P</span><span class="avatar frame" aria-hidden="true">LB</span>
+      <div><div class="p1__name">LilBru</div><div class="p1__rank">Nv <b>7</b> · Beatmaker</div>
+        <div class="meter" role="meter" aria-label="Experiencia: 3.112 de 3.350 para el nivel 8" aria-valuemin="2650" aria-valuemax="3350" aria-valuenow="3112"><i style="width:66%"></i></div></div>
+    </div>
+    <div class="tbox frame">
+      <div class="kicker">Resultados oficiales</div>
+      <h1 id="t" class="display">Semana 40</h1>
+      <span class="stamp stamp--red sealed">Sellada</span>
+    </div>
+    <div class="hud-r">
+      <div class="chipbox frame"><small>Temporada T4</small><b>20 PTS · 7.º</b></div>
+      <button class="iconbtn frame" aria-label="Sonido de efectos (M)" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#fff"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+    </div>
+  </header>
+  <div class="sub"><p><b>Neón en Sants</b> · 27 entradas · 412 votos · voto ciego revelado</p><p><span class="kbd">R</span> Repetir la ceremonia</p></div>
+
+  <section class="podium" aria-label="Podio">
+    <div class="spot spot--2">
+      <div class="art frame"><canvas data-cover="s40-e7" data-bpm="96" data-key="9" aria-hidden="true"></canvas><span class="torn torn--a" aria-hidden="true">Autoría</span><span class="torn torn--b" aria-hidden="true">oculta</span>
+        <div class="label-pick"><img src="img/otp-slap.png" alt=""><span>Elección del sello</span></div></div>
+      <div class="name"><span class="sr">2.º puesto.</span><span class="alias-x"><span class="sr">Alias: </span>Cuervo Cromado</span><span class="prod">noahflips</span>
+        <span class="score"><span data-medal="2"></span><b>4,41</b><span>38 votos<br>Disco de platino</span></span></div>
+    </div>
+    <div class="spot spot--1">
+      <svg class="crown" viewBox="0 0 100 52" aria-hidden="true"><path d="M8 48 L4 12 L28 30 L50 4 L72 30 L96 12 L92 48 Z" fill="#ff003c" stroke="#000" stroke-width="5" stroke-linejoin="round"/><path d="M8 48 L4 12 L28 30 L50 4 L72 30 L96 12 L92 48 Z" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" transform="translate(0,-1)"/><circle cx="50" cy="30" r="5" fill="#fff"/></svg>
+      <div class="champ"><span class="ptag ptag--white">Campeón de la semana</span></div>
+      <div class="art frame"><canvas data-cover="s40-e2" data-bpm="140" data-key="0" aria-hidden="true"></canvas><span class="torn torn--a" aria-hidden="true">Autoría</span><span class="torn torn--b" aria-hidden="true">oculta</span></div>
+      <div class="name"><span class="sr">1.er puesto.</span><span class="alias-x"><span class="sr">Alias: </span>Faro Errante</span><span class="prod">kairo.wav</span>
+        <span class="score"><span data-medal="1"></span><b>4,62</b><span>41 votos<br>Disco de oro</span></span></div>
+    </div>
+    <div class="spot spot--3">
+      <div class="art frame"><canvas data-cover="s40-e19" data-bpm="88" data-key="4" aria-hidden="true"></canvas><span class="torn torn--a" aria-hidden="true">Autoría</span><span class="torn torn--b" aria-hidden="true">oculta</span></div>
+      <div class="name"><span class="sr">3.er puesto.</span><span class="alias-x"><span class="sr">Alias: </span>Medusa Lenta</span><span class="prod">merce_mpc</span>
+        <span class="score"><span data-medal="3"></span><b>4,37</b><span>35 votos<br>Disco de diamante</span></span></div>
+    </div>
+    <div class="ped ped--2" aria-hidden="true"><div class="ped__top"></div><div class="ped__front"><b>2</b></div></div>
+    <div class="ped ped--1" aria-hidden="true"><div class="ped__top" style="background:#ff4a70"></div><div class="ped__front"><b>1</b></div></div>
+    <div class="ped ped--3" aria-hidden="true"><div class="ped__top"></div><div class="ped__front"><b>3</b></div></div>
+  </section>
+
+  <section class="mine frame" aria-label="Tu resultado">
+    <span class="ptag ptag--cta">Tu resultado</span>
+    <div class="tile frame"><small>Posición</small><b>6.º <span>de 27</span></b></div>
+    <div class="tile frame"><small>Puntuación</small><b>4,21</b></div>
+    <div class="tile frame"><small>Votos</small><b>33</b></div>
+    <div class="tile frame"><small>XP</small><b>+132</b></div>
+    <div class="tile frame"><small>Temporada</small><b>+8 <span>pts</span></b></div>
+    <div class="tile frame"><small>Oído de oro</small><b>0,71 <span>ρ</span></b></div>
+    <div class="mine__btns">
+      <button class="btn btn--red frame" type="button" data-start>▶ Play al campeón <span class="kbd kbd--red">INTRO</span></button>
+      <button class="btn frame" type="button">Clasificación <span class="kbd">T</span></button>
+    </div>
+  </section>
+
+  <footer class="ctrl">
+    <div class="ctrl__keys" aria-label="Controles">
+      <span class="ctrl__k"><span class="kbd">←</span><span class="kbd">→</span> Podio</span>
+      <span class="ctrl__k"><span class="kbd">INTRO</span> Escuchar</span>
+      <span class="ctrl__k"><span class="kbd">T</span> Clasificación</span>
+      <span class="ctrl__k"><span class="kbd">X</span> Compartir</span>
+      <span class="ctrl__k"><span class="kbd">ESC</span> Volver</span>
+    </div>
+    <a class="firma" data-otp-signature href="https://www.otherpeople.es">Un juego de <img src="img/otp-slap.png" alt="Other People"> Other People Records</a>
+    <div class="ctrl__r">Siguiente drop · lunes <em>00:00</em></div>
+  </footer>
+</main>
+<script src="final.js"></script>
+<script>
+  window.paintScreen = function () {
+    Arena.halftone(document.getElementById('fl'), { cell: 12, angle: 0, color: '#ff003c', bg: '#160308', max: .62,
+      fn: (u, v) => Math.pow(v, 0.9) * (0.35 + 0.65 * Math.pow(Math.abs(u - 0.5) * 2, 1.3)) });
+    Arena.roving(document.querySelector('.mine__btns'), { items: 'button', mode: 'h', autofocus: true });
+  };
+</script>
+</body>
+</html>

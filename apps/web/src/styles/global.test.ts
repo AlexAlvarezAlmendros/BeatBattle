@@ -22,11 +22,16 @@ function matchingRules(element: Element): CSSStyleRule[] {
 const removesOutline = (element: Element) =>
   matchingRules(element).some((rule) => rule.style.getPropertyValue('outline') === 'none')
 
-/** ¿Alguna regla que casa con el elemento le pone el anillo de foco de los tokens? */
+/**
+ * ¿Alguna regla que casa con el elemento le pone el foco genérico de §3.3 (contorno blanco de 3 px a
+ * 4 px más el halo)?
+ */
 const drawsFocusRing = (element: Element) =>
   matchingRules(element).some(
     (rule) =>
-      rule.style.getPropertyValue('outline').includes('var(--bb-focus-color)') &&
+      rule.style.getPropertyValue('outline').includes('var(--bb-stroke-cursor)') &&
+      rule.style.getPropertyValue('outline').includes('var(--bb-white)') &&
+      rule.style.getPropertyValue('outline-offset') === 'var(--bb-cursor-gap)' &&
       rule.style.getPropertyValue('box-shadow') === 'var(--bb-focus-halo)',
   )
 
@@ -44,7 +49,7 @@ describe('global.css: foco visible', () => {
     document.body.innerHTML = ''
   })
 
-  it('RNF-A11Y-01: un botón enfocado lleva el anillo rojo con halo', () => {
+  it('RNF-A11Y-01: un botón enfocado lleva el foco genérico: contorno blanco de 3 px a 4 px y halo', () => {
     const button = focused('<button type="button">Votar</button>')
     expect(drawsFocusRing(button)).toBe(true)
     expect(removesOutline(button)).toBe(false)
@@ -62,8 +67,20 @@ describe('global.css: foco visible', () => {
     }
   })
 
+  it('RNF-A11Y-01: en los menús de juego (data-cursor) el foco es el cursor y el contorno se apaga', () => {
+    const plate = focused('<button type="button" data-cursor>Jugar</button>')
+    expect(
+      matchingRules(plate).some(
+        (rule) =>
+          rule.selectorText === '[data-cursor]:focus-visible' &&
+          rule.style.getPropertyValue('outline') === 'none' &&
+          rule.style.boxShadow === 'none',
+      ),
+    ).toBe(true)
+  })
+
   it('RNF-A11Y-01: solo el destino de foco del marco (data-focus-target) va sin anillo', () => {
-    const main = focused('<main id="contenido" tabindex="-1" data-focus-target>Contenido</main>')
+    const main = focused('<main id="contenido" tabindex="-1" data-focus-target="main">Contenido</main>')
     expect(removesOutline(main)).toBe(true)
     expect(
       matchingRules(main).some(
@@ -125,18 +142,59 @@ describe('global.css: red de «reducir movimiento»', () => {
   })
 })
 
-describe('global.css: encabezados', () => {
+describe('global.css: base de la arena (§3.2)', () => {
   afterEach(() => {
     document.body.innerHTML = ''
+    document.documentElement.removeAttribute('data-serious')
   })
 
-  it('RD-VIS-02: los encabezados sin clase pesan 700, como los títulos del sello (el del navegador)', () => {
+  it('RD-VIS-01: fondo negro y Chakra Petch como texto, sin negritas ni cursivas falsas', () => {
+    const body = matchingRules(document.body)
+    expect(body.some((rule) => rule.style.getPropertyValue('background-color') === 'var(--bb-black)')).toBe(
+      true,
+    )
+    expect(body.some((rule) => rule.style.getPropertyValue('font-family') === 'var(--bb-font-ui)')).toBe(true)
+    expect(body.some((rule) => rule.style.getPropertyValue('font-synthesis') === 'none')).toBe(true)
+    const html = matchingRules(document.documentElement)
+    expect(html.some((rule) => rule.style.getPropertyValue('background-color') === 'var(--bb-black)')).toBe(
+      true,
+    )
+  })
+
+  it('RD-VIS-01: los encabezados sin clase heredan el tamaño y pesan 700', () => {
     for (const level of [1, 2, 3, 4, 5, 6]) {
       document.body.innerHTML = `<h${level}>Título</h${level}>`
-      const weights = matchingRules(document.body.firstElementChild as Element)
-        .map((rule) => rule.style.getPropertyValue('font-weight'))
-        .filter(Boolean)
-      expect(weights).toEqual(['var(--bb-weight-bold)'])
+      const rules = matchingRules(document.body.firstElementChild as Element)
+      expect(rules.map((rule) => rule.style.getPropertyValue('font-weight')).filter(Boolean)).toEqual([
+        'var(--bb-weight-bold)',
+      ])
+      expect(rules.some((rule) => rule.style.getPropertyValue('font-size') === 'inherit')).toBe(true)
     }
+  })
+
+  it('«Saltar al contenido» y .sr-only existen; el enlace mide 44 px y va por encima de la puerta', () => {
+    document.body.innerHTML = '<a class="skip-link" href="#contenido">Saltar al contenido</a>'
+    const skip = matchingRules(document.body.firstElementChild as Element)
+    expect(skip.some((rule) => rule.style.getPropertyValue('min-height') === 'var(--bb-target)')).toBe(true)
+    expect(skip.some((rule) => rule.style.getPropertyValue('z-index') === 'calc(var(--bb-z-gate) + 1)')).toBe(
+      true,
+    )
+    document.body.innerHTML = '<span class="sr-only">Oculto</span>'
+    expect(matchingRules(document.body.firstElementChild as Element).length).toBeGreaterThan(0)
+  })
+
+  it('§3.6: el modo serio (data-serious) quita las piezas de espectáculo (data-fx) y deja el resto', () => {
+    document.body.innerHTML = '<div data-fx="rays"></div><p>Información</p>'
+    const fx = document.body.firstElementChild!
+    const hides = (element: Element) =>
+      matchingRules(element).some(
+        (rule) =>
+          rule.style.getPropertyValue('display') === 'none' &&
+          rule.style.getPropertyPriority('display') === 'important',
+      )
+    expect(hides(fx)).toBe(false)
+    document.documentElement.setAttribute('data-serious', '')
+    expect(hides(fx)).toBe(true)
+    expect(hides(document.body.lastElementChild!)).toBe(false)
   })
 })

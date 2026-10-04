@@ -1,10 +1,11 @@
 import { Children, type HTMLAttributes, isValidElement, type ReactNode, useId } from 'react'
 import { Link, type To } from 'react-router'
-import { t } from '../../i18n'
+import { formatNumber, t } from '../../i18n'
 import { Button } from '../Button'
+import { CoverArt } from '../CoverArt'
 import { cx, forceStateAttr } from '../forceState'
 import { Icon } from '../Icon'
-import { Waveform, type WaveformPeak } from '../Waveform'
+import { Medal, type MedalPlace } from '../Medal'
 import styles from './EntryRow.module.css'
 
 /**
@@ -13,68 +14,53 @@ import styles from './EntryRow.module.css'
  */
 export type EntryRowState = 'rest' | 'hover' | 'focus' | 'focusTitle' | 'pressed'
 
-/**
- * Estado del audio de la fila (§3.3): `loading` mientras carga (el play enseña la onda de carga) y
- * `error` si no ha cargado (`RF-PLAY-09`: «No hemos podido cargar este beat», y el play reintenta).
- */
+/** Estado del audio: cargando (el play enseña la onda de carga) o error (`RF-PLAY-09`). */
 export type EntryRowStatus = 'idle' | 'loading' | 'error'
+
+/** Resultado de una semana **sellada** (`RF-PLAY-05`): sin él, la fila no enseña posición ni nota. */
+export interface EntryRowResult {
+  position: number
+  /** Media bayesiana (§2.8), con dos decimales. */
+  score: number
+  medal?: MedalPlace
+}
 
 export interface EntryRowProps {
   title: string
-  /** Alias del productor («Prod. by …»). */
-  alias: string
-  genres?: readonly string[]
-  bpm?: number
-  /** Tonalidad ya formateada («Re♯ menor»). */
-  musicalKey?: string
-  /** Picos de la mini onda. */
-  peaks: readonly WaveformPeak[]
-  /** Parte escuchada, en `[0, 1]`. */
-  progress?: number
+  /** Segunda línea («S40 · era Faro Errante · 41 votos»; antes del sellado, sin autoría ni votos). */
+  subtitle?: string
+  /** Solo tras el sellado. */
+  result?: EntryRowResult
   /** Está sonando: play en rojo y su etiqueta pasa a «Pausar». */
   playing?: boolean
-  /** Audio cargando o que no ha cargado (el play pasa a «Reintentar»). */
   status?: EntryRowStatus
-  /** No se puede reproducir (p. ej. la entrada aún se está procesando): play deshabilitado y fila apagada. */
+  /** No se puede reproducir (p. ej. se está procesando): play deshabilitado y fila apagada. */
   disabled?: boolean
-  coverUrl?: string
   /** Ficha de la entrada: el título enlaza ahí. */
   to?: To
   onPlayToggle?: () => void
-  /** Acciones a la derecha (votar, compartir…), cuando las haya. */
+  /** Acciones a la derecha, cuando las haya. */
   actions?: ReactNode
-  /** Nivel del encabezado del título (por defecto `h3`). */
   titleAs?: 'h2' | 'h3' | 'h4'
-  /** Estado forzado para la galería. */
   state?: EntryRowState
   className?: string
 }
 
 /**
- * Fila de entrada (§3.3): la anatomía de la lista de beats del sello (`BeatListRow`): portada, play
- * redondo, título, «Prod. by», chips de género, BPM y tonalidad en gris con cifras tabulares; la mini
- * onda sustituye a la barra de progreso. Hover: fondo `--bb-ink-700` y la mini onda «respira» (sin
- * movimiento, solo el fondo; Anexo E). El play se transforma en pausa (`Icon`, Anexo E). Con puntero
- * grueso, el enlace del título cubre toda la fila (RNF-A11Y-09).
- *
- * Estados (§3.3): cargando (el play enseña la onda de carga), error (`RF-PLAY-09`: el aviso «No hemos
- * podido cargar este beat» bajo el título y el play pasa a «Reintentar») y deshabilitado (no se puede
- * reproducir: play deshabilitado y la fila apagada).
- *
- * Solo pinta con props: el audio y el reproductor llegan en la Fase 5.
+ * Fila de entrada (guía §3.3; listas largas: archivo, clasificación, historial): un marcador de
+ * 56–58 px con portada de 44 px (en chaflán, con el play dentro), título y subtítulo, posición en
+ * display, puntuación en Oxanium y medalla. **Antes del sellado, sin posición ni puntuación** (`RF-PLAY-05`): `result` solo llega con la
+ * semana sellada. Hover: `--bb-panel-2`. Error de audio: aviso y reintentar (`RF-PLAY-09`). **Fila
+ * estrecha**: título y subtítulo parten en líneas (nunca «…») y el resultado baja a una segunda fila;
+ * la fila es un contenedor, así que su ancho lo pone quien la contiene.
  */
 export function EntryRow({
   title,
-  alias,
-  genres = [],
-  bpm,
-  musicalKey,
-  peaks,
-  progress = 0,
+  subtitle,
+  result,
   playing = false,
   status = 'idle',
   disabled = false,
-  coverUrl,
   to,
   onPlayToggle,
   actions,
@@ -83,6 +69,26 @@ export function EntryRow({
   className,
 }: EntryRowProps) {
   const titleId = useId()
+  const subtitleId = useId()
+  const info = (
+    <>
+      <TitleTag id={titleId} className={styles.title}>
+        <span className={styles.titleText}>{title}</span>
+      </TitleTag>
+      {status === 'error' ? (
+        <p className={styles.error}>
+          <Icon name="alert" />
+          {t('ui.entryRow.loadError')}
+        </p>
+      ) : (
+        subtitle && (
+          <p id={subtitleId} className={styles.subtitle}>
+            {subtitle}
+          </p>
+        )
+      )}
+    </>
+  )
   return (
     <article
       className={cx(styles.row, className)}
@@ -90,99 +96,73 @@ export function EntryRow({
       data-playing={playing || undefined}
       data-status={status === 'idle' ? undefined : status}
       data-disabled={disabled || undefined}
-      {...forceStateAttr(state === 'focusTitle' ? 'focus' : state)}
+      data-sealed={result ? '' : undefined}
+      {...forceStateAttr(
+        state === 'focusTitle' || state === 'focus' || state === 'pressed' ? undefined : state,
+      )}
     >
-      <div className={styles.thumb}>
-        {coverUrl ? (
-          <img src={coverUrl} alt={t('ui.entryRow.cover', { title })} loading="lazy" />
-        ) : (
-          <span className={styles.coverFallback} aria-hidden="true" />
-        )}
-      </div>
-
-      <Button
-        variant="icon"
-        size="sm"
-        icon={playing ? 'pause' : 'play'}
-        aria-label={t(
-          status === 'error' ? 'ui.entryRow.retry' : playing ? 'ui.entryRow.pause' : 'ui.entryRow.play',
-          { title },
-        )}
-        onClick={onPlayToggle}
-        loading={status === 'loading'}
-        loadingLabel={t('ui.entryRow.loading', { title })}
-        status={status === 'error' ? 'error' : 'idle'}
-        disabled={disabled}
-        state={state === 'focus' || state === 'pressed' ? state : undefined}
-        className={styles.play}
-      />
-
-      <div className={styles.center}>
-        <div className={styles.info}>
-          <TitleTag id={titleId} className={styles.title}>
-            {to !== undefined ? (
-              <Link
-                to={to}
-                className={cx(styles.titleLink, styles.titleText)}
-                {...forceStateAttr(state === 'focusTitle' ? 'focus' : undefined)}
-              >
-                {title}
-              </Link>
-            ) : (
-              <span className={styles.titleText}>{title}</span>
+      {/* La fila es el contenedor (estrecha o ancha) y este cuerpo, la rejilla que cambia con ella. */}
+      <div className={styles.body}>
+        {/* El play va dentro de la portada (no es un botón redondo suelto, como la lista del sello). */}
+        <div className={styles.coverPlay}>
+          <CoverArt className={styles.cover} />
+          <Button
+            variant={playing ? 'cta' : 'outline'}
+            size="sm"
+            iconOnly
+            icon={playing ? 'pause' : 'play'}
+            className={styles.play}
+            aria-label={t(
+              status === 'error' ? 'ui.entryRow.retry' : playing ? 'ui.entryRow.pause' : 'ui.entryRow.play',
+              { title },
             )}
-          </TitleTag>
-          {status === 'error' && (
-            <p className={styles.error}>
-              <Icon name="alert" className={styles.errorIcon} />
-              {t('ui.entryRow.loadError')}
-            </p>
-          )}
-          <div className={styles.meta}>
-            <span className={styles.alias}>{t('ui.entryRow.by', { alias })}</span>
-            {genres.length > 0 && (
-              // biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none
-              <ul role="list" className={styles.tags} aria-label={t('ui.entryRow.genres')}>
-                {genres.map((genre) => (
-                  <li key={genre} className={styles.tag}>
-                    {genre}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {bpm !== undefined && <span className={styles.data}>{t('ui.entryRow.bpm', { bpm })}</span>}
-            {musicalKey && <span className={styles.data}>{musicalKey}</span>}
-          </div>
-        </div>
-        <div className={styles.wave}>
-          {/* Sin entrada animada: en una lista no aporta y serían decenas de animaciones a la vez. */}
-          <Waveform
-            peaks={peaks}
-            progress={progress}
-            height={24}
-            playhead={false}
-            animateIn={false}
-            decorative
+            onClick={onPlayToggle}
+            loading={status === 'loading'}
+            loadingLabel={t('ui.entryRow.loading', { title })}
+            disabled={disabled}
+            state={state === 'focus' || state === 'pressed' ? state : undefined}
           />
         </div>
+        {to !== undefined ? (
+          // El enlace a la ficha abarca título y subtítulo: su anillo de foco los rodea a los dos y no
+          // tapa el subtítulo (§3.3 «Fila de entrada»). Su nombre es el título.
+          <Link
+            to={to}
+            className={cx(styles.info, styles.infoLink)}
+            aria-labelledby={titleId}
+            aria-describedby={subtitle && status !== 'error' ? subtitleId : undefined}
+            {...forceStateAttr(state === 'focusTitle' ? 'focus' : undefined)}
+          >
+            {info}
+          </Link>
+        ) : (
+          <div className={styles.info}>{info}</div>
+        )}
+        {result && (
+          <div className={styles.result} data-entry-result="">
+            <span className={cx('bb-display', styles.position)}>
+              {t('ui.entryRow.position', { position: result.position })}
+            </span>
+            <span className={styles.score}>
+              <span className="sr-only">{t('ui.entryRow.score')} </span>
+              {formatNumber(result.score, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+            {result.medal && <Medal place={result.medal} className={styles.medal} />}
+          </div>
+        )}
+        {actions && <div className={styles.actions}>{actions}</div>}
       </div>
-
-      {actions && <div className={styles.actions}>{actions}</div>}
     </article>
   )
 }
 
-/** Lista de filas de entrada (`<ol>`), con el filete entre filas del sello. */
+/** Lista de filas de entrada (`<ol>`). */
 export function EntryList({ className, children, ...rest }: HTMLAttributes<HTMLOListElement>) {
   return (
     // biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none
     <ol role="list" {...rest} className={cx(styles.list, className)}>
       {Children.map(children, (child, index) =>
-        isValidElement(child) ? (
-          <li key={child.key ?? index} className={styles.item}>
-            {child}
-          </li>
-        ) : null,
+        isValidElement(child) ? <li key={child.key ?? index}>{child}</li> : null,
       )}
     </ol>
   )

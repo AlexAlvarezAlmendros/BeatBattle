@@ -1,0 +1,135 @@
+/*
+ * Marco de esquina recortada (`Frame`, guía §3.3): la base de casi todo en la arena. Dos capas
+ * recortadas con el mismo chaflán (arriba-izquierda y abajo-derecha): `::before` es el borde
+ * (`--frame-border`) y `::after`, metida el ancho del trazo (`--frame-stroke`), el relleno
+ * (`--frame-fill`). Así el borde sigue el chaflán, cosa que `border` no hace. El chaflán interior
+ * sale del exterior con `calc()` sobre el trazo (2 − √2 ≈ 0,586: lo que encoge un chaflán de 45° al
+ * meterlo hacia dentro), nunca con un número suelto (§3.2 «Forma»).
+ *
+ * API por atributos, para que cualquier elemento pueda ser un marco (lo pinta el componente `Frame`):
+ *   data-frame="panel | stage | title"   variante (§3.3)
+ *   data-frame-cut="xs | sm | md | base | lg"   chaflán (por defecto, `base` = `--bb-cut`)
+ *
+ * Todas las reglas van en `:where()` (especificidad 0): una pieza que se monta sobre el marco cambia
+ * `--frame-border`, `--frame-fill`, `--frame-cut` o `--frame-stroke` desde su propia clase sin pelear
+ * con el orden de las hojas. El elemento no se recorta: el foco y los hijos pueden salirse.
+ */
+
+:where([data-frame]) {
+  --frame-cut: var(--bb-cut);
+  --frame-stroke: var(--bb-stroke);
+  --frame-border: var(--bb-line-strong);
+  --frame-fill: var(--bb-panel-veil);
+  position: relative;
+  isolation: isolate;
+}
+
+:where([data-frame])::before,
+:where([data-frame])::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+
+:where([data-frame])::before {
+  inset: 0;
+  background: var(--frame-border);
+  clip-path: polygon(
+    var(--frame-cut) 0,
+    100% 0,
+    100% calc(100% - var(--frame-cut)),
+    calc(100% - var(--frame-cut)) 100%,
+    0 100%,
+    0 var(--frame-cut)
+  );
+}
+
+:where([data-frame])::after {
+  --frame-cut-inner: calc(var(--frame-cut) - var(--frame-stroke) * 0.586);
+  inset: var(--frame-stroke);
+  background: var(--frame-fill);
+  clip-path: polygon(
+    var(--frame-cut-inner) 0,
+    100% 0,
+    100% calc(100% - var(--frame-cut-inner)),
+    calc(100% - var(--frame-cut-inner)) 100%,
+    0 100%,
+    0 var(--frame-cut-inner)
+  );
+}
+
+/* ── Variantes (§3.3 «Marco») ─────────────────────────────────────────────────────────────── */
+
+/* Panel: casi opaco sobre la arena, con borde en reposo. Todo texto sobre la cuña va encima de uno. */
+:where([data-frame="panel"]) {
+  --frame-border: var(--bb-line-strong);
+  --frame-fill: var(--bb-panel-veil);
+}
+
+/*
+ * Escenario: borde rojo y relleno granate oscuro con trama de puntos granates que crece hacia la
+ * derecha (la tarjeta de la semana). La trama va en el relleno, debajo de un velo del propio relleno
+ * que la tapa por la izquierda, donde va el texto (RD-VIS-05: nunca texto sobre trama sin panel).
+ */
+:where([data-frame="stage"]) {
+  --frame-border: var(--bb-red);
+  --frame-fill: var(--bb-wine-3);
+}
+
+:where([data-frame="stage"])::after {
+  background:
+    linear-gradient(to right, var(--frame-fill) 35%, transparent),
+    radial-gradient(circle, var(--bb-wine) 0 var(--bb-tex-fill-dot), transparent var(--bb-tex-fill-dot)) 0 0 /
+    var(--bb-tex-halftone-cell-piece) var(--bb-tex-halftone-cell-piece),
+    var(--frame-fill);
+}
+
+/* Sin trama (`texture={false}`): el escenario liso, para poner texto en cualquier sitio. */
+:where([data-frame="stage"][data-frame-texture="off"])::after {
+  background: var(--frame-fill);
+}
+
+/* Título: borde blanco (placa de título del HUD en las pantallas interiores). */
+:where([data-frame="title"]) {
+  --frame-border: var(--bb-white);
+  --frame-fill: var(--bb-panel-veil);
+}
+
+/* ── Chaflanes (§3.2) ─────────────────────────────────────────────────────────────────────── */
+:where([data-frame-cut="xs"]) {
+  --frame-cut: var(--bb-cut-xs);
+}
+
+:where([data-frame-cut="sm"]) {
+  --frame-cut: var(--bb-cut-sm);
+}
+
+:where([data-frame-cut="md"]) {
+  --frame-cut: var(--bb-cut-md);
+}
+
+:where([data-frame-cut="base"]) {
+  --frame-cut: var(--bb-cut);
+}
+
+:where([data-frame-cut="lg"]) {
+  --frame-cut: var(--bb-cut-lg);
+}
+
+/*
+ * Contraste alto (`forced-colors: active`): el modo quita los fondos de color, y el borde del marco es una
+ * capa de fondo recortada en chaflán, así que desaparecería. El borde se pinta con `CanvasText` y el
+ * relleno con `Canvas` (el texto de encima lo adapta el navegador), sin dejar que el modo los toque.
+ */
+@media (forced-colors: active) {
+  :where([data-frame])::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  :where([data-frame])::after {
+    forced-color-adjust: none;
+    background: Canvas;
+  }
+}

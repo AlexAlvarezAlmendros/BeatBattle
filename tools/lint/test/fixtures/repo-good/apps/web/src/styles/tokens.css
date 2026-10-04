@@ -1,6 +1,18 @@
 /* Fixture: tokens.css es la fuente de verdad y queda fuera del lint aunque tenga literales. */
 :root {
   --bb-red: #ff003c;
+  --bb-text: #ffffff;
+  --bb-line: rgba(255, 255, 255, 0.16);
+  --bb-panel-2: #141416;
   --bb-dur-fast: 150ms;
-  --bb-radius-md: 12px;
+  --bb-dur-slow: 420ms;
+  --bb-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --bb-cut: 14px;
+  --bb-slant: 18px;
+  --bb-stroke: 2px;
+  --bb-stroke-hair: 1px;
+  --bb-tilt-sticker: -7deg;
+  --bb-space-3: 0.75rem;
+  --bb-shadow-hard: 4px 4px 0 #e6003a;
+  --bb-focus-halo: 0 0 0 10px rgba(255, 0, 60, 0.35);
 }

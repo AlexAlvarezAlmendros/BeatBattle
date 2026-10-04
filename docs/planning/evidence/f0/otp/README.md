@@ -1,3 +1,6 @@
+> **Histórico: la dirección de copiar el sello se abandonó el 2026-10-03 (guía v0.6).** Esta carpeta
+> se conserva como registro; la referencia vigente de diseño son las maquetas de `../arena/`.
+
 # Referencia del sello: capturas y medidas de otherpeople.es
 
 Referencia de la «prueba del sello» (`RD-VIS-02`, guía §3.1): cómo se ve y cuánto mide de verdad la

@@ -2,9 +2,10 @@ import { expect, type Page, test } from '@playwright/test'
 import { open, openGallery, settle } from './support'
 
 /**
- * «Reducir movimiento» del sistema emulado (`RNF-A11Y-03`, guía §2.17 y Anexo E): sin bucles, sin
- * desplazamientos y solo fundidos de ≤ 200 ms. Se registra cada animación que arranca desde la carga
- * (CSS y Web Animations) y se mira lo que sigue en marcha al asentarse la página.
+ * «Reducir movimiento» del sistema emulado (`RNF-A11Y-03`, guía §2.17, §3.6 y Anexo E): sin bucles, sin
+ * desplazamientos ni giros y solo fundidos de ≤ 200 ms, en la home, en el menú con semana en juego (el
+ * vinilo-sol, la crónica, el cursor) y al cambiar de pantalla. Se registra cada animación que arranca
+ * desde la carga (CSS y Web Animations) y se mira lo que sigue en marcha al asentarse la página.
  */
 
 interface RecordedAnimation {
@@ -108,27 +109,76 @@ function runningLoops(page: Page) {
 test.describe('con «reducir movimiento» del sistema', () => {
   test.use({ reducedMotion: 'reduce' })
 
-  test('RNF-A11Y-03: la home no deja bucles en marcha y solo hace fundidos de ≤ 200 ms', async ({ page }) => {
-    await page.addInitScript(recordAnimations)
-    const deferred = toastListResponse(page)
-    await open(page, '/', 'Beat Battle')
-    // Lo último que carga la home es la zona de avisos diferida: cualquier bucle ya ha arrancado.
-    await deferredLoaded(page, deferred)
-    await settle(page)
+  for (const { path, name } of [
+    { path: '/', name: 'la home' },
+    { path: '/dev/menu', name: 'el menú con semana en juego' },
+  ]) {
+    test(`RNF-A11Y-03: ${name} no deja bucles en marcha y solo hace fundidos de ≤ 200 ms`, async ({
+      page,
+    }) => {
+      await page.addInitScript(recordAnimations)
+      const deferred = toastListResponse(page)
+      await open(page, path, 'Beat Battle')
+      // Lo último que carga es la zona de avisos diferida: cualquier bucle ya ha arrancado.
+      await deferredLoaded(page, deferred)
+      // El cursor de juego también salta sin movimiento.
+      await page.keyboard.press('ArrowDown')
+      await settle(page)
 
-    expect(await runningLoops(page)).toEqual([])
+      expect(await runningLoops(page)).toEqual([])
+      const recorded = await page.evaluate(() => window.__bbAnimations)
+      expect(recorded.filter((a) => a.iterations === Infinity)).toEqual([])
+      expect(recorded.filter((a) => a.moves)).toEqual([])
+      expect(recorded.filter((a) => a.duration > 200)).toEqual([])
+      // La crónica de la arena cambia sin fundido (Anexo E, §3.6).
+      await expect(page.locator('[data-chronicle]')).toHaveAttribute('data-static', 'true')
+    })
+  }
+
+  /**
+   * La crónica es información, no un bucle decorativo (§3.6 v0.6.6; cuarto pase del jurado de la 0.28, F4):
+   * con «reducir movimiento» se quedaba para siempre en «Inserta tu beat · Crédito 01» y el recuento de
+   * votos («340 votos esta semana») no estaba en ninguna otra parte. Sigue rotando cada 5 s, sin fundido,
+   * y el botón «Pausar las animaciones» sigue ahí y la para (WCAG 2.2.2). Con el reloj de la página falso.
+   */
+  test('RNF-A11Y-03 / WCAG 2.2.2: en /dev/menu la crónica sigue rotando sin fundido y el botón de pausa la para', async ({
+    page,
+  }) => {
+    await page.clock.install()
+    await open(page, '/dev/menu', 'Beat Battle')
+    await page.mouse.move(0, 0)
+    const bar = page.getByRole('contentinfo')
+    const chronicle = bar.locator('[data-chronicle]')
+    await expect(chronicle).toHaveAttribute('data-static', 'true')
+    await expect(chronicle).toContainText('Inserta tu beat')
+    await page.clock.runFor(5_000)
+    await expect(chronicle).toContainText('Nueva entrada')
+    expect(await chronicle.evaluate((element) => element.getAnimations({ subtree: true }).length)).toBe(0)
+    await page.clock.runFor(10_000)
+    await expect(chronicle).toContainText('votos esta semana')
+
+    const pause = bar.getByRole('button', { name: 'Pausar las animaciones' })
+    await expect(pause).toHaveAttribute('aria-pressed', 'false')
+    await pause.click()
+    await expect(pause).toHaveAttribute('aria-pressed', 'true')
+    // Sin el ratón encima ni el foco dentro: lo que la para es el botón.
+    await page.mouse.move(0, 0)
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    const paused = await chronicle.textContent()
+    await page.clock.runFor(15_000)
+    await expect(chronicle).toHaveText(paused ?? '')
+  })
+
+  test('RNF-A11Y-03: cambiar de pantalla es un fundido, sin barrido de la diagonal', async ({ page }) => {
+    await page.addInitScript(recordAnimations)
+    await open(page, '/', 'Beat Battle')
+    await page.getByRole('menuitem', { name: /^Cómo se juega/ }).click()
+    await expect(page).toHaveURL('/como-funciona')
+    await settle(page)
+    await expect(page.locator('.screen-sweep')).toBeHidden()
     const recorded = await page.evaluate(() => window.__bbAnimations)
-    expect(recorded.filter((a) => a.iterations === Infinity)).toEqual([])
     expect(recorded.filter((a) => a.moves)).toEqual([])
     expect(recorded.filter((a) => a.duration > 200)).toEqual([])
-
-    // Piezas con variante propia (Anexo E): orbes quietos, marquee estático y titular sin desplazar.
-    const orbs = page.locator('.ambient-orbs__orb')
-    await expect(orbs).toHaveCount(3)
-    for (const orb of await orbs.all()) await expect(orb).toHaveCSS('animation-name', 'none')
-    await expect(page.getByRole('marquee')).toHaveAttribute('data-static', 'true')
-    for (const line of await page.locator('.hero-title__line').all())
-      expect(await line.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).isIdentity)).toBe(true)
   })
 
   test('RNF-A11Y-03: la galería no deja bucles en marcha', async ({ page }) => {
@@ -138,21 +188,77 @@ test.describe('con «reducir movimiento» del sistema', () => {
   })
 })
 
-test('RNF-A11Y-03 (control): sin la preferencia, la home sí tiene bucles (orbes y marquee)', async ({
+test('RNF-A11Y-03 (control): sin la preferencia, el menú con semana sí tiene bucles (el vinilo-sol gira)', async ({
   page,
 }) => {
-  // Garantiza que el test de arriba mide algo: con el mismo registrador y las mismas esperas, sin
-  // «reducir movimiento» salen bucles, desplazamientos y animaciones de más de 200 ms. Si el registro
-  // dejara de ver algo (p. ej. Motion sin Web Animations), este control caería y lo delataría.
+  // Garantiza que los tests de arriba miden algo: con el mismo registrador y las mismas esperas, sin
+  // «reducir movimiento» salen bucles, giros y animaciones de más de 200 ms.
   await page.emulateMedia({ reducedMotion: 'no-preference' })
   await page.addInitScript(recordAnimations)
   const deferred = toastListResponse(page)
-  await open(page, '/', 'Beat Battle')
+  await open(page, '/dev/menu', 'Beat Battle')
   await deferredLoaded(page, deferred)
-  const loops = await runningLoops(page)
-  expect(loops).toEqual(expect.arrayContaining(['ambient-orb-drift-1', 'marquee-scroll']))
   const recorded = await page.evaluate(() => window.__bbAnimations)
   expect(recorded.some((a) => a.iterations === Infinity)).toBe(true)
   expect(recorded.some((a) => a.moves)).toBe(true)
   expect(recorded.some((a) => a.duration > 200)).toBe(true)
+})
+
+/**
+ * Pausa de la página (WCAG 2.2.2, nivel A; guía §3.6 «Bucles» y §3.8.3): los bucles decorativos (el
+ * vinilo-sol, el respiro de «Inserta tu beat», el latido del reloj en la última hora y la rotación de la
+ * crónica) se paran con el botón de pausa de la barra, sin depender de «reducir movimiento» del sistema.
+ */
+test.describe('pausa de los bucles (WCAG 2.2.2)', () => {
+  test.use({ reducedMotion: 'no-preference' })
+
+  test('WCAG 2.2.2: el botón de pausa de la barra para todos los bucles del menú, no solo la crónica', async ({
+    page,
+  }) => {
+    await open(page, '/dev/menu', 'Beat Battle')
+    await settle(page)
+    // En marcha: el vinilo-sol y el respiro de «Inserta tu beat».
+    expect((await runningLoops(page)).length).toBeGreaterThanOrEqual(2)
+    const pause = page.getByRole('contentinfo').getByRole('button', { name: 'Pausar las animaciones' })
+    await expect(pause).toHaveAttribute('aria-pressed', 'false')
+    await pause.click()
+    await expect(pause).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.locator('html')).toHaveAttribute('data-loops', 'paused')
+    await expect.poll(() => runningLoops(page)).toEqual([])
+    // La crónica tampoco cambia (también con el ratón fuera).
+    await page.mouse.move(0, 0)
+    const chronicle = page.locator('[data-chronicle]')
+    const before = await chronicle.textContent()
+    await page.waitForTimeout(5_500)
+    await expect(chronicle).toHaveText(before ?? '')
+    // Al reanudar, el vinilo sigue girando.
+    await pause.click()
+    await expect(page.locator('html')).not.toHaveAttribute('data-loops', 'paused')
+    await expect.poll(async () => (await runningLoops(page)).length).toBeGreaterThanOrEqual(2)
+  })
+
+  test('WCAG 2.2.2: la pausa también para el latido del reloj de ronda en la última hora', async ({
+    page,
+  }) => {
+    await openGallery(page)
+    const clock = page.locator('[data-phase="final"]').first()
+    await clock.scrollIntoViewIfNeeded()
+    const heartbeats = () => clock.evaluate((element) => element.getAnimations().length)
+    await expect.poll(heartbeats).toBe(1)
+    await page.evaluate(() => document.documentElement.setAttribute('data-loops', 'paused'))
+    await expect.poll(heartbeats).toBe(0)
+  })
+
+  test.describe('móvil táctil (390 × 844)', () => {
+    test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
+
+    test('WCAG 2.2.2: sin la crónica a la vista no queda ningún bucle en marcha (el vinilo oculto no gira)', async ({
+      page,
+    }) => {
+      await open(page, '/dev/menu', 'Beat Battle')
+      await settle(page)
+      await expect(page.locator('[data-chronicle]')).toBeHidden()
+      expect(await runningLoops(page)).toEqual([])
+    })
+  })
 })

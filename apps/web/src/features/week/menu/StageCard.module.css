@@ -1,0 +1,440 @@
+/*
+ * Tarjeta del escenario (§3.8.3; maqueta `01-menu.html` `.stage`): marco rojo de chaflán `--bb-cut-lg`
+ * sobre `--bb-wine-3`, con la trama granate que crece hacia la derecha pintada en un canvas.
+ */
+/*
+ * `--menu-s` (`MainMenu`): la escala de la ventana grande (de 1 a 1,33). Crecen los rellenos, las
+ * separaciones, el vinilo y el título en display; el texto de lectura y los controles, no.
+ */
+.card {
+  --card-s: var(--menu-s, 1);
+  --frame-fill: var(--bb-wine-3);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: calc(var(--bb-space-3) * var(--card-s));
+  padding: calc(var(--bb-space-5) * var(--card-s)) calc(var(--bb-space-6) * var(--card-s));
+}
+
+/* La trama, dentro del relleno: metida el trazo del marco y con su mismo chaflán. */
+.halftone {
+  position: absolute;
+  inset: var(--bb-stroke);
+  z-index: -1;
+  width: calc(100% - 2 * var(--bb-stroke));
+  height: calc(100% - 2 * var(--bb-stroke));
+  clip-path: polygon(
+    var(--bb-cut-lg) 0,
+    100% 0,
+    100% calc(100% - var(--bb-cut-lg)),
+    calc(100% - var(--bb-cut-lg)) 100%,
+    0 100%,
+    0 var(--bb-cut-lg)
+  );
+}
+
+.top {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: calc(var(--bb-space-5) * var(--card-s));
+}
+
+.vinyl {
+  width: calc(var(--bb-space-16) * 1.625 * var(--card-s));
+}
+
+.heading {
+  display: grid;
+  gap: var(--bb-space-2);
+  min-width: 0;
+}
+
+.card {
+  min-width: 0;
+}
+
+.kickers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--bb-space-1) var(--bb-space-3);
+}
+
+.kickers :global(.bb-label) {
+  color: var(--bb-text-2);
+  letter-spacing: var(--bb-tracking-label-wide);
+}
+
+.number,
+.kickerRed {
+  color: var(--bb-red);
+}
+
+.kickers .kickerRed {
+  color: var(--bb-red);
+}
+
+/*
+ * El título se ajusta a su ancho (`useFitText`) y recorta solo en horizontal: en vertical deja salir las
+ * tildes de las mayúsculas en display («GRÀCIA», «PRÓXIMO»), que con el interlineado 0,9 sobresalen
+ * por arriba de la caja. El margen de arriba les hace sitio dentro de la tarjeta.
+ */
+.title {
+  min-width: 0;
+  overflow-x: clip;
+  overflow-y: visible;
+  padding-top: var(--bb-space-1);
+  font-size: calc(var(--bb-fs-title) * var(--card-s));
+  white-space: nowrap;
+}
+
+/*
+ * Sin semana el título es una frase: en dos líneas si hace falta, y nunca más ancha que la tarjeta
+ * (tampoco con la fuente de reserva, antes de que llegue Anybody: en móvil, un desborde al cargar
+ * ensancharía la ventana).
+ */
+.emptyTitle {
+  font-size: calc(var(--bb-fs-2xl) * var(--card-s));
+  line-height: 1;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.credits {
+  max-width: 60ch;
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-semibold);
+}
+
+/*
+ * Chips de la semana: en una fila, como la maqueta (también los cuatro del móvil); si no caben (el
+ * espaciado de texto de WCAG 1.4.12, la letra ampliada), parten en otra fila en vez de cortarse.
+ */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-2);
+  margin-top: var(--bb-space-1);
+}
+
+.mobileOnly,
+.mobileClock {
+  display: none;
+}
+
+.play {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-4);
+}
+
+.wave {
+  flex: 1;
+  min-width: 0;
+}
+
+.time {
+  color: var(--bb-text-3);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-bold);
+  white-space: nowrap;
+}
+
+.foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bb-space-2) var(--bb-space-4);
+  padding-top: var(--bb-space-3);
+  border-top: var(--bb-stroke-hair) solid var(--bb-line);
+}
+
+.challenge {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-3);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-semibold);
+}
+
+.entries {
+  display: flex;
+  align-items: baseline;
+  gap: var(--bb-space-2);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-semibold);
+}
+
+.entries b {
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xl);
+  font-weight: var(--bb-weight-extrabold);
+}
+
+/* ── Calendario vacío: el hueco del aviso del próximo drop ───────────────────────────────── */
+.alert {
+  display: grid;
+  gap: var(--bb-space-2);
+  margin-top: var(--bb-space-2);
+  padding-top: var(--bb-space-3);
+  border-top: var(--bb-stroke-hair) solid var(--bb-line);
+  scroll-margin-top: var(--bb-space-16);
+}
+
+.alertTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-3);
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-bold);
+}
+
+.alertText {
+  max-width: 60ch;
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+/*
+ * ── Ventana baja de escritorio (≥ 721 px de ancho y < 900 de alto; §3.8.3, `MainMenu`) ──────────
+ * La misma tarjeta, apretada: menos relleno y separación, el vinilo de 64 px (decorativo: repite la
+ * semana y el BPM) y las entradas a 20 px. Si el reto no cabe junto a las entradas, parte su texto en
+ * vez de mandarlas a otra fila. No se va nada: chips, play con la onda, reto y entradas siguen ahí.
+ * Por debajo de 1200 px de ancho, hasta 968 px de alto: ahí la barra es más alta (`MainMenu`).
+ */
+@media (min-width: 721px) and (max-height: 899px),
+  (min-width: 721px) and (max-width: 1199px) and (max-height: 968px) {
+  .card {
+    gap: var(--bb-space-2);
+    padding: var(--bb-space-2) var(--bb-space-5);
+  }
+
+  .top {
+    gap: var(--bb-space-4);
+  }
+
+  .vinyl {
+    width: var(--bb-space-16);
+  }
+
+  .heading {
+    gap: var(--bb-space-1);
+  }
+
+  .chips {
+    margin-top: 0;
+  }
+
+  .foot {
+    flex-wrap: nowrap;
+    padding-top: var(--bb-space-2);
+  }
+
+  .challenge {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .entries {
+    flex: none;
+  }
+
+  .entries b {
+    font-size: var(--bb-fs-lg);
+  }
+
+  .alert {
+    margin-top: 0;
+    padding-top: var(--bb-space-2);
+  }
+}
+
+/*
+ * ── Móvil: compacta, con el reloj en línea en lugar de la onda ────────────────────────────
+ * Por ancho solo cambia la composición y se van las piezas que repiten algo (el vinilo, la onda, el
+ * «0:00 / 1:12»). Lo que **informa** (créditos, género, semana, reto, entradas, aviso) solo se pliega en
+ * un móvil táctil, como en la maqueta: en escritorio con zoom (1280 × 720 al 200 % = 640 × 360) la
+ * pantalla se desplaza en vez de esconder (WCAG 1.4.4 y 1.4.10). La tableta vertical (`MainMenu`) lleva
+ * esta misma tarjeta, con el título y los rellenos de escritorio (más abajo).
+ */
+@media (max-width: 720px), (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) {
+  .card {
+    gap: var(--bb-space-2);
+    padding: var(--bb-space-3) var(--bb-space-4);
+  }
+
+  .top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .vinyl,
+  .wave,
+  .time {
+    display: none;
+  }
+
+  .title {
+    font-size: var(--bb-fs-xl);
+  }
+
+  .emptyTitle {
+    font-size: var(--bb-fs-xl);
+  }
+
+  .chips {
+    gap: var(--bb-space-1);
+  }
+
+  .mobileClock {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .play {
+    gap: var(--bb-space-3);
+  }
+
+  .alert {
+    margin-top: 0;
+    padding-top: var(--bb-space-2);
+  }
+}
+
+/* Tableta vertical: la tarjeta del móvil a escala de tableta. */
+@media (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) {
+  .card {
+    gap: var(--bb-space-3);
+    padding: var(--bb-space-3) var(--bb-space-5);
+  }
+
+  .title,
+  .emptyTitle {
+    font-size: var(--bb-fs-title);
+  }
+}
+
+/* Móvil táctil (y tableta vertical táctil): la tarjeta plegada de la maqueta (las entradas, en un chip). */
+@media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse),
+  (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) and (hover: none),
+  (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) and (pointer: coarse) {
+  .emptyKickers,
+  .credits,
+  .foot,
+  .genre,
+  .range {
+    display: none;
+  }
+
+  .mobileOnly {
+    display: inline-flex;
+  }
+
+  /* El aviso, en una línea: el título del escenario sigue siendo el texto principal (y el LCP). */
+  .alertText {
+    display: none;
+  }
+}
+
+/*
+ * Móvil con teclado y ratón: el rótulo de arriba («SEMANA 41 · ESCENARIO», «PRÓXIMO DROP») no se pliega y
+ * empieza en la esquina del chaflán `--bb-cut-lg`. Va `--bb-space-3` por debajo del borde y, de lado, a la
+ * medida del chaflán como poco: con 16 px la «P» cruzaba el chaflán y, con los 4 px del móvil bajo, la tilde
+ * de la «Ó» tocaba el borde rojo (jurado de la 0.28, cierre, K7: «/» a 720 × 450 y 320 × 568). En táctil, la
+ * de la maqueta (más abajo).
+ */
+@media (max-width: 720px) {
+  .card {
+    padding-inline: var(--bb-cut-lg);
+  }
+}
+
+@media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse) {
+  .card {
+    padding-inline: var(--bb-space-4);
+  }
+}
+
+/* Móvil bajo (≤ 780 px de alto; `MainMenu`): todo más junto. */
+@media (max-width: 720px) and (max-height: 780px) {
+  .card {
+    gap: var(--bb-space-1);
+  }
+}
+
+/*
+ * Móvil bajo táctil: la semana plegada en título y reloj (§3.8.3), con «CIERRE DE ENVÍOS» en una línea
+ * junto al reloj, como en la maqueta `01-menu-375x667` (jurado de la 0.28, cierre: a 375 × 667 y
+ * 360 × 640 partía en dos líneas, y a 320 × 568 en tres). El rótulo no parte; si con el reloj no cabe en
+ * la fila (por debajo de unos 350 px), los dígitos bajan debajo de él. Para que quepa a 360 px, la tarjeta
+ * aprieta sus rellenos de los lados y la separación del play. Arriba y abajo, `--bb-space-2` dentro del marco,
+ * como la maqueta `01-menu-375x667` (8–10 px; jurado de la 0.28, cierre, R7: con 4, «SEMANA 41 · ESCENARIO»
+ * iba pegado al filete y el play a unos 2 px del de abajo); a 360 × 640, 4 (más abajo). Solo en táctil: con
+ * teclado el rótulo no se pliega y necesita su sitio (más arriba).
+ */
+@media (max-width: 720px) and (max-height: 780px) and (hover: none),
+  (max-width: 720px) and (max-height: 780px) and (pointer: coarse) {
+  .chips {
+    display: none;
+  }
+
+  .card {
+    padding: var(--bb-space-2) var(--bb-space-3);
+  }
+
+  /*
+   * Entre el rótulo de la semana y el título, `--bb-space-1` (como con la ventana baja de escritorio): deja ese
+   * alto al sitio del anillo de la última placa (`MainMenu`, jurado de la 0.28, ronda final, E3) y la pantalla
+   * sigue cabiendo a 360 × 640. Las tildes del título siguen teniendo su margen de arriba.
+   */
+  .heading {
+    gap: var(--bb-space-1);
+  }
+
+  .play {
+    gap: var(--bb-space-2);
+  }
+
+  /* El play, del objetivo táctil (44 px) en vez de 48: la fila del reloj no crece por él. */
+  .play .playButton {
+    width: var(--bb-target);
+    height: var(--bb-target);
+  }
+
+  .play .mobileClock [role="timer"] {
+    flex-wrap: wrap;
+    column-gap: var(--bb-space-2);
+  }
+
+  .play .mobileClock [role="timer"] > p[aria-hidden] {
+    white-space: nowrap;
+  }
+}
+
+/*
+ * Móvil bajo de 650 px de alto o menos y 360 px de ancho o más (360 × 640): arriba y abajo, 4 px dentro del
+ * marco. Con 8 no cabe sin desplazar: con la semana en juego y el jugador en el HUD sobran 3,4 px bajo el
+ * anillo de la placa 06 elegida y harían falta 8 (jurado de la 0.28, cierre, R7). Esos 4 px quedan para la
+ * franja de «ELIGE MODO», que lleva aire (`MainMenu`). Por debajo de 360 px la pantalla ya se desplaza
+ * (§3.8.3) y lleva los 8.
+ */
+@media (min-width: 360px) and (max-width: 720px) and (max-height: 650px) and (hover: none),
+  (min-width: 360px) and (max-width: 720px) and (max-height: 650px) and (pointer: coarse) {
+  .card {
+    padding-block: var(--bb-space-1);
+  }
+}
+
+/* Por debajo de 375 px, el rótulo del reloj con el interletraje de los botones: a 360 px cabe en la fila. */
+@media (max-width: 374px) and (max-height: 780px) and (hover: none),
+  (max-width: 374px) and (max-height: 780px) and (pointer: coarse) {
+  .play .mobileClock [role="timer"] > p[aria-hidden] {
+    letter-spacing: var(--bb-tracking-button);
+  }
+}

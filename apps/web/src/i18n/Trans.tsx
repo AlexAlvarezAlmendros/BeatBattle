@@ -2,7 +2,7 @@ import { createElement, Fragment, type ReactNode } from 'react'
 import { type MessageKey, t } from './index'
 
 interface TransProps {
-  /** Clave de `es.json` con variables entre llaves: `"{brand} · {otherPeople}"`. */
+  /** Clave de `es.json` con variables entre llaves: `"{page} · Beat Battle"`. */
   k: MessageKey
   /** Valor de cada variable: textos, números (se formatean en castellano) o elementos. */
   values: Readonly<Record<string, ReactNode>>
@@ -13,7 +13,7 @@ interface TransProps {
  * separadores salen de `es.json`; el JSX solo pone los elementos:
  *
  * ```tsx
- * <Trans k="footer.credit" values={{ brand: t('app.brand'), otherPeople: <a href={url}>…</a> }} />
+ * <Trans k="app.pageTitle" values={{ page: <a href={url}>…</a> }} />
  * ```
  */
 export function Trans({ k, values }: TransProps) {

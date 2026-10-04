@@ -2,22 +2,54 @@ import type { ComponentType } from 'react'
 import { data, type LoaderFunctionArgs, type RouteObject, redirect } from 'react-router'
 import { devRoutes as defaultDevRoutes } from './devRoutes'
 import { RootLayout } from './layout/RootLayout'
-import { isLegalDoc, paths } from './paths'
+import { interiorScreen, MENU_SCREEN, type ScreenConfig, simpleScreen } from './layout/screen'
+import { FIRST_SETTINGS_SECTION, isLegalDoc, paths } from './paths'
 import { RouteErrorBoundary } from './RouteErrorBoundary'
 
 /**
  * Mapa de rutas de la app (guía §2.18). Cada página se carga en diferido en su propio trozo
  * (`lazy`, §4.7.1) y fija su título con `<DocumentTitle>`.
  *
- * `handle.access` recoge la columna «Acceso» de §2.18; las guardas llegan con las cuentas (Fase 2).
+ * - `handle.access` recoge la columna «Acceso» de §2.18; las guardas llegan con las cuentas (Fase 2).
+ * - `handle.screen` es la configuración del marco de juego de esa pantalla (§3.4.1, §3.8.14; tarea
+ *   0.23): cuña de la arena, teclas de la barra de controles y placa de título del HUD.
  */
 
 export type RouteAccess = 'public' | 'session' | 'verified' | 'admin'
 export interface RouteHandle {
   access: RouteAccess
+  screen: ScreenConfig
 }
 
-const access = (level: RouteAccess): RouteHandle => ({ access: level })
+const handle = (level: RouteAccess, screen: ScreenConfig): RouteHandle => ({ access: level, screen })
+
+/** Pantalla interior con su placa: rótulo de `frame.plates.<clave>` y título de la página. */
+const interior = (
+  plate: keyof typeof PLATE_KICKERS,
+  title: Parameters<typeof interiorScreen>[0]['title'],
+  keys?: Parameters<typeof interiorScreen>[1],
+) => interiorScreen({ kicker: PLATE_KICKERS[plate], title }, keys)
+
+/** Rótulos de las placas de título del HUD (§3.8.14: cada pantalla interior con su aspecto de juego). */
+const PLATE_KICKERS = {
+  week: 'frame.plates.week',
+  weekResults: 'frame.plates.weekResults',
+  weeks: 'frame.plates.weeks',
+  entry: 'frame.plates.entry',
+  jury: 'frame.plates.jury',
+  upload: 'frame.plates.upload',
+  profile: 'frame.plates.profile',
+  hallOfFame: 'frame.plates.hallOfFame',
+  season: 'frame.plates.season',
+  howItWorks: 'frame.plates.howItWorks',
+  settings: 'frame.plates.settings',
+  signIn: 'frame.plates.signIn',
+  signUp: 'frame.plates.signUp',
+  account: 'frame.plates.account',
+  admin: 'frame.plates.admin',
+  legal: 'frame.plates.legal',
+  notFound: 'frame.plates.notFound',
+} as const
 
 /** `lazy` de React Router para un componente con nombre de un módulo. */
 function page<M>(load: () => Promise<M>, pick: (module: M) => ComponentType) {
@@ -62,7 +94,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
           children: [
             {
               index: true,
-              handle: access('public'),
+              handle: handle('public', MENU_SCREEN),
               lazy: page(
                 () => import('../features/week/HomePage'),
                 (m) => m.HomePage,
@@ -70,7 +102,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'semana/:slug',
-              handle: access('public'),
+              handle: handle('public', interior('week', 'pages.week.title')),
               lazy: page(
                 () => import('../features/week/WeekPage'),
                 (m) => m.WeekPage,
@@ -78,7 +110,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'semana/:slug/resultados',
-              handle: access('public'),
+              handle: handle('public', interior('weekResults', 'pages.weekResults.title')),
               lazy: page(
                 () => import('../features/results/WeekResultsPage'),
                 (m) => m.WeekResultsPage,
@@ -86,7 +118,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'semanas',
-              handle: access('public'),
+              handle: handle('public', interior('weeks', 'pages.weeks.title')),
               lazy: page(
                 () => import('../features/archive/WeeksPage'),
                 (m) => m.WeeksPage,
@@ -94,7 +126,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'e/:id',
-              handle: access('public'),
+              handle: handle('public', interior('entry', 'pages.entry.title')),
               lazy: page(
                 () => import('../features/entries/EntryPage'),
                 (m) => m.EntryPage,
@@ -102,7 +134,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'jurado',
-              handle: access('verified'),
+              handle: handle('verified', interior('jury', 'pages.jury.title')),
               lazy: page(
                 () => import('../features/jury/JuryPage'),
                 (m) => m.JuryPage,
@@ -110,7 +142,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'subir',
-              handle: access('verified'),
+              handle: handle('verified', interior('upload', 'pages.upload.title')),
               lazy: page(
                 () => import('../features/upload/UploadPage'),
                 (m) => m.UploadPage,
@@ -118,7 +150,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'p/:username',
-              handle: access('public'),
+              handle: handle('public', interior('profile', 'pages.profile.title')),
               lazy: page(
                 () => import('../features/profile/ProfilePage'),
                 (m) => m.ProfilePage,
@@ -126,7 +158,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'salon-de-la-fama',
-              handle: access('public'),
+              handle: handle('public', interior('hallOfFame', 'pages.hallOfFame.title')),
               lazy: page(
                 () => import('../features/archive/HallOfFamePage'),
                 (m) => m.HallOfFamePage,
@@ -134,7 +166,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'temporada/:id',
-              handle: access('public'),
+              handle: handle('public', interior('season', 'pages.season.title')),
               lazy: page(
                 () => import('../features/game/SeasonPage'),
                 (m) => m.SeasonPage,
@@ -142,7 +174,10 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'como-funciona',
-              handle: access('public'),
+              handle: handle(
+                'public',
+                interior('howItWorks', 'pages.howItWorks.title', ['choose', 'enter', 'back', 'sound']),
+              ),
               lazy: page(
                 () => import('../features/week/HowItWorksPage'),
                 (m) => m.HowItWorksPage,
@@ -150,29 +185,66 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'ajustes',
-              handle: access('session'),
+              handle: handle('session', interior('settings', 'settings.title', ['section', 'back', 'sound'])),
               lazy: page(
                 () => import('../features/settings/SettingsLayout'),
                 (m) => m.SettingsLayout,
               ),
               children: [
                 // Redirige antes de pintar; el Component vacío evita el aviso de ruta hoja sin elemento.
-                { index: true, loader: () => redirect(paths.settings('cuenta')), Component: Redirecting },
+                {
+                  index: true,
+                  loader: () => redirect(paths.settings(FIRST_SETTINGS_SECTION)),
+                  Component: Redirecting,
+                },
+                { path: 'sonido', lazy: page(settings, (m) => m.SoundSettingsPage) },
+                { path: 'movimiento', lazy: page(settings, (m) => m.MotionSettingsPage) },
                 { path: 'cuenta', lazy: page(settings, (m) => m.AccountSettingsPage) },
                 { path: 'perfil', lazy: page(settings, (m) => m.ProfileSettingsPage) },
-                { path: 'sonido', lazy: page(settings, (m) => m.SoundSettingsPage) },
                 { path: 'emails', lazy: page(settings, (m) => m.EmailSettingsPage) },
                 { path: 'sesiones', lazy: page(settings, (m) => m.SessionsSettingsPage) },
                 { path: 'privacidad', lazy: page(settings, (m) => m.PrivacySettingsPage) },
+                { path: 'accesibilidad', lazy: page(settings, (m) => m.AccessibilitySettingsPage) },
               ],
             },
-            { path: 'entrar', handle: access('public'), lazy: page(auth, (m) => m.SignInPage) },
-            { path: 'registro', handle: access('public'), lazy: page(auth, (m) => m.SignUpPage) },
-            { path: 'verificar', handle: access('public'), lazy: page(auth, (m) => m.VerifyPage) },
-            { path: 'recuperar', handle: access('public'), lazy: page(auth, (m) => m.RecoverPage) },
+            {
+              path: 'entrar',
+              handle: handle(
+                'public',
+                simpleScreen({ kicker: PLATE_KICKERS.signIn, title: 'pages.signIn.title' }),
+              ),
+              lazy: page(auth, (m) => m.SignInPage),
+            },
+            {
+              path: 'registro',
+              handle: handle(
+                'public',
+                simpleScreen({ kicker: PLATE_KICKERS.signUp, title: 'pages.signUp.title' }),
+              ),
+              lazy: page(auth, (m) => m.SignUpPage),
+            },
+            {
+              path: 'verificar',
+              handle: handle(
+                'public',
+                simpleScreen({ kicker: PLATE_KICKERS.account, title: 'pages.verify.title' }),
+              ),
+              lazy: page(auth, (m) => m.VerifyPage),
+            },
+            {
+              path: 'recuperar',
+              handle: handle(
+                'public',
+                simpleScreen({ kicker: PLATE_KICKERS.account, title: 'pages.recover.title' }),
+              ),
+              lazy: page(auth, (m) => m.RecoverPage),
+            },
             {
               path: 'admin',
-              handle: access('admin'),
+              handle: handle(
+                'admin',
+                simpleScreen({ kicker: PLATE_KICKERS.admin, title: 'pages.admin.title' }),
+              ),
               // Las secciones del panel (samples, semanas, moderación, campañas, uso) se añaden aquí.
               children: [
                 {
@@ -186,7 +258,14 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'legal/:doc',
-              handle: access('public'),
+              handle: handle(
+                'public',
+                simpleScreen({ kicker: PLATE_KICKERS.legal, title: 'frame.plates.legalTitle' }, [
+                  'section',
+                  'back',
+                  'sound',
+                ]),
+              ),
               loader: legalLoader,
               lazy: page(
                 () => import('./LegalPage'),
@@ -196,7 +275,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             ...devRoutes,
             {
               path: '*',
-              handle: access('public'),
+              handle: handle('public', interior('notFound', 'pages.notFound.plate')),
               lazy: page(
                 () => import('./NotFoundPage'),
                 (m) => m.NotFoundPage,

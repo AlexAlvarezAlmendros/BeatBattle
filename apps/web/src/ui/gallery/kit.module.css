@@ -1,0 +1,351 @@
+/*
+ * Galería en la arena (tareas 0.22 y 0.25): cabecera, índice, secciones, bloques, muestras y celdas de
+ * estado con las piezas y los tokens de la v0.6 (§3.2).
+ */
+
+.page {
+  position: relative;
+  z-index: var(--bb-z-content);
+  isolation: isolate;
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: var(--bb-space-8) var(--bb-gutter) var(--bb-space-16);
+}
+
+.header {
+  display: grid;
+  gap: var(--bb-space-4);
+  padding-bottom: var(--bb-space-8);
+  border-bottom: var(--bb-stroke) solid var(--bb-red);
+}
+
+.kicker {
+  color: var(--bb-red);
+}
+
+.title {
+  font-size: var(--bb-fs-title);
+}
+
+/*
+ * Con la placa del HUD («DESARROLLO · GALERÍA», desde 721 px) el título ya se ve ahí: el `<h1>` queda para
+ * los lectores de pantalla, como en las pantallas interiores (`ScreenPage`; acta de la 0.28, grupo 8). El
+ * rótulo y el resumen se siguen viendo. En móvil el HUD no lleva placa y el `<h1>` se ve.
+ */
+@media (min-width: 721px) {
+  .title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+.summary {
+  max-width: 64ch;
+  color: var(--bb-text-2);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-4) var(--bb-space-6);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* ── Interruptor: chip de filtro de la arena con su estado en texto (§3.3 «Chip de filtro») ───── */
+.switchField {
+  display: grid;
+  gap: var(--bb-space-2);
+  max-width: 34ch;
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: var(--bb-space-3);
+  min-height: var(--bb-target);
+  padding: 0 var(--bb-space-3) 0 var(--bb-space-4);
+  border: 0;
+  background: transparent;
+  color: var(--bb-text);
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+  --frame-cut: var(--bb-cut-sm);
+}
+
+.switch[aria-checked="true"] {
+  --frame-border: var(--bb-red);
+  --frame-fill: var(--bb-red);
+  color: var(--bb-black);
+}
+
+.yesNo {
+  display: inline-flex;
+  font-family: var(--bb-font-display);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-button);
+}
+
+.yesNo span {
+  padding: var(--bb-space-1) var(--bb-space-2);
+  background: var(--bb-ink-3);
+  color: var(--bb-text-3);
+}
+
+.yesNo .on {
+  background: var(--bb-white);
+  color: var(--bb-black);
+}
+
+/*
+ * Contraste alto (`forced-colors: active`, RNF-A11Y-01): el estado iba solo en fondos (la casilla blanca
+ * de «SÍ | NO» y el relleno rojo del encendido), y el modo los quita: «SÍ» y «NO» se veían iguales. Como
+ * en el chip de filtro (`Chip.module.css`): la casilla elegida en `Highlight` con su texto en
+ * `HighlightText`, y el encendido con el borde en `Highlight` (el de reposo, `CanvasText`, `frame.css`).
+ */
+@media (forced-colors: active) {
+  .yesNo .on {
+    forced-color-adjust: none;
+    background: Highlight;
+    color: HighlightText;
+  }
+
+  .switch[aria-checked="true"]::before {
+    background: Highlight;
+  }
+}
+
+.hint {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-sm);
+}
+
+/* ── Índice ───────────────────────────────────────────────────────────────────────────────── */
+.index {
+  padding: var(--bb-space-6) 0;
+}
+
+.indexList,
+.indexSub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-1) var(--bb-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.indexList {
+  flex-direction: column;
+}
+
+/*
+ * Enlaces del índice: chips de chaflán `--bb-cut-sm` (se leen como enlaces sin subrayado) con su
+ * objetivo de 44 × 44 px (RNF-A11Y-09).
+ */
+.indexLink,
+.indexSubLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--bb-target);
+  min-height: var(--bb-target);
+  color: var(--bb-text);
+  text-decoration: none;
+}
+
+.indexSubLink {
+  --frame-cut: var(--bb-cut-sm);
+  --frame-fill: var(--bb-panel);
+  padding-inline: var(--bb-space-3);
+}
+
+.indexLink {
+  font-family: var(--bb-font-display);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-plate);
+  text-transform: uppercase;
+}
+
+.indexSubLink {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.indexSubLink:hover {
+  --frame-border: var(--bb-white);
+}
+
+.indexLink:hover,
+.indexSubLink:hover {
+  color: var(--bb-red);
+}
+
+/* ── Secciones y bloques ──────────────────────────────────────────────────────────────────── */
+/*
+ * Las rejillas de la galería (secciones, bloques, muestras y celdas) son de una columna `minmax(0, 1fr)`
+ * y sus hijos tienen `min-width: 0`: ninguna pieza ancha estira la columna más allá de la ventana.
+ */
+.section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-8);
+  padding-block: var(--bb-space-12);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-4);
+  min-width: 0;
+  font-size: var(--bb-fs-3xl);
+  overflow-wrap: anywhere;
+}
+
+/* Filete de sección: rojo los primeros 48 px y blanco tenue después (como en las maquetas). */
+.sectionTitle::after {
+  content: "";
+  flex: 1;
+  height: var(--bb-stroke);
+  background: linear-gradient(
+    to right,
+    var(--bb-red) 0 var(--bb-space-12),
+    var(--bb-line) var(--bb-space-12)
+  );
+}
+
+.intro {
+  max-width: 72ch;
+  color: var(--bb-text-2);
+}
+
+.block {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-5);
+  scroll-margin-top: var(--bb-space-8);
+}
+
+.blockTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-3);
+  font-size: var(--bb-fs-xl);
+}
+
+/* Barra roja inclinada delante del título del bloque (`slab` de las maquetas). */
+.blockTitle::before {
+  content: "";
+  width: var(--bb-space-1);
+  height: var(--bb-space-5);
+  background: var(--bb-red);
+  transform: skewX(calc(-1 * var(--bb-split-angle)));
+}
+
+.rowTitle {
+  margin-bottom: var(--bb-space-3);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+  gap: var(--bb-space-4);
+}
+
+.gridWide {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+}
+
+/* Piezas grandes en display (el anunciador): como mucho dos por fila en escritorio, a su tamaño. */
+.gridXl {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 28rem), 1fr));
+}
+
+/* Muestra: la pieza sobre negro y su pie con el nombre (y el token). */
+.specimen {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
+  gap: var(--bb-space-2);
+  margin: 0;
+}
+
+.stage {
+  display: grid;
+  place-items: center;
+  min-height: var(--bb-space-16);
+  padding: var(--bb-space-6) var(--bb-space-4);
+  --frame-fill: var(--bb-panel);
+  --frame-border: var(--bb-line);
+}
+
+.caption {
+  display: grid;
+  gap: var(--bb-space-1);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.token {
+  color: var(--bb-text-3);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  overflow-wrap: anywhere;
+}
+
+/* ── Celdas de estado (matriz de §3.3) ────────────────────────────────────────────────────── */
+.cell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 1fr auto;
+  gap: var(--bb-space-2);
+  min-width: 0;
+  margin: 0;
+}
+
+.cellWide {
+  grid-column: 1 / -1;
+}
+
+.cellStage {
+  --frame-fill: var(--bb-panel);
+  --frame-border: var(--bb-line);
+  display: grid;
+  place-items: center;
+  min-height: var(--bb-space-16);
+  padding: var(--bb-space-6) var(--bb-space-5);
+}
+
+.cellStage > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.matrixStage {
+  place-items: start;
+}
+
+/* En móvil, las piezas casi al ancho de la ventana (como se ven en las pantallas). */
+@media (max-width: 720px) {
+  .cellStage {
+    padding: var(--bb-space-4) var(--bb-space-2);
+  }
+}
+
+.matrixReason {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-sm);
+}

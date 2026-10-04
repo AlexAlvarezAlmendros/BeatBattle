@@ -14,7 +14,8 @@ function renderAt(path: string, routeList: RouteObject[] = routes) {
   return router
 }
 
-const h1 = (name: string) => screen.findByRole('heading', { level: 1, name })
+/** Cada página llega en su trozo diferido: con toda la batería en paralelo puede tardar más de 1 s. */
+const h1 = (name: string) => screen.findByRole('heading', { level: 1, name }, { timeout: 5000 })
 /** Traduce una clave compuesta en el test; en modo estricto, una clave que no existe es un error. */
 const tk = (key: string) => {
   if (!t.has(key)) throw new Error(`Falta la clave «${key}» en es.json`)
@@ -46,8 +47,11 @@ const PAGES: { path: string; heading: string; title: string }[] = [
     heading: 'pages.howItWorks.title',
     title: documentTitle(tk('pages.howItWorks.title')),
   },
-  ...(['account', 'profile', 'sound', 'emails', 'sessions', 'privacy'] as const).map((section, i) => ({
-    path: `/ajustes/${['cuenta', 'perfil', 'sonido', 'emails', 'sesiones', 'privacidad'][i]}`,
+  // Opciones (§3.8.14, §2.18): las ocho secciones, en el orden de sus pestañas.
+  ...(
+    ['sound', 'motion', 'account', 'profile', 'emails', 'sessions', 'privacy', 'accessibility'] as const
+  ).map((section, i) => ({
+    path: `/ajustes/${['sonido', 'movimiento', 'cuenta', 'perfil', 'emails', 'sesiones', 'privacidad', 'accesibilidad'][i]}`,
     heading: `settings.${section}.title`,
     title: documentTitle(t('settings.pageTitle', { section: tk(`settings.${section}.title`) })),
   })),
@@ -85,7 +89,7 @@ describe('router (0.10, guía §2.18)', () => {
     expect(await screen.findByText(/«2026-41»/)).toBeInTheDocument()
   })
 
-  it('todas las páginas están dentro del marco: saltar al contenido, cabecera, <main id="contenido"> y pie', async () => {
+  it('todas las páginas están dentro del marco: saltar al contenido, HUD, <main id="contenido"> y barra con la firma', async () => {
     renderAt('/semanas')
     await h1(t('pages.weeks.title'))
     const skip = screen.getByRole('link', { name: t('app.skipToContent') })
@@ -93,13 +97,33 @@ describe('router (0.10, guía §2.18)', () => {
     expect(screen.getByRole('banner')).toBeInTheDocument()
     expect(screen.getByRole('main')).toHaveAttribute('id', 'contenido')
     // Destino de foco programático: global.css le quita el anillo solo a lo que lleva esta marca.
-    expect(screen.getByRole('main')).toHaveAttribute('data-focus-target')
-    expect(screen.getByRole('contentinfo')).toBeInTheDocument()
-    const nav = screen.getByRole('navigation', { name: t('layout.nav.label') })
-    expect(within(nav).getByRole('link', { name: t('layout.nav.results') })).toHaveAttribute(
-      'aria-current',
-      'page',
+    expect(screen.getByRole('main')).toHaveAttribute('data-focus-target', 'main')
+    const bar = screen.getByRole('contentinfo')
+    expect(within(bar).getByRole('link', { name: t('frame.controls.signatureLabel') })).toHaveAttribute(
+      'data-otp-signature',
     )
+  })
+
+  it('RD-VIS-02: cada ruta declara su pantalla del marco de juego (cuña, teclas y placa)', () => {
+    const leaves: string[] = []
+    const walk = (list: RouteObject[], prefix: string) => {
+      for (const route of list) {
+        const path = route.index ? prefix : `${prefix}/${route.path ?? ''}`.replace(/\/+/g, '/')
+        if (route.children) walk(route.children, path)
+        else leaves.push(path.replace(/:[a-z]+/gi, 'x') || '/')
+      }
+    }
+    walk(routes, '')
+    expect(leaves.length).toBeGreaterThan(20)
+    for (const path of leaves) {
+      const handles = (matchRoutes(routes, path) ?? [])
+        .map((m) => m.route.handle as RouteHandle | undefined)
+        .filter((h): h is RouteHandle => Boolean(h?.screen))
+      const screenConfig = handles.at(-1)?.screen
+      expect(screenConfig, path).toBeDefined()
+      expect(screenConfig?.keys.length, path).toBeGreaterThan(0)
+      expect(screenConfig?.keys, path).toContain('sound')
+    }
   })
 
   it('RNF-A11Y-01: «Saltar al contenido» lleva el foco al <main>', async () => {
@@ -114,10 +138,10 @@ describe('router (0.10, guía §2.18)', () => {
   })
 
   it.each(['/no-existe', '/semana', '/semana/2026-41/otra', '/ajustes/nada', '/admin/nada', '/legal/nada'])(
-    '%s → 404 dentro del marco',
+    '%s → 404 dentro del marco: «BONUS STAGE» de titular y «Página no encontrada» en la pestaña',
     async (path) => {
       renderAt(path)
-      expect(await h1(t('pages.notFound.title'))).toBeInTheDocument()
+      expect(await h1(t('pages.notFound.plate'))).toBeInTheDocument()
       expect(screen.getByRole('banner')).toBeInTheDocument()
       await waitFor(() => expect(document.title).toBe(documentTitle(t('pages.notFound.title'))))
     },
@@ -132,13 +156,33 @@ describe('router (0.10, guía §2.18)', () => {
     expect(await h1(t('pages.error.title'))).toBeInTheDocument()
     expect(screen.getByText(t('pages.error.summary'))).toBeInTheDocument()
     expect(screen.getAllByText(new RegExp(t('pages.error.title')))).toHaveLength(1)
-    expect(screen.getByRole('link', { name: t('common.backHome') })).toHaveAttribute('href', '/')
+    expect(screen.getByRole('link', { name: t('screen.backToMenu') })).toHaveAttribute('href', '/')
   })
 
-  it('/ajustes lleva a /ajustes/cuenta', async () => {
+  it('/ajustes lleva a la primera sección, /ajustes/sonido (§3.8.14)', async () => {
     const router = renderAt('/ajustes')
-    expect(await h1(t('settings.account.title'))).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/ajustes/cuenta')
+    expect(await h1(t('settings.sound.title'))).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/ajustes/sonido')
+  })
+
+  it('las pestañas de Opciones son las ocho secciones de §3.8.14, en su orden', async () => {
+    renderAt('/ajustes/sonido')
+    await h1(t('settings.sound.title'))
+    const nav = screen.getByRole('navigation', { name: t('settings.navLabel') })
+    expect(
+      within(nav)
+        .getAllByRole('link')
+        .map((link) => link.getAttribute('href')),
+    ).toEqual([
+      '/ajustes/sonido',
+      '/ajustes/movimiento',
+      '/ajustes/cuenta',
+      '/ajustes/perfil',
+      '/ajustes/emails',
+      '/ajustes/sesiones',
+      '/ajustes/privacidad',
+      '/ajustes/accesibilidad',
+    ])
   })
 
   it('RNF-A11Y-01: al navegar vuelve arriba y el foco pasa al contenido nuevo', async () => {
@@ -147,9 +191,8 @@ describe('router (0.10, guía §2.18)', () => {
     await h1(t('pages.home.title'))
     const scrollTo = vi.mocked(window.scrollTo)
     scrollTo.mockClear()
-    const nav = screen.getByRole('navigation', { name: t('layout.nav.label') })
-    await user.click(within(nav).getByRole('link', { name: t('layout.nav.howItWorks') }))
-    expect(await h1(t('pages.howItWorks.title'))).toBeInTheDocument()
+    await user.click(screen.getByRole('link', { name: t('frame.hud.joinLabel') }))
+    expect(await h1(t('pages.signIn.title'))).toBeInTheDocument()
     expect(scrollTo).toHaveBeenCalledWith(0, 0)
     expect(screen.getByRole('main')).toHaveFocus()
   })
@@ -214,6 +257,8 @@ describe('router (0.10, guía §2.18)', () => {
       paths.howItWorks(),
       paths.settings(),
       paths.settings('privacidad'),
+      paths.settings('movimiento'),
+      paths.settings('accesibilidad'),
       paths.signIn(),
       paths.signUp(),
       paths.verify(),
@@ -227,8 +272,9 @@ describe('router (0.10, guía §2.18)', () => {
     }
   })
 
-  it('la galería existe en desarrollo y no existe en producción', async () => {
+  it('la galería y el menú de muestra existen en desarrollo y no en producción', async () => {
     expect(matchRoutes(routes, '/dev/galeria')?.at(-1)?.route.path).toBe('dev/galeria')
+    expect(matchRoutes(routes, '/dev/menu')?.at(-1)?.route.path).toBe('dev/menu')
 
     vi.stubEnv('DEV', false)
     vi.stubEnv('PROD', true)
@@ -237,7 +283,8 @@ describe('router (0.10, guía §2.18)', () => {
     expect(devRoutes).toEqual([])
     const production = (await import('./routes')).createRoutes()
     expect(matchRoutes(production, '/dev/galeria')?.at(-1)?.route.path).toBe('*')
+    expect(matchRoutes(production, '/dev/menu')?.at(-1)?.route.path).toBe('*')
     renderAt('/dev/galeria', production)
-    expect(await h1(t('pages.notFound.title'))).toBeInTheDocument()
+    expect(await h1(t('pages.notFound.plate'))).toBeInTheDocument()
   })
 })

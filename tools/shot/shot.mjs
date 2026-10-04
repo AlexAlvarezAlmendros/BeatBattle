@@ -11,6 +11,8 @@
 //   --wait=1500               espera tras cargar, en ms
 //   --full                    página entera en vez de solo la ventana
 //   --reduced-motion          emula «reducir movimiento» (calidad apagada del Escenario)
+//   --forced-colors           emula el contraste alto (`forced-colors: active`)
+//   --touch                   táctil (`hover: none`, `pointer: coarse`) sin cambiar el tamaño
 //   --eval="expr"             evalúa una expresión antes de capturar e imprime el resultado
 //   --headed                  con ventana visible
 import { chromium } from '@playwright/test'
@@ -41,9 +43,10 @@ const browser = await chromium.launch({
 const page = await browser.newPage({
   viewport: { width: w, height: h },
   deviceScaleFactor: Number(opt.dpr ?? 1),
-  isMobile: mobile,
-  hasTouch: mobile,
+  isMobile: mobile || Boolean(opt.touch),
+  hasTouch: mobile || Boolean(opt.touch),
   reducedMotion: opt['reduced-motion'] ? 'reduce' : 'no-preference',
+  forcedColors: opt['forced-colors'] ? 'active' : 'none',
 })
 const logs = []
 page.on('console', (m) => logs.push(`[${m.type()}] ${m.text()}`))

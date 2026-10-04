@@ -1,7 +1,9 @@
 /*
- * Base global de la app: reset mínimo, fondo y texto del sello, foco visible, selección, enlace
- * «Saltar al contenido», utilidad `.sr-only` y reglas de «reducir movimiento». Solo usa tokens
- * (`tokens.css`); el estilo de cada pieza vive junto a su componente.
+ * Base global de la arena (guía v0.6 §3.2, §3.3 y §3.6; tarea 0.22): reset mínimo, fondo negro,
+ * Chakra Petch como texto, foco genérico, selección, enlace «Saltar al contenido», `.sr-only`,
+ * utilidades tipográficas y las redes de «reducir movimiento» y del modo serio. Solo usa tokens
+ * (`tokens.css`); cada pieza trae su propio CSS. Las primitivas (marco, cursor, tecla, etiqueta) viven en
+ * `ui/primitives.css`.
  */
 
 *,
@@ -11,35 +13,36 @@
 }
 
 /*
- * El negro va en <html>, como en el sello (`index.html` lo pinta incluso antes de cargar este CSS):
- * así el fondo no parpadea y el Escenario, fijo detrás del contenido, no queda tapado por <body>.
+ * El negro va también en <html> (index.html lo pinta antes de cargar este CSS): sin destello al
+ * cargar, y el Escenario, fijo detrás del contenido, no queda tapado por <body>.
  */
 html {
   background-color: var(--bb-black);
   color-scheme: dark;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-}
-
-/*
- * Lo que la isla sticky (y el logo que cuelga de ella) taparía al desplazarse para mostrarlo: controles
- * enfocados con el teclado y destinos de anclas del contenido y del pie. No va en `html` como
- * `scroll-padding-top`: los controles de la isla siempre caen dentro de esa franja, así que cada Tab en
- * la isla desplazaba la página (RNF-A11Y-01).
- */
-:where(.site-main, .site-footer) :is(a[href], button, input, select, textarea, summary, [tabindex], [id]) {
-  scroll-margin-top: var(--nav-obscured);
+  /*
+   * Ningún elemento enfocado queda cortado por el borde de arriba de la ventana (§3.3 v0.6.7): al
+   * desplazarse para enseñarlo, el navegador deja el alto del anillo (4 + 3 px) y su halo. Sin él, un
+   * control que asomaba a medias por arriba (el botón de sonido del HUD, al dar la vuelta con Tab desde la
+   * barra) quedaba en top 0 con el borde de su anillo fuera (tercer pase del jurado sobre la v0.6.6, B2).
+   * Abajo lo cubre el margen del foco (`scroll-margin-block-end`, más abajo): un `scroll-padding-bottom`
+   * se sumaría al de las piezas de la barra pegada y la pantalla saltaría al llegar a ellas con Tab.
+   */
+  scroll-padding-top: calc(var(--bb-cursor-gap) + var(--bb-stroke-cursor) + var(--bb-focus-halo-spread));
 }
 
 body {
   margin: 0;
   min-height: 100dvh;
-  overflow-x: clip; /* Sin scroll horizontal y sin crear contenedor de scroll (la isla es sticky) */
+  overflow-x: clip; /* Sin desplazamiento horizontal y sin crear contenedor de desplazamiento */
+  background-color: var(--bb-black);
   color: var(--bb-text);
-  font-family: var(--bb-font-body);
-  font-size: var(--bb-font-size-md);
-  font-weight: var(--bb-weight-regular);
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-medium);
   line-height: var(--bb-leading-body);
+  /* Anybody solo existe en cursiva y Chakra Petch empieza en 500: nada de negritas ni cursivas falsas */
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -53,10 +56,9 @@ h4,
 h5,
 h6 {
   margin: 0;
-  font-family: var(--bb-font-display);
-  /* El de los títulos del sello (el del navegador). Los titulares de 800–900 lo ponen en su clase. */
+  font-size: inherit;
   font-weight: var(--bb-weight-bold);
-  line-height: var(--bb-leading-snug);
+  line-height: var(--bb-leading-label);
 }
 
 p,
@@ -67,8 +69,12 @@ dd {
   margin: 0;
 }
 
-ul[role="list"],
-ol[role="list"] {
+/*
+ * Listas sin viñetas (`role="list"`, que Safari quita con `list-style: none`). Con especificidad 0
+ * (`:where`): cualquier clase de una pieza manda sobre el reset. Antes (0,1,1) ganaba a una clase sola y
+ * borraba, por ejemplo, el `--bar-gap` que reservan las teclas de la barra antes de la firma (§3.4.1).
+ */
+:where(ul[role="list"], ol[role="list"]) {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -104,14 +110,31 @@ code,
 kbd,
 samp,
 pre {
-  font-family: var(--bb-font-mono);
+  font-family: var(--bb-font-num);
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Foco (RNF-A11Y-01): anillo rojo de 2 px y halo, solo con teclado ─────────────────────── */
+/*
+ * Ningún control enfocado queda tapado por la barra de controles (§3.3): al desplazarse para enseñarlo,
+ * el navegador deja ese margen por debajo. Es el alto **real** de lo que va pegado al pie
+ * (`--controls-pinned-h`, que publica `ControlsBar`): la barra entera (en una ventana estrecha con
+ * teclado crece de 58 a 80–110 px) o, si se despega, la fila de la firma, que sigue pegada (§3.4.1
+ * v0.6.6); con `--bb-controls-h` mientras no se ha medido. Los controles de la propia barra no lo llevan
+ * (`ControlsBar.module.css`).
+ */
+:is(a[href], button, input, select, textarea, summary, [tabindex]) {
+  scroll-margin-block-end: calc(var(--controls-pinned-h, var(--bb-controls-h)) + var(--bb-space-4));
+}
+
+/*
+ * ── Foco (RNF-A11Y-01, §3.3) ────────────────────────────────────────────────────────────────
+ * Foco genérico: contorno blanco de 3 px a 4 px del elemento más el halo rojo, solo con teclado. En
+ * los menús de juego (`[data-cursor]`: opciones, casillas, pestañas, estrellas) el foco es el cursor
+ * (`ui/Cursor/cursor.css`) y el contorno sobra.
+ */
 :focus-visible {
-  outline: var(--bb-focus-width) solid var(--bb-focus-color);
-  outline-offset: var(--bb-focus-offset);
+  outline: var(--bb-stroke-cursor) solid var(--bb-white);
+  outline-offset: var(--bb-cursor-gap);
   box-shadow: var(--bb-focus-halo);
 }
 
@@ -119,38 +142,55 @@ pre {
   outline: none;
 }
 
+[data-cursor]:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
 /*
- * Destinos de foco programático del marco, marcados con `data-focus-target` (el <main> que recibe el
- * foco al navegar o con «Saltar al contenido»): no son tabulables y no llevan anillo, aunque el
- * navegador los marque como `:focus-visible` tras usar el teclado. Solo esos: los widgets ARIA
- * (menús, pestañas, listbox, rejillas) mueven el foco con flechas a elementos con tabindex="-1", y
- * esos sí necesitan el anillo (RNF-A11Y-01).
+ * Destinos de foco programático (`data-focus-target`): el <main> del marco (`main`), que recibe el foco
+ * al navegar o con «Saltar al contenido», y el diálogo de una ventana de juego (`dialog`). No son
+ * tabulables y no llevan anillo.
  */
 [data-focus-target]:focus-visible {
   outline: none;
   box-shadow: none;
 }
 
-/* Negro sobre rojo: 5,3:1 (el blanco sobre rojo no llega a 4,5:1 en texto normal). */
+/*
+ * Contraste alto (`forced-colors: active`): en los menús de juego el foco es el cursor (`cursor.css`, que
+ * en este modo se pinta con `Highlight`); por si una pieza lo recorta o lo tapa, el contorno vuelve como
+ * red de seguridad, a la misma distancia que el anillo.
+ */
+@media (forced-colors: active) {
+  [data-cursor]:focus-visible {
+    outline: var(--bb-stroke-cursor) solid Highlight;
+    outline-offset: var(--bb-cursor-gap);
+  }
+}
+
+/* Negro sobre rojo de marca: 5,32:1 (§3.2). */
 ::selection {
   background-color: var(--bb-red);
   color: var(--bb-black);
 }
 
-/* ── Saltar al contenido: primer elemento enfocable, visible solo con foco ────────────────── */
+/* ── Saltar al contenido: primer elemento enfocable, visible solo con foco ─────────────────── */
 .skip-link {
   position: fixed;
-  top: var(--nav-gap);
-  left: var(--nav-gap);
+  top: var(--bb-space-3);
+  left: var(--bb-space-4);
   z-index: calc(var(--bb-z-gate) + 1);
-  padding: var(--bb-space-3) var(--bb-space-5);
-  border: 1px solid var(--bb-line-strong);
-  border-radius: var(--bb-radius-pill);
-  background-color: var(--bb-ink-800);
-  color: var(--bb-text);
-  font-size: var(--bb-font-size-sm);
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bb-target);
+  padding: var(--bb-space-2) var(--bb-space-4);
+  background-color: var(--bb-white);
+  color: var(--bb-black);
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-sm);
   font-weight: var(--bb-weight-bold);
-  letter-spacing: var(--bb-tracking-cta);
+  letter-spacing: var(--bb-tracking-label);
   text-transform: uppercase;
   text-decoration: none;
 }
@@ -159,10 +199,10 @@ pre {
   clip-path: inset(50%);
   width: 1px;
   height: 1px;
+  min-height: 0;
   padding: 0;
   overflow: hidden;
   white-space: nowrap;
-  border: 0;
 }
 
 /* ── Solo para lectores de pantalla ───────────────────────────────────────────────────────── */
@@ -178,21 +218,64 @@ pre {
   border: 0;
 }
 
-/* ── Movimiento ───────────────────────────────────────────────────────────────────────────── */
 /*
- * Sin `scroll-behavior: smooth` global: la vuelta arriba al cambiar de página (ScrollRestoration)
- * tiene que ser un salto, no un desplazamiento animado. Quien quiera suavidad la pone en su pieza.
+ * ── Utilidades tipográficas (§3.2) ─────────────────────────────────────────────────────────
+ * - `.bb-display`: Anybody cursiva 900, ancha, en mayúsculas (textos de ≤ 4 palabras).
+ * - `.bb-label`: rótulo en mayúsculas de 12 px con interletraje (Chakra Petch 700).
+ * - `.bb-num`: cifras en Oxanium (ancho fijo de serie).
+ * - `.bb-hard`: sombra dura roja bajo un display blanco.
+ */
+.bb-display {
+  font-family: var(--bb-font-display);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-display);
+  letter-spacing: var(--bb-tracking-display);
+  line-height: var(--bb-leading-display);
+  text-transform: uppercase;
+}
+
+.bb-label {
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: var(--bb-leading-label);
+  text-transform: uppercase;
+  color: var(--bb-text-3);
+}
+
+.bb-num {
+  font-family: var(--bb-font-num);
+  font-weight: var(--bb-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.bb-hard {
+  text-shadow: var(--bb-shadow-hard);
+}
+
+/*
+ * ── Modo serio (§3.6, RNF-A11Y-08) ─────────────────────────────────────────────────────────
+ * `<html data-serious>` (hook `useSeriousMode`): fuera las piezas de puro espectáculo, que se marcan
+ * con `data-fx` (anunciador, estampas, rayos, líneas de barrido, temblores, partículas). Lo que
+ * informa nunca lleva `data-fx`: se pierde espectáculo, nunca información. `--bb-fx` pasa a 0 en
+ * `tokens.css` para que los temblores que quedan se multipliquen por cero.
+ */
+:root[data-serious] [data-fx] {
+  /* biome-ignore lint/complexity/noImportantStyles: el modo serio manda sobre cualquier pieza */
+  display: none !important;
+}
+
+/*
+ * ── Movimiento ─────────────────────────────────────────────────────────────────────────────
+ * Sin `scroll-behavior: smooth` global: la vuelta arriba al cambiar de pantalla tiene que ser un salto.
  *
  * «Reducir movimiento» (RNF-A11Y-03): las duraciones y curvas ya se recortan en `tokens.css`
- * (`--bb-dur-*` ≤ 200 ms, `--bb-ease-back` sin rebote, `--bb-motion: 0`) y cada componente trae su
- * variante (RD-MOT-03), que quita desplazamientos, 3D y bucles y deja un fundido.
- *
- * La red global, por si una pieza se olvida de su variante:
- * - Ningún bucle: toda animación da una sola pasada. Un latido, un parpadeo o un marquee que usara
- *   un `--bb-dur-*` irían de 3 a 6 veces más rápido al recortarse la duración, justo lo contrario de
- *   lo que se pide, y por encima de 3 destellos por segundo (RNF-A11Y-04). Un indicador de carga
- *   que gire en bucle necesita su variante estática.
- * - Sin desplazamiento suave, aunque alguna pieza lo haya pedido.
+ * (`--bb-dur-*` ≤ 200 ms, sin rebotes, `--bb-motion: 0`) y cada pieza trae su variante (RD-MOT-03).
+ * Esta es la red por si una se olvida: ningún bucle (toda animación da una sola pasada: un bucle con
+ * una duración recortada iría más rápido, justo lo contrario de lo que se pide y con riesgo de pasar
+ * de 3 destellos por segundo, RNF-A11Y-04) y ningún desplazamiento suave.
  */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -212,4 +295,20 @@ pre {
   animation-iteration-count: 1 !important;
   /* biome-ignore lint/complexity/noImportantStyles: la preferencia del usuario manda sobre cualquier pieza */
   scroll-behavior: auto !important;
+}
+
+/*
+ * Pausa de los bucles (§3.6 «Bucles», WCAG 2.2.2): con el botón «Pausar las animaciones» de la barra
+ * (`<html data-loops="paused">`, `ui/loops.ts`), la misma red: ningún bucle sigue (el que ya ha dado su
+ * pasada se queda en reposo; el que está en ella la acaba). Cubre las piezas que no traen su propia
+ * variante de pausa (en la galería, los barridos del esqueleto y los cargadores de onda de los botones
+ * seguían en marcha: tercer pase del jurado sobre la v0.6.6, B3); las que la traen (el latido del reloj,
+ * el respiro de «Inserta tu beat») la quitan del todo. Las animaciones de una sola pasada (entradas,
+ * transiciones) no cambian.
+ */
+:root[data-loops="paused"] *,
+:root[data-loops="paused"] *::before,
+:root[data-loops="paused"] *::after {
+  /* biome-ignore lint/complexity/noImportantStyles: la pausa del usuario manda sobre cualquier pieza */
+  animation-iteration-count: 1 !important;
 }

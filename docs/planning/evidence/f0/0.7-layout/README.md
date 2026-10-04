@@ -1,3 +1,6 @@
+> **Histórico: la dirección de copiar el sello se abandonó el 2026-10-03 (guía v0.6).** Esta carpeta
+> se conserva como registro; la referencia vigente de diseño son las maquetas de `../arena/`.
+
 # Prueba del sello de la tarea 0.7: layout del sello
 
 Comparación A/B de la home de BeatBattle (estado «calendario vacío», §2.19) con la referencia medida de

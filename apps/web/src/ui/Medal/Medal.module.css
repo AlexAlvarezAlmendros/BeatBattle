@@ -1,0 +1,51 @@
+/* Medalla de vinilo (§3.4.3): 30–40 px en 2D, con la galleta del color de su puesto (`--bb-medal-*`). */
+.medal {
+  --medal-ink: var(--bb-medal-1);
+  --medal-rim: var(--bb-medal-1);
+  display: block;
+  flex: none;
+  width: var(--bb-space-10);
+  height: var(--bb-space-10);
+}
+
+.medal[data-place="2"] {
+  --medal-ink: var(--bb-medal-2);
+  --medal-rim: var(--bb-medal-2);
+}
+
+.medal[data-place="3"] {
+  --medal-ink: var(--bb-medal-3);
+  --medal-rim: var(--bb-white);
+}
+
+.disc {
+  fill: var(--bb-panel);
+  stroke: var(--medal-rim);
+  stroke-width: 3;
+}
+
+.groove {
+  fill: none;
+  stroke: var(--bb-line);
+  stroke-width: 1;
+}
+
+.shine {
+  fill: none;
+  stroke: var(--bb-line-strong);
+  stroke-width: 3;
+}
+
+.label {
+  fill: var(--medal-ink);
+}
+
+.medal[data-place="3"] .label {
+  stroke: var(--bb-white);
+  stroke-width: 2;
+}
+
+.crown,
+.hole {
+  fill: var(--bb-black);
+}

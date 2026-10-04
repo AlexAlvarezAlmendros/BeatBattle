@@ -32,24 +32,7 @@ const PATHS = {
       <path d="M12 11v5.5M12 7.5v.01" />
     </>
   ),
-  arrowRight: <path d="M5 12h14M13 6l6 6-6 6" />,
-  chevronDown: <path d="M6 9l6 6 6-6" />,
   plus: <path d="M12 5v14M5 12h14" />,
-  music: (
-    <>
-      <path d="M9 18V5l11-2v13" />
-      <circle cx="6" cy="18" r="3" />
-      <circle cx="17" cy="16" r="3" />
-    </>
-  ),
-  metronome: <path d="M7 21L10.5 3h3L17 21zM12 15l5-8M7 21h10" />,
-  sharp: <path d="M10 4L8 20M16 4l-2 16M5 9h15M4 15h15" />,
-  calendar: (
-    <>
-      <rect x="3" y="5" width="18" height="16" rx="2" />
-      <path d="M3 10h18M8 3v4M16 3v4" />
-    </>
-  ),
   clock: (
     <>
       <circle cx="12" cy="12" r="9" />
@@ -62,12 +45,28 @@ const PATHS = {
       <circle cx="7.5" cy="7.5" r="1.5" />
     </>
   ),
-  user: (
+  /* Botón de sonido del HUD (§3.4.1): altavoz con ondas, o tachado. */
+  soundOn: (
     <>
-      <circle cx="12" cy="8" r="4" />
-      <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+      <path d="M4 9h4l5-4v14l-5-4H4z" className={styles.solid} />
+      <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" />
     </>
   ),
+  soundOff: (
+    <>
+      <path d="M4 9h4l5-4v14l-5-4H4z" className={styles.solid} />
+      <path d="M16 9l5 6M21 9l-5 6" />
+    </>
+  ),
+  /* Opción de menú deshabilitada (§3.3 «Opción de menú»): candado. */
+  lock: (
+    <>
+      <path d="M5 11h14v10H5z" />
+      <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+    </>
+  ),
+  /* Flecha maciza del cursor de las placas del menú y del botón «Escuchar». */
+  triangleRight: <path d="M7 4.5v15L19 12z" className={styles.solid} />,
 } satisfies Record<string, ReactNode>
 
 export type IconName = keyof typeof PATHS

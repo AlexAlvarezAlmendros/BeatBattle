@@ -46,6 +46,13 @@ async function load() {
 const politeRegion = () => document.querySelector<HTMLElement>('[aria-live="polite"]')!
 const assertiveRegion = () => document.querySelector<HTMLElement>('[aria-live="assertive"]')!
 
+/**
+ * La parte animada es un `import()` de verdad (Motion entra por primera vez): con la máquina cargada
+ * llega después del segundo por defecto de `findBy*`/`waitFor`. Se espera más (`LAZY`), y cada test,
+ * más aún (`timeout` del `describe`, por encima de sus esperas).
+ */
+const LAZY = { timeout: 10_000 }
+
 beforeEach(() => {
   gate.reset()
 })
@@ -55,7 +62,7 @@ afterEach(() => {
   gate.release()
 })
 
-describe('ToastViewport: parte animada en diferido', () => {
+describe('ToastViewport: parte animada en diferido', { timeout: 20_000 }, () => {
   it('RNF-A11Y-07: las dos regiones vivas se pintan vacías al montar; la parte animada se pide después de pintar, con el navegador libre', async () => {
     // Fotogramas y ratos libres a mano, para ver en qué momento se pide la parte animada.
     const frames: FrameRequestCallback[] = []
@@ -84,7 +91,7 @@ describe('ToastViewport: parte animada en diferido', () => {
     expect(gate.requests).toBe(0)
     // Con el navegador libre, se pide (una vez).
     idle[0]!({ didTimeout: false, timeRemaining: () => 50 })
-    await vi.waitFor(() => expect(gate.requests).toBe(1))
+    await vi.waitFor(() => expect(gate.requests).toBe(1), LAZY)
     // Desmontar con los globales aún sustituidos (la limpieza cancela su rato libre).
     unmount()
   })
@@ -96,12 +103,14 @@ describe('ToastViewport: parte animada en diferido', () => {
       toast.error('Se ha cortado la subida')
     })
     // El aviso adelanta la petición (sin esperar al navegador libre); mientras llega, la región sigue ahí.
-    await waitFor(() => expect(gate.requests).toBe(1))
+    await waitFor(() => expect(gate.requests).toBe(1), LAZY)
     expect(assertiveRegion()).toBeEmptyDOMElement()
     await act(async () => {
       gate.release()
     })
-    expect(await within(assertiveRegion()).findByText('Se ha cortado la subida')).toBeInTheDocument()
+    expect(
+      await within(assertiveRegion()).findByText('Se ha cortado la subida', {}, LAZY),
+    ).toBeInTheDocument()
     expect(politeRegion()).toBeEmptyDOMElement()
   })
 
@@ -115,8 +124,8 @@ describe('ToastViewport: parte animada en diferido', () => {
     await act(async () => {
       gate.release()
     })
-    expect(await within(politeRegion()).findByText('Nueva entrada')).toBeInTheDocument()
-    expect(await within(assertiveRegion()).findByText('Error al votar')).toBeInTheDocument()
+    expect(await within(politeRegion()).findByText('Nueva entrada', {}, LAZY)).toBeInTheDocument()
+    expect(await within(assertiveRegion()).findByText('Error al votar', {}, LAZY)).toBeInTheDocument()
     expect(gate.requests).toBe(1)
   })
 
@@ -131,7 +140,7 @@ describe('ToastViewport: parte animada en diferido', () => {
     await act(async () => {
       gate.release()
     })
-    const item = await within(assertiveRegion()).findByRole('listitem')
+    const item = await within(assertiveRegion()).findByRole('listitem', {}, LAZY)
     expect(item).toHaveTextContent(`${t('ui.toast.tone.error')}: Se ha cortado la subida`)
     expect(item).toHaveTextContent('Tu ficha sigue aquí: reintenta.')
     await user.click(within(item).getByRole('button', { name: t('ui.toast.close') }))

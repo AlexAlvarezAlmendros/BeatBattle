@@ -1,0 +1,763 @@
+/* Sección «Base» de la galería (tarea 0.22): paleta, contraste, tipografía, escala, forma, primitivas y cursor. */
+
+/* ── Paleta ─────────────────────────────────────────────────────────────────────────────── */
+.swatches {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 11rem), 1fr));
+  gap: var(--bb-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.swatch {
+  display: grid;
+  gap: var(--bb-space-2);
+}
+
+.chip {
+  height: var(--bb-space-16);
+  background: var(--swatch);
+  clip-path: polygon(
+    var(--bb-cut) 0,
+    100% 0,
+    100% calc(100% - var(--bb-cut)),
+    calc(100% - var(--bb-cut)) 100%,
+    0 100%,
+    0 var(--bb-cut)
+  );
+  box-shadow: none;
+}
+
+/* Los colores oscuros y los velos se ven sobre un damero de línea para que no desaparezcan. */
+.chipWrap {
+  padding: var(--bb-stroke);
+  background: var(--bb-line);
+  clip-path: polygon(
+    var(--bb-cut) 0,
+    100% 0,
+    100% calc(100% - var(--bb-cut)),
+    calc(100% - var(--bb-cut)) 100%,
+    0 100%,
+    0 var(--bb-cut)
+  );
+}
+
+.swatchName {
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  color: var(--bb-text);
+  overflow-wrap: anywhere;
+}
+
+.swatchValue {
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  color: var(--bb-text-3);
+}
+
+.proportion {
+  display: flex;
+  height: var(--bb-space-6);
+  margin-bottom: var(--bb-space-2);
+}
+
+.proportion span {
+  height: 100%;
+}
+
+.proportion .pBlack {
+  flex: 70;
+  background: var(--bb-black);
+  border: var(--bb-stroke-hair) solid var(--bb-line-strong);
+}
+
+.proportion .pWine {
+  flex: 15;
+  background: var(--bb-wine);
+}
+
+.proportion .pRed {
+  flex: 10;
+  background: var(--bb-red);
+}
+
+.proportion .pWhite {
+  flex: 5;
+  background: var(--bb-white);
+}
+
+.medals {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-6);
+}
+
+.medal {
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-2);
+  margin: 0;
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.disc {
+  width: var(--bb-space-12);
+  height: var(--bb-space-12);
+}
+
+/* ── Contraste ──────────────────────────────────────────────────────────────────────────── */
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--bb-fs-sm);
+}
+
+.table th {
+  padding: var(--bb-space-2) var(--bb-space-3);
+  border-bottom: var(--bb-stroke) solid var(--bb-red);
+  text-align: left;
+}
+
+.table td {
+  padding: var(--bb-space-2) var(--bb-space-3);
+  border-bottom: var(--bb-stroke-hair) solid var(--bb-line);
+  vertical-align: middle;
+}
+
+/*
+ * Por debajo de 720 px, la tabla pasa a lista de clave y valor (como la tesela en móvil, §3.3): cada par
+ * es un bloque con sus cuatro filas, el nombre de la columna delante. Nada se sale ni hay que desplazar.
+ */
+@media (max-width: 720px) {
+  .tableWrap {
+    overflow: visible;
+  }
+
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+  }
+
+  .table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .table tr {
+    padding: var(--bb-space-3) 0;
+    border-bottom: var(--bb-stroke-hair) solid var(--bb-line);
+  }
+
+  .table td {
+    display: grid;
+    grid-template-columns: var(--bb-space-16) minmax(0, 1fr);
+    align-items: center;
+    gap: var(--bb-space-3);
+    padding: var(--bb-space-1) 0;
+    border: 0;
+  }
+
+  .table td::before {
+    content: attr(data-label);
+    color: var(--bb-text-3);
+    font-size: var(--bb-fs-xs);
+    font-weight: var(--bb-weight-bold);
+    letter-spacing: var(--bb-tracking-label);
+    text-transform: uppercase;
+  }
+
+  .swatchName {
+    overflow-wrap: anywhere;
+  }
+}
+
+.sample {
+  display: inline-block;
+  min-width: min(9rem, 100%);
+  padding: var(--bb-space-2) var(--bb-space-3);
+  font-weight: var(--bb-weight-bold);
+}
+
+.sampleLarge {
+  font-size: var(--bb-fs-lg);
+}
+
+.ratio {
+  font-family: var(--bb-font-num);
+  font-weight: var(--bb-weight-bold);
+}
+
+/* ── Tipografía y escala ────────────────────────────────────────────────────────────────── */
+.families {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-6);
+}
+
+.family {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-3);
+  padding: var(--bb-space-5);
+}
+
+.displaySample {
+  font-size: var(--bb-fs-3xl);
+  overflow-wrap: anywhere;
+}
+
+.uiSample {
+  font-size: var(--bb-fs-lg);
+}
+
+.numSample {
+  font-size: var(--bb-fs-clock);
+  font-family: var(--bb-font-num);
+  font-weight: var(--bb-weight-extrabold);
+}
+
+.stretches {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-2);
+}
+
+.stretch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--bb-space-2) var(--bb-space-4);
+}
+
+.weights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-2) var(--bb-space-6);
+  color: var(--bb-text-2);
+}
+
+.scale {
+  display: grid;
+  gap: var(--bb-space-3);
+  margin: 0;
+}
+
+.scaleRow {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) 1fr;
+  align-items: baseline;
+  gap: var(--bb-space-4);
+  padding-bottom: var(--bb-space-3);
+  border-bottom: var(--bb-stroke-hair) solid var(--bb-line);
+}
+
+.scaleRow dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .scaleRow {
+    grid-template-columns: 1fr;
+    gap: var(--bb-space-1);
+  }
+}
+
+/* ── Forma ──────────────────────────────────────────────────────────────────────────────── */
+.cutBox {
+  width: 100%;
+  min-height: var(--bb-space-16);
+}
+
+.slantBox {
+  width: 100%;
+  height: var(--bb-space-12);
+  background: var(--bb-red-cta);
+  clip-path: polygon(var(--bb-slant) 0, 100% 0, calc(100% - var(--bb-slant)) 100%, 0 100%);
+}
+
+.slantBoxSm {
+  clip-path: polygon(var(--bb-slant-sm) 0, 100% 0, calc(100% - var(--bb-slant-sm)) 100%, 0 100%);
+  height: var(--bb-space-6);
+  background: var(--bb-white);
+}
+
+/* Diagonal (§3.2): banda roja de 12 px + filete blanco de 3 px separado 14 px, a 17° de la vertical. */
+.split {
+  position: relative;
+  width: 100%;
+  height: var(--bb-space-16);
+  overflow: hidden;
+  background: linear-gradient(to right, var(--bb-black) 50%, var(--bb-wine-2) 50%);
+}
+
+.splitBand,
+.splitRule {
+  position: absolute;
+  top: calc(-1 * var(--bb-space-4));
+  bottom: calc(-1 * var(--bb-space-4));
+  transform: skewX(calc(-1 * var(--bb-split-angle)));
+}
+
+.splitBand {
+  left: 50%;
+  width: var(--bb-split-band);
+  background: var(--bb-red);
+}
+
+.splitRule {
+  left: calc(50% - var(--bb-split-gap) - var(--bb-split-rule));
+  width: var(--bb-split-rule);
+  background: var(--bb-white);
+}
+
+.tiltSticker {
+  transform: rotate(var(--bb-tilt-sticker));
+}
+
+.tiltCard {
+  width: var(--bb-space-16);
+  height: calc(var(--bb-space-16) * 1.4);
+  transform: rotate(var(--bb-tilt-card));
+}
+
+.tiltAnn {
+  transform: rotate(var(--bb-tilt-ann));
+}
+
+/* Sello de goma: borde de 3 px del color del texto, girado entre −9° y +9° (§3.3). */
+.stamp {
+  display: inline-flex;
+  padding: var(--bb-space-1) var(--bb-space-2);
+  border: var(--bb-stroke-stamp) solid currentColor;
+  color: var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-sm);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-button);
+  text-transform: uppercase;
+}
+
+.stampLeft {
+  transform: rotate(calc(-1 * var(--bb-tilt-stamp)));
+}
+
+.stampRight {
+  transform: rotate(var(--bb-tilt-stamp));
+  color: var(--bb-red);
+}
+
+.stroke {
+  width: 100%;
+  height: 0;
+  border-top-style: solid;
+  border-top-color: var(--bb-white);
+}
+
+.strokeHair {
+  border-top-width: var(--bb-stroke-hair);
+}
+
+.strokeBase {
+  border-top-width: var(--bb-stroke);
+}
+
+.strokeCursor {
+  border-top-width: var(--bb-stroke-cursor);
+}
+
+.hardText {
+  font-size: var(--bb-fs-2xl);
+  text-shadow: var(--bb-shadow-hard);
+}
+
+.hardTextSm {
+  font-size: var(--bb-fs-xl);
+  text-shadow: var(--bb-shadow-hard-sm);
+}
+
+.dropBox {
+  width: var(--bb-space-16);
+  height: var(--bb-space-12);
+  background: var(--bb-white);
+  box-shadow: var(--bb-shadow-drop);
+}
+
+/* Réplica estática del foco genérico (el real solo se ve con teclado). */
+.focusReplica {
+  padding: var(--bb-space-2) var(--bb-space-4);
+  background: var(--bb-panel-2);
+  outline: var(--bb-stroke-cursor) solid var(--bb-white);
+  outline-offset: var(--bb-cursor-gap);
+  box-shadow: var(--bb-focus-halo);
+}
+
+.focusTry {
+  min-height: var(--bb-target);
+  padding: 0 var(--bb-space-4);
+  border: 0;
+  background: var(--bb-panel-2);
+  color: var(--bb-text);
+}
+
+/* ── Primitivas ─────────────────────────────────────────────────────────────────────────── */
+.frameSample {
+  display: grid;
+  gap: var(--bb-space-2);
+  width: 100%;
+  padding: var(--bb-space-4) var(--bb-space-5);
+}
+
+.frameTitle {
+  font-size: var(--bb-fs-lg);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bb-space-3);
+}
+
+.barSample {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-3);
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-semibold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+/* ── Cursor ─────────────────────────────────────────────────────────────────────────────── */
+/*
+ * Escenario de las demos del cursor: a la izquierda, el sitio del 1P (en escritorio). Su columna es
+ * `minmax(0, 1fr)`: ninguna demo la estira más allá de la ventana.
+ */
+.cursorStage {
+  grid-column: 1 / -1;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-8);
+  padding: var(--bb-space-8) var(--bb-space-6) var(--bb-space-8) var(--bb-space-16);
+}
+
+@media (max-width: 720px) {
+  .cursorStage {
+    padding: var(--bb-space-6) var(--bb-space-4);
+  }
+}
+
+/* Placa en paralelogramo (simplificada; la de verdad es `MenuPlate`, 0.24/0.25). */
+.plate {
+  position: relative;
+  min-width: min(100%, 24rem);
+  display: grid;
+  grid-template-columns: var(--bb-space-10) minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: var(--bb-space-14);
+  padding: 0 calc(var(--bb-slant) + var(--bb-space-4));
+  color: var(--bb-text);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-xl);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-plate);
+  text-transform: uppercase;
+  isolation: isolate;
+  cursor: pointer;
+}
+
+.plate::before,
+.plate::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+}
+
+.plate::before {
+  inset: 0;
+  background: var(--bb-line-strong);
+  clip-path: polygon(var(--bb-slant) 0, 100% 0, calc(100% - var(--bb-slant)) 100%, 0 100%);
+}
+
+.plate::after {
+  inset: var(--bb-stroke);
+  background: var(--bb-panel-veil);
+  clip-path: polygon(var(--bb-slant) 0, 100% 0, calc(100% - var(--bb-slant)) 100%, 0 100%);
+}
+
+.plate:focus::before,
+.plate[data-force-state="focus"]::before,
+.plate[data-cursor-active="true"]::before {
+  background: var(--bb-white);
+}
+
+.plate:focus::after,
+.plate[data-force-state="focus"]::after {
+  background: var(--bb-red-cta);
+}
+
+.plateIndex {
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-sm);
+  font-style: normal;
+  font-weight: var(--bb-weight-bold);
+}
+
+.plate:focus .plateIndex,
+.plate[data-force-state="focus"] .plateIndex {
+  color: var(--bb-white);
+}
+
+.plateKey {
+  visibility: hidden;
+}
+
+.plate:focus .plateKey,
+.plate[data-force-state="focus"] .plateKey {
+  visibility: visible;
+}
+
+.menu {
+  display: grid;
+  gap: var(--bb-space-3);
+  min-width: 0;
+  max-width: min(100%, 34rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/*
+ * Muy estrecho (< 360 px; reflow de WCAG 1.4.10 a 320 px), como el menú de verdad (`MenuPlate`): la lista
+ * llegaba a x = 343 en una ventana de 320 y el marco de juego le cortaba el lado derecho, el chaflán y el
+ * anillo del cursor. El escenario deja menos margen a la izquierda (el 1P de la izquierda no se ve por
+ * debajo de 720 px: queda el anillo, que cabe en `--bb-space-2`), el índice ocupa menos y la tecla de la
+ * elegida baja a una segunda línea, bajo la etiqueta, en vez de quitarle sitio.
+ */
+@media (max-width: 359px) {
+  .cursorStage {
+    padding-inline: var(--bb-space-2);
+  }
+
+  .plate {
+    grid-template-columns: var(--bb-space-7) minmax(0, 1fr);
+    grid-template-areas:
+      "index label"
+      "index key";
+    align-content: center;
+    row-gap: var(--bb-space-1);
+    padding: var(--bb-space-2) calc(var(--bb-slant) + var(--bb-space-2));
+  }
+
+  .plateIndex {
+    grid-area: index;
+  }
+
+  .plateLabel {
+    grid-area: label;
+  }
+
+  .plateKey {
+    grid-area: key;
+    justify-self: start;
+    display: none;
+  }
+
+  .plate:focus .plateKey,
+  .plate[data-force-state="focus"] .plateKey {
+    display: inline-flex;
+  }
+}
+
+/* Táctil: sin teclas (no hay teclado, §3.3), como en el menú de verdad; con teclado se ven a cualquier ancho. */
+@media (hover: none), (pointer: coarse) {
+  .plate .plateKey,
+  .plate:is(:focus, [data-force-state="focus"]) .plateKey {
+    display: none;
+  }
+}
+
+.note {
+  grid-column: 1 / -1;
+  max-width: 72ch;
+  color: var(--bb-text-2);
+}
+
+.help {
+  max-width: 34rem;
+  padding: var(--bb-space-3) var(--bb-space-5);
+  color: var(--bb-text-2);
+}
+
+/* Casilla de la rejilla: portada de trama en marco de chaflán + alias (sin números ni medias). */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 8rem);
+  gap: var(--bb-space-6) var(--bb-space-4);
+  margin: 0;
+  padding: var(--bb-space-4) 0 0;
+}
+
+@media (max-width: 720px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.cell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-2);
+  cursor: pointer;
+}
+
+/* La casilla forzada, con el ancho de las de la rejilla. */
+.cellStatic {
+  justify-self: center;
+  width: 8rem;
+}
+
+/* Todas las casillas iguales (§3.8.13): mismo tamaño, mismo marco y la misma altura de nombre. */
+.cellArt {
+  width: 100%;
+  aspect-ratio: 1;
+  --frame-border: var(--bb-line-strong);
+}
+
+.cell:focus .cellArt,
+.cell[data-force-state="focus"] .cellArt {
+  --frame-border: var(--bb-red);
+}
+
+.cellName {
+  min-height: calc(2em * var(--bb-leading-label));
+  line-height: var(--bb-leading-label);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.cell:focus .cellName {
+  color: var(--bb-white);
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bb-space-2);
+}
+
+.tab {
+  position: relative;
+  min-height: var(--bb-target);
+  padding: 0 calc(var(--bb-slant-sm) + var(--bb-space-3));
+  border: 0;
+  background: transparent;
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+  isolation: isolate;
+}
+
+.tab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--bb-panel-2);
+  clip-path: polygon(var(--bb-slant-sm) 0, 100% 0, calc(100% - var(--bb-slant-sm)) 100%, 0 100%);
+}
+
+.tab[aria-selected="true"] {
+  color: var(--bb-black);
+}
+
+.tab[aria-selected="true"]::before {
+  background: var(--bb-white);
+}
+
+.panel {
+  padding: var(--bb-space-4) var(--bb-space-5);
+  color: var(--bb-text-2);
+}
+
+.flashBox {
+  grid-column: 1 / -1;
+  max-width: 34rem;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: var(--bb-space-16);
+  overflow: hidden;
+  padding: var(--bb-space-4);
+}
+
+.flashLight {
+  position: absolute;
+  inset: 0;
+  background: var(--bb-white);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.flashOn {
+  animation: bb-gallery-flash var(--bb-dur-base) var(--bb-ease-out);
+}
+
+@keyframes bb-gallery-flash {
+  from {
+    opacity: var(--flash-opacity);
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.flashButton {
+  min-height: var(--bb-target);
+  padding: 0 var(--bb-space-5);
+  border: 0;
+  background: transparent;
+  color: var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-style: italic;
+  font-weight: var(--bb-weight-extrabold);
+  font-stretch: var(--bb-stretch-button);
+  text-transform: uppercase;
+  --frame-border: var(--bb-red-cta);
+  --frame-fill: var(--bb-red-cta);
+}
+
+/* Muestra de tildes en display (§3.2): recorta en horizontal como las placas, nunca en vertical. */
+.accentsSample {
+  overflow-x: clip;
+  overflow-y: visible;
+  font-size: var(--bb-fs-2xl);
+}

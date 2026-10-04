@@ -1,0 +1,628 @@
+/*
+ * Opción de menú (§3.3, §3.8.3; maqueta `01-menu.html` `.plate`): placa en paralelogramo
+ * (`--bb-slant`) de dos capas, borde y relleno. Elegida = enfocada (o la elegida del grupo cuando el
+ * foco está fuera, `data-cursor-active`): sale a la izquierda, crece, se rellena de rojo y enseña la
+ * flecha, el 1P (el cursor) y su tecla.
+ *
+ * Columnas: índice, etiqueta (`minmax(0, 1fr)`: la que cede, ajustada con `useFitText`) y dato con la
+ * tecla (`max-content`: nunca se encoge ni se corta). El relleno del final (`--plate-pad-end`) es al
+ * menos el desplazamiento del paralelogramo más un margen: la tecla queda siempre dentro del corte.
+ */
+.plate {
+  --plate-border: var(--bb-line-strong);
+  --plate-fill: var(--bb-panel-veil);
+  --plate-shift: var(--bb-space-7);
+  --plate-pad-end: var(--bb-space-8);
+  /*
+   * Alto en reposo (70 px) y elegida (84), y cuerpo del rótulo (25 y 31 px). Quien pone las placas los
+   * puede cambiar desde fuera: `--menu-plate-scale` los multiplica (la ventana grande del menú principal),
+   * `--menu-plate-h` y `--menu-plate-h-on` fijan el alto (sus compactaciones) y `--menu-plate-fs` y
+   * `--menu-plate-fs-on`, el cuerpo común de todas sus placas (§3.3: el menor que necesite cualquiera;
+   * `MainMenu`). Fuera de ese menú (la galería) son siempre los de la maqueta.
+   */
+  --plate-scale: var(--menu-plate-scale, 1);
+  --plate-h: var(--menu-plate-h, calc(var(--bb-plate-h) * var(--plate-scale)));
+  --plate-h-on: var(--menu-plate-h-on, calc((var(--bb-space-16) + var(--bb-space-5)) * var(--plate-scale)));
+  --plate-fs: var(--menu-plate-fs, calc(var(--bb-fs-plate) * var(--plate-scale)));
+  --plate-fs-on: var(--menu-plate-fs-on, calc(var(--bb-fs-plate-on) * var(--plate-scale)));
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: var(--bb-space-13) minmax(0, 1fr) max-content;
+  grid-template-areas: "index label detail";
+  align-content: center;
+  align-items: center;
+  gap: var(--bb-space-1) var(--bb-space-4);
+  height: var(--plate-h);
+  margin-left: var(--plate-shift);
+  padding: 0 var(--plate-pad-end) 0 calc(var(--bb-space-8) + var(--bb-stroke));
+  color: var(--bb-white);
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    margin-left var(--bb-dur-tick) var(--bb-ease-snap),
+    height var(--bb-dur-tick) var(--bb-ease-snap);
+}
+
+.plate::before,
+.plate::after,
+.texture {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  clip-path: polygon(var(--bb-slant) 0, 100% 0, calc(100% - var(--bb-slant)) 100%, 0 100%);
+  pointer-events: none;
+}
+
+.plate::before {
+  inset: 0;
+  background: var(--plate-border);
+}
+
+.plate::after {
+  inset: var(--bb-stroke);
+  background: var(--plate-fill);
+}
+
+/*
+ * La trama de relleno de la elegida (§3.2 «Texturas»): una franja en paralelogramo al final de la placa,
+ * dentro del relleno del final, donde no hay texto («Nunca bajo texto», `RD-VIS-05`). Su borde izquierdo
+ * es paralelo al de la placa; por debajo de la tecla queda el rojo liso.
+ */
+.texture {
+  inset: var(--bb-stroke) var(--bb-stroke) var(--bb-stroke) auto;
+  z-index: 0;
+  display: none;
+  width: var(--plate-pad-end);
+  background:
+    radial-gradient(circle, var(--bb-red-shade) 0 var(--bb-tex-fill-dot), transparent var(--bb-tex-fill-dot))
+    0 0 / var(--bb-tex-fill-cell) var(--bb-tex-fill-cell);
+}
+
+.index {
+  grid-area: index;
+  position: relative;
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+}
+
+/*
+ * La etiqueta recorta solo en horizontal (`overflow-x: clip`, para medirse al ajustarla): en vertical
+ * deja salir las tildes de las mayúsculas (À, Ó, Ú), que con el interlineado 1 sobresalen de la caja.
+ */
+.label {
+  grid-area: label;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-3);
+  min-width: 0;
+  overflow-x: clip;
+  overflow-y: visible;
+  font-family: var(--bb-font-display);
+  font-size: var(--plate-fs);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-plate);
+  letter-spacing: var(--bb-tracking-display);
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.lock {
+  flex: none;
+  font-size: 0.7em;
+}
+
+.detail {
+  grid-area: detail;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  gap: var(--bb-space-2);
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1;
+  text-align: right;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.detailText,
+.extra {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+}
+
+:is(.detailText, .extra) b {
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-md);
+}
+
+/*
+ * El motivo de una deshabilitada es información (§3.3): nunca se corta. Si no cabe en una línea, pasa a
+ * dos dentro de su ancho máximo.
+ */
+.plate[data-disabled] .detailText {
+  display: block;
+  max-width: var(--plate-reason-max, 10rem);
+  line-height: var(--bb-leading-label);
+  white-space: normal;
+}
+
+.key {
+  display: none;
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  left: calc(-1 * var(--bb-space-6));
+  display: none;
+  width: var(--bb-space-4);
+  height: var(--bb-space-5);
+  background: var(--bb-white);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  translate: 0 -50%;
+}
+
+/* ── Hover forzado (galería): el marco se aclara ────────────────────────────────────────── */
+.plate[data-force-state="hover"] {
+  --plate-border: var(--bb-white);
+}
+
+/* ── Elegida (enfocada o la elegida del grupo) ───────────────────────────────────────────── */
+.plate:focus,
+.plate[data-cursor-active="true"],
+.plate[data-force-state="focus"],
+.plate[data-force-state="pressed"] {
+  --plate-border: var(--bb-white);
+  --plate-fill: var(--bb-red-cta);
+  --plate-shift: 0px;
+  grid-template-columns: var(--bb-space-14) minmax(0, 1fr) max-content;
+  height: var(--plate-h-on);
+}
+
+.plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+  :is(.texture, .arrow) {
+  display: block;
+}
+
+.plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+  .key {
+  display: inline-grid;
+}
+
+.plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+  .index {
+  color: var(--bb-white);
+}
+
+.plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+  .label {
+  font-size: var(--plate-fs-on);
+}
+
+.plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+  .detail {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-sm);
+  letter-spacing: var(--bb-tracking-button);
+  text-transform: none;
+}
+
+/*
+ * El cursor de las placas: el 1P a la izquierda de la flecha. Lo que sale por la izquierda (≈ 76 px) cabe
+ * en `--bb-plate-cursor-reach`, el hueco mínimo entre las columnas del menú: si cambia, cambian los dos.
+ */
+.plate :global([data-cursor-player="left"]) {
+  right: calc(100% + var(--bb-space-8));
+}
+
+/* Pulsada: escala 0,98 (y la transición de pantalla barre la diagonal). */
+.plate:active,
+.plate[data-force-state="pressed"] {
+  scale: 0.98;
+}
+
+/* ── Deshabilitada: candado, etiqueta apagada y el motivo ────────────────────────────────── */
+.plate[data-disabled] {
+  cursor: not-allowed;
+}
+
+.plate[data-disabled] .label {
+  color: var(--bb-text-4);
+}
+
+.plate[data-disabled]:is(:focus, [data-cursor-active="true"], [data-force-state="focus"]) {
+  --plate-fill: var(--bb-panel-2);
+}
+
+.plate[data-disabled]:is(:focus, [data-cursor-active="true"], [data-force-state="focus"])
+  :is(.texture, .key) {
+  display: none;
+}
+
+.plate[data-disabled]:is(:focus, [data-cursor-active="true"], [data-force-state="focus"]) .label {
+  color: var(--bb-text-2);
+}
+
+.plate[data-disabled]:is(:focus, [data-cursor-active="true"], [data-force-state="focus"]) .index {
+  color: var(--bb-text-2);
+}
+
+/*
+ * ── Lista estrecha (la composición de dos columnas de 721 a unos 1200 px, o ampliada) ──────────
+ * La columna de las placas del menú es un contenedor (`menu-plates`; solo en la composición de dos
+ * columnas, `MainMenu`): por debajo de 32 rem el dato y la tecla bajan a una segunda línea, bajo la etiqueta, en
+ * vez de quitarle el sitio (jurado de la 0.28: de 721 a 900 px «JUGAR», «RESULTADOS» y «AJUSTES» se
+ * quedaban sin ancho). La placa no cambia de alto (70 px, 84 la elegida): las dos líneas caben dentro;
+ * si la etiqueta parte en dos, crece con ella. Las de un mismo menú en reposo miden todas lo de la más alta
+ * (`--menu-plate-h-fit`, que mide el menú con `useMenuPlateFit`), lleven dato o no (§3.3; jurado de la
+ * 0.28, cierre: a 1024 × 768 medían de 50 a 67 px).
+ */
+@container menu-plates (width < 32rem) {
+  .plate {
+    grid-template-columns: var(--bb-space-13) minmax(0, 1fr);
+    grid-template-areas:
+      "index label"
+      "index detail";
+    align-content: center;
+    row-gap: var(--bb-space-1);
+    height: auto;
+    min-height: max(var(--plate-h), var(--menu-plate-h-fit, 0px));
+    /* 4 px de aire dentro del borde: con el mismo alto para todas, la más alta (la etiqueta NUEVO) manda. */
+    padding-block: calc(var(--bb-space-1) + var(--bb-stroke));
+    transition:
+      margin-left var(--bb-dur-tick) var(--bb-ease-snap),
+      min-height var(--bb-dur-tick) var(--bb-ease-snap);
+  }
+
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
+    grid-template-columns: var(--bb-space-14) minmax(0, 1fr);
+    height: auto;
+    /* Nunca más baja que las de reposo. */
+    min-height: max(var(--plate-h-on), var(--menu-plate-h-fit, 0px));
+  }
+
+  /*
+   * El dato, en su línea: si sus piezas (cifra o etiqueta, dato largo, tecla) no caben, parten en dos; y si
+   * una sola no cabe (el espaciado de texto de WCAG 1.4.12, la letra ampliada), parte su texto: nunca se
+   * sale de la placa ni pasa por encima de su borde.
+   */
+  .detail {
+    flex-wrap: wrap;
+    justify-self: start;
+    row-gap: var(--bb-space-1);
+    max-width: 100%;
+    text-align: start;
+  }
+
+  .detailText,
+  .extra {
+    flex-wrap: wrap;
+    line-height: var(--bb-leading-label);
+    white-space: normal;
+  }
+
+  .plate[data-disabled] .detailText {
+    max-width: none;
+  }
+}
+
+/*
+ * ── Placa apretada (`data-plate-stack`) ──────────────────────────────────────────────────────────
+ * La etiqueta nunca se corta (§3.3): si con el dato o el motivo al lado no cabe ni a su cuerpo mínimo, el
+ * dato baja a una segunda línea, bajo la etiqueta, antes que recortarla. Lo mide la propia placa
+ * (`MenuPlate`, `useStackWhenCramped`), con su dato de verdad: en la galería, la deshabilitada
+ * «RESULTADOS · Aún nada sellado» en una columna de 313 px baja el motivo (dejaba la etiqueta en 12–21 px de
+ * ancho, con el candado y un trozo de la «R»; jurado de la 0.28, cierre), y «JUGAR [INTRO]», que cabe, no
+ * (revisión del cierre). El motivo va en una línea si cabe (el alto de la placa no cambia). En el móvil
+ * (≤ 720 px) vale la misma regla con las medidas del móvil (más abajo); en la lista estrecha del menú, el dato
+ * ya va debajo (más arriba).
+ */
+@media (min-width: 721px) {
+  .plate[data-plate-stack] {
+    grid-template-columns: var(--bb-space-13) minmax(0, 1fr);
+    grid-template-areas:
+      "index label"
+      "index detail";
+    row-gap: var(--bb-space-1);
+  }
+
+  .plate[data-plate-stack]:is(
+    :focus,
+    [data-cursor-active="true"],
+    [data-force-state="focus"],
+    [data-force-state="pressed"]
+  ) {
+    grid-template-columns: var(--bb-space-14) minmax(0, 1fr);
+  }
+
+  .plate[data-plate-stack] .detail {
+    flex-wrap: wrap;
+    justify-self: start;
+    row-gap: var(--bb-space-1);
+    max-width: 100%;
+    text-align: start;
+  }
+
+  .plate[data-plate-stack] :is(.detailText, .extra) {
+    flex-wrap: wrap;
+    line-height: var(--bb-leading-label);
+    white-space: normal;
+  }
+
+  .plate[data-plate-stack][data-disabled] .detailText {
+    max-width: none;
+  }
+}
+
+/*
+ * Lista muy estrecha (< 21 rem: de 721 a unos 850 px, tan estrecha como en un móvil): las medidas de la
+ * placa en móvil, para que el dato quepa en su línea (jurado de la 0.28, tercer pase: «SONIDO ·
+ * MOVIMIENTO» se salía hasta 25 px por el borde inclinado de AJUSTES en reposo): índice de 28 px,
+ * separación de 8 y, en reposo, sale 12 a la izquierda en vez de 28 (`MainMenu` alinea la cabecera y la
+ * ayuda con ella). La flecha y el 1P se quedan: van en el hueco entre las columnas del menú, que mide
+ * como poco su alcance (`--bb-plate-cursor-reach`, `MainMenu`), así que no pisan la tarjeta ni el logo.
+ */
+@container menu-plates (width < 21rem) {
+  .plate {
+    --plate-shift: var(--bb-space-3);
+  }
+
+  .plate,
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
+    grid-template-columns: var(--bb-space-7) minmax(0, 1fr);
+    column-gap: var(--bb-space-2);
+  }
+}
+
+/*
+ * ── Móvil: 48 px (56 la elegida), sin flecha ni 1P (no caben a la izquierda) ───────────────────
+ * El dato largo solo en la elegida; el corto (cifras, etiquetas, motivos) siempre. La tecla de entrar
+ * depende del tipo de entrada, no del ancho: se oculta en táctil (más abajo).
+ */
+@media (max-width: 720px) {
+  .plate {
+    --plate-shift: var(--bb-space-3);
+    --plate-pad-end: calc(var(--bb-slant) + var(--bb-space-3));
+    --plate-reason-max: 5rem;
+    grid-template-columns: var(--bb-space-7) minmax(0, 1fr) max-content;
+    column-gap: var(--bb-space-2);
+    height: var(--bb-space-12);
+    padding: 0 var(--plate-pad-end) 0 var(--bb-space-6);
+  }
+
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
+    grid-template-columns: var(--bb-space-7) minmax(0, 1fr) max-content;
+    height: var(--bb-space-14);
+  }
+
+  .index {
+    font-size: var(--bb-fs-sm);
+  }
+
+  .label {
+    font-stretch: var(--bb-stretch-button);
+  }
+
+  .extra {
+    display: none;
+  }
+
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+    .extra {
+    display: inline-flex;
+  }
+
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+    .arrow {
+    display: none;
+  }
+}
+
+/*
+ * Placa apretada en el móvil (`data-plate-stack`, con teclado y en táctil): la misma regla que fuera del móvil
+ * (más arriba). Si la etiqueta no cabe al lado del dato ni a su cuerpo mínimo, el dato y la tecla bajan a la
+ * segunda línea y la placa crece con ellas, sin bajar de su alto de móvil (`--plate-h-mobile`). Antes la regla
+ * solo valía de 721 px en adelante (jurado de la 0.28, ronda final, E2): a 360 × 640 con teclado, AJUSTES
+ * elegida enseñaba «06 AJUS Sonido · movimiento [INTRO]» y, a 390 × 844, la etiqueta bajaba a 12 px. Donde la
+ * etiqueta cabe al lado (en táctil a 360 × 640 y 375 × 667, sin la tecla), nada cambia.
+ */
+@media (max-width: 720px) {
+  .plate {
+    --plate-h-mobile: var(--bb-space-12);
+  }
+
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
+    --plate-h-mobile: var(--bb-space-14);
+  }
+
+  .plate[data-plate-stack],
+  .plate[data-plate-stack]:is(
+    :focus,
+    [data-cursor-active="true"],
+    [data-force-state="focus"],
+    [data-force-state="pressed"]
+  ) {
+    grid-template-columns: var(--bb-space-7) minmax(0, 1fr);
+    grid-template-areas:
+      "index label"
+      "index detail";
+    align-content: center;
+    row-gap: var(--bb-space-1);
+    height: auto;
+    min-height: var(--plate-h-mobile);
+    padding-block: var(--bb-space-2);
+  }
+
+  .plate[data-plate-stack] .detail {
+    flex-wrap: wrap;
+    justify-self: start;
+    row-gap: var(--bb-space-1);
+    max-width: 100%;
+    text-align: start;
+  }
+
+  .plate[data-plate-stack] :is(.detailText, .extra) {
+    flex-wrap: wrap;
+    line-height: var(--bb-leading-label);
+    white-space: normal;
+  }
+
+  .plate[data-plate-stack][data-disabled] .detailText {
+    max-width: none;
+  }
+}
+
+/* Táctil: sin teclas (no hay teclado, §3.3); con teclado y ratón se enseñan a cualquier ancho. */
+@media (hover: none), (pointer: coarse) {
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"])
+    .key {
+    display: none;
+  }
+}
+
+/*
+ * Móvil bajo (≤ 780 px de alto; `MainMenu`): placas de 44 px (§3.8.3) y 48 la elegida.
+ */
+@media (max-width: 720px) and (max-height: 780px) {
+  .plate {
+    --plate-h-mobile: var(--bb-target);
+    height: var(--bb-target);
+  }
+
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
+    --plate-h-mobile: var(--bb-space-12);
+    height: var(--bb-space-12);
+  }
+
+  /* Apretada (más arriba): crece con sus dos líneas, sin bajar de esos altos. */
+  .plate[data-plate-stack],
+  .plate[data-plate-stack]:is(
+    :focus,
+    [data-cursor-active="true"],
+    [data-force-state="focus"],
+    [data-force-state="pressed"]
+  ) {
+    height: auto;
+  }
+}
+
+/*
+ * Placa apretada en el móvil táctil: sus dos líneas caben en el alto de la placa (56 px la elegida y 48 en
+ * reposo; 48 y 44 en el móvil bajo), así que no crece y el menú sigue cabiendo sin desplazar con cualquier
+ * placa elegida (§3.8.3; jurado de la 0.28, cierre, R1: con RESULTADOS elegida, «NUEVO · Semana 40» bajaba y
+ * la placa crecía de 48 a 64 px; a 360 × 640 la página desbordaba 13 px y AJUSTES quedaba bajo la barra). Sin
+ * la tecla (táctil), la segunda línea la manda la etiqueta del dato («NUEVO», 22 px): baja a `--bb-stroke` de
+ * relleno (16 px), las líneas se separan `--bb-stroke` y la placa deja `--bb-space-1` arriba y abajo
+ * (4 + 22 + 2 + 16 + 4 = 48). La etiqueta no se toca. Con teclado (la tecla, de 26 px) crece como antes: ahí
+ * la pantalla se desplaza.
+ */
+@media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse) {
+  .plate[data-plate-stack],
+  .plate[data-plate-stack]:is(
+    :focus,
+    [data-cursor-active="true"],
+    [data-force-state="focus"],
+    [data-force-state="pressed"]
+  ) {
+    row-gap: var(--bb-stroke);
+    padding-block: var(--bb-space-1);
+  }
+
+  .plate[data-plate-stack] .detail {
+    row-gap: var(--bb-stroke);
+  }
+
+  .plate[data-plate-stack] :global([data-tag]) {
+    padding-block: var(--bb-stroke);
+  }
+}
+
+/*
+ * Muy estrecho (< 360 px; reflow de WCAG 1.4.10 a 320 px): el dato baja a una segunda línea bajo la
+ * etiqueta, en vez de quitarle sitio o cortarse, y la placa crece con sus dos líneas (como poco, 44 px).
+ * Va después del móvil bajo para ganarle: con su alto fijo (44 y 50 px) el texto se salía por arriba y
+ * la tecla por abajo a 320 × 568 (jurado de la 0.28).
+ */
+@media (max-width: 359px) {
+  .plate,
+  .plate:is(:focus, [data-cursor-active="true"], [data-force-state="focus"], [data-force-state="pressed"]) {
+    grid-template-columns: var(--bb-space-7) minmax(0, 1fr);
+    grid-template-areas:
+      "index label"
+      "index detail";
+    align-content: center;
+    row-gap: var(--bb-space-1);
+    height: auto;
+    min-height: max(var(--bb-target), var(--menu-plate-h-fit, 0px));
+    padding-block: var(--bb-space-2);
+  }
+
+  /*
+   * La segunda línea parte como la de la placa apretada (más arriba): si el dato y la tecla no caben en ella
+   * (el espaciado de texto de WCAG 1.4.12, la letra ampliada), la tecla baja dentro de la placa y queda dentro
+   * del corte (§3.3; jurado de la 0.28, cierre, R2: a 320 × 568 con teclado, con RESULTADOS elegida, [INTRO]
+   * iba de 263 a 321 px con la placa en 16–304, tapaba el anillo del cursor y quedaba cortada).
+   */
+  .detail {
+    flex-wrap: wrap;
+    justify-self: start;
+    row-gap: var(--bb-space-1);
+    max-width: 100%;
+    text-align: start;
+  }
+
+  .detailText,
+  .extra {
+    flex-wrap: wrap;
+    white-space: normal;
+  }
+
+  .plate[data-disabled] .detailText {
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plate {
+    transition: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .plate {
+  transition: none;
+}
+
+/*
+ * Contraste alto (`forced-colors: active`): borde `CanvasText` y relleno `Canvas` (las dos capas son
+ * fondos recortados que el modo quitaría) y sin la trama; la elegida se ve por el cursor (`Highlight`).
+ */
+@media (forced-colors: active) {
+  .plate::before {
+    forced-color-adjust: none;
+    background: CanvasText;
+  }
+
+  .plate::after {
+    forced-color-adjust: none;
+    background: Canvas;
+  }
+
+  .texture {
+    display: none;
+  }
+}

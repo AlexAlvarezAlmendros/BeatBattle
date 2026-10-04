@@ -1,0 +1,114 @@
+/*
+ * Crónica de la arena (§3.8.3): una línea en mayúsculas en el hueco derecho de la barra de controles.
+ * Cada mensaje entra con un fundido (sin desplazamiento: es un cambio de texto, no movimiento). A su
+ * derecha, el botón que la pausa a ella y a los bucles de la pantalla (WCAG 2.2.2).
+ */
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+  min-width: 0;
+}
+
+/* «Pausar las animaciones»: 44 px, marco de chaflán pequeño, icono de pausa o de play (si está en pausa). */
+.pause {
+  --frame-fill: var(--bb-black);
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--bb-target);
+  height: var(--bb-target);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-lg);
+}
+
+.pause:hover,
+.pause[aria-pressed="true"] {
+  --frame-border: var(--bb-white);
+  color: var(--bb-white);
+}
+
+/*
+ * Una línea mientras quepa en su hueco; si no (la letra del navegador a 24 px a 1440 px, una ventana
+ * estrecha), parte en dos antes que cortarse en «Crédit…» (WCAG 1.4.4; cuarto pase del jurado de la 0.28,
+ * F6). Dos líneas caben siempre en el alto del botón de pausa (las dos medidas van en `rem`), así que la
+ * barra no cambia de alto al rotar. Solo un mensaje más largo que dos líneas acaba en «…». El crédito
+ * parte por el «·» y no antes de él («Inserta tu beat ·» / «Crédito 01»: espacios de no separación en
+ * `home.chronicle.*`); si un trozo así no cabe ni solo en su línea, parte donde haga falta antes que
+ * cortarse (`overflow-wrap`). Va centrada en vertical con el botón de pausa (`.wrap`); es un `div` para que el
+ * margen de párrafo del espaciado de WCAG 1.4.12 no la descentre (jurado de la 0.28, cierre, R5: a 1440 × 900
+ * el texto de una línea iba de 851 a 865 px con la pausa en 849–893).
+ */
+.chronicle {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: var(--bb-white);
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  overflow-wrap: break-word;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  text-wrap: balance;
+  white-space: normal;
+}
+
+.message {
+  animation: bb-chronicle-in var(--bb-dur-base) var(--bb-ease-out);
+}
+
+@keyframes bb-chronicle-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.chronicle[data-static] .message {
+  animation: none;
+}
+
+/* ── «Inserta tu beat · Crédito 01» (§3.8.3): el guiño de «INSERT COIN / CREDIT 01» ────────── */
+.credit {
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: none;
+}
+
+.credit em {
+  color: var(--bb-red);
+  font-style: normal;
+}
+
+/*
+ * «Inserta tu beat» respira (2 s, 1 ↔ 0,55; §3.6 «Bucles»); sin movimiento o con la pausa de la barra
+ * (`data-loops="paused"`, WCAG 2.2.2), quieto y entero (opacidad 1: a medias bajaría el contraste).
+ */
+.breathe {
+  animation: bb-credit-breathe var(--bb-loop-breathe) var(--bb-ease-in-out) infinite;
+}
+
+@keyframes bb-credit-breathe {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breathe {
+    animation: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .breathe,
+:global(:root[data-loops="paused"]) .breathe {
+  animation: none;
+}

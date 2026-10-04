@@ -1,28 +1,67 @@
 import type { ReactNode } from 'react'
-import { DocumentTitle } from './DocumentTitle'
-import './placeholder.css'
+import { ScreenPage, type ScreenPageProps, UnderConstruction } from './ScreenPage'
 
 interface PlaceholderPageProps {
-  /** Encabezado `<h1>` de la página (ya traducido). */
+  /** Encabezado `<h1>` de la pantalla (ya traducido). */
   title: string
   /** Una línea que cuenta qué irá aquí (ya traducida). */
   summary: string
   /** Título de la pestaña; por defecto, el propio `title`. `null` deja el de la marca (home). */
   documentTitle?: string | null
+  /** Rótulo encima del título. */
+  kicker?: string
+  /**
+   * La pieza de la cuña (el logo con su lockup en la autenticación). Sin ella, la pieza es el sello
+   * «EN OBRAS»; con ella, el sello va arriba del panel.
+   */
+  piece?: ReactNode
+  /** Reparto de la pantalla (`ScreenPage`): `title` en la autenticación, como la pantalla de título. */
+  layout?: ScreenPageProps['layout']
+  /** Las pestañas de la pantalla (`ScreenPage`): las secciones de Opciones. */
+  tabs?: ReactNode
+  /** La pantalla llena el alto entre el HUD y la barra (`ScreenPage`): solo las de contenido. */
+  fill?: boolean
+  /** Dónde va el `<h1>` (`ScreenPage`): `panel` en los legales. */
+  titlePlacement?: ScreenPageProps['titlePlacement']
   children?: ReactNode
 }
 
 /**
- * Página provisional (tarea 0.10): título, `<h1>` y una línea sobre lo que será. Cada fase la sustituye
- * por la pantalla real de su ruta.
+ * Pantalla provisional (tareas 0.10, 0.26 y 0.28): la plantilla de pantalla interior de la arena con su
+ * título, una línea sobre lo que será y el sello «EN OBRAS» como pieza de la cuña (o arriba del panel,
+ * si la pantalla trae su propia pieza). Cada fase la sustituye por la pantalla real de su ruta.
+ *
+ * Sin pestañas, la provisional no tiene más elemento de juego que «Volver al menú»: es el primero
+ * (`backIsStart`, §3.8.14). La pantalla real de cada fase decide el suyo (en la autenticación, el primer
+ * campo del formulario).
  */
-export function PlaceholderPage({ title, summary, documentTitle = title, children }: PlaceholderPageProps) {
+export function PlaceholderPage({
+  title,
+  summary,
+  documentTitle = title,
+  kicker,
+  piece,
+  layout,
+  tabs,
+  fill,
+  titlePlacement,
+  children,
+}: PlaceholderPageProps) {
   return (
-    <div className="placeholder-page">
-      <DocumentTitle page={documentTitle ?? undefined} />
-      <h1>{title}</h1>
-      <p>{summary}</p>
+    <ScreenPage
+      title={title}
+      kicker={kicker}
+      summary={summary}
+      documentTitle={documentTitle}
+      piece={piece ?? <UnderConstruction big />}
+      badge={piece ? <UnderConstruction /> : undefined}
+      layout={layout}
+      tabs={tabs}
+      fill={fill}
+      titlePlacement={titlePlacement}
+      backIsStart={!tabs}
+    >
       {children}
-    </div>
+    </ScreenPage>
   )
 }

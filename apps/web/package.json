@@ -10,10 +10,12 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@beatbattle/covers": "workspace:^",
     "@beatbattle/rules": "workspace:^",
     "@beatbattle/shared": "workspace:^",
-    "@fontsource-variable/jetbrains-mono": "5.3.0",
-    "@fontsource-variable/montserrat": "5.3.0",
+    "@fontsource-variable/anybody": "5.3.0",
+    "@fontsource-variable/oxanium": "5.3.0",
+    "@fontsource/chakra-petch": "5.3.0",
     "@tanstack/react-query": "5.104.1",
     "motion": "13.5.0",
     "react": "19.3.0",

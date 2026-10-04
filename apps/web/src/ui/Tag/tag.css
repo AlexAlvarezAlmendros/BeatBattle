@@ -1,0 +1,66 @@
+/*
+ * Etiqueta (`Tag`, guía §3.3): paralelogramo pequeño (`--bb-slant-sm`) en display cursiva de 12 a
+ * 16 px: 1P, NUEVO, RETO, EN JUEGO, TU RESULTADO.
+ *
+ *   data-tag="white | red | cta"   blanca y roja con texto negro (21:1 y 5,32:1); `cta` con texto
+ *                                  blanco sobre `--bb-red-cta` (4,75:1), la del 1P
+ *   data-tag-size="sm | md | lg"   12, 14 o 16 px (por defecto, 12)
+ *
+ * Especificidad 0 (`:where()`), para que la pieza que la usa pueda ajustarla.
+ */
+
+:where([data-tag]) {
+  --tag-slant: var(--bb-slant-sm);
+  display: inline-block;
+  padding: calc(var(--bb-space-1) + var(--bb-stroke-hair)) calc(var(--tag-slant) + var(--bb-space-1));
+  background: var(--bb-white);
+  color: var(--bb-black);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-xs);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-button);
+  line-height: 1;
+  letter-spacing: calc(var(--bb-tracking-label) / 2);
+  text-transform: uppercase;
+  white-space: nowrap;
+  clip-path: polygon(var(--tag-slant) 0, 100% 0, calc(100% - var(--tag-slant)) 100%, 0 100%);
+}
+
+:where([data-tag="red"]) {
+  background: var(--bb-red);
+  color: var(--bb-black);
+}
+
+:where([data-tag="cta"]) {
+  background: var(--bb-red-cta);
+  color: var(--bb-white);
+}
+
+:where([data-tag-size="md"]) {
+  font-size: var(--bb-fs-sm);
+}
+
+:where([data-tag-size="lg"]) {
+  font-size: var(--bb-fs-md);
+}
+
+/*
+ * Contraste alto (`forced-colors: active`, RNF-A11Y-01; §3.3 «las etiquetas conservan su caja»): el modo
+ * quita el fondo, y la etiqueta (1P, NUEVO, RETO, EN JUEGO…) quedaba como texto suelto; el recorte en
+ * paralelogramo se comería además un borde por los lados. Conserva su caja: sin recorte y con borde
+ * `CanvasText`; la 1P del cursor, que ya va en `Highlight` (`cursor.css`), con el borde en `Highlight`. El
+ * borde se come el relleno: la etiqueta mide lo mismo y nada se mueve.
+ */
+@media (forced-colors: active) {
+  :where([data-tag]) {
+    padding: calc(var(--bb-space-1) + var(--bb-stroke-hair) - var(--bb-stroke))
+      calc(var(--tag-slant) + var(--bb-space-1) - var(--bb-stroke));
+    border: var(--bb-stroke) solid CanvasText;
+    clip-path: none;
+  }
+
+  :where([data-tag][data-cursor-player]) {
+    border-color: Highlight;
+  }
+}

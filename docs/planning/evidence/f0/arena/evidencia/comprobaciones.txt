@@ -1,0 +1,11 @@
+00-titulo 1440×900 · negro 76 % · fuera de paleta 0.00 % · axe: 0 violaciones · texto<12px: ninguno · foco inicial: Pulsa para empezar
+01-menu 1440×900 · negro 82 % · fuera de paleta 0.00 % · axe: 0 violaciones · texto<12px: ninguno · foco inicial: Jugar · teclado: ↓↓ → Resultados | ayuda: La semana 40 ya está sellada. Mira la ceremonia y 
+01-menu 390×844 · negro 74 % · fuera de paleta 0.00 % · axe: 0 violaciones · texto<12px: ninguno · foco inicial: Jugar
+01-menu 375×667 · negro 74 % · fuera de paleta 0.00 % · axe: 0 violaciones · texto<12px: ninguno · foco inicial: Jugar
+01-menu 360×640 · negro 74 % · fuera de paleta 0.01 % · axe: 0 violaciones · texto<12px: ninguno · foco inicial: Jugar
+02-seleccion 1440×900 · negro 88 % · fuera de paleta 0.00 % · axe: 0 violaciones · texto<12px: ninguno · foco inicial: Tigre Púrpura, 94 BPM, Re menor, sin votar · teclado: Aurora Glaciar, 96 BPM, La menor, sin votar | ficha: Aurora Glaciar
+03-jurado 1440×900 · negro 88 % · fuera de paleta 0.00 % · axe: 0 violaciones · texto<12px: ninguno · foco inicial: (ninguno: la página no fija foco)
+03-jurado?estado=votado 1440×900 · negro 86 % · fuera de paleta 0.00 % · axe: 0 violaciones · texto<12px: ninguno · foco inicial: 4 de 5 estrellas: Muy bien · teclado: ····X foco: 5 de 5 estrellas: Brutal
+04-resultados 1440×900 · negro 86 % · fuera de paleta 0.00 % · axe: 0 violaciones · texto<12px: ninguno · foco inicial: ▶ Play al campeón INTRO
+05-perfil 1440×900 · negro 86 % · fuera de paleta 0.03 % · axe: 0 violaciones · texto<12px: ninguno · foco inicial: (ninguno: la página no fija foco)
+06-jurado-movil 390×844 · negro 83 % · fuera de paleta 0.00 % · axe: 0 violaciones · texto<12px: ninguno · foco inicial: (ninguno: la página no fija foco)

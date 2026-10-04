@@ -48,12 +48,40 @@ export async function open(page: Page, path: string, heading: string): Promise<v
 /**
  * Abre la galería y espera a su cuerpo, que se carga aparte (`React.lazy`) y arrastra todos los
  * componentes: tarda más que la espera normal de `expect`, sobre todo con Vite en frío (el proyecto
- * `warmup` lo calienta antes de los E2E).
+ * `warmup` lo calienta antes de los E2E). El último bloque es «Portada y medallas».
  */
 export async function openGallery(page: Page, timeout = 30_000): Promise<void> {
   await page.goto('/dev/galeria')
-  await expect(page.locator('section#cristal')).toBeVisible({ timeout })
+  await expect(page.locator('section#portada')).toBeVisible({ timeout })
 }
+
+/**
+ * Las pantallas de la app (guía §2.18) con el `<h1>` de cada una, más la 404 y las dos de desarrollo
+ * (`/dev/menu`, el menú con los datos de las maquetas, y la galería). Las comparten los E2E que
+ * recorren «cada ruta» (`RD-VIS-02`, `RD-VIS-05`, `RNF-A11Y-02`).
+ */
+export const ROUTES = [
+  { path: '/', heading: 'Beat Battle' },
+  { path: '/dev/menu', heading: 'Beat Battle' },
+  { path: '/semana/2026-41', heading: 'Semana' },
+  { path: '/semana/2026-41/resultados', heading: 'Resultados' },
+  { path: '/semanas', heading: 'Semanas' },
+  { path: '/e/0192f3a1', heading: 'Entrada' },
+  { path: '/jurado', heading: 'Modo Jurado' },
+  { path: '/subir', heading: 'Subir mi beat' },
+  { path: '/p/aina', heading: 'Perfil' },
+  { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
+  { path: '/temporada/t4', heading: 'Temporada' },
+  { path: '/como-funciona', heading: 'Cómo se juega' },
+  { path: '/ajustes/cuenta', heading: 'Cuenta' },
+  { path: '/entrar', heading: 'Entrar' },
+  { path: '/registro', heading: 'Crear cuenta' },
+  { path: '/verificar', heading: 'Verificar el email' },
+  { path: '/recuperar', heading: 'Recuperar la contraseña' },
+  { path: '/admin', heading: 'Administración' },
+  { path: '/legal/bases', heading: 'Bases de la competición' },
+  { path: '/esto-no-existe', heading: 'Bonus stage' },
+] as const
 
 /** Resumen legible de una violación de axe: regla, impacto, ayuda y los nodos afectados. */
 function describe(violations: Awaited<ReturnType<AxeBuilder['analyze']>>['violations']): string {
@@ -70,8 +98,11 @@ function describe(violations: Awaited<ReturnType<AxeBuilder['analyze']>>['violat
     .join('\n\n')
 }
 
-/** Capas decorativas del fondo (`aria-hidden`): orbes rojos y rejilla y viñeta del hero. */
-const DECORATIVE_BACKDROP = '.ambient-orbs, .hero__backdrop'
+/**
+ * Capas decorativas (`aria-hidden`): la arena de detrás (cuña con trama, diagonal, rayos y viñeta) y la
+ * trama de las tarjetas.
+ */
+const DECORATIVE_BACKDROP = '[data-wedge][aria-hidden], [data-halftone]'
 
 /**
  * Auditoría de axe con las reglas de WCAG 2.2 AA sobre la página entera. Falla con la lista de
@@ -82,11 +113,11 @@ const DECORATIVE_BACKDROP = '.ambient-orbs, .hero__backdrop'
  *   fotograma, el de reposo, y se congelan mientras axe mide: así el contraste se mide en el estado
  *   legible y no en un instante al azar del ciclo (el `:` de la cuenta atrás baja a opacidad 0,25 a
  *   mitad de su parpadeo). Al terminar siguen corriendo.
- * - Segunda pasada solo de `color-contrast` sin las capas decorativas del fondo: axe no sabe medir el
- *   contraste sobre un degradado y deja como «incompleto» casi todo el texto que pasa por encima de los
- *   orbes o de la rejilla del hero. Sin ellas mide contra el negro de base y lo verifica. (Los orbes, a
- *   opacidad ≤ 0,2, apenas aclaran el fondo; el contraste de cada par de tokens sobre su superficie lo
- *   comprueba además `contrast.test.ts` de la galería.)
+ * - Segunda pasada solo de `color-contrast` sin las capas decorativas: axe no sabe medir el contraste
+ *   sobre la cuña con trama ni sobre un lienzo y deja como «incompleto» el texto que pasa por encima.
+ *   Sin ellas mide contra el fondo de su panel o el negro de base y lo verifica (todo texto sobre la
+ *   cuña va en un panel o en su zona sin trama, `RD-VIS-05`; el contraste de cada par de tokens lo
+ *   comprueba además `contrast.test.ts` de la galería).
  */
 export async function expectNoAxeViolations(page: Page): Promise<void> {
   await settle(page)
@@ -127,40 +158,43 @@ export function focusRing(locator: Locator) {
       outlineStyle: style.outlineStyle,
       outlineWidth: style.outlineWidth,
       outlineColor: style.outlineColor,
+      outlineOffset: style.outlineOffset,
       boxShadow: style.boxShadow,
     }
   })
 }
 
 /**
- * Parte interior del halo de foco (`--bb-focus-halo`: 6 px de `--bb-red-wash`) tal y como la serializa
- * `getComputedStyle`. Ninguna sombra de reposo la lleva (el CTA ya tiene `--bb-shadow-cta`), así que
+ * Halo del foco genérico (`--bb-focus-halo`: 10 px de rojo al 35 %, §3.2) tal y como lo serializa
+ * `getComputedStyle`. Ninguna sombra de reposo lo lleva (en la arena solo hay sombras duras), así que
  * comprobar que aparece demuestra que el foco pinta el halo, no que haya una sombra cualquiera.
  */
-export const FOCUS_HALO_SHADOW = 'rgba(255, 0, 60, 0.1) 0px 0px 0px 6px'
+export const FOCUS_HALO_SHADOW = 'rgba(255, 0, 60, 0.35) 0px 0px 0px 10px'
 
 /**
- * Comprueba el foco visible de §2.17 (`RNF-A11Y-01`): el elemento tiene el foco, es `:focus-visible` y
- * pinta el anillo rojo de 2 px (`--bb-focus-color`, `#ff003c`) con su halo (`--bb-focus-halo`).
+ * Comprueba el foco genérico de §3.3 (`RNF-A11Y-01`): el elemento tiene el foco, es `:focus-visible` y
+ * pinta el contorno blanco de 3 px (`--bb-stroke-cursor`) a 4 px (`--bb-cursor-gap`) con su halo
+ * (`--bb-focus-halo`). Los menús de juego (`[data-cursor]`) usan el cursor, no este contorno.
  */
 export async function expectVisibleFocus(locator: Locator): Promise<void> {
   await expect(locator).toBeFocused()
   const ring = await focusRing(locator)
   expect(ring.focusVisible).toBe(true)
   expect(ring.outlineStyle).toBe('solid')
-  expect(ring.outlineWidth).toBe('2px')
-  expect(ring.outlineColor).toBe('rgb(255, 0, 60)')
-  // La sombra tiene transición (el CTA pasa de su halo de reposo al de foco): se espera a que asiente.
+  expect(ring.outlineWidth).toBe('3px')
+  expect(ring.outlineOffset).toBe('4px')
+  expect(ring.outlineColor).toBe('rgb(255, 255, 255)')
+  // La sombra puede tener transición: se espera a que asiente.
   await expect.poll(async () => (await focusRing(locator)).boxShadow).toContain(FOCUS_HALO_SHADOW)
 }
 
 /**
- * Ancestro que recorta el anillo de foco de un elemento (contorno de 2 px a 2 px de distancia: 4 px
+ * Ancestro que recorta el anillo de foco de un elemento (contorno de 3 px a 4 px de distancia: 7 px
  * alrededor de la caja), o `null` si se ve entero. Mira `overflow`, `clip-path` y `contain: paint`.
  */
 export function focusRingClippedBy(locator: Locator): Promise<string | null> {
   return locator.evaluate((element) => {
-    const RING = 4
+    const RING = 7
     const box = element.getBoundingClientRect()
     const ring = {
       left: box.left - RING,
@@ -186,4 +220,15 @@ export function focusRingClippedBy(locator: Locator): Promise<string | null> {
     }
     return null
   })
+}
+
+/**
+ * El cursor de juego de §3.3 (`RD-MOT-05`): el elemento tiene el foco y enseña su anillo (el marco
+ * blanco de 3 px a 4 px que sigue su forma), en vez del contorno genérico.
+ */
+export async function expectCursor(locator: Locator): Promise<void> {
+  await expect(locator).toBeFocused()
+  await expect(locator).toHaveAttribute('data-cursor', '')
+  await expect(locator.locator(':scope > [data-cursor-ring]')).toBeVisible()
+  expect((await focusRing(locator)).outlineStyle).toBe('none')
 }

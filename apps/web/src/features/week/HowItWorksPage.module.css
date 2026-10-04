@@ -1,0 +1,288 @@
+/*
+ * «Cómo se juega» (§3.8.14): la lista de movimientos como menú de juego en la cuña (placas opacas: la
+ * cuña lleva trama, `RD-VIS-05`) y las reglas de juego limpio como filas con índice en el panel.
+ */
+.moves {
+  display: grid;
+  gap: var(--bb-space-3);
+  width: 100%;
+}
+
+/* Sitio a la izquierda para la etiqueta 1P del cursor. */
+.list {
+  display: grid;
+  gap: var(--bb-space-3);
+  margin: 0;
+  padding: 0 0 0 var(--bb-space-12);
+  list-style: none;
+}
+
+/* ── Movimiento: número, nombre, texto y teclas ─────────────────────────────────────────── */
+.move {
+  --frame-fill: var(--bb-panel-veil);
+  display: grid;
+  grid-template-columns: var(--bb-space-8) minmax(0, 1fr);
+  grid-template-areas:
+    "number title"
+    "number text";
+  align-items: center;
+  gap: var(--bb-space-1) var(--bb-space-3);
+  padding: var(--bb-space-3) var(--bb-space-5) var(--bb-space-4) var(--bb-space-4);
+  color: var(--bb-white);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.number {
+  grid-area: number;
+  align-self: start;
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-2xl);
+  font-weight: var(--bb-weight-extrabold);
+  line-height: 1;
+}
+
+.moveTitle {
+  grid-area: title;
+  font-size: var(--bb-fs-lg);
+  font-stretch: var(--bb-stretch-plate);
+}
+
+.moveText {
+  grid-area: text;
+  display: grid;
+  gap: var(--bb-space-2);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+/* Teclas o gesto: ayuda, como en la barra de controles (tecla oscura y su verbo), no la acción. */
+.inputs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bb-space-2);
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.keys,
+.keyGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-1);
+}
+
+.dash {
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-num);
+}
+
+/* ── Elegido (enfocado o el elegido del grupo): relleno rojo, texto blanco ───────────────── */
+.move:is(:focus, [data-cursor-active="true"]) {
+  --frame-border: var(--bb-white);
+  --frame-fill: var(--bb-red-cta);
+}
+
+.move:is(:focus, [data-cursor-active="true"]) :is(.number, .moveText, .inputs, .dash) {
+  color: var(--bb-white);
+}
+
+.move:active {
+  scale: 0.98;
+}
+
+/* ── «Bases [B]» y «Volver al menú [ESC]»: opciones de una línea con su tecla ───────────────── */
+.option {
+  --frame-fill: var(--bb-panel-veil);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--bb-space-3);
+  min-height: var(--bb-space-12);
+  padding: var(--bb-space-2) var(--bb-space-4) var(--bb-space-2) var(--bb-space-5);
+  color: var(--bb-white);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.optionBases {
+  margin-top: var(--bb-space-2);
+}
+
+.optionLabel {
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-sm);
+  font-style: italic;
+  font-weight: var(--bb-weight-extrabold);
+  font-stretch: var(--bb-stretch-button);
+  letter-spacing: var(--bb-tracking-button);
+  text-transform: uppercase;
+}
+
+.option:is(:focus, [data-cursor-active="true"]) {
+  --frame-border: var(--bb-white);
+}
+
+.option:active {
+  scale: 0.98;
+}
+
+/*
+ * ── Reglas de juego limpio: filas con índice, como un marcador ───────────────────────────
+ * Justo debajo de la entrada del panel (§3.8.14 v0.6.7: «la lista va justo debajo de la entrada»): si la
+ * lista de movimientos es más alta, el panel llega a su pie (`ScreenPage`) y lo que sobra queda al pie del
+ * panel, no entre el resumen y la lista (quedaban ~80 px a 1440 × 900; cuarto pase del jurado, P4).
+ */
+.rules {
+  display: grid;
+  gap: var(--bb-space-3);
+}
+
+.rulesTitle {
+  color: var(--bb-red);
+}
+
+.ruleList {
+  display: grid;
+  border-top: var(--bb-stroke-hair) solid var(--bb-line);
+}
+
+/*
+ * Cada regla, una fila densa (§3.8.14, como las de `05-perfil`): el índice, el nombre en display y una
+ * línea de explicación, a su alto natural (unos 64 px; 56 con la ventana baja).
+ */
+.rule {
+  display: grid;
+  grid-template-columns: var(--bb-space-10) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--bb-space-3);
+  padding: var(--bb-space-3) 0;
+  border-bottom: var(--bb-stroke-hair) solid var(--bb-line);
+}
+
+.ruleBody {
+  display: grid;
+  gap: var(--bb-space-1);
+}
+
+.ruleTitle {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-md);
+  font-stretch: var(--bb-stretch-plate);
+  line-height: 1;
+}
+
+.ruleText {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+.ruleIndex {
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-lg);
+  font-weight: var(--bb-weight-extrabold);
+  line-height: 1;
+}
+
+/*
+ * Pantalla grande (≥ 1600 px): la columna de la pieza y el panel crecen con la ventana (`ScreenPage`,
+ * tercer pase del jurado, L1); la letra de los movimientos y de las reglas crece con ellos.
+ */
+@media (min-width: 1600px) {
+  .move {
+    grid-template-columns: var(--bb-space-10) minmax(0, 1fr);
+  }
+
+  .number {
+    font-size: var(--bb-fs-3xl);
+  }
+
+  .moveTitle {
+    font-size: var(--bb-fs-xl);
+  }
+
+  .moveText,
+  .ruleText {
+    font-size: var(--bb-fs-md);
+  }
+
+  .ruleTitle {
+    font-size: var(--bb-fs-lg);
+  }
+
+  .ruleIndex {
+    font-size: var(--bb-fs-2xl);
+  }
+}
+
+/*
+ * Ventana baja (≥ 721 px de ancho y < 900 de alto; §3.8.14): se aprieta por altura, sin esconder nada.
+ * Los movimientos, más juntos (6 px) y con 8 px de relleno; su ayuda (teclas o gesto) sigue al texto en
+ * la misma línea si cabe; las reglas, a 56 px.
+ */
+@media (min-width: 721px) and (max-height: 899px) {
+  .list {
+    gap: var(--bb-space-2);
+  }
+
+  .move {
+    row-gap: 0;
+    padding-block: var(--bb-space-2);
+  }
+
+  .moveText {
+    display: block;
+  }
+
+  .moveText .inputs {
+    display: inline-flex;
+    margin-left: var(--bb-space-2);
+    vertical-align: middle;
+  }
+
+  .option {
+    min-height: var(--bb-target);
+  }
+
+  .optionBases {
+    margin-top: 0;
+  }
+
+  .rule {
+    padding-block: var(--bb-space-2);
+  }
+
+  .rules {
+    gap: var(--bb-space-2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .move:active,
+  .option:active {
+    scale: none;
+  }
+}
+
+/* Móvil: sin sitio para el 1P a la izquierda (queda el anillo); táctil, sin teclas de ayuda. */
+@media (max-width: 720px) {
+  .list {
+    padding-left: 0;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .keys,
+  .option :global([data-key]) {
+    display: none;
+  }
+}

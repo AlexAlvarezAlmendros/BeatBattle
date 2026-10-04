@@ -14,18 +14,16 @@ import {
 import { createPortal } from 'react-dom'
 import { t } from '../../i18n'
 import { Button } from '../Button'
+import { frameAttributes } from '../Frame'
 import { cx } from '../forceState'
-import { GlassSurface } from '../GlassSurface'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 import { Icon } from '../Icon'
 import { Skeleton, SkeletonGroup } from '../Skeleton'
 import { isTopModalLayer, lockScroll, pushModalLayer, trapTab } from './focus'
 import styles from './Modal.module.css'
 
-export type ModalSurfaceKind = 'glass' | 'solid'
-
-/** Escala de entrada del modal (§3.3: «entra con escala 0,96 → 1»). */
-export const MODAL_ENTER_SCALE = 0.96
+/** Distancia desde la que entra la ventana, deslizándose desde la diagonal (§3.3, en px). */
+export const MODAL_ENTER_OFFSET_PX = 32
 
 export interface ModalSurfaceProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
   title: ReactNode
@@ -36,8 +34,6 @@ export interface ModalSurfaceProps extends Omit<HTMLAttributes<HTMLDivElement>, 
   /** Botón de cerrar arriba a la derecha (con su `aria-label`). */
   onClose?: () => void
   footer?: ReactNode
-  /** `glass` (por defecto) o `solid` para calidad baja. */
-  surface?: ModalSurfaceKind
   titleAs?: 'h2' | 'h3' | 'h4'
   children?: ReactNode
   /** El cuerpo está cargando: esqueleto en su lugar y `aria-busy` (§3.3, estado «cargando»). */
@@ -50,13 +46,9 @@ export interface ModalSurfaceProps extends Omit<HTMLAttributes<HTMLDivElement>, 
 }
 
 /**
- * La pieza visible del modal, sin comportamiento: título, descripción, cuerpo y pie sobre cristal
- * (borde `--bb-line-strong`, radio `md`) o maciza. `Modal` la usa dentro del diálogo; la galería la
- * enseña quieta.
- *
- * El cristal es `GlassSurface` (§3.3), como la isla: `--bb-glass-card` + refracción SVG + `blur(3px)`.
- * Sin capacidad (equipo modesto, «reducir movimiento», Safari/Firefox) se queda en la alternativa de
- * `Modal.module.css`: `--bb-glass-card` + `blur(8px)`.
+ * La pieza visible del modal, sin comportamiento: la **ventana de juego** (guía §3.3), un panel
+ * `--bb-panel-veil` con marco blanco y chaflán `--bb-cut-lg`, título en display, descripción, cuerpo y
+ * las teclas de acción en el pie. `Modal` la usa dentro del diálogo; la galería la enseña quieta.
  */
 export function ModalSurface({
   title,
@@ -65,7 +57,6 @@ export function ModalSurface({
   descriptionId,
   onClose,
   footer,
-  surface = 'glass',
   titleAs: TitleTag = 'h2',
   className,
   children,
@@ -81,7 +72,7 @@ export function ModalSurface({
       <Skeleton shape="text" width="60%" />
     </SkeletonGroup>
   ) : error ? (
-    <p className={styles.error}>
+    <p className={styles.error} role="alert">
       <Icon name="alert" className={styles.errorIcon} />
       <span>{error}</span>
     </p>
@@ -91,13 +82,14 @@ export function ModalSurface({
   const content = (
     <>
       <header className={styles.header}>
-        <TitleTag id={titleId} className={styles.title}>
+        <TitleTag id={titleId} className={cx('bb-display', styles.title)}>
           {title}
         </TitleTag>
         {onClose && (
           <Button
-            variant="icon"
+            variant="outline"
             size="sm"
+            iconOnly
             icon="close"
             aria-label={t('ui.modal.close')}
             onClick={onClose}
@@ -119,17 +111,14 @@ export function ModalSurface({
       {footer && <footer className={styles.footer}>{footer}</footer>}
     </>
   )
-  const surfaceProps = {
-    ...rest,
-    className: cx(styles.surface, surface === 'glass' ? styles.glass : styles.solid, className),
-    'data-surface': surface,
-  }
-  return surface === 'glass' ? (
-    <GlassSurface {...surfaceProps} backdropBlur="var(--bb-glass-blur-card)">
+  return (
+    <div
+      {...rest}
+      {...frameAttributes({ variant: 'title', cut: 'lg' })}
+      className={cx(styles.surface, className)}
+    >
       {content}
-    </GlassSurface>
-  ) : (
-    <div {...surfaceProps}>{content}</div>
+    </div>
   )
 }
 
@@ -141,7 +130,6 @@ export interface ModalProps {
   description?: ReactNode
   footer?: ReactNode
   children?: ReactNode
-  surface?: ModalSurfaceKind
   /** Cerrar al pulsar el fondo (por defecto, sí). Esc y el botón de cerrar funcionan siempre. */
   dismissible?: boolean
   /** Elemento que recibe el foco al abrir; por defecto, el propio diálogo (se lee el título). */
@@ -149,13 +137,14 @@ export interface ModalProps {
 }
 
 /**
- * Modal (§3.3): cristal sobre `--bb-scrim` con desenfoque, en un portal.
+ * Modal (§3.3, «ventana de juego»): sobre `--bb-scrim`, en un portal.
  *
  * - `role="dialog"` + `aria-modal` + `aria-labelledby` (y `aria-describedby` con descripción).
  * - Trampa de foco, Esc para cerrar, el foco vuelve a donde estaba al cerrar y la página no hace
  *   scroll mientras está abierto (el bloqueo se quita en cuanto empieza a cerrarse).
  * - Se pueden apilar (un modal abierto desde otro): solo el de arriba atiende Tab, Esc y el foco.
- * - Entra con escala 0,96 → 1 y fundido del fondo; con «reducir movimiento», solo fundido (Anexo E).
+ * - Entra con la diagonal: se desliza desde la izquierda con fundido (`--bb-dur-base`); con «reducir
+ *   movimiento», solo fundido (Anexo E).
  * - El sonido (`ui.open`) lo cablea la Fase 1.
  */
 export function Modal({
@@ -165,7 +154,6 @@ export function Modal({
   description,
   footer,
   children,
-  surface = 'glass',
   dismissible = true,
   initialFocus,
 }: ModalProps) {
@@ -202,7 +190,6 @@ export function Modal({
           title={title}
           description={description}
           footer={footer}
-          surface={surface}
           dismissible={dismissible}
           initialFocus={initialFocus}
         >
@@ -223,7 +210,6 @@ function ModalLayer({
   description,
   footer,
   children,
-  surface,
   dismissible,
   initialFocus,
 }: ModalLayerProps) {
@@ -289,7 +275,7 @@ function ModalLayer({
     duration: (reduced ? reducedDuration.base : duration.base) / 1000,
     ease: [...ease.out] as [number, number, number, number],
   }
-  const scale = reduced ? 1 : MODAL_ENTER_SCALE
+  const offset = reduced ? 0 : -MODAL_ENTER_OFFSET_PX
 
   return (
     <motion.div
@@ -310,9 +296,9 @@ function ModalLayer({
     >
       <motion.div
         className={styles.frame}
-        initial={{ opacity: 0, scale }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale }}
+        initial={{ opacity: 0, x: offset }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: offset }}
         transition={fade}
       >
         <ModalSurface
@@ -322,7 +308,7 @@ function ModalLayer({
           aria-labelledby={titleId}
           aria-describedby={description ? descriptionId : undefined}
           tabIndex={-1}
-          data-focus-target=""
+          data-focus-target="dialog"
           onKeyDown={onKeyDown}
           title={title}
           titleId={titleId}
@@ -330,7 +316,6 @@ function ModalLayer({
           descriptionId={descriptionId}
           onClose={onClose}
           footer={footer}
-          surface={surface}
         >
           {children}
         </ModalSurface>

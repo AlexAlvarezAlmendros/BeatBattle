@@ -9,7 +9,10 @@ import { defineConfig } from '@playwright/test'
  *
  * - En local, el Chrome del sistema con la GPU real (Vulkan sobre la iGPU, como Orchard y `tools/shot`);
  *   con `PW_SOFTWARE=1`, el mismo Chrome sin esos ajustes de GPU (render por software, como en CI).
- * - En CI (`CI=1`), el Chromium de Playwright (`pnpm exec playwright install --with-deps chromium`).
+ * - En CI (`CI=1`), el Chromium completo de Playwright (`channel: 'chromium'`, el «new headless»;
+ *   `pnpm exec playwright install --with-deps chromium`). No el *headless shell* por defecto: ese redondea
+ *   el avance de los glifos (el texto sale ~3 % más ancho que en Chrome) y las pruebas de encaje de la
+ *   Arena (§3.8.3, §3.8.14) fallaban solo en la CI (PR #2). El completo mide el texto como Chrome.
  * - `PW_PORT` y `PW_API_PORT` cambian los puertos para no chocar con `pnpm dev:all` (5173 y 3000).
  * - El proyecto `perf` mide la build de producción (`vite build` + `vite preview` en `PW_PREVIEW_PORT`,
  *   5175) después de todos los E2E, para que nada compita con él por la CPU (RNF-PERF-02).
@@ -48,7 +51,7 @@ export default defineConfig({
     timezoneId: 'Europe/Madrid',
     trace: ci ? 'on-first-retry' : 'retain-on-failure',
     ...(ci
-      ? {}
+      ? { channel: 'chromium' }
       : software
         ? { channel: 'chrome' }
         : {

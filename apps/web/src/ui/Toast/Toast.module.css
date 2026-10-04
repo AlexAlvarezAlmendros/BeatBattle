@@ -1,62 +1,48 @@
 /*
- * Avisos (§3.3). Anatomía del `Toast` del sello (fondo `#1a1a1a`, radio 12, icono del tono, mensaje y
- * cerrar) con los tokens: acento lateral del tono y el icono con nombre (nunca solo el color). La zona
- * (posición y regiones vivas) está en `ToastViewport.module.css`, que va en el trozo inicial.
+ * Avisos (§3.3): panel opaco con marco de chaflán (`[data-frame]`), icono del tono con su nombre y el
+ * texto. Información y éxito, sobre el panel con el borde en reposo (el éxito, con borde blanco); el
+ * error, **de papel**: panel blanco con texto negro (21:1; §3.2 «Estados»). La zona (posición y
+ * regiones vivas) está en `ToastViewport.module.css`, que va en el trozo inicial.
  */
 .item {
   pointer-events: auto;
 }
 
 .toast {
+  --frame-fill: var(--bb-panel);
   position: relative;
   display: flex;
   align-items: flex-start;
   gap: var(--bb-space-3);
   padding: var(--bb-space-3) var(--bb-space-3) var(--bb-space-3) var(--bb-space-4);
-  overflow: hidden;
-  border: 1px solid var(--bb-line-strong);
-  border-radius: var(--bb-radius-md);
-  background-color: var(--bb-ink-800);
-  box-shadow: var(--bb-shadow-float);
   color: var(--bb-text);
-  transition: border-color var(--bb-dur-fast) var(--bb-ease-out);
-}
-
-/* Acento del tono: la barra lateral (como el rótulo de sección, en vertical). */
-.toast::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 3px;
-  background-color: var(--toast-accent);
-}
-
-/* Información en neutro: el rojo queda para el error (§3.2 distingue el peligro del rojo de marca). */
-.toast[data-tone="info"] {
-  --toast-accent: var(--bb-text-2);
 }
 
 .toast[data-tone="success"] {
-  --toast-accent: var(--bb-success);
+  --frame-border: var(--bb-white);
 }
 
 .toast[data-tone="error"] {
-  --toast-accent: var(--bb-danger);
+  --frame-border: var(--bb-white);
+  --frame-fill: var(--bb-white);
+  color: var(--bb-black);
 }
 
 .toast:hover,
 .toast[data-force-state="hover"],
 .toast:focus-within,
 .toast[data-force-state="focus"] {
-  border-color: var(--bb-line-lit);
+  --frame-border: var(--bb-white);
 }
 
 .icon {
   margin-top: var(--bb-space-2);
-  color: var(--toast-accent);
-  font-size: var(--bb-font-size-lg);
+  font-size: var(--bb-fs-lg);
+}
+
+.toast[data-tone="info"] .icon,
+.toast[data-tone="success"] .icon {
+  color: var(--bb-red);
 }
 
 .text {
@@ -68,18 +54,21 @@
 }
 
 .title {
-  font-size: var(--bb-font-size-sm);
-  font-weight: var(--bb-weight-semibold);
-  line-height: var(--bb-leading-snug);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-bold);
+  line-height: var(--bb-leading-label);
 }
 
 .message {
   color: var(--bb-text-2);
-  font-size: var(--bb-font-size-xs);
+  font-size: var(--bb-fs-xs);
   line-height: var(--bb-leading-body);
+}
+
+.toast[data-tone="error"] .message {
+  color: var(--bb-black);
 }
 
 .close {
   flex-shrink: 0;
-  border-color: transparent;
 }

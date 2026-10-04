@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portadas generativas · test de tinta</title>
+<link rel="stylesheet" href="final.css">
+<style>
+  body{padding:28px 32px}
+  h1{font-size:30px;margin-bottom:6px}
+  .grid{display:grid;grid-template-columns:repeat(8,1fr);gap:14px 12px;margin-top:18px}
+  figure{margin:0}
+  canvas{width:100%;aspect-ratio:1;display:block}
+  figcaption{font:700 12px/1.25 var(--bb-font-ui);letter-spacing:.06em;text-transform:uppercase;margin-top:6px;color:var(--bb-text-2)}
+  figcaption small{display:block;font:600 12px/1.2 var(--bb-font-num);color:var(--bb-text-3);text-transform:none;letter-spacing:0}
+  #res{font:600 14px/1.5 var(--bb-font-num);color:var(--bb-text-2);margin-top:8px}
+  #res b{color:var(--bb-white)}
+</style>
+</head>
+<body>
+<h1 class="display">Portadas generativas · 48 semillas</h1>
+<p class="body">Mismo fondo, tamaño y galleta; tinta roja 11,5 % y blanca 1,6 % del disco; 8 familias de forma. Test: proporción de píxeles rojos y luminancia media dentro de ±5 % de la media.</p>
+<p id="res"></p>
+<div class="grid" id="g"></div>
+<script src="final.js"></script>
+<script>
+  const A = ['Tigre','Cometa','Neón','Eclipse','Pantera','Relámpago','Sirena','Satélite','Bruma','Volcán','Lince','Faro','Medusa','Trueno','Cuervo','Aurora','Galgo','Cobra','Brasa','Marea'];
+  const B = ['Púrpura','Ácido','Nocturno','Salvaje','Eléctrico','Fantasma','Lunar','Callejero','Infinito','Hipnótico','Turbio','Glaciar','Oxidado','Cromado','Errante','Magnético','Lento','Feroz'];
+  const g = document.getElementById('g');
+  for (let i = 0; i < 48; i++) {
+    const id = 'entrada-s41-' + i, bpm = 70 + (Arena.hash(id) % 90), key = Arena.hash(id + 'k') % 12;
+    g.insertAdjacentHTML('beforeend', `<figure><canvas data-cover="${id}" data-bpm="${bpm}" data-key="${key}" width="160" height="160"></canvas><figcaption>${A[i % A.length]} ${B[(i * 7) % B.length]}<small></small></figcaption></figure>`);
+  }
+  window.paintScreen = () => {
+    const rows = [...document.querySelectorAll('canvas[data-cover]')].map((c) => ({ c, ...Arena.coverStats(c) }));
+    const mr = rows.reduce((a, r) => a + r.red, 0) / rows.length, ml = rows.reduce((a, r) => a + r.lum, 0) / rows.length;
+    let worstR = 0, worstL = 0;
+    rows.forEach((r) => { const dr = (r.red - mr) / mr, dl = (r.lum - ml) / ml; worstR = Math.max(worstR, Math.abs(dr)); worstL = Math.max(worstL, Math.abs(dl));
+      r.c.nextElementSibling.querySelector('small').textContent = `${r.c.dataset.family} · rojo ${(dr * 100).toFixed(1)} % · lum ${(dl * 100).toFixed(1)} %`; });
+    document.getElementById('res').innerHTML = `Media: rojo <b>${(mr * 100).toFixed(2)} %</b> de píxeles · luminancia <b>${ml.toFixed(4)}</b> · peor desviación: rojo <b>${(worstR * 100).toFixed(1)} %</b>, luminancia <b>${(worstL * 100).toFixed(1)} %</b> → ${worstR <= 0.05 && worstL <= 0.05 ? '<b>PASA</b>' : '<b>NO PASA</b>'}`;
+    window.coverTest = { mr, ml, worstR, worstL, fams: rows.map((r) => r.c.dataset.family) };
+  };
+</script>
+</body>
+</html>

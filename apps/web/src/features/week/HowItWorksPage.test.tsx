@@ -1,0 +1,118 @@
+import { act, render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { createMemoryRouter, RouterProvider } from 'react-router'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { RootLayout } from '../../app/layout/RootLayout'
+import { interiorScreen } from '../../app/layout/screen'
+import { t } from '../../i18n'
+import { useShortcuts } from '../../ui/shortcuts'
+import { HowItWorksPage } from './HowItWorksPage'
+
+function renderPage() {
+  const router = createMemoryRouter(
+    [
+      {
+        element: <RootLayout />,
+        children: [
+          {
+            path: 'como-funciona',
+            handle: {
+              screen: interiorScreen({ kicker: 'frame.plates.howItWorks', title: 'pages.howItWorks.title' }, [
+                'choose',
+                'enter',
+                'back',
+                'sound',
+              ]),
+            },
+            element: <HowItWorksPage />,
+          },
+          { path: '*', element: <h1>Destino</h1> },
+        ],
+      },
+    ],
+    { initialEntries: ['/como-funciona'] },
+  )
+  render(<RouterProvider router={router} />)
+  return router
+}
+
+beforeEach(() => vi.spyOn(window, 'scrollTo').mockImplementation(() => {}))
+afterEach(() => {
+  vi.restoreAllMocks()
+  useShortcuts.getState().set(true)
+  localStorage.clear()
+})
+
+const moveList = () => screen.getByRole('menu', { name: t('frame.plates.howItWorks') })
+
+describe('«Cómo se juega» como lista de movimientos (§3.8.14; 0.26, 0.28)', () => {
+  it('RD-VIS-02 d: un menú de juego con los tres movimientos, «Bases» y «Volver al menú», una sola parada', async () => {
+    renderPage()
+    const items = within(moveList()).getAllByRole('menuitem')
+    expect(items.map((item) => item.getAttribute('href'))).toEqual([
+      '/',
+      '/subir',
+      '/jurado',
+      '/legal/bases',
+      '/',
+    ])
+    expect(items[0]).toHaveAccessibleName(t('howItWorks.moves.sample.title'))
+    expect(items[2]).toHaveAccessibleDescription(new RegExp(t('howItWorks.moves.vote.keysLabel')))
+    expect(items.filter((item) => item.tabIndex === 0)).toEqual([items[0]])
+    // Cursor de juego con la etiqueta 1P en cada opción.
+    for (const item of items)
+      expect(item.querySelector('[data-cursor-player="left"]')).toHaveTextContent('1P')
+    await act(async () => {})
+  })
+
+  it('RD-MOT-05: ↑/↓ mueven el cursor en bucle; con el foco en ningún control, las flechas van a la lista', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    const items = within(moveList()).getAllByRole('menuitem')
+    // El foco está en el <main> (destino de foco del marco): ↓ entra en la lista.
+    screen.getByRole('main').focus()
+    await user.keyboard('{ArrowDown}')
+    expect(items[1]).toHaveFocus()
+    await user.keyboard('{ArrowUp}{ArrowUp}')
+    expect(items[4]).toHaveFocus()
+    expect(items[4]).toHaveAttribute('data-cursor-active', 'true')
+  })
+
+  it('B abre las bases de la competición desde cualquier sitio de la pantalla', async () => {
+    const user = userEvent.setup()
+    const router = renderPage()
+    within(moveList()).getAllByRole('menuitem')[0]!.focus()
+    await user.keyboard('b')
+    expect(router.state.location.pathname).toBe('/legal/bases')
+  })
+
+  it('RNF-A11Y-08 / WCAG 2.1.4: con los atajos de una tecla apagados, B solo abre las bases con el foco en la lista', async () => {
+    const user = userEvent.setup()
+    useShortcuts.getState().set(false)
+    const router = renderPage()
+    screen.getByRole('main').focus()
+    await user.keyboard('b')
+    expect(router.state.location.pathname).toBe('/como-funciona')
+    within(moveList()).getAllByRole('menuitem')[0]!.focus()
+    await user.keyboard('b')
+    expect(router.state.location.pathname).toBe('/legal/bases')
+  })
+
+  it('RD-VIS-02 e: las cinco reglas de juego limpio, como filas densas con su índice, el nombre en display y una línea (§3.8.14)', async () => {
+    renderPage()
+    const rules = screen.getByRole('region', { name: t('howItWorks.rulesTitle') })
+    const rows = within(rules).getAllByRole('listitem')
+    expect(rows).toHaveLength(5)
+    expect(rows[0]).toHaveTextContent(`01${t('howItWorks.rules.blind.title')}`)
+    // Voto ciego, escucha mínima, Ronda justa, media bayesiana y el XP no puntúa (§1.3, §2.7, §2.8).
+    const names = rows.map((row) => row.querySelector('b'))
+    expect(names.map((name) => name?.textContent)).toEqual(
+      (['blind', 'listen', 'fairRound', 'bayes', 'xp'] as const).map((rule) =>
+        t(`howItWorks.rules.${rule}.title`),
+      ),
+    )
+    for (const name of names) expect(name).toHaveClass('bb-display')
+    expect(rows[4]).toHaveTextContent(t('howItWorks.rules.xp.text'))
+    await act(async () => {})
+  })
+})

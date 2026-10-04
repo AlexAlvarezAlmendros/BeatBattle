@@ -14,6 +14,7 @@
     "check": "biome check . && pnpm lint:tokens && pnpm lint:purity",
     "lint:tokens": "node tools/lint/check-tokens.mjs",
     "lint:purity": "pnpm --filter @beatbattle/rules lint:purity",
+    "brand:slap": "node tools/brand/otp-slap.mjs",
     "fix": "biome check --write .",
     "typecheck": "pnpm -r typecheck && tsc -p tsconfig.json",
     "test": "pnpm -r test",

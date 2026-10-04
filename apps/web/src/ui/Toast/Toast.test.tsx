@@ -161,7 +161,7 @@ describe('ToastViewport', () => {
 })
 
 describe('Toast (pieza)', () => {
-  it('información con acento neutro: el rojo se queda para el error', () => {
+  it('§3.2 «Estados»: el aviso es un panel con marco; el de error, de papel (blanco con texto negro)', () => {
     const { container } = render(
       <>
         <Toast toast={{ tone: 'info', title: 'Aviso' }} />
@@ -169,8 +169,11 @@ describe('Toast (pieza)', () => {
       </>,
     )
     const [info, error] = [...container.querySelectorAll<HTMLElement>('[data-tone]')]
-    expect(getComputedStyle(info!).getPropertyValue('--toast-accent')).toBe('var(--bb-text-2)')
-    expect(getComputedStyle(error!).getPropertyValue('--toast-accent')).toBe('var(--bb-danger)')
+    expect(info).toHaveAttribute('data-frame')
+    expect(getComputedStyle(info!).getPropertyValue('--frame-fill')).toBe('var(--bb-panel)')
+    expect(getComputedStyle(error!).getPropertyValue('--frame-fill')).toBe('var(--bb-white)')
+    // El tono, con palabras (nunca solo color).
+    expect(screen.getByRole('img', { name: t('ui.toast.tone.error') })).toBeInTheDocument()
   })
 
   it('RD-VIS-03: estados forzados y sin botón de cerrar si no se puede cerrar', () => {

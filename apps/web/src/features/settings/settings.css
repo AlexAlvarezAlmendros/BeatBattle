@@ -1,45 +1,304 @@
-/* Marco provisional de ajustes (0.10): navegación lateral en escritorio, arriba en móvil. */
-.settings-layout {
+/* Opciones (§3.8.14): las pestañas de las secciones van en la pantalla de cada sección (`SettingsTabs`). */
+
+/* Una opción de la sección: el conmutador y, debajo, qué hace (RNF-A11Y-08). */
+.settings-option {
   display: grid;
-  gap: var(--bb-space-8);
+  justify-items: start;
+  gap: var(--bb-space-2);
 }
 
-@media (min-width: 768px) {
-  .settings-layout {
-    grid-template-columns: minmax(12rem, 16rem) 1fr;
-  }
+.settings-option-help {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
 }
 
-.settings-layout__label {
-  margin-bottom: var(--bb-space-2);
-  color: var(--bb-text-3);
-  font-size: var(--bb-font-size-xs);
-  font-weight: var(--bb-weight-bold);
-  letter-spacing: var(--bb-tracking-caps);
-  text-transform: uppercase;
+/*
+ * La pieza de Opciones en la cuña (§3.8.14): las placas de la sección en vista previa, quietas. Placas
+ * opacas de chaflán `--bb-cut-md` (la cuña lleva trama, `RD-VIS-05`): el nombre a la izquierda y el
+ * control a la derecha, un medidor de 10 pasos, «◀ SÍ ▶» o la acción con su flecha.
+ */
+.settings-preview {
+  --frame-fill: var(--bb-panel-veil);
+  container: preview / inline-size;
+  display: grid;
+  gap: var(--bb-space-3);
+  width: 100%;
+  margin: 0;
+  padding: var(--bb-space-5) var(--bb-space-4);
 }
 
-.settings-layout nav ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--bb-space-1) var(--bb-space-4);
+.settings-preview-list {
+  display: grid;
+  gap: var(--bb-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-@media (min-width: 768px) {
-  .settings-layout nav ul {
-    flex-direction: column;
-  }
+/*
+ * Cada placa, a su alto natural y acotado: el de las placas del menú en reposo (`--bb-plate-h`, 70 px; 56
+ * con la ventana baja y 48 en móvil), nunca estirada para llenar la columna (§3.8.14 «Reparto del
+ * alto»). El nombre, en display como las del menú, parte en dos líneas antes que cortarse (nunca en
+ * tres: en un tablero estrecho cede antes su anchura y después el valor baja de línea, abajo); el valor
+ * o el medidor, a su lado, más grandes que un rótulo y nunca más que el nombre.
+ */
+.settings-preview-option {
+  --frame-fill: var(--bb-panel-2);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--bb-space-4);
+  min-height: var(--bb-plate-h);
+  padding: var(--bb-space-2) var(--bb-space-5);
 }
 
-.settings-layout nav a {
+.settings-preview-label {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-lg);
+  font-stretch: var(--bb-stretch-plate);
+  line-height: 1;
+  text-wrap: balance;
+}
+
+.settings-preview-toggle,
+.settings-preview-action {
   display: inline-flex;
   align-items: center;
-  min-height: var(--bb-space-11);
-  color: var(--bb-text-2);
-  text-decoration: none;
+  gap: var(--bb-space-2);
+  color: var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-lg);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-button);
+  letter-spacing: var(--bb-tracking-button);
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.settings-layout nav a[aria-current="page"] {
-  color: var(--bb-text);
-  font-weight: var(--bb-weight-semibold);
+/* La acción («Cambiar ▸»): un punto por debajo del nombre y en gris, como un dato de la placa. */
+.settings-preview-action {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-md);
+}
+
+/*
+ * El medidor, más grande que el de una línea de texto (16 px de alto en vez de 10, los mismos diez
+ * segmentos), con su valor en cifra al lado (Oxanium, como las teselas).
+ */
+.settings-preview-meter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-3);
+}
+
+.settings-preview-meter [role="meter"] {
+  height: var(--bb-space-4);
+}
+
+.settings-preview-number {
+  min-width: 2ch;
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-lg);
+  font-weight: var(--bb-weight-extrabold);
+  line-height: 1;
+  text-align: right;
+}
+
+/*
+ * Las flechas del conmutador y de la acción: triángulos rojos en SVG, del color del texto de la flecha
+ * (`currentColor`): en contraste alto toman el del sistema, como el texto (un fondo recortado se perdía).
+ */
+.settings-preview-arrow {
+  flex: none;
+  width: var(--bb-space-2);
+  height: var(--bb-space-3);
+  color: var(--bb-red);
+  fill: currentColor;
+}
+
+@media (forced-colors: active) {
+  .settings-preview-arrow {
+    color: CanvasText;
+  }
+}
+
+/*
+ * Tablero estrecho (el interior del tablero mide menos de 22 rem: la columna de la pieza de escritorio
+ * de 961 a ~1400 px, y el móvil; a 1440 mide 23 rem): como el rótulo de la placa del menú (§3.3 «Nada
+ * se corta»), el nombre cede su anchura, de 125 a 105 %, y así no pasa de dos líneas («TAMAÑO / DE /
+ * TEXTO» partía en tres a 1280).
+ */
+@container preview (width < 22rem) {
+  .settings-preview-label {
+    font-stretch: var(--bb-stretch-min);
+  }
+}
+
+/*
+ * Más estrecho (< 20 rem: la columna de 18 a ~21 rem, de 961 a ~1250 px con la ventana baja y a ~1280
+ * con la normal): las placas, con menos relleno a los lados (12 px), y cede el medidor, el valor más
+ * ancho (diez segmentos y su cifra): baja a una segunda línea bajo el nombre, como el dato en la lista
+ * estrecha del menú (§3.3), y el nombre tiene todo el ancho de la placa. El corte va donde «ENTRADAS»
+ * (la palabra más ancha que va junto a un medidor) aún deja 14 px hasta él: con 19 rem, de ~1200 a
+ * ~1230 px (ventana baja) y hacia 1260 × 900 llegaba a pisarlo (cuarto pase del jurado, P6). Los
+ * conmutadores y las acciones, cortos, siguen al lado (bajarlos haría partir en dos «Avisos de la
+ * batalla», que ya no tendría el ancho de su valor y no cabría en el alto). Todas las placas siguen a su
+ * alto (70 px; 56 con la ventana baja y 48 en móvil): el nombre y el medidor, juntos (4 px), caben en él.
+ */
+@container preview (width < 20rem) {
+  .settings-preview-option {
+    column-gap: var(--bb-space-3);
+    padding-inline: var(--bb-space-3);
+  }
+
+  .settings-preview-option:has(.settings-preview-meter) {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    justify-items: start;
+    gap: var(--bb-space-1);
+    padding-block: var(--bb-space-1);
+  }
+}
+
+/* El pie, en el propio tablero (opaco: la cuña lleva trama). */
+.settings-preview-caption {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+/*
+ * Qué hará cada opción (en el panel): filas densas con índice, como las reglas de «Cómo se juega» y las
+ * de `05-perfil`: el nombre en display y una línea de explicación, a su alto natural.
+ */
+.settings-help {
+  display: grid;
+  gap: var(--bb-space-3);
+}
+
+.settings-help-title {
+  color: var(--bb-red);
+}
+
+.settings-help-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  border-top: var(--bb-stroke-hair) solid var(--bb-line);
+  list-style: none;
+}
+
+.settings-help-row {
+  display: grid;
+  grid-template-columns: var(--bb-space-10) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--bb-space-3);
+  padding: var(--bb-space-3) 0;
+  border-bottom: var(--bb-stroke-hair) solid var(--bb-line);
+}
+
+.settings-help-body {
+  display: grid;
+  gap: var(--bb-space-1);
+}
+
+.settings-help-name {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-md);
+  font-stretch: var(--bb-stretch-plate);
+  line-height: 1;
+}
+
+.settings-help-text {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+.settings-help-index {
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-lg);
+  font-weight: var(--bb-weight-extrabold);
+  line-height: 1;
+}
+
+/* La última fila no lleva filete: debajo va el de las acciones del panel. */
+.settings-help-row:last-child {
+  border-bottom: 0;
+}
+
+/* Pantalla grande (≥ 1600 px): la letra de la ayuda crece con el panel, como la de «Cómo se juega». */
+@media (min-width: 1600px) {
+  .settings-help-text {
+    font-size: var(--bb-fs-md);
+  }
+
+  .settings-help-name {
+    font-size: var(--bb-fs-lg);
+  }
+
+  .settings-help-index {
+    font-size: var(--bb-fs-2xl);
+  }
+}
+
+/*
+ * Ventana baja (≥ 721 px de ancho y < 900 de alto; §3.8.14): se aprieta por altura, sin esconder nada.
+ * Placas de 56 px en un tablero con 12 px de relleno, filas de la ayuda a 56 px y el conmutador de los
+ * atajos con su explicación al lado, si cabe.
+ */
+@media (min-width: 721px) and (max-height: 899px) {
+  .settings-preview {
+    gap: var(--bb-space-2);
+    padding: var(--bb-space-3);
+  }
+
+  .settings-preview-option {
+    min-height: var(--bb-space-14);
+  }
+
+  .settings-help {
+    gap: var(--bb-space-2);
+  }
+
+  .settings-help-row {
+    padding-block: var(--bb-space-2);
+  }
+
+  .settings-option {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--bb-space-2) var(--bb-space-4);
+  }
+
+  .settings-option-help {
+    flex: 1 1 24rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .settings-preview {
+    padding: var(--bb-space-3);
+  }
+
+  .settings-preview-option {
+    min-height: var(--bb-space-12);
+    padding: var(--bb-space-2) var(--bb-space-4);
+  }
+
+  .settings-preview-label,
+  .settings-preview-toggle,
+  .settings-preview-number {
+    font-size: var(--bb-fs-md);
+  }
+
+  .settings-preview-action {
+    font-size: var(--bb-fs-sm);
+  }
 }

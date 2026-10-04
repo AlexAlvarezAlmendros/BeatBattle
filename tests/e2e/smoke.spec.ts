@@ -2,66 +2,45 @@ import { expect, test } from '@playwright/test'
 import { collectErrors } from './support'
 
 /**
- * Humo de la home (tarea 0.13, guía §4.16): el marco del sello (isla, titular, pie) se pinta sin
- * errores y la API responde por el proxy de Vite en el mismo origen, como en producción.
+ * Humo de la home (tareas 0.13 y 0.27, guía §3.4.1 y §3.8.3): el marco de juego (HUD, barra de
+ * controles con la firma) y el menú principal en «calendario vacío» se pintan sin errores, y la API
+ * responde por el proxy de Vite en el mismo origen, como en producción.
  */
 
-test('humo: la home pinta la isla, el titular «Beat Battle» y el pie, sin errores', async ({ page }) => {
-  const errors = collectErrors(page)
-  await page.goto('/')
-
-  await expect(page).toHaveTitle('Beat Battle · Other People')
-
-  // Isla de navegación: logo del sello, enlaces principales y «Entrar».
-  const island = page.getByRole('banner')
-  await expect(island).toBeVisible()
-  await expect(island.getByRole('link', { name: 'Other People Records' })).toHaveAttribute(
-    'href',
-    'https://www.otherpeople.es/',
-  )
-  const nav = island.getByRole('navigation', { name: 'Principal' })
-  for (const name of ['Semana', 'Jurado', 'Resultados', 'Salón de la fama', 'Cómo funciona'])
-    await expect(nav.getByRole('link', { name, exact: true })).toBeVisible()
-  await expect(nav.getByRole('link', { name: 'Semana', exact: true })).toHaveAttribute('aria-current', 'page')
-  await expect(island.getByRole('link', { name: 'Entrar', exact: true })).toBeVisible()
-
-  // Titular del hero y estado «calendario vacío» (§2.19).
-  const main = page.getByRole('main')
-  await expect(main.getByRole('heading', { level: 1, name: 'Beat Battle' })).toBeVisible()
-  await expect(main.getByText('El próximo drop está en el horno.')).toBeVisible()
-  await expect(main.getByRole('link', { name: 'Avísame del próximo drop' })).toHaveAttribute(
-    'href',
-    '/#alerta',
-  )
-  await expect(page.getByRole('marquee', { name: 'Teletipo de la batalla' })).toBeVisible()
-
-  // Pie del sello con sus enlaces (RF-OTP-01) y los legales.
-  const footer = page.getByRole('contentinfo')
-  await expect(footer.getByRole('heading', { name: 'Beat Battle', exact: true })).toBeVisible()
-  await expect(footer.getByRole('navigation', { name: 'Web de Other People Records' })).toBeVisible()
-  await expect(footer.getByRole('link', { name: /^Beats/ })).toHaveAttribute(
-    'href',
-    'https://www.otherpeople.es/beats',
-  )
-  await expect(footer.getByRole('navigation', { name: 'Legal' }).getByRole('link')).toHaveCount(4)
-
-  expect(errors).toEqual([])
-})
-
-test('§2.12.3: el CTA «Avísame del próximo drop» lleva a su sección de la home, a la vista bajo la isla', async ({
+test('humo: la home pinta el HUD, el menú principal y la barra de controles, sin errores', async ({
   page,
 }) => {
   const errors = collectErrors(page)
   await page.goto('/')
+  await expect(page).toHaveTitle('Beat Battle · Other People')
+
+  // HUD: sin sesión, «1P · PULSA PARA UNIRTE» lleva a entrar; el botón de sonido es un conmutador.
+  const hud = page.getByRole('banner')
+  await expect(hud.getByRole('link', { name: /Pulsa para unirte/ })).toHaveAttribute('href', '/entrar')
+  await expect(hud.getByRole('button', { name: 'Sonido de efectos (M)' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+
+  // Menú principal (§3.8.3) en «calendario vacío» (§2.19).
   const main = page.getByRole('main')
-  await main.getByRole('link', { name: 'Avísame del próximo drop' }).click()
-  await expect(page).toHaveURL('/#alerta')
-  const section = main.getByRole('region', { name: 'Avísame del próximo drop' })
-  await expect(section).toHaveAttribute('id', 'alerta')
-  const heading = section.getByRole('heading', { level: 2, name: 'Avísame del próximo drop' })
-  await expect(heading).toBeInViewport()
-  // El título no queda bajo la isla ni bajo el logo que cuelga de ella (`--nav-obscured`).
-  await expect.poll(async () => (await heading.boundingBox())?.y ?? 0).toBeGreaterThanOrEqual(119)
+  await expect(main.getByRole('heading', { level: 1, name: 'Beat Battle' })).toBeAttached()
+  await expect(
+    main.getByRole('heading', { level: 2, name: 'El próximo drop está en el horno' }),
+  ).toBeVisible()
+  const menu = main.getByRole('menu', { name: 'Elige modo' })
+  await expect(menu.getByRole('menuitem')).toHaveCount(6)
+  await expect(main.getByRole('region', { name: /Avísame del próximo drop/ })).toHaveAttribute('id', 'alerta')
+
+  // Barra de controles con sus teclas y la firma del sello (RF-OTP-01).
+  const bar = page.getByRole('contentinfo')
+  await expect(bar.getByRole('list', { name: 'Controles' }).getByRole('listitem')).toHaveCount(4)
+  await expect(
+    bar.getByRole('link', {
+      name: 'Un juego de Other People Records (abre la web del sello en una pestaña nueva)',
+    }),
+  ).toHaveAttribute('href', 'https://www.otherpeople.es/')
+
   expect(errors).toEqual([])
 })
 
