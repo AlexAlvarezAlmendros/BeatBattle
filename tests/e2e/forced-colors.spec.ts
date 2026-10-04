@@ -155,3 +155,72 @@ test('RNF-A11Y-01: en contraste alto, los interruptores de la galería enseñan 
   await expect(reduced).toHaveAttribute('aria-checked', 'false')
   expect(await yesNo(reduced)).toEqual(off)
 })
+
+/** Un color del sistema (`CanvasText`, `Highlight`…) tal y como lo resuelve el navegador en el modo forzado. */
+function systemColor(page: Page, name: string) {
+  return page.evaluate((keyword) => {
+    const probe = document.createElement('span')
+    probe.style.cssText = `position:absolute;forced-color-adjust:none;background:${keyword}`
+    document.body.append(probe)
+    const color = getComputedStyle(probe).backgroundColor
+    probe.remove()
+    return color
+  }, name)
+}
+
+/**
+ * El medidor (§3.3; el de las opciones, la barra de XP) pintaba en contraste alto la pista en `GrayText` y
+ * el relleno en `Highlight`: en el esquema claro, azul marino y rojo oscuro, casi iguales sobre blanco
+ * (tercer pase del jurado, L13b). Ahora se distinguen por la forma: los segmentos vacíos son solo un borde
+ * `CanvasText` sin relleno (la pista, `Canvas`, con su contorno y los huecos en `CanvasText`) y los
+ * llenos, macizos en `Highlight`.
+ */
+test.describe('esquema claro', () => {
+  test.use({ colorScheme: 'light' })
+
+  /** Cómo pinta cada medidor de `scope`: pista, contorno (estilo, color y si tiene ancho), huecos y relleno. */
+  function meters(page: Page, scope: string) {
+    return page.locator(`${scope} :is([role="meter"], [role="progressbar"])`).evaluateAll((tracks) =>
+      tracks.map((track) => {
+        const style = getComputedStyle(track)
+        const fill = track.querySelector('[data-meter-fill]')!
+        return {
+          track: style.backgroundColor,
+          clipPath: style.clipPath,
+          ring: `${style.outlineStyle} ${style.outlineColor} ${Number.parseFloat(style.outlineWidth) > 0}`,
+          gaps: getComputedStyle(track, '::after').backgroundImage,
+          fill: getComputedStyle(fill).backgroundColor,
+          filled: fill.getBoundingClientRect().width > 0,
+        }
+      }),
+    )
+  }
+
+  test('RNF-A11Y-01: en contraste alto, el medidor distingue los segmentos llenos (Highlight) de los vacíos (solo borde), en Opciones y en la galería', async ({
+    page,
+  }) => {
+    await open(page, '/ajustes/accesibilidad', 'Accesibilidad')
+    expect(await page.evaluate(() => matchMedia('(prefers-color-scheme: light)').matches)).toBe(true)
+    const [canvas, canvasText, highlight] = await Promise.all(
+      ['Canvas', 'CanvasText', 'Highlight'].map((name) => systemColor(page, name)),
+    )
+    const check = (found: Awaited<ReturnType<typeof meters>>) => {
+      expect(found.length).toBeGreaterThan(0)
+      for (const meter of found) {
+        // Vacíos: sin relleno (el lienzo) y con borde: el contorno de la pista y los huecos, en CanvasText.
+        expect(meter.track).toBe(canvas)
+        expect(meter.clipPath).toBe('none')
+        expect(meter.ring).toBe(`solid ${canvasText} true`)
+        expect(meter.gaps).toContain(canvasText)
+        // Llenos: macizos en Highlight.
+        expect(meter.filled).toBe(true)
+        expect(meter.fill).toBe(highlight)
+      }
+    }
+    check(await meters(page, 'main'))
+
+    await openGallery(page)
+    await page.locator('section#medidor').scrollIntoViewIfNeeded()
+    check(await meters(page, 'section#medidor'))
+  })
+})

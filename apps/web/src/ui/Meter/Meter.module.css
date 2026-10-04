@@ -99,11 +99,30 @@
   display: none;
 }
 
-/* Contraste alto (`forced-colors: active`): pista `GrayText` y relleno `Highlight` (son fondos). */
+/*
+ * Contraste alto (`forced-colors: active`, RNF-A11Y-01): pista, relleno y huecos son fondos que el modo
+ * quitaría. Con la pista en `GrayText` y el relleno en `Highlight`, en el esquema claro salían azul
+ * marino y rojo oscuro, casi iguales sobre blanco. Ahora se distinguen por la forma y no solo por el
+ * tono: los segmentos vacíos son solo borde (`CanvasText`) sin relleno (la pista, `Canvas`, con su
+ * contorno por dentro, sin cambiar su tamaño, y los huecos en `CanvasText`) y los llenos, macizos en
+ * `Highlight`. La pista va sin el corte en paralelogramo, que se comería el contorno de los extremos.
+ */
 @media (forced-colors: active) {
   .track {
     forced-color-adjust: none;
-    background: GrayText;
+    background: Canvas;
+    outline: var(--bb-stroke-hair) solid CanvasText;
+    outline-offset: calc(-1 * var(--bb-stroke-hair));
+    clip-path: none;
+  }
+
+  .track::after {
+    background: repeating-linear-gradient(
+      90deg,
+      transparent 0 calc(var(--bb-space-2) + var(--bb-stroke-hair)),
+      CanvasText calc(var(--bb-space-2) + var(--bb-stroke-hair))
+        calc(var(--bb-space-2) + var(--bb-stroke-hair) + var(--bb-stroke))
+    );
   }
 
   .fill {
