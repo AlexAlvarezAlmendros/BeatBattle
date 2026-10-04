@@ -24,6 +24,7 @@ export function LegalPage() {
       titlePlacement="panel"
       tabs={
         <TabLinks
+          short
           label={t('legal.navLabel')}
           links={LEGAL_DOCS.map((item) => ({
             to: paths.legal(item),

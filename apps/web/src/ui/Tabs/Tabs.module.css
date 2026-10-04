@@ -133,6 +133,20 @@
   outline-offset: var(--bb-cursor-gap);
 }
 
+/*
+ * Rótulos cortos en móvil (≤ 720 px; los legales, §3.8.14 v0.6.7): las cuatro pestañas van en una fila de
+ * 360 a 390 px de ancho en táctil (a 390 × 844 «COOKIES» quedaba sola en otra fila; cuarto pase del
+ * jurado, P7). El rótulo sigue a 12 px y la pestaña a 44 px de alto; ceden el relleno de los lados (el
+ * de la inclinación y `--bb-space-1`) y el interletraje. Más estrecho, o con [Q] y [E] a los lados,
+ * parten en filas como siempre.
+ */
+@media (max-width: 720px) {
+  .row[data-short] .tab {
+    padding-inline: calc(var(--bb-slant-sm) + var(--bb-space-1));
+    letter-spacing: 0;
+  }
+}
+
 /* Táctil: sin las teclas Q/E (no hay teclado, §3.3), y las pestañas, a todo lo ancho; depende del tipo
  * de entrada, no del ancho. */
 @media (hover: none), (pointer: coarse) {

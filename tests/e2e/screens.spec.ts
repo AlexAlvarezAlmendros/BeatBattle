@@ -1214,3 +1214,49 @@ for (const viewport of [
     })
   })
 }
+
+/**
+ * Las pestañas de los legales en una fila también en móvil, a partir de 360 px (§3.8.14 v0.6.7; cuarto
+ * pase del jurado, P7): a 390 × 844 partían en dos filas («COOKIES» sola). En móvil llevan menos relleno a
+ * los lados y sin interletraje, a 12 px; siguen midiendo 44 px de alto y ninguna se corta.
+ */
+for (const viewport of [
+  { width: 360, height: 640 },
+  { width: 375, height: 667 },
+  { width: 390, height: 844 },
+]) {
+  test.describe(`pestañas de los legales a ${viewport.width} × ${viewport.height} táctil`, () => {
+    test.use({ viewport, isMobile: true, hasTouch: true })
+
+    test('RD-VIS-02 e / §3.8.14: BASES · TÉRMINOS · PRIVACIDAD · COOKIES van en una fila (P7)', async ({
+      page,
+    }) => {
+      await open(page, '/legal/bases', 'Bases de la competición')
+      await settle(page)
+      const tabs = await page.evaluate(() =>
+        [...document.querySelectorAll('main nav[aria-label="Documentos legales"] li > a')].map((tab) => {
+          const box = tab.getBoundingClientRect()
+          // El rótulo (el último nodo: antes va el cursor), en una línea y dentro de la pestaña.
+          const range = document.createRange()
+          range.selectNodeContents(tab.lastChild!)
+          const text = [...range.getClientRects()].filter((rect) => rect.width > 0)
+          return {
+            top: Math.round(box.top),
+            height: box.height,
+            size: Number.parseFloat(getComputedStyle(tab).fontSize),
+            clipped: text.length !== 1 || text[0]!.left < box.left || text[0]!.right > box.right,
+            right: box.right,
+          }
+        }),
+      )
+      expect(tabs).toHaveLength(4)
+      expect(new Set(tabs.map((tab) => tab.top)).size, 'filas de pestañas').toBe(1)
+      for (const tab of tabs) {
+        expect(tab.height).toBeGreaterThanOrEqual(44)
+        expect(tab.size).toBeGreaterThanOrEqual(12)
+        expect(tab.clipped).toBe(false)
+        expect(tab.right).toBeLessThanOrEqual(viewport.width)
+      }
+    })
+  })
+}

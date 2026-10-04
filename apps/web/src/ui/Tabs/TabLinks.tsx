@@ -65,10 +65,16 @@ export function keepsTabFocus(state: unknown, navigationType: NavigationType): b
 export function TabLinks({
   label,
   links,
+  short = false,
   className,
 }: {
   label: string
   links: readonly TabLink[]
+  /**
+   * Rótulos cortos que van en una fila también en móvil (los legales, §3.8.14 v0.6.7: «BASES · TÉRMINOS
+   * · PRIVACIDAD · COOKIES»): en móvil, menos relleno a los lados y sin interletraje (`Tabs.module.css`).
+   */
+  short?: boolean
   className?: string
 }) {
   const navigate = useNavigate()
@@ -145,7 +151,12 @@ export function TabLinks({
   const listProps = { 'data-cursor-group': '', onKeyDown: roving.onKeyDown, onBlur }
 
   return (
-    <nav ref={navRef} aria-label={label} className={cx(styles.row, className)}>
+    <nav
+      ref={navRef}
+      aria-label={label}
+      className={cx(styles.row, className)}
+      data-short={short || undefined}
+    >
       <Key aria-hidden="true">{t('ui.tabs.previousKey')}</Key>
       {/* biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none */}
       <ul role="list" className={styles.list} {...listProps}>
