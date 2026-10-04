@@ -554,8 +554,20 @@ async function lockupOverLogo(page: Page): Promise<LockupOverLogo> {
  * una línea (móvil bajo, 360 × 640 y 375 × 667) la cinta y la pegatina quedaban sobre la extrusión de
  * «BEAT» y de «BATTLE». A 390 × 844 y en escritorio, con el logo en dos líneas, tampoco. Y el menú sigue
  * cabiendo sin desplazar en los móviles de la guía.
+ *
+ * La autenticación lleva el mismo lockup (§3.1 v0.6.7: «en el menú ni en la autenticación»), también con
+ * el espaciado de texto de WCAG 1.4.12 (la cinta parte en dos líneas y el lockup reserva su alto real):
+ * en móvil la pegatina de 62 px pisaba el pie de «LE» de BATTLE (137–192 px²) y, con 1.4.12, la cinta en
+ * dos líneas pisaba «BATTLE» (159 px; cuarto pase del jurado, P1). A 320 × 568 solo la autenticación: el
+ * menú se desplaza ahí (§3.8.3).
  */
+const AUTH_LOCKUPS = [
+  { path: '/entrar', heading: 'Entrar' },
+  { path: '/registro', heading: 'Crear cuenta' },
+]
+
 for (const viewport of [
+  { width: 320, height: 568, touch: false, authOnly: true },
   { width: 360, height: 640, touch: true },
   { width: 375, height: 667, touch: true },
   { width: 390, height: 844, touch: true },
@@ -575,6 +587,30 @@ for (const viewport of [
       isMobile: viewport.touch,
       hasTouch: viewport.touch,
     })
+
+    for (const { path, heading } of AUTH_LOCKUPS)
+      for (const spacing of [false, true])
+        test(`RD-VIS-02 e / §3.1: ni la pegatina OTP ni la cinta del lockup pisan el logo de ${path}${spacing ? ' con el espaciado de texto (WCAG 1.4.12)' : ''}`, async ({
+          page,
+        }) => {
+          if (spacing)
+            await page.addInitScript((css) => {
+              document.addEventListener('DOMContentLoaded', () => {
+                const style = document.createElement('style')
+                style.textContent = css
+                document.head.append(style)
+              })
+            }, TEXT_SPACING)
+          await open(page, path, heading)
+          await settle(page)
+          if (spacing)
+            expect(await page.evaluate(() => getComputedStyle(document.body).letterSpacing)).not.toBe(
+              'normal',
+            )
+          expect(await lockupOverLogo(page)).toEqual({ sticker: 0, ribbon: 0 })
+        })
+
+    if (viewport.authOnly) return
 
     for (const path of ['/dev/menu', '/']) {
       test(`RD-VIS-02 e / §3.1: ni la pegatina OTP ni la cinta del lockup pisan el logo de ${path}`, async ({

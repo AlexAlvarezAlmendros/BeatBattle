@@ -16,12 +16,24 @@
   margin: calc(-1 * var(--bb-space-1)) 0 0 var(--bb-space-2);
 }
 
+/*
+ * Móvil (≤ 720 px): el lockup, debajo de la zona opaca del logo, como en el menú (§3.1 v0.6.7: la
+ * pegatina nunca pisa el logo, tampoco en la autenticación; `MainMenu.module.css`). La firma cuelga de la
+ * fila (`--lockup-signature-hang`): la fila mide lo que la cinta y la pegatina sobresale unos 7 px por
+ * arriba y por abajo; el lienzo del logo en dos líneas deja unos 7 px transparentes al pie, así que basta
+ * con separarlo `--bb-space-1` hacia abajo, nunca hacia arriba. El lockup ocupa su alto real en la rejilla
+ * de la pieza (también con la cinta en dos líneas, con el espaciado de WCAG 1.4.12: empuja el panel en vez
+ * de subir sobre el logo); lo que cuelga la firma por debajo (8 px) cae en la separación de la rejilla
+ * hasta el panel (`--bb-space-6` como poco). Antes subía `--bb-space-2` dentro del logo y la pegatina de
+ * 62 px pisaba el pie de «LE» de BATTLE (cuarto pase del jurado, P1).
+ */
 @media (max-width: 720px) {
   .logo {
     margin-left: 0;
   }
 
   .lockup {
-    margin: calc(-1 * var(--bb-space-2)) 0 0;
+    --lockup-signature-hang: calc(-1 * var(--bb-space-2));
+    margin: var(--bb-space-1) 0 0;
   }
 }
