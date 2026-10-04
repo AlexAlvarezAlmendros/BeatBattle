@@ -12,7 +12,9 @@
  * columnas de los lados y las pestañas en la del centro, que parte en varias líneas si no caben (las
  * líneas, entre [Q] y [E]; antes, con flex, cada tecla podía quedarse sola en una línea encima y
  * debajo). La columna del centro mide lo que las pestañas, hasta lo que haya: en una línea, [E] sigue a
- * la última pestaña. Las teclas, centradas en la primera línea (pestañas de 44 px, `--bb-target`).
+ * la última pestaña. Las teclas, centradas en la primera línea (pestañas de 44 px, `--bb-target`). Vale
+ * igual en móvil: nunca una fila que se desplaza en horizontal (la activa salía cortada y el foco casi
+ * fuera de la ventana, WCAG 1.4.10 y 2.4.11).
  */
 .row {
   display: grid;
@@ -128,12 +130,6 @@
 .panel:focus-visible {
   outline-offset: var(--bb-cursor-gap);
 }
-
-/*
- * Móvil (≤ 720 px): igual, [Q] pestañas [E] en una fila y las pestañas parten entre las dos teclas, nunca
- * en desplazamiento horizontal (la activa salía cortada y el foco casi fuera de la ventana, WCAG 1.4.10
- * y 2.4.11). Cada pestaña cabe entera, con su cursor (7 px por fuera) dentro del medianil.
- */
 
 /* Táctil: sin las teclas Q/E (no hay teclado, §3.3), y las pestañas, a todo lo ancho; depende del tipo
  * de entrada, no del ancho. */
