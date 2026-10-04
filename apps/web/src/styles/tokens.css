@@ -223,7 +223,8 @@
   --bb-shadow-hard-sm: 3px 3px 0 var(--bb-red-cta);
   --bb-shadow-drop: 10px 12px 0 rgba(0, 0, 0, 0.6); /* Carta, objetos */
   /* La única sombra difusa: el halo del foco genérico, por fuera del contorno blanco */
-  --bb-focus-halo: 0 0 0 10px rgba(255, 0, 60, 0.35);
+  --bb-focus-halo-spread: 10px; /* Lo que sale de la caja: 3 px más allá del contorno (4 + 3 px) */
+  --bb-focus-halo: 0 0 0 var(--bb-focus-halo-spread) rgba(255, 0, 60, 0.35);
 
   /*
    * ── Texturas (§3.2 «Texturas») ──────────────────────────────────────────────────────────

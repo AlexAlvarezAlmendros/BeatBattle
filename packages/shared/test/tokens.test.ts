@@ -301,7 +301,8 @@ describe('tokens: tokens.css ↔ tokens.ts', () => {
     }
     const shadows = [...root.keys()].filter((name) => name.startsWith('--bb-shadow-'))
     expect(shadows.sort()).toEqual(['--bb-shadow-drop', '--bb-shadow-hard', '--bb-shadow-hard-sm'])
-    expect(root.get('--bb-focus-halo')).toBe('0 0 0 10px rgba(255, 0, 60, 0.35)')
+    expect(root.get('--bb-focus-halo')).toBe('0 0 0 var(--bb-focus-halo-spread) rgba(255, 0, 60, 0.35)')
+    expect(root.get('--bb-focus-halo-spread')).toBe('10px')
   })
 
   it('RD-VIS-01: los tokens del sello retirados en la v0.6 ya no existen', () => {

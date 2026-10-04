@@ -20,13 +20,16 @@
 
 .row {
   --frame-cut: var(--bb-cut-md);
+  --row-pad-block: var(--bb-space-1);
+  /* Lo que el foco genérico (anillo y halo) necesita entre la caja del enlace y el borde de la fila. */
+  --row-focus-air: calc(var(--bb-focus-halo-spread) + var(--bb-stroke-hair));
   position: relative;
   isolation: isolate;
   container: entry-row / inline-size;
   display: grid;
   align-content: center;
   min-height: calc(var(--bb-space-14) + var(--bb-stroke));
-  padding: var(--bb-space-1) var(--bb-space-4) var(--bb-space-1) var(--bb-space-2);
+  padding: var(--row-pad-block) var(--bb-space-4) var(--row-pad-block) var(--bb-space-2);
 }
 
 .body {
@@ -117,16 +120,33 @@
 }
 
 /*
- * El enlace a la ficha (título y subtítulo) es un objetivo de 44 px de alto como poco (RNF-A11Y-09): con
- * las dos líneas medía 39 px. Crece hasta `--bb-target` con el texto centrado en vertical.
+ * El enlace a la ficha (título y subtítulo) y su foco (§3.3 v0.6.6: «su anillo de foco cabe dentro de la
+ * fila»). Con la caja a 44 px en la fila de 58, el anillo (4 + 3 px) quedaba encima del borde de la fila
+ * y el halo de 10 px asomaba 3 px por fuera. Ahora:
+ *
+ * - la caja es la de su texto (≈ 35 px, el título y el subtítulo a `--bb-leading-label`) y del ancho de
+ *   su texto, para que el anillo rodee título y subtítulo y no la columna entera;
+ * - su objetivo sigue midiendo 44 px de alto como poco (RNF-A11Y-09), por pseudoelemento, como el
+ *   botón `sm`;
+ * - el margen en vertical deja, con el relleno de la fila, el aire del anillo y el halo hasta el borde
+ *   (`--row-focus-air`), también cuando el texto parte en líneas (fila estrecha, espaciado de 1.4.12) y la
+ *   fila crece con él. Con una línea de título, la fila sigue midiendo 58 px.
  */
 .infoLink {
-  /* Del ancho de su texto: el anillo de foco rodea título y subtítulo, no la columna entera. */
+  position: relative;
   justify-self: start;
-  min-height: var(--bb-target);
-  align-content: center;
+  margin-block: calc(var(--row-focus-air) - var(--row-pad-block));
   color: inherit;
   text-decoration: none;
+}
+
+.infoLink::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: max(100%, var(--bb-target));
+  translate: 0 -50%;
 }
 
 .infoLink[data-force-state="focus"] {
@@ -156,6 +176,7 @@
   color: var(--bb-text-3);
   font-size: var(--bb-fs-xs);
   font-weight: var(--bb-weight-semibold);
+  line-height: var(--bb-leading-label);
   letter-spacing: var(--bb-tracking-button);
   overflow-wrap: anywhere;
 }
@@ -171,6 +192,7 @@
   color: var(--bb-black);
   font-size: var(--bb-fs-xs);
   font-weight: var(--bb-weight-bold);
+  line-height: var(--bb-leading-label);
 }
 
 .result {
@@ -211,19 +233,23 @@
 /*
  * Fila estrecha (§3.3 v0.6.6): por debajo de 26 rem de contenido el título no tenía ni 10 rem al lado
  * de posición, nota y medalla (a 320 px, 46 px para «Neón en Sants»). El resultado baja a una segunda
- * fila, bajo el título (la portada se queda en la primera), y las acciones, a su lado.
+ * fila, bajo el título (la portada se queda en la primera), y las acciones, a su lado. La segunda fila
+ * es implícita: sin resultado ni acciones no existe, y la fila sigue siendo el marcador de 58 px.
  */
 @container entry-row (width < 26rem) {
   .body {
     grid-template-columns: var(--bb-target) minmax(0, 1fr) auto;
-    grid-template-areas:
-      "cover info info"
-      ". result actions";
+    grid-template-areas: "cover info info";
     row-gap: var(--bb-space-2);
   }
 
   .result {
+    grid-area: 2 / 2;
     justify-self: start;
+  }
+
+  .actions {
+    grid-area: 2 / 3;
   }
 
   .position {
@@ -231,15 +257,22 @@
   }
 }
 
+/* En móvil, el relleno del final es el aire del foco: un título largo llega hasta él. */
 @media (max-width: 720px) {
   .row {
-    padding-inline: var(--bb-space-2);
+    padding-inline: var(--bb-space-2) var(--row-focus-air);
   }
 
   .result {
     gap: var(--bb-space-2);
   }
+}
 
+/*
+ * La medalla solo se oculta en el móvil táctil (§3.3 v0.6.6): con teclado y ratón, en una ventana
+ * estrecha o ampliada al 200 %, se ve (WCAG 1.4.4 y 1.4.10). Por tipo de entrada, como las teclas.
+ */
+@media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse) {
   .medal {
     display: none;
   }

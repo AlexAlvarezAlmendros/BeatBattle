@@ -1,4 +1,4 @@
-import { expect, type Page, test } from '@playwright/test'
+import { expect, type Locator, type Page, test } from '@playwright/test'
 import { collectErrors, expectVisibleFocus, focusRingClippedBy, openGallery } from './support'
 
 /**
@@ -377,6 +377,138 @@ for (const { viewport, touch, spacing, narrow } of [
       }
       // Hay filas con resultado (posición y nota) en todas las anchuras.
       expect(rows.filter((row) => row.result).length).toBeGreaterThanOrEqual(4)
+    })
+  })
+}
+
+/**
+ * Lo que les sobra al anillo (contorno a `outline-offset`, con su trazo) y al halo (la extensión de
+ * `--bb-focus-halo`) del enlace de título y subtítulo hasta el borde de su fila, que lleva por dentro un
+ * filete de `--bb-stroke-hair`: negativo si se salen de la fila o pisan el filete. Y el área efectiva
+ * del enlace en vertical (lo que `elementFromPoint` da por suyo por encima y por debajo de su centro).
+ */
+function linkFocusAir(link: Locator) {
+  return link.evaluate((element) => {
+    // `elementFromPoint` solo ve lo que está en la ventana.
+    element.scrollIntoView({ block: 'center' })
+    const probe = document.createElement('div')
+    probe.style.width = 'var(--bb-stroke-hair)'
+    document.body.append(probe)
+    const hair = probe.getBoundingClientRect().width
+    probe.remove()
+    const style = getComputedStyle(element)
+    const ring = Number.parseFloat(style.outlineOffset) + Number.parseFloat(style.outlineWidth)
+    // `rgba(255, 0, 60, 0.35) 0px 0px 0px 10px`: la cuarta longitud es la extensión.
+    const spread = Number.parseFloat([...style.boxShadow.matchAll(/(-?[\d.]+)px/g)][3]?.[1] ?? '0')
+    const reach = Math.max(ring, spread)
+    const box = element.getBoundingClientRect()
+    const row = element.closest('article')!.getBoundingClientRect()
+    const owns = (y: number) =>
+      document.elementFromPoint(box.left + box.width / 2, y)?.closest('a') === element
+    let up = 0
+    while (up < 30 && owns(box.top + box.height / 2 - up - 1)) up++
+    let down = 0
+    while (down < 30 && owns(box.top + box.height / 2 + down + 1)) down++
+    return {
+      halo: spread,
+      ring,
+      air: {
+        top: +(box.top - reach - (row.top + hair)).toFixed(1),
+        bottom: +(row.bottom - hair - (box.bottom + reach)).toFixed(1),
+        left: +(box.left - reach - (row.left + hair)).toFixed(1),
+        right: +(row.right - hair - (box.right + reach)).toFixed(1),
+      },
+      target: up + down + 1,
+    }
+  })
+}
+
+/**
+ * El foco del enlace de título y subtítulo de la fila de entrada (§3.3 v0.6.6: «su anillo de foco cabe
+ * dentro de la fila»): con el enlace a 44 px de alto en una fila de 58, el anillo (4 + 3 px) quedaba
+ * justo encima del borde de la fila y el halo de 10 px asomaba 3 px por fuera. Ahora el enlace mide lo
+ * que su texto, su objetivo sigue teniendo 44 px de alto (por pseudoelemento, como el botón `sm`) y la
+ * fila deja aire para el anillo y el halo también cuando el texto parte en líneas (estrecha, 1.4.12).
+ * La fila sigue siendo un marcador de 56–58 px a 1440.
+ */
+for (const { viewport, touch, spacing } of [
+  { viewport: { width: 1440, height: 900 }, touch: false, spacing: false },
+  { viewport: { width: 390, height: 844 }, touch: true, spacing: false },
+  { viewport: { width: 320, height: 568 }, touch: false, spacing: false },
+  { viewport: { width: 1440, height: 900 }, touch: false, spacing: true },
+  { viewport: { width: 390, height: 844 }, touch: true, spacing: true },
+]) {
+  const input = touch ? 'táctil' : 'con teclado'
+  const name = `${viewport.width} × ${viewport.height} ${input}${spacing ? ' y el espaciado de 1.4.12' : ''}`
+  test.describe(`foco de la fila de entrada a ${name}`, () => {
+    test.use({ viewport, isMobile: touch, hasTouch: touch })
+
+    test('RNF-A11Y-01 / RNF-A11Y-09: el anillo y el halo del foco del título caben dentro de la fila y el enlace tiene 44 px de alto de objetivo', async ({
+      page,
+    }) => {
+      if (spacing) await withTextSpacing(page)
+      await openGallery(page)
+      await page.evaluate(() => document.fonts.ready)
+      const section = page.locator('section#fila')
+      // El foco forzado de la galería (estado «Foco») y el de verdad, con el tabulador desde el play.
+      const forced = section.locator('a[data-force-state="focus"]')
+      await forced.scrollIntoViewIfNeeded()
+      const link = section.getByRole('link', { name: 'Neón en Sants' }).first()
+      await section
+        .getByRole('button', { name: /Reproducir «Neón en Sants»/ })
+        .first()
+        .focus()
+      await page.keyboard.press('Tab')
+      await expectVisibleFocus(link)
+      for (const [which, locator] of [
+        ['forzado', forced],
+        ['con el tabulador', link],
+      ] as const) {
+        const focus = await linkFocusAir(locator)
+        expect(focus.halo, `${which}: el foco lleva el halo`).toBeGreaterThan(focus.ring)
+        for (const [side, air] of Object.entries(focus.air))
+          expect(air, `${which}: el anillo o el halo se sale por ${side}`).toBeGreaterThanOrEqual(0)
+        expect(focus.target, `${which}: objetivo en vertical`).toBeGreaterThanOrEqual(44)
+      }
+      if (viewport.width === 1440 && !spacing) {
+        // Marcador de 56–58 px (§3.3), también con error de audio.
+        const heights = await section
+          .locator('article')
+          .evaluateAll((rows) => rows.map((row) => +row.getBoundingClientRect().height.toFixed(1)))
+        for (const height of heights) {
+          expect(height).toBeGreaterThanOrEqual(56)
+          expect(height).toBeLessThanOrEqual(58)
+        }
+      }
+    })
+  })
+}
+
+/**
+ * La medalla de la fila de entrada (§3.3 v0.6.6: «la medalla solo se oculta en táctil»): por debajo de
+ * 720 px se ocultaba también con teclado y ratón (una ventana estrecha o ampliada al 200 %), y con
+ * teclado y ratón no se esconde nada que informe (WCAG 1.4.4 y 1.4.10).
+ */
+for (const { viewport, touch, medal } of [
+  { viewport: { width: 1440, height: 900 }, touch: false, medal: true },
+  { viewport: { width: 390, height: 844 }, touch: false, medal: true },
+  { viewport: { width: 390, height: 844 }, touch: true, medal: false },
+]) {
+  test.describe(`medalla de la fila de entrada a ${viewport.width} × ${viewport.height}${touch ? ' táctil' : ' con teclado'}`, () => {
+    test.use({ viewport, isMobile: touch, hasTouch: touch })
+
+    test(`WCAG 1.4.4 / 1.4.10: la medalla de la fila de entrada ${medal ? 'se ve' : 'se oculta (móvil táctil)'}`, async ({
+      page,
+    }) => {
+      await openGallery(page)
+      const medals = page.locator('section#fila [data-entry-result] [role="img"]')
+      expect(await medals.count()).toBeGreaterThanOrEqual(3)
+      for (const item of await medals.all())
+        if (medal) await expect(item).toBeVisible()
+        else await expect(item).toBeHidden()
+      // La posición y la nota se ven siempre.
+      for (const result of await page.locator('section#fila [data-entry-result]').all())
+        await expect(result).toBeVisible()
     })
   })
 }

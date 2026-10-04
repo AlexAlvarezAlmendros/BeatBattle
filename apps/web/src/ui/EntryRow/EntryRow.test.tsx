@@ -35,8 +35,25 @@ describe('EntryRow (§3.3 «Fila de entrada», 0.25)', () => {
     // La fila es el contenedor y su cuerpo, la rejilla: estrecha, el resultado va bajo el título.
     expect(css).toMatch(/\.row \{[^}]*container: entry-row \/ inline-size/)
     expect(css).toMatch(
-      /@container entry-row \(width < \d+(\.\d+)?rem\) \{\s*\.body \{[^}]*"cover info info"\s*"\. result actions"/,
+      /@container entry-row \(width < \d+(\.\d+)?rem\) \{\s*\.body \{[^}]*"cover info info"/,
     )
+    expect(css).toMatch(/@container entry-row[\s\S]*\.result \{\s*grid-area: 2 \/ 2;/)
+  })
+
+  it('RNF-A11Y-01 / RNF-A11Y-09: el enlace mide lo que su texto, su objetivo 44 px de alto (pseudoelemento) y la fila deja aire al anillo y al halo', () => {
+    expect(css).not.toMatch(/\.infoLink \{[^}]*min-height/)
+    expect(css).toMatch(/\.infoLink::before \{[^}]*height: max\(100%, var\(--bb-target\)\)/)
+    expect(css).toMatch(/--row-focus-air: calc\(var\(--bb-focus-halo-spread\) \+ var\(--bb-stroke-hair\)\)/)
+    expect(css).toMatch(
+      /\.infoLink \{[^}]*margin-block: calc\(var\(--row-focus-air\) - var\(--row-pad-block\)\)/,
+    )
+  })
+
+  it('§3.3: la medalla solo se oculta en el móvil táctil (con teclado y ratón se ve a cualquier ancho)', () => {
+    const hides = [...css.matchAll(/@media ([^{]+)\{[^@]*?\.medal \{\s*display: none;/g)].map((m) =>
+      m[1]!.trim(),
+    )
+    expect(hides).toEqual(['(max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse)'])
   })
 
   it('RF-PLAY-09: con error de audio avisa y el play pasa a «Reintentar»', async () => {
