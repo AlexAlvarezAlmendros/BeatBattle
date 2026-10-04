@@ -24,11 +24,11 @@ interface PlateCut {
  * elegida) y en las demás (en reposo, con el cursor en otra placa; jurado de la 0.28, tercer pase: de 721
  * a unos 765 px, «SONIDO · MOVIMIENTO» de AJUSTES en reposo se salía por el borde de la placa).
  */
-function plateCuts(page: Page): Promise<PlateCut[]> {
-  return page.evaluate(async () => {
+function plateCuts(page: Page, selector = 'main [data-menu-plate]'): Promise<PlateCut[]> {
+  return page.evaluate(async (scope) => {
     const frame = () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
     const cuts: { plate: string; problem: string }[] = []
-    const plates = [...document.querySelectorAll<HTMLElement>('main [data-menu-plate]')]
+    const plates = [...document.querySelectorAll<HTMLElement>(scope)]
     const check = (plate: HTMLElement, state: string) => {
       const name = `${plate.querySelector('[data-plate-label]')?.textContent ?? '?'}${state}`
       const label = plate.querySelector<HTMLElement>('[data-plate-label]')!
@@ -68,7 +68,7 @@ function plateCuts(page: Page): Promise<PlateCut[]> {
       for (const other of plates) if (other !== plate) check(other, ' (en reposo)')
     }
     return [...new Map(cuts.map((cut) => [`${cut.plate}|${cut.problem}`, cut])).values()]
-  })
+  }, selector)
 }
 
 /** Textos en display con tilde que algún antepasado recorta por arriba. */
@@ -141,11 +141,11 @@ for (const viewport of [
  * Elige cada placa del menú y mide, en reposo y elegida, si el texto de su etiqueta, su dato y su tecla
  * se sale por arriba o por abajo del relleno de la placa (dentro del borde, `--bb-stroke`).
  */
-function plateOverflowY(page: Page): Promise<string[]> {
-  return page.evaluate(async () => {
+function plateOverflowY(page: Page, selector = 'main [data-menu-plate]'): Promise<string[]> {
+  return page.evaluate(async (scope) => {
     const frame = () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
     const problems: string[] = []
-    const plates = [...document.querySelectorAll<HTMLElement>('main [data-menu-plate]')]
+    const plates = [...document.querySelectorAll<HTMLElement>(scope)]
     const check = (plate: HTMLElement, state: string) => {
       const box = plate.getBoundingClientRect()
       const stroke = Number.parseFloat(getComputedStyle(plate, '::after').top) || 0
@@ -183,7 +183,7 @@ function plateOverflowY(page: Page): Promise<string[]> {
       check(plate, 'elegida')
     }
     return problems
-  })
+  }, selector)
 }
 
 /**
@@ -1407,3 +1407,42 @@ for (const viewport of [
       })
   })
 }
+
+/**
+ * La etiqueta de una placa nunca se corta (§3.3; jurado de la 0.28, cierre): en la galería, «Opción de menú
+ * → Interactivo» pone sus placas en una columna de 313 px, y «03 RESULTADOS · Aún nada sellado» dejaba la
+ * etiqueta en 12–21 px de ancho, recortada (el candado y un trozo de la «R»), y con el espaciado de WCAG
+ * 1.4.12 también. Ahora, en una placa estrecha (contenedor `menu-plate`) el motivo baja a la segunda línea.
+ */
+test.describe('galería: opción de menú interactiva a 1440 × 900', () => {
+  const MENU = '#opcion-menu [role="menu"] [data-menu-plate]'
+
+  for (const spacing of [false, true]) {
+    test(`§3.3 / RD-VIS-05${spacing ? ' / WCAG 1.4.12' : ''}: ninguna placa del menú interactivo corta su etiqueta, su dato ni su tecla${spacing ? ' con el espaciado de texto' : ''}`, async ({
+      page,
+    }) => {
+      if (spacing)
+        await page.addInitScript((css) => {
+          document.addEventListener('DOMContentLoaded', () => {
+            const style = document.createElement('style')
+            style.textContent = css
+            document.head.append(style)
+          })
+        }, TEXT_SPACING)
+      await openGallery(page)
+      await page.evaluate(() => document.fonts.ready)
+      await page.locator('#opcion-menu [role="menu"]').scrollIntoViewIfNeeded()
+      expect(await plateCuts(page, MENU)).toEqual([])
+      expect(await plateOverflowY(page, MENU)).toEqual([])
+      // Ningún rótulo por debajo del mínimo legible (RD-VIS-05).
+      const sizes = await page.evaluate(
+        (scope) =>
+          [...document.querySelectorAll(`${scope} [data-plate-label]`)].map((label) =>
+            Number.parseFloat(getComputedStyle(label).fontSize),
+          ),
+        MENU,
+      )
+      expect(Math.min(...sizes)).toBeGreaterThanOrEqual(16)
+    })
+  }
+})

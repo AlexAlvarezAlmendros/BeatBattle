@@ -28,13 +28,16 @@
   --plate-h-on: var(--menu-plate-h-on, calc((var(--bb-space-16) + var(--bb-space-5)) * var(--plate-scale)));
   --plate-fs: var(--menu-plate-fs, calc(var(--bb-fs-plate) * var(--plate-scale)));
   --plate-fs-on: var(--menu-plate-fs-on, calc(var(--bb-fs-plate-on) * var(--plate-scale)));
+  /* Contenedor de su propio ancho (`menu-plate`): en una placa estrecha, el dato baja (más abajo). */
+  container: menu-plate / inline-size;
   position: relative;
   isolation: isolate;
   display: grid;
   grid-template-columns: var(--bb-space-13) minmax(0, 1fr) max-content;
   grid-template-areas: "index label detail";
+  align-content: center;
   align-items: center;
-  column-gap: var(--bb-space-4);
+  gap: var(--bb-space-1) var(--bb-space-4);
   height: var(--plate-h);
   margin-left: var(--plate-shift);
   padding: 0 var(--plate-pad-end) 0 calc(var(--bb-space-8) + var(--bb-stroke));
@@ -320,6 +323,51 @@
 
   .plate[data-disabled] .detailText {
     max-width: none;
+  }
+}
+
+/*
+ * ── Placa estrecha (menos de 21 rem de ancho útil, fuera del móvil) ──────────────────────────────
+ * La etiqueta nunca se corta (§3.3): si con el dato o el motivo al lado no le queda sitio ni a 12 px, el
+ * dato baja a una segunda línea, bajo la etiqueta, antes que recortarla. Lo decide el ancho de la propia
+ * placa (contenedor `menu-plate`), no el de la ventana ni el de la lista: la galería pone las placas de su
+ * menú interactivo en una columna de 313 px, y «RESULTADOS» con «Aún nada sellado» dejaba la etiqueta en
+ * 12–21 px de ancho, con el candado y un trozo de la «R» (jurado de la 0.28, cierre). Con 21 rem dentro de
+ * los rellenos caben el índice, la etiqueta más larga a 12 px y el motivo más largo en sus dos líneas
+ * (10 rem), también con el espaciado de WCAG 1.4.12: las placas de la maqueta (386 px útiles) no cambian. El motivo va
+ * en una línea si cabe (el alto de la placa no cambia). En el móvil (≤ 720 px) las placas tienen sus medidas
+ * y sus reglas (más abajo); en la lista estrecha del menú, el dato ya va debajo (más arriba).
+ */
+@media (min-width: 721px) {
+  @container menu-plate (width < 21rem) {
+    .index {
+      grid-row: 1 / span 2;
+    }
+
+    .label {
+      grid-column: 2 / -1;
+    }
+
+    .detail {
+      flex-wrap: wrap;
+      grid-row: 2;
+      grid-column: 2 / -1;
+      justify-self: start;
+      row-gap: var(--bb-space-1);
+      max-width: 100%;
+      text-align: start;
+    }
+
+    .detailText,
+    .extra {
+      flex-wrap: wrap;
+      line-height: var(--bb-leading-label);
+      white-space: normal;
+    }
+
+    .plate[data-disabled] .detailText {
+      max-width: none;
+    }
   }
 }
 
