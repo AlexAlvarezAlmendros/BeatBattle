@@ -43,6 +43,15 @@ export const LOGO_LAYOUTS = {
   },
 } satisfies Record<string, LogoLayout>
 
+/**
+ * Proporción (ancho / alto) del lienzo de una composición: la que el logo expone en `--game-logo-aspect`,
+ * para quien lo dimensiona por el alto (el menú con la ventana baja, §3.8.3).
+ */
+export function logoAspect(compact = false): number {
+  const [, , width, height] = (compact ? LOGO_LAYOUTS.compact : LOGO_LAYOUTS.full).box
+  return width / height
+}
+
 /** Líneas de velocidad detrás de «BEAT» (unidades del logo): alto, inicio y color. */
 const SPEED_LINES = [
   { y: 46, h: 18, x0: 150, white: true },
@@ -236,7 +245,7 @@ export function GameLogo({ compact = false, className }: GameLogoProps) {
     }
   }, [layout, wordsKey])
 
-  const aspect = { '--game-logo-aspect': layout.box[2] / layout.box[3] } as CSSProperties
+  const aspect = { '--game-logo-aspect': logoAspect(compact) } as CSSProperties
   return (
     <span
       className={cx(styles.logo, className)}

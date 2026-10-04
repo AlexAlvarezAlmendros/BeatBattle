@@ -1,1 +1,1 @@
-export { GameLogo, type GameLogoProps } from './GameLogo'
+export { GameLogo, type GameLogoProps, logoAspect } from './GameLogo'

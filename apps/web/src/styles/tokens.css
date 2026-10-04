@@ -143,7 +143,16 @@
    */
   --bb-plate-h-low: clamp(2.75rem, 10dvh - 1.25rem, 4.375rem); /* Placa: 44 → 70 px (≥ --bb-target) */
   --bb-plate-gap-low: clamp(0.25rem, 3dvh - 0.9375rem, 0.75rem); /* Entre placas: 4 → 12 px */
-  --bb-menu-logo-h-min: 6rem; /* Alto mínimo del logo del menú (≈ 227 px de ancho): por debajo, se desplaza */
+  --bb-menu-logo-w-max: 40rem; /* Logo del menú de la maqueta: 640 px de ancho (y la columna del título) */
+  /* Alto mínimo del logo del menú: ≈ 265 px de ancho, lo que pide debajo el lockup más corto; por debajo, se desplaza */
+  --bb-menu-logo-h-min: 7rem;
+  /*
+   * Alto del lockup del menú con la ventana baja, con el que cuenta el logo: con la pegatina de 104 px
+   * (82 / 120 de alto: 71 px) la fila mide 63, porque la firma sube 8; con la de 62, lo que mide la firma
+   * (su objetivo táctil) menos esos 8.
+   */
+  --bb-menu-lockup-h: 4rem; /* 64 px (≥ 63) */
+  --bb-menu-lockup-h-compact: calc(var(--bb-target) - var(--bb-space-2)); /* 36 px */
 
   /* ── Forma (sustituye a los radios; §3.2 «Forma») ────────────────────────────────────────── */
   /* Chaflán de dos esquinas opuestas (arriba-izquierda y abajo-derecha) */

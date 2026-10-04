@@ -6,7 +6,7 @@
 .menu {
   display: grid;
   flex: 1 0 auto;
-  grid-template-columns: minmax(0, 40rem) minmax(0, 35rem);
+  grid-template-columns: minmax(0, var(--bb-menu-logo-w-max)) minmax(0, 35rem);
   justify-content: space-between;
   align-items: start;
   /*
@@ -27,9 +27,11 @@
 /*
  * ── Título: logo y lockup ──────────────────────────────────────────────────────────────────
  * La columna ocupa todo el alto y la tarjeta de la semana se ancla al pie (llega a la barra de
- * controles, como en la maqueta), también cuando es la corta del calendario vacío.
+ * controles, como en la maqueta), también cuando es la corta del calendario vacío. Es un contenedor
+ * (`menu-title`) en la composición de dos columnas; en móvil, no (más abajo).
  */
 .title {
+  container: menu-title / inline-size;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto auto auto 1fr;
@@ -42,8 +44,16 @@
   align-self: end;
 }
 
+/*
+ * El logo y el lockup van juntos (`.brand`): sin caja propia (`display: contents`) salvo con la ventana
+ * baja de escritorio, donde ocupan el alto que les deja la tarjeta (más abajo).
+ */
+.brand {
+  display: contents;
+}
+
 .logoFull {
-  width: min(100%, 40rem);
+  width: min(100%, var(--bb-menu-logo-w-max));
   margin-left: calc(-1 * var(--bb-space-3));
 }
 
@@ -54,6 +64,18 @@
 /* El lockup (`TitleLockup`), pegado al pie del logo. */
 .lockup {
   margin: calc(-1 * var(--bb-space-1)) 0 0 var(--bb-space-2);
+}
+
+/*
+ * Con la columna del título estrecha (< 27,5 rem, de 721 a unos 1060 px: el lockup lleva la pegatina de
+ * 62 px, `TitleLockup`), el lockup baja `--bb-space-1` en vez de subir: la pegatina sobresale de su fila
+ * por arriba y, con el logo así de pequeño, pisaba el pie de «BATTLE» (§3.1, margen alrededor de la
+ * pegatina; revisión de la 0.28, tercer pase).
+ */
+@container menu-title (width < 27.5rem) {
+  .lockup {
+    margin-top: var(--bb-space-1);
+  }
 }
 
 .title > article {
@@ -185,11 +207,14 @@
  * desplazaba como una web (jurado de la 0.28, tercer pase). Aquí baja con el alto, sin esconder nada (con
  * teclado y ratón no hay pliegues que escondan; §3.8.3):
  *
- * - El logo ocupa el alto que dejan el lockup y la tarjeta (la columna del título es una columna flexible
- *   y el logo, un contenedor de tamaño que pinta su lienzo a ese alto), nunca más que el de su ancho (el
- *   de la maqueta) ni menos que `--bb-menu-logo-h-min`. Así se adapta al HUD (con o sin reloj) y a la
- *   tarjeta; lo que sobra queda entre el lockup y la tarjeta, que sigue llegando a la barra.
- * - Las placas y su separación bajan con el alto de la ventana (`MenuPlate`, `--bb-plate-gap-low`).
+ * - El logo y el lockup (`.brand`, un contenedor de tamaño en la columna flexible del título) ocupan el
+ *   alto que deja la tarjeta: el logo, ese alto menos el del lockup (`--bb-menu-lockup-h`), nunca más
+ *   ancho que el de la maqueta ni más bajo que `--bb-menu-logo-h-min`. Así se adapta al HUD (con o sin
+ *   reloj) y a la tarjeta; lo que sobra queda entre el lockup y la tarjeta, que sigue llegando a la barra.
+ * - El lockup nunca es más ancho que el logo (acaba donde acaba su lienzo): si el logo baja, el lockup
+ *   pasa a sus pasos estrechos (`TitleLockup`) y BEAT BATTLE sigue mandando sobre «TORNEO SEMANAL…» (jurado
+ *   de la 0.28, tercer pase: a 1366 × 657 con el reloj, el logo medía 291 px y el lockup, 577).
+ * - Las placas y su separación bajan con el alto de la ventana (`--bb-plate-h-low`, `--bb-plate-gap-low`).
  * - La tarjeta de la semana se aprieta (`StageCard`) y los márgenes entre piezas bajan a 8 px.
  * - El menú sube hasta el pie del HUD: el lienzo del logo ya deja aire por arriba, y «ELIGE MODO» guarda
  *   su margen.
@@ -202,23 +227,43 @@
   }
 
   .title {
-    container: menu-title / inline-size;
     display: flex;
     flex-direction: column;
   }
 
-  .logoFull {
-    container-type: size;
+  /*
+   * `--menu-lockup-room`: lo que ocupa el lockup bajo el logo (su alto y el margen de debajo; aquí no sube
+   * sobre el logo: con el logo más pequeño, la pegatina pisaría el pie de «BATTLE»). `--menu-logo-h-max`:
+   * el alto del logo de la maqueta o, si la columna es más estrecha, el que le da su ancho.
+   * `--menu-logo-w`: el ancho del logo, el de su alto en la caja (100cqh) menos el sitio del lockup, sin
+   * pasar del ancho de la columna ni del de la maqueta.
+   */
+  .brand {
+    --menu-lockup-room: calc(var(--bb-menu-lockup-h) + var(--bb-space-2));
+    --menu-lockup-room-compact: calc(var(--bb-menu-lockup-h-compact) + var(--bb-space-2) + var(--bb-space-1));
+    --menu-logo-h-max: calc(min(100cqw, var(--bb-menu-logo-w-max)) / var(--game-logo-aspect));
+    container: menu-brand / size;
+    display: block;
     flex: 1 1 0;
-    min-height: var(--bb-menu-logo-h-min);
-    max-height: calc(min(100cqw, 40rem) / var(--game-logo-aspect));
+    min-height: calc(var(--bb-menu-logo-h-min) + var(--menu-lockup-room-compact));
+    max-height: calc(var(--menu-logo-h-max) + var(--menu-lockup-room));
+  }
+
+  .logoFull canvas,
+  .lockup {
+    --menu-logo-h: calc(100cqh - var(--menu-lockup-room));
+    --menu-logo-w: min(100cqw, var(--bb-menu-logo-w-max), var(--menu-logo-h) * var(--game-logo-aspect));
   }
 
   .logoFull canvas {
-    width: min(100%, calc(100cqh * var(--game-logo-aspect)));
+    width: var(--menu-logo-w);
   }
 
+  /* El lockup empieza `--bb-space-3` + `--bb-space-2` a la derecha del lienzo del logo y acaba con él. */
   .lockup {
+    width: min(100% - var(--bb-space-2), var(--menu-logo-w) - var(--bb-space-3) - var(--bb-space-2));
+    min-height: var(--bb-menu-lockup-h);
+    margin-top: 0;
     margin-bottom: var(--bb-space-2);
   }
 
@@ -241,6 +286,31 @@
   }
 }
 
+/*
+ * Con poco alto para el logo y el lockup (o con la columna estrecha), el lockup es el de la pegatina de
+ * 62 px (`TitleLockup`, por debajo de 27 rem) y el logo cuenta solo con su alto
+ * (`--bb-menu-lockup-h-compact`): no reserva el de la pegatina grande. El umbral es el alto en el que, con
+ * la pegatina grande, el lockup llegaría a 27 rem: (27 rem + 20 px) / 2,36 (la proporción del logo) +
+ * 72 px de lockup ≈ 16,5 rem. Por debajo, el lockup no pasa de `--menu-lockup-compact-max` (justo por
+ * debajo de esos 27 rem), para que nunca vuelva a la pegatina grande con el sitio de la pequeña; y baja
+ * `--bb-space-1`, como con la columna estrecha, para que la pegatina no pise el pie del logo pequeño.
+ * Cualquier umbral es seguro (con la pegatina grande el sitio sobra; con la pequeña, el lockup no pasa de
+ * ella): solo decide cuándo el logo aprovecha el alto que la pegatina pequeña no usa.
+ */
+@container menu-brand (height < 16.5rem) or (width < 27.5rem) {
+  .logoFull canvas,
+  .lockup {
+    --menu-lockup-room: var(--menu-lockup-room-compact);
+  }
+
+  .lockup {
+    --menu-lockup-compact-max: calc(27rem - var(--bb-space-2));
+    max-width: var(--menu-lockup-compact-max);
+    min-height: 0;
+    margin-top: var(--bb-space-1);
+  }
+}
+
 /* ── Móvil (≤ 720 px): apilado; placas de 48 px; sin número gigante ───────────────────────── */
 @media (max-width: 720px) {
   .menu {
@@ -249,6 +319,10 @@
     gap: var(--bb-space-3);
     margin-top: calc(-1 * var(--bb-space-3));
     margin-bottom: 0;
+  }
+
+  .title {
+    container-type: normal;
   }
 
   .logoFull {

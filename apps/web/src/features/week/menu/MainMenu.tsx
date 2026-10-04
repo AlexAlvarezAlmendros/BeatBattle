@@ -1,4 +1,4 @@
-import { type ReactNode, useId, useRef } from 'react'
+import { type CSSProperties, type ReactNode, useId, useRef } from 'react'
 import { Chronicle, CreditLine } from '../../../app/layout/Chronicle'
 import { HudStat, PlayerCard } from '../../../app/layout/PlayerCard'
 import { FrameSlot } from '../../../app/layout/slots'
@@ -7,7 +7,7 @@ import { formatNumber, t } from '../../../i18n'
 import { Trans } from '../../../i18n/Trans'
 import { Frame } from '../../../ui/Frame'
 import { cx } from '../../../ui/forceState'
-import { GameLogo } from '../../../ui/GameLogo'
+import { GameLogo, logoAspect } from '../../../ui/GameLogo'
 import { useIdleMenuKeys } from '../../../ui/hooks/useIdleMenuKeys'
 import { useRovingMenu } from '../../../ui/hooks/useRovingMenu'
 import { MenuPlate } from '../../../ui/MenuPlate'
@@ -30,6 +30,9 @@ interface ModeEntry {
 }
 
 const bold = (text: ReactNode) => <b>{text}</b>
+
+/** La proporción del logo en dos líneas, para que el lockup (fuera del logo) se mida con él (§3.8.3). */
+const BRAND_STYLE = { '--game-logo-aspect': logoAspect() } as CSSProperties
 
 /**
  * Qué hace cada modo según la semana y el jugador (§3.8.3): a dónde lleva, su dato, si está
@@ -230,9 +233,12 @@ export function MainMenu({ model }: { model: MenuModel }) {
       )}
 
       <section className={styles.title} aria-label={t('home.title.label')}>
-        <GameLogo className={styles.logoFull} />
-        <GameLogo className={styles.logoCompact} compact />
-        <TitleLockup className={styles.lockup} />
+        {/* El logo y su lockup: con la ventana baja, el lockup se mide con el logo (proporción del lienzo). */}
+        <div className={styles.brand} style={BRAND_STYLE}>
+          <GameLogo className={styles.logoFull} />
+          <GameLogo className={styles.logoCompact} compact />
+          <TitleLockup className={styles.lockup} />
+        </div>
         <StageCard week={week} />
       </section>
 

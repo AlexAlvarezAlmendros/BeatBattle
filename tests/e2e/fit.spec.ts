@@ -478,6 +478,14 @@ for (const viewport of [
   { width: 375, height: 667, touch: true },
   { width: 390, height: 844, touch: true },
   { width: 1440, height: 900, touch: false },
+  // De 721 a unos 1060 px la pegatina es la pequeña y el logo, estrecho: la pegatina pisaba el pie de
+  // «BATTLE»; y con la ventana baja, el logo baja y el lockup va con él (revisión de la 0.28, tercer pase).
+  { width: 721, height: 900, touch: false },
+  { width: 1024, height: 768, touch: false },
+  { width: 900, height: 800, touch: false },
+  { width: 1366, height: 657, touch: false },
+  { width: 1536, height: 730, touch: false },
+  { width: 1280, height: 720, touch: false },
 ]) {
   test.describe(`lockup a ${viewport.width} × ${viewport.height}`, () => {
     test.use({
@@ -932,6 +940,52 @@ for (const viewport of [
           await expect(card.getByText(/Usa solo el primer compás/)).toBeVisible()
         }
         await expect(page.getByRole('main').locator('nav [aria-live="polite"]')).toBeVisible()
+      })
+    }
+  })
+}
+
+/** Cuánto pasa el lockup (la cinta o la firma con la pegatina) del borde derecho del lienzo del logo. */
+function lockupPastLogo(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const main = document.querySelector('main')!
+    const canvas = [...main.querySelectorAll('[data-game-logo] canvas')].find(
+      (element) => element.getBoundingClientRect().width > 0,
+    )!
+    const lockup = main.querySelector('section [class*=lockup]')!
+    const right = Math.max(
+      ...[lockup.querySelector('p')!, lockup.querySelector('a')!].map(
+        (element) => element.getBoundingClientRect().right,
+      ),
+    )
+    return Math.round(right - canvas.getBoundingClientRect().right)
+  })
+}
+
+/**
+ * Con la ventana baja, el logo baja con el alto y el lockup va con él (jurado de la 0.28, tercer pase;
+ * guía §3.8.3): a 1366 × 657, con el reloj en el HUD, el logo medía 291 px y el lockup, 577, y BEAT
+ * BATTLE quedaba más pequeño que «TORNEO SEMANAL DE PRODUCTORES by OTP». Ahora el lockup acaba donde acaba
+ * el lienzo del logo y pasa a sus pasos estrechos cuando el logo baja.
+ */
+for (const viewport of [
+  { width: 1440, height: 789 },
+  { width: 1366, height: 657 },
+  { width: 1536, height: 730 },
+  { width: 1280, height: 720 },
+  { width: 1366, height: 768 },
+  { width: 1280, height: 600 },
+  { width: 900, height: 800 },
+]) {
+  test.describe(`logo y lockup con la ventana baja a ${viewport.width} × ${viewport.height}`, () => {
+    test.use({ viewport })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`RD-VIS-02 e / §3.1: en ${path} el lockup no es más ancho que el logo`, async ({ page }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        expect(await lockupPastLogo(page)).toBeLessThanOrEqual(0)
+        expect(await ribbonLines(page)).toMatchObject({ lines: 1 })
       })
     }
   })
