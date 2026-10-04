@@ -292,3 +292,91 @@ for (const viewport of [
     }
   })
 }
+
+/**
+ * Espaciado de texto de WCAG 1.4.12 (el de `fit.spec.ts`: interlineado 1,5, letras 0,12 em, palabras
+ * 0,16 em y párrafos 2 em, con `!important`), puesto desde la carga, como lo pone quien lo necesita.
+ */
+const TEXT_SPACING = `*, *::before, *::after { line-height: 1.5 !important; letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important; } p { margin-bottom: 2em !important; }`
+
+async function withTextSpacing(page: Page): Promise<void> {
+  await page.addInitScript((css) => {
+    document.addEventListener('DOMContentLoaded', () => {
+      const style = document.createElement('style')
+      style.textContent = css
+      document.head.append(style)
+    })
+  }, TEXT_SPACING)
+}
+
+/**
+ * Las filas de entrada de la galería: los textos (título y subtítulo) que no caben en su caja (se cortan
+ * con «…» o se salen) y dónde cae el resultado (posición, nota y medalla) respecto del enlace del título
+ * y de la fila.
+ */
+function entryRows(page: Page) {
+  return page.locator('section#fila article').evaluateAll((rows) =>
+    rows.map((row) => {
+      const state = row.closest('[data-state]')?.getAttribute('data-state') ?? '?'
+      const heading = row.querySelector<HTMLElement>(':is(h2, h3, h4)')!
+      const info = heading.parentElement!.getBoundingClientRect()
+      const box = row.getBoundingClientRect()
+      const cut = [...row.querySelectorAll<HTMLElement>(':is(h2, h3, h4), :is(h2, h3, h4) > span, p')]
+        .filter((text) => text.scrollWidth > text.clientWidth + 1)
+        .map((text) => `«${text.textContent}» ${text.scrollWidth} > ${text.clientWidth}`)
+      const result = row.querySelector('[data-entry-result]')?.getBoundingClientRect()
+      return {
+        row: `${state}: ${heading.textContent}`,
+        cut,
+        infoInside: info.left >= box.left && info.right <= box.right + 0.5,
+        result: result && {
+          below: result.top >= info.bottom - 1,
+          inside: result.left >= box.left && result.right <= box.right + 0.5,
+        },
+      }
+    }),
+  )
+}
+
+/**
+ * Fila de entrada estrecha (guía §3.3 v0.6.6; WCAG 1.4.10 y 1.4.12): a 320 px, y a 390 táctil con el
+ * espaciado de texto, el título se cortaba con «…» hasta no leerse («Neón en Sants» → «Neó…», 46 de
+ * 109 px) y el subtítulo también («S40 · …»), en reposo, hover y foco, mientras posición, nota y medalla
+ * se quedaban la columna. Ahora título y subtítulo parten en líneas, sin «…», y el resultado baja a una
+ * segunda fila. A 1440 con el espaciado la fila es ancha y el resultado se queda a la derecha, pero
+ * tampoco se corta nada.
+ */
+for (const { viewport, touch, spacing, narrow } of [
+  { viewport: { width: 320, height: 568 }, touch: false, spacing: false, narrow: true },
+  { viewport: { width: 320, height: 568 }, touch: false, spacing: true, narrow: true },
+  { viewport: { width: 390, height: 844 }, touch: true, spacing: true, narrow: true },
+  { viewport: { width: 1440, height: 900 }, touch: false, spacing: true, narrow: false },
+]) {
+  const input = touch ? 'táctil' : 'con teclado'
+  const name = `${viewport.width} × ${viewport.height} ${input}${spacing ? ' y el espaciado de 1.4.12' : ''}`
+  test.describe(`fila de entrada a ${name}`, () => {
+    test.use({ viewport, isMobile: touch, hasTouch: touch })
+
+    test(`RD-VIS-05 / WCAG 1.4.10 y 1.4.12: el título y el subtítulo de la fila de entrada no se cortan${narrow ? ' y el resultado baja a una segunda fila' : ''}`, async ({
+      page,
+    }) => {
+      if (spacing) await withTextSpacing(page)
+      await openGallery(page)
+      await page.evaluate(() => document.fonts.ready)
+      if (spacing)
+        expect(await page.evaluate(() => getComputedStyle(document.body).letterSpacing)).not.toBe('normal')
+      const rows = await entryRows(page)
+      expect(rows.length).toBeGreaterThanOrEqual(8)
+      for (const row of rows) {
+        expect(row.cut, `${row.row}: texto cortado`).toEqual([])
+        expect(row.infoInside, `${row.row}: el título se sale de la fila`).toBe(true)
+        if (!row.result) continue
+        expect(row.result.inside, `${row.row}: el resultado se sale de la fila`).toBe(true)
+        if (narrow) expect(row.result.below, `${row.row}: el resultado no baja a una segunda fila`).toBe(true)
+      }
+      // Hay filas con resultado (posición y nota) en todas las anchuras.
+      expect(rows.filter((row) => row.result).length).toBeGreaterThanOrEqual(4)
+    })
+  })
+}

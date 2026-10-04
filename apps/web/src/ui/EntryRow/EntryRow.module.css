@@ -3,6 +3,12 @@
  * marco de chaflán `--bb-cut-md` con portada de 44 px en chaflán `--bb-cut-sm` (el play va dentro),
  * título y subtítulo, y a la derecha la posición en display, la nota en Oxanium y la medalla (solo tras
  * el sellado).
+ *
+ * **Fila estrecha** (§3.3 v0.6.6; WCAG 1.4.10 y 1.4.12): la fila es un contenedor (`entry-row`) y su
+ * cuerpo, la rejilla. Título y subtítulo parten en líneas en vez de cortarse con «…» (en cualquier fila:
+ * el CSS no sabe si hay espaciado de 1.4.12, y un «…» se come el título), y si la fila es estrecha el
+ * resultado baja a una segunda fila, bajo el título. Como contenedor, su ancho lo pone quien la contiene
+ * (una lista, una columna), no su contenido.
  */
 .list {
   display: grid;
@@ -16,12 +22,19 @@
   --frame-cut: var(--bb-cut-md);
   position: relative;
   isolation: isolate;
+  container: entry-row / inline-size;
   display: grid;
-  grid-template-columns: var(--bb-target) minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: var(--bb-space-3);
+  align-content: center;
   min-height: calc(var(--bb-space-14) + var(--bb-stroke));
   padding: var(--bb-space-1) var(--bb-space-4) var(--bb-space-1) var(--bb-space-2);
+}
+
+.body {
+  display: grid;
+  grid-template-columns: var(--bb-target) minmax(0, 1fr) auto auto;
+  grid-template-areas: "cover info result actions";
+  align-items: center;
+  gap: var(--bb-space-3);
 }
 
 /* Dos capas recortadas (borde y relleno), como el marco. */
@@ -67,6 +80,7 @@
 
 /* Portada en chaflán con el play encima, en la misma celda. */
 .coverPlay {
+  grid-area: cover;
   display: grid;
   width: var(--bb-target);
   height: var(--bb-target);
@@ -96,6 +110,7 @@
 }
 
 .info {
+  grid-area: info;
   display: grid;
   gap: var(--bb-space-1);
   min-width: 0;
@@ -106,6 +121,8 @@
  * las dos líneas medía 39 px. Crece hasta `--bb-target` con el texto centrado en vertical.
  */
 .infoLink {
+  /* Del ancho de su texto: el anillo de foco rodea título y subtítulo, no la columna entera. */
+  justify-self: start;
   min-height: var(--bb-target);
   align-content: center;
   color: inherit;
@@ -119,8 +136,8 @@
 }
 
 /*
- * El título se corta con puntos suspensivos en el enlace, no en el encabezado: un ancestro que recorta
- * taparía el anillo de foco del enlace (el propio `overflow` del enlace no recorta su contorno).
+ * Título y subtítulo parten en líneas (también dentro de una palabra que no cabe) en vez de cortarse
+ * con «…»: nada recorta, así que el anillo de foco del enlace tampoco.
  */
 .title {
   min-width: 0;
@@ -128,13 +145,7 @@
   font-size: var(--bb-fs-md);
   font-weight: var(--bb-weight-semibold);
   line-height: var(--bb-leading-label);
-  white-space: nowrap;
-}
-
-.titleText {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 .infoLink:hover .titleText {
@@ -142,13 +153,11 @@
 }
 
 .subtitle {
-  overflow: hidden;
   color: var(--bb-text-3);
   font-size: var(--bb-fs-xs);
   font-weight: var(--bb-weight-semibold);
   letter-spacing: var(--bb-tracking-button);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 /* Error de audio (`RF-PLAY-09`): aviso de papel en pequeño, con icono y texto. */
@@ -165,6 +174,7 @@
 }
 
 .result {
+  grid-area: result;
   display: flex;
   align-items: center;
   gap: var(--bb-space-4);
@@ -192,9 +202,33 @@
 }
 
 .actions {
+  grid-area: actions;
   display: flex;
   align-items: center;
   gap: var(--bb-space-2);
+}
+
+/*
+ * Fila estrecha (§3.3 v0.6.6): por debajo de 26 rem de contenido el título no tenía ni 10 rem al lado
+ * de posición, nota y medalla (a 320 px, 46 px para «Neón en Sants»). El resultado baja a una segunda
+ * fila, bajo el título (la portada se queda en la primera), y las acciones, a su lado.
+ */
+@container entry-row (width < 26rem) {
+  .body {
+    grid-template-columns: var(--bb-target) minmax(0, 1fr) auto;
+    grid-template-areas:
+      "cover info info"
+      ". result actions";
+    row-gap: var(--bb-space-2);
+  }
+
+  .result {
+    justify-self: start;
+  }
+
+  .position {
+    text-align: left;
+  }
 }
 
 @media (max-width: 720px) {

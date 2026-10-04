@@ -50,7 +50,9 @@ export interface EntryRowProps {
  * Fila de entrada (guía §3.3; listas largas: archivo, clasificación, historial): un marcador de
  * 56–58 px con portada de 44 px (en chaflán, con el play dentro), título y subtítulo, posición en
  * display, puntuación en Oxanium y medalla. **Antes del sellado, sin posición ni puntuación** (`RF-PLAY-05`): `result` solo llega con la
- * semana sellada. Hover: `--bb-panel-2`. Error de audio: aviso y reintentar (`RF-PLAY-09`).
+ * semana sellada. Hover: `--bb-panel-2`. Error de audio: aviso y reintentar (`RF-PLAY-09`). **Fila
+ * estrecha**: título y subtítulo parten en líneas (nunca «…») y el resultado baja a una segunda fila;
+ * la fila es un contenedor, así que su ancho lo pone quien la contiene.
  */
 export function EntryRow({
   title,
@@ -99,54 +101,57 @@ export function EntryRow({
         state === 'focusTitle' || state === 'focus' || state === 'pressed' ? undefined : state,
       )}
     >
-      {/* El play va dentro de la portada (no es un botón redondo suelto, como la lista del sello). */}
-      <div className={styles.coverPlay}>
-        <CoverArt className={styles.cover} />
-        <Button
-          variant={playing ? 'cta' : 'outline'}
-          size="sm"
-          iconOnly
-          icon={playing ? 'pause' : 'play'}
-          className={styles.play}
-          aria-label={t(
-            status === 'error' ? 'ui.entryRow.retry' : playing ? 'ui.entryRow.pause' : 'ui.entryRow.play',
-            { title },
-          )}
-          onClick={onPlayToggle}
-          loading={status === 'loading'}
-          loadingLabel={t('ui.entryRow.loading', { title })}
-          disabled={disabled}
-          state={state === 'focus' || state === 'pressed' ? state : undefined}
-        />
-      </div>
-      {to !== undefined ? (
-        // El enlace a la ficha abarca título y subtítulo: su anillo de foco los rodea a los dos y no
-        // tapa el subtítulo (§3.3 «Fila de entrada»). Su nombre es el título.
-        <Link
-          to={to}
-          className={cx(styles.info, styles.infoLink)}
-          aria-labelledby={titleId}
-          aria-describedby={subtitle && status !== 'error' ? subtitleId : undefined}
-          {...forceStateAttr(state === 'focusTitle' ? 'focus' : undefined)}
-        >
-          {info}
-        </Link>
-      ) : (
-        <div className={styles.info}>{info}</div>
-      )}
-      {result && (
-        <div className={styles.result}>
-          <span className={cx('bb-display', styles.position)}>
-            {t('ui.entryRow.position', { position: result.position })}
-          </span>
-          <span className={styles.score}>
-            <span className="sr-only">{t('ui.entryRow.score')} </span>
-            {formatNumber(result.score, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </span>
-          {result.medal && <Medal place={result.medal} className={styles.medal} />}
+      {/* La fila es el contenedor (estrecha o ancha) y este cuerpo, la rejilla que cambia con ella. */}
+      <div className={styles.body}>
+        {/* El play va dentro de la portada (no es un botón redondo suelto, como la lista del sello). */}
+        <div className={styles.coverPlay}>
+          <CoverArt className={styles.cover} />
+          <Button
+            variant={playing ? 'cta' : 'outline'}
+            size="sm"
+            iconOnly
+            icon={playing ? 'pause' : 'play'}
+            className={styles.play}
+            aria-label={t(
+              status === 'error' ? 'ui.entryRow.retry' : playing ? 'ui.entryRow.pause' : 'ui.entryRow.play',
+              { title },
+            )}
+            onClick={onPlayToggle}
+            loading={status === 'loading'}
+            loadingLabel={t('ui.entryRow.loading', { title })}
+            disabled={disabled}
+            state={state === 'focus' || state === 'pressed' ? state : undefined}
+          />
         </div>
-      )}
-      {actions && <div className={styles.actions}>{actions}</div>}
+        {to !== undefined ? (
+          // El enlace a la ficha abarca título y subtítulo: su anillo de foco los rodea a los dos y no
+          // tapa el subtítulo (§3.3 «Fila de entrada»). Su nombre es el título.
+          <Link
+            to={to}
+            className={cx(styles.info, styles.infoLink)}
+            aria-labelledby={titleId}
+            aria-describedby={subtitle && status !== 'error' ? subtitleId : undefined}
+            {...forceStateAttr(state === 'focusTitle' ? 'focus' : undefined)}
+          >
+            {info}
+          </Link>
+        ) : (
+          <div className={styles.info}>{info}</div>
+        )}
+        {result && (
+          <div className={styles.result} data-entry-result="">
+            <span className={cx('bb-display', styles.position)}>
+              {t('ui.entryRow.position', { position: result.position })}
+            </span>
+            <span className={styles.score}>
+              <span className="sr-only">{t('ui.entryRow.score')} </span>
+              {formatNumber(result.score, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+            {result.medal && <Medal place={result.medal} className={styles.medal} />}
+          </div>
+        )}
+        {actions && <div className={styles.actions}>{actions}</div>}
+      </div>
     </article>
   )
 }

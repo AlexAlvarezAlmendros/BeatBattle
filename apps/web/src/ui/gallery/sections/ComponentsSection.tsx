@@ -460,19 +460,21 @@ function EntryCellBlock() {
 
 function EntryRowBlock() {
   const [playing, setPlaying] = useState(false)
-  const base = {
+  const neon = {
     title: t('dev.gallery.arena.rows.neon'),
     subtitle: t('dev.gallery.arena.rows.neonSub'),
     to: '/e/neon-en-sants',
   }
+  // Las filas sueltas llevan el ancho de la lista (`.rows`): la fila no lo toma de su contenido.
+  const base = { ...neon, className: styles.rows }
   const sealed = { position: 1, score: 4.62, medal: 1 as const }
   return (
     <GalleryBlock id="fila" title={t('dev.gallery.components.entryRow')}>
       <p className={styles.note}>{t('dev.gallery.arena.rows.note')}</p>
       <GalleryRow wide>
         <StateCell label={stateLabel('rest')} state="rest" wide>
-          <EntryList>
-            <EntryRow {...base} result={sealed} />
+          <EntryList className={styles.rows}>
+            <EntryRow {...neon} result={sealed} />
             <EntryRow
               title={t('dev.gallery.arena.rows.rain')}
               subtitle={t('dev.gallery.arena.rows.rainSub')}

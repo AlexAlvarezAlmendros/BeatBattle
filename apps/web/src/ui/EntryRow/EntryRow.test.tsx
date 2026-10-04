@@ -4,8 +4,10 @@ import { MemoryRouter } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
 import { EntryRow } from './EntryRow'
+import entryRowCss from './EntryRow.module.css?raw'
 
 const renderRow = (ui: React.ReactElement) => render(<MemoryRouter>{ui}</MemoryRouter>)
+const css = entryRowCss.replace(/\/\*[\s\S]*?\*\//g, '')
 
 describe('EntryRow (§3.3 «Fila de entrada», 0.25)', () => {
   it('RF-PLAY-05: antes del sellado, sin posición ni puntuación ni medalla', () => {
@@ -22,6 +24,19 @@ describe('EntryRow (§3.3 «Fila de entrada», 0.25)', () => {
     expect(row).toHaveTextContent('1.º')
     expect(row).toHaveTextContent('4,62')
     expect(screen.getByRole('img', { name: t('ui.medal.place1') })).toBeInTheDocument()
+    expect(row.querySelector('[data-entry-result]')).toHaveTextContent('1.º')
+  })
+
+  it('RD-VIS-05 / WCAG 1.4.10 y 1.4.12: título y subtítulo parten en líneas (sin «…») y en la fila estrecha el resultado baja a una segunda fila', () => {
+    expect(css).not.toMatch(/text-overflow:\s*ellipsis/)
+    expect(css).not.toMatch(/white-space:\s*nowrap/)
+    expect(css).toMatch(/\.title \{[^}]*overflow-wrap: anywhere/)
+    expect(css).toMatch(/\.subtitle \{[^}]*overflow-wrap: anywhere/)
+    // La fila es el contenedor y su cuerpo, la rejilla: estrecha, el resultado va bajo el título.
+    expect(css).toMatch(/\.row \{[^}]*container: entry-row \/ inline-size/)
+    expect(css).toMatch(
+      /@container entry-row \(width < \d+(\.\d+)?rem\) \{\s*\.body \{[^}]*"cover info info"\s*"\. result actions"/,
+    )
   })
 
   it('RF-PLAY-09: con error de audio avisa y el play pasa a «Reintentar»', async () => {

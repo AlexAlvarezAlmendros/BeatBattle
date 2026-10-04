@@ -62,6 +62,16 @@
   width: 100%;
 }
 
+/*
+ * Filas de entrada: la fila es un contenedor (`container-type: inline-size`) y no toma el ancho de su
+ * contenido, así que la tesela se lo da, el de la lista del historial de la maqueta `05-perfil`; en móvil,
+ * el de la tesela (estrecha: el resultado en una segunda fila).
+ */
+.rows {
+  width: 100%;
+  max-width: 44rem;
+}
+
 /* XP flotante (§3.4.2): cifra y signo en Oxanium rojo. */
 .xpAmount {
   color: var(--bb-red);
