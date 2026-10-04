@@ -497,6 +497,41 @@ test.describe('espaciado de texto (WCAG 1.4.12) a 390 × 844 táctil', () => {
   }
 })
 
+/**
+ * Por debajo de 360 px el dato va en la segunda línea de la placa, y con el espaciado de texto de WCAG 1.4.12
+ * esa línea tiene que poder partir (§3.3: «la tecla queda dentro del corte»; jurado de la 0.28, cierre, R2: a
+ * 320 × 568 con teclado, con RESULTADOS elegida, «NUEVO Semana 40 [INTRO]» no partía y la tecla iba de 263 a
+ * 321 px con la placa en 16–304 y la ventana en 320: tapaba el anillo del cursor y quedaba cortada). Con cada
+ * placa elegida, el dato y la tecla quedan dentro del corte y de la placa, con el espaciado aplicado al cargar
+ * y después, y también sin él (sin el espaciado, [INTRO] de RESULTADOS ya pasaba 16 px del corte).
+ */
+test.describe('placas a 320 × 568 con teclado, con y sin el espaciado de texto (WCAG 1.4.12)', () => {
+  test.use({ viewport: { width: 320, height: 568 } })
+
+  for (const path of ['/dev/menu', '/dev/menu?estado=votacion', '/'])
+    for (const applied of ['sin espaciado', 'al cargar', 'después de cargar'] as const)
+      test(`§3.3 / WCAG 1.4.12 y 1.4.10: en ${path}, ${applied === 'sin espaciado' ? 'sin el espaciado de texto' : `con el espaciado aplicado ${applied}`} y cada placa elegida, el dato y la tecla quedan dentro de la placa`, async ({
+        page,
+      }) => {
+        if (applied === 'al cargar')
+          await page.addInitScript((css) => {
+            document.addEventListener('DOMContentLoaded', () => {
+              const style = document.createElement('style')
+              style.textContent = css
+              document.head.append(style)
+            })
+          }, TEXT_SPACING)
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        if (applied === 'después de cargar') await page.addStyleTag({ content: TEXT_SPACING })
+        const spaced = await page.evaluate(() => getComputedStyle(document.body).letterSpacing !== 'normal')
+        expect(spaced).toBe(applied !== 'sin espaciado')
+        await expect.poll(() => clippedFitTexts(page)).toEqual([])
+        expect(await plateCuts(page)).toEqual([])
+        expect(await plateOverflowY(page)).toEqual([])
+      })
+})
+
 /** Etiquetas de las placas y título de la tarjeta de la semana que desbordan su caja (se recortan). */
 function clippedFitTexts(page: Page): Promise<string[]> {
   return page.evaluate(() =>

@@ -570,8 +570,24 @@
     padding-block: var(--bb-space-2);
   }
 
+  /*
+   * La segunda línea parte como la de la placa apretada (más arriba): si el dato y la tecla no caben en ella
+   * (el espaciado de texto de WCAG 1.4.12, la letra ampliada), la tecla baja dentro de la placa y queda dentro
+   * del corte (§3.3; jurado de la 0.28, cierre, R2: a 320 × 568 con teclado, con RESULTADOS elegida, [INTRO]
+   * iba de 263 a 321 px con la placa en 16–304, tapaba el anillo del cursor y quedaba cortada).
+   */
   .detail {
+    flex-wrap: wrap;
     justify-self: start;
+    row-gap: var(--bb-space-1);
+    max-width: 100%;
+    text-align: start;
+  }
+
+  .detailText,
+  .extra {
+    flex-wrap: wrap;
+    white-space: normal;
   }
 
   .plate[data-disabled] .detailText {
