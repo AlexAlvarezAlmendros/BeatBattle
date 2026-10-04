@@ -520,6 +520,37 @@
 }
 
 /*
+ * Placa apretada en el móvil táctil: sus dos líneas caben en el alto de la placa (56 px la elegida y 48 en
+ * reposo; 48 y 44 en el móvil bajo), así que no crece y el menú sigue cabiendo sin desplazar con cualquier
+ * placa elegida (§3.8.3; jurado de la 0.28, cierre, R1: con RESULTADOS elegida, «NUEVO · Semana 40» bajaba y
+ * la placa crecía de 48 a 64 px; a 360 × 640 la página desbordaba 13 px y AJUSTES quedaba bajo la barra). Sin
+ * la tecla (táctil), la segunda línea la manda la etiqueta del dato («NUEVO», 22 px): baja a `--bb-stroke` de
+ * relleno (16 px), las líneas se separan `--bb-stroke` y la placa deja `--bb-space-1` arriba y abajo
+ * (4 + 22 + 2 + 16 + 4 = 48). La etiqueta no se toca. Con teclado (la tecla, de 26 px) crece como antes: ahí
+ * la pantalla se desplaza.
+ */
+@media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse) {
+  .plate[data-plate-stack],
+  .plate[data-plate-stack]:is(
+    :focus,
+    [data-cursor-active="true"],
+    [data-force-state="focus"],
+    [data-force-state="pressed"]
+  ) {
+    row-gap: var(--bb-stroke);
+    padding-block: var(--bb-space-1);
+  }
+
+  .plate[data-plate-stack] .detail {
+    row-gap: var(--bb-stroke);
+  }
+
+  .plate[data-plate-stack] :global([data-tag]) {
+    padding-block: var(--bb-stroke);
+  }
+}
+
+/*
  * Muy estrecho (< 360 px; reflow de WCAG 1.4.10 a 320 px): el dato baja a una segunda línea bajo la
  * etiqueta, en vez de quitarle sitio o cortarse, y la placa crece con sus dos líneas (como poco, 44 px).
  * Va después del móvil bajo para ganarle: con su alto fijo (44 y 50 px) el texto se salía por arriba y

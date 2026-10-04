@@ -347,6 +347,85 @@ for (const viewport of [
 }
 
 /**
+ * Con cada placa elegida, el menú del móvil táctil cabe sin desplazar y ninguna placa (ni el anillo de la
+ * elegida) queda bajo la barra. Elige cada placa (foco), espera a que acabe su transición y a que decida si
+ * baja el dato (`data-plate-stack`), vuelve arriba y mide.
+ */
+function plateFitWithEachChosen(page: Page): Promise<string[]> {
+  return page.evaluate(async () => {
+    const frame = () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
+    const problems: string[] = []
+    const plates = [...document.querySelectorAll<HTMLElement>('main [data-menu-plate]')]
+    const bar = document.querySelector('footer')!
+    for (const chosen of plates) {
+      chosen.focus()
+      await frame()
+      await new Promise((done) => setTimeout(done, 250))
+      await Promise.allSettled(
+        document
+          .getAnimations()
+          .filter((animation) => animation.effect?.getTiming().iterations !== Number.POSITIVE_INFINITY)
+          .map((animation) => animation.finished),
+      )
+      await frame()
+      window.scrollTo(0, 0)
+      await frame()
+      const name = chosen.querySelector('[data-plate-label]')?.textContent ?? '?'
+      const scroll = document.scrollingElement!.scrollHeight
+      if (scroll > window.innerHeight)
+        problems.push(`${name} elegida: la página mide ${scroll} de ${window.innerHeight}`)
+      const limit = bar.getBoundingClientRect().top
+      for (const plate of plates) {
+        const ring =
+          plate === chosen ? plate.querySelector('[data-cursor-ring]')?.getBoundingClientRect() : null
+        const bottom = Math.max(plate.getBoundingClientRect().bottom, ring?.bottom ?? 0)
+        if (bottom > limit + 0.5)
+          problems.push(
+            `${name} elegida: ${plate.querySelector('[data-plate-label]')?.textContent} acaba en ${bottom.toFixed(1)}, con la barra en ${limit.toFixed(1)}`,
+          )
+      }
+    }
+    return problems
+  })
+}
+
+/**
+ * En el móvil táctil, la placa elegida cuyo dato baja a la segunda línea (la etiqueta no cabe al lado,
+ * `data-plate-stack`) no crece por encima del alto de la elegida (56 px; 48 en el móvil bajo): el menú sigue
+ * cabiendo sin desplazar con cualquier placa elegida y en todos los estados (§3.3, §3.8.3; jurado de la 0.28,
+ * cierre, R1: con RESULTADOS elegida, «NUEVO · Semana 40» bajaba y la placa crecía de 48 a 64 px; a 360 × 640
+ * la página desbordaba 13 px y AJUSTES quedaba 5,6 px bajo la barra, y a 390 × 844, 4 px).
+ */
+for (const viewport of [
+  { width: 390, height: 844 },
+  { width: 375, height: 667 },
+  { width: 360, height: 640 },
+]) {
+  test.describe(`placas elegidas a ${viewport.width} × ${viewport.height} táctil`, () => {
+    test.use({ viewport, isMobile: true, hasTouch: true })
+
+    for (const path of [
+      '/dev/menu',
+      '/dev/menu?estado=votacion',
+      '/dev/menu?estado=vacio',
+      '/dev/menu?visitante',
+      '/dev/menu?subida',
+      '/',
+    ]) {
+      test(`RD-VIS-02 e / §3.8.3: en ${path}, con cada una de las seis placas elegida, el menú cabe sin desplazar y ninguna placa queda bajo la barra`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        await expect(page.locator('main [data-menu-plate]')).toHaveCount(6)
+        expect(await plateFitWithEachChosen(page)).toEqual([])
+        expect(await plateOverflowY(page)).toEqual([])
+      })
+    }
+  })
+}
+
+/**
  * Espaciado de texto de WCAG 1.4.12 (interlineado 1,5, letras 0,12 em, palabras 0,16 em, párrafos 2 em),
  * con `!important` en todo, como lo aplica quien lo necesita (una hoja de estilo propia o un
  * marcador).
