@@ -13,7 +13,8 @@ import { expectCursor, open, settle } from './support'
  *   no estiran cajas para llenar el alto. El bloque de dos columnas (pieza y panel, del mismo alto) se
  *   centra en vertical entre el HUD y la barra, con filas densas (nombre en display y una línea, como las
  *   de `05-perfil`: ninguna pasa de 72 px) y las acciones al pie del panel; a 1920, de medianil a
- *   medianil, centrado con la placa del HUD (L1).
+ *   medianil, centrado con la placa del HUD (L1). Las pestañas no entran en el centrado: van fijas
+ *   arriba, a la misma altura en todas las secciones, y el bloque se centra en el hueco de debajo.
  * - **404 en móvil**: el subtítulo va con el titular, antes del pad, y se ve sin desplazar, y «Volver al
  *   menú» va antes del pad (L2).
  * - **Pestañas**: [Q] y [E] a los lados, también cuando parten (L11).
@@ -105,17 +106,18 @@ const FEW_SCREENS = [
 const ROW_MAX = 72
 
 /**
- * El bloque de la pantalla (pestañas, pieza y panel) y sus márgenes con el HUD y la barra: centrado, el
- * de arriba y el de abajo se parecen (el `<main>` deja 24 px arriba y 32 abajo).
+ * El bloque de dos columnas de la pantalla (pieza y panel) y sus márgenes: el de arriba, con el HUD o,
+ * si hay pestañas, con ellas (van fijas arriba y no entran en el centrado, §3.8.14), y el de abajo, con
+ * la barra. Centrado, se parecen (el `<main>` deja 24 px arriba y 32 abajo; las pestañas, 24 debajo).
  */
 async function block(page: Page) {
   const box = await boxes(page, { panel: PANEL, piece: PIECE })
   const tabs = await page.evaluate(
-    () => document.querySelector('main [data-screen-part="tabs"]')?.getBoundingClientRect().top ?? null,
+    () => document.querySelector('main [data-screen-part="tabs"]')?.getBoundingClientRect().bottom ?? null,
   )
-  const top = Math.min(tabs ?? Number.POSITIVE_INFINITY, box.piece.top, box.panel.top)
+  const top = Math.min(box.piece.top, box.panel.top)
   const bottom = Math.max(box.piece.bottom, box.panel.bottom)
-  return { ...box, top, bottom, above: top - box.hud.bottom, below: box.bar.top - bottom }
+  return { ...box, top, bottom, above: top - (tabs ?? box.hud.bottom), below: box.bar.top - bottom }
 }
 
 /** Altos de las filas de la pantalla: las del panel (reglas, ayuda, leyenda) y las placas de la cuña. */
@@ -297,6 +299,61 @@ for (const viewport of [
         expect(fit.overflow, `${fit.overflow} px de desplazamiento`).toBeLessThanOrEqual(0)
         expect(fit.covered, 'controles bajo la barra').toEqual([])
         expect(fit.hidden, 'filas o párrafos escondidos').toEqual([])
+      })
+    }
+  })
+}
+
+/**
+ * Las pestañas de Opciones y de los legales van fijas arriba (§3.8.14: solo se centra el bloque de dos
+ * columnas): al cambiar de sección con Q/E, la fila no salta y la pestaña nueva, con el foco, se queda
+ * donde estaba. Con todo el bloque centrado (revisión de la 0.28), la fila bajaba o subía hasta 71 px
+ * entre secciones y, con el ratón, el puntero se quedaba fuera de las pestañas.
+ */
+const TAB_SCREENS = [
+  {
+    name: 'Opciones',
+    nav: 'Secciones de ajustes',
+    paths: [
+      'sonido',
+      'movimiento',
+      'cuenta',
+      'perfil',
+      'emails',
+      'sesiones',
+      'privacidad',
+      'accesibilidad',
+    ].map((section) => `/ajustes/${section}`),
+  },
+  {
+    name: 'los legales',
+    nav: 'Documentos legales',
+    paths: ['bases', 'terminos', 'privacidad', 'cookies'].map((doc) => `/legal/${doc}`),
+  },
+]
+
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 1366, height: 657 },
+]) {
+  test.describe(`${viewport.width} × ${viewport.height}, pestañas fijas`, () => {
+    test.use({ viewport })
+
+    for (const { name, nav, paths } of TAB_SCREENS) {
+      test(`RD-VIS-02 e: en ${name}, la fila de pestañas no salta al cambiar de sección con E (§3.8.14)`, async ({
+        page,
+      }) => {
+        const row = page.getByRole('navigation', { name: nav })
+        await page.goto(paths[0]!)
+        const tops: number[] = []
+        for (const [index, path] of paths.entries()) {
+          if (index > 0) await page.keyboard.press('e')
+          await expect(page).toHaveURL(path)
+          await expect(row.locator('a[aria-current="page"]')).toHaveAttribute('href', path)
+          await settle(page)
+          tops.push(Math.round((await row.boundingBox())!.y))
+        }
+        expect(new Set(tops).size, `arriba de la fila: ${tops.join(', ')} px`).toBe(1)
       })
     }
   })

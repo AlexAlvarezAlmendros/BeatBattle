@@ -158,10 +158,12 @@
  * al pie del panel) y la pieza va centrada en su columna, que sigue a la cuña.
  *
  * - **Poco contenido** (por defecto: «Cómo se juega», Opciones, la 404, los legales y las provisionales):
- *   no se estira ninguna caja para llenar el alto. La pantalla ocupa del HUD a la barra y su bloque
- *   (las pestañas, si las hay, y las dos columnas) se centra en vertical; las filas tienen su alto
- *   natural. Si el bloque es más alto que el hueco, la pantalla crece con él (`flex: 1 0 auto`): empieza
- *   arriba y se desplaza, y la barra no tapa ningún control (su alto real es el margen del foco).
+ *   no se estira ninguna caja para llenar el alto. La pantalla ocupa del HUD a la barra y su bloque de
+ *   dos columnas se centra en vertical; las filas tienen su alto natural. Las pestañas, si las hay, no
+ *   entran en el centrado: van fijas arriba y el bloque se centra en el hueco que dejan (abajo), para
+ *   que la fila de pestañas no salte al cambiar de sección (revisión de la 0.28). Si el bloque es más
+ *   alto que el hueco, la pantalla crece con él (`flex: 1 0 auto`): empieza arriba y se desplaza, y la
+ *   barra no tapa ningún control (su alto real es el margen del foco).
  * - **Contenido** (`fill`: selección, ficha, perfil, resultados…): la fila de la pieza y el panel es
  *   `1fr` y las dos columnas llegan a la barra, como las maquetas `02-seleccion` y `05-perfil`.
  */
@@ -173,6 +175,42 @@
 
   .screen[data-piece] .panel {
     align-self: stretch;
+  }
+
+  /*
+   * Con pestañas (Opciones, los legales): la fila de las pestañas, fija arriba (la misma en todas las
+   * secciones), y el bloque de la pieza y el panel, centrado en el hueco de debajo entre dos filas
+   * elásticas iguales (que valen 0 si el bloque no cabe: entonces empieza arriba y se desplaza). La fila
+   * de la pieza y el panel es una sola (`auto`): los iguala en alto. Sin separación entre filas (las
+   * elásticas la sumarían dos veces arriba): las pestañas llevan la suya debajo.
+   */
+  .screen[data-layout="interior"][data-tabs]:not([data-fill]) {
+    align-content: stretch;
+    grid-template-rows: auto auto minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas:
+      "head head"
+      "tabs tabs"
+      ". ."
+      "piece panel"
+      ". .";
+    row-gap: 0;
+  }
+
+  .screen[data-layout="interior"][data-tabs][data-title-in-hud]:not([data-fill]) {
+    grid-template-rows: auto minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas:
+      "tabs tabs"
+      ". ."
+      "piece panel"
+      ". .";
+  }
+
+  .screen[data-layout="interior"][data-tabs]:not([data-fill]) .head {
+    margin-bottom: var(--bb-space-6);
+  }
+
+  .screen[data-layout="interior"][data-tabs]:not([data-fill]) .tabs {
+    margin-bottom: var(--bb-space-6);
   }
 
   /* De 961 a 1199 px, el medianil entre columnas baja a 32 px: el panel no parte sus filas en dos. */
@@ -257,6 +295,13 @@
   /* Las pestañas que parten en dos líneas (de 721 a ~1200 px), con 8 px entre líneas. */
   .tabs ul {
     row-gap: var(--bb-space-2);
+  }
+
+  /* Con pestañas (dos columnas, arriba), su separación del bloque, la misma que entre filas: 12 px. */
+  @media (min-width: 961px) {
+    .screen[data-layout="interior"][data-tabs]:not([data-fill]) :is(.head, .tabs) {
+      margin-bottom: var(--bb-space-3);
+    }
   }
 
   .intro {
