@@ -1254,8 +1254,9 @@ for (const viewport of [
 /**
  * La columna de «ELIGE MODO» y la tarjeta de la semana acaban a la misma altura, junto a la barra, en todos
  * los estados (§3.8.3): en «/» (calendario vacío, sin reloj en el HUD) la columna de modos se quedaba
- * arriba y dejaba 130 px vacíos hasta la barra a 1440 × 900. La ayuda deja sobre la barra el aire de la
- * maqueta (`--bb-space-6`, escalado en la ventana grande).
+ * arriba y dejaba 130 px vacíos hasta la barra a 1440 × 900. Bajo la ayuda queda un pie de `--bb-space-6` a
+ * `--bb-space-7` (escalados en la ventana grande): el alto que sobra lo llena primero a él y después queda
+ * arriba.
  */
 for (const viewport of [
   { width: 1440, height: 900 },
@@ -1264,22 +1265,50 @@ for (const viewport of [
 ]) {
   test.describe(`pie del menú a ${viewport.width} × ${viewport.height}`, () => {
     test.use({ viewport })
-    const air = 24 * menuScale(viewport.width, viewport.height)
+    const scale = menuScale(viewport.width, viewport.height)
 
     for (const path of ['/dev/menu', '/', '/dev/menu?estado=vacio', '/dev/menu?estado=votacion&visitante']) {
-      test(`§3.8.3: en ${path} la ayuda de «ELIGE MODO» y la tarjeta de la semana acaban junto a la barra`, async ({
+      test(`RD-VIS-02 e / §3.8.3: en ${path} la ayuda de «ELIGE MODO» y la tarjeta de la semana acaban junto a la barra`, async ({
         page,
       }) => {
         await open(page, path, 'Beat Battle')
         await settle(page)
         const box = await menuBoxes(page)
         expect(Math.abs(box.card.bottom - box.bar.top)).toBeLessThanOrEqual(1)
-        expect(box.bar.top - box.help.bottom).toBeGreaterThanOrEqual(air - 2)
-        expect(box.bar.top - box.help.bottom).toBeLessThanOrEqual(air + 2)
+        expect(box.bar.top - box.help.bottom).toBeGreaterThanOrEqual(24 * scale - 1)
+        expect(box.bar.top - box.help.bottom).toBeLessThanOrEqual(28 * scale + 1)
       })
     }
   })
 }
+
+/**
+ * A 1440 × 900 con la semana en juego, el menú es el de antes de la ventana grande (revisión del cierre de
+ * la 0.28): la columna de modos no baja. Allí sobran ~25 px bajo la ayuda, que caben en el pie, así que la
+ * franja de «ELIGE MODO» empieza `--bb-space-2` por debajo de la columna, arriba del todo (con el contenido
+ * al pie, bajaba 1–2 px), y el logo va a todo su ancho.
+ */
+test.describe('menú a 1440 × 900', () => {
+  test.use({ viewport: { width: 1440, height: 900 } })
+
+  test('RD-VIS-02 e / §3.8.3: la columna de modos y el logo quedan donde estaban', async ({ page }) => {
+    await open(page, '/dev/menu', 'Beat Battle')
+    await settle(page)
+    const { modesTop, headTop, logo } = await page.evaluate(() => {
+      const nav = document.querySelector('main nav')!
+      const canvas = [...document.querySelectorAll('main [data-game-logo] canvas')].find(
+        (element) => element.getBoundingClientRect().width > 0,
+      )!
+      return {
+        modesTop: nav.getBoundingClientRect().top,
+        headTop: nav.querySelector('h2')!.parentElement!.getBoundingClientRect().top,
+        logo: canvas.getBoundingClientRect().width,
+      }
+    })
+    expect(Math.abs(headTop - (modesTop + 8))).toBeLessThanOrEqual(0.5)
+    expect(logo).toBe(640)
+  })
+})
 
 /**
  * Tableta vertical (jurado de la 0.28, cierre; guía §3.8.3): a 768 × 1024 la tarjeta de la semana iba en
@@ -1492,6 +1521,51 @@ for (const viewport of [
         expect(card).toBeGreaterThanOrEqual(sticker - 0.5)
         expect(hit).toBe(false)
         expect((await lockupOverLogo(page)).sticker).toBe(0)
+      })
+    }
+  })
+}
+
+/**
+ * Con la ventana baja y el espaciado de texto normal, la caja del logo reserva para el lockup lo de la maqueta
+ * (revisión del cierre de la 0.28): la pegatina cuelga dentro del margen de debajo del lockup, como antes, y
+ * el logo no encoge (a 1440 × 789 había bajado de 589 a 575 px). Y si la caja del logo llega a su alto máximo
+ * y aún sobra alto (en «/» a 1440 × 789, con el HUD de visitante), sobra arriba: el lockup acaba a
+ * `--bb-space-2` de la tarjeta, no a 86 px.
+ */
+for (const viewport of [
+  { width: 1440, height: 789 },
+  { width: 1366, height: 657 },
+  { width: 1280, height: 720 },
+  { width: 1536, height: 730 },
+]) {
+  test.describe(`logo del menú con la ventana baja a ${viewport.width} × ${viewport.height}`, () => {
+    test.use({ viewport })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`RD-VIS-02 e / RF-OTP-01 / §3.8.3: en ${path} el lockup se asienta sobre la tarjeta y la pegatina no la toca`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        // El lockup se vuelve a medir en el fotograma siguiente a su cambio de tamaño.
+        await page.waitForTimeout(200)
+        const { lockup, sticker, card, scroll } = await page.evaluate(() => {
+          const main = document.querySelector('main')!
+          const signature = main.querySelector('[data-otp-signature]')!
+          return {
+            lockup: signature.closest('section > div > *')!.getBoundingClientRect().bottom,
+            sticker: signature.querySelector('img')!.getBoundingClientRect().bottom,
+            card: main.querySelector('article')!.getBoundingClientRect().top,
+            scroll: document.scrollingElement!.scrollHeight - window.innerHeight,
+          }
+        })
+        expect(scroll).toBeLessThanOrEqual(0)
+        expect(
+          Math.abs(card - lockup - 8),
+          `del lockup a la tarjeta, ${(card - lockup).toFixed(1)} px`,
+        ).toBeLessThanOrEqual(1)
+        expect(sticker).toBeLessThanOrEqual(card + 0.5)
       })
     }
   })

@@ -380,10 +380,11 @@ function useLockupExtent(brandRef: RefObject<HTMLElement | null>) {
       if (box.height === 0) return
       const style = getComputedStyle(lockup)
       const sticker = lockup.querySelector('img')?.getBoundingClientRect()
-      const bottom = Math.max(box.bottom, sticker?.bottom ?? box.bottom)
-      const extent =
-        bottom - box.top + Number.parseFloat(style.marginTop) + Number.parseFloat(style.marginBottom)
-      const value = `${Math.ceil(extent)}px`
+      // La pegatina puede colgar dentro del margen de debajo (como en la maqueta): solo cuenta lo que pase.
+      const top = box.top - Number.parseFloat(style.marginTop)
+      const bottom = Math.max(box.bottom + Number.parseFloat(style.marginBottom), sticker?.bottom ?? 0)
+      // Redondeado hacia arriba, sin el ruido de coma flotante de las restas (72,0000001 → 72, no 73).
+      const value = `${Math.ceil(Math.round((bottom - top) * 100) / 100)}px`
       if (brand.style.getPropertyValue(LOCKUP_EXTENT_VAR) !== value)
         brand.style.setProperty(LOCKUP_EXTENT_VAR, value)
     }

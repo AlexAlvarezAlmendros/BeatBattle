@@ -98,18 +98,32 @@
  * móvil, no (más abajo).
  *
  * Ocupa todo el alto, como la columna del título, y su contenido va al pie (§3.8.3): en todos los estados
- * la ayuda acaba a la altura de la tarjeta de la semana, junto a la barra, con `--bb-space-6` de aire (lo
- * que deja la maqueta). Con el reloj en el HUD (la semana en juego) la columna ya llenaba el alto y no se
- * mueve; sin él (el calendario vacío), antes se quedaba arriba y dejaba 130 px vacíos hasta la barra.
+ * la ayuda acaba a la altura de la tarjeta de la semana, junto a la barra. Con el reloj en el HUD (la
+ * semana en juego) la columna ya llenaba el alto; sin él (el calendario vacío), antes se quedaba arriba y
+ * dejaba 130 px vacíos hasta la barra.
+ *
+ * Bajo la ayuda queda un pie (`::after`, de `--bb-space-6` a `--bb-space-7`, escalado): el alto que sobra
+ * lo llena primero a él, hasta su tope, y después queda arriba (el margen automático de la cabecera). Así, a
+ * 1440 × 900 con la semana en juego (sobran ~25 px) la columna queda donde estaba, arriba del todo y pixel a
+ * pixel (revisión del cierre de la 0.28: con el contenido al pie, bajaba 1–2 px), y en los demás estados la
+ * ayuda acaba a 24–28 px de la barra (escalados). El pie cuenta en el alto de la columna solo con su mínimo:
+ * no hace más alta la fila del menú.
  */
 .modes {
+  --menu-modes-foot: calc(var(--bb-space-6) * var(--menu-s));
+  --menu-modes-foot-max: calc(var(--bb-space-7) * var(--menu-s));
   container: menu-plates / inline-size;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-content: end;
+  display: flex;
+  flex-direction: column;
   align-self: stretch;
   min-width: 0;
-  padding-block: calc(var(--bb-space-2) * var(--menu-s)) calc(var(--bb-space-6) * var(--menu-s));
+  padding-top: calc(var(--bb-space-2) * var(--menu-s));
+}
+
+.modes::after {
+  content: "";
+  flex: 1 0 var(--menu-modes-foot);
+  max-height: var(--menu-modes-foot-max);
 }
 
 /*
@@ -123,7 +137,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0 var(--bb-space-4);
-  margin: 0 0 calc(var(--bb-space-3) * var(--menu-s)) var(--bb-space-7);
+  margin: auto 0 calc(var(--bb-space-3) * var(--menu-s)) var(--bb-space-7);
   padding: calc(var(--bb-space-2) * var(--menu-s)) calc(var(--bb-slant) + var(--bb-space-3))
     calc(var(--bb-space-2) * var(--menu-s)) calc(var(--bb-slant) + var(--bb-space-2));
   background: var(--bb-panel-veil);
@@ -270,14 +284,19 @@
    * `--menu-lockup-nominal`: lo que ocupa el lockup bajo el logo según la maqueta (su alto y el margen de
    * debajo; aquí no sube sobre el logo: con el logo más pequeño, la pegatina pisaría el pie de «BATTLE»).
    * `--menu-lockup-room`: lo que el logo le deja de verdad, el mayor de ese y el que mide `MainMenu`
-   * (`--menu-lockup-extent`: la caja del lockup con sus márgenes y la pegatina girada que cuelga). Con el
-   * espaciado de texto de WCAG 1.4.12 la cinta parte en dos líneas y el lockup crece: la caja reserva su alto
-   * real y el logo baja, en vez de que la tarjeta tape el pie de la pegatina (§3.1; jurado de la 0.28,
-   * cierre: a 1366 × 657 la tarjeta tapaba sus 12 px de abajo). El ancho del lockup sale del sitio de la
+   * (`--menu-lockup-extent`: la caja del lockup con sus márgenes, y la pegatina girada si cuelga más que el
+   * margen de debajo). Con el espaciado de texto de WCAG 1.4.12 la cinta parte en dos líneas y el lockup
+   * crece: la caja reserva su alto real y el logo baja, en vez de que la tarjeta tape el pie de la pegatina
+   * (§3.1; jurado de la 0.28, cierre: a 1366 × 657 la tarjeta tapaba sus 12 px de abajo). Sin ese
+   * espaciado, lo medido es lo de la maqueta y el logo no cambia. El ancho del lockup sale del sitio de la
    * maqueta, no del real: así su alto no depende de sí mismo.
    * `--menu-logo-h-max`: el alto del logo de la maqueta o, si la columna es más estrecha, el que le da su
    * ancho. `--menu-logo-w`: el ancho del logo, el de su alto en la caja (100cqh) menos el sitio del lockup,
    * sin pasar del ancho de la columna ni del de la maqueta.
+   *
+   * Si la caja llega a su alto máximo (el logo de la maqueta) y aún sobra alto (en «/» a 1440 × 789, con el
+   * HUD de visitante), sobra arriba (`margin-top: auto`), como en la ventana normal: el logo se asienta
+   * sobre la tarjeta en vez de quedarse colgado del HUD a 86 px de ella (revisión del cierre de la 0.28).
    */
   .brand {
     --menu-lockup-nominal: calc(var(--bb-menu-lockup-h) + var(--bb-space-2));
@@ -292,6 +311,7 @@
     container: menu-brand / size;
     display: block;
     flex: 1 1 0;
+    margin-top: auto;
     min-height: calc(var(--bb-menu-logo-h-min) + var(--menu-lockup-room-compact));
     max-height: calc(var(--menu-logo-h-max) + var(--menu-lockup-room));
   }
@@ -320,12 +340,13 @@
 
   .title > article {
     align-self: stretch;
-    margin-top: auto;
+    margin-top: 0;
   }
 
   /* Sin aire bajo la ayuda: con la ventana baja, la columna de modos acaba con la tarjeta, en la barra. */
   .modes {
-    padding-bottom: 0;
+    --menu-modes-foot: 0px;
+    --menu-modes-foot-max: 0px;
   }
 
   .head {
@@ -434,7 +455,9 @@
   }
 
   .modes {
-    padding-block: 0;
+    --menu-modes-foot: 0px;
+    --menu-modes-foot-max: 0px;
+    padding-top: 0;
   }
 
   /*
@@ -524,7 +547,9 @@
   }
 
   .modes {
-    padding-block: 0;
+    --menu-modes-foot: 0px;
+    --menu-modes-foot-max: 0px;
+    padding-top: 0;
   }
 
   .head,
