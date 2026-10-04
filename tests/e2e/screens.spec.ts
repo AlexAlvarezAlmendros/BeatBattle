@@ -1190,6 +1190,51 @@ for (const viewport of [
 }
 
 /**
+ * La autenticación en el móvil bajo (§3.8.14 «en móvil, el panel va anclado al pie»; sexto pase del jurado,
+ * G4): en táctil la barra no enseña Esc y «Volver al menú» es la única salida, así que el panel acaba sobre
+ * la barra y el botón se ve entero con su anillo (7 px), sin desplazar. A 320 × 568 el pie del panel y el
+ * botón quedaban ~4 px bajo la barra (514) y la página se desplazaba 79 px; por debajo de 360 px de ancho,
+ * la cabeza se acerca al logo y el logo cede alto.
+ */
+for (const viewport of [
+  { width: 320, height: 568 },
+  { width: 360, height: 640 },
+  { width: 375, height: 667 },
+]) {
+  test.describe(`autenticación a ${viewport.width} × ${viewport.height} táctil`, () => {
+    test.use({ viewport, isMobile: true, hasTouch: true })
+
+    for (const { path, heading } of [
+      { path: '/entrar', heading: 'Entrar' },
+      { path: '/registro', heading: 'Crear cuenta' },
+    ])
+      test(`RD-VIS-02 e / §3.8.14: en ${path}, el panel acaba sobre la barra y «Volver al menú» se ve entero con su anillo, sin desplazar (G4)`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        const box = await boxes(page, {
+          title: 'main [data-title-piece]',
+          panel: PANEL,
+          back: 'main a[href="/"]',
+        })
+        expect(
+          box.panel.bottom,
+          `panel hasta ${box.panel.bottom}, barra en ${box.bar.top}`,
+        ).toBeLessThanOrEqual(box.bar.top)
+        // El anillo del foco: 4 px de hueco y 3 de trazo.
+        expect(box.back.bottom + 7, 'anillo de «Volver al menú»').toBeLessThanOrEqual(box.bar.top)
+        // El logo, entre la cabeza y el panel.
+        expect(box.title.bottom).toBeLessThanOrEqual(box.panel.top)
+        await expect(page.getByRole('main').getByRole('link', { name: 'Volver al menú' })).toBeInViewport({
+          ratio: 1,
+        })
+        expect(await page.evaluate(() => scrollY)).toBe(0)
+      })
+  })
+}
+
+/**
  * Opciones por debajo de 360 px (§3.8.14 v0.6.7; cuarto pase del jurado, P3): las ocho pestañas ocupan
  * cinco o seis filas y la vista previa baja fuera de la primera vista, así que detrás de las pestañas
  * quedaba la cuña desnuda con su trama (granate de la primera vista: 25,4 % con teclado y 20,4 % en táctil

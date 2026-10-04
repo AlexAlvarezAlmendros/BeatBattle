@@ -37,3 +37,16 @@
     margin: var(--bb-space-1) 0 0;
   }
 }
+
+/*
+ * Móvil bajo y estrecho (< 360 px de ancho y ≤ 700 de alto; §3.8.14 «en móvil, el panel va anclado al
+ * pie»; sexto pase del jurado, G4): a 320 × 568 el pie del panel y «Volver al menú», la única salida en
+ * táctil, quedaban bajo la barra (514) con su anillo. El logo cede alto (`--bb-space-12` menos de ancho:
+ * 240 px a 320, del ancho del lockup, que no se mueve) y, con la cabeza más cerca (`ScreenPage`), el
+ * panel acaba sobre la barra, como la 404 en el móvil bajo.
+ */
+@media (max-width: 359px) and (max-height: 700px) {
+  .logo {
+    width: calc(100% - var(--bb-space-12));
+  }
+}

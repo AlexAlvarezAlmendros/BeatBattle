@@ -521,3 +521,30 @@
     font-size: var(--bb-fs-lg);
   }
 }
+
+/*
+ * Pantalla de título en el móvil bajo (≤ 700 px de alto; §3.8.14 «Autenticación»: «en móvil, el panel va
+ * anclado al pie»; sexto pase del jurado, G4): el panel acaba sobre la barra. A 320 × 568 quedaba 24 px bajo
+ * ella en /entrar y 48 en /registro, con «Volver al menú» (la única salida en táctil) y su anillo debajo, y a
+ * 375 × 667, /registro, 16. La cabeza se acerca al logo (`--bb-space-2`; entre el lockup y el panel siguen
+ * los `--bb-space-6` donde cae la firma que cuelga) y el panel se aprieta como con la ventana baja (12 px
+ * entre sus partes); por debajo de 360 px, además, el logo cede alto (`AuthPages.module.css`). Nada se
+ * esconde.
+ */
+@media (max-width: 720px) and (max-height: 700px) {
+  .screen[data-layout="title"] {
+    row-gap: var(--bb-space-2);
+  }
+
+  .screen[data-layout="title"] .piece {
+    margin-bottom: var(--bb-space-4);
+  }
+
+  .screen[data-layout="title"] :is(.panel, .intro) {
+    gap: var(--bb-space-3);
+  }
+
+  .screen[data-layout="title"] .actions {
+    padding-top: var(--bb-space-3);
+  }
+}
