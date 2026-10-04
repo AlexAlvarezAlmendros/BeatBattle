@@ -314,6 +314,56 @@ for (const viewport of [
 }
 
 /**
+ * Reparto del alto en una columna (§3.8.14; sexto pase del jurado, G1): de 721 a 960 px (la tableta
+ * vertical, una ventana estrecha de escritorio) la pieza va encima del panel, y las pantallas de poco
+ * contenido también centran ese bloque entre el HUD (o el pie de las pestañas, que van fijas arriba) y la
+ * barra. A 820 × 1180 el sello «EN OBRAS» y el panel de los legales y de las provisionales iban de 228 a 523
+ * y quedaban ~590 px de rayos vacíos hasta la barra (1115).
+ */
+for (const { viewport, touch, screens } of [
+  {
+    viewport: { width: 820, height: 1180 },
+    touch: true,
+    screens: [
+      { path: '/legal/bases', heading: 'Bases de la competición' },
+      { path: '/semanas', heading: 'Semanas' },
+      { path: '/subir', heading: 'Subir mi beat' },
+      { path: '/e/0192f3a1', heading: 'Entrada' },
+      { path: '/esto-no-existe', heading: 'Bonus stage' },
+      { path: '/ajustes/accesibilidad', heading: 'Accesibilidad' },
+    ],
+  },
+  {
+    viewport: { width: 960, height: 800 },
+    touch: false,
+    screens: [
+      { path: '/legal/bases', heading: 'Bases de la competición' },
+      { path: '/semanas', heading: 'Semanas' },
+    ],
+  },
+]) {
+  test.describe(`${viewport.width} × ${viewport.height}${touch ? ' táctil' : ''}, una columna`, () => {
+    test.use({ viewport, isMobile: touch, hasTouch: touch })
+
+    for (const { path, heading } of screens)
+      test(`RD-VIS-02 e / §3.8.14: en una columna, ${path} centra la pieza y el panel entre el HUD (o las pestañas) y la barra (G1)`, async ({
+        page,
+      }) => {
+        await open(page, path, heading)
+        await settle(page)
+        const box = await block(page)
+        expect(
+          Math.abs(box.above - box.below),
+          `arriba ${box.above} px · abajo ${box.below} px`,
+        ).toBeLessThanOrEqual(24)
+        expect(box.below, 'hueco bajo el bloque').toBeGreaterThanOrEqual(40)
+        // Uno encima del otro: la columna única.
+        expect(box.panel.left, 'una columna').toBeLessThan(box.piece.right)
+      })
+  })
+}
+
+/**
  * Las pestañas de Opciones y de los legales van fijas arriba (§3.8.14: solo se centra el bloque de dos
  * columnas): al cambiar de sección con Q/E, la fila no salta y la pestaña nueva, con el foco, se queda
  * donde estaba. Con todo el bloque centrado (revisión de la 0.28), la fila bajaba o subía hasta 71 px

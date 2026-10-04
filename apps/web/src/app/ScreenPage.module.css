@@ -395,6 +395,99 @@
   }
 }
 
+/*
+ * Una columna de 721 a 960 px (tableta vertical, ventana estrecha de escritorio; §3.8.14 «Reparto del
+ * alto»): las de poco contenido también centran su bloque (la pieza y el panel, uno encima del otro) entre
+ * el HUD y la barra, como en dos columnas. A 820 × 1180 el sello «EN OBRAS» y el panel de los legales y de
+ * las provisionales se quedaban arriba (228–523) con ~590 px de rayos vacíos hasta la barra (sexto pase
+ * del jurado, G1). Si el bloque no cabe, la pantalla crece con él (`flex: 1 0 auto`): empieza arriba y se
+ * desplaza. En el móvil (≤ 720 px) no cambia: la cabeza va a la vista y el bloque empieza debajo.
+ */
+@media (min-width: 721px) and (max-width: 960px) {
+  .screen[data-layout="interior"]:not([data-fill]) {
+    flex: 1 0 auto;
+    align-content: center;
+  }
+
+  /*
+   * Con el título en la placa del HUD, la cabeza va solo para los lectores (fuera de la rejilla): sin su
+   * fila, que con su separación bajaba el bloque 24 px del centro.
+   */
+  .screen[data-layout="interior"][data-title-in-hud]:not([data-fill]) {
+    grid-template-areas:
+      "piece"
+      "panel";
+  }
+
+  .screen[data-layout="interior"][data-title-in-hud][data-panel-first]:not([data-fill]) {
+    grid-template-areas:
+      "panel"
+      "piece";
+  }
+
+  /*
+   * Con pestañas (los legales, Opciones): las pestañas, fijas arriba, y el bloque, centrado en el hueco de
+   * debajo entre dos filas elásticas iguales (0 si no cabe), como en dos columnas. Sin separación entre
+   * filas (las elásticas la sumarían dos veces): la llevan la cabeza, las pestañas y la primera caja del
+   * bloque.
+   */
+  .screen[data-layout="interior"][data-tabs]:not([data-fill]) {
+    --screen-row-gap: var(--bb-space-6);
+    align-content: stretch;
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto minmax(0, 1fr);
+    grid-template-areas:
+      "head"
+      "tabs"
+      "."
+      "piece"
+      "panel"
+      ".";
+    row-gap: 0;
+  }
+
+  .screen[data-layout="interior"][data-tabs][data-title-in-hud]:not([data-fill]) {
+    grid-template-rows: auto minmax(0, 1fr) auto auto minmax(0, 1fr);
+    grid-template-areas:
+      "tabs"
+      "."
+      "piece"
+      "panel"
+      ".";
+  }
+
+  .screen[data-layout="interior"][data-tabs][data-panel-first]:not([data-fill]) {
+    grid-template-areas:
+      "head"
+      "tabs"
+      "."
+      "panel"
+      "piece"
+      ".";
+  }
+
+  .screen[data-layout="interior"][data-tabs][data-title-in-hud][data-panel-first]:not([data-fill]) {
+    grid-template-areas:
+      "tabs"
+      "."
+      "panel"
+      "piece"
+      ".";
+  }
+
+  .screen[data-layout="interior"][data-tabs]:not([data-fill]) > :is(.head, .tabs),
+  .screen[data-layout="interior"][data-tabs]:not([data-fill], [data-panel-first]) > .piece,
+  .screen[data-layout="interior"][data-tabs][data-panel-first]:not([data-fill]) > .panel {
+    margin-bottom: var(--screen-row-gap);
+  }
+}
+
+/* Con la ventana baja, la separación de la ventana baja (12 px, arriba). */
+@media (min-width: 721px) and (max-width: 960px) and (max-height: 899px) {
+  .screen[data-layout="interior"][data-tabs]:not([data-fill]) {
+    --screen-row-gap: var(--bb-space-3);
+  }
+}
+
 @media (max-width: 720px) {
   .head {
     padding: var(--bb-space-3) var(--bb-space-4);
