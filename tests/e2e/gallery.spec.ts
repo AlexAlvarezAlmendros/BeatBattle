@@ -150,23 +150,30 @@ test('RD-VIS-03: el modo serio quita el espectáculo (anunciador, rayos) y deja 
 })
 
 /**
- * La etiqueta girada del anunciador, como en la maqueta `03-jurado` (`03b-jurado-votado-1440x900.png`,
- * `.ptag--red`): «¡VOTO GUARDADO!» va en la etiqueta roja con texto negro (5,32:1), no en la blanca
- * (esa es la de «¡A ESCUCHAR!», `03-jurado-escuchando`).
+ * La etiqueta girada del anunciador, como en la maqueta `03-jurado` (`03b-jurado-votado-1440x900.png`):
+ * «¡VOTO GUARDADO!» va en la etiqueta roja con texto blanco (`Tag` `cta`, `--bb-red-cta`, 4,75:1; §3.3
+ * v0.6.7), no en la roja de marca con texto negro ni en la blanca (esa es la de «¡A ESCUCHAR!»,
+ * `03-jurado-escuchando`).
  */
-test('RD-VIS-02 e: la etiqueta girada del anunciador («¡VOTO GUARDADO!») es roja con texto negro, como en 03-jurado', async ({
-  page,
-}) => {
-  await openGallery(page)
-  const tag = page.locator('section#anunciador [data-announcer="tag"] [data-tag]')
-  await expect(tag).toHaveText('¡Voto guardado!')
-  await expect(tag).toHaveAttribute('data-tag', 'red')
-  const paint = await tag.evaluate((element) => {
-    const style = getComputedStyle(element)
-    return { background: style.backgroundColor, color: style.color }
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 390, height: 844 },
+]) {
+  test(`RD-VIS-02 e: la etiqueta girada del anunciador («¡VOTO GUARDADO!») es roja con texto blanco (cta), como en 03-jurado (${viewport.width} px)`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(viewport)
+    await openGallery(page)
+    const tag = page.locator('section#anunciador [data-announcer="tag"] [data-tag]')
+    await expect(tag).toHaveText('¡Voto guardado!')
+    await expect(tag).toHaveAttribute('data-tag', 'cta')
+    const paint = await tag.evaluate((element) => {
+      const style = getComputedStyle(element)
+      return { background: style.backgroundColor, color: style.color }
+    })
+    expect(paint).toEqual({ background: 'rgb(230, 0, 58)', color: 'rgb(255, 255, 255)' })
   })
-  expect(paint).toEqual({ background: 'rgb(255, 0, 60)', color: 'rgb(0, 0, 0)' })
-})
+}
 
 test('RNF-A11Y-01: el anillo de foco del título de una fila de entrada se ve entero', async ({ page }) => {
   await openGallery(page)

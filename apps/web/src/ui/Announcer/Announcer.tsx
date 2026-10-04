@@ -10,11 +10,11 @@ export interface AnnouncerProps {
   /** `display` (blanco con extrusión y contorno) o `tag` (etiqueta grande girada −6°). */
   variant?: 'display' | 'tag'
   /**
-   * Tono de la etiqueta girada (`variant="tag"`), los de `Tag` con texto negro. Como en la maqueta
-   * `03-jurado`: blanca para lo que invita («¡A ESCUCHAR!») y roja para lo que confirma
-   * («¡VOTO GUARDADO!»).
+   * Tono de la etiqueta girada (`variant="tag"`). Por defecto, la roja con texto blanco (`Tag` `cta`,
+   * `--bb-red-cta`; §3.3), la de «¡VOTO GUARDADO!» en `03b-jurado-votado`. La blanca con texto negro,
+   * solo para lo que invita («¡A ESCUCHAR!», `03-jurado-escuchando`).
    */
-  tone?: 'white' | 'red'
+  tone?: 'cta' | 'white'
   /** Sin la región viva (la galería, que enseña varios a la vez). */
   silent?: boolean
   className?: string
@@ -22,8 +22,9 @@ export interface AnnouncerProps {
 
 /**
  * Anunciador (guía §3.3, §3.9): un rótulo de una a tres palabras en display, blanco con extrusión de
- * trama y contorno, o la etiqueta grande girada −6° (blanca o roja, `tone`). **Uno por evento**, nunca encadenados, y repetido
- * en una región viva educada. Es espectáculo: el modo serio lo quita (`data-fx`) y deja la región viva.
+ * trama y contorno, o la etiqueta grande girada −6° (roja con texto blanco, `cta`; blanca si lo pide
+ * `tone`). **Uno por evento**, nunca encadenados, y repetido en una región viva educada. Es
+ * espectáculo: el modo serio lo quita (`data-fx`) y deja la región viva.
  * Entra estampado (escala 1,12 → 1, `--bb-dur-slam`); sin movimiento, aparece montado.
  *
  * Ocupa el ancho de su caja y centra el rótulo. El de display se ajusta a ese ancho (`useFitText`, como
@@ -37,7 +38,7 @@ export interface AnnouncerProps {
 export function Announcer({
   text,
   variant = 'display',
-  tone = 'white',
+  tone = 'cta',
   silent = false,
   className,
 }: AnnouncerProps) {

@@ -10,12 +10,15 @@ describe('Announcer (§3.3, §3.9; 0.25)', () => {
     expect(screen.getByRole('status')).toHaveAttribute('aria-live', 'polite')
   })
 
-  it('RD-VIS-02 e: la etiqueta girada lleva el tono de su evento (03-jurado: «¡A escuchar!» blanca, «¡Voto guardado!» roja)', () => {
-    const { container, rerender } = render(<Announcer text="¡A escuchar!" variant="tag" silent />)
-    expect(container.querySelector('[data-tag]')).toHaveAttribute('data-tag', 'white')
-    rerender(<Announcer text="¡Voto guardado!" variant="tag" tone="red" silent />)
-    expect(container.querySelector('[data-tag]')).toHaveAttribute('data-tag', 'red')
+  it('RD-VIS-02 e: la etiqueta girada es roja con texto blanco (Tag cta), como «¡Voto guardado!» en 03-jurado; blanca solo si se pide', () => {
+    const { container, rerender } = render(<Announcer text="¡Voto guardado!" variant="tag" silent />)
+    expect(container.querySelector('[data-tag]')).toHaveAttribute('data-tag', 'cta')
     expect(container.querySelector('[data-tag]')).toHaveTextContent('¡Voto guardado!')
+    rerender(<Announcer text="¡Voto guardado!" variant="tag" tone="cta" silent />)
+    expect(container.querySelector('[data-tag]')).toHaveAttribute('data-tag', 'cta')
+    // «¡A escuchar!» (03-jurado-escuchando) es la blanca con texto negro.
+    rerender(<Announcer text="¡A escuchar!" variant="tag" tone="white" silent />)
+    expect(container.querySelector('[data-tag]')).toHaveAttribute('data-tag', 'white')
   })
 
   it('en modo serio el rótulo desaparece (global.css) y la región viva se queda', () => {
