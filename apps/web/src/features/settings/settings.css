@@ -73,16 +73,22 @@
   color: var(--bb-text-2);
 }
 
-/* Las flechas del conmutador y de la acción: triángulos rojos (orientaciones, no inclinaciones). */
+/*
+ * Las flechas del conmutador y de la acción: triángulos rojos en SVG, del color del texto de la flecha
+ * (`currentColor`): en contraste alto toman el del sistema, como el texto (un fondo recortado se perdía).
+ */
 .settings-preview-arrow {
+  flex: none;
   width: var(--bb-space-2);
   height: var(--bb-space-3);
-  background: var(--bb-red);
-  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  color: var(--bb-red);
+  fill: currentColor;
 }
 
-.settings-preview-arrow[data-side="left"] {
-  clip-path: polygon(100% 0, 0 50%, 100% 100%);
+@media (forced-colors: active) {
+  .settings-preview-arrow {
+    color: CanvasText;
+  }
 }
 
 /* El pie, sobre un panel como el del pad de la 404 (la cuña lleva trama). */

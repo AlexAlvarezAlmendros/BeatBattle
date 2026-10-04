@@ -387,6 +387,74 @@ for (const { viewport, path, heading, nav } of [
   })
 }
 
+/**
+ * Proporción de píxeles de «tinta» en una caja de la pantalla: los que se apartan (más de 48 en algún
+ * canal) del color más repetido de la caja, que es su fondo. Una flecha que no se pinta da 0.
+ */
+async function inkShare(page: Page, box: Box): Promise<number> {
+  const png = await page.screenshot({
+    clip: { x: box.left, y: box.top, width: box.right - box.left, height: box.bottom - box.top },
+  })
+  return page.evaluate(async (data) => {
+    const image = new Image()
+    image.src = `data:image/png;base64,${data}`
+    await image.decode()
+    const canvas = new OffscreenCanvas(image.width, image.height)
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })!
+    ctx.drawImage(image, 0, 0)
+    const { data: px } = ctx.getImageData(0, 0, image.width, image.height)
+    const counts = new Map<number, number>()
+    for (let i = 0; i < px.length; i += 4) {
+      const key = (px[i]! << 16) | (px[i + 1]! << 8) | px[i + 2]!
+      counts.set(key, (counts.get(key) ?? 0) + 1)
+    }
+    const background = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]![0]
+    const [r, g, b] = [(background >> 16) & 255, (background >> 8) & 255, background & 255]
+    let ink = 0
+    for (let i = 0; i < px.length; i += 4) {
+      if (Math.max(Math.abs(px[i]! - r), Math.abs(px[i + 1]! - g), Math.abs(px[i + 2]! - b)) > 48) ink += 1
+    }
+    return ink / (px.length / 4)
+  }, png.toString('base64'))
+}
+
+for (const colorScheme of ['dark', 'light'] as const) {
+  test.describe(`contraste alto, esquema ${colorScheme === 'dark' ? 'oscuro' : 'claro'}`, () => {
+    test.use({ colorScheme })
+
+    test('RNF-A11Y-01 / RD-VIS-02 e: las flechas ◀ ▶ y ▸ de la vista previa de Opciones se ven (L13a)', async ({
+      page,
+    }) => {
+      await page.emulateMedia({ forcedColors: 'active', colorScheme })
+      // Movimiento: conmutadores «◀ NO ▶»; Cuenta: acciones «Cambiar ▸».
+      for (const { path, heading, arrows } of [
+        { path: '/ajustes/movimiento', heading: 'Movimiento', arrows: 6 },
+        { path: '/ajustes/cuenta', heading: 'Cuenta', arrows: 4 },
+      ]) {
+        await open(page, path, heading)
+        await settle(page)
+        expect(await page.evaluate(() => matchMedia('(forced-colors: active)').matches)).toBe(true)
+        const boxesOfArrows = await page.evaluate(
+          (sel) =>
+            [...document.querySelectorAll(`${sel} [data-settings-preview] [data-side]`)].map((arrow) => {
+              const rect = arrow.getBoundingClientRect()
+              return { top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right }
+            }),
+          PIECE,
+        )
+        expect(boxesOfArrows).toHaveLength(arrows)
+        for (const box of boxesOfArrows) {
+          // El triángulo llena media caja: al menos un cuarto de sus píxeles son tinta.
+          const share = await inkShare(page, box)
+          expect(share, `${path}: flecha con ${(share * 100).toFixed(0)} % de tinta`).toBeGreaterThanOrEqual(
+            0.25,
+          )
+        }
+      }
+    })
+  })
+}
+
 test.describe('1920 × 1080', () => {
   test.use({ viewport: { width: 1920, height: 1080 } })
 

@@ -224,16 +224,36 @@ function PreviewControl({ option }: { option: PreviewOption }) {
   if ('toggle' in option) {
     return (
       <span className="settings-preview-toggle">
-        <span className="settings-preview-arrow" data-side="left" />
+        <Arrow side="left" />
         {t(option.toggle)}
-        <span className="settings-preview-arrow" data-side="right" />
+        <Arrow side="right" />
       </span>
     )
   }
   return (
     <span className="settings-preview-action">
       {t(option.action)}
-      <span className="settings-preview-arrow" data-side="right" />
+      <Arrow side="right" />
     </span>
+  )
+}
+
+/**
+ * Flecha del conmutador («◀ SÍ ▶») o de la acción («Cambiar ▸»): un triángulo en SVG pintado con el
+ * color del texto (`currentColor`). Antes era un fondo recortado con `clip-path`, y el contraste alto
+ * quita los fondos: las flechas desaparecían (tercer pase del jurado, L13a). Así toman el color de
+ * texto del sistema.
+ */
+function Arrow({ side }: { side: 'left' | 'right' }) {
+  return (
+    <svg
+      className="settings-preview-arrow"
+      data-side={side}
+      viewBox="0 0 2 3"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d={side === 'left' ? 'M2 0 0 1.5 2 3Z' : 'M0 0 2 1.5 0 3Z'} />
+    </svg>
   )
 }
