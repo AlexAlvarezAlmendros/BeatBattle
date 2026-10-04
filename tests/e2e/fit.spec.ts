@@ -1446,3 +1446,53 @@ test.describe('galería: opción de menú interactiva a 1440 × 900', () => {
     })
   }
 })
+
+/**
+ * Nada tapa la pegatina OTP del lockup (§3.1, `RF-OTP-01`; jurado de la 0.28, cierre): con el espaciado de
+ * texto de WCAG 1.4.12 y la ventana baja (1366 × 657), la cinta partía en «TORNEO / SEMANAL», el lockup
+ * crecía y la tarjeta de la semana tapaba los 12 px de abajo de la pegatina (`elementFromPoint` en su borde
+ * daba el `<article>`): la caja del logo reservaba un alto fijo para el lockup. Ahora reserva el real.
+ */
+for (const viewport of [
+  { width: 1366, height: 657 },
+  { width: 1280, height: 720 },
+  { width: 1536, height: 730 },
+  { width: 1440, height: 789 },
+]) {
+  test.describe(`pegatina del lockup con el espaciado de texto a ${viewport.width} × ${viewport.height}`, () => {
+    test.use({ viewport })
+
+    for (const path of ['/dev/menu', '/']) {
+      test(`RF-OTP-01 / §3.1 / WCAG 1.4.12: en ${path} la tarjeta de la semana no tapa la pegatina OTP ni la pegatina pisa el logo`, async ({
+        page,
+      }) => {
+        await page.addInitScript((css) => {
+          document.addEventListener('DOMContentLoaded', () => {
+            const style = document.createElement('style')
+            style.textContent = css
+            document.head.append(style)
+          })
+        }, TEXT_SPACING)
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        // El lockup se vuelve a medir en el fotograma siguiente a su cambio de tamaño.
+        await page.waitForTimeout(200)
+        const { sticker, card, hit } = await page.evaluate(() => {
+          const main = document.querySelector('main')!
+          const img = main.querySelector('[data-otp-signature] img')!.getBoundingClientRect()
+          const article = main.querySelector('article')!
+          // El borde de abajo de la pegatina, en su centro (lo que tapaba la tarjeta).
+          const element = document.elementFromPoint(img.left + img.width / 2, img.bottom - 4)
+          return {
+            sticker: img.bottom,
+            card: article.getBoundingClientRect().top,
+            hit: element ? article.contains(element) : false,
+          }
+        })
+        expect(card).toBeGreaterThanOrEqual(sticker - 0.5)
+        expect(hit).toBe(false)
+        expect((await lockupOverLogo(page)).sticker).toBe(0)
+      })
+    }
+  })
+}

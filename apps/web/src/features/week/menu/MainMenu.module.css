@@ -267,15 +267,27 @@
   }
 
   /*
-   * `--menu-lockup-room`: lo que ocupa el lockup bajo el logo (su alto y el margen de debajo; aquí no sube
-   * sobre el logo: con el logo más pequeño, la pegatina pisaría el pie de «BATTLE»). `--menu-logo-h-max`:
-   * el alto del logo de la maqueta o, si la columna es más estrecha, el que le da su ancho.
-   * `--menu-logo-w`: el ancho del logo, el de su alto en la caja (100cqh) menos el sitio del lockup, sin
-   * pasar del ancho de la columna ni del de la maqueta.
+   * `--menu-lockup-nominal`: lo que ocupa el lockup bajo el logo según la maqueta (su alto y el margen de
+   * debajo; aquí no sube sobre el logo: con el logo más pequeño, la pegatina pisaría el pie de «BATTLE»).
+   * `--menu-lockup-room`: lo que el logo le deja de verdad, el mayor de ese y el que mide `MainMenu`
+   * (`--menu-lockup-extent`: la caja del lockup con sus márgenes y la pegatina girada que cuelga). Con el
+   * espaciado de texto de WCAG 1.4.12 la cinta parte en dos líneas y el lockup crece: la caja reserva su alto
+   * real y el logo baja, en vez de que la tarjeta tape el pie de la pegatina (§3.1; jurado de la 0.28,
+   * cierre: a 1366 × 657 la tarjeta tapaba sus 12 px de abajo). El ancho del lockup sale del sitio de la
+   * maqueta, no del real: así su alto no depende de sí mismo.
+   * `--menu-logo-h-max`: el alto del logo de la maqueta o, si la columna es más estrecha, el que le da su
+   * ancho. `--menu-logo-w`: el ancho del logo, el de su alto en la caja (100cqh) menos el sitio del lockup,
+   * sin pasar del ancho de la columna ni del de la maqueta.
    */
   .brand {
-    --menu-lockup-room: calc(var(--bb-menu-lockup-h) + var(--bb-space-2));
-    --menu-lockup-room-compact: calc(var(--bb-menu-lockup-h-compact) + var(--bb-space-2) + var(--bb-space-1));
+    --menu-lockup-nominal: calc(var(--bb-menu-lockup-h) + var(--bb-space-2));
+    --menu-lockup-nominal-compact: calc(
+      var(--bb-menu-lockup-h-compact) +
+      var(--bb-space-2) +
+      var(--bb-space-1)
+    );
+    --menu-lockup-room: max(var(--menu-lockup-nominal), var(--menu-lockup-extent, 0px));
+    --menu-lockup-room-compact: max(var(--menu-lockup-nominal-compact), var(--menu-lockup-extent, 0px));
     --menu-logo-h-max: calc(min(100cqw, var(--bb-menu-logo-w-max)) / var(--game-logo-aspect));
     container: menu-brand / size;
     display: block;
@@ -284,9 +296,13 @@
     max-height: calc(var(--menu-logo-h-max) + var(--menu-lockup-room));
   }
 
-  .logoFull canvas,
-  .lockup {
+  .logoFull canvas {
     --menu-logo-h: calc(100cqh - var(--menu-lockup-room));
+    --menu-logo-w: min(100cqw, var(--bb-menu-logo-w-max), var(--menu-logo-h) * var(--game-logo-aspect));
+  }
+
+  .lockup {
+    --menu-logo-h: calc(100cqh - var(--menu-lockup-nominal));
     --menu-logo-w: min(100cqw, var(--bb-menu-logo-w-max), var(--menu-logo-h) * var(--game-logo-aspect));
   }
 
@@ -359,9 +375,12 @@
  * ella): solo decide cuándo el logo aprovecha el alto que la pegatina pequeña no usa.
  */
 @container menu-brand (height < 16.5rem) or (width < 27.5rem) {
-  .logoFull canvas,
-  .lockup {
+  .logoFull canvas {
     --menu-lockup-room: var(--menu-lockup-room-compact);
+  }
+
+  .lockup {
+    --menu-lockup-nominal: var(--menu-lockup-nominal-compact);
   }
 
   .lockup {

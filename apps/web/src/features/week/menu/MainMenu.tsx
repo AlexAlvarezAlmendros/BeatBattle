@@ -1,4 +1,4 @@
-import { type CSSProperties, type ReactNode, useId, useRef } from 'react'
+import { type CSSProperties, type ReactNode, type RefObject, useId, useLayoutEffect, useRef } from 'react'
 import { Chronicle, CreditLine } from '../../../app/layout/Chronicle'
 import { HudStat, PlayerCard } from '../../../app/layout/PlayerCard'
 import { FrameSlot } from '../../../app/layout/slots'
@@ -174,6 +174,7 @@ export function MainMenu({ model }: { model: MenuModel }) {
   const helpId = useId()
   const listRef = useRef<HTMLUListElement>(null)
   const helpRef = useRef<HTMLDivElement>(null)
+  const brandRef = useRef<HTMLDivElement>(null)
   const firstEnabled = Math.max(0, model.player?.uploaded ? 1 : entries.findIndex((entry) => !entry.disabled))
   const menu = useRovingMenu({
     count: entries.length,
@@ -185,6 +186,8 @@ export function MainMenu({ model }: { model: MenuModel }) {
   const active = entries[menu.activeIndex] ?? entries[0]!
   // Un mismo cuerpo de rótulo y un mismo alto para todas las placas en reposo (§3.3).
   const fit = useMenuPlateFit(listRef)
+  // Con la ventana baja, el logo deja al lockup su alto real (§3.1: la tarjeta no tapa la pegatina).
+  useLockupExtent(brandRef)
 
   // Las flechas e Intro, con el foco en ningún control (la página recién cargada), van al menú.
   useIdleMenuKeys(menu, entries.length, listRef)
@@ -241,7 +244,7 @@ export function MainMenu({ model }: { model: MenuModel }) {
 
       <section className={styles.title} aria-label={t('home.title.label')}>
         {/* El logo y su lockup: con la ventana baja, el lockup se mide con el logo (proporción del lienzo). */}
-        <div className={styles.brand} style={BRAND_STYLE}>
+        <div ref={brandRef} className={styles.brand} style={BRAND_STYLE}>
           <GameLogo className={styles.logoFull} />
           <GameLogo className={styles.logoCompact} compact />
           <TitleLockup className={styles.lockup} />
@@ -318,3 +321,47 @@ function revealHelp(list: HTMLElement | null, help: HTMLElement | null) {
 
 /** Lo que se espera al final de la transición de la placa elegida (`--bb-dur-tick`, 90 ms) antes de soltarla. */
 const REVEAL_WAIT_MS = 500
+
+/** Variable con lo que ocupa el lockup bajo el logo (`MainMenu.module.css`, ventana baja). */
+const LOCKUP_EXTENT_VAR = '--menu-lockup-extent'
+
+/**
+ * Publica en la caja del logo (`.brand`) lo que ocupa de verdad el lockup (§3.1, §3.8.3): de su margen de
+ * arriba al de abajo, contando la pegatina girada que cuelga de la fila. Con la ventana baja, el logo se
+ * queda con el alto que sobra; si la cinta parte en dos líneas (el espaciado de texto de WCAG 1.4.12, la
+ * letra ampliada), el logo baja y la tarjeta de la semana ya no tapa el pie de la pegatina. El ancho del
+ * lockup no depende de esto (CSS), así que medirlo no cambia lo medido. Se vuelve a medir cuando cambia de
+ * tamaño, en el fotograma siguiente.
+ */
+function useLockupExtent(brandRef: RefObject<HTMLElement | null>) {
+  useLayoutEffect(() => {
+    const brand = brandRef.current
+    const lockup = brand
+      ?.querySelector<HTMLElement>('[data-otp-signature]')
+      ?.closest<HTMLElement>(`.${styles.lockup}`)
+    if (!brand || !lockup || typeof ResizeObserver === 'undefined') return
+    const update = () => {
+      const box = lockup.getBoundingClientRect()
+      if (box.height === 0) return
+      const style = getComputedStyle(lockup)
+      const sticker = lockup.querySelector('img')?.getBoundingClientRect()
+      const bottom = Math.max(box.bottom, sticker?.bottom ?? box.bottom)
+      const extent =
+        bottom - box.top + Number.parseFloat(style.marginTop) + Number.parseFloat(style.marginBottom)
+      const value = `${Math.ceil(extent)}px`
+      if (brand.style.getPropertyValue(LOCKUP_EXTENT_VAR) !== value)
+        brand.style.setProperty(LOCKUP_EXTENT_VAR, value)
+    }
+    update()
+    let frame = 0
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(update)
+    })
+    observer.observe(lockup)
+    return () => {
+      cancelAnimationFrame(frame)
+      observer.disconnect()
+    }
+  }, [brandRef])
+}
