@@ -271,7 +271,11 @@ for (const { width, height } of [
         await expect(page.getByRole('contentinfo').locator('[data-otp-signature]')).toBeInViewport({
           ratio: 1,
         })
-        if (path === '/dev/menu' || path === '/')
+        // Por debajo de 700 px de alto (360 × 640, 375 × 667) no se pide: con teclado y ratón la
+        // composición de móvil no esconde nada y se desplaza (§3.8.3), y el HUD lleva la temporada y la
+        // racha en una segunda fila (§3.4.1 v0.6.6, F3), así que la primera placa queda bajo la primera
+        // vista aunque la barra no tape nada más que su fila de la firma.
+        if ((path === '/dev/menu' || path === '/') && height > 700)
           expect(plates, 'rótulos de placa en la primera vista').toBeGreaterThan(0)
       })
     }

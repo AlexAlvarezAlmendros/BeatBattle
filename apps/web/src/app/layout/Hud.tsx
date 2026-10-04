@@ -57,7 +57,10 @@ export function Hud({ screen }: { screen: ScreenConfig }) {
  * no caben en una fila (§3.4.1): en una fila, cada lado mide como poco su contenido, así que no caben si
  * la última pieza se sale del HUD. Depende de lo que lleve cada hueco (la ficha del jugador, el reloj y
  * la temporada del menú; «1P · PULSA PARA UNIRTE» y la placa de título de las pantallas interiores), no
- * de un ancho fijo: de 721 a unos 1000 px en el menú.
+ * de un ancho fijo: de 721 a unos 1000 px en el menú. En móvil (≤ 720 px) con teclado y ratón, donde el
+ * centro baja a la pantalla, apilado es el jugador y el sonido arriba y la temporada y la racha en una
+ * segunda fila (a 390 px no caben al lado del jugador; a 720, sí). En el móvil táctil no se apila: el
+ * pliegue quita las teselas (§3.4.1 v0.6.6).
  *
  * Se mide en una fila (sin el atributo) y se vuelve a poner en el mismo paso, sin pintar entre medias.
  * Cuando cambia el tamaño del HUD o de una pieza (la letra que llega, una pantalla que rellena un hueco)

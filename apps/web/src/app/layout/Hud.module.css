@@ -119,12 +119,44 @@
   color: var(--bb-text-3);
 }
 
+/*
+ * Móvil (≤ 720 px): una fila, jugador y derecha; el centro baja a la pantalla. Con teclado y ratón la
+ * derecha lleva también la temporada y la racha (el pliegue que las quita es del móvil táctil, §3.4.1
+ * v0.6.6) y cada lado mide como poco su contenido: si no caben al lado del jugador, el HUD se apila
+ * (`data-stacked`, lo mide `Hud`) con el jugador y el sonido arriba y las teselas en una segunda fila, a la
+ * derecha, bajo el sonido (cuarto pase del jurado de la 0.28, F3).
+ */
 @media (max-width: 720px) {
   .hud {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(max-content, 1fr) auto;
     grid-template-areas: "player right";
     gap: var(--bb-space-3);
     padding: var(--bb-space-3) var(--bb-gutter) 0;
+  }
+
+  .hud[data-stacked] {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "player sound"
+      "extras extras";
+  }
+
+  .hud[data-stacked] .right {
+    display: contents;
+  }
+
+  /* El jugador ocupa su columna: si no cabe (320 px), su medidor se estrecha en vez de pisar el sonido. */
+  .hud[data-stacked] .player {
+    justify-self: stretch;
+  }
+
+  .hud[data-stacked] .extras {
+    grid-area: extras;
+    justify-self: end;
+  }
+
+  .hud[data-stacked] .sound {
+    grid-area: sound;
   }
 
   .center {
@@ -133,6 +165,13 @@
 
   .p1 {
     display: none;
+  }
+}
+
+/* Móvil táctil: la fila compacta de la maqueta `01-menu-390x844` (el jugador cede si no cabe). */
+@media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse) {
+  .hud {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 }
 

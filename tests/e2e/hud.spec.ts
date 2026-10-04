@@ -117,3 +117,97 @@ for (const { width, height, touch, path, heading } of [
     })
   })
 }
+
+/**
+ * El pliegue del HUD (sin las cifras del medidor ni las teselas de temporada y racha) es **del móvil
+ * táctil** (§3.4.1 v0.6.6; cuarto pase del jurado de la 0.28, F3): con teclado y ratón en una ventana
+ * estrecha o ampliada (720 × 450 es 1440 × 900 al 200 %) desaparecían «TEMPORADA T4 · 12 PTS · 9.º», «RACHA
+ * ×3», «XP 2.980» y «NV 8 · 3.350», porque el CSS dependía del ancho y no del tipo de entrada (WCAG 1.4.4 y
+ * 1.4.10). Ahora se quedan, en una segunda fila del HUD si no caben al lado del jugador, enteras dentro de
+ * la ventana y sin pisarse.
+ */
+for (const { width, height } of [
+  { width: 720, height: 450 },
+  { width: 390, height: 844 },
+  { width: 360, height: 640 },
+  { width: 320, height: 568 },
+]) {
+  test.describe(`HUD con teclado a ${width} × ${height}`, () => {
+    test.use({ viewport: { width, height } })
+
+    test('RD-VIS-02 e / §3.4.1 (WCAG 1.4.10): las teselas de temporada y racha y las cifras del medidor de XP se ven', async ({
+      page,
+    }) => {
+      await page.goto('/dev/menu')
+      await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toHaveText('Beat Battle')
+      await settle(page)
+      const hud = page.locator('.game-frame > header')
+      for (const text of ['Temporada T4', '12 PTS · 9.º', 'Racha', '×3', 'XP 2.980', 'NV 8 · 3.350'])
+        await expect(hud.getByText(text, { exact: true })).toBeInViewport({ ratio: 1 })
+      // Nada se pisa: la ficha del jugador, las teselas y el botón de sonido.
+      const overlaps = await hud.evaluate((header) => {
+        const boxes = [
+          header.querySelector('[data-frame-slot="hudPlayer"] > *'),
+          ...header.querySelectorAll('[data-frame-slot="hudRight"] > *'),
+          header.querySelector('[data-sound]'),
+        ].map((element) => element!.getBoundingClientRect())
+        const out: string[] = []
+        for (let a = 0; a < boxes.length; a++)
+          for (let b = a + 1; b < boxes.length; b++) {
+            const one = boxes[a]!
+            const two = boxes[b]!
+            const x = Math.min(one.right, two.right) - Math.max(one.left, two.left)
+            const y = Math.min(one.bottom, two.bottom) - Math.max(one.top, two.top)
+            if (x > 0.5 && y > 0.5) out.push(`${a} y ${b}`)
+          }
+        return out
+      })
+      expect(overlaps).toEqual([])
+    })
+  })
+}
+
+/** Y en táctil, el pliegue de la maqueta `01-menu-390x844`: sin teselas ni cifras bajo el medidor. */
+test.describe('HUD táctil a 390 × 844', () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
+
+  test('RD-VIS-02 e / §3.4.1: en el móvil táctil el HUD va en una fila, sin teselas ni cifras del medidor', async ({
+    page,
+  }) => {
+    await page.goto('/dev/menu')
+    await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toHaveText('Beat Battle')
+    const hud = page.locator('.game-frame > header')
+    await expect(hud.getByText('Temporada T4', { exact: true })).toBeHidden()
+    await expect(hud.getByText('XP 2.980', { exact: true })).toBeHidden()
+    await expect(hud).not.toHaveAttribute('data-stacked')
+  })
+})
+
+/** RD-VIS-05 con teclado en una ventana pequeña: las teselas de la segunda fila tampoco van sobre los rayos. */
+for (const { width, height } of [
+  { width: 390, height: 844 },
+  { width: 720, height: 450 },
+]) {
+  test.describe(`${width} × ${height} con teclado`, () => {
+    test.use({ viewport: { width, height } })
+
+    test('RD-VIS-05: en /dev/menu, ningún texto del HUD (con las teselas y las cifras del medidor) va sobre los rayos', async ({
+      page,
+    }) => {
+      await page.goto('/dev/menu')
+      await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toHaveText('Beat Battle')
+      await settle(page)
+      const rects = await hudTextRects(page)
+      expect(rects.some((rect) => rect.text === 'Temporada T4')).toBe(true)
+      await expect(page.locator(RAYS)).toHaveCount(1)
+      await page.addStyleTag({
+        content:
+          '.game-frame > header, .game-frame > header * { color: transparent !important; -webkit-text-fill-color: transparent !important; text-shadow: none !important; }',
+      })
+      const withRays = await page.screenshot()
+      await page.addStyleTag({ content: `${RAYS} { display: none !important; }` })
+      const withoutRays = await page.screenshot()
+      expect(await changedPixels(page, withRays, withoutRays, rects)).toEqual([])
+    })
+  })
+}

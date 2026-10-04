@@ -86,11 +86,33 @@
   line-height: 1;
 }
 
+/*
+ * Móvil (≤ 720 px): sin el «1P» decorativo; con teclado y ratón, la ficha entera (con las cifras del
+ * medidor) y, si no cabe, el medidor se estrecha con su columna (el HUD lleva la temporada y la racha a
+ * una segunda fila, `Hud`).
+ */
 @media (max-width: 720px) {
   .p1 {
     display: none;
   }
 
+  .text {
+    min-width: 0;
+  }
+
+  .meter {
+    max-width: 100%;
+  }
+}
+
+/*
+ * El pliegue del HUD es **del móvil táctil** (§3.4.1 v0.6.6): avatar, nombre, nivel y XP en una fila, sin
+ * las cifras del medidor ni las teselas de temporada y racha. Depende del tipo de entrada, no del ancho:
+ * con teclado y ratón en una ventana estrecha o ampliada (720 × 450 = 1440 × 900 al 200 %) se quedan (WCAG
+ * 1.4.4 y 1.4.10; cuarto pase del jurado de la 0.28, F3). Las cifras están también en el nombre del
+ * medidor (`aria-valuetext`).
+ */
+@media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse) {
   .meter {
     width: 8.25rem;
   }
