@@ -144,6 +144,13 @@
 
 /* ── Cuña granate con su trama ──────────────────────────────────────────────────────────── */
 .wedge {
+  /* Sondas de la diagonal (ver más abajo): por defecto, borde izquierdo de la cuña del menú. */
+  --edge-ax: 0;
+  --edge-ay: 100%;
+  --edge-bx: 0;
+  --edge-by: 0;
+  --edge-inx: var(--bb-space-16);
+  --edge-iny: 50%;
   position: absolute;
   inset-block: 0;
   overflow: hidden;
@@ -183,6 +190,51 @@
   inset: 0;
   width: 100%;
   height: 100%;
+}
+
+/* Con el Escenario pintando (tarea 1.1), la trama estática se esconde: la pinta el *shader* encima. */
+.arena[data-stage-live] .halftone {
+  visibility: hidden;
+}
+
+/* Copia de la cuña por encima del lienzo del Escenario, solo para lo que la pantalla pone dentro (el
+   número de semana): misma geometría, sin fondo. */
+.wedge[data-layer="extras"] {
+  background: none;
+}
+
+/*
+ * Sondas de la diagonal para el Escenario (§3.5 «Reparto de la capa 0»): `a` y `b` en el borde de la cuña
+ * que da a la diagonal e `in`, un punto de dentro (en las cuñas recortadas, la esquina de abajo a la
+ * derecha, que siempre está dentro por baja que vaya la diagonal). Van dentro de `.wedge`, así que su transformación
+ * (`skewX`) las lleva a su sitio; en móvil, donde la cuña se recorta con `clip-path`, van en los vértices
+ * del recorte. El Escenario lee su posición con `getBoundingClientRect`.
+ */
+.probe {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.probe[data-stage-edge="a"] {
+  left: var(--edge-ax);
+  top: var(--edge-ay);
+}
+
+.probe[data-stage-edge="b"] {
+  left: var(--edge-bx);
+  top: var(--edge-by);
+}
+
+.probe[data-stage-edge="in"] {
+  left: var(--edge-inx);
+  top: var(--edge-iny);
+}
+
+.arena[data-wedge="left"] .wedge {
+  --edge-ax: 100%;
+  --edge-bx: 100%;
+  --edge-inx: calc(100% - var(--bb-space-16));
 }
 
 .extras {
@@ -248,6 +300,12 @@
 
   .arena[data-wedge] .wedge {
     clip-path: polygon(0 56%, 100% 40%, 100% 100%, 0 100%);
+    --edge-ax: 0;
+    --edge-ay: 56%;
+    --edge-bx: 100%;
+    --edge-by: 40%;
+    --edge-inx: 100%;
+    --edge-iny: 100%;
   }
 
   .arena[data-wedge] .band {
@@ -274,6 +332,12 @@
 
   .arena[data-wedge="left"] .wedge {
     clip-path: polygon(0 calc(var(--wedge-top) + 16%), 100% var(--wedge-top), 100% 100%, 0 100%);
+    --edge-ax: 0;
+    --edge-ay: calc(var(--wedge-top) + 16%);
+    --edge-bx: 100%;
+    --edge-by: var(--wedge-top);
+    --edge-inx: 100%;
+    --edge-iny: 100%;
   }
 
   .arena[data-wedge="left"] .band {
@@ -311,6 +375,12 @@
 
   .arena[data-wedge="right"] .wedge {
     clip-path: polygon(0 56%, 100% 40%, 100% 100%, 0 100%);
+    --edge-ax: 0;
+    --edge-ay: 56%;
+    --edge-bx: 100%;
+    --edge-by: 40%;
+    --edge-inx: 100%;
+    --edge-iny: 100%;
   }
 
   .arena[data-wedge="right"] .band {

@@ -1,6 +1,6 @@
 # Plan 01 — Spike de sensación y audio (GO/NO-GO)
 
-> Fase: 1 de 10 | Estado: ⬜ Pendiente | Iniciado: — | Cerrado: —
+> Fase: 1 de 10 | Estado: 🔄 En curso | Iniciado: 2026-10-05 | Cerrado: —
 > Hito del roadmap: arena (trama en *shader*) + vista 3D + partículas a 60 fps en escritorio con GPU
 > integrada y ≥ 45 fps en un Android de gama media; efectos con < 30 ms de latencia; analizador de Web
 > Audio funcionando sobre un MP3 firmado de Cloudinary; ffmpeg mide la sonoridad de un WAV de 50 MB en
@@ -32,9 +32,9 @@ ya dentro del monorepo (`apps/web/src/stage`, `apps/web/src/audio`, `packages/au
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 1.1 | Canvas R3F único detrás del contenido (`eventSource` en `body`) con la **capa 0 de la arena** (§3.5): fondo negro, cuña granate con **trama roja en *shader***, diagonal roja con filete blanco, estallido de rayos, número de semana en contorno y viñeta, con la posición de la cuña por pantalla; el `ArenaBackdrop` estático de la 0.23 como alternativa y *placeholder* mientras carga el trozo. La pantalla tiene que verse igual con la arena en WebGL que con el fondo estático | ⬜ Listo | 0.1, 0.4, 0.23 | §3.5 · `RNF-PERF-04` · Referencia: maquetas de `docs/planning/evidence/f0/arena/` |
-| 1.2 | Sonda de rendimiento de 2 s y niveles de calidad (alta, media, baja, apagada), con `prefers-reduced-motion`, sin WebGL y ahorro de datos → apagada; pausa con `visibilitychange` | 🔒 Bloqueado | 1.1 | §3.5 · `RNF-PERF-05`, `RNF-A11Y-03` |
-| 1.3 | Vista anclada (`View` de drei) con el **vinilo-sol** de la semana (gira una vuelta por compás al BPM) pegado a la tarjeta del escenario + sistema de partículas (chispas rojas y blancas, confeti en la paleta) con presupuesto por nivel y **siempre a través del limitador de destellos** (`flash.request`) | 🔒 Bloqueado | 1.1 | §3.5, §4.17 · `RD-MOT-04` |
+| 1.1 | Canvas R3F único detrás del contenido (`eventSource` en `body`) con la **capa 0 de la arena** (§3.5): fondo negro, cuña granate con **trama roja en *shader***, diagonal roja con filete blanco, estallido de rayos, número de semana en contorno y viñeta, con la posición de la cuña por pantalla; el `ArenaBackdrop` estático de la 0.23 como alternativa y *placeholder* mientras carga el trozo. La pantalla tiene que verse igual con la arena en WebGL que con el fondo estático | ✅ Hecho | 0.1, 0.4, 0.23 | §3.5 · `RNF-PERF-04` · Guía v0.6.9 («Reparto de la capa 0»): el *shader* (`stage/shaders/arenaHalftone.frag.glsl`) pinta solo la trama; cuña, diagonal, rayos, número y viñeta siguen en CSS y la geometría la pone el CSS, que el Escenario lee de sondas en el borde de la cuña. Un solo lienzo de R3F (`stage/Stage.tsx`) en un trozo diferido tras la primera pintura (243,8 kB gz, presupuesto < 250), bajo demanda y al dpr del dispositivo hasta 2 (0,75 se veía borroso en densidad 2). Puerta: sin WebGL, con «reducir movimiento» o ahorro de datos, la arena estática; `bb:stage` para pruebas. Verificado: la matemática del *shader* en TS (`arenaMath.ts`) contra `halftoneDots` (26 tests, 4.000 píxeles al azar por forma y tamaño); E2E `stage.spec.ts` (`RNF-PERF-04`: el trozo se pide después del FCP; `RD-VIS-02 e`: con y sin Escenario cambia < 0,5 % de píxeles en el menú, el menú móvil, «Cómo se juega» y Opciones a 320 px; medido 0,02–0,05 % con GPU y 0,21 % en el Chromium de la CI; sin Escenario con «reducir movimiento» y con `bb:stage=off`; lienzo único que sobrevive a la navegación); capturas a densidad 1 y 2 miradas; `e2e` 986 + `perf` en verde en local; la CI lleva SwiftShader para probar WebGL |
+| 1.2 | Sonda de rendimiento de 2 s y niveles de calidad (alta, media, baja, apagada), con `prefers-reduced-motion`, sin WebGL y ahorro de datos → apagada; pausa con `visibilitychange` | ⬜ Listo | 1.1 | §3.5 · `RNF-PERF-05`, `RNF-A11Y-03` |
+| 1.3 | Vista anclada (`View` de drei) con el **vinilo-sol** de la semana (gira una vuelta por compás al BPM) pegado a la tarjeta del escenario + sistema de partículas (chispas rojas y blancas, confeti en la paleta) con presupuesto por nivel y **siempre a través del limitador de destellos** (`flash.request`) | ⬜ Listo | 1.1 | §3.5, §4.17 · `RD-MOT-04` |
 
 ### Audio en el cliente
 
@@ -95,6 +95,7 @@ repite el banco antes de seguir. **NO-GO** en 4 o 5 → se replantea el almacena
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-05 | 1.1 | **Hecha.** Arena en *shader* idéntica a la estática (guía v0.6.9: el *shader* pinta solo la trama y la geometría la pone el CSS). Dos hallazgos al mirarla: el punto «dentro de la cuña» quedaba por encima de la diagonal en Opciones a 320 px (la trama salía del lado contrario) y el dpr 0,75 del Silk emborronaba los puntos en pantallas de densidad 2. Las pruebas con reloj falso van sin Escenario (`installClockWithoutStage`). 1.2 y 1.3 pasan a listas. |
 | 2026-10-03 | — | Replanificado para la dirección «Arena»: 1.1 (arena en *shader* en lugar del Silk; depende también de la 0.23), 1.3 (vinilo-sol y limitador), 1.5 (estrellas con medidor), 1.6 (reactividad sobre el tamaño de punto), 1.11 y 1.12 (jurado visual en lugar de la prueba del sello). |
 | 2026-10-03 | 1.13 | Nueva tarea, del jurado visual de la Arena (0.28): la puerta de entrada completa con la pantalla de título `00-titulo` (§3.8.1). La 1.4 se queda con la puerta mínima (el desbloqueo del `AudioContext`). |
 | 2026-10-02 | 1.5 | Revisión adversarial de la Fase 0 (sdd-2): la 1.5 cierra también `RD-VIS-03` (Estrellas en la galería con sus estados). |

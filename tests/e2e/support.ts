@@ -232,3 +232,14 @@ export async function expectCursor(locator: Locator): Promise<void> {
   await expect(locator.locator(':scope > [data-cursor-ring]')).toBeVisible()
   expect((await focusRing(locator)).outlineStyle).toBe('none')
 }
+
+/**
+ * Reloj falso de Playwright sin el Escenario de WebGL (§3.5, 1.1). Con el reloj falso, el trozo del
+ * Escenario se carga cuando la prueba avanza el tiempo, a mitad de lo que mide, y su evaluación ocupa el
+ * hilo principal; las pruebas que avanzan el reloj miden otra cosa (la crónica, los bucles), así que van
+ * con la arena estática (`bb:stage` = `off`).
+ */
+export async function installClockWithoutStage(page: Page): Promise<void> {
+  await page.addInitScript(() => window.localStorage.setItem('bb:stage', 'off'))
+  await page.clock.install()
+}

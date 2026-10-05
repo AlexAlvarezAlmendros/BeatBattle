@@ -1,5 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
-import { open, openGallery, settle } from './support'
+import { installClockWithoutStage, open, openGallery, settle } from './support'
 
 /**
  * «Reducir movimiento» del sistema emulado (`RNF-A11Y-03`, guía §2.17, §3.6 y Anexo E): sin bucles, sin
@@ -144,7 +144,7 @@ test.describe('con «reducir movimiento» del sistema', () => {
   test('RNF-A11Y-03 / WCAG 2.2.2: en /dev/menu la crónica sigue rotando sin fundido y el botón de pausa la para', async ({
     page,
   }) => {
-    await page.clock.install()
+    await installClockWithoutStage(page)
     await open(page, '/dev/menu', 'Beat Battle')
     await page.mouse.move(0, 0)
     const bar = page.getByRole('contentinfo')

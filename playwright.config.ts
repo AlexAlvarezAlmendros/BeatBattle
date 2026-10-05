@@ -51,7 +51,9 @@ export default defineConfig({
     timezoneId: 'Europe/Madrid',
     trace: ci ? 'on-first-retry' : 'retain-on-failure',
     ...(ci
-      ? { channel: 'chromium' }
+      ? // SwiftShader: WebGL por software en una máquina sin GPU, para que el Escenario (1.1) también se
+        // pruebe en la CI. Sin él, Chromium no da WebGL y se queda la arena estática.
+        { channel: 'chromium', launchOptions: { args: ['--enable-unsafe-swiftshader'] } }
       : software
         ? { channel: 'chrome' }
         : {
