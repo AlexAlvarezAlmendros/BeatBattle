@@ -2,9 +2,10 @@
   "name": "@beatbattle/audio",
   "private": true,
   "type": "module",
-  "description": "Análisis de audio, teoría musical y efectos como datos (guía §4.6)",
+  "description": "Análisis de audio (BPM y tonalidad), teoría musical y efectos como datos (guía §4.6)",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./analysis": "./src/analysis/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
