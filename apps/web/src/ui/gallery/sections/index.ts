@@ -29,4 +29,14 @@ export const GALLERY_SECTIONS: readonly GallerySectionEntry[] = [
     })),
     load: () => import('./ComponentsSection'),
   },
+  {
+    id: 'sonido',
+    title: 'dev.gallery.sections.sound',
+    anchors: [
+      { id: 'sonido-ui', label: 'dev.gallery.sound.blocks.ui' },
+      { id: 'sonido-stars', label: 'dev.gallery.sound.blocks.stars' },
+      { id: 'sonido-game', label: 'dev.gallery.sound.blocks.game' },
+    ],
+    load: () => import('./SoundSection'),
+  },
 ]

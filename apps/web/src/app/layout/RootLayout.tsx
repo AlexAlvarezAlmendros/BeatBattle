@@ -10,6 +10,7 @@ import { ControlsBar } from './ControlsBar'
 import { Hud } from './Hud'
 import { useScreen } from './screen'
 import { FrameSlotsProvider } from './slots'
+import { useAudioUnlock } from './useAudioUnlock'
 import { useFrameKeys } from './useFrameKeys'
 import { useGamepad } from './useGamepad'
 import './layout.css'
@@ -63,6 +64,7 @@ function GameFrame() {
   if (pathname !== firstPathname.current) navigated.current = true
   useFrameKeys()
   useGamepad()
+  useAudioUnlock()
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: solo al cambiar de pantalla (con el estado de esa navegación)
   useEffect(() => {
