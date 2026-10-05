@@ -1,5 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
-import { open, openGallery, settle } from './support'
+import { installClockWithoutStage, open, openGallery, settle } from './support'
 
 /**
  * La barra de controles con teclado y ratón (guía §3.4.1 y §3.8.3; WCAG 1.4.4 y 1.4.10; tercer pase del
@@ -568,7 +568,7 @@ for (const { width, height, fontSize } of [
       const cdp = await page.context().newCDPSession(page)
       await cdp.send('Page.enable')
       await cdp.send('Page.setFontSizes', { fontSizes: { standard: fontSize, fixed: fontSize } })
-      await page.clock.install()
+      await installClockWithoutStage(page)
       await open(page, '/dev/menu', 'Beat Battle')
       await page.mouse.move(0, 0)
       const chronicle = page.getByRole('contentinfo').locator('[data-chronicle]')
@@ -621,7 +621,7 @@ for (const { width, height, fontSize } of [
         await cdp.send('Page.enable')
         await cdp.send('Page.setFontSizes', { fontSizes: { standard: fontSize, fixed: fontSize } })
       }
-      await page.clock.install()
+      await installClockWithoutStage(page)
       await open(page, '/dev/menu', 'Beat Battle')
       await page.mouse.move(0, 0)
       await page.addStyleTag({ content: TEXT_SPACING })

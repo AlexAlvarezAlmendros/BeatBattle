@@ -50,6 +50,10 @@ export type FrameProps<E extends ElementType = 'div'> = FrameOptions & {
  * clase (las reglas del marco tienen especificidad 0).
  */
 export function Frame<E extends ElementType = 'div'>({ as, variant, cut, texture, ...rest }: FrameProps<E>) {
-  const Component: ElementType = as ?? 'div'
-  return <Component {...rest} {...frameAttributes({ variant, cut, texture })} />
+  // Tipado como `div` solo para el JSX: con los elementos de React Three Fiber en el JSX global (1.1),
+  // un `ElementType` genérico reparte las props entre todos y TypeScript las reduce a `never`.
+  const Component = (as ?? 'div') as 'div'
+  return (
+    <Component {...(rest as ComponentPropsWithRef<'div'>)} {...frameAttributes({ variant, cut, texture })} />
+  )
 }

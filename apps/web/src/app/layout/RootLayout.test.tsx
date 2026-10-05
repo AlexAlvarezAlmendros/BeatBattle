@@ -291,3 +291,26 @@ describe('RootLayout: zona de avisos del marco (§3.3)', () => {
     expect(await within(polite).findByText('Beat subido', {}, { timeout: 10_000 })).toBeInTheDocument()
   }, 20_000)
 })
+
+describe('RootLayout: la arena y el Escenario (§3.5, 1.1)', () => {
+  it('§3.5: la cuña lleva las sondas de la diagonal para el Escenario y el hueco de la pantalla va por encima del lienzo', () => {
+    renderFrame('/')
+    const arena = document.querySelector('[aria-hidden="true"][data-wedge]')
+    expect(arena).not.toBeNull()
+    const probes = [...(arena?.querySelectorAll('[data-stage-edge]') ?? [])].map((probe) =>
+      probe.getAttribute('data-stage-edge'),
+    )
+    expect(probes).toEqual(['a', 'b', 'in'])
+    expect(arena?.querySelector('[data-layer="extras"]')).not.toBeNull()
+  })
+
+  it('RNF-PERF-04: sin WebGL (jsdom) no se carga el Escenario y la trama estática se queda', async () => {
+    renderFrame('/')
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    })
+    expect(document.querySelector('[data-stage]')).toBeNull()
+    expect(document.querySelector('[data-stage-live]')).toBeNull()
+    expect(document.querySelector('[data-halftone]')).not.toBeNull()
+  })
+})

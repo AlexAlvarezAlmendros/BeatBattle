@@ -46,14 +46,19 @@ function vendor(name: string, packages: readonly string[]) {
  * | `framework` + `data` (arena, pulsado por CSS: **este**)     | 158,62 kB       | 171,81 kB        | 314,36 kB   |
  *
  * En la Fase 0 se midieron también partir Motion o los datos en más grupos: cada trozo de más es un
- * gzip aparte y más enlaces entre trozos, y la primera pintura crecía. El aviso se queda en 500 kB a
- * propósito: si un grupo vuelve a pasar de ahí, hay que mirarlo.
+ * gzip aparte y más enlaces entre trozos, y la primera pintura crecía.
+ *
+ * **El Escenario** (tarea 1.1) es un trozo diferido aparte, `Stage`: three + React Three Fiber (R3F
+ * importa three entero) y el *shader* de la arena. 916,16 kB (243,81 kB gz), dentro del presupuesto de
+ * §4.17 (< 250 kB gz), y se pide después de la primera pintura (`RNF-PERF-04`). Por él el aviso pasa de
+ * 500 a 950 kB: ningún otro trozo pasa de 315 kB, y si alguno se acerca a 500, hay que mirarlo igual.
  */
 export default defineConfig({
   plugins: [react(), fontPreload(), routePreload()],
   server: { port: 5173, proxy: { '/api': { target: apiTarget } } },
   build: {
     target: 'es2023',
+    chunkSizeWarningLimit: 950,
     rolldownOptions: {
       output: {
         codeSplitting: {
