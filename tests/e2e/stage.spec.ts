@@ -1,3 +1,5 @@
+import { writeFile } from 'node:fs/promises'
+import { cpus } from 'node:os'
 import { type BrowserContext, expect, type Page, test } from '@playwright/test'
 import { collectErrors, open, settle } from './support'
 
@@ -205,6 +207,17 @@ test.describe('Escenario, capa 0', () => {
       if (!scratch || !withStage || !withoutStage) throw new Error('faltan capturas')
       const page: Page = scratch
       const { ratio, box } = await differingRatio(page, withStage, withoutStage, 48)
+      if (ratio >= 0.005) {
+        // Las dos capturas, en `test-results/` (artefacto de la CI) y en el informe, para ver la diferencia.
+        for (const [file, body] of [
+          ['con-escenario.png', withStage],
+          ['sin-escenario.png', withoutStage],
+        ] as const) {
+          const path = test.info().outputPath(file)
+          await writeFile(path, body)
+          await test.info().attach(file, { path, contentType: 'image/png' })
+        }
+      }
       // Lo que cambia es el suavizado del borde de algunos puntos (Canvas 2D frente al *shader*): medido,
       // 0,02–0,05 % con la GPU y 0,21 % con el Chromium de la CI. Una cuña del lado equivocado o una forma
       // distinta pasan del 3 %.
@@ -212,7 +225,7 @@ test.describe('Escenario, capa 0', () => {
       // veces en la CI a 320 px con un 13,43 % y no se reproducía en local).
       expect(
         ratio,
-        `${(ratio * 100).toFixed(3)} % de píxeles distintos en ${JSON.stringify(box)}; estado: ${JSON.stringify(states)}`,
+        `${(ratio * 100).toFixed(3)} % de píxeles distintos en ${JSON.stringify(box)}; estado: ${JSON.stringify(states)}; CPU: ${cpus()[0]?.model ?? '?'}`,
       ).toBeLessThan(0.005)
       await page.context().close()
     })
