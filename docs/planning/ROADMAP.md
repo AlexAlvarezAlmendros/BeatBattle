@@ -29,7 +29,7 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 | # | Fase | Estado | Plan | Hito |
 |---|------|--------|------|------|
 | 0 | Fundaciones | ✅ Cerrada (2026-10-04, con la dirección «Arena»; PR nueva pendiente de revisión) | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes de la arena (guía v0.6 §3); marco de juego y menú principal navegables con teclado; prueba de marca y de juego (`RD-VIS-02`) |
-| 1 | Spike de sensación y audio | ⬜ Lista (1.1, 1.4 y 1.9 se pueden empezar) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio; efectos < 30 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
+| 1 | Spike de sensación y audio | 🔄 En curso (1.1, 1.4 y 1.9 hechas; 1.2, 1.3, 1.6, 1.10 y 1.13 listas) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio; efectos < 30 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
 | 2 | Cuentas y base de email | 🔒 Bloqueada (F0, GO de F1) | — (se crea al llegar) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, preferencias, consentimientos y bajas |
 | 3 | Semanas y samples | 🔒 Bloqueada (F2) | — | 3 semanas programadas; cambio de semana en la frontera con reloj simulado; email del drop (también sin cuenta) |
 | 4 | Participar | 🔒 Bloqueada (F3) | — | WAV de 60 MB por trozos con BPM, tonalidad y sonoridad medida; recibo por email |
@@ -44,7 +44,7 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 ## Foco actual
 
 **Fase 1, spike GO/NO-GO** ([plan 01](plans/01-spike-sensacion-audio.md), replanificado para la Arena):
-1.1 (la arena en *shader*), 1.4 (motor de audio) y 1.9 (port del motor de análisis) se pueden empezar;
+1.1 (la arena en *shader*), 1.4 (motor de audio) y 1.9 (motor de análisis) están hechas; 1.2 (calidad), 1.3 (vistas y partículas), 1.6 (reactividad), 1.10 (onda y sonoridad) y 1.13 (pantalla de título) se pueden empezar;
 1.7–1.8 crean recursos en la nube y esperan la decisión de la cuenta de Cloudinary.
 
 La **Fase 0** se cerró el 2026-10-04 con la dirección de arte «Arena» (tareas 0.21–0.28; guía v0.6.8;
@@ -167,6 +167,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 |-------|------|-------|
 | 2026-10-05 | F1 | 1.9 hecha: motor de análisis de BPM y tonalidad del sello en TypeScript, con su batería en Vitest y resultados idénticos al original; worker en la web. |
 | 2026-10-05 | F1 | 1.4 hecha: motor de audio con los efectos del Anexo D de la tarea, medidos *offline* (nivel ±1 dB, *ducking* −6/−18 dB) y sin `AudioContext` antes del primer gesto. |
+| 2026-10-05 | F1 | Fase 1 empezada: 1.1 hecha (la arena en *shader*, un único lienzo diferido, igual que la estática; guía v0.6.9). Listas: 1.2, 1.3, 1.4 y 1.9. |
 | 2026-10-04 | F0 | CI de GitHub en verde en la PR #2 (980/980 E2E) tras pasar la CI al Chromium completo de Playwright: el *headless shell* medía el texto más ancho y tumbaba 24 pruebas de encaje. |
 | 2026-10-04 | F0 | **Fase 0 cerrada.** 0.28 hecha: segundo pase del jurado, seis rondas de arreglos (143 commits) y verificación final en verde en las tres lentes; guía v0.6.6–v0.6.8 con las reglas que fijó el jurado; `e2e` 980/980 en local. La PR #1 se había mezclado con el estado anterior a la Arena; el rediseño va en una PR nueva. Fase 1 lista. Nueva decisión abierta: móviles de 781 a ~840 px de alto. |
 | 2026-10-04 | F1 | Plan 01 replanificado para la Arena (1.1 arena en *shader*, 1.3 vinilo-sol y limitador, 1.5 estrellas con medidor, 1.6 reactividad sobre el tamaño de punto, 1.11–1.12 jurado visual; 1.1 depende también de la 0.23). |
