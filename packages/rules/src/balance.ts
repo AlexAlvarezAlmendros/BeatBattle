@@ -85,10 +85,12 @@ export const STARS_MIN = 1
 /** Estrella máxima de un voto. */
 export const STARS_MAX = 5
 
-/** Tope del umbral de escucha: `min(45 s, 50 % de la duración)` (`RF-VOTE-04`). */
-export const LISTEN_THRESHOLD_MAX_MS = 45_000
-/** Parte de la duración que hay que escuchar, si es menor que el tope. */
-export const LISTEN_THRESHOLD_DURATION_PERCENT = 50
+/**
+ * Margen de la escucha entera (`RF-VOTE-04`): para votar hay que escuchar la entrada entera, menos este
+ * margen al final, para que la granularidad del reproductor (un `timeupdate` cada ~250 ms) no deje a
+ * nadie a unas décimas del voto.
+ */
+export const LISTEN_END_TOLERANCE_MS = 1_000
 
 /** Peso `C` del previo bayesiano, en votos (guía §2.8, `RF-RES-01`). */
 export const BAYES_PRIOR_WEIGHT = 5
@@ -109,8 +111,8 @@ export const VOTES_PER_HOUR_LIMIT = 120
 
 /** Duración mínima de una entrada: 30 s (`RF-ENT-03`). */
 export const ENTRY_MIN_DURATION_MS = 30_000
-/** Duración máxima de una entrada: 6 min (`RF-ENT-03`). */
-export const ENTRY_MAX_DURATION_MS = 360_000
+/** Duración máxima de una entrada: 4 min (`RF-ENT-03`; con escucha entera, el jurado escucha como mucho 4 min por voto). */
+export const ENTRY_MAX_DURATION_MS = 240_000
 
 /**
  * Tamaño máximo del fichero de una entrada: «100 MB» (`RF-ENT-03`). Se cuenta como lo cuenta
@@ -118,6 +120,9 @@ export const ENTRY_MAX_DURATION_MS = 360_000
  * almacenamiento coincidan.
  */
 export const ENTRY_MAX_BYTES = 100 * 1024 * 1024
+
+/** Formatos de audio de una entrada (`RF-ENT-03`), por su extensión en minúsculas (`aif` es `aiff`). */
+export const ENTRY_FORMATS = Object.freeze(['wav', 'aiff', 'flac', 'mp3'] as const)
 
 /** Sonoridad integrada objetivo de la reproducción (`RF-PLAY-03`). */
 export const TARGET_LOUDNESS_LUFS = -14

@@ -546,18 +546,11 @@ function TileBlock() {
 function WaveformBlock() {
   const [progress, setProgress] = useState(0.24)
   const peaks = samplePeaks('onda-galeria')
-  const threshold = { at: 45 / 171, label: t('dev.gallery.arena.wave.threshold') }
   return (
     <GalleryBlock id="onda" title={t('dev.gallery.components.waveform')}>
       <GalleryRow wide>
         <StateCell label={stateLabel('rest')} state="rest" wide>
-          <Waveform
-            peaks={peaks}
-            progress={progress}
-            onSeek={setProgress}
-            duration={171}
-            threshold={threshold}
-          />
+          <Waveform peaks={peaks} progress={progress} onSeek={setProgress} duration={171} />
         </StateCell>
         {(['hover', 'focus', 'pressed'] as const).map((state) => (
           <StateCell key={state} label={stateLabel(state)} state={state}>

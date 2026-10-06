@@ -45,8 +45,7 @@ describe('balance: semana y voto (Anexo B)', () => {
   it('constantes de voto', () => {
     expect(balance.STARS_MIN).toBe(1)
     expect(balance.STARS_MAX).toBe(5)
-    expect(balance.LISTEN_THRESHOLD_MAX_MS).toBe(45_000)
-    expect(balance.LISTEN_THRESHOLD_DURATION_PERCENT).toBe(50)
+    expect(balance.LISTEN_END_TOLERANCE_MS).toBe(1_000)
     expect(balance.BAYES_PRIOR_WEIGHT).toBe(5)
     expect(balance.PODIUM_MIN_VOTES).toBe(3)
     expect(balance.PODIUM_SIZE).toBe(3)
@@ -56,7 +55,8 @@ describe('balance: semana y voto (Anexo B)', () => {
 
   it('constantes de entradas y audio', () => {
     expect(balance.ENTRY_MIN_DURATION_MS).toBe(30_000)
-    expect(balance.ENTRY_MAX_DURATION_MS).toBe(6 * 60_000)
+    expect(balance.ENTRY_MAX_DURATION_MS).toBe(4 * 60_000)
+    expect(balance.ENTRY_FORMATS).toEqual(['wav', 'aiff', 'flac', 'mp3'])
     expect(balance.ENTRY_MAX_BYTES).toBe(104_857_600)
     expect(balance.TARGET_LOUDNESS_LUFS).toBe(-14)
     expect(balance.PLAYBACK_GAIN_MAX_DB).toBe(0)
@@ -142,6 +142,7 @@ describe('balance: inmutabilidad', () => {
       balance.RANK_LADDER,
       ...balance.RANK_LADDER,
       balance.SEASON_POINTS_BY_POSITION,
+      balance.ENTRY_FORMATS,
     ]
     for (const value of frozen) expect(Object.isFrozen(value)).toBe(true)
   })

@@ -50,8 +50,8 @@
         "beats_other": "{count} beats",
         "signIn": "Entra para votar",
         "empty": "Sin beats que votar",
-        "help": "{count} sin votar. Escucha 45\u00a0s de cada uno y puntúalo de 1 a 5. Sin nombres hasta el domingo a las 23:59.",
-        "helpVisitor": "Entra para votar: escucha 45\u00a0s de cada beat y puntúalo de 1 a 5, sin saber de quién es.",
+        "help": "{count} sin votar. Escucha cada uno entero y puntúalo de 1 a 5. Sin nombres hasta el domingo a las 23:59.",
+        "helpVisitor": "Entra para votar: escucha cada beat entero y puntúalo de 1 a 5, sin saber de quién es.",
         "helpEmpty": "Cuando caiga el sample y lleguen las primeras entradas, aquí las escucharás y votarás."
       },
       "results": {
@@ -69,7 +69,7 @@
       "howItWorks": {
         "label": "Cómo se juega",
         "detail": "{minutes}\u00a0min",
-        "help": "Las reglas en un minuto: sample, flip, voto ciego, escucha mínima y Ronda justa."
+        "help": "Las reglas en un minuto: sample, flip, voto ciego, escucha entera y Ronda justa."
       },
       "settings": {
         "label": "Ajustes",
@@ -149,7 +149,13 @@
     },
     "upload": {
       "title": "Subir mi beat",
-      "summary": "Aquí irá la subida o la edición de tu entrada de la semana."
+      "summary": "Aquí irá la subida o la edición de tu entrada de la semana.",
+      "problems": {
+        "unsupportedFormat": "Eso no suena a audio. Prueba con WAV, AIFF, FLAC o MP3.",
+        "fileTooLarge": "Tu archivo pesa {size}\u00a0MB. El máximo son 100\u00a0MB.",
+        "durationTooLong": "Tu beat dura {duration}. El máximo son 4\u00a0minutos.",
+        "durationTooShort": "Tu beat dura {duration}. El mínimo son 30\u00a0segundos."
+      }
     },
     "profile": {
       "title": "Perfil",
@@ -273,7 +279,7 @@
         "links": "Instagram, SoundCloud, YouTube, Spotify o BeatStars, en tu perfil.",
         "accent": "El color de tu carta, dentro de la paleta del juego.",
         "battleAlerts": "Un interruptor por cada aviso de la batalla, y el del lunes junto o por separado.",
-        "marketing": "Novedades y campañas, solo si das tu permiso; te das de baja en un clic.",
+        "marketing": "Novedades, campañas y packs exclusivos de loops, solo si das tu permiso; te das de baja en un clic.",
         "quietHours": "Nada que no sea de servicio entre las 22:00 y las 08:00 (hora de Madrid).",
         "activeSessions": "Dónde tienes la cuenta abierta: el navegador y su última actividad.",
         "closeOthers": "Cierra todas las demás de una vez si ves una que no es tuya.",
@@ -417,7 +423,7 @@
       "titleLabel": "Título",
       "notVoted": "Sin votar",
       "voted": "✓ Votada {vote}/5",
-      "listenHint": "Escucha {seconds}\u00a0s y desbloqueas las estrellas.",
+      "listenHint": "Escúchalo entero y desbloqueas las estrellas.",
       "votedHint": "Puedes cambiar tu voto hasta el cierre.",
       "preview": "Previa",
       "listen": "Escuchar",
@@ -735,7 +741,7 @@
           },
           "menuHelp": {
             "play": "Pilla el sample, cocina tu flip y súbelo antes del domingo.",
-            "jury": "Escucha 45\u00a0s de cada beat y puntúalo de 1 a 5. Sin nombres hasta el domingo.",
+            "jury": "Escucha cada beat entero y puntúalo de 1 a 5. Sin nombres hasta el domingo.",
             "results": "La semana sellada, con su ceremonia y su podio.",
             "settings": "Sonido, movimiento, modo serio y tamaño de texto."
           },
@@ -831,7 +837,7 @@
           "resultsLocked": "Aún nada sellado",
           "help": {
             "play": "Pilla el sample, cocina tu flip y súbelo antes del domingo a las 20:00.",
-            "jury": "Escucha 45\u00a0s de cada beat y puntúalo de 1 a 5. Sin nombres hasta el domingo.",
+            "jury": "Escucha cada beat entero y puntúalo de 1 a 5. Sin nombres hasta el domingo.",
             "results": "Aún no hay semanas selladas: la primera ceremonia, el domingo.",
             "settings": "Sonido, movimiento, modo serio y tamaño de texto."
           }
@@ -897,7 +903,6 @@
           "mean": "Media final"
         },
         "wave": {
-          "threshold": "45\u00a0s",
           "error": "No hemos podido cargar la onda"
         },
         "modal": {
@@ -1079,13 +1084,13 @@
         "keysLabel": "Tecla: Intro sobre Jugar."
       },
       "flip": {
-        "title": "Cocina tu flip",
+        "title": "Flipea el sample",
         "text": "Tienes hasta el domingo a las 20:00. Una entrada por semana.",
         "gesture": "En tu estudio"
       },
       "vote": {
         "title": "Sube y vota",
-        "text": "Sube tu beat y entra al jurado: escucha 45\u00a0s de cada entrada y puntúala de 1 a 5.",
+        "text": "Sube tu beat y entra al jurado: escucha cada entrada entera y puntúala de 1 a 5.",
         "gesture": "Votar",
         "keysLabel": "Teclas: del 1 al 5 para votar."
       }
@@ -1097,8 +1102,8 @@
         "text": "Nadie sabe de quién es cada beat hasta el sellado, el domingo a las 23:59."
       },
       "listen": {
-        "title": "Escucha mínima",
-        "text": "Para votar, escucha 45\u00a0s de la entrada (la mitad, si es corta); saltar con la onda no cuenta."
+        "title": "Escucha entera",
+        "text": "Para votar, escucha la entrada entera; saltar con la onda no cuenta."
       },
       "fairRound": {
         "title": "Ronda justa",

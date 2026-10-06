@@ -154,11 +154,4 @@ describe('Waveform como control (§3.3, RF-PLAY-06)', () => {
     rerender(<Waveform peaks={PEAKS} error="No carga" onSeek={(at) => seeks.push(at)} />)
     expect(screen.getByRole('alert')).toHaveTextContent('No carga')
   })
-
-  it('marca del umbral de escucha (Modo Jurado) en su punto', () => {
-    const { container } = render(<Waveform peaks={PEAKS} threshold={{ at: 0.25, label: '45 s' }} />)
-    const mark = container.querySelector<HTMLElement>('[data-threshold]')!
-    expect(mark.style.left).toBe('25%')
-    expect(mark).toHaveTextContent('45 s')
-  })
 })

@@ -98,7 +98,7 @@ versión hasta que se mezcle la PR nueva de `feat/f0-fundaciones` con el redise�
 - 2026-10-02 — **Modelo de semana**: drop el lunes 00:00 (Madrid), envíos hasta el domingo 20:00 y
   votos hasta las 23:59:59, sellado perezoso e idempotente. Guía §2.1.
 - 2026-10-02 — **Integridad del voto**: voto ciego por defecto con alias de batalla, umbral de
-  escucha `min(45 s, 50 %)` con recibo en servidor, ninguna media ni recuento público antes del
+  escucha entera con recibo en servidor, ninguna media ni recuento público antes del
   sellado, orden «Ronda justa», igualación de sonoridad a −14 LUFS que solo atenúa, media bayesiana
   con `C = 5` y podio con ≥ 3 votos. Guía §1.3, §2.6–2.8.
 - 2026-10-02 — **Capa de juego cosmética**: el XP, los niveles y los logros nunca influyen en la
@@ -139,6 +139,10 @@ versión hasta que se mezcle la PR nueva de `feat/f0-fundaciones` con el redise�
   páginas sin recurso en `app/` y el sistema de diseño en `ui/` (guía v0.5 §4.4).
 - 2026-10-02 — **Motor de BPM y tonalidad**: se porta a TS el de `ReactOtpWeb` con su batería de
   validación como oráculo. Guía §4.6.
+- 2026-10-06 — **Escucha entera y beats de 4 min** (decisión del usuario): para votar se escucha la
+  entrada entera (menos 1 s de margen; era `min(45 s, 50 %)`) y una entrada dura como mucho 4 min (era
+  6), validado con la misma regla en el navegador y en el servidor. El marketing anuncia también packs
+  exclusivos de loops. Guía v0.6.11 (§2.5, §2.7, §2.12, Anexos B y G).
 
 ## Decisiones abiertas
 
@@ -165,6 +169,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-06 | — | Escucha entera para votar, entradas de 4 min como mucho, «Flipea el sample» en «Cómo se juega» y packs de loops en el marketing (guía v0.6.11). |
 | 2026-10-06 | F1 | 1.2 hecha: sonda de 2 s, niveles de calidad y pausa con la pestaña oculta (guía v0.6.10). |
 | 2026-10-06 | F1 | 1.10 hecha: onda en `Int8`, sonoridad aproximada BS.1770 y momento más enérgico en `packages/audio`. |
 | 2026-10-05 | F1 | 1.9 hecha: motor de análisis de BPM y tonalidad del sello en TypeScript, con su batería en Vitest y resultados idénticos al original; worker en la web. |

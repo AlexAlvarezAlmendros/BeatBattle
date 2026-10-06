@@ -25,6 +25,12 @@ export const ERROR_STATUS = {
   UNSUPPORTED_MEDIA_TYPE: 415,
   /** El cuerpo, la consulta o una cabecera no pasan el esquema Zod; `details` lleva los problemas. */
   VALIDATION_FAILED: 422,
+  /** El audio de una entrada no es WAV, AIFF, FLAC ni MP3 (`RF-ENT-03`; Fase 4, también en el navegador). */
+  UNSUPPORTED_FORMAT: 422,
+  /** El audio de una entrada pasa de 100 MiB (`RF-ENT-03`). */
+  FILE_TOO_LARGE: 422,
+  /** El audio de una entrada dura menos de 30 s o más de 4 min (`RF-ENT-03`). */
+  DURATION_OUT_OF_RANGE: 422,
   /** Límite de frecuencia superado; la respuesta lleva `Retry-After`. */
   RATE_LIMITED: 429,
   /** Error inesperado; nunca lleva la pila ni mensajes internos. */
