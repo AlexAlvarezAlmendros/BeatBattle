@@ -36,6 +36,8 @@ export interface WaveformProps {
   onSeek?: (fraction: number) => void
   /** Duración en segundos: el valor del control y su texto («0:41 de 2:51»). */
   duration?: number
+  /** Marca del umbral de escucha en el Modo Jurado (fracción; «30 s»), con su rótulo. */
+  threshold?: { at: number; label: string }
   /** El audio aún no está: barras de esqueleto y `aria-busy`. */
   loading?: boolean
   /** No se puede saltar (p. ej. la entrada aún se procesa): 45 % y `aria-disabled`. */
@@ -53,9 +55,8 @@ export interface WaveformProps {
  * densidad), con tantas barras como caben en su ancho.
  *
  * Sin `onSeek` es una imagen (o decorativa). Con `onSeek`, un control deslizante: hover enseña dónde
- * caería el salto, el foco es el contorno genérico y al pulsar se ve el punto. En el Modo Jurado no lleva
- * marca de umbral (para votar se escucha la entrada entera, `RF-VOTE-04`); la nota de que saltar con la
- * onda no cuenta la pone su pantalla.
+ * caería el salto, el foco es el contorno genérico y al pulsar se ve el punto. En el Modo Jurado lleva
+ * la marca del umbral («30 s») y la nota de que saltar con la onda no cuenta (la pone su pantalla).
  */
 export function Waveform({
   peaks,
@@ -66,6 +67,7 @@ export function Waveform({
   decorative = false,
   onSeek,
   duration = 0,
+  threshold,
   loading = false,
   disabled = false,
   error,
@@ -176,6 +178,7 @@ export function Waveform({
       )}
       style={{ height }}
       data-progress={percent}
+      data-has-threshold={threshold ? '' : undefined}
       {...forceStateAttr(state)}
       {...control}
     >
@@ -207,6 +210,16 @@ export function Waveform({
           )
         })}
       </svg>
+      {threshold && (
+        <span
+          className={styles.threshold}
+          style={{ left: `${clamp01(threshold.at) * 100}%` }}
+          data-threshold=""
+          aria-hidden="true"
+        >
+          <span className={styles.thresholdLabel}>{threshold.label}</span>
+        </span>
+      )}
       {preview !== null && (
         <span className={styles.preview} style={{ left: `${preview * 100}%` }} aria-hidden="true" />
       )}

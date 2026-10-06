@@ -50,8 +50,8 @@
         "beats_other": "{count} beats",
         "signIn": "Entra para votar",
         "empty": "Sin beats que votar",
-        "help": "{count} sin votar. Escucha cada uno entero y puntúalo de 1 a 5. Sin nombres hasta el domingo a las 23:59.",
-        "helpVisitor": "Entra para votar: escucha cada beat entero y puntúalo de 1 a 5, sin saber de quién es.",
+        "help": "{count} sin votar. Escucha 30\u00a0s de cada uno y puntúalo de 1 a 5. Sin nombres hasta el domingo a las 23:59.",
+        "helpVisitor": "Entra para votar: escucha 30\u00a0s de cada beat y puntúalo de 1 a 5, sin saber de quién es.",
         "helpEmpty": "Cuando caiga el sample y lleguen las primeras entradas, aquí las escucharás y votarás."
       },
       "results": {
@@ -69,7 +69,7 @@
       "howItWorks": {
         "label": "Cómo se juega",
         "detail": "{minutes}\u00a0min",
-        "help": "Las reglas en un minuto: sample, flip, voto ciego, escucha entera y Ronda justa."
+        "help": "Las reglas en un minuto: sample, flip, voto ciego, escucha mínima y Ronda justa."
       },
       "settings": {
         "label": "Ajustes",
@@ -423,7 +423,7 @@
       "titleLabel": "Título",
       "notVoted": "Sin votar",
       "voted": "✓ Votada {vote}/5",
-      "listenHint": "Escúchalo entero y desbloqueas las estrellas.",
+      "listenHint": "Escucha {seconds}\u00a0s y desbloqueas las estrellas.",
       "votedHint": "Puedes cambiar tu voto hasta el cierre.",
       "preview": "Previa",
       "listen": "Escuchar",
@@ -757,7 +757,7 @@
           },
           "menuHelp": {
             "play": "Pilla el sample, cocina tu flip y súbelo antes del domingo.",
-            "jury": "Escucha cada beat entero y puntúalo de 1 a 5. Sin nombres hasta el domingo.",
+            "jury": "Escucha 30\u00a0s de cada beat y puntúalo de 1 a 5. Sin nombres hasta el domingo.",
             "results": "La semana sellada, con su ceremonia y su podio.",
             "settings": "Sonido, movimiento, modo serio y tamaño de texto."
           },
@@ -853,7 +853,7 @@
           "resultsLocked": "Aún nada sellado",
           "help": {
             "play": "Pilla el sample, cocina tu flip y súbelo antes del domingo a las 20:00.",
-            "jury": "Escucha cada beat entero y puntúalo de 1 a 5. Sin nombres hasta el domingo.",
+            "jury": "Escucha 30\u00a0s de cada beat y puntúalo de 1 a 5. Sin nombres hasta el domingo.",
             "results": "Aún no hay semanas selladas: la primera ceremonia, el domingo.",
             "settings": "Sonido, movimiento, modo serio y tamaño de texto."
           }
@@ -919,6 +919,7 @@
           "mean": "Media final"
         },
         "wave": {
+          "threshold": "30\u00a0s",
           "error": "No hemos podido cargar la onda"
         },
         "modal": {
@@ -1106,7 +1107,7 @@
       },
       "vote": {
         "title": "Sube y vota",
-        "text": "Sube tu beat y entra al jurado: escucha cada entrada entera y puntúala de 1 a 5.",
+        "text": "Sube tu beat y entra al jurado: escucha 30\u00a0s de cada entrada y puntúala de 1 a 5.",
         "gesture": "Votar",
         "keysLabel": "Teclas: del 1 al 5 para votar."
       }
@@ -1118,8 +1119,8 @@
         "text": "Nadie sabe de quién es cada beat hasta el sellado, el domingo a las 23:59."
       },
       "listen": {
-        "title": "Escucha entera",
-        "text": "Para votar, escucha la entrada entera; saltar con la onda no cuenta."
+        "title": "Escucha mínima",
+        "text": "Para votar, escucha 30\u00a0s de la entrada; saltar con la onda no cuenta."
       },
       "fairRound": {
         "title": "Ronda justa",

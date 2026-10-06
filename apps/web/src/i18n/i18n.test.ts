@@ -139,6 +139,7 @@ describe('i18n: es.json', () => {
       .map(([key, value]) => `${key}: ${value}`)
     expect(split).toEqual([])
     expect(t('pages.upload.problems.durationTooLong', { duration: '4:12' })).toContain('4 minutos')
+    expect(t('home.modes.jury.helpVisitor')).toContain('30 s')
   })
 })
 
