@@ -10,6 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@beatbattle/audio": "workspace:^",
     "@beatbattle/covers": "workspace:^",
     "@beatbattle/rules": "workspace:^",
     "@beatbattle/shared": "workspace:^",

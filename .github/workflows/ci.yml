@@ -20,7 +20,9 @@ concurrency:
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Con la Fase 1, los E2E pasan de 980 (unos 14 min en el runner) y la batería del motor de análisis
+    # suma más de medio minuto: 20 min se quedaban cortos (la PR #5 se cortó en los E2E).
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
         with:

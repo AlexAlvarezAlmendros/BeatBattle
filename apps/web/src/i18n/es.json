@@ -515,7 +515,8 @@
       },
       "sections": {
         "base": "Base de la arena",
-        "components": "Componentes"
+        "components": "Componentes",
+        "sound": "Sonido"
       },
       "states": {
         "rest": "Reposo",
@@ -550,6 +551,14 @@
         "otherText": "Otro texto"
       },
       "kicker": "Beat Battle · banco de pruebas de la arena",
+      "sound": {
+        "intro": "Efectos de la tarea 1.4 (Anexo D), sintetizados por código en La menor. El primer clic desbloquea el audio; con el sonido apagado (M) no suena nada.",
+        "blocks": {
+          "ui": "Interfaz",
+          "stars": "Estrellas",
+          "game": "Voto y progreso"
+        }
+      },
       "base": {
         "intro": "Tokens de la guía v0.6 (§3.2) y primitivas compartidas (§3.3): lo que usan todas las pantallas. Con «Reducir movimiento», el cursor salta sin animación; en modo serio no hay destellos.",
         "blocks": {

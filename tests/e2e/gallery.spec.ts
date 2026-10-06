@@ -10,6 +10,7 @@ import { collectErrors, expectVisibleFocus, focusRingClippedBy, openGallery } fr
 const SECTIONS = [
   { id: 'base', name: 'Base de la arena' },
   { id: 'componentes', name: 'Componentes' },
+  { id: 'sonido', name: 'Sonido' },
 ] as const
 
 /** Bloques de la sección «Base» (tarea 0.22). */
@@ -46,6 +47,13 @@ const COMPONENTS = [
   { id: 'portada', name: 'Portada y medallas' },
 ] as const
 
+/** Bloques de la sección «Sonido» (tarea 1.4): el banco de escucha de los efectos. */
+const SOUND = [
+  { id: 'sonido-ui', name: 'Interfaz' },
+  { id: 'sonido-stars', name: 'Estrellas' },
+  { id: 'sonido-game', name: 'Voto y progreso' },
+] as const
+
 test('RD-VIS-03: la galería pinta todas sus secciones y bloques, en el orden del índice', async ({
   page,
 }) => {
@@ -63,7 +71,7 @@ test('RD-VIS-03: la galería pinta todas sus secciones y bloques, en el orden de
     .evaluateAll((anchors) =>
       anchors.map((a) => ({ id: a.getAttribute('href')?.slice(1), name: a.textContent })),
     )
-  const expected = [SECTIONS[0], ...BASE, SECTIONS[1], ...COMPONENTS]
+  const expected = [SECTIONS[0], ...BASE, SECTIONS[1], ...COMPONENTS, SECTIONS[2], ...SOUND]
   expect(links).toEqual(expected.map(({ id, name }) => ({ id, name })))
 
   // Cada ancla es una sección pintada (con tamaño) cuyo título es el del índice.
