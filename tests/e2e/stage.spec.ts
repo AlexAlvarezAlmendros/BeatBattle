@@ -221,8 +221,9 @@ test.describe('Escenario, capa 0', () => {
       // Lo que cambia es el suavizado del borde de algunos puntos (Canvas 2D frente al *shader*): medido,
       // 0,02–0,05 % con la GPU y 0,21 % con el Chromium de la CI. Una cuña del lado equivocado o una forma
       // distinta pasan del 3 %.
-      // Si falla, el mensaje dice dónde está la diferencia y el estado de cada página (2026-10-06: fallaba a
-      // veces en la CI a 320 px con un 13,43 % y no se reproducía en local).
+      // Si falla, el mensaje dice dónde está la diferencia y el estado de cada página, y las dos capturas
+      // quedan en `test-results/`. Con eso se vio el 13,43 % que salía a veces en la CI a 320 px: no era el
+      // Escenario, sino el HUD que se quedaba apilado en una de las dos cargas (12 px más; `hud.spec.ts`).
       expect(
         ratio,
         `${(ratio * 100).toFixed(3)} % de píxeles distintos en ${JSON.stringify(box)}; estado: ${JSON.stringify(states)}; CPU: ${cpus()[0]?.model ?? '?'}`,

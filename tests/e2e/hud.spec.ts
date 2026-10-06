@@ -211,3 +211,36 @@ for (const { width, height } of [
     })
   })
 }
+
+/**
+ * El HUD se desapila en cuanto vuelve a caber. A 320 px «1P · PULSA PARA UNIRTE» y el sonido caben por
+ * ~14 px; con la letra de reserva de la CI (más ancha) no, así que si se medía antes de que llegara la
+ * letra se apilaba y se quedaba apilado: apilado, el jugador va estirado y la derecha no hace caja, y
+ * ningún tamaño observado cambiaba al encoger el texto. Sobraban 12 px (la fila vacía de la temporada) y
+ * la pantalla entera bajaba: era el fallo intermitente de la comparación del Escenario a 320 px en la CI.
+ */
+test.describe('HUD con teclado a 320 × 568', () => {
+  test.use({ viewport: { width: 320, height: 568 } })
+
+  test('RD-VIS-02 e / §3.4.1: el HUD apilado se desapila cuando lo que lleva vuelve a caber en una fila', async ({
+    page,
+  }) => {
+    await page.goto('/ajustes/sonido')
+    await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toHaveText('Sonido y efectos')
+    const hud = page.locator('.game-frame > header')
+    await expect(hud).not.toHaveAttribute('data-stacked')
+    const height = await hud.evaluate((element) => element.getBoundingClientRect().height)
+    // Lo que hace la letra que llega tarde: el texto del jugador primero no cabe y después sí.
+    const label = hud.getByText('Pulsa para unirte')
+    const text = (await label.textContent()) ?? ''
+    await label.evaluate((element) => {
+      element.textContent = `${element.textContent} · · · · · ·`
+    })
+    await expect(hud).toHaveAttribute('data-stacked')
+    await label.evaluate((element, value) => {
+      element.textContent = value
+    }, text)
+    await expect(hud).not.toHaveAttribute('data-stacked')
+    expect(await hud.evaluate((element) => element.getBoundingClientRect().height)).toBe(height)
+  })
+})
