@@ -61,6 +61,23 @@ async function differingRatio(page: Page, a: Buffer, b: Buffer, threshold: numbe
   )
 }
 
+/**
+ * Captura cuando la página ya está quieta: dos capturas seguidas iguales. La geometría de la cuña puede
+ * cambiar justo después de montar (Opciones publica el pie de sus pestañas, `--screen-tabs-bottom`) y el
+ * Escenario la redibuja al fotograma siguiente; en la CI, con WebGL por software, una captura inmediata
+ * podía pillar la cuña de antes (13 % de píxeles distintos a 320 px, 2026-10-06).
+ */
+async function stableScreenshot(page: Page): Promise<Buffer> {
+  let previous = await page.screenshot()
+  for (let attempt = 0; attempt < 20; attempt++) {
+    await page.waitForTimeout(150)
+    const current = await page.screenshot()
+    if (current.equals(previous)) return current
+    previous = current
+  }
+  return previous
+}
+
 test.describe('Escenario, capa 0', () => {
   test('RNF-PERF-04: el trozo del Escenario se pide después de la primera pintura y el lienzo se enciende', async ({
     page,
@@ -135,7 +152,7 @@ test.describe('Escenario, capa 0', () => {
           await expect(page.locator('[data-stage] canvas')).toHaveCount(0)
         }
         await settle(page)
-        shots.push(await page.screenshot())
+        shots.push(await stableScreenshot(page))
         if (mode === 'off') scratch = page
         else await context.close()
       }
