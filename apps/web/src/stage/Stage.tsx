@@ -3,17 +3,29 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import { type Mesh, PlaneGeometry, RawShaderMaterial } from 'three'
 import { defaultGrid, SHAPE_INDEX, type StageShapeName, type Vec2 } from './arenaMath'
+import { medianFps, PROBE_MS, qualityFromFps, stageDpr, useStageQuality } from './quality'
 import styles from './Stage.module.css'
 import fragmentShader from './shaders/arenaHalftone.frag.glsl?raw'
 import vertexShader from './shaders/fullscreen.vert.glsl?raw'
 
 /**
- * Píxeles del búfer por px CSS de la capa 0 en calidad alta (§3.5): el dpr del dispositivo, entre 1 y 2.
- * No 0,75 (el valor del Silk del sello): los puntos de la trama tienen borde nítido y a 0,75 se emborronan
- * en una pantalla de densidad 2. Como dibuja bajo demanda, cuesta poco. Los niveles de calidad (1.2) lo
- * bajan.
+ * Contadores para las pruebas (solo en desarrollo): fotogramas dibujados y estado de la sonda. Sin DOM: así
+ * no despiertan a nadie que observe la arena.
  */
-export const STAGE_DPR: [number, number] = [1, 2]
+interface StageDebug {
+  frames: number
+  probing: boolean
+  probeFps: number | null
+}
+
+declare global {
+  interface Window {
+    __bbStage?: StageDebug
+  }
+}
+
+const debug: StageDebug | null = import.meta.env.DEV ? { frames: 0, probing: false, probeFps: null } : null
+if (debug) window.__bbStage = debug
 
 /** Sondas que la arena pone en el borde de la cuña (`ArenaBackdrop`): la diagonal y un punto de dentro. */
 export const EDGE_PROBE = 'data-stage-edge'
@@ -149,6 +161,7 @@ function ArenaLayer({ arena, shape, cell, onLive }: StageProps) {
   }, [arena, uniforms, invalidate])
 
   useFrame((state) => {
+    if (debug) debug.frames++
     const { width, height } = state.size
     // Píxeles reales del búfer por px CSS (con el redondeo del tamaño del búfer).
     const canvas = state.gl.domElement
@@ -164,15 +177,59 @@ function ArenaLayer({ arena, shape, cell, onLive }: StageProps) {
 }
 
 /**
+ * Sonda de rendimiento y pausa (§3.5 «Sonda», `RNF-PERF-05`; tarea 1.2). Sin calidad todavía, dibuja sin
+ * parar durante 2 s de pestaña visible y decide la calidad por la mediana de los fotogramas. Con la pestaña
+ * oculta, el bucle se para del todo (`never`) y la sonda espera.
+ */
+function Loop() {
+  const setFrameloop = useThree((state) => state.setFrameloop)
+  const invalidate = useThree((state) => state.invalidate)
+  const quality = useStageQuality((state) => state.quality)
+  const setProbed = useStageQuality((state) => state.setProbed)
+  const probing = quality === null
+  const deltas = useRef<number[]>([])
+  const elapsed = useRef(0)
+
+  useEffect(() => {
+    const apply = () => {
+      if (document.hidden) setFrameloop('never')
+      else {
+        setFrameloop(probing ? 'always' : 'demand')
+        invalidate()
+      }
+    }
+    apply()
+    if (debug) debug.probing = probing
+    document.addEventListener('visibilitychange', apply)
+    return () => document.removeEventListener('visibilitychange', apply)
+  }, [probing, setFrameloop, invalidate])
+
+  useFrame((_, delta) => {
+    if (!probing || document.hidden) return
+    // Los primeros fotogramas (compilar el shader, subir texturas) no cuentan.
+    elapsed.current += delta * 1000
+    if (elapsed.current > 250) deltas.current.push(delta)
+    if (elapsed.current >= PROBE_MS + 250) {
+      const fps = medianFps(deltas.current)
+      if (debug) debug.probeFps = fps
+      setProbed(qualityFromFps(fps))
+    }
+  })
+
+  return null
+}
+
+/**
  * El Escenario (guía §3.5): un único lienzo de React Three Fiber detrás del contenido, a pantalla
  * completa. En la tarea 1.1 pinta la capa 0, la trama de la cuña; la 1.3 le añade las vistas ancladas y
  * las partículas. Dibuja bajo demanda: solo cuando cambia algo de lo que depende.
  */
 export function Stage(props: StageProps) {
+  const quality = useStageQuality((state) => state.quality)
   return (
     <Canvas
       className={styles.stage}
-      dpr={STAGE_DPR}
+      dpr={stageDpr(quality)}
       frameloop="demand"
       flat
       linear
@@ -183,6 +240,7 @@ export function Stage(props: StageProps) {
       aria-hidden="true"
     >
       <ArenaLayer {...props} />
+      <Loop />
     </Canvas>
   )
 }

@@ -49,6 +49,13 @@ export default defineConfig({
     viewport: { width: 1440, height: 900 },
     locale: 'es-ES',
     timezoneId: 'Europe/Madrid',
+    // Calidad del Escenario fijada en «alta» (§3.5, tarea 1.2): sin ella, la sonda dibujaría sin parar 2 s
+    // en cada página de cada prueba (CPU de sobra en la CI, con WebGL por software). Las pruebas de la sonda
+    // y de la pausa (`stage.spec.ts`) la quitan.
+    storageState: {
+      cookies: [],
+      origins: [{ origin: webOrigin, localStorage: [{ name: 'bb:quality', value: 'alta' }] }],
+    },
     trace: ci ? 'on-first-retry' : 'retain-on-failure',
     ...(ci
       ? // SwiftShader: WebGL por software en una máquina sin GPU, para que el Escenario (1.1) también se

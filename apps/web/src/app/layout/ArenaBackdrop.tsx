@@ -1,5 +1,6 @@
 import { texture, textureMobile } from '@beatbattle/shared/tokens'
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
+import { arenaUsesStage, useStageQuality } from '../../stage/quality'
 import { whenIdleAfterFirstPaint } from '../../ui/afterFirstPaint'
 import { HalftoneCanvas } from '../../ui/arena/HalftoneCanvas'
 import { useMediaQuery } from '../../ui/hooks/useMediaQuery'
@@ -63,7 +64,9 @@ export function ArenaBackdrop({ wedge, rays = true }: { wedge: ArenaWedge; rays?
     return whenIdleAfterFirstPaint(() => setLoad(hasWebGL()))
   }, [allowed])
   const onLive = useCallback(() => setLive(true), [])
-  const stage = allowed && load && arena !== null
+  // Con calidad baja o apagada (la sonda o la elegida a mano), la arena estática (§3.5, 1.2).
+  const quality = useStageQuality((state) => state.quality)
+  const stage = allowed && load && arena !== null && arenaUsesStage(quality)
 
   return (
     <div

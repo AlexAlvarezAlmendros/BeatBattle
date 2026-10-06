@@ -10,15 +10,34 @@ import { collectErrors, open, settle } from './support'
  * ese caso es la arena estática de siempre, que cubren las demás.
  */
 
-const STAGE_KEY = 'bb:stage'
+/** Contadores del Escenario en desarrollo (`stage/Stage.tsx`). */
+declare global {
+  interface Window {
+    __bbStage?: { frames: number; probing: boolean; probeFps: number | null }
+  }
+}
 
-async function setStage(context: BrowserContext, mode: 'on' | 'off' | null) {
+const STAGE_KEY = 'bb:stage'
+const QUALITY_KEY = 'bb:quality'
+
+/**
+ * Enciende (`on`) o apaga (`off`) el Escenario, o lo deja a su aire (`null`). Con `on`, además, la calidad
+ * alta a mano: sin ella, la sonda (1.2) podría elegir otra en una máquina lenta (la CI, con WebGL por
+ * software) y apagar el Escenario a mitad de la prueba.
+ */
+async function setStage(
+  context: BrowserContext,
+  mode: 'on' | 'off' | null,
+  quality: string | null = mode === 'on' ? 'alta' : null,
+) {
   await context.addInitScript(
-    ([key, value]) => {
-      if (value) window.localStorage.setItem(key, value)
-      else window.localStorage.removeItem(key)
+    ([stageKey, stage, qualityKey, level]) => {
+      if (stage) window.localStorage.setItem(stageKey, stage)
+      else window.localStorage.removeItem(stageKey)
+      if (level) window.localStorage.setItem(qualityKey, level)
+      else window.localStorage.removeItem(qualityKey)
     },
-    [STAGE_KEY, mode] as const,
+    [STAGE_KEY, mode, QUALITY_KEY, quality] as const,
   )
 }
 
@@ -82,6 +101,7 @@ test.describe('Escenario, capa 0', () => {
   test('RNF-PERF-04: el trozo del Escenario se pide después de la primera pintura y el lienzo se enciende', async ({
     page,
   }) => {
+    await setStage(page.context(), null, 'alta')
     const errors = collectErrors(page)
     await page.goto('/')
     test.skip(!(await webglAvailable(page)), 'sin WebGL: se queda la arena estática')
@@ -90,7 +110,11 @@ test.describe('Escenario, capa 0', () => {
       const fcp = performance.getEntriesByName('first-contentful-paint')[0]?.startTime ?? null
       const stage = performance
         .getEntriesByType('resource')
-        .filter((entry) => /\/stage\/|Stage[-.]/.test(entry.name))
+        // Lo pesado: el componente (en desarrollo) o su trozo (en la build), y three y R3F. El módulo de calidad
+        // (`stage/quality.ts`) es ligero y va con la arena a propósito (1.2).
+        .filter((entry) =>
+          /\/stage\/Stage\.tsx|\/Stage-[\w-]+\.js|deps\/(three|@react-three)/.test(entry.name),
+        )
         .map((entry) => entry.startTime)
       return { fcp, stage: stage.length ? Math.min(...stage) : null }
     })
@@ -195,6 +219,7 @@ test.describe('Escenario, capa 0', () => {
   test('§3.5: el lienzo es único y sobrevive al cambio de pantalla (de la cuña del menú a la de las interiores)', async ({
     page,
   }) => {
+    await setStage(page.context(), null, 'alta')
     await open(page, '/dev/menu', 'Beat Battle')
     test.skip(!(await webglAvailable(page)), 'sin WebGL: se queda la arena estática')
     await expect(live(page)).toBeAttached({ timeout: 20_000 })
@@ -211,5 +236,82 @@ test.describe('Escenario, capa 0', () => {
         (element) => (element as HTMLCanvasElement & { __bbMark?: boolean }).__bbMark === true,
       ),
     ).toBe(true)
+  })
+
+  test('§3.5: la sonda de 2 s decide la calidad, la guarda para la sesión y no se repite al recargar', async ({
+    page,
+  }) => {
+    // Sin la calidad fijada de la configuración: aquí se mide la sonda de verdad.
+    await setStage(page.context(), null, null)
+    await open(page, '/dev/menu', 'Beat Battle')
+    test.skip(!(await webglAvailable(page)), 'sin WebGL: se queda la arena estática')
+    await expect
+      .poll(() => page.evaluate(() => window.sessionStorage.getItem('bb:stage-probe')), { timeout: 20_000 })
+      .toMatch(/^(alta|media|baja|apagada)$/)
+    const first = await page.evaluate(() => ({
+      quality: window.sessionStorage.getItem('bb:stage-probe'),
+      fps: window.__bbStage?.probeFps ?? null,
+    }))
+    expect(first.fps).toBeGreaterThan(0)
+    await page.reload()
+    await expect(page.locator('main h1')).toBeAttached()
+    await page.waitForTimeout(2_500)
+    expect(await page.evaluate(() => window.__bbStage?.probing ?? false)).toBe(false)
+    expect(await page.evaluate(() => window.sessionStorage.getItem('bb:stage-probe'))).toBe(first.quality)
+  })
+
+  test('RNF-PERF-05: con la pestaña oculta el Escenario no dibuja nada, y vuelve al mostrarla', async ({
+    page,
+  }) => {
+    // Sin la calidad fijada de la configuración: aquí se mide la sonda de verdad.
+    await setStage(page.context(), null, null)
+    await open(page, '/dev/menu', 'Beat Battle')
+    test.skip(!(await webglAvailable(page)), 'sin WebGL: se queda la arena estática')
+    // La sonda dibuja sin parar: es cuando el bucle está en marcha.
+    await expect
+      .poll(() => page.evaluate(() => window.__bbStage?.probing ?? false), { timeout: 20_000 })
+      .toBe(true)
+    const setHidden = (hidden: boolean) =>
+      page.evaluate((value) => {
+        Object.defineProperty(document, 'hidden', { configurable: true, get: () => value })
+        Object.defineProperty(document, 'visibilityState', {
+          configurable: true,
+          get: () => (value ? 'hidden' : 'visible'),
+        })
+        document.dispatchEvent(new Event('visibilitychange'))
+      }, hidden)
+    const frames = () => page.evaluate(() => window.__bbStage?.frames ?? 0)
+    await setHidden(true)
+    await page.waitForTimeout(200)
+    const hiddenStart = await frames()
+    await page.waitForTimeout(800)
+    expect(await frames(), 'ningún fotograma con la pestaña oculta').toBe(hiddenStart)
+    await setHidden(false)
+    await expect.poll(frames).toBeGreaterThan(hiddenStart)
+  })
+
+  test('§3.5: con la calidad baja elegida a mano, la arena estática; con la media, la trama a dpr 1', async ({
+    browser,
+  }) => {
+    const low = await browser.newContext()
+    await setStage(low, null, 'baja')
+    const lowPage = await low.newPage()
+    await open(lowPage, '/dev/menu', 'Beat Battle')
+    await lowPage.waitForTimeout(3_000)
+    await expect(lowPage.locator('[data-stage] canvas')).toHaveCount(0)
+    await expect(lowPage.locator('[data-halftone="menuWedge"]')).toBeVisible()
+    await low.close()
+
+    const medium = await browser.newContext({ deviceScaleFactor: 2 })
+    await setStage(medium, null, 'media')
+    const mediumPage = await medium.newPage()
+    await open(mediumPage, '/dev/menu', 'Beat Battle')
+    test.skip(!(await webglAvailable(mediumPage)), 'sin WebGL: se queda la arena estática')
+    await expect(live(mediumPage)).toBeAttached({ timeout: 20_000 })
+    const ratio = await mediumPage
+      .locator('[data-stage] canvas')
+      .evaluate((canvas) => (canvas as HTMLCanvasElement).width / canvas.getBoundingClientRect().width)
+    expect(ratio).toBeCloseTo(1, 1)
+    await medium.close()
   })
 })
