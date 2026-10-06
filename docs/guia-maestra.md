@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.11 · 2026-10-06 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.12 · 2026-10-06 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1361,8 +1361,8 @@ del sello). Concentra en un contexto el fondo, las vistas 3D y las partículas.
 | Capa | Contenido | Notas |
 |---|---|---|
 | 0 · Arena | Fondo negro, **cuña granate** (`--bb-wine-2`) con **trama roja** en *shader*, **diagonal** roja con filete blanco, estallido de rayos, número de semana en contorno y viñeta. Cada pantalla define la posición de su cuña (menú: derecha; selección y perfil: izquierda; Jurado: lado de la entrada; resultados: suelo del podio) | 30 fps como mucho; la trama, al dpr del dispositivo hasta 2 (a 0,75, el valor del Silk del sello, los puntos se emborronan en una pantalla de densidad 2: medido en la 1.1). La reactividad al audio solo cambia **el tamaño de punto** de la trama (≤ 15 %, paso bajo ≤ 2 Hz); **nunca** la luminancia del rojo ni el brillo de un área grande |
-| 1 · Vistas ancladas | Vinilo-sol de la semana (gira **una vuelta por compás** al BPM del sample), podio con focos, carta con su pase, vinilos de medalla | Patrón `View`; solo dibujan si el elemento es visible |
-| 2 · Partículas | Chispas rojas y blancas (voto de 5, VS), confeti en la paleta (ceremonia), ascuas (semana dorada) | Con presupuesto (§4.17) y por el limitador de destellos (§3.6) |
+| 1 · Vistas ancladas | Vinilo-sol de la semana (gira **una vuelta por compás** al BPM del sample), podio con focos, carta con su pase, vinilos de medalla | Patrón `View` (drei, en el mismo lienzo); solo dibujan si el elemento es visible. Solo donde la arena está a la vista (pantalla de título, podio): el lienzo va detrás del contenido y, encima de él, los rayos y la viñeta; dentro de un panel opaco la pieza es DOM (el vinilo de la tarjeta del escenario gira en el compositor). El relevo con la pieza DOM no se nota: mismo pintor, tamaño y densidad, y los dos por CPU |
+| 2 · Partículas | Chispas rojas y blancas (voto de 5, VS), confeti en la paleta (ceremonia), ascuas (semana dorada) | Con presupuesto (§4.17) y **siempre** por el limitador de destellos (§3.6): sin su permiso no hay ráfaga, el círculo que barre una ráfaga ocupa como mucho el área autorizada (≤ 25 % de la ventana) y sus partículas no pasan de la opacidad autorizada (≤ 40 %). Se ven en la arena abierta (detrás de los paneles) |
 | 3 · Postproceso | Líneas de barrido sobre la cuña y grano al 6 % | Solo calidad alta; nunca bajo texto |
 
 **Calidad** (sonda de rendimiento de 2 s al arrancar; ajustable en Opciones):
@@ -1370,8 +1370,8 @@ del sello). Concentra en un contexto el fondo, las vistas 3D y las partículas.
 | Nivel | Qué incluye |
 |---|---|
 | Alta | Todo (la trama al dpr del dispositivo, hasta 2) |
-| Media | Trama a dpr 1 (sin la densidad de las pantallas retina; por debajo de 1 los puntos se emborronan), sin postproceso, partículas a la mitad |
-| Baja | Fondo estático (el *bitmap* de la capa 0), 3D solo en ceremonias, partículas al 25 % |
+| Media | Trama a dpr 1 (sin la densidad de las pantallas retina; por debajo de 1 los puntos se emborronan), sin postproceso, partículas hasta 1.500 (§4.17) |
+| Baja | Fondo estático (el *bitmap* de la capa 0), 3D solo en ceremonias, partículas al 25 % (1.000) |
 | Apagada | Sin WebGL: el **fondo estático pregenerado** (trama + diagonal + rayos) como imagen por *breakpoint* y DPR, piezas en SVG y CSS. Automática con `prefers-reduced-motion`, sin WebGL o con ahorro de datos |
 
 **Sonda** (tarea 1.2). La primera vez que se enciende el Escenario en la sesión, dibuja la arena sin parar
@@ -2151,6 +2151,19 @@ las escenas ancladas. Bucle de render propio: el fondo a 30 fps, las vistas a 60
 animándose y nada cuando no. Pausa con `visibilitychange`. Shaders en `apps/web/src/stage/shaders/`,
 un fichero por material o pase.
 
+Tarea 1.3: las pantallas no importan three; registran sus vistas (`useStageView`) y piden sus ráfagas
+(`stageBurst`) en un módulo ligero (`stage/runtime.ts`) que el Escenario lee cuando está. Con una `View`
+dentro del lienzo, R3F deja de pintar la escena principal por su cuenta: el Escenario la pinta en su pase
+(prioridad 1: arena y partículas, con el *viewport* del lienzo entero, que drei deja en el de la última
+vista) y las vistas van después (prioridad 2). Mientras algo se mueve (un vinilo que gira, una ráfaga
+viva), el bucle pasa a `never` y el Escenario pinta con `advance()` desde su propio `requestAnimationFrame`,
+un fotograma cada ~16 ms como mucho (60 fps también en pantallas de 120 Hz); si no, bajo demanda. Las
+partículas son un único `Points` con un anillo del tamaño del presupuesto: cada ráfaga escribe sus
+partículas al nacer y el *shader* las mueve (una llamada de dibujo). Las texturas de las vistas se pintan
+por CPU (`willReadFrequently`, como las portadas, §3.4.5): con la iGPU AMD por Vulkan, un lienzo 2D
+acelerado que no cuelga del DOM llegaba vacío a la textura. Banco en `/dev/escenario` (`?banco` llena el
+anillo).
+
 #### 4.7.6 Audio del cliente
 
 Un `AudioContext` creado en la primera interacción (puerta de entrada). Buses, compresor y limitador
@@ -2674,7 +2687,7 @@ negocio en el panel de admin (participantes, votos, escuchas por semana) y Verce
 | INP | < 200 ms |
 | CLS | < 0,05 |
 | JS inicial (sin Escenario) | < 200 kB gz, contando la entrada con sus importaciones estáticas y también la primera pintura de la home (175 y 185 kB gz al cerrar la Fase 0; con la arena, 179 y 193 kB gz con Motion por el pulsado del botón y 159 y 172 kB gz sin él, 2026-10-03) |
-| Escenario (trozo diferido) | < 250 kB gz (243,8 kB gz con three + R3F y la capa 0, tarea 1.1: drei y las vistas de la 1.3 obligan a revisarlo) |
+| Escenario (trozo diferido) | < 250 kB gz (243,8 kB gz con three + R3F y la capa 0, tarea 1.1; **249,1 kB gz** con `View` de drei, las vistas y las partículas, tarea 1.3: sin margen, lo próximo que entre en el trozo obliga a partirlo) |
 | Fuentes (subconjunto latino) | ≈ 127 KB: Anybody cursiva 62, Chakra Petch 5 × ~10, Oxanium 14; precarga solo de Chakra Petch 700 (§3.2). Medido el 2026-10-03 (perfil de `RNF-PERF-02`, cinco cargas intercaladas): con Anybody y Chakra 600 precargadas, LCP 2,00 s y CLS 0,0002; sin precargas, 1,60 s y 0,0036; solo Chakra 700, 1,64 s y 0,0034 |
 | FPS | 60 en escritorio con GPU integrada; ≥ 45 en un Android de gama media con calidad automática |
 | Inicio de reproducción tras el clic | < 600 ms en 4G |
@@ -3285,6 +3298,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-06 | 0.6.12 | **Vistas ancladas y partículas** (§3.5 capas 1 y 2, §4.7.5, §4.17; tarea 1.3). Las vistas solo van donde la arena está a la vista: el lienzo único va detrás del contenido y bajo los rayos y la viñeta, así que dentro de un panel opaco la pieza es DOM (el vinilo de la tarjeta del escenario sigue en el compositor; el plan decía «pegado a la tarjeta»). Partículas: anillo con el presupuesto (media, hasta 1.500, como §4.17; decía «a la mitad»), radio y opacidad que autoriza el limitador. Pase de pintado propio, `advance()` a 60 fps mientras algo se mueve y texturas de las vistas por CPU. Trozo del Escenario: 249,1 kB gz. |
 | 2026-10-06 | 0.6.11 | **Escucha entera y beats de 4 min** (decisión del usuario): para votar hay que escuchar la entrada entera, menos 1 s de margen (era `min(45 s, 50 %)`; §2.7, `RF-VOTE-04`, Anexos B y G); el Modo Jurado pierde la marca del umbral en la onda y el medidor cuenta la duración. Duración máxima de una entrada, 4 min (era 6; §2.5, `RF-ENT-03`, §4.8), con la validación compartida por cliente y servidor (`validateEntryAudio`) y los códigos `UNSUPPORTED_FORMAT`, `FILE_TOO_LARGE` y `DURATION_OUT_OF_RANGE`. «Cómo se juega»: el paso 2 es «Flipea el sample». El marketing incluye packs exclusivos de loops (§2.2, §2.12). |
 | 2026-10-06 | 0.6.10 | **Calidad del Escenario** (§3.5, tarea 1.2): umbrales de la sonda de 2 s (≥ 50 fps alta, ≥ 35 media, ≥ 20 baja, por debajo apagada), resultado guardado por sesión, pausa con la pestaña oculta y calidad a mano (`bb:quality`) por encima de la sonda. La media pasa de «trama a dpr 0,5» a «trama a dpr 1»: por debajo de 1 los puntos se emborronan (medido en la 1.1). |
 | 2026-10-05 | 0.6.9 | **Escenario, capa 0** (§3.5, tarea 1.1): el *shader* pinta solo la trama de la cuña; la cuña, la diagonal, los rayos, el número y la viñeta siguen en CSS (la versión Apagada) y la geometría la sigue poniendo el CSS, que el Escenario lee con sondas en el borde de la cuña. Dibujo bajo demanda; interruptor `bb:stage` para pruebas. La trama va al dpr del dispositivo (hasta 2), no a 0,75: con puntos de borde nítido, 0,75 se ve borroso en pantallas de densidad 2. |

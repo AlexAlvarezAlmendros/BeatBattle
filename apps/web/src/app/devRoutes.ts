@@ -24,6 +24,22 @@ export const devRoutes: RouteObject[] = import.meta.env.DEV
         lazy: async () => ({ Component: (await import('../ui/gallery/GalleryPage')).GalleryPage }),
       },
       {
+        // Banco del Escenario (1.3, 1.11): el vinilo-sol como vista anclada y las ráfagas de partículas.
+        // Cuña a la derecha, como el menú; la izquierda queda abierta para el vinilo y las ráfagas.
+        path: 'dev/escenario',
+        handle: {
+          access: 'public',
+          screen: {
+            wedge: 'right',
+            keys: ['back', 'sound'],
+            plate: { kicker: 'frame.plates.dev', title: 'dev.stage.title' },
+            simple: true,
+            loops: true,
+          },
+        },
+        lazy: async () => ({ Component: (await import('../ui/gallery/StageBenchPage')).StageBenchPage }),
+      },
+      {
         // El menú principal con los datos de muestra de las maquetas (0.24), para compararlo con ellas.
         path: 'dev/menu',
         handle: { access: 'public', screen: MENU_SCREEN },

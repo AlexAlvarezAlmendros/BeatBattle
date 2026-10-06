@@ -12,3 +12,8 @@
   height: 100%;
   border-radius: 50%;
 }
+
+/* Con la vista del Escenario ya pintando (§3.5 capa 1), el lienzo 2D se aparta: el vinilo es el de la vista. */
+.vinyl[data-stage-view="live"] .canvas {
+  visibility: hidden;
+}

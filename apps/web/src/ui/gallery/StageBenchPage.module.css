@@ -1,0 +1,60 @@
+/*
+ * Banco del Escenario (`/dev/escenario`): a la izquierda, la arena abierta con el vinilo-sol (una vista
+ * anclada se ve donde no hay panel encima, §3.5) y el centro de las ráfagas; a la derecha, los mandos.
+ */
+.page {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) minmax(0, calc(var(--bb-space-16) * 5.5));
+  gap: var(--bb-space-8);
+  align-items: end;
+}
+
+.arena {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-8);
+  min-height: calc(var(--bb-space-16) * 6);
+}
+
+.vinyl {
+  width: calc(var(--bb-space-16) * 4.5);
+}
+
+.target {
+  flex: 1;
+  align-self: stretch;
+}
+
+.panel {
+  display: grid;
+  gap: var(--bb-space-4);
+  padding: var(--bb-space-6);
+}
+
+.intro {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-3);
+}
+
+.status {
+  min-height: var(--bb-space-6);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+@media (max-width: 720px) {
+  .page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .vinyl {
+    width: calc(var(--bb-space-16) * 3);
+  }
+}

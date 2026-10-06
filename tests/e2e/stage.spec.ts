@@ -13,7 +13,15 @@ import { collectErrors, open, settle } from './support'
 /** Contadores del Escenario en desarrollo (`stage/Stage.tsx`). */
 declare global {
   interface Window {
-    __bbStage?: { frames: number; probing: boolean; probeFps: number | null }
+    __bbStage?: {
+      frames: number
+      probing: boolean
+      probeFps: number | null
+      drawCalls: number
+      animating: boolean
+      particles: { bursts: number; alive: number }
+      views: { frames: Record<number, number> }
+    }
   }
 }
 
@@ -313,5 +321,109 @@ test.describe('Escenario, capa 0', () => {
       .evaluate((canvas) => (canvas as HTMLCanvasElement).width / canvas.getBoundingClientRect().width)
     expect(ratio).toBeCloseTo(1, 1)
     await medium.close()
+  })
+})
+
+/**
+ * Capas 1 y 2 del Escenario (guía §3.5, tarea 1.3), en el banco `/dev/escenario`: el vinilo-sol como vista
+ * anclada de drei en la arena abierta y las ráfagas de partículas, siempre por el limitador de destellos.
+ */
+test.describe('Escenario, capas 1 y 2', () => {
+  const BENCH = '/dev/escenario'
+  const HEADING = 'Escenario (banco)'
+  const stageState = (page: Page) => page.evaluate(() => window.__bbStage)
+
+  test('§3.5 capa 1: el vinilo-sol pasa a la vista anclada del Escenario y se ve igual que el del DOM', async ({
+    browser,
+  }) => {
+    const shots: Buffer[] = []
+    let scratch: Page | null = null as Page | null
+    for (const mode of ['on', 'off'] as const) {
+      // Quietos los dos («reducir movimiento»; `on` enciende el Escenario igual): se comparan píxel a píxel.
+      const context = await browser.newContext({
+        viewport: { width: 1440, height: 900 },
+        reducedMotion: 'reduce',
+      })
+      await setStage(context, mode)
+      const page = await context.newPage()
+      await open(page, BENCH, HEADING)
+      const vinyl = page.locator('[data-stage-view]')
+      if (mode === 'on') {
+        test.skip(!(await webglAvailable(page)), 'sin WebGL: se queda el vinilo del DOM')
+        await expect(vinyl).toHaveAttribute('data-stage-view', 'live', { timeout: 20_000 })
+      } else {
+        await expect(vinyl).toHaveAttribute('data-stage-view', 'waiting')
+      }
+      await settle(page)
+      const box = await vinyl.boundingBox()
+      if (!box) throw new Error('sin vinilo')
+      shots.push(await page.screenshot({ clip: box }))
+      if (mode === 'off') scratch = page
+      else await context.close()
+    }
+    const [withView, withoutView] = shots
+    if (!scratch || !withView || !withoutView) throw new Error('faltan capturas')
+    // El mismo pintor, al mismo tamaño y densidad, y los dos por CPU: medido, 0 % con la GPU.
+    const ratio = await differingRatio(scratch, withView, withoutView, 48)
+    expect(ratio, `${(ratio * 100).toFixed(3)} % de píxeles distintos`).toBeLessThan(0.005)
+    await scratch.context().close()
+  })
+
+  test('§3.6 / §4.7.5: el vinilo de la vista gira con el lienzo en marcha; con la pausa de la barra, quieto y sin fotogramas', async ({
+    page,
+  }) => {
+    await open(page, BENCH, HEADING)
+    test.skip(!(await webglAvailable(page)), 'sin WebGL: se queda el vinilo del DOM')
+    await expect(page.locator('[data-stage-view]')).toHaveAttribute('data-stage-view', 'live', {
+      timeout: 20_000,
+    })
+    await expect.poll(async () => (await stageState(page))?.animating).toBe(true)
+    const start = (await stageState(page))?.frames ?? 0
+    await expect.poll(async () => (await stageState(page))?.frames ?? 0).toBeGreaterThan(start + 5)
+    await page.getByRole('button', { name: 'Pausar las animaciones' }).click()
+    await expect.poll(async () => (await stageState(page))?.animating).toBe(false)
+    await page.waitForTimeout(200)
+    const paused = (await stageState(page))?.frames
+    await page.waitForTimeout(800)
+    expect((await stageState(page))?.frames, 'ningún fotograma con los bucles en pausa').toBe(paused)
+  })
+
+  test('RD-MOT-04: las ráfagas pasan por el limitador de destellos: de cinco seguidas, tres; en modo serio, ninguna', async ({
+    page,
+  }) => {
+    await open(page, BENCH, HEADING)
+    test.skip(!(await webglAvailable(page)), 'sin Escenario no hay ráfagas')
+    await expect(page.locator('[data-stage-view]')).toHaveAttribute('data-stage-view', 'live', {
+      timeout: 20_000,
+    })
+    const status = page.locator('[data-burst-status]')
+    // Las cinco en el mismo instante: el limitador cuenta por ventana de 1 s.
+    await page.getByRole('button', { name: 'Chispas', exact: true }).evaluate((button) => {
+      for (let i = 0; i < 5; i++) (button as HTMLButtonElement).click()
+    })
+    await expect(status).toHaveAttribute('data-burst-status', 'denied')
+    expect((await stageState(page))?.particles.bursts).toBe(3)
+    await page.waitForTimeout(1100)
+    await page.evaluate(() => document.documentElement.setAttribute('data-serious', ''))
+    await page.getByRole('button', { name: 'Confeti', exact: true }).click()
+    await expect(status).toHaveAttribute('data-burst-status', 'denied')
+    expect((await stageState(page))?.particles.bursts).toBe(3)
+  })
+
+  test('§4.17: con el banco lleno, como mucho 4.000 partículas vivas y menos de 120 llamadas de dibujo', async ({
+    page,
+  }) => {
+    await open(page, `${BENCH}?banco`, HEADING)
+    test.skip(!(await webglAvailable(page)), 'sin Escenario no hay partículas')
+    await expect
+      .poll(async () => (await stageState(page))?.particles.alive ?? 0, { timeout: 20_000 })
+      .toBeGreaterThan(2000)
+    for (let i = 0; i < 6; i++) {
+      const state = await stageState(page)
+      expect(state?.particles.alive).toBeLessThanOrEqual(4000)
+      expect(state?.drawCalls).toBeGreaterThan(0)
+      expect(state?.drawCalls).toBeLessThan(120)
+      await page.waitForTimeout(250)
+    }
   })
 })

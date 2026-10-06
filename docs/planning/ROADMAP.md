@@ -29,7 +29,7 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 | # | Fase | Estado | Plan | Hito |
 |---|------|--------|------|------|
 | 0 | Fundaciones | ✅ Cerrada (2026-10-04, con la dirección «Arena»; PR nueva pendiente de revisión) | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes de la arena (guía v0.6 §3); marco de juego y menú principal navegables con teclado; prueba de marca y de juego (`RD-VIS-02`) |
-| 1 | Spike de sensación y audio | 🔄 En curso (1.1, 1.2, 1.4, 1.9 y 1.10 hechas; 1.3, 1.6 y 1.13 listas) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio; efectos < 30 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
+| 1 | Spike de sensación y audio | 🔄 En curso (1.1, 1.2, 1.3, 1.4, 1.9 y 1.10 hechas; 1.5, 1.6 y 1.13 listas) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio; efectos < 30 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
 | 2 | Cuentas y base de email | 🔒 Bloqueada (F0, GO de F1) | — (se crea al llegar) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, preferencias, consentimientos y bajas |
 | 3 | Semanas y samples | 🔒 Bloqueada (F2) | — | 3 semanas programadas; cambio de semana en la frontera con reloj simulado; email del drop (también sin cuenta) |
 | 4 | Participar | 🔒 Bloqueada (F3) | — | WAV de 60 MB por trozos con BPM, tonalidad y sonoridad medida; recibo por email |
@@ -44,7 +44,7 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 ## Foco actual
 
 **Fase 1, spike GO/NO-GO** ([plan 01](plans/01-spike-sensacion-audio.md), replanificado para la Arena):
-1.1 (la arena en *shader*), 1.2 (sonda y calidad), 1.4 (motor de audio), 1.9 (motor de análisis) y 1.10 (onda y sonoridad) están hechas; 1.3 (vistas y partículas), 1.6 (reactividad) y 1.13 (pantalla de título) se pueden empezar;
+1.1 (la arena en *shader*), 1.2 (sonda y calidad), 1.3 (vistas y partículas), 1.4 (motor de audio), 1.9 (motor de análisis) y 1.10 (onda y sonoridad) están hechas; 1.5 (estrellas), 1.6 (reactividad) y 1.13 (pantalla de título) se pueden empezar;
 1.7–1.8 crean recursos en la nube y esperan la decisión de la cuenta de Cloudinary.
 
 La **Fase 0** se cerró el 2026-10-04 con la dirección de arte «Arena» (tareas 0.21–0.28; guía v0.6.8;
@@ -169,6 +169,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-06 | F1 | 1.3 hecha: vistas ancladas (el vinilo-sol en la arena abierta) y partículas por el limitador; 60 fps a dpr 2 con 4.000 partículas en la iGPU (guía v0.6.12). |
 | 2026-10-06 | — | Escucha entera para votar, entradas de 4 min como mucho, «Flipea el sample» en «Cómo se juega» y packs de loops en el marketing (guía v0.6.11). |
 | 2026-10-06 | F1 | 1.2 hecha: sonda de 2 s, niveles de calidad y pausa con la pestaña oculta (guía v0.6.10). |
 | 2026-10-06 | F1 | 1.10 hecha: onda en `Int8`, sonoridad aproximada BS.1770 y momento más enérgico en `packages/audio`. |
