@@ -307,8 +307,7 @@ extra y 8 *chops* (marcas de inicio y fin) para el kit sonoro de la semana (§3.
 1. **Comprobaciones previas.** Sesión verificada, bases aceptadas, fase `open` y sin entrada activa
    (si ya la tiene, el botón dice «Editar mi entrada»).
 2. **Zona de soltar.** Arrastrar o elegir fichero. Formatos: **WAV, AIFF, FLAC o MP3**; hasta
-   **100 MB**; duración de **30 s a 4 min** (con la escucha entera de §2.7, el jurado escucha como
-   mucho 4 min por voto). La validación de formato, tamaño y duración se hace en el navegador antes de
+   **100 MB**; duración de **30 s a 4 min**. La validación de formato, tamaño y duración se hace en el navegador antes de
    subir nada, con la misma regla que el servidor (`validateEntryAudio` de `packages/rules`), y dice el
    motivo: «Tu beat dura 4:12. El máximo son 4 minutos.».
 3. **Análisis local** (Web Worker, motor portado de Other People, §4.6): BPM, tonalidad, forma de
@@ -401,11 +400,10 @@ distribución de estrellas (histograma de 5 barras) e identidad del productor.
 - De **1 a 5 estrellas enteras**. Un voto por usuario y entrada; se puede **cambiar** hasta el
   cierre de votos y cuenta el último.
 - No se vota la **propia** entrada.
-- Hace falta el **recibo de escucha**: haber escuchado la entrada **entera** (toda su duración menos
-  1 s de margen al final, por la granularidad del reproductor). El cliente lo controla con el tiempo
-  distinto realmente reproducido (los saltos con la onda no cuentan y repetir un trozo no suma dos
-  veces); el servidor comprueba además que entre el inicio de la escucha y el voto ha pasado ese
-  tiempo de reloj. Se puede pausar. Es fricción contra el voto a ciegas, no una garantía absoluta.
+- Hace falta el **recibo de escucha**: haber escuchado al menos **30 s** de esa entrada (la entrada
+  entera, si dura menos). El cliente lo controla con el tiempo realmente reproducido (los saltos con la
+  onda no cuentan); el servidor comprueba además que entre el inicio de la escucha y el voto ha pasado
+  ese tiempo de reloj. Es fricción contra el voto a ciegas, no una garantía absoluta.
 - **Voto ciego** (por defecto en todas las semanas, configurable por semana): no se ve quién ha
   hecho cada entrada hasta el sellado. Las entradas se identifican por su título y un **alias de
   batalla** generado (adjetivo + sustantivo, p. ej. «Tigre Púrpura»), estable por entrada.
@@ -424,8 +422,8 @@ con un barrido y un sonido (`vote.unlocked`).
   grande, alias, título y chips. El *versus* es escenografía: cada entrada se puntúa por sí sola.
 - Cola = entradas activas de la semana que el usuario no ha votado y que no son suyas, en orden de
   «Ronda justa».
-- Reproducción automática desde el principio; lo que queda por escuchar se ve en el medidor de
-  escucha y en el contador del HUD.
+- Reproducción automática desde el principio; el umbral se ve en el medidor de escucha mínima y en
+  el contador del HUD.
 - Votar con clic o teclas **1–5**; **S** salta (la entrada pasa al final), **Espacio** pausa,
   **←/→** buscan en la onda (con el cursor en las estrellas, eligen la nota; §3.8.7), **Esc** sale.
 - Tras votar, transición de cambio de entrada a lo largo de la diagonal (1,2 s, `--bb-dur-swap`) y
@@ -442,7 +440,7 @@ contenido ofensivo · spam · otro) y detalle opcional. Va a la cola de moderaci
 | `RF-VOTE-01` | Estrellas enteras de 1 a 5 | `stars: 0`, `6` o `3.5` → 422 |
 | `RF-VOTE-02` | Un voto por usuario y entrada; repetirlo lo actualiza | Votar 3 y después 5 deja un único voto de 5 con `updated_at` nuevo |
 | `RF-VOTE-03` | No se vota la propia entrada | 403 `OWN_ENTRY`; en la UI, las estrellas no aparecen en la propia entrada |
-| `RF-VOTE-04` | Sin recibo de escucha (la entrada escuchada entera) no se vota | Votar sin haber iniciado escucha → 409 `LISTEN_REQUIRED`; a los 45 s de una entrada de 3 min → 409; a los 2:59 → 200 |
+| `RF-VOTE-04` | Sin recibo de escucha (30 s escuchados) no se vota | Votar sin haber iniciado escucha → 409 `LISTEN_REQUIRED`; a los 20 s de una entrada de 3 min → 409; a los 31 s → 200 |
 | `RF-VOTE-05` | Solo se vota en fases `open` y `voting` | Tras el cierre → 409 `VOTING_CLOSED`, aunque el sellado aún no haya terminado |
 | `RF-VOTE-06` | Solo votan cuentas verificadas y no bloqueadas | 403 `EMAIL_NOT_VERIFIED` / 401 tras el bloqueo |
 | `RF-VOTE-07` | Voto ciego: la API pública de una semana sin sellar no revela la autoría | Ver `RF-ENT-10` |
@@ -1192,11 +1190,11 @@ una ventana estrecha o ampliada al 200 %.
 | **Tecla** (`Key`) | Pieza de chaflán `--bb-cut-xs`, 26 px de alto, Oxanium 12 px. Variante clara (en botones blancos) y marcada (`--bb-red-press`). Son la ayuda visible del teclado. |
 | **Etiqueta** | Paralelogramo pequeño (`--bb-slant-sm`) en display cursiva a 12–16 px: 1P, NUEVO, RETO, EN JUEGO, TU RESULTADO. Blanca (texto negro), roja (texto negro) o `cta` (texto blanco). |
 | **Sello de goma** | Borde de 3 px del color del texto con la máscara de ruido, girado entre −9° y +9°: «SIN VOTAR», «✓ VOTADA 4/5», «AUTORÍA OCULTA», «SELLADA». Es **estado propio** del usuario o de la semana, nunca un dato de la entrada. |
-| **Ficha de luchador** (entrada seleccionada) | Retrato (portada de 300 px en marco blanco con el sello «AUTORÍA OCULTA»), columna de 4 teselas (tempo, tonalidad, duración, género), **banda del alias** (placa negra con filete blanco y cuña roja; alias en display ajustado a su ancho: baja `font-stretch` de 150 a 105 % y después el cuerpo hasta 30 px) y panel opaco con título, estado («SIN VOTAR · Escúchalo entero y desbloqueas las estrellas»), previa de onda y botones. Se actualiza al mover el cursor (región viva educada). |
+| **Ficha de luchador** (entrada seleccionada) | Retrato (portada de 300 px en marco blanco con el sello «AUTORÍA OCULTA»), columna de 4 teselas (tempo, tonalidad, duración, género), **banda del alias** (placa negra con filete blanco y cuña roja; alias en display ajustado a su ancho: baja `font-stretch` de 150 a 105 % y después el cuerpo hasta 30 px) y panel opaco con título, estado («SIN VOTAR · Escucha 30 s y desbloqueas las estrellas»), previa de onda y botones. Se actualiza al mover el cursor (región viva educada). |
 | **Casilla de entrada** (rejilla) | Portada cuadrada en marco de chaflán `--bb-cut` + alias en dos líneas como máximo (12 px, mayúsculas). **Enfocada**: cursor blanco con 1P, marco rojo y alias blanco. **Votada**: portada al 42 % y sello «✓ VOTADA n/5» (es tu voto). **Aleatorio**: casilla final con «?» que elige una entrada sin votar. Sin números de orden, medias, recuentos ni autoría. `role="option"` dentro de un `listbox` 2D. |
 | **Fila de entrada** (listas largas: archivo, clasificación, historial) | Marcador de 56–58 px: portada de 44 px en chaflán `--bb-cut-sm` con el play dentro (nunca un play redondo suelto: es la lista de beats del sello, §3.1), título y subtítulo (los dos son el enlace a la ficha: el foco los rodea sin tapar nada), posición en display blanco con `--bb-shadow-hard-sm`, puntuación en Oxanium y medalla. Antes del sellado, sin posición ni puntuación (`RF-PLAY-05`). **Hover**: `--bb-panel-2`. **Error de audio**: aviso y reintentar (`RF-PLAY-09`). El enlace de título y subtítulo tiene un área efectiva de 44 px de alto como poco (su caja es la del texto y el objetivo crece por pseudoelemento, como el botón `sm`), y su anillo de foco y su halo caben dentro de la fila, también cuando el texto parte. Título y subtítulo parten en líneas en cualquier fila, nunca con puntos suspensivos (el espaciado de 1.4.12 no se puede detectar). **Fila estrecha** (la fila mide menos de 26 rem; es un contenedor y su ancho lo pone quien la contiene): el resultado baja a una segunda fila, bajo el título. La medalla solo se oculta en el móvil táctil (≤ 720 px con `hover: none` o `pointer: coarse`). |
 | **Tesela / estadística** | Marco de chaflán `--bb-cut-md` con rótulo de 12 px y valor en Oxanium 22–24 px, unidad en 12–13 px. `tile--hot`: borde rojo para el dato destacado. En móvil, lista de clave y valor. |
-| **Forma de onda** | Barras de 3 px con 2 px de hueco; reproducido `--bb-red`, resto `--bb-wave-idle`; cabeza blanca de 2 px con halo de 6 px. En el Modo Jurado no lleva marca de umbral (para votar se escucha entera: el umbral es el final) y sí la nota «saltar con la onda no cuenta». Teclado: ←/→ 5 s, Inicio/Fin (`RF-PLAY-06`). |
+| **Forma de onda** | Barras de 3 px con 2 px de hueco; reproducido `--bb-red`, resto `--bb-wave-idle`; cabeza blanca de 2 px con halo de 6 px. En el Modo Jurado lleva la **marca del umbral**: un filete que sobresale por arriba de la pista y su rótulo «30 s» en una línea encima, sobre `--bb-panel-veil`; y la nota «saltar con la onda no cuenta». Teclado: ←/→ 5 s, Inicio/Fin (`RF-PLAY-06`). |
 | **Modal** (ventana de juego) | Panel `--bb-panel-veil` con marco blanco y chaflán `--bb-cut-lg`, título en display, teclas de acción en el pie, sobre `--bb-scrim`. Entra con la diagonal (`--bb-dur-base`) y `ui.open`. El foco va al diálogo; Esc cierra. |
 | **Anunciador** | Rótulo de una a tres palabras en display, blanco con extrusión de trama y contorno, o etiqueta grande girada −6°: «RONDA 07», «¡A ESCUCHAR!», «¡VOTO LISTO!», «¡VOTO GUARDADO!», «¡TIEMPO!», «¡SELLADO!», «¡JURADO COMPLETO!», «¡CAMPEÓN!». **Uno por evento**, nunca encadenados, y repetido en `aria-live="polite"`. El rótulo en display ocupa el ancho de su caja, centrado y con `--bb-space-2` de aire a los lados para la sombra dura, y se ajusta con `useFitText` como el alias (anchura de 150 a 105 %, después el cuerpo hasta 30 px y, como último recurso, parte entre palabras). La etiqueta girada es roja con texto blanco (`cta`, como «¡VOTO GUARDADO!» en `03-jurado`); la blanca con texto negro queda para lo que invita («¡A ESCUCHAR!», `03-jurado-escuchando`). Las dos parten entre palabras y en contraste alto conservan su caja. Modo serio: no aparece (queda la región viva); la galería lo explica en la tesela. |
 | **Aviso** (*toast*) | Panel opaco con marco, icono y texto; abajo a la derecha (arriba en móvil), 4 s, pausa con ratón o foco, como mucho 4. El de error es de papel (§3.2). Logros: §3.8.8. |
@@ -1655,7 +1653,7 @@ Grupo de radio de cinco estrellas grandes (62 px de dibujo en botones de 96 px; 
 Brutal):
 
 - **Dormidas** (umbral sin cumplir): al 40 %, `aria-disabled` y `aria-describedby` con el motivo
-  («Las estrellas despiertan al acabar el beat: faltan 1:12»), junto a un medidor pequeño.
+  («Las estrellas despiertan a los 30 s: faltan 8 s»), junto a un medidor pequeño.
 - **Despertar**: un único barrido de izquierda a derecha (`--bb-dur-slow`) y `vote.unlocked`; el
   anunciador dice «¡VOTO LISTO!».
 - **Elegir**: flechas o *hover* rellenan hasta la estrella del cursor (la nota suena muy bajo,
@@ -1707,9 +1705,9 @@ Sin movimiento: podio quieto que aparece por fundidos, con los mismos textos.
 
 #### 3.8.7 Modo Jurado (VS)
 
-**HUD de combate**: a la izquierda, «1P TÚ · JURADO» con el **medidor de escucha** en tres tercios de
-la duración («1:52 / 3:12»; al cumplirse, «✓ ESCUCHADA»). En el centro, la caja de ronda «RONDA 07 /
-23» con pips y el **contador del umbral** («1:20 · para puntuar» → «YA · voto guardado»). A la
+**HUD de combate**: a la izquierda, «1P TÚ · JURADO» con el **medidor de escucha mínima** en tres
+tramos de 10 s («22 / 30 s»; al cumplirse, «✓ 30 / 30 s»). En el centro, la caja de ronda «RONDA 07 /
+23» con pips y el **contador del umbral** («08 · s para puntuar» → «YA · voto guardado»). A la
 derecha, «VOTO CIEGO · TIGRE PÚRPURA» y una **placa rayada** («AUTORÍA OCULTA · SE REVELA EL DOM 11 A LAS
 23:59») que a propósito **no es una barra de vida**: la entrada no pierde nada, la puntúas tú.
 
@@ -1718,7 +1716,7 @@ semana») contra la portada de la entrada en marco blanco con «AUTORÍA OCULTA�
 el centro, el **VS** estampado y la nota fija «Puntúas **este beat por sí solo**, de 1 a 5. No compite
 contra otro.». El anunciador (etiqueta girada) dice «¡A ESCUCHAR!», «¡VOTO LISTO!» o «¡VOTO GUARDADO!».
 
-**Panel de combate** (opaco): onda grande, tiempo, «Sonoridad igualada a −14 LUFS ·
+**Panel de combate** (opaco): onda grande con la marca de 30 s, tiempo, «Sonoridad igualada a −14 LUFS ·
 saltar con la onda no cuenta»; el combo (§3.4.2) a la izquierda, las estrellas (§3.8.4) en el centro y
 el veredicto o el motivo a la derecha. Barra de controles: `1–5 PUNTUAR · ESPACIO PAUSA · ←→ BUSCAR · S
 SALTAR · R DENUNCIAR · ESC SALIR`.
@@ -1871,7 +1869,7 @@ las pantallas de texto sin pieza, como la galería, no los llevan.
 | **Salón de la fama** | Tabla de récords de recreativa: campeones semana a semana (portada y disco de oro), campeones de temporada en placas grandes y récords (más victorias, racha más larga, mejor puntuación, más votos emitidos) con cifras en Oxanium y posición en display. Flechas en horizontal; en móvil, lista |
 | **Archivo** (`/semanas`) | «Selección de escenario»: rejilla de semanas selladas (vinilo-sol en miniatura, número de entradas y podio), con flechas y Q/E |
 | **Temporada** | Clasificación de torneo con puntos tipo F1; el top 3 en peanas pequeñas |
-| **Cómo se juega** | «Lista de movimientos», un menú de juego en la cuña (cursor con 1P, ↑↓, Intro): 1 Pilla el sample · 2 Flipea el sample · 3 Sube y vota, cada uno con sus teclas o su gesto como ayuda («[INTRO] Jugar», «En tu estudio», «[1]–[5] Votar») y «HECHO» para quien lo ha completado (con las cuentas, Fase 2), más «Bases de la competición [B]» y «Volver al menú [Esc]»; a la derecha, las reglas de juego limpio en 5 filas con índice (voto ciego, escucha entera, Ronda justa, media bayesiana, el XP no puntúa), cada una con su nombre en display y una línea de explicación |
+| **Cómo se juega** | «Lista de movimientos», un menú de juego en la cuña (cursor con 1P, ↑↓, Intro): 1 Pilla el sample · 2 Flipea el sample · 3 Sube y vota, cada uno con sus teclas o su gesto como ayuda («[INTRO] Jugar», «En tu estudio», «[1]–[5] Votar») y «HECHO» para quien lo ha completado (con las cuentas, Fase 2), más «Bases de la competición [B]» y «Volver al menú [Esc]»; a la derecha, las reglas de juego limpio en 5 filas con índice (voto ciego, escucha mínima, Ronda justa, media bayesiana, el XP no puntúa), cada una con su nombre en display y una línea de explicación |
 | **Ajustes = OPCIONES** | Pestañas Q/E (Sonido · Movimiento · Cuenta · Perfil · Emails · Sesiones · Privacidad · Accesibilidad; `/ajustes` lleva a Sonido); cada opción es una placa con «◀ SÍ ▶» o un medidor de 10 pasos que se cambia con ←/→: volumen por bus, reducir movimiento, sin sonido, **modo serio**, tamaño de texto, calidad visual, puerta de entrada y atajos de una tecla (Accesibilidad, `RNF-A11Y-08`). Mientras no funcionan (Fase 2), la cuña enseña las placas de la sección en vista previa, quietas («Todavía no hacen nada»), sobre un tablero opaco con su pie, con su nombre en display y su valor o medidor (en un tablero estrecho, por debajo de 20 rem, el medidor baja bajo el nombre; por debajo de 22 rem, el nombre baja de 125 a 105 %), y el granate queda en el rango de las maquetas (≤ 24,5 % a 1440 px, ≤ 18 % en móvil; por debajo de 360 px, donde las pestañas ocupan varias filas, la cuña, que es fija, empieza bajo ellas y al desplazar la vista previa pasa sobre negro); el sello «EN OBRAS» pasa al panel |
 | **Autenticación** | «CONTINUAR PARTIDA» (entrar) y «NUEVO JUGADOR» (registro) como pantalla de título (maqueta `00-titulo`): a la izquierda, sobre los rayos, el logo con el mismo lockup que el menú («TORNEO SEMANAL DE PRODUCTORES by [OTP.]», en una fila); el bloque del logo y el panel se centra en vertical entre el HUD y la barra, con el pie del panel alineado con el del lockup y un ancho de panel acotado; en móvil, el panel va anclado al pie y acaba sobre la barra (en el móvil bajo la cabeza se acerca al logo y el panel se aprieta; por debajo de 360 px el logo cede alto); campos normales y accesibles en paneles opacos; Google y Discord como botones neutros; abajo, la barra de controles con sus teclas y la firma |
 | **Admin y legales** | Marco simple: HUD sin capa de juego, paneles y tablas, y la barra de controles con sus teclas y la firma en el centro; sin anunciador ni puerta. Los legales usan la plantilla de las interiores (mientras no estén los textos, Fase 10, el sello «EN OBRAS» en la columna de la pieza) y sus pestañas van en una fila de rótulos cortos («BASES · TÉRMINOS · PRIVACIDAD · COOKIES»; el nombre completo, en el título del panel), también en móvil a partir de 360 px |
@@ -1886,7 +1884,7 @@ las pantallas de texto sin pieza, como la galería, no los llevan.
 
 | Evento | Anunciador | Texto que lo acompaña |
 |---|---|---|
-| Entrar en el Modo Jurado | «RONDA 01» | «Escucha cada beat entero y puntúa de 1 a 5» |
+| Entrar en el Modo Jurado | «RONDA 01» | «Escucha 30 s y puntúa de 1 a 5» |
 | Empieza una entrada | «¡A ESCUCHAR!» | — |
 | Umbral cumplido | «¡VOTO LISTO!» | «Ya puedes puntuar» |
 | Voto | «¡VOTO GUARDADO!» | «4 de 5 · Muy bien. Puedes cambiarlo hasta el cierre» |
@@ -2993,7 +2991,7 @@ no aplica: BeatBattle deja de copiar la web del sello (§3.1).
 |---|---|
 | Cierre de envíos | Domingo 20:00 (Madrid) |
 | Cierre de votos | Domingo 23:59:59 (Madrid); se guarda como el instante exclusivo del lunes 00:00:00.000 (`VOTING_CLOSE_EXCLUSIVE_AT`), así la ventana de solo votación dura 4 h justas; `VOTING_CLOSE_DISPLAY_AT` es solo para mostrar |
-| Umbral de escucha | La entrada entera, menos 1 s de margen (`LISTEN_END_TOLERANCE_MS`) |
+| Umbral de escucha | 30 s (`LISTEN_THRESHOLD_MS`; la entrada entera si dura menos) |
 | Peso del previo bayesiano `C` | 5 |
 | Votos mínimos para el podio | 3 |
 | Votos por hora y usuario | 120 |
@@ -3210,7 +3208,7 @@ efectos al 100 %; variación = desafinación aleatoria por disparo.
 Orden: B, C, A. A queda además sin clasificar para el podio (< 3 votos). (`m = 3,6` es la media de
 toda la semana, que tiene más entradas que estas tres: la de A, B y C juntas sería 131/29 ≈ 4,517.)
 
-**Umbral de escucha.** `umbralMs = max(0, round(duracionMs) − 1 000)` → 3 min → 2:59; 60 s → 59 s; 4 min → 3:59.
+**Umbral de escucha.** `umbralMs = min(30 000, round(duracionMs))` → 3 min → 30 s; 4 min → 30 s; 20 s → 20 s.
 
 **Spearman** (oído de oro): `ρ = 1 − 6 Σ dᵢ² / (n (n² − 1))` sobre los rangos de las estrellas del
 jurado y de la puntuación de las entradas recalculada sin su voto; con empates, rangos medios y la
@@ -3285,7 +3283,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
-| 2026-10-06 | 0.6.11 | **Escucha entera y beats de 4 min** (decisión del usuario): para votar hay que escuchar la entrada entera, menos 1 s de margen (era `min(45 s, 50 %)`; §2.7, `RF-VOTE-04`, Anexos B y G); el Modo Jurado pierde la marca del umbral en la onda y el medidor cuenta la duración. Duración máxima de una entrada, 4 min (era 6; §2.5, `RF-ENT-03`, §4.8), con la validación compartida por cliente y servidor (`validateEntryAudio`) y los códigos `UNSUPPORTED_FORMAT`, `FILE_TOO_LARGE` y `DURATION_OUT_OF_RANGE`. «Cómo se juega»: el paso 2 es «Flipea el sample». El marketing incluye packs exclusivos de loops (§2.2, §2.12). |
+| 2026-10-06 | 0.6.11 | **Escucha de 30 s y beats de 4 min** (decisión del usuario): para votar bastan 30 s de escucha (era `min(45 s, 50 %)`; §2.7, `RF-VOTE-04`, Anexos B y G; la marca de la onda y el medidor del Modo Jurado pasan a 30 s). Se probó a pedir la escucha entera y el usuario lo dejó en 30 s. Duración máxima de una entrada, 4 min (era 6; §2.5, `RF-ENT-03`, §4.8), con la validación compartida por cliente y servidor (`validateEntryAudio`) y los códigos `UNSUPPORTED_FORMAT`, `FILE_TOO_LARGE` y `DURATION_OUT_OF_RANGE`. «Cómo se juega»: el paso 2 es «Flipea el sample». El marketing incluye packs exclusivos de loops (§2.2, §2.12). |
 | 2026-10-06 | 0.6.10 | **Calidad del Escenario** (§3.5, tarea 1.2): umbrales de la sonda de 2 s (≥ 50 fps alta, ≥ 35 media, ≥ 20 baja, por debajo apagada), resultado guardado por sesión, pausa con la pestaña oculta y calidad a mano (`bb:quality`) por encima de la sonda. La media pasa de «trama a dpr 0,5» a «trama a dpr 1»: por debajo de 1 los puntos se emborronan (medido en la 1.1). |
 | 2026-10-05 | 0.6.9 | **Escenario, capa 0** (§3.5, tarea 1.1): el *shader* pinta solo la trama de la cuña; la cuña, la diagonal, los rayos, el número y la viñeta siguen en CSS (la versión Apagada) y la geometría la sigue poniendo el CSS, que el Escenario lee con sondas en el borde de la cuña. Dibujo bajo demanda; interruptor `bb:stage` para pruebas. La trama va al dpr del dispositivo (hasta 2), no a 0,75: con puntos de borde nítido, 0,75 se ve borroso en pantallas de densidad 2. |
 | 2026-10-04 | 0.6.8 | Cierre de la tarea 0.28 (rondas 4 a 6 sobre la v0.6.7; acta en `docs/planning/evidence/f0/arena/jurado.md`). **Móvil bajo hasta 780 px de alto** (414×736 y 412×780 caben; de 781 a ~840 px sigue abierto) y tarjeta plegada con `--bb-space-2` (§3.8.3). **Opción de menú** (§3.3): el dato y la tecla bajan a cualquier ancho si la etiqueta no cabe con su cuerpo mínimo, también con el espaciado de 1.4.12 aplicado después de cargar; en el móvil táctil la placa apilada conserva su alto; por debajo de 360 px la segunda línea parte. **Barra** (§3.4.1): despegada, el marco mide lo que hace falta para que al abrir solo se vea la fila de la firma. **Cursor**: definición de «otro control». **Pestañas** de los legales en una fila con teclado desde 360 px. **Interiores** (§3.8.14): centrado también de 721 a 960 px, cuña que sigue a la pieza desde 1200 px, rayos que siguen a la pieza en el marco simple de una columna, título de móvil que se ajusta antes de partir, autenticación que acaba sobre la barra. **Tableta vertical**: reparto del sobrante alrededor de la tarjeta. **Bucles**: la pausa deja cada bucle en reposo tras su pasada y las rutas los declaran. Anunciador: la etiqueta blanca queda para «¡A ESCUCHAR!». |

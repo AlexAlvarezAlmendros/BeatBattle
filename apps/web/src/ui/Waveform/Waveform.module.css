@@ -115,6 +115,46 @@
   fill: var(--bb-red-cta);
 }
 
+/*
+ * Marca del umbral de escucha (Modo Jurado, «30 s»; maqueta `03-jurado` `.wv__mark`): un filete que
+ * sobresale por arriba de la pista y su rótulo en una línea encima, sobre un panel. La onda deja salir
+ * la marca por arriba (solo recorta en horizontal) y se aparta para hacerle sitio.
+ */
+.waveform[data-has-threshold] {
+  margin-top: var(--bb-space-6);
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+.threshold {
+  position: absolute;
+  top: calc(-1 * var(--bb-space-2));
+  bottom: 0;
+  width: var(--bb-stroke);
+  background: repeating-linear-gradient(
+    180deg,
+    var(--bb-white) 0 var(--bb-space-1),
+    transparent var(--bb-space-1) var(--bb-space-2)
+  );
+  pointer-events: none;
+}
+
+.thresholdLabel {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  padding: var(--bb-space-1) var(--bb-space-2);
+  background: var(--bb-panel-veil);
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-button);
+  line-height: 1;
+  white-space: nowrap;
+  translate: -50% -100%;
+}
+
 /* Cargando: las barras quietas en gris oscuro (no hay audio todavía). */
 .waveform.loading .bar {
   fill: var(--bb-ink-4);

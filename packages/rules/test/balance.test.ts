@@ -45,7 +45,7 @@ describe('balance: semana y voto (Anexo B)', () => {
   it('constantes de voto', () => {
     expect(balance.STARS_MIN).toBe(1)
     expect(balance.STARS_MAX).toBe(5)
-    expect(balance.LISTEN_END_TOLERANCE_MS).toBe(1_000)
+    expect(balance.LISTEN_THRESHOLD_MS).toBe(30_000)
     expect(balance.BAYES_PRIOR_WEIGHT).toBe(5)
     expect(balance.PODIUM_MIN_VOTES).toBe(3)
     expect(balance.PODIUM_SIZE).toBe(3)

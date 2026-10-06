@@ -85,12 +85,8 @@ export const STARS_MIN = 1
 /** Estrella máxima de un voto. */
 export const STARS_MAX = 5
 
-/**
- * Margen de la escucha entera (`RF-VOTE-04`): para votar hay que escuchar la entrada entera, menos este
- * margen al final, para que la granularidad del reproductor (un `timeupdate` cada ~250 ms) no deje a
- * nadie a unas décimas del voto.
- */
-export const LISTEN_END_TOLERANCE_MS = 1_000
+/** Escucha que hace falta para votar: 30 s (`RF-VOTE-04`; la entrada entera si dura menos). */
+export const LISTEN_THRESHOLD_MS = 30_000
 
 /** Peso `C` del previo bayesiano, en votos (guía §2.8, `RF-RES-01`). */
 export const BAYES_PRIOR_WEIGHT = 5
@@ -111,7 +107,7 @@ export const VOTES_PER_HOUR_LIMIT = 120
 
 /** Duración mínima de una entrada: 30 s (`RF-ENT-03`). */
 export const ENTRY_MIN_DURATION_MS = 30_000
-/** Duración máxima de una entrada: 4 min (`RF-ENT-03`; con escucha entera, el jurado escucha como mucho 4 min por voto). */
+/** Duración máxima de una entrada: 4 min (`RF-ENT-03`). */
 export const ENTRY_MAX_DURATION_MS = 240_000
 
 /**
