@@ -1,0 +1,7 @@
+/* El lienzo del Escenario (§3.5): fijo detrás del contenido, sin recibir el puntero (los eventos de las
+   vistas de la 1.3 llegan por `eventSource`, el `body`). */
+.stage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
