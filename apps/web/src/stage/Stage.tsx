@@ -1,12 +1,16 @@
 import { color } from '@beatbattle/shared/tokens'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { advance, Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import { type Mesh, PlaneGeometry, RawShaderMaterial } from 'three'
+import { useStageActivity } from './activity'
 import { defaultGrid, SHAPE_INDEX, type StageShapeName, type Vec2 } from './arenaMath'
+import { type ParticleStats, Particles } from './particles/Particles'
 import { medianFps, PROBE_MS, qualityFromFps, stageDpr, useStageQuality } from './quality'
+import { setStageRunning, useStageRuntime } from './runtime'
 import styles from './Stage.module.css'
 import fragmentShader from './shaders/arenaHalftone.frag.glsl?raw'
 import vertexShader from './shaders/fullscreen.vert.glsl?raw'
+import { type ViewStats, VinylView } from './views/VinylView'
 
 /**
  * Contadores para las pruebas (solo en desarrollo): fotogramas dibujados y estado de la sonda. Sin DOM: así
@@ -16,6 +20,12 @@ interface StageDebug {
   frames: number
   probing: boolean
   probeFps: number | null
+  /** Llamadas de dibujo del último fotograma (§4.17: < 120). */
+  drawCalls: number
+  /** Algo se mueve: el Escenario pinta sin esperar a que cambie nada. */
+  animating: boolean
+  particles: ParticleStats
+  views: ViewStats
 }
 
 declare global {
@@ -24,7 +34,17 @@ declare global {
   }
 }
 
-const debug: StageDebug | null = import.meta.env.DEV ? { frames: 0, probing: false, probeFps: null } : null
+const debug: StageDebug | null = import.meta.env.DEV
+  ? {
+      frames: 0,
+      probing: false,
+      probeFps: null,
+      drawCalls: 0,
+      animating: false,
+      particles: { bursts: 0, alive: 0 },
+      views: { frames: {} },
+    }
+  : null
 if (debug) window.__bbStage = debug
 
 /** Sondas que la arena pone en el borde de la cuña (`ArenaBackdrop`): la diagonal y un punto de dentro. */
@@ -190,19 +210,42 @@ function Loop() {
   const deltas = useRef<number[]>([])
   const elapsed = useRef(0)
 
+  // Algo se mueve (un vinilo, una ráfaga): el Escenario pinta él mismo con `advance`, un fotograma cada
+  // ~16 ms como mucho, también en pantallas de 120 Hz (§4.7.5: «las vistas a 60 cuando hay algo
+  // animándose y nada cuando no»). Si no, bajo demanda; la sonda, sin parar; oculta, nada.
+  const animating = useStageActivity((state) => state.animators.size > 0)
   useEffect(() => {
+    if (debug) {
+      debug.probing = probing
+      debug.animating = animating
+    }
+    let frame = 0
+    let last = 0
+    const tick = (now: number) => {
+      frame = requestAnimationFrame(tick)
+      if (now - last < MIN_FRAME_MS) return
+      last = now
+      advance(now)
+    }
     const apply = () => {
+      cancelAnimationFrame(frame)
       if (document.hidden) setFrameloop('never')
-      else {
-        setFrameloop(probing ? 'always' : 'demand')
+      else if (probing) setFrameloop('always')
+      else if (animating) {
+        setFrameloop('never')
+        frame = requestAnimationFrame(tick)
+      } else {
+        setFrameloop('demand')
         invalidate()
       }
     }
     apply()
-    if (debug) debug.probing = probing
     document.addEventListener('visibilitychange', apply)
-    return () => document.removeEventListener('visibilitychange', apply)
-  }, [probing, setFrameloop, invalidate])
+    return () => {
+      cancelAnimationFrame(frame)
+      document.removeEventListener('visibilitychange', apply)
+    }
+  }, [probing, animating, setFrameloop, invalidate])
 
   useFrame((_, delta) => {
     if (!probing || document.hidden) return
@@ -219,6 +262,35 @@ function Loop() {
   return null
 }
 
+/** Intervalo mínimo entre fotogramas mientras algo se mueve (60 fps, con margen para el temporizador). */
+const MIN_FRAME_MS = 1000 / 60 - 2
+
+/**
+ * Pase principal (§4.7.5): la arena y las partículas, con el lienzo entero limpio. Las vistas de drei
+ * pintan después, cada una en su recorte (prioridad 2); con ellas, R3F ya no pinta la escena por su cuenta.
+ */
+function RenderPass() {
+  useFrame(({ gl, scene, camera, size }) => {
+    gl.info.reset()
+    // drei deja el *viewport* de la última vista (solo restaura el recorte): el pase es del lienzo entero.
+    gl.setScissorTest(false)
+    gl.setViewport(0, 0, size.width, size.height)
+    gl.autoClear = true
+    gl.render(scene, camera)
+  }, 1)
+  // Al final del fotograma: las llamadas de dibujo de todo él (§4.17: < 120).
+  useFrame(({ gl }) => {
+    if (debug) debug.drawCalls = gl.info.render.calls
+  }, 3)
+  return null
+}
+
+/** Las vistas ancladas que han pedido las pantallas (`useStageView`). */
+function StageViews() {
+  const anchors = useStageRuntime((state) => state.anchors)
+  return anchors.map((anchor) => <VinylView key={anchor.id} anchor={anchor} stats={debug?.views ?? null} />)
+}
+
 /**
  * El Escenario (guía §3.5): un único lienzo de React Three Fiber detrás del contenido, a pantalla
  * completa. En la tarea 1.1 pinta la capa 0, la trama de la cuña; la 1.3 le añade las vistas ancladas y
@@ -226,6 +298,10 @@ function Loop() {
  */
 export function Stage(props: StageProps) {
   const quality = useStageQuality((state) => state.quality)
+  useEffect(() => {
+    setStageRunning(true)
+    return () => setStageRunning(false)
+  }, [])
   return (
     <Canvas
       className={styles.stage}
@@ -238,8 +314,15 @@ export function Stage(props: StageProps) {
       data-stage=""
       gl={{ alpha: true, antialias: false, premultipliedAlpha: true, powerPreference: 'low-power' }}
       aria-hidden="true"
+      // Las llamadas de dibujo se cuentan por fotograma (pase principal y vistas), no por `render`.
+      onCreated={({ gl }) => {
+        gl.info.autoReset = false
+      }}
     >
       <ArenaLayer {...props} />
+      <Particles quality={quality ?? 'alta'} stats={debug?.particles ?? null} />
+      <StageViews />
+      <RenderPass />
       <Loop />
     </Canvas>
   )
