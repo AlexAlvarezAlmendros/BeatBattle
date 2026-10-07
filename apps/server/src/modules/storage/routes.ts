@@ -8,7 +8,10 @@ import type { CloudinaryStorage, ResourceInfo, SignedUpload } from './cloudinary
 
 /** Comprobaciones del spike (tarea 1.7), hechas desde el servidor contra Cloudinary. */
 export interface SpikeChecks {
-  /** `RF-STO-02`: el original sin firma no se entrega (se espera 401). */
+  /**
+   * `RF-STO-02`: el original sin firma no se entrega. Cloudinary responde 404 («Resource not found») a un
+   * recurso `authenticated` sin firma: no dice ni que existe.
+   */
   unsignedOriginalStatus: number
   /** El derivado firmado: estado, tipo y la cabecera CORS para el origen de la web. */
   stream: { status: number; contentType: string | null; allowOrigin: string | null }

@@ -95,6 +95,8 @@ export function createCloudinaryStorage(config: StorageConfig): CloudinaryStorag
           ...credentials(config),
           resource_type: 'video',
           type: 'authenticated',
+          // Sin esto, la Admin API no devuelve la duración de un audio.
+          media_metadata: true,
         })
         const eager = (resource.derived ?? resource.eager ?? []) as {
           bytes?: number

@@ -126,7 +126,7 @@ export function ListenSpikePage() {
       push({
         key: 'unsigned',
         text: t('dev.listen.unsigned', { status: checks.unsignedOriginalStatus }),
-        ok: checks.unsignedOriginalStatus === 401,
+        ok: checks.unsignedOriginalStatus === 401 || checks.unsignedOriginalStatus === 404,
       })
       push({
         key: 'cors',

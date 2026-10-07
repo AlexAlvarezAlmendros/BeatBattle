@@ -2311,7 +2311,7 @@ la misma API, para no depender de la red.
 | Id | Requisito | Aceptación |
 |---|---|---|
 | `RF-STO-01` | El audio se sube directo a Cloudinary con parámetros firmados; nunca pasa por la API | El cuerpo máximo de la API es 64 kB; test de la ruta de firma |
-| `RF-STO-02` | Entradas y samples como `authenticated`; solo se entregan con URL firmada de una transformación concreta | Pedir el original sin firma → 401 de Cloudinary |
+| `RF-STO-02` | Entradas y samples como `authenticated`; solo se entregan con URL firmada de una transformación concreta | Pedir el original sin firma no lo entrega: Cloudinary responde 404 «Resource not found» (medido en la 1.7; no dice ni que existe), o 401 |
 | `RF-STO-03` | Verificación con la Admin API antes de aceptar un recurso | Un `public_id` inexistente o de otra carpeta → 422 y no se crea nada |
 | `RF-STO-04` | Sonoridad, pico y forma de onda medidos en servidor (o plan B) | Una pista de prueba a −10 LUFS se mide entre −10,5 y −9,5 |
 | `RF-STO-05` | Limpieza de *intents* caducados, retiradas, cuentas borradas y huérfanos | Tras el `tick`, un recurso huérfano de más de 24 h ya no existe |
@@ -3334,7 +3334,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
-| 2026-10-07 | 0.6.17 | **Cuenta de Cloudinary propia** (decisión del usuario, §4.8.1). Spike de la 1.7 en marcha: subida firmada por trozos, entrega firmada del derivado y comprobaciones desde el servidor (`/dev/escucha`); `RF-STO-06` ya se comprueba al arrancar (también en las previews de Vercel, `VERCEL_ENV`). |
+| 2026-10-07 | 0.6.17 | **Cuenta de Cloudinary propia** (decisión del usuario, §4.8.1). Spike de la 1.7 hecho: subida firmada por trozos, derivado listo en ~7 s para 4 min, entrega firmada con CORS, y el original sin firma da 404 (`RF-STO-02` corregido: no 401); `RF-STO-06` ya se comprueba al arrancar (también en las previews de Vercel, `VERCEL_ENV`). |
 | 2026-10-07 | 0.6.16 | **Pantalla de título** (§3.8.1, tarea 1.13): sale al entrar en el menú la primera vez de la sesión (no en un enlace directo a una pantalla interior), se desactiva con `bb:title`; teclas (todas entran salvo Tab y M; S, sin sonido); el disco es un lienzo 2D porque la puerta va por encima del lienzo del Escenario (§3.5 capa 1 corregido); columna sin diagonal en ≤ 960 px. Pendiente: la extrusión del logo capa a capa (Anexo E). |
 | 2026-10-07 | 0.6.15 | **Banco de la Fase 1** (tarea 1.11, §4.7.6, §4.17): 60 fps en escritorio y en Android emulado (CPU ×4; sin dispositivo real, decisión del usuario), y la sonda apaga el Escenario con una GPU por software. El contexto de audio pide la latencia mínima con puntero fino (`latencyHint: 0`): la parte de la app queda en ~4 ms, pero la salida de PipeWire (24–48 ms) deja `RD-SND-05` sin cumplir en Linux; decisión abierta para el GO/NO-GO. |
 | 2026-10-07 | 0.6.14 | **Estrellas** (§3.8.4, tarea 1.5): teclado completo (flechas, Inicio, Fin, 1–5; el cursor pasa a la votada), estado «guardando» y vuelta atrás si el servidor no guarda, chispas del DOM por el limitador de destellos (el lienzo va detrás del panel opaco) y temblor por `onImpact`. Efecto `vote.unlocked` del Anexo D. Anexo E: el medidor de escucha va por tramos de 10 s (se quedó en 15 con el cambio a 30 s de la 0.6.11). |
