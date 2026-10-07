@@ -5,8 +5,6 @@ import type { MatrixComponentKey } from './anchors'
  * deshabilitado, éxito y error. «S» se enseña (una celda con `data-state`); «NA» no aplica, con su
  * motivo (`dev.gallery.matrix.reasons.*`). Es la tabla de la guía, componente a componente; el test de
  * la galería recorre cada bloque contra ella.
- *
- * Falta «Estrellas» (§3.8.4): llega con la tarea 1.5 de la Fase 1, con sus estados.
  */
 
 export const STATES = [
@@ -50,6 +48,8 @@ const NA = (reason: StateReason): StateCoverage => ({ kind: 'notApplicable', rea
 
 export const STATE_MATRIX: Record<MatrixComponentKey, Record<ComponentState, StateCoverage>> = {
   button: { rest: S, hover: S, focus: S, pressed: S, loading: S, disabled: S, success: S, error: S },
+  // §3.8.4: cargando es «guardando»; deshabilitado, «dormidas» (umbral sin cumplir).
+  stars: { rest: S, hover: S, focus: S, pressed: S, loading: S, disabled: S, success: S, error: S },
   menuPlate: {
     rest: S,
     hover: S,

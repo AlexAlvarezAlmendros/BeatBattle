@@ -206,9 +206,9 @@ describe('galería /dev/galeria (0.9, 0.22, 0.25)', { timeout: 15_000 }, () => {
     expect(within(byId('portada')).getAllByRole('img', { name: /Disco/ })).toHaveLength(3)
   })
 
-  it('RD-VIS-03: cada bloque enseña los estados de su matriz y dice por qué no enseña el resto (salvo Estrellas, 1.5)', async () => {
+  it('RD-VIS-03: cada bloque enseña los estados de su matriz y dice por qué no enseña el resto', async () => {
     await renderGallery()
-    // La matriz cubre los componentes de §3.3 de la galería (Estrellas llega con la tarea 1.5).
+    // La matriz cubre los componentes de §3.3 de la galería.
     const inMatrix = COMPONENT_ANCHORS.filter((anchor) => anchor.matrix)
     expect(Object.keys(STATE_MATRIX).sort()).toEqual(inMatrix.map(({ key }) => key).sort())
     for (const { id, key } of inMatrix) {

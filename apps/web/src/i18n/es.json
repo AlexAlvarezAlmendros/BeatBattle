@@ -413,6 +413,24 @@
       "randomGlyph": "?",
       "randomLabel": "Aleatorio: una entrada sin votar"
     },
+    "stars": {
+      "word1": "Flojo",
+      "word2": "Regular",
+      "word3": "Bien",
+      "word4": "Muy bien",
+      "word5": "Brutal",
+      "star": "{stars} de 5 estrellas: {word}",
+      "asleep": "Las estrellas despiertan a los {threshold}\u00a0s: faltan {left}\u00a0s.",
+      "listen": "Escucha mínima",
+      "listenValue": "{heard} de {threshold}\u00a0segundos",
+      "listenCaption": "{heard} / {threshold}\u00a0s",
+      "awake": "Ya puedes puntuar.",
+      "saving": "Guardando tu voto…",
+      "saved": "{stars} de 5 · {word}. Voto guardado.",
+      "savedNext": "Pasas a la siguiente en 1\u00a0s; puedes cambiarlo hasta el cierre.",
+      "savedChange": "Puedes cambiarlo hasta el cierre.",
+      "error": "No se ha guardado tu voto. Vuelve a intentarlo."
+    },
     "fighterCard": {
       "authorHidden": "Autoría oculta",
       "tempo": "Tempo",
@@ -498,6 +516,11 @@
       }
     },
     "gallery": {
+      "stars": {
+        "label": "Tu nota para Tigre Púrpura, de 1 a 5",
+        "listen": "Escuchar 10\u00a0s más",
+        "reset": "Otra entrada"
+      },
       "title": "Galería",
       "summary": "La base de la arena (paleta, contraste, tipografía, forma, primitivas y cursor de juego) y sus componentes con todos sus estados, con y sin movimiento y en modo serio. Solo existe en desarrollo.",
       "indexLabel": "Índice de la galería",
@@ -815,6 +838,7 @@
         "meter": "Medidor",
         "skeleton": "Esqueleto",
         "roundClock": "Reloj de ronda",
+        "stars": "Estrellas",
         "titlePlate": "Placa de título",
         "cover": "Portada y medallas"
       },

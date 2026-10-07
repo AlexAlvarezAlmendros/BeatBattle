@@ -43,7 +43,7 @@ export interface SfxDef {
   duration: number
 }
 
-/** Los efectos de la tarea 1.4 (el resto del Anexo D llega con sus pantallas). */
+/** Los efectos de la tarea 1.4 y `vote.unlocked` de la 1.5 (el resto del Anexo D llega con sus pantallas). */
 export const SFX_IDS = [
   'ui.enter',
   'ui.hover',
@@ -59,6 +59,7 @@ export const SFX_IDS = [
   'star.vote.4',
   'star.vote.5',
   'vote.locked',
+  'vote.unlocked',
   'xp.gain',
   'level.up',
 ] as const
@@ -211,6 +212,23 @@ export function sfxCatalog(key: Key = DEFAULT_KEY, xpCombo = 0): Record<SfxId, S
           gain: 0.85,
         }),
       ],
+    },
+    // Las estrellas despiertan (1.5): barrido ascendente con tres notas de la escala (grados 1, 3 y 5).
+    'vote.unlocked': {
+      jitter: 0,
+      levelDb: -16,
+      duration: 0.45,
+      layers: [1, 3, 5].map((degree, index) =>
+        tone({
+          wave: 'triangle',
+          freq: [star(degree), star(degree) * 1.02],
+          attack: 0.006,
+          decay: 0.22,
+          dur: 0.3,
+          gain: 1,
+          delay: index * 0.07,
+        }),
+      ),
     },
     'xp.gain': {
       jitter: 0,

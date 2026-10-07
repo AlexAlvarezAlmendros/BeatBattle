@@ -61,7 +61,8 @@ test.describe('audio', () => {
       for (const id of offline.SFX_IDS as readonly string[]) result[id] = await offline.renderSfx(id)
       return result
     }, OFFLINE_MODULE)
-    expect(Object.keys(metrics)).toHaveLength(16)
+    // Los 16 de la tarea 1.4 y `vote.unlocked` de la 1.5.
+    expect(Object.keys(metrics)).toHaveLength(17)
     for (const [id, m] of Object.entries(metrics)) {
       expect(
         Math.abs(m.peakDb - m.levelDb),
