@@ -16,6 +16,7 @@ const WEEK: NonNullable<MenuModel['week']> = {
   title: 'Lluvia en Gràcia',
   credits: 'Rhodes y lluvia',
   range: '5–11 oct',
+  code: '2026-W41',
   bpm: 92,
   musicalKey: 'Re menor',
   durationSeconds: 72,
@@ -44,6 +45,8 @@ function renderMenu(model: Partial<MenuModel> = {}) {
   const full: MenuModel = {
     week: WEEK,
     player: PLAYER,
+    season: null,
+    champion: null,
     lastSealed: { number: 40, unseen: true },
     chronicle: ['Hola'],
     ...model,

@@ -13,6 +13,25 @@
     "count_other": "{count} entradas"
   },
   "home": {
+    "gate": {
+      "heading": "Beat Battle, un juego de Other People",
+      "presents": "Presenta",
+      "top": "Semana {week} · {code}",
+      "topSeason": "Temporada {season} · semana {week} · {code}",
+      "start": "Pulsa para empezar",
+      "hint": "Intro, cualquier tecla, clic o toque · el sonido empieza al entrar",
+      "muted": "Entrar sin sonido",
+      "champion": "Campeón vigente",
+      "championDetail": "S{week} · {title} · {score}",
+      "inPlay": "En juego",
+      "billKicker": "Semana {number} · el sample",
+      "closes": "Cierre de envíos",
+      "inBattle": "en la batalla",
+      "credit": "Crédito",
+      "creditValue": "01",
+      "url": "battle.otherpeople.es",
+      "discSub": "{bpm}\u00a0BPM · {key}"
+    },
     "dropAlert": {
       "title": "Avísame del próximo drop",
       "summary": "Muy pronto podrás dejar aquí tu email para que te avisemos de cada drop, sin crear cuenta."
@@ -1003,6 +1022,10 @@
     },
     "menu": {
       "title": "Menú (muestra)",
+      "champion": {
+        "title": "Neón en Sants",
+        "score": "4,62"
+      },
       "week": {
         "title": "Lluvia en Gràcia",
         "credits": "Rhodes y lluvia grabados en Gràcia · Other People Sound Lab",

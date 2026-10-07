@@ -22,6 +22,8 @@ export function HomePage() {
   const model: MenuModel = {
     week: null,
     player: null,
+    season: null,
+    champion: null,
     lastSealed: null,
     chronicle: IDLE_CHRONICLE.map((key) => t(key)),
   }
