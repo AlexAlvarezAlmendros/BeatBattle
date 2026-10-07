@@ -510,9 +510,11 @@ test.describe('Escenario, capas 1 y 2', () => {
     await expect
       .poll(async () => (await stageState(page))?.dotScale ?? 1, { timeout: 10_000 })
       .toBeGreaterThan(1.01)
-    await page.waitForTimeout(3000)
+    // Unos segundos de muestras (a 30 fps con la GPU; con SwiftShader en la CI, menos por segundo).
+    await expect
+      .poll(async () => (await stageState(page))?.dotScales.length ?? 0, { timeout: 30_000 })
+      .toBeGreaterThan(60)
     const scales = ((await stageState(page))?.dotScales ?? []).filter((sample) => sample.scale > 0)
-    expect(scales.length).toBeGreaterThan(30)
     for (const { scale } of scales) {
       expect(scale).toBeGreaterThanOrEqual(1)
       expect(scale).toBeLessThanOrEqual(1.15)
