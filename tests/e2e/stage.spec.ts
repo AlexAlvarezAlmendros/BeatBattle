@@ -1,6 +1,7 @@
 import { writeFile } from 'node:fs/promises'
 import { cpus } from 'node:os'
 import { type BrowserContext, expect, type Page, test } from '@playwright/test'
+import { maxFlashesPerSecond, relativeLuminance } from '../../packages/audio/src/reactive'
 import { collectErrors, open, settle } from './support'
 
 /**
@@ -21,6 +22,9 @@ declare global {
       probeFps: number | null
       drawCalls: number
       animating: boolean
+      fps: number
+      dotScale: number
+      dotScales: { t: number; scale: number }[]
       particles: { bursts: number; alive: number }
       views: { frames: Record<number, number> }
     }
@@ -492,5 +496,40 @@ test.describe('Escenario, capas 1 y 2', () => {
       expect(state?.drawCalls).toBeLessThan(120)
       await page.waitForTimeout(250)
     }
+  })
+
+  test('§3.5 / RNF-A11Y-04: con un beat a 160 BPM la trama solo cambia de tamaño de punto (≤ 15 %), a 30 fps, sin destellos, y vuelve al reposo al parar', async ({
+    page,
+  }) => {
+    await open(page, `${BENCH}?vinilo=no`, HEADING)
+    test.skip(!(await webglAvailable(page)), 'sin Escenario no hay reactividad')
+    await expect(live(page)).toBeAttached({ timeout: 20_000 })
+    await page.getByRole('button', { name: /Ritmo de prueba/ }).click()
+    // Solo se mueve la trama: a 30 fps como mucho (§3.5 capa 0).
+    await expect.poll(async () => (await stageState(page))?.fps).toBe(30)
+    await expect
+      .poll(async () => (await stageState(page))?.dotScale ?? 1, { timeout: 10_000 })
+      .toBeGreaterThan(1.01)
+    // Unos segundos de muestras (a 30 fps con la GPU; con SwiftShader en la CI, menos por segundo).
+    await expect
+      .poll(async () => (await stageState(page))?.dotScales.length ?? 0, { timeout: 30_000 })
+      .toBeGreaterThan(60)
+    const scales = ((await stageState(page))?.dotScales ?? []).filter((sample) => sample.scale > 0)
+    for (const { scale } of scales) {
+      expect(scale).toBeGreaterThanOrEqual(1)
+      expect(scale).toBeLessThanOrEqual(1.15)
+    }
+    // La luminancia de la cuña en su zona más densa (cobertura 0,55 · escala²), con lo que ha hecho de verdad
+    // la trama: ningún destello.
+    const red = relativeLuminance([1, 0, 60 / 255])
+    const wine = relativeLuminance([43 / 255, 7 / 255, 17 / 255])
+    const series = scales.map(({ t, scale }) => {
+      const coverage = Math.min(1, 0.55 * scale * scale)
+      return { t, luminance: coverage * red + (1 - coverage) * wine }
+    })
+    expect(maxFlashesPerSecond(series)).toBe(0)
+    await page.getByRole('button', { name: 'Parar el ritmo' }).click()
+    await expect.poll(async () => (await stageState(page))?.dotScale, { timeout: 10_000 }).toBe(1)
+    await expect.poll(async () => (await stageState(page))?.animating).toBe(false)
   })
 })

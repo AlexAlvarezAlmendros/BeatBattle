@@ -482,13 +482,15 @@
     "stage": {
       "title": "Escenario (banco)",
       "controls": "Ráfagas",
-      "intro": "El vinilo-sol es una vista anclada del Escenario. Las ráfagas pasan por el limitador de destellos: 3 por segundo como mucho.",
+      "intro": "El vinilo-sol es una vista anclada del Escenario. Las ráfagas pasan por el limitador de destellos: 3 por segundo como mucho. El ritmo de prueba mueve la trama de la cuña.",
       "vinylLabel": "S41",
       "vinylSub": "92\u00a0BPM",
       "sparks": "Chispas",
       "confetti": "Confeti",
       "benchStart": "Banco: 4.000 partículas",
       "benchStop": "Parar el banco",
+      "beatStart": "Ritmo de prueba (160\u00a0BPM)",
+      "beatStop": "Parar el ritmo",
       "status": {
         "granted": "Ráfaga autorizada.",
         "denied": "El limitador la ha parado: 3 destellos por segundo como mucho.",

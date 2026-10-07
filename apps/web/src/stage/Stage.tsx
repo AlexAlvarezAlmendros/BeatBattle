@@ -2,10 +2,11 @@ import { color } from '@beatbattle/shared/tokens'
 import { advance, Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef } from 'react'
 import { type Mesh, PlaneGeometry, RawShaderMaterial } from 'three'
-import { useStageActivity } from './activity'
+import { neededFps, useStageActivity } from './activity'
 import { defaultGrid, SHAPE_INDEX, type StageShapeName, type Vec2 } from './arenaMath'
 import { type ParticleStats, Particles } from './particles/Particles'
 import { medianFps, PROBE_MS, qualityFromFps, stageDpr, useStageQuality } from './quality'
+import { useReactiveDots } from './reactivity'
 import { setStageRunning, useStageRuntime } from './runtime'
 import styles from './Stage.module.css'
 import fragmentShader from './shaders/arenaHalftone.frag.glsl?raw'
@@ -24,6 +25,11 @@ interface StageDebug {
   drawCalls: number
   /** Algo se mueve: el Escenario pinta sin esperar a que cambie nada. */
   animating: boolean
+  /** Fps como mucho mientras algo se mueve (30 la trama, 60 las vistas y las partículas). */
+  fps: number
+  /** Escala de punto de la trama (reactividad al audio, 1.6) y su historia reciente. */
+  dotScale: number
+  dotScales: { t: number; scale: number }[]
   particles: ParticleStats
   views: ViewStats
 }
@@ -41,6 +47,9 @@ const debug: StageDebug | null = import.meta.env.DEV
       probeFps: null,
       drawCalls: 0,
       animating: false,
+      fps: 0,
+      dotScale: 1,
+      dotScales: [],
       particles: { bursts: 0, alive: 0 },
       views: { frames: {} },
     }
@@ -193,6 +202,8 @@ function ArenaLayer({ arena, shape, cell, onLive }: StageProps) {
     }
   })
 
+  useReactiveDots(uniforms.uDotScale, debug)
+
   return <mesh ref={mesh} geometry={geometry} material={material} frustumCulled={false} />
 }
 
@@ -210,20 +221,25 @@ function Loop() {
   const deltas = useRef<number[]>([])
   const elapsed = useRef(0)
 
-  // Algo se mueve (un vinilo, una ráfaga): el Escenario pinta él mismo con `advance`, un fotograma cada
-  // ~16 ms como mucho, también en pantallas de 120 Hz (§4.7.5: «las vistas a 60 cuando hay algo
-  // animándose y nada cuando no»). Si no, bajo demanda; la sonda, sin parar; oculta, nada.
-  const animating = useStageActivity((state) => state.animators.size > 0)
+  // Algo se mueve: el Escenario pinta él mismo con `advance`, a los fps del animador más exigente (la trama
+  // que reacciona al audio, 30; un vinilo o una ráfaga, 60), también en pantallas de 120 Hz (§4.7.5: «el
+  // fondo a 30 fps, las vistas a 60 cuando hay algo animándose y nada cuando no»). Si no, bajo demanda; la
+  // sonda, sin parar; oculta, nada.
+  const fps = useStageActivity((state) => neededFps(state.animators))
+  const animating = fps > 0
   useEffect(() => {
     if (debug) {
       debug.probing = probing
       debug.animating = animating
+      debug.fps = fps
     }
+    // Con un margen para el temporizador: a 60 Hz, 30 fps es uno de cada dos fotogramas.
+    const minFrameMs = animating ? 1000 / fps - 2 : 0
     let frame = 0
     let last = 0
     const tick = (now: number) => {
       frame = requestAnimationFrame(tick)
-      if (now - last < MIN_FRAME_MS) return
+      if (now - last < minFrameMs) return
       last = now
       advance(now)
     }
@@ -245,7 +261,7 @@ function Loop() {
       cancelAnimationFrame(frame)
       document.removeEventListener('visibilitychange', apply)
     }
-  }, [probing, animating, setFrameloop, invalidate])
+  }, [probing, animating, fps, setFrameloop, invalidate])
 
   useFrame((_, delta) => {
     if (!probing || document.hidden) return
@@ -261,9 +277,6 @@ function Loop() {
 
   return null
 }
-
-/** Intervalo mínimo entre fotogramas mientras algo se mueve (60 fps, con margen para el temporizador). */
-const MIN_FRAME_MS = 1000 / 60 - 2
 
 /**
  * Pase principal (§4.7.5): la arena y las partículas, con el lienzo entero limpio. Las vistas de drei

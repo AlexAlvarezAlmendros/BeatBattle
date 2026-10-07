@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.12 · 2026-10-06 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.13 · 2026-10-07 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1391,6 +1391,16 @@ cuña o la geometría) y, cuando algo se mueve (1.6), a 30 fps como mucho. Mient
 siempre que no haya WebGL, se ve la trama estática; el relevo no se nota. Para pruebas y depuración,
 `localStorage['bb:stage']` = `off` lo apaga y `on` lo enciende también con «reducir movimiento».
 
+**Reactividad** (tarea 1.6). El motor de audio tiene un analizador (FFT de 1024, sin suavizado propio) en
+el bus de música; el Escenario lee la energía de la banda del bombo y el bajo (40–160 Hz), la pasa por
+una puerta (por debajo del 35 % no se mueve nada; desde el 80 %, el máximo) y por un paso bajo de un polo
+a **2 Hz**, y de ahí sale la escala del tamaño de punto: de 1 a **1,15**. Mientras suena música la trama
+pinta a 30 fps; al parar vuelve al reposo y deja de pintar. Con «reducir movimiento» o con la pausa de la
+barra, quieta. Como el rojo de la marca es oscuro en luminancia relativa (0,21), ni la escala máxima fija
+movería la luminancia de la cuña el 0,1 que hace falta para un destello: medido con píxeles reales y un
+beat a 160 BPM (`tools/shot/flashes.mjs`), 0 destellos por segundo y una oscilación de 0,0006
+(`docs/planning/evidence/f1/reactividad/`).
+
 La identidad no depende del Escenario: con calidad Apagada la pantalla se ve igual, quieta. El render
 se pausa con la pestaña oculta. El LCP nunca es el canvas ni el logo (que se pinta en un canvas 2D, sin
 `<text>` que pueda contar como candidato): es un texto (el título del escenario de la semana en la home) y sale con la primera pintura (`RNF-PERF-02`).
@@ -2685,7 +2695,7 @@ negocio en el panel de admin (participantes, votos, escuchas por semana) y Verce
 | INP | < 200 ms |
 | CLS | < 0,05 |
 | JS inicial (sin Escenario) | < 200 kB gz, contando la entrada con sus importaciones estáticas y también la primera pintura de la home (175 y 185 kB gz al cerrar la Fase 0; con la arena, 179 y 193 kB gz con Motion por el pulsado del botón y 159 y 172 kB gz sin él, 2026-10-03) |
-| Escenario (trozo diferido) | < 250 kB gz (243,8 kB gz con three + R3F y la capa 0, tarea 1.1; **249,1 kB gz** con `View` de drei, las vistas y las partículas, tarea 1.3: sin margen, lo próximo que entre en el trozo obliga a partirlo) |
+| Escenario (trozo diferido) | < 250 kB gz (243,8 kB gz con three + R3F y la capa 0, tarea 1.1; 249,1 kB gz con `View` de drei, las vistas y las partículas, tarea 1.3; **249,8 kB gz** con la reactividad, tarea 1.6: sin margen, lo próximo que entre en el trozo obliga a partirlo) |
 | Fuentes (subconjunto latino) | ≈ 127 KB: Anybody cursiva 62, Chakra Petch 5 × ~10, Oxanium 14; precarga solo de Chakra Petch 700 (§3.2). Medido el 2026-10-03 (perfil de `RNF-PERF-02`, cinco cargas intercaladas): con Anybody y Chakra 600 precargadas, LCP 2,00 s y CLS 0,0002; sin precargas, 1,60 s y 0,0036; solo Chakra 700, 1,64 s y 0,0034 |
 | FPS | 60 en escritorio con GPU integrada; ≥ 45 en un Android de gama media con calidad automática |
 | Inicio de reproducción tras el clic | < 600 ms en 4G |
@@ -3296,6 +3306,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-07 | 0.6.13 | **Reactividad al audio** (§3.5, tarea 1.6): analizador de FFT 1024 en el bus de música, banda de 40–160 Hz, puerta, paso bajo de un polo a 2 Hz y escala de punto de 1 a 1,15; la trama a 30 fps mientras suena y en reposo al parar. Medición de destellos con píxeles reales y un beat a 160 BPM (`tools/shot/flashes.mjs`): 0 por segundo (`RNF-A11Y-04`). Trozo del Escenario: 249,8 kB gz. |
 | 2026-10-06 | 0.6.12 | **Vistas ancladas y partículas** (§3.5 capas 1 y 2, §4.7.5, §4.17; tarea 1.3). Las vistas solo van donde la arena está a la vista: el lienzo único va detrás del contenido y bajo los rayos y la viñeta, así que dentro de un panel opaco la pieza es DOM (el vinilo de la tarjeta del escenario sigue en el compositor; el plan decía «pegado a la tarjeta»). Partículas: anillo con el presupuesto (media, hasta 1.500, como §4.17; decía «a la mitad»), radio y opacidad que autoriza el limitador. Pase de pintado propio, `advance()` a 60 fps mientras algo se mueve y texturas de las vistas por CPU. Trozo del Escenario: 249,1 kB gz. |
 | 2026-10-06 | 0.6.11 | **Escucha de 30 s y beats de 4 min** (decisión del usuario): para votar bastan 30 s de escucha (era `min(45 s, 50 %)`; §2.7, `RF-VOTE-04`, Anexos B y G; la marca de la onda y el medidor del Modo Jurado pasan a 30 s). Se probó a pedir la escucha entera y el usuario lo dejó en 30 s. Duración máxima de una entrada, 4 min (era 6; §2.5, `RF-ENT-03`, §4.8), con la validación compartida por cliente y servidor (`validateEntryAudio`) y los códigos `UNSUPPORTED_FORMAT`, `FILE_TOO_LARGE` y `DURATION_OUT_OF_RANGE`. «Cómo se juega»: el paso 2 es «Flipea el sample». El marketing incluye packs exclusivos de loops (§2.2, §2.12). |
 | 2026-10-06 | 0.6.10 | **Calidad del Escenario** (§3.5, tarea 1.2): umbrales de la sonda de 2 s (≥ 50 fps alta, ≥ 35 media, ≥ 20 baja, por debajo apagada), resultado guardado por sesión, pausa con la pestaña oculta y calidad a mano (`bb:quality`) por encima de la sonda. La media pasa de «trama a dpr 0,5» a «trama a dpr 1»: por debajo de 1 los puntos se emborronan (medido en la 1.1). |

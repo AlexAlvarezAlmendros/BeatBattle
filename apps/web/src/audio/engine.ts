@@ -32,6 +32,8 @@ export class AudioEngine {
   private catalog: Record<SfxId, SfxDef> = sfxCatalog(DEFAULT_KEY)
   private muted = false
   private lastHover = Number.NEGATIVE_INFINITY
+  private loop: AudioBufferSourceNode | null = null
+  private musicListeners = new Set<(playing: boolean) => void>()
 
   /** ¿Hay ya contexto (ha habido una interacción)? */
   get unlocked(): boolean {
@@ -70,6 +72,49 @@ export class AudioEngine {
 
   setMusicPlaying(playing: boolean): void {
     this.mix?.setMusicPlaying(playing)
+  }
+
+  /** Analizador del bus de música (tarea 1.6), o `null` sin contexto. */
+  get musicAnalyser(): AnalyserNode | null {
+    return this.mix?.analyser ?? null
+  }
+
+  /** ¿Suena música (un bucle, y en la Fase 5 una entrada)? */
+  get musicPlaying(): boolean {
+    return this.loop !== null
+  }
+
+  /** Avisa cada vez que la música empieza o para (el Escenario enciende o apaga la reactividad). */
+  onMusicChange(listener: (playing: boolean) => void): () => void {
+    this.musicListeners.add(listener)
+    return () => this.musicListeners.delete(listener)
+  }
+
+  /**
+   * Toca un bucle por el bus de música (el ritmo de prueba del banco, tarea 1.6; el reproductor de entradas
+   * es de la Fase 5), con el *ducking* de efectos y ambiente. Hace falta el contexto (`unlock`).
+   */
+  playLoop(make: (ctx: BaseAudioContext) => AudioBuffer): void {
+    const { ctx, mix } = this
+    if (!ctx || !mix) return
+    this.stopLoop()
+    const source = ctx.createBufferSource()
+    source.buffer = make(ctx)
+    source.loop = true
+    source.connect(mix.input.music)
+    source.start()
+    this.loop = source
+    mix.setMusicPlaying(true)
+    for (const listener of this.musicListeners) listener(true)
+  }
+
+  stopLoop(): void {
+    if (!this.loop) return
+    this.loop.stop()
+    this.loop.disconnect()
+    this.loop = null
+    this.mix?.setMusicPlaying(false)
+    for (const listener of this.musicListeners) listener(false)
   }
 
   /** Dispara un efecto. Sin contexto, en silencio o con `ui.hover` demasiado seguido, no hace nada. */

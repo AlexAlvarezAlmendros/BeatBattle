@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { DocumentTitle } from '../../app/DocumentTitle'
+import { audio } from '../../audio/engine'
+import { makeTestBeat } from '../../audio/testBeat'
 import { t } from '../../i18n'
 import { type BurstKind, stageBurst, useStageRuntime } from '../../stage/runtime'
 import { Button } from '../Button'
@@ -19,14 +21,31 @@ type Status = 'idle' | 'granted' | 'denied' | 'offline'
  * `/dev/escenario` — banco del Escenario (guía §3.5 capas 1 y 2, tareas 1.3 y 1.11). Solo en desarrollo.
  * El vinilo-sol de la semana como **vista anclada** en la arena abierta (sin panel encima) y ráfagas de
  * chispas y confeti, siempre por el limitador de destellos. `?banco` lanza ráfagas sin parar para medir
- * con `tools/shot/bench.mjs` la arena, el vinilo y 4.000 partículas a la vez.
+ * con `tools/shot/bench.mjs` la arena, el vinilo y 4.000 partículas a la vez. El ritmo de prueba (160 BPM,
+ * por el bus de música) mueve la trama de la cuña (tarea 1.6); `?vinilo=no` quita el vinilo para ver la trama sola.
  */
 export function StageBenchPage() {
   const [params] = useSearchParams()
   const target = useRef<HTMLDivElement>(null)
   const [bench, setBench] = useState(() => params.has('banco'))
+  // `?vinilo=no`: sin la vista del vinilo, lo único que se mueve con el ritmo es la trama (a 30 fps).
+  const vinyl = params.get('vinilo') !== 'no'
   const [status, setStatus] = useState<Status>('idle')
   const running = useStageRuntime((state) => state.running)
+  const [beat, setBeat] = useState(false)
+  // El ritmo de prueba se para al salir del banco.
+  useEffect(() => () => audio.stopLoop(), [])
+  const toggleBeat = () => {
+    if (beat) {
+      audio.stopLoop()
+      setBeat(false)
+      return
+    }
+    // El clic es el gesto que deja crear el contexto de audio (`RD-SND-01`).
+    audio.unlock()
+    audio.playLoop((ctx) => makeTestBeat(ctx, 160))
+    setBeat(audio.musicPlaying)
+  }
 
   const burst = (kind: BurstKind, count?: number) => {
     const box = target.current?.getBoundingClientRect()
@@ -62,13 +81,15 @@ export function StageBenchPage() {
       <DocumentTitle page={t('dev.stage.title')} />
       <h1 className="sr-only">{t('dev.stage.title')}</h1>
       <div className={styles.arena}>
-        <VinylSun
-          className={styles.vinyl}
-          label={t('dev.stage.vinylLabel')}
-          sub={t('dev.stage.vinylSub')}
-          bpm={92}
-          stage
-        />
+        {vinyl && (
+          <VinylSun
+            className={styles.vinyl}
+            label={t('dev.stage.vinylLabel')}
+            sub={t('dev.stage.vinylSub')}
+            bpm={92}
+            stage
+          />
+        )}
         <div ref={target} className={styles.target} data-burst-target="" />
       </div>
       <Frame as="section" className={styles.panel} aria-labelledby="stage-bench-title">
@@ -81,6 +102,9 @@ export function StageBenchPage() {
           <Button onClick={() => burst('confetti')}>{t('dev.stage.confetti')}</Button>
           <Button variant="outline" onClick={() => setBench((value) => !value)} aria-pressed={bench}>
             {t(bench ? 'dev.stage.benchStop' : 'dev.stage.benchStart')}
+          </Button>
+          <Button variant="outline" onClick={toggleBeat} aria-pressed={beat}>
+            {t(beat ? 'dev.stage.beatStop' : 'dev.stage.beatStart')}
           </Button>
         </div>
         <p className={styles.status} aria-live="polite" data-burst-status={status}>
