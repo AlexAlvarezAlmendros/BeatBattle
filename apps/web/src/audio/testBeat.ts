@@ -34,3 +34,46 @@ export function makeTestBeat(ctx: BaseAudioContext, bpm = 160, bars = 2): AudioB
   }
   return buffer
 }
+
+/**
+ * El ritmo de prueba como WAV estéreo de 16 bits (`seconds` segundos, en bucle), para el spike de
+ * Cloudinary (tarea 1.7): un fichero real de varios trozos sin depender de tener uno a mano.
+ */
+export async function renderTestBeatWav(seconds = 60, sampleRate = 44_100, bpm = 160): Promise<Blob> {
+  const length = Math.round(seconds * sampleRate)
+  const offline = new OfflineAudioContext(2, length, sampleRate)
+  const source = offline.createBufferSource()
+  source.buffer = makeTestBeat(offline, bpm)
+  source.loop = true
+  source.connect(offline.destination)
+  source.start()
+  const rendered = await offline.startRendering()
+  const channels = [rendered.getChannelData(0), rendered.getChannelData(1)]
+  const bytes = 44 + length * 4
+  const view = new DataView(new ArrayBuffer(bytes))
+  const text = (at: number, value: string) => {
+    for (let i = 0; i < value.length; i++) view.setUint8(at + i, value.charCodeAt(i))
+  }
+  text(0, 'RIFF')
+  view.setUint32(4, bytes - 8, true)
+  text(8, 'WAVE')
+  text(12, 'fmt ')
+  view.setUint32(16, 16, true)
+  view.setUint16(20, 1, true)
+  view.setUint16(22, 2, true)
+  view.setUint32(24, sampleRate, true)
+  view.setUint32(28, sampleRate * 4, true)
+  view.setUint16(32, 4, true)
+  view.setUint16(34, 16, true)
+  text(36, 'data')
+  view.setUint32(40, length * 4, true)
+  let at = 44
+  for (let i = 0; i < length; i++) {
+    for (const channel of channels) {
+      const sample = Math.max(-1, Math.min(1, channel[i] ?? 0))
+      view.setInt16(at, sample < 0 ? sample * 0x8000 : sample * 0x7fff, true)
+      at += 2
+    }
+  }
+  return new Blob([view.buffer], { type: 'audio/wav' })
+}

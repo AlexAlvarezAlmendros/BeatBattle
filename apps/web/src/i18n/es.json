@@ -516,6 +516,25 @@
     }
   },
   "dev": {
+    "listen": {
+      "title": "Escucha (spike de Cloudinary)",
+      "steps": "Subir, esperar el derivado y escuchar",
+      "intro": "Con pnpm dev:all y las credenciales de Cloudinary en apps/server/.env. Sube el WAV por trozos y firmado, espera al MP3 a 192\u00a0kb/s y lo reproduce por el bus de música.",
+      "generate": "Generar WAV de prueba (60\u00a0s)",
+      "pick": "…o elegir un audio",
+      "run": "Subir y escuchar",
+      "remove": "Borrar de Cloudinary",
+      "progress": "Subida",
+      "generated": "WAV de prueba: {size}\u00a0MB.",
+      "signed": "Subida firmada: {publicId}.",
+      "uploaded": "Subido por trozos en {seconds}\u00a0s.",
+      "eager": "Derivado MP3 listo {seconds}\u00a0s después de la subida.",
+      "eagerTimeout": "El derivado no ha llegado en 2\u00a0minutos.",
+      "unsigned": "Original sin firma: {status} (se espera 401).",
+      "cors": "Derivado firmado: {status}, {type}, CORS {origin}.",
+      "kbps": "Tasa del derivado: {kbps}\u00a0kb/s (se espera ~192).",
+      "removed": "Recurso borrado."
+    },
     "stage": {
       "title": "Escenario (banco)",
       "controls": "Ráfagas",

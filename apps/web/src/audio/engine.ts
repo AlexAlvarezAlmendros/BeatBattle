@@ -45,6 +45,8 @@ export class AudioEngine {
   private muted = false
   private lastHover = Number.NEGATIVE_INFINITY
   private loop: AudioBufferSourceNode | null = null
+  private element: HTMLMediaElement | null = null
+  private elementSources = new WeakMap<HTMLMediaElement, MediaElementAudioSourceNode>()
   private musicListeners = new Set<(playing: boolean) => void>()
 
   /** ¿Hay ya contexto (ha habido una interacción)? */
@@ -91,9 +93,41 @@ export class AudioEngine {
     return this.mix?.analyser ?? null
   }
 
-  /** ¿Suena música (un bucle, y en la Fase 5 una entrada)? */
+  /** ¿Suena música (un bucle o un elemento de audio)? */
   get musicPlaying(): boolean {
-    return this.loop !== null
+    return this.loop !== null || (this.element !== null && !this.element.paused)
+  }
+
+  private announceMusic(): void {
+    const playing = this.musicPlaying
+    this.mix?.setMusicPlaying(playing)
+    for (const listener of this.musicListeners) listener(playing)
+  }
+
+  /**
+   * Lleva un `<audio>` por el bus de música (spike de la tarea 1.7; el reproductor es de la Fase 5): pasa
+   * por el analizador (la trama reacciona) y por el *ducking*. El elemento necesita `crossOrigin` para que
+   * el analizador vea el audio de Cloudinary. Devuelve con qué soltarlo. Hace falta el contexto.
+   */
+  attachElement(element: HTMLMediaElement): () => void {
+    const { ctx, mix } = this
+    if (!ctx || !mix) return () => {}
+    let source = this.elementSources.get(element)
+    if (!source) {
+      source = ctx.createMediaElementSource(element)
+      this.elementSources.set(element, source)
+    }
+    source.connect(mix.input.music)
+    this.element = element
+    const update = () => this.announceMusic()
+    for (const type of ['play', 'pause', 'ended'] as const) element.addEventListener(type, update)
+    update()
+    return () => {
+      for (const type of ['play', 'pause', 'ended'] as const) element.removeEventListener(type, update)
+      source.disconnect()
+      if (this.element === element) this.element = null
+      this.announceMusic()
+    }
   }
 
   /** Avisa cada vez que la música empieza o para (el Escenario enciende o apaga la reactividad). */

@@ -45,7 +45,7 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 
 **Fase 1, spike GO/NO-GO** ([plan 01](plans/01-spike-sensacion-audio.md), replanificado para la Arena):
 1.1 (la arena en *shader*), 1.2 (sonda y calidad), 1.3 (vistas y partículas), 1.4 (motor de audio), 1.5 (estrellas), 1.6 (reactividad), 1.9 (motor de análisis), 1.10 (onda y sonoridad), 1.11 (banco, con Android emulado) y 1.13 (pantalla de título) están hechas;
-1.7–1.8 crean recursos en la nube y esperan la decisión de la cuenta de Cloudinary.
+1.7 (Cloudinary, cuenta propia) está en marcha y espera las credenciales; 1.8 (ffmpeg en Vercel) creará un proyecto en Vercel con confirmación.
 
 La **Fase 0** se cerró el 2026-10-04 con la dirección de arte «Arena» (tareas 0.21–0.28; guía v0.6.8;
 acta del jurado en `docs/planning/evidence/f0/arena/jurado.md`). La PR #1 se mezcló el 2026-10-04 con el
@@ -144,13 +144,15 @@ versión hasta que se mezcle la PR nueva de `feat/f0-fundaciones` con el redise�
   una entrada dura como mucho 4 min (era 6), validado con la misma regla en el navegador y en el servidor. El marketing anuncia también packs
   exclusivos de loops. Guía v0.6.11 (§2.5, §2.7, §2.12, Anexos B y G).
 
+- 2026-10-07 — **Cuenta de Cloudinary propia de BeatBattle** (decisión del usuario): compartir la del
+  sello arriesgaba su cuota y las descargas de su tienda. Guía v0.6.17 (§4.8.1).
+
 ## Decisiones abiertas
 
 Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Decisión | Por defecto | Se cierra en | Notas |
 |---|---|---|---|
-| Cuenta de Cloudinary | Propia de BeatBattle (mismo sistema que el sello) | Antes de 1.6 | Compartir la del sello arriesga su cuota y las descargas de su tienda |
 | Dominio | `battle.otherpeople.es` | Antes de F2 | Afecta a OAuth, cookies y CORS del widget |
 | Cuenta de Gmail para enviar | Cuenta propia de BeatBattle (no la del sello); dirección de `otherpeople.es` si está en Google Workspace | Antes de F2 | Con Gmail normal, el Lunes de batalla llega el mismo día a ~330 personas; el resto, el martes (guía §4.17) |
 | Newsletter del sello desde BeatBattle | Casilla opcional en el registro | F9 | Necesita que la API de newsletter del sello acepte `source` |

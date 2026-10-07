@@ -49,7 +49,7 @@ ya dentro del monorepo (`apps/web/src/stage`, `apps/web/src/audio`, `packages/au
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 1.7 | Cloudinary: decidir la cuenta (decisión abierta); subida **firmada por trozos** de un WAV de prueba desde el navegador como `authenticated` con `eager` `f_mp3,br_192k`; entregar el derivado con URL firmada; reproducirlo con `crossOrigin="anonymous"` + `MediaElementSource` + analizador. Verificar: CORS de `res.cloudinary.com`, que el original sin firma da 401, que `br_192k` aplica al audio y el tiempo del `eager` | 🔒 Bloqueado | 1.4, decisión de cuenta | §4.8 · `RF-STO-01`, `RF-STO-02` |
+| 1.7 | Cloudinary (cuenta propia de BeatBattle); subida **firmada por trozos** de un WAV de prueba desde el navegador como `authenticated` con `eager` `f_mp3,br_192k`; entregar el derivado con URL firmada; reproducirlo con `crossOrigin="anonymous"` + `MediaElementSource` + analizador. Verificar: CORS de `res.cloudinary.com`, que el original sin firma da 401, que `br_192k` aplica al audio y el tiempo del `eager` | 🔄 En curso | 1.4, cuenta (propia, decidida el 2026-10-07) | §4.8 · `RF-STO-01`, `RF-STO-02` |
 | 1.8 | ffmpeg en Vercel: función de prueba con `ffmpeg-static` que lee un WAV de 50 MB de Cloudinary por URL firmada y calcula sonoridad integrada (`ebur128`), pico real y forma de onda de 1000 bins. Medir tamaño de la función, arranque en frío y tiempo total. **GO si cabe y tarda < 8 s**; si no, plan B (§4.8.4) | 🔒 Bloqueado | 1.7 | §4.8.4 · `RF-STO-04` |
 
 ### Análisis local

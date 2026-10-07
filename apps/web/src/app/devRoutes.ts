@@ -24,6 +24,20 @@ export const devRoutes: RouteObject[] = import.meta.env.DEV
         lazy: async () => ({ Component: (await import('../ui/gallery/GalleryPage')).GalleryPage }),
       },
       {
+        // Spike de Cloudinary (1.7): subir por trozos, esperar el derivado y escucharlo.
+        path: 'dev/escucha',
+        handle: {
+          access: 'public',
+          screen: {
+            wedge: 'none',
+            keys: ['back', 'sound'],
+            plate: { kicker: 'frame.plates.dev', title: 'dev.listen.title' },
+            simple: true,
+          },
+        },
+        lazy: async () => ({ Component: (await import('../ui/gallery/ListenSpikePage')).ListenSpikePage }),
+      },
+      {
         // Banco del Escenario (1.3, 1.11): el vinilo-sol como vista anclada y las ráfagas de partículas.
         // Cuña a la derecha, como el menú; la izquierda queda abierta para el vinilo y las ráfagas.
         path: 'dev/escenario',
