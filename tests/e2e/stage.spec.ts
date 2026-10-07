@@ -1,3 +1,5 @@
+import { writeFile } from 'node:fs/promises'
+import { cpus } from 'node:os'
 import { type BrowserContext, expect, type Page, test } from '@playwright/test'
 import { collectErrors, open, settle } from './support'
 
@@ -35,7 +37,13 @@ const live = (page: Page) => page.locator('[data-stage-live]')
  * Proporción de píxeles que cambian más de `threshold` (0–255, en el canal que más cambia) entre dos
  * capturas del mismo tamaño. Se decodifican en el propio navegador (sin dependencias de PNG en Node).
  */
-async function differingRatio(page: Page, a: Buffer, b: Buffer, threshold: number): Promise<number> {
+interface Difference {
+  ratio: number
+  /** Caja de los píxeles distintos (px de la captura), para saber dónde está la diferencia. */
+  box: { x0: number; y0: number; x1: number; y1: number } | null
+}
+
+async function differingRatio(page: Page, a: Buffer, b: Buffer, threshold: number): Promise<Difference> {
   return page.evaluate(
     async ([first, second, limit]) => {
       const decode = async (base64: string) => {
@@ -45,17 +53,30 @@ async function differingRatio(page: Page, a: Buffer, b: Buffer, threshold: numbe
         const context = canvas.getContext('2d')
         if (!context) throw new Error('sin contexto 2D')
         context.drawImage(bitmap, 0, 0)
-        return context.getImageData(0, 0, bitmap.width, bitmap.height).data
+        return { data: context.getImageData(0, 0, bitmap.width, bitmap.height).data, width: bitmap.width }
       }
-      const x = await decode(first)
-      const y = await decode(second)
+      const { data: x, width } = await decode(first)
+      const { data: y } = await decode(second)
       let differing = 0
+      let box: { x0: number; y0: number; x1: number; y1: number } | null = null
       for (let i = 0; i < x.length; i += 4) {
         const channel = (k: number) => Math.abs((x[i + k] ?? 0) - (y[i + k] ?? 0))
         const delta = Math.max(channel(0), channel(1), channel(2))
-        if (delta > limit) differing++
+        if (delta > limit) {
+          differing++
+          const px = (i / 4) % width
+          const py = Math.floor(i / 4 / width)
+          box = box
+            ? {
+                x0: Math.min(box.x0, px),
+                y0: Math.min(box.y0, py),
+                x1: Math.max(box.x1, px),
+                y1: Math.max(box.y1, py),
+              }
+            : { x0: px, y0: py, x1: px, y1: py }
+        }
       }
-      return differing / (x.length / 4)
+      return { ratio: differing / (x.length / 4), box }
     },
     [a.toString('base64'), b.toString('base64'), threshold] as const,
   )
@@ -76,6 +97,28 @@ async function stableScreenshot(page: Page): Promise<Buffer> {
     previous = current
   }
   return previous
+}
+
+/** Estado de la página para el diagnóstico de la comparación (lo que puede mover la cuña o el contenido). */
+function pageState(page: Page) {
+  return page.evaluate(() => {
+    const point = (name: string) => {
+      const probe = document.querySelector(`[data-stage-edge="${name}"]`)
+      if (!probe) return null
+      const rect = probe.getBoundingClientRect()
+      return [Math.round(rect.left), Math.round(rect.top)]
+    }
+    const active = document.activeElement
+    return {
+      scrollY: window.scrollY,
+      scrollHeight: document.documentElement.scrollHeight,
+      tabsBottom: document.documentElement.style.getPropertyValue('--screen-tabs-bottom') || null,
+      edges: { a: point('a'), b: point('b'), in: point('in') },
+      live: document.querySelector('[data-stage-live]') !== null,
+      active: active ? `${active.tagName.toLowerCase()}${active.id ? `#${active.id}` : ''}` : null,
+      fonts: document.fonts.status,
+    }
+  })
 }
 
 test.describe('Escenario, capa 0', () => {
@@ -132,6 +175,7 @@ test.describe('Escenario, capa 0', () => {
       browser,
     }) => {
       const shots: Buffer[] = []
+      const states: Record<string, unknown> = {}
       let scratch: Page | null = null as Page | null
       for (const mode of ['on', 'off'] as const) {
         // Con «reducir movimiento» para que nada se mueva entre las dos capturas; `on` enciende el
@@ -153,17 +197,37 @@ test.describe('Escenario, capa 0', () => {
         }
         await settle(page)
         shots.push(await stableScreenshot(page))
+        states[mode] = await pageState(page)
+        // `BB_STAGE_DEBUG=1` imprime el estado de cada página aunque la prueba pase.
+        if (process.env.BB_STAGE_DEBUG) console.log(name, mode, JSON.stringify(states[mode]))
         if (mode === 'off') scratch = page
         else await context.close()
       }
       const [withStage, withoutStage] = shots
       if (!scratch || !withStage || !withoutStage) throw new Error('faltan capturas')
       const page: Page = scratch
-      const ratio = await differingRatio(page, withStage, withoutStage, 48)
+      const { ratio, box } = await differingRatio(page, withStage, withoutStage, 48)
+      if (ratio >= 0.005) {
+        // Las dos capturas, en `test-results/` (artefacto de la CI) y en el informe, para ver la diferencia.
+        for (const [file, body] of [
+          ['con-escenario.png', withStage],
+          ['sin-escenario.png', withoutStage],
+        ] as const) {
+          const path = test.info().outputPath(file)
+          await writeFile(path, body)
+          await test.info().attach(file, { path, contentType: 'image/png' })
+        }
+      }
       // Lo que cambia es el suavizado del borde de algunos puntos (Canvas 2D frente al *shader*): medido,
       // 0,02–0,05 % con la GPU y 0,21 % con el Chromium de la CI. Una cuña del lado equivocado o una forma
       // distinta pasan del 3 %.
-      expect(ratio, `${(ratio * 100).toFixed(3)} % de píxeles distintos`).toBeLessThan(0.005)
+      // Si falla, el mensaje dice dónde está la diferencia y el estado de cada página, y las dos capturas
+      // quedan en `test-results/`. Con eso se vio el 13,43 % que salía a veces en la CI a 320 px: no era el
+      // Escenario, sino el HUD que se quedaba apilado en una de las dos cargas (12 px más; `hud.spec.ts`).
+      expect(
+        ratio,
+        `${(ratio * 100).toFixed(3)} % de píxeles distintos en ${JSON.stringify(box)}; estado: ${JSON.stringify(states)}; CPU: ${cpus()[0]?.model ?? '?'}`,
+      ).toBeLessThan(0.005)
       await page.context().close()
     })
   }

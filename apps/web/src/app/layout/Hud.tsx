@@ -80,15 +80,35 @@ export function useHudStack(ref: RefObject<HTMLElement | null>): void {
     update()
     if (typeof ResizeObserver === 'undefined') return
     let frame = 0
-    const observer = new ResizeObserver(() => {
+    const schedule = () => {
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(update)
+    }
+    const resize = new ResizeObserver(schedule)
+    // Se observa también lo que lleva cada pieza: apilado, el jugador se estira y la derecha no hace caja
+    // (`display: contents`), así que lo único que cambia cuando el contenido encoge (la letra que llega,
+    // una ficha que cambia) es el contenido. Sin esto, apilado una vez, se quedaba apilado (la letra de
+    // reserva de la CI no cabe a 320 px: sobraban los 12 px de la fila vacía de la temporada).
+    const observe = () => {
+      resize.disconnect()
+      resize.observe(hud)
+      for (const piece of hud.children) {
+        resize.observe(piece)
+        for (const content of piece.children) resize.observe(content)
+      }
+    }
+    observe()
+    // Los huecos se llenan y se vacían (la ficha del jugador, las teselas de la temporada). Solo sus hijos
+    // directos: el reloj del menú cambia su texto cada segundo y no tiene por qué volver a medir.
+    const mutations = new MutationObserver(() => {
+      observe()
+      schedule()
     })
-    observer.observe(hud)
-    for (const piece of hud.children) observer.observe(piece)
+    for (const piece of hud.children) mutations.observe(piece, { childList: true })
     return () => {
       cancelAnimationFrame(frame)
-      observer.disconnect()
+      resize.disconnect()
+      mutations.disconnect()
     }
   }, [ref])
 }
