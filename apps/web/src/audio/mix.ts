@@ -19,6 +19,11 @@ export interface Mix {
   /** Entrada de cada bus. */
   input: Record<Bus, GainNode>
   master: GainNode
+  /**
+   * Analizador del bus de música (FFT de 1024, §3.5 y tarea 1.6): lo lee el Escenario para mover la trama.
+   * Sin suavizado propio (el paso bajo de 2 Hz va en `createReactivity`) y sin salida.
+   */
+  analyser: AnalyserNode
   setVolume(bus: Bus, volume: number): void
   /** ¿Suena una entrada? Atenúa efectos y ambiente (§3.7.2). */
   setMusicPlaying(playing: boolean, at?: number): void
@@ -53,10 +58,17 @@ export function createMix(ctx: BaseAudioContext): Mix {
     return { volume, duck }
   }
   const buses = { music: make('music'), sfx: make('sfx'), ambience: make('ambience') }
+  const analyser = ctx.createAnalyser()
+  analyser.fftSize = 1024
+  analyser.smoothingTimeConstant = 0
+  analyser.minDecibels = -90
+  analyser.maxDecibels = -10
+  buses.music.volume.connect(analyser)
 
   return {
     input: { music: buses.music.volume, sfx: buses.sfx.volume, ambience: buses.ambience.volume },
     master,
+    analyser,
     setVolume(bus, volume) {
       buses[bus].volume.gain.value = Math.min(1, Math.max(0, volume))
     },

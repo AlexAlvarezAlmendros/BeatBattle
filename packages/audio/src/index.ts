@@ -4,5 +4,6 @@
  */
 
 export * from './measure'
+export * from './reactive'
 export * from './sfx'
 export * from './theory'
