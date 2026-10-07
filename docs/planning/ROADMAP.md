@@ -29,7 +29,7 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 | # | Fase | Estado | Plan | Hito |
 |---|------|--------|------|------|
 | 0 | Fundaciones | ✅ Cerrada (2026-10-04, con la dirección «Arena»; PR nueva pendiente de revisión) | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes de la arena (guía v0.6 §3); marco de juego y menú principal navegables con teclado; prueba de marca y de juego (`RD-VIS-02`) |
-| 1 | Spike de sensación y audio | 🔄 En curso (1.1–1.6, 1.9 y 1.10 hechas; 1.11 y 1.13 listas) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio; efectos < 30 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
+| 1 | Spike de sensación y audio | 🔄 En curso (1.1–1.6 y 1.9–1.11 hechas; 1.13 lista) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio; efectos < 30 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
 | 2 | Cuentas y base de email | 🔒 Bloqueada (F0, GO de F1) | — (se crea al llegar) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, preferencias, consentimientos y bajas |
 | 3 | Semanas y samples | 🔒 Bloqueada (F2) | — | 3 semanas programadas; cambio de semana en la frontera con reloj simulado; email del drop (también sin cuenta) |
 | 4 | Participar | 🔒 Bloqueada (F3) | — | WAV de 60 MB por trozos con BPM, tonalidad y sonoridad medida; recibo por email |
@@ -44,7 +44,7 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 ## Foco actual
 
 **Fase 1, spike GO/NO-GO** ([plan 01](plans/01-spike-sensacion-audio.md), replanificado para la Arena):
-1.1 (la arena en *shader*), 1.2 (sonda y calidad), 1.3 (vistas y partículas), 1.4 (motor de audio), 1.5 (estrellas), 1.6 (reactividad), 1.9 (motor de análisis) y 1.10 (onda y sonoridad) están hechas; 1.11 (banco de rendimiento) y 1.13 (pantalla de título) se pueden empezar;
+1.1 (la arena en *shader*), 1.2 (sonda y calidad), 1.3 (vistas y partículas), 1.4 (motor de audio), 1.5 (estrellas), 1.6 (reactividad), 1.9 (motor de análisis), 1.10 (onda y sonoridad) y 1.11 (banco, con Android emulado) están hechas; 1.13 (pantalla de título) se puede empezar;
 1.7–1.8 crean recursos en la nube y esperan la decisión de la cuenta de Cloudinary.
 
 La **Fase 0** se cerró el 2026-10-04 con la dirección de arte «Arena» (tareas 0.21–0.28; guía v0.6.8;
@@ -158,6 +158,8 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 | Premios | Sin premio material; visibilidad y Elección del sello | Antes de la beta | Con premios, revisar bases y fiscalidad |
 | Origen y licencia de los samples | Del sello o de sus productores, con licencia escrita | Antes de F3 | — |
 | Nombre de marca | «Beat Battle · un juego de Other People» | F0 (0.24) | Logo, lockup «by [OTP.]» y textos |
+| Latencia de efectos en Linux (`RD-SND-05`) | La parte de la app es de ~4 ms; la salida del sistema (PipeWire, 24–48 ms) deja el total en 35–51 ms en el portátil | GO/NO-GO de la Fase 1 | Opciones: medir en macOS/Windows y aceptar Linux como excepción, o reformular el criterio como «latencia propia < 10 ms + la del sistema medida aparte». Evidencia en `evidence/f1/banco/` |
+| Rendimiento en un Android real (`RNF-PERF-03`) | Emulado (CPU ×4, GPU del portátil): 60 fps | GO/NO-GO de la Fase 1 | Sin dispositivo, por decisión del usuario; la emulación no reproduce una GPU móvil |
 | Móviles de 781 a ~840 px de alto (360×800, 375×812, 393×786) | El menú con todos los datos se desplaza 35–94 px (la placa enfocada siempre se ve) | Antes de la beta | Opciones: subir el móvil bajo hasta ~840 px (cabe, con una franja vacía de ~180 px a 375×812) o un paso intermedio con el logo en una línea y la tarjeta sin plegar. Acta de la 0.28 |
 | Dorado como excepción | No: medallas y semana dorada en la paleta | Antes de F6 | Si se aprueba, `#f5c542` solo para el 1.º, la carta de campeón y la semana dorada (guía §3.2, §7) |
 | Pase de la carta | Cinta propia con física | F7 | Alternativa: expositor giratorio si se percibe como pieza del sello (guía §3.4.4) |
@@ -169,6 +171,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-07 | F1 | 1.11 hecha con Android emulado: 60 fps en escritorio y emulado; latencia de la app ~4 ms, pero la salida de Linux deja `RD-SND-05` abierto (guía v0.6.15). |
 | 2026-10-07 | F1 | 1.5 hecha: las estrellas completas (dormidas, despertar, voto con *hit-stop*, chispas por el limitador, teclado y lector) con su bloque en la galería (guía v0.6.14). |
 | 2026-10-07 | F1 | 1.6 hecha: la trama reacciona a la música (tamaño de punto ≤ 15 %, paso bajo de 2 Hz, 30 fps); 0 destellos por segundo medidos a 160 BPM (guía v0.6.13). |
 | 2026-10-06 | F1 | 1.3 hecha: vistas ancladas (el vinilo-sol en la arena abierta) y partículas por el limitador; 60 fps a dpr 2 con 4.000 partículas en la iGPU (guía v0.6.12). |

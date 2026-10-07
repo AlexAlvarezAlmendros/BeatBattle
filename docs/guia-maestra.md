@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.14 · 2026-10-07 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.15 · 2026-10-07 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2184,7 +2184,11 @@ anillo).
 
 Un `AudioContext` creado en la primera interacción (puerta de entrada). Buses, compresor y limitador
 de §3.7.2. Los efectos se programan con `ctx.currentTime` y un pequeño margen de antelación, y las
-coreografías visuales se sincronizan con ese reloj (`RD-MOT-02`).
+coreografías visuales se sincronizan con ese reloj (`RD-MOT-02`). Con puntero fino, el contexto pide la
+latencia mínima del dispositivo (`latencyHint: 0`): la latencia base baja de 10,7 ms a 2,7 (medido en la
+1.11); en táctil, `interactive`, porque un búfer mínimo puede dar chasquidos en un móvil lento. La
+latencia de salida la pone el sistema (en Linux con PipeWire, 24–48 ms) y la app no la controla
+(`docs/planning/evidence/f1/banco/`).
 
 #### 4.7.7 Metadatos para compartir
 
@@ -2705,7 +2709,7 @@ negocio en el panel de admin (participantes, votos, escuchas por semana) y Verce
 | JS inicial (sin Escenario) | < 200 kB gz, contando la entrada con sus importaciones estáticas y también la primera pintura de la home (175 y 185 kB gz al cerrar la Fase 0; con la arena, 179 y 193 kB gz con Motion por el pulsado del botón y 159 y 172 kB gz sin él, 2026-10-03) |
 | Escenario (trozo diferido) | < 250 kB gz (243,8 kB gz con three + R3F y la capa 0, tarea 1.1; 249,1 kB gz con `View` de drei, las vistas y las partículas, tarea 1.3; **249,8 kB gz** con la reactividad, tarea 1.6: sin margen, lo próximo que entre en el trozo obliga a partirlo) |
 | Fuentes (subconjunto latino) | ≈ 127 KB: Anybody cursiva 62, Chakra Petch 5 × ~10, Oxanium 14; precarga solo de Chakra Petch 700 (§3.2). Medido el 2026-10-03 (perfil de `RNF-PERF-02`, cinco cargas intercaladas): con Anybody y Chakra 600 precargadas, LCP 2,00 s y CLS 0,0002; sin precargas, 1,60 s y 0,0036; solo Chakra 700, 1,64 s y 0,0034 |
-| FPS | 60 en escritorio con GPU integrada; ≥ 45 en un Android de gama media con calidad automática |
+| FPS | 60 en escritorio con GPU integrada; ≥ 45 en un Android de gama media con calidad automática (tarea 1.11: 60 en escritorio a dpr 1 y 2 con la arena, el vinilo y 4.000 partículas; 60 en un Android **emulado** con CPU ×4, a falta de un dispositivo real; `docs/planning/evidence/f1/banco/`) |
 | Inicio de reproducción tras el clic | < 600 ms en 4G |
 | Latencia de efectos | < 30 ms (`RD-SND-05`) |
 | Partículas simultáneas | ≤ 4.000 (alta), ≤ 1.500 (media) |
@@ -3314,6 +3318,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-07 | 0.6.15 | **Banco de la Fase 1** (tarea 1.11, §4.7.6, §4.17): 60 fps en escritorio y en Android emulado (CPU ×4; sin dispositivo real, decisión del usuario), y la sonda apaga el Escenario con una GPU por software. El contexto de audio pide la latencia mínima con puntero fino (`latencyHint: 0`): la parte de la app queda en ~4 ms, pero la salida de PipeWire (24–48 ms) deja `RD-SND-05` sin cumplir en Linux; decisión abierta para el GO/NO-GO. |
 | 2026-10-07 | 0.6.14 | **Estrellas** (§3.8.4, tarea 1.5): teclado completo (flechas, Inicio, Fin, 1–5; el cursor pasa a la votada), estado «guardando» y vuelta atrás si el servidor no guarda, chispas del DOM por el limitador de destellos (el lienzo va detrás del panel opaco) y temblor por `onImpact`. Efecto `vote.unlocked` del Anexo D. Anexo E: el medidor de escucha va por tramos de 10 s (se quedó en 15 con el cambio a 30 s de la 0.6.11). |
 | 2026-10-07 | 0.6.13 | **Reactividad al audio** (§3.5, tarea 1.6): analizador de FFT 1024 en el bus de música, banda de 40–160 Hz, puerta, paso bajo de un polo a 2 Hz y escala de punto de 1 a 1,15; la trama a 30 fps mientras suena y en reposo al parar. Medición de destellos con píxeles reales y un beat a 160 BPM (`tools/shot/flashes.mjs`): 0 por segundo (`RNF-A11Y-04`). Trozo del Escenario: 249,8 kB gz. |
 | 2026-10-06 | 0.6.12 | **Vistas ancladas y partículas** (§3.5 capas 1 y 2, §4.7.5, §4.17; tarea 1.3). Las vistas solo van donde la arena está a la vista: el lienzo único va detrás del contenido y bajo los rayos y la viñeta, así que dentro de un panel opaco la pieza es DOM (el vinilo de la tarjeta del escenario sigue en el compositor; el plan decía «pegado a la tarjeta»). Partículas: anillo con el presupuesto (media, hasta 1.500, como §4.17; decía «a la mitad»), radio y opacidad que autoriza el limitador. Pase de pintado propio, `advance()` a 60 fps mientras algo se mueve y texturas de las vistas por CPU. Trozo del Escenario: 249,1 kB gz. |
