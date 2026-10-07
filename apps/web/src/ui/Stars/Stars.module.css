@@ -1,0 +1,194 @@
+/*
+ * Estrellas (§3.8.4, maqueta `03-jurado`): estrella de 62 px con contorno blanco en un botón de 96, su
+ * tecla y su palabra debajo. Encendida, rellena de rojo; el cursor de juego marca la elegida. Dormidas, al
+ * 40 % con su medidor y el motivo.
+ */
+.stars {
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-3);
+}
+
+.group {
+  display: flex;
+  justify-content: center;
+  max-width: 100%;
+}
+
+.star {
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-2);
+  width: var(--bb-star-button);
+  padding: var(--bb-space-2) 0 var(--bb-space-3);
+  border: 0;
+  background: transparent;
+  color: var(--bb-text-3);
+  cursor: pointer;
+}
+
+.glyph {
+  display: block;
+  width: var(--bb-star-glyph);
+  height: var(--bb-star-glyph);
+  overflow: visible;
+  fill: transparent;
+  stroke: var(--bb-white);
+  transition: fill var(--bb-dur-instant) var(--bb-ease-out);
+}
+
+.star[data-on] .glyph {
+  fill: var(--bb-red);
+}
+
+.word {
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.star[data-on] .word {
+  color: var(--bb-white);
+}
+
+/* Pulsado (y el *hit-stop*): la estrella aplastada a 0,8 (§3.8.4). */
+.star:active .glyph,
+.star[data-force-state="pressed"] .glyph,
+.star[data-squash="hold"] .glyph {
+  scale: calc(1 - 0.2 * var(--bb-motion));
+}
+
+/* Tras el *hit-stop*: 0,8 → 1,15 → 1 en el tiempo de la recompensa. */
+.star[data-squash="squash"] .glyph {
+  animation: bb-star-squash var(--bb-dur-reward) var(--bb-ease-out);
+}
+
+@keyframes bb-star-squash {
+  0% {
+    scale: 0.8;
+  }
+  20% {
+    scale: 1.15;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+/* Dormidas: al 40 %, sin cursor de mano. */
+.group[data-asleep] .star {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* Despertar: un barrido de izquierda a derecha en `--bb-dur-slow`, estrella a estrella. */
+.group[data-waking] .star {
+  /* Antes de su turno, todavía dormida (`backwards`); al acabar, nada se queda en efecto. */
+  animation: bb-star-wake calc(var(--bb-dur-slow) / 2) var(--bb-ease-out) backwards;
+  animation-delay: calc(var(--i) * var(--bb-dur-slow) / 10);
+}
+
+@keyframes bb-star-wake {
+  from {
+    opacity: 0.4;
+    translate: 0 calc(var(--bb-space-1) * var(--bb-motion));
+  }
+}
+
+/* Guardando: la elegida late suave hasta que confirma el servidor. */
+.group[data-saving] .star[aria-checked="true"] .glyph {
+  animation: bb-star-saving var(--bb-loop-breathe) var(--bb-ease-in-out) infinite alternate;
+}
+
+@keyframes bb-star-saving {
+  to {
+    opacity: 0.55;
+  }
+}
+
+/* Chispas del voto (§3.8.4), con la opacidad que autoriza el limitador de destellos. */
+.sparks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.spark {
+  position: absolute;
+  top: calc(var(--bb-space-2) + var(--bb-star-glyph) / 2);
+  left: 50%;
+  width: var(--bb-space-1);
+  height: var(--bb-space-1);
+  border-radius: 50%;
+  background: var(--bb-red);
+  /* El estado final es el de reposo (lejos y transparente): la animación no se queda en efecto. */
+  translate: calc(-50% + var(--dx) * var(--bb-star-button)) calc(-50% + var(--dy) * var(--bb-star-button));
+  opacity: 0;
+  animation: bb-star-spark var(--bb-dur-reward) var(--bb-ease-out);
+}
+
+.spark[data-tone="white"] {
+  background: var(--bb-white);
+}
+
+@keyframes bb-star-spark {
+  from {
+    translate: -50% -50%;
+    opacity: 1;
+  }
+}
+
+.asleep {
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-2);
+}
+
+.meter {
+  width: calc(var(--bb-space-16) * 3);
+}
+
+.reason,
+.status {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  text-align: center;
+}
+
+.status:empty {
+  display: none;
+}
+
+.status[data-status="error"] {
+  color: var(--bb-white);
+}
+
+@media (max-width: 720px) {
+  /* Se reparten el ancho si no caben (320 px), sin bajar del objetivo táctil. */
+  .star {
+    flex: 0 1 var(--bb-star-button-sm);
+    width: auto;
+    min-width: var(--bb-target);
+  }
+
+  .glyph {
+    width: var(--bb-star-glyph-sm);
+    height: var(--bb-star-glyph-sm);
+  }
+}
+
+/* Sin movimiento (Anexo E): relleno sin salto ni chispas. */
+@media (prefers-reduced-motion: reduce) {
+  .star[data-squash] .glyph,
+  .group[data-waking] .star,
+  .group[data-saving] .star[aria-checked="true"] .glyph {
+    animation: none;
+  }
+
+  .sparks {
+    display: none;
+  }
+}

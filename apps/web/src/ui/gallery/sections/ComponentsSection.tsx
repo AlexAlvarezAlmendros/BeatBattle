@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { duration, length } from '@beatbattle/shared/tokens'
+import { useRef, useState } from 'react'
 import { type Messages, t } from '../../../i18n'
 import { Trans } from '../../../i18n/Trans'
 import { Announcer } from '../../Announcer'
@@ -19,6 +20,7 @@ import { Modal, ModalSurface } from '../../Modal'
 import { RoundClock } from '../../RoundClock'
 import { Skeleton, SkeletonGroup } from '../../Skeleton'
 import { Stamp } from '../../Stamp'
+import { Stars } from '../../Stars'
 import { Tabs } from '../../Tabs'
 import { TitlePlate } from '../../TitlePlate'
 import { Toast, toast } from '../../Toast'
@@ -56,6 +58,7 @@ export default function ComponentsSection() {
       <MeterBlock />
       <SkeletonBlock />
       <RoundClockBlock />
+      <StarsBlock />
       <TitlePlateBlock />
       <CoverBlock />
     </GallerySection>
@@ -894,6 +897,88 @@ function RoundClockBlock() {
         </StateCell>
       </GalleryRow>
       <StateMatrixRow component="roundClock" />
+    </GalleryBlock>
+  )
+}
+
+/* ── Estrellas ──────────────────────────────────────────────────────────────────────────── */
+
+const STARS_LABEL = () => t('dev.gallery.stars.label')
+
+/**
+ * Estrellas (§3.8.4, tarea 1.5): los ocho estados de la matriz y una celda para probarlas de verdad,
+ * con la escucha simulada (despiertan a los 30 s) y un servidor que tarda medio segundo en confirmar.
+ */
+function StarsBlock() {
+  const [heard, setHeard] = useState(0)
+  const [vote, setVote] = useState<number | null>(null)
+  const card = useRef<HTMLDivElement>(null)
+  const cells = [
+    ['rest', 'rest'],
+    ['hover', 'hover'],
+    ['focus', 'focus'],
+    ['pressed', 'pressed'],
+    ['loading', 'loading'],
+    ['disabled', 'disabled'],
+    ['success', 'success'],
+    ['error', 'error'],
+  ] as const
+  return (
+    <GalleryBlock id="estrellas" title={t('dev.gallery.components.stars')}>
+      <GalleryRow wide>
+        {cells.map(([state, label]) => (
+          <StateCell key={state} label={stateLabel(label)} state={state} wide>
+            <Stars label={STARS_LABEL()} value={null} state={state} />
+          </StateCell>
+        ))}
+        <StateCell label={stateLabel('interactive')} wide>
+          <div ref={card} className={styles.stack}>
+            <Stars
+              label={STARS_LABEL()}
+              value={vote}
+              listen={{ heardMs: heard, thresholdMs: 30_000 }}
+              onVote={(stars) =>
+                new Promise<void>((done) => {
+                  window.setTimeout(() => {
+                    setVote(stars)
+                    done()
+                  }, 500)
+                })
+              }
+              onImpact={() => {
+                // El temblor de 2 px de la tarjeta (§3.8.4): lo hace quien contiene las estrellas.
+                const px = `${length.stroke}px`
+                card.current?.animate(
+                  [
+                    { translate: '0 0' },
+                    { translate: `${px} 0` },
+                    { translate: `-${px} 0` },
+                    { translate: '0 0' },
+                  ],
+                  { duration: duration.fast },
+                )
+              }}
+              next
+            />
+            <div className={styles.row}>
+              <Button size="sm" variant="outline" onClick={() => setHeard((value) => value + 10_000)}>
+                {t('dev.gallery.stars.listen')}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setHeard(0)
+                  setVote(null)
+                }}
+              >
+                {t('dev.gallery.stars.reset')}
+              </Button>
+            </div>
+          </div>
+        </StateCell>
+      </GalleryRow>
+      <StateMatrixRow component="stars" />
     </GalleryBlock>
   )
 }

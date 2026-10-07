@@ -9,6 +9,7 @@ const ANNEX_D: Record<string, { duration: number; levelDb: number; jitter: numbe
   'ui.hover': { duration: 0.025, levelDb: -30, jitter: 1 },
   'ui.press': { duration: 0.04, levelDb: -18, jitter: 1 },
   'vote.locked': { duration: 0.12, levelDb: -12, jitter: 0.5 },
+  'vote.unlocked': { duration: 0.45, levelDb: -16, jitter: 0 },
   'xp.gain': { duration: 0.09, levelDb: -22, jitter: 0 },
   'level.up': { duration: 1.6, levelDb: -8, jitter: 0 },
   'star.vote.5': { duration: 0.6, levelDb: -10, jitter: 0 },

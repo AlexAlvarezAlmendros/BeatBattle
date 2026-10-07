@@ -129,6 +129,11 @@
   --bb-space-16: 4rem; /* 64 px */
   --bb-gutter: 3rem; /* Medianil de pantalla: 48 px en escritorio, 16 px en móvil */
   --bb-target: 2.75rem; /* Objetivo táctil mínimo: 44 px (RNF-A11Y-09) */
+  /* Estrellas (§3.8.4): estrella de 62 px en un botón de 96; en móvil, 46 en 62. */
+  --bb-star-button: 6rem; /* 96 px */
+  --bb-star-glyph: 3.875rem; /* 62 px */
+  --bb-star-button-sm: 3.875rem; /* 62 px */
+  --bb-star-glyph-sm: 2.875rem; /* 46 px */
   --bb-controls-h: 3.625rem; /* Barra de controles: 58 px (§3.4.1); margen de desplazamiento del foco */
   /*
    * Alcance del cursor de las placas del menú (§3.3 «Opción de menú»): la etiqueta 1P (≈ 44 px) va 32 px

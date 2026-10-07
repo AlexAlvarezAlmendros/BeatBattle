@@ -21,11 +21,12 @@ export const COMPONENT_ANCHORS = [
   { id: 'medidor', key: 'meter', matrix: true },
   { id: 'esqueleto', key: 'skeleton', matrix: true },
   { id: 'reloj', key: 'roundClock', matrix: true },
+  { id: 'estrellas', key: 'stars', matrix: true },
   { id: 'placa', key: 'titlePlate', matrix: false },
   { id: 'portada', key: 'cover', matrix: false },
 ] as const
 
 export type ComponentKey = (typeof COMPONENT_ANCHORS)[number]['key']
 
-/** Componentes de la matriz de §3.3 (Estrellas llega con la tarea 1.5). */
+/** Componentes de la matriz de §3.3. */
 export type MatrixComponentKey = Extract<(typeof COMPONENT_ANCHORS)[number], { matrix: true }>['key']

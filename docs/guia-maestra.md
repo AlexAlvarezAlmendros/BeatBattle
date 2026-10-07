@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.13 · 2026-10-07 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.14 · 2026-10-07 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1673,8 +1673,16 @@ Brutal):
   un temblor de 2 px de la tarjeta), sello `vote.locked`, «+5 XP» en el combo y la confirmación en texto
   y en región viva: «4 de 5 · Muy bien. Voto guardado. Pasas a la siguiente en 1 s; puedes cambiarlo
   hasta el cierre».
-- **Cambio de voto**: relleno sin celebración. Teclado: flechas y 1–5; lector: «4 de 5 estrellas: Muy
-  bien» (`RNF-A11Y-06`).
+- **Cambio de voto**: relleno sin celebración (ni aplastado, ni nota, ni chispas; solo `vote.locked` al
+  confirmar). Teclado: flechas, Inicio y Fin mueven el cursor y rellenan hasta él; 1–5 votan y el cursor
+  pasa a la votada; lector: «4 de 5 estrellas: Muy bien» (`RNF-A11Y-06`).
+- **Guardando** (hasta que el servidor confirma): la elegida late suave y el grupo va con `aria-busy`; si
+  no se guarda, vuelve el voto anterior y se dice («No se ha guardado tu voto. Vuelve a intentarlo.»).
+
+Implementación (tarea 1.5, `ui/Stars`). Las chispas son del DOM, dentro de la estrella: las estrellas
+van en el panel de combate, que es opaco, y el lienzo del Escenario va detrás del contenido (§3.5). Piden
+permiso a `flash.request()` como cualquier destello, así que pintan con su opacidad (≤ 40 %) y en modo
+serio no salen. El temblor de la tarjeta lo hace quien la contiene (`onImpact`), con el trazo de 2 px.
 
 #### 3.8.5 Subida («INSERTA TU BEAT»)
 
@@ -3175,7 +3183,7 @@ efectos al 100 %; variación = desafinación aleatoria por disparo.
 | Barra de la semana | El segmento de hoy se llena con el tiempo | Continuo (1 actualización/min) | — | Igual (no es movimiento) |
 | Anunciador | Golpe desde escala 1,4 con un temblor de 3 px | 280 ms, `--bb-ease-back` | `ann.*` | Aparece sin golpe (y región viva) |
 | VS | Las dos mitades entran por los lados a lo largo de la diagonal; el VS se estampa | 420 ms | `jury.swap` | Composición fija |
-| Medidor de escucha | Se llena por tramos de 15 s con un pulso al completar cada uno | 150 ms por pulso | — | Relleno sin pulso |
+| Medidor de escucha | Se llena por tramos de 10 s con un pulso al completar cada uno | 150 ms por pulso | — | Relleno sin pulso |
 | Estrellas | §3.8.4 | 70 ms + 900 ms | `star.*`, `vote.*` | Relleno sin salto ni chispas |
 | Cambio de entrada | Portada sale por la derecha y entra la siguiente por la izquierda | `--bb-dur-swap` (1,2 s) | `jury.swap` | Fundido |
 | XP flotante | Sube 24 px con muelle y vuela al medidor del HUD | 900 ms | `xp.gain` | «+5 XP» con fundido |
@@ -3306,6 +3314,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-07 | 0.6.14 | **Estrellas** (§3.8.4, tarea 1.5): teclado completo (flechas, Inicio, Fin, 1–5; el cursor pasa a la votada), estado «guardando» y vuelta atrás si el servidor no guarda, chispas del DOM por el limitador de destellos (el lienzo va detrás del panel opaco) y temblor por `onImpact`. Efecto `vote.unlocked` del Anexo D. Anexo E: el medidor de escucha va por tramos de 10 s (se quedó en 15 con el cambio a 30 s de la 0.6.11). |
 | 2026-10-07 | 0.6.13 | **Reactividad al audio** (§3.5, tarea 1.6): analizador de FFT 1024 en el bus de música, banda de 40–160 Hz, puerta, paso bajo de un polo a 2 Hz y escala de punto de 1 a 1,15; la trama a 30 fps mientras suena y en reposo al parar. Medición de destellos con píxeles reales y un beat a 160 BPM (`tools/shot/flashes.mjs`): 0 por segundo (`RNF-A11Y-04`). Trozo del Escenario: 249,8 kB gz. |
 | 2026-10-06 | 0.6.12 | **Vistas ancladas y partículas** (§3.5 capas 1 y 2, §4.7.5, §4.17; tarea 1.3). Las vistas solo van donde la arena está a la vista: el lienzo único va detrás del contenido y bajo los rayos y la viñeta, así que dentro de un panel opaco la pieza es DOM (el vinilo de la tarjeta del escenario sigue en el compositor; el plan decía «pegado a la tarjeta»). Partículas: anillo con el presupuesto (media, hasta 1.500, como §4.17; decía «a la mitad»), radio y opacidad que autoriza el limitador. Pase de pintado propio, `advance()` a 60 fps mientras algo se mueve y texturas de las vistas por CPU. Trozo del Escenario: 249,1 kB gz. |
 | 2026-10-06 | 0.6.11 | **Escucha de 30 s y beats de 4 min** (decisión del usuario): para votar bastan 30 s de escucha (era `min(45 s, 50 %)`; §2.7, `RF-VOTE-04`, Anexos B y G; la marca de la onda y el medidor del Modo Jurado pasan a 30 s). Se probó a pedir la escucha entera y el usuario lo dejó en 30 s. Duración máxima de una entrada, 4 min (era 6; §2.5, `RF-ENT-03`, §4.8), con la validación compartida por cliente y servidor (`validateEntryAudio`) y los códigos `UNSUPPORTED_FORMAT`, `FILE_TOO_LARGE` y `DURATION_OUT_OF_RANGE`. «Cómo se juega»: el paso 2 es «Flipea el sample». El marketing incluye packs exclusivos de loops (§2.2, §2.12). |

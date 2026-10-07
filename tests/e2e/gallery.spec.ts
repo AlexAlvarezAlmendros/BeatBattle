@@ -43,6 +43,7 @@ const COMPONENTS = [
   { id: 'medidor', name: 'Medidor' },
   { id: 'esqueleto', name: 'Esqueleto' },
   { id: 'reloj', name: 'Reloj de ronda' },
+  { id: 'estrellas', name: 'Estrellas' },
   { id: 'placa', name: 'Placa de título' },
   { id: 'portada', name: 'Portada y medallas' },
 ] as const
