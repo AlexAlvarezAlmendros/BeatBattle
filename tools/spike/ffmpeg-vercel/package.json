@@ -1,0 +1,10 @@
+{
+  "name": "beatbattle-ffmpeg-spike",
+  "private": true,
+  "type": "module",
+  "description": "Spike 1.8 (guía §4.8.4): ¿cabe ffmpeg en una función de Vercel y mide un WAV de 50 MB en < 8 s?",
+  "dependencies": {
+    "cloudinary": "2.11.0",
+    "ffmpeg-static": "5.3.0"
+  }
+}
