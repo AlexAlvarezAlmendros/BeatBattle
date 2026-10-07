@@ -98,6 +98,23 @@ function nextFrame(page: Page): Promise<unknown> {
   return page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))))
 }
 
+/**
+ * Espera a que la pantalla quede quieta tras mover el cursor: el menú vuelve a traer la placa a la vista
+ * cuando acaban las transiciones de alto de las placas (`--bb-dur-tick`, `useRevealHelp`), así que lo que
+ * cuenta es la posición del final, no la del primer fotograma. Con la máquina cargada, dos fotogramas no
+ * bastaban (fallo intermitente a 320×256: «Jurado: entero=false»).
+ */
+function settled(page: Page): Promise<unknown> {
+  return page.evaluate(async () => {
+    const running = document.getAnimations().filter((animation) => animation.playState === 'running')
+    const finite = running.filter(
+      (animation) => animation.effect?.getTiming().iterations !== Number.POSITIVE_INFINITY,
+    )
+    await Promise.allSettled(finite.map((animation) => animation.finished))
+    await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
+  })
+}
+
 for (const { width, height, touch, paths } of [
   { width: 1440, height: 900, touch: false, paths: ['/dev/menu', '/como-funciona'] },
   { width: 1024, height: 768, touch: false, paths: ['/dev/menu', '/como-funciona'] },
@@ -131,7 +148,7 @@ for (const viewport of [
     const problems: string[] = []
     for (let step = 0; step < 6; step++) {
       await page.keyboard.press('ArrowDown')
-      await nextFrame(page)
+      await settled(page)
       const { label, covered, inside } = await focusedVersusBar(page)
       if (covered > 0.5 || !inside)
         problems.push(`${label}: tapado ${covered.toFixed(1)} px, entero=${inside}`)
