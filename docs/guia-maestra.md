@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.9 · 2026-10-05 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.10 · 2026-10-06 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1366,10 +1366,18 @@ del sello). Concentra en un contexto el fondo, las vistas 3D y las partículas.
 
 | Nivel | Qué incluye |
 |---|---|
-| Alta | Todo |
-| Media | Trama a dpr 0,5, sin postproceso, partículas a la mitad |
+| Alta | Todo (la trama al dpr del dispositivo, hasta 2) |
+| Media | Trama a dpr 1 (sin la densidad de las pantallas retina; por debajo de 1 los puntos se emborronan), sin postproceso, partículas a la mitad |
 | Baja | Fondo estático (el *bitmap* de la capa 0), 3D solo en ceremonias, partículas al 25 % |
 | Apagada | Sin WebGL: el **fondo estático pregenerado** (trama + diagonal + rayos) como imagen por *breakpoint* y DPR, piezas en SVG y CSS. Automática con `prefers-reduced-motion`, sin WebGL o con ahorro de datos |
+
+**Sonda** (tarea 1.2). La primera vez que se enciende el Escenario en la sesión, dibuja la arena sin parar
+durante 2 s con la calidad alta y mide la mediana de los fotogramas: **≥ 50 fps → alta, ≥ 35 → media, ≥ 20
+→ baja y por debajo → apagada**. El resultado se guarda para la sesión (`sessionStorage`), así que la sonda
+no se repite en cada página. Con la pestaña oculta no mide (la sonda espera) y **no se dibuja nada**: el
+bucle se para con `visibilitychange` (`RNF-PERF-05`). La calidad elegida a mano (Opciones, y hasta que
+existan, `localStorage['bb:quality']` = `alta`, `media`, `baja` o `apagada`) manda sobre la sonda; «reducir
+movimiento», la falta de WebGL y el ahorro de datos mandan sobre todo (apagada).
 
 **Reparto de la capa 0** (tarea 1.1). El *shader* pinta la **trama** de la cuña, que es lo único de la
 capa que cambia (la reactividad mueve el tamaño de punto, 1.6). El fondo granate de la cuña, la diagonal,
@@ -3274,6 +3282,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-06 | 0.6.10 | **Calidad del Escenario** (§3.5, tarea 1.2): umbrales de la sonda de 2 s (≥ 50 fps alta, ≥ 35 media, ≥ 20 baja, por debajo apagada), resultado guardado por sesión, pausa con la pestaña oculta y calidad a mano (`bb:quality`) por encima de la sonda. La media pasa de «trama a dpr 0,5» a «trama a dpr 1»: por debajo de 1 los puntos se emborronan (medido en la 1.1). |
 | 2026-10-05 | 0.6.9 | **Escenario, capa 0** (§3.5, tarea 1.1): el *shader* pinta solo la trama de la cuña; la cuña, la diagonal, los rayos, el número y la viñeta siguen en CSS (la versión Apagada) y la geometría la sigue poniendo el CSS, que el Escenario lee con sondas en el borde de la cuña. Dibujo bajo demanda; interruptor `bb:stage` para pruebas. La trama va al dpr del dispositivo (hasta 2), no a 0,75: con puntos de borde nítido, 0,75 se ve borroso en pantallas de densidad 2. |
 | 2026-10-04 | 0.6.8 | Cierre de la tarea 0.28 (rondas 4 a 6 sobre la v0.6.7; acta en `docs/planning/evidence/f0/arena/jurado.md`). **Móvil bajo hasta 780 px de alto** (414×736 y 412×780 caben; de 781 a ~840 px sigue abierto) y tarjeta plegada con `--bb-space-2` (§3.8.3). **Opción de menú** (§3.3): el dato y la tecla bajan a cualquier ancho si la etiqueta no cabe con su cuerpo mínimo, también con el espaciado de 1.4.12 aplicado después de cargar; en el móvil táctil la placa apilada conserva su alto; por debajo de 360 px la segunda línea parte. **Barra** (§3.4.1): despegada, el marco mide lo que hace falta para que al abrir solo se vea la fila de la firma. **Cursor**: definición de «otro control». **Pestañas** de los legales en una fila con teclado desde 360 px. **Interiores** (§3.8.14): centrado también de 721 a 960 px, cuña que sigue a la pieza desde 1200 px, rayos que siguen a la pieza en el marco simple de una columna, título de móvil que se ajusta antes de partir, autenticación que acaba sobre la barra. **Tableta vertical**: reparto del sobrante alrededor de la tarjeta. **Bucles**: la pausa deja cada bucle en reposo tras su pasada y las rutas los declaran. Anunciador: la etiqueta blanca queda para «¡A ESCUCHAR!». |
 | 2026-10-04 | 0.6.7 | Tercer pase del jurado sobre la v0.6.6 (tarea 0.28). **Decisiones**: a 320×568 el menú se desplaza (alto automático de las placas, mismo alto en reposo y «cabe sin desplazar» no caben juntas; §3.8.3); en la composición estrecha con teclado, «ELIGE MODO» va antes que la tarjeta; la tableta vertical escala con el ancho; en `voting` la barra no invita a subir; la barra se despega pasado el 15 % en cualquier ventana; la selección con el foco en otro control se pinta apagada (§3.3); las pestañas tienen relleno opaco. **Desviaciones registradas**: la «O» de la pegatina es 0,47 de su alto y en el lockup el margen hacia la tarjeta es `--bb-space-2` (§3.1); la etiqueta de la opción de menú baja el dato con su cuerpo mínimo de 16 px; fila de entrada que parte siempre y área táctil por pseudoelemento; halo con `--bb-focus-halo-spread`; ayuda de «ELIGE MODO» con un pie de 24–28 px como en la maqueta; interiores con la lista bajo la entrada, centrado bajo las pestañas, de medianil a medianil a partir de 1600 px y rayos que siguen a la pieza; vista previa de Opciones en un tablero opaco; 404 con la leyenda «Cuando llegue el pad» y el botón tras el resumen en el móvil bajo; crónica que parte en dos líneas con la letra ampliada. |
