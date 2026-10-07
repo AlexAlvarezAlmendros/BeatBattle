@@ -116,7 +116,7 @@
 }
 
 /*
- * Marca del umbral de escucha (Modo Jurado, «45 s»; maqueta `03-jurado` `.wv__mark`): un filete que
+ * Marca del umbral de escucha (Modo Jurado, «30 s»; maqueta `03-jurado` `.wv__mark`): un filete que
  * sobresale por arriba de la pista y su rótulo en una línea encima, sobre un panel. La onda deja salir
  * la marca por arriba (solo recorta en horizontal) y se aparta para hacerle sitio.
  */

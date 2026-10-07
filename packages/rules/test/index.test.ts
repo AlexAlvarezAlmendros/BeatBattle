@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import * as balance from '../src/balance'
+import * as entryAudio from '../src/entryAudio'
 import * as goldenEar from '../src/goldenEar'
 import * as rules from '../src/index'
 import * as levels from '../src/levels'
@@ -9,7 +10,7 @@ import * as prng from '../src/prng'
 import * as scoring from '../src/scoring'
 import * as season from '../src/season'
 
-const modules = { balance, goldenEar, levels, listen, loudness, prng, scoring, season }
+const modules = { balance, entryAudio, goldenEar, levels, listen, loudness, prng, scoring, season }
 
 describe('@beatbattle/rules', () => {
   it.each(Object.entries(modules))('el índice reexporta todo %s', (_, module) => {

@@ -67,7 +67,7 @@ integridad. Cada regla cierra una forma concreta de ganar sin tener el mejor bea
 | Regla | Lo que evita |
 |---|---|
 | **Voto ciego.** Hasta el sellado nadie sabe quién hizo qué: cada entrada sale con su título y un alias generado («Tigre Púrpura») | Votar al amigo o al nombre conocido |
-| **Umbral de escucha.** Para votar hay que haber oído `min(45 s, 50 %)` de la entrada (saltar con la onda no cuenta); el servidor comprueba además el tiempo de reloj | Puntuar sin escuchar |
+| **Umbral de escucha.** Para votar hay que haber oído 30 s de la entrada, que dura 4 min como mucho (saltar con la onda no cuenta); el servidor comprueba además el tiempo de reloj | Puntuar sin escuchar |
 | **Ningún número antes del sellado.** Ni medias, ni recuentos de votos, ni posiciones provisionales; tampoco en las imágenes para compartir ni en los emails | El voto en manada |
 | **Ronda justa.** La lista pone primero lo que aún no has votado y, dentro de eso, lo que menos votos lleva | Que a las entradas tardías no las escuche nadie |
 | **Sonoridad igualada** a −14 LUFS, solo atenuando | Que gane el master más fuerte |

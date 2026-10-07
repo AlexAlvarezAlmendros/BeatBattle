@@ -44,8 +44,8 @@ describe('HomePage: menú principal en «calendario vacío» y visitante (0.24, 
     expect(items[1]).toHaveAttribute('href', '/entrar')
     expect(items[1]).toHaveAttribute('data-cursor-active', 'true')
     expect(items.filter((item) => item.tabIndex === 0)).toEqual([items[1]])
-    // El panel de ayuda describe el modo elegido (región viva educada). «45 s» va unido por un espacio de no
-    // separación: se compara sin convertirlo en un espacio normal.
+    // El panel de ayuda describe el modo elegido (región viva educada). Se compara sin convertir los
+    // espacios de no separación en normales.
     expect(
       screen.getByText(t('home.modes.jury.helpVisitor'), {
         normalizer: getDefaultNormalizer({ collapseWhitespace: false }),

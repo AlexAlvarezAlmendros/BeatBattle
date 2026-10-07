@@ -36,7 +36,7 @@ export interface WaveformProps {
   onSeek?: (fraction: number) => void
   /** Duración en segundos: el valor del control y su texto («0:41 de 2:51»). */
   duration?: number
-  /** Marca del umbral de escucha en el Modo Jurado (fracción; «45 s»), con su rótulo. */
+  /** Marca del umbral de escucha en el Modo Jurado (fracción; «30 s»), con su rótulo. */
   threshold?: { at: number; label: string }
   /** El audio aún no está: barras de esqueleto y `aria-busy`. */
   loading?: boolean
@@ -56,7 +56,7 @@ export interface WaveformProps {
  *
  * Sin `onSeek` es una imagen (o decorativa). Con `onSeek`, un control deslizante: hover enseña dónde
  * caería el salto, el foco es el contorno genérico y al pulsar se ve el punto. En el Modo Jurado lleva
- * la marca del umbral («45 s») y la nota de que saltar con la onda no cuenta (la pone su pantalla).
+ * la marca del umbral («30 s») y la nota de que saltar con la onda no cuenta (la pone su pantalla).
  */
 export function Waveform({
   peaks,

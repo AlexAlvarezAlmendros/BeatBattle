@@ -546,7 +546,7 @@ function TileBlock() {
 function WaveformBlock() {
   const [progress, setProgress] = useState(0.24)
   const peaks = samplePeaks('onda-galeria')
-  const threshold = { at: 45 / 171, label: t('dev.gallery.arena.wave.threshold') }
+  const threshold = { at: 30 / 171, label: t('dev.gallery.arena.wave.threshold') }
   return (
     <GalleryBlock id="onda" title={t('dev.gallery.components.waveform')}>
       <GalleryRow wide>

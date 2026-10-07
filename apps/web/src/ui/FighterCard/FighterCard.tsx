@@ -32,7 +32,7 @@ export interface FighterCardProps {
   entry?: FighterEntry
   /**
    * Segundos de escucha que desbloquean las estrellas, si los manda el servidor. Por defecto, la regla de
-   * `RF-VOTE-04` (`listenThresholdMs` de `@beatbattle/rules`: min(45 s, 50 % de la duración)).
+   * `RF-VOTE-04` (`listenThresholdMs` de `@beatbattle/rules`: 30 s, o la entrada entera si dura menos).
    */
   listenSeconds?: number
   loading?: boolean
@@ -48,7 +48,7 @@ export interface FighterCardProps {
  * Ficha de luchador (guía §3.3, §3.8.13): la entrada enfocada en la selección. Retrato (la portada en
  * marco blanco con el sello «AUTORÍA OCULTA»), columna de cuatro teselas (tempo, tonalidad, duración,
  * género), **banda del alias** (placa negra con filete blanco y cuña roja; el alias se ajusta a su
- * ancho, `useFitText`) y panel opaco con el título, el estado propio («SIN VOTAR · Escucha 45 s…»), la
+ * ancho, `useFitText`) y panel opaco con el título, el estado propio («SIN VOTAR · Escucha 30 s…»), la
  * previa de la onda y los botones. Se actualiza al mover el cursor: su región es viva y educada.
  *
  * Integridad (§1.3): ni autoría, ni medias, ni recuentos, ni posición; el único estado es el del

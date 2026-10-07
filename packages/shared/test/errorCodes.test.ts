@@ -26,6 +26,14 @@ describe('catálogo de códigos de error', () => {
     })
   })
 
+  it('RF-ENT-03: el audio de una entrada que no vale se rechaza con su motivo (422)', () => {
+    expect(ERROR_STATUS).toMatchObject({
+      UNSUPPORTED_FORMAT: 422,
+      FILE_TOO_LARGE: 422,
+      DURATION_OUT_OF_RANGE: 422,
+    })
+  })
+
   it('los códigos son constantes en MAYÚSCULAS y sin repetir', () => {
     expect(new Set(ERROR_CODES).size).toBe(ERROR_CODES.length)
     for (const code of ERROR_CODES) expect(code).toMatch(/^[A-Z][A-Z0-9_]*$/)
