@@ -432,8 +432,11 @@ test.describe('Escenario, capas 1 y 2', () => {
     const [withView, withoutView] = shots
     if (!scratch || !withView || !withoutView) throw new Error('faltan capturas')
     // El mismo pintor, al mismo tamaño y densidad, y los dos por CPU: medido, 0 % con la GPU.
-    const ratio = await differingRatio(scratch, withView, withoutView, 48)
-    expect(ratio, `${(ratio * 100).toFixed(3)} % de píxeles distintos`).toBeLessThan(0.005)
+    const { ratio, box } = await differingRatio(scratch, withView, withoutView, 48)
+    expect(
+      ratio,
+      `${(ratio * 100).toFixed(3)} % de píxeles distintos en ${JSON.stringify(box)}`,
+    ).toBeLessThan(0.005)
     await scratch.context().close()
   })
 
