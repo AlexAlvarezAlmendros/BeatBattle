@@ -109,8 +109,8 @@ consentimiento y no se envía nada.
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 2.13 | `packages/emails` con React Email: cabecera (logo del juego en imagen y pegatina OTP), tarjeta, botón a prueba de balas (tabla + VML), pie con firma y baja; `lang="es"`, `role="presentation"`, `alt`, 14 px mínimo, modo oscuro; visor `pnpm emails:dev` con *fixtures* y galería de emails con capturas | ⬜ Listo | — | §3.8.12, §4.19.4 · `RF-NOTIF-03` |
-| 2.14 | Plantillas `auth.verify`, `auth.reset`, `auth.welcome`, `auth.security` y `account.deleted` con los textos del Anexo H, asunto ≤ 50 caracteres y texto plano completo | ⬜ Listo | 2.13 | §2.12, Anexo H · `RF-NOTIF-03` |
+| 2.13 | `packages/emails` con React Email: cabecera (logo del juego en imagen y pegatina OTP), tarjeta, botón a prueba de balas (tabla + VML), pie con firma y baja; `lang="es"`, `role="presentation"`, `alt`, 14 px mínimo, modo oscuro; visor `pnpm emails:dev` con *fixtures* y galería de emails con capturas | ✅ Hecho | — | §3.8.12, §4.19.4 · `RF-NOTIF-03` · **Hecho:** componentes (`Layout`, `Header`, `Card`, `Button`, `Footer`, textos), `renderEmail`, visor `pnpm emails:dev`, galería con capturas a 600 y 390 px (`evidence/f2/emails/`) e imágenes de cabecera con `tools/brand/email-images.mjs`. Pendiente: Chakra Petch como fuente web (hace falta una URL estable para sus ficheros) |
+| 2.14 | Plantillas `auth.verify`, `auth.reset`, `auth.welcome`, `auth.security` y `account.deleted` con los textos del Anexo H, asunto ≤ 50 caracteres y texto plano completo | ✅ Hecho | 2.13 | §2.12, Anexo H · `RF-NOTIF-03` · **Hecho:** las cinco plantillas con los textos del Anexo H; `templates.test.ts` (22): texto plano, accesibilidad, sin píxeles y asunto de 50 caracteres o menos, también con un nombre de 20 |
 
 ### Pantallas
 
@@ -163,6 +163,7 @@ para los avisos de las fases 3 a 7.
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-08 | 2.13, 2.14 | `packages/emails` con React Email (componentes, render, visor y galería) y las cinco plantillas de cuentas. Guía v0.6.24. |
 | 2026-10-08 | 2.8 | Cola de salida con presupuesto, reserva de servicio, reintentos y reglas al enviar. Guía v0.6.23 (`label_pick_on`, `to_address`). |
 | 2026-10-08 | 2.3 | Better Auth 1.7.7 fijado, esquema generado sin cascadas, perfil de productor y redirecciones de nombre, con su migración. Guía v0.6.22. |
 | 2026-10-08 | 2.2, 2.7 | Mailpit sin Docker (`pnpm mail:dev`) y el `Mailer` con sus tres transportes. Guía v0.6.21: el cupo lo calcula la cola, lista blanca de la preview en `MAIL_PREVIEW_ALLOWLIST` y reglas de arranque en producción. |

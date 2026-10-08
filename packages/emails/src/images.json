@@ -1,0 +1,13 @@
+{
+  "$comment": "Generado por tools/brand/email-images.mjs: no se edita a mano.",
+  "logo": {
+    "path": "/img/email/logo@2x.png",
+    "width": 296,
+    "height": 135
+  },
+  "slap": {
+    "path": "/img/email/otp-slap@2x.png",
+    "width": 136,
+    "height": 98
+  }
+}
