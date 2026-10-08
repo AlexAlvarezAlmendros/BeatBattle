@@ -1,4 +1,4 @@
-import { usernameProblem } from '@beatbattle/shared'
+import { SignupConsentsSchema, usernameProblem } from '@beatbattle/shared'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { APIError, createAuthMiddleware, isAPIError } from 'better-auth/api'
@@ -9,6 +9,8 @@ import * as schema from '../db/schema'
 import { producerProfile } from '../db/schema'
 import type { ServiceEmails } from '../email/service'
 import { maskEmail } from '../email/unsubscribe'
+import { ipHash } from '../lib/ipHash'
+import { recordSignupConsents } from '../modules/emailPrefs/service'
 import { isDisposableEmail } from './disposable'
 import { schemaOptions } from './options'
 import { describeUserAgent } from './userAgent'
@@ -25,6 +27,7 @@ export interface AuthDeps {
   db: Db
   emails: ServiceEmails
   now: () => number
+  newId: () => string
 }
 
 /**
@@ -115,6 +118,20 @@ export function createAuth(deps: AuthDeps) {
         const redirected =
           isAPIError(returned) && (returned.status === 'FOUND' || returned.statusCode === 302)
         if (isAPIError(returned) && !redirected) return
+        if (ctx.path === '/sign-up/email') {
+          // Las casillas del registro (§2.3): avisos y consentimientos, con su historial (`RF-NOTIF-16`).
+          const created = (returned as { user?: { id?: string } } | null)?.user?.id
+          const consents = SignupConsentsSchema.safeParse(
+            (ctx.body as { consents?: unknown } | undefined)?.consents ?? {},
+          )
+          if (created && consents.success)
+            await recordSignupConsents(db, created, consents.data, {
+              now: deps.now(),
+              ipHash: ipHash(ctx.headers?.get(CLIENT_IP_HEADER), config.auth.secret, deps.now()),
+              newId: deps.newId,
+            })
+          return
+        }
         if (ctx.path === '/verify-email') {
           // La verificación de la dirección nueva puede abrirse sin sesión (otro navegador): el token
           // (ya comprobado por Better Auth, que no ha devuelto error) dice de qué dirección a cuál.

@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.28 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.29 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -689,7 +689,14 @@ cuenta y conserva las preferencias.
 #### 2.12.4 Preferencias, frecuencia y horas de silencio
 
 - **Ajustes → Emails**: un interruptor por cada aviso, formato del lunes (combinado o separado),
-  consentimiento de marketing y la opción de la newsletter del sello (§2.16).
+  consentimiento de marketing y la opción de la newsletter del sello (§2.16). API: `GET`/`PUT
+  /api/me/email-prefs`, con los esquemas de `@beatbattle/shared` (`EmailPrefsSchema`).
+- **Consentimientos** (`RF-NOTIF-16`): marketing y newsletter del sello. Las casillas del registro
+  viajan en el propio alta (`consents` en el cuerpo de `sign-up/email`) y se guardan con origen
+  `registro`; las de Ajustes, con `ajustes`; las bajas, con `baja`. Solo se **añade** una fila cuando
+  el valor cambia, con la versión del texto mostrado (`CONSENT_TEXT_VERSIONS`: si cambia el texto,
+  cambia la versión) y el hash de la IP con sal semanal (§4.14). `email_pref.marketing_on` es el espejo
+  del último de marketing.
 - **Horas de silencio**: nada que no sea de servicio entre las 22:00 y las 08:00 (Madrid); se
   retiene hasta las 08:00.
 - **Tope**: como mucho **3 emails no de servicio por usuario y semana** (el del lunes cuenta como
@@ -3432,6 +3439,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-08 | 0.6.29 | **Preferencias y consentimientos** (tarea 2.12, §2.12.4): la API de Ajustes → Emails, las casillas del registro en el propio alta y el historial que solo añade cuando cambia el valor, con la versión del texto y el hash de la IP (sal semanal). |
 | 2026-10-08 | 0.6.28 | **Flujos de cuenta** (tarea 2.6, §2.3): el cambio de email se aprueba desde la dirección actual con un email nuevo del catálogo, `auth.change_email` (§2.12, Anexo H), y avisa a las dos direcciones; cambiar la contraseña y cerrar las demás sesiones avisan con `auth.security`. En Better Auth, una redirección (302) es un `APIError`: los *hooks* la tratan como éxito. |
 | 2026-10-08 | 0.6.27 | **Guardas de ruta** (tarea 2.5, §4.9): `requireSession`, `requireVerified` y `requireAdmin`, y la guarda de admin puesta sola en toda ruta bajo `/api/admin`. Nuevo código `EMAIL_NOT_VERIFIED` (403). |
 | 2026-10-08 | 0.6.26 | **Better Auth en el servidor** (tarea 2.4, §4.9): la ruta comodín, la sesión en cada petición, la IP para el rate limit, los errores propios (`EMAIL_DISPOSABLE` y `USERNAME_RESERVED`, 422), el número de carta y los emails por la cola. La lista de dominios desechables es la comunitaria (CC0), como datos. Las plantillas llevan el pragma del JSX automático: con `tsx` fallaban fuera del paquete. |
