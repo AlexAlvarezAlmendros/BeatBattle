@@ -58,6 +58,8 @@ export const paths = {
   signUp: () => '/registro',
   verify: () => '/verificar',
   recover: () => '/recuperar',
+  /** La página de baja del pie de los avisos (§2.12.4); el token lo pone el email. */
+  unsubscribe: (token: string) => `/baja?token=${encodeURIComponent(token)}`,
   admin: () => '/admin',
   legal: (doc: LegalDoc) => `/legal/${doc}`,
 } as const

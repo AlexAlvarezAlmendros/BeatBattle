@@ -46,6 +46,7 @@ const PLATE_KICKERS = {
   signIn: 'frame.plates.signIn',
   signUp: 'frame.plates.signUp',
   account: 'frame.plates.account',
+  emails: 'frame.plates.emails',
   admin: 'frame.plates.admin',
   legal: 'frame.plates.legal',
   notFound: 'frame.plates.notFound',
@@ -238,6 +239,17 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
                 simpleScreen({ kicker: PLATE_KICKERS.account, title: 'pages.recover.title' }),
               ),
               lazy: page(auth, (m) => m.RecoverPage),
+            },
+            {
+              path: 'baja',
+              handle: handle(
+                'public',
+                simpleScreen({ kicker: PLATE_KICKERS.emails, title: 'pages.unsubscribe.title' }),
+              ),
+              lazy: page(
+                () => import('../features/email/UnsubscribePage'),
+                (m) => m.UnsubscribePage,
+              ),
             },
             {
               path: 'admin',

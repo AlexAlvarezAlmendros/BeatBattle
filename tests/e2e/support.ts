@@ -78,6 +78,7 @@ export const ROUTES = [
   { path: '/registro', heading: 'Crear cuenta' },
   { path: '/verificar', heading: 'Verificar el email' },
   { path: '/recuperar', heading: 'Recuperar la contraseña' },
+  { path: '/baja?token=no-vale', heading: 'Baja de emails' },
   { path: '/admin', heading: 'Administración' },
   { path: '/legal/bases', heading: 'Bases de la competición' },
   { path: '/esto-no-existe', heading: 'Bonus stage' },

@@ -12,6 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@beatbattle/emails": "workspace:^",
     "@beatbattle/shared": "workspace:^",
     "@libsql/client": "0.18.0",
     "better-auth": "1.7.7",

@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.24 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.25 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2986,8 +2986,18 @@ CREATE TABLE entry_receipt_seq (week_id TEXT PRIMARY KEY, last INTEGER NOT NULL)
 #### 4.19.6 Bajas
 
 - Tokens de baja firmados con HMAC (`UNSUBSCRIBE_SECRET`) sobre `destinatario + tipo`, sin
-  caducidad: `GET /api/unsubscribe?token=` muestra la página (baja de ese tipo o de todo lo no
-  esencial) y `POST /api/unsubscribe/one-click?token=` atiende el RFC 8058.
+  caducidad (solo de avisos y marketing; uno de servicio no vale):
+  - La cabecera `List-Unsubscribe` lleva `POST /api/unsubscribe/one-click?token=` (RFC 8058). La llama
+    el cliente de correo sin `Origin` y con un formulario; es la única ruta que admite formularios, con
+    su parser en su propio contexto. Da de baja de ese tipo.
+  - El pie enlaza a la página **`/baja?token=`** de la web, en el marco simple de la arena: dice a
+    quién (enmascarado) y de qué tipo con `GET /api/unsubscribe?token=` y aplica «Solo estos» o «Todo
+    lo no esencial» con `POST /api/unsubscribe` (JSON, con `Origin`). Es un menú de juego: con el foco
+    en ningún control, ↑↓ e Intro van a sus placas.
+  - **Solo estos**: los interruptores del tipo (el lunes combinado, los dos) o, si es marketing, el
+    consentimiento retirado. **Todo lo no esencial**: todos los avisos, el marketing retirado y la
+    dirección suprimida (solo su hash). Un suscriptor sin cuenta que se da de baja del drop deja de estar
+    suscrito. Cada baja queda en `email_consent` (`source = baja`) y suma en `email_stat`.
 - Los rebotes los gestiona `bounceScan` (§4.19.2).
 
 ---
@@ -3400,6 +3410,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-08 | 0.6.25 | **Bajas y render de la cola** (tareas 2.9 y 2.10, §4.19.6): la página de baja es la pantalla `/baja?token=` de la web, sobre `GET` y `POST /api/unsubscribe`; la de un clic va en la cabecera. Qué apaga cada baja. El servidor renderiza la cola con `@beatbattle/emails` (`createRenderer`), y un tipo sin plantilla falla y se reintenta. |
 | 2026-10-08 | 0.6.24 | **Plantillas de email** (tareas 2.13 y 2.14, §3.8.12 y §4.19.4): el botón es una tabla con `bgcolor` en la celda, sin VML; las imágenes de la cabecera, con fondo negro propio; `renderEmail` y el contexto (URL pública, familia, página de baja, dirección postal); la galería y sus capturas. Chakra Petch como fuente web queda pendiente de una URL estable para sus ficheros. |
 | 2026-10-08 | 0.6.23 | **Cola de salida** (tarea 2.8, §4.19.3): qué se decide al enviar (familias, interruptores, consentimiento, supresión, motivos de `skipped`), la reclamación que impide enviar dos veces y el reparto del cupo con la reserva de servicio. `email_pref.label_pick_on` (la Elección del sello no tenía interruptor) y `email_outbox.to_address` (para `account.deleted`, cuando la cuenta ya no existe). |
 | 2026-10-08 | 0.6.22 | **Better Auth fijado en la 1.7.7** (tarea 2.3, §4.9): la configuración de referencia compila tal cual contra sus tipos. Las tablas se generan con su CLI (`auth:schema`), que quita las cascadas (§4.11). `producer_profile` y `username_redirect` (§4.11): el acento es `red`, `white` o `wine` (quedaba «8 claves» de antes de la Arena). Los reservados y el formato del nombre, en `@beatbattle/shared`. |
