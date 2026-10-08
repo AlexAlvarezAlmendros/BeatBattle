@@ -10,7 +10,8 @@ import { SettingsOptionsHelp, SettingsPreview } from './SettingsPreview'
 /*
  * Secciones de `/ajustes/*` (Opciones, §3.8.14; §2.3, §2.12.4, RNF-A11Y-08), en el orden de sus pestañas:
  * Sonido · Movimiento · Cuenta · Perfil · Emails · Sesiones · Privacidad · Accesibilidad. Una por ruta
- * para que cada fase sustituya la suya sin tocar las demás. Provisionales (0.10).
+ * para que cada fase sustituya la suya sin tocar las demás. Provisionales (0.10) las que aún no funcionan;
+ * Cuenta, Emails y Sesiones (Fase 2) viven en su propio fichero y su propio trozo diferido.
  */
 
 /** `/ajustes/sonido` */
@@ -51,24 +52,9 @@ function SettingsSectionPlaceholder({
   )
 }
 
-/** `/ajustes/cuenta` */
-export function AccountSettingsPage() {
-  return <SettingsSectionPlaceholder section="account" />
-}
-
 /** `/ajustes/perfil` */
 export function ProfileSettingsPage() {
   return <SettingsSectionPlaceholder section="profile" />
-}
-
-/** `/ajustes/emails` */
-export function EmailSettingsPage() {
-  return <SettingsSectionPlaceholder section="emails" />
-}
-
-/** `/ajustes/sesiones` */
-export function SessionsSettingsPage() {
-  return <SettingsSectionPlaceholder section="sessions" />
 }
 
 /** `/ajustes/privacidad` */

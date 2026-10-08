@@ -1,5 +1,6 @@
 import { type RefObject, useLayoutEffect, useRef } from 'react'
 import { Link } from 'react-router'
+import { playerOf, useSession } from '../../features/account/session'
 import { t } from '../../i18n'
 import { Frame } from '../../ui/Frame'
 import { Icon } from '../../ui/Icon'
@@ -7,6 +8,7 @@ import { useShortcuts } from '../../ui/shortcuts'
 import { TitlePlate } from '../../ui/TitlePlate'
 import { paths } from '../paths'
 import styles from './Hud.module.css'
+import { PlayerCard } from './PlayerCard'
 import type { ScreenConfig } from './screen'
 import { FrameSlotTarget } from './slots'
 import { useSound } from './soundStore'
@@ -15,7 +17,8 @@ import { useSound } from './soundStore'
  * HUD superior del marco de juego (guía §3.4.1; tarea 0.23): rejilla de tres columnas.
  *
  * - **Izquierda, el jugador** (hueco `hudPlayer`): sin sesión, «1P · PULSA PARA UNIRTE», que lleva a
- *   entrar. Con sesión, la pantalla pone su ficha (avatar, nivel, medidor de XP).
+ *   entrar. Con sesión, su ficha (avatar, nivel, medidor de XP) en todas las pantallas de juego; el menú
+ *   pone la suya con lo que sabe de la semana.
  * - **Centro, el contexto** (hueco `hudCenter`): la placa de título de las pantallas interiores (de la
  *   configuración de la ruta) o lo que ponga la pantalla (el reloj de ronda en el menú).
  * - **Derecha** (hueco `hudRight`, temporada y racha) y el **botón de sonido** (44 px, `aria-pressed`,
@@ -33,7 +36,7 @@ export function Hud({ screen }: { screen: ScreenConfig }) {
       <FrameSlotTarget
         name="hudPlayer"
         className={styles.player}
-        fallback={screen.simple ? null : <JoinPrompt />}
+        fallback={screen.simple ? null : <SessionPlayer />}
       />
       <FrameSlotTarget
         name="hudCenter"
@@ -154,6 +157,12 @@ export function useHudPlayerBox(ref: RefObject<HTMLElement | null>): void {
       clear()
     }
   }, [ref])
+}
+
+/** El jugador de la sesión (§3.4.1): su ficha o, sin sesión (o mientras se lee), «PULSA PARA UNIRTE». */
+function SessionPlayer() {
+  const me = useSession((state) => state.me)
+  return me ? <PlayerCard {...playerOf(me)} /> : <JoinPrompt />
 }
 
 /** «1P · PULSA PARA UNIRTE» (§3.4.1, sin sesión): lleva a entrar. */

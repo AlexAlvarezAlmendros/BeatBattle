@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { useSession } from '../../features/account/session'
 import { t } from '../../i18n'
 import { useLoops } from '../../ui/loops'
 import { useShortcuts } from '../../ui/shortcuts'
@@ -54,6 +55,28 @@ afterEach(() => {
 })
 
 describe('RootLayout: marco de juego (0.23, §3.4.1)', () => {
+  it('con sesión, el HUD de las pantallas interiores lleva la ficha del jugador, no «PULSA PARA UNIRTE»', async () => {
+    const me = {
+      id: 'u1',
+      email: 'aina@example.com',
+      emailVerified: true,
+      username: 'aina',
+      displayUsername: 'Aina',
+      role: 'user' as const,
+      cardNumber: 7,
+      xp: 0,
+    }
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ data: me }), { headers: { 'content-type': 'application/json' } }),
+    )
+    useSession.setState({ status: 'signedIn', me })
+    renderFrame('/como-funciona')
+    const hud = screen.getByRole('banner')
+    expect(await within(hud).findByText('Aina')).toBeInTheDocument()
+    expect(within(hud).queryByRole('link', { name: t('frame.hud.joinLabel') })).toBeNull()
+    act(() => useSession.setState({ status: 'anonymous', me: null }))
+  })
+
   it('pinta el HUD, el contenido y la barra de controles con la firma del sello (RF-OTP-01)', () => {
     renderFrame()
     const hud = screen.getByRole('banner')

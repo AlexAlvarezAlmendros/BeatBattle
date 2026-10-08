@@ -1,4 +1,4 @@
-import { SignupConsentsSchema, usernameProblem } from '@beatbattle/shared'
+import { describeUserAgent, SignupConsentsSchema, usernameProblem } from '@beatbattle/shared'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { APIError, createAuthMiddleware, isAPIError } from 'better-auth/api'
@@ -13,7 +13,6 @@ import { ipHash } from '../lib/ipHash'
 import { recordSignupConsents } from '../modules/emailPrefs/service'
 import { isDisposableEmail } from './disposable'
 import { schemaOptions } from './options'
-import { describeUserAgent } from './userAgent'
 
 /** Cabecera interna con la IP que ha resuelto Fastify (respeta `trustProxy`); la de fuera se borra. */
 export const CLIENT_IP_HEADER = 'x-bb-client-ip'
@@ -110,8 +109,16 @@ export function createAuth(deps: AuthDeps) {
         },
       },
     },
-    // Avisos de seguridad (`auth.security`): contraseña cambiada, sesiones cerradas y email cambiado.
     hooks: {
+      // El dominio desechable se rechaza al pedir el cambio de email (`RF-AUTH-09`), no al final: el
+      // formulario de Ajustes → Cuenta lo dice en el campo, antes de mandar ningún email.
+      before: createAuthMiddleware(async (ctx) => {
+        if (ctx.path !== '/change-email') return
+        const newEmail = (ctx.body as { newEmail?: unknown } | undefined)?.newEmail
+        if (typeof newEmail === 'string' && isDisposableEmail(newEmail))
+          throw reject('EMAIL_DISPOSABLE', 'Ese dominio de email no se admite.')
+      }),
+      // Avisos de seguridad (`auth.security`): contraseña cambiada, sesiones cerradas y email cambiado.
       after: createAuthMiddleware(async (ctx) => {
         const returned = ctx.context.returned
         // Better Auth redirige lanzando un `APIError` con 302 (`FOUND`): eso no es un fallo.

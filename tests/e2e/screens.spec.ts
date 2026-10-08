@@ -769,6 +769,9 @@ for (const viewport of [
  * tablero estrecho, el nombre cede su anchura y el medidor baja a una segunda línea (a 1280 × 720 y a
  * 1024 × 768, «TAMAÑO / DE / TEXTO» partía en tres).
  */
+/** Secciones de Opciones que ya funcionan (§3.8.14): su cuña lleva el emblema, no la vista previa. */
+const WORKING_SETTINGS = ['/ajustes/cuenta', '/ajustes/emails', '/ajustes/sesiones']
+
 for (const viewport of [
   { width: 1440, height: 900 },
   { width: 1366, height: 657 },
@@ -792,6 +795,11 @@ for (const viewport of [
           page.getByRole('navigation', { name: TAB_SCREENS[0]!.nav }).locator('a[aria-current="page"]'),
         ).toHaveAttribute('href', path)
         await settle(page)
+        // Las secciones que ya funcionan (Fase 2) llevan su emblema, no la vista previa.
+        if (WORKING_SETTINGS.includes(path)) {
+          await expect(page.locator(`${PIECE} figure`)).toHaveCount(0)
+          continue
+        }
         const plates = await page.evaluate(
           (piece) =>
             [...document.querySelectorAll(`${piece} figure li`)].map((plate) => {
@@ -987,10 +995,10 @@ for (const colorScheme of ['dark', 'light'] as const) {
       page,
     }) => {
       await page.emulateMedia({ forcedColors: 'active', colorScheme })
-      // Movimiento: conmutadores «◀ NO ▶»; Cuenta: acciones «Cambiar ▸».
+      // Movimiento: conmutadores «◀ NO ▶»; Perfil: acciones «Editar ▸» (Cuenta ya funciona).
       for (const { path, heading, arrows } of [
         { path: '/ajustes/movimiento', heading: 'Movimiento', arrows: 6 },
-        { path: '/ajustes/cuenta', heading: 'Cuenta', arrows: 4 },
+        { path: '/ajustes/perfil', heading: 'Perfil', arrows: 4 },
       ]) {
         await open(page, path, heading)
         await settle(page)
