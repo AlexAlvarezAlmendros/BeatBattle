@@ -37,6 +37,7 @@ export const EMAIL_CATALOG = {
   'auth.reset': service(),
   'auth.welcome': service(1),
   'auth.security': service(),
+  'auth.change_email': service(),
   'alert.confirm': service(),
   'entry.receipt': service(),
   'entry.failed': service(),

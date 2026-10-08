@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.27 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.28 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -253,6 +253,12 @@ campañas y packs exclusivos de loops de Beat Battle, y la newsletter de Other P
 
 **Verificación.** Email con enlace (válido 24 h). Al verificar se inicia sesión y se dispara la
 animación de bienvenida (§3.8.9). Los dominios de email desechables se rechazan.
+
+**Cambio de email.** Se aprueba desde la dirección actual (`auth.change_email`), después la nueva recibe
+su verificación y, al verificarla, las dos reciben `auth.security`. El último enlace puede abrirse sin
+sesión (otro navegador): el aviso sale del propio token de verificación, sin estado en memoria.
+**Contraseña.** Cambiarla o «Cerrar las demás» sesiones avisa con `auth.security` (qué, cuándo y desde
+qué navegador, resumido: «Chrome en Linux»); restablecerla revoca todas las sesiones (`RF-AUTH-08`).
 
 **Perfil público** (`/p/:username`): avatar, nombre, rango y nivel, bio (160 caracteres), ciudad,
 enlaces (Instagram, SoundCloud, YouTube, Spotify, BeatStars), color de acento (rojo, blanco o
@@ -621,6 +627,7 @@ distintas:
 | `auth.reset` | Servicio | «He olvidado mi contraseña» | El usuario | Inmediato |
 | `auth.welcome` | Servicio | Email verificado | El usuario | Inmediato |
 | `auth.security` | Servicio | Cambio de contraseña o de email (a la dirección antigua y a la nueva), cuenta social vinculada, sesiones cerradas | El usuario | Inmediato |
+| `auth.change_email` | Servicio | Petición de cambio de email: aprobarlo desde la dirección actual | El usuario (dirección actual) | Inmediato |
 | `alert.confirm` | Servicio | Suscripción a la alerta de drop sin cuenta | El visitante | Inmediato |
 | `entry.receipt` | Servicio | **Entrada verificada y aceptada** | El participante | Inmediato (< 1 min) |
 | `entry.failed` | Servicio | La verificación o la medición rechazan la subida | El participante | Inmediato |
@@ -3373,6 +3380,7 @@ fórmula de Pearson sobre rangos. Casos de prueba: sin empates, `[1,2,3,4,5]` fr
 | `auth.reset` | «Restablece tu contraseña» | Botón, caducidad 1 h, aviso de que se cerrarán las sesiones |
 | `auth.welcome` | «Bienvenido a la batalla, <nombre>» | Tu carta de productor (imagen), cómo funciona en 3 pasos, sample en curso con cuenta atrás, ajustes de email |
 | `auth.security` | «Han cambiado la contraseña de tu cuenta» (y variantes) | Qué ha cambiado, cuándo, desde qué navegador y «No he sido yo» |
+| `auth.change_email` | «Confirma el cambio de email de tu cuenta» | La dirección nueva enmascarada, botón «Aprobar el cambio», qué hacer si no ha sido él |
 | `alert.confirm` | «Confirma tu alerta de drop» | Botón de confirmar, caducidad 7 días |
 | `entry.receipt` | «Recibo: tu beat está en la batalla #41» | Ticket con nº de recibo, alias, título, metadatos, informe técnico (LUFS, ajuste, pico real, onda), hora de recepción, huella, botones (§2.12.1) |
 | `entry.failed` | «No hemos podido aceptar tu beat» | Motivo, qué hacer, enlace a `/subir` con la ficha conservada |
@@ -3424,6 +3432,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-08 | 0.6.28 | **Flujos de cuenta** (tarea 2.6, §2.3): el cambio de email se aprueba desde la dirección actual con un email nuevo del catálogo, `auth.change_email` (§2.12, Anexo H), y avisa a las dos direcciones; cambiar la contraseña y cerrar las demás sesiones avisan con `auth.security`. En Better Auth, una redirección (302) es un `APIError`: los *hooks* la tratan como éxito. |
 | 2026-10-08 | 0.6.27 | **Guardas de ruta** (tarea 2.5, §4.9): `requireSession`, `requireVerified` y `requireAdmin`, y la guarda de admin puesta sola en toda ruta bajo `/api/admin`. Nuevo código `EMAIL_NOT_VERIFIED` (403). |
 | 2026-10-08 | 0.6.26 | **Better Auth en el servidor** (tarea 2.4, §4.9): la ruta comodín, la sesión en cada petición, la IP para el rate limit, los errores propios (`EMAIL_DISPOSABLE` y `USERNAME_RESERVED`, 422), el número de carta y los emails por la cola. La lista de dominios desechables es la comunitaria (CC0), como datos. Las plantillas llevan el pragma del JSX automático: con `tsx` fallaban fuera del paquete. |
 | 2026-10-08 | 0.6.25 | **Bajas y render de la cola** (tareas 2.9 y 2.10, §4.19.6): la página de baja es la pantalla `/baja?token=` de la web, sobre `GET` y `POST /api/unsubscribe`; la de un clic va en la cabecera. Qué apaga cada baja. El servidor renderiza la cola con `@beatbattle/emails` (`createRenderer`), y un tipo sin plantilla falla y se reintenta. |
