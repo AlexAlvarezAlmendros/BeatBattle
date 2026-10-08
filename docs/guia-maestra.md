@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.17 · 2026-10-07 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.18 · 2026-10-07 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1992,7 +1992,7 @@ con el DOM. Las versiones se fijan en la tarea 0.1, alineadas con las de Orchard
 | Autenticación | **Better Auth** (adaptador Drizzle) con los plugins `username`, `admin` y `haveIBeenPwned` | Decisión del usuario. Aquí sí hay email, así que encaja (Orchard la descartó porque no pedía email) |
 | Base de datos | **libSQL**: Turso (UE) en producción, fichero o `sqld` en local; **Drizzle ORM** | Como Orchard; restricciones únicas para votos y entradas |
 | Almacenamiento | **Cloudinary** (subida firmada directa, entrega firmada, transformaciones) | Mismo sistema que Other People |
-| Medición de audio en servidor | **ffmpeg** (`ffmpeg-static`) con `ebur128` | Sonoridad y forma de onda autoritativas; viabilidad en Vercel a validar en la Fase 1 |
+| Medición de audio en servidor | **ffmpeg** (`ffmpeg-static`) con `ebur128` | Sonoridad y forma de onda autoritativas; validado en Vercel en la Fase 1 (*spike* 1.8: ~80 MB de función, 3,7 s en frío para 52 MB) |
 | Email | **nodemailer** + **Gmail** (SMTP con contraseña de aplicación) + **React Email**; **Mailpit** en local | Decisión del usuario: el mismo sistema que el sello y sin coste. Sus límites se gestionan con presupuesto diario y cola (§4.19) |
 | Imágenes OG | **satori + resvg** (`@vercel/og`) | Imágenes con la dirección de arte del juego en servidor |
 | Tests | **Vitest**, **fast-check**, **Testing Library**, **Playwright** | Unitarios, propiedades, componentes y E2E |
@@ -2279,15 +2279,25 @@ Al registrar la entrada:
 2. **Admin API** `resource(public_id)` → existe, está en la carpeta esperada, `bytes ≤ 100 MB`,
    formato permitido, `30 s ≤ duration ≤ 240 s` (`validateEntryAudio`), creado después del *intent*. Se guarda el `etag`
    para detectar duplicados (`RF-ENT-11`).
-3. **Medición**: ffmpeg lee el original por HTTPS (URL firmada temporal) y calcula sonoridad
-   integrada, pico real y la forma de onda de 1000 bins.
+3. **Medición**: Node descarga el original con una URL firmada temporal y lo pasa a ffmpeg por la
+   entrada estándar según llega (`pipe:0`, sin disco); ffmpeg, en una sola pasada (`asplit`), calcula
+   sonoridad integrada y pico real (`ebur128=peak=true`) y saca la señal a 8 kHz mono para la forma de
+   onda de 1000 bins. ffmpeg no abre la URL él mismo: el binario estático de `ffmpeg-static` da un fallo
+   de segmento al resolver DNS. El binario entra en la función con `includeFiles`
+   (`node_modules/ffmpeg-static/ffmpeg`), y el script de instalación de `ffmpeg-static`, que lo descarga,
+   tiene que estar permitido en el gestor de paquetes (`onlyBuiltDependencies` desde pnpm 10); la CI
+   comprueba que el binario existe.
 4. Entrada, XP y logros se escriben en un único `batch`.
 5. Si cualquier paso falla, se borra el recurso y se devuelve el motivo.
 
 Si la medición tarda más que el límite de la función, la entrada se crea en estado `processing`
 (visible solo para su dueño) y el siguiente `tick` la completa.
 
-**Plan B** si ffmpeg no cabe o no rinde en Vercel (lo decide el *spike* 1.8): el cliente mide la
+El *spike* 1.8 lo validó en Vercel (`fra1`): con un WAV de 52 MB, 3,7 s en frío y ~2,5 s en caliente,
+−10,0 LUFS medidos sobre una referencia de −10, 124 MB de memoria y ~80 MB de función (evidencia en
+`docs/planning/evidence/f1/ffmpeg/`).
+
+**Plan B** (reserva; el *spike* 1.8 no lo necesitó): el cliente mide la
 sonoridad en la subida y los primeros clientes que escuchan cada entrada miden el derivado y
 envían su medición; el servidor usa la mediana cuando hay 3 y marca las discrepancias de más de
 2 LU para revisión.
@@ -2970,7 +2980,7 @@ F7 (logros); F10 cierra.
 | Poca participación las primeras semanas (sin entradas no hay juego) | Alta | Alto | Beta cerrada con productores del entorno del sello; semanas de arranque con samples muy «flipeables»; widget en la web del sello; emails de drop |
 | Voto en manada o brigadas de amigos | Alta | Alto | Voto ciego, umbral de escucha, verificación de email, bayesiana, informe de anomalías, anulación de votos |
 | Coste de Cloudinary al crecer, o gastar la cuota del sello | Media | Alto | Cuenta propia, derivado a 192 kb/s, retención a 8 semanas, alerta al 80 %, interfaz `AudioStorage` para mover el archivo a R2 |
-| ffmpeg no cabe o es lento en Vercel | Media | Medio | *Spike* 1.8 con criterio claro; plan B de medición en cliente con mediana (§4.8.4) |
+| ffmpeg no cabe o es lento en Vercel | Baja (validado en el *spike* 1.8: 3,7 s en frío para 52 MB) | Medio | Ficheros cerca de 100 MB rozan los 8 s: estado `processing` y `tick`; plan B de medición en cliente con mediana (§4.8.4) |
 | El 3D y los efectos van mal en móviles modestos | Media | Medio | *Spike* de la Fase 1, calidad automática, fondo estático de la arena, presupuestos |
 | Problemas de derechos con un sample | Media | Alto | Licencia escrita obligatoria por sample, bases claras, retirada rápida (§2.13) |
 | Plagio o entradas que no usan el sample | Media | Medio | Declaración en la subida, denuncias, duplicados por `etag`, descalificación con re-sellado |
@@ -3334,6 +3344,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-07 | 0.6.18 | **ffmpeg en Vercel validado** (*spike* 1.8, §4.8.4): cabe (~80 MB de función) y mide un WAV de 52 MB en 3,7 s en frío con la sonoridad exacta. La descarga la hace Node y ffmpeg lee de la entrada estándar (el ffmpeg estático falla al resolver DNS); el binario va con `includeFiles` y su script de instalación tiene que estar permitido. El plan B queda como reserva. |
 | 2026-10-07 | 0.6.17 | **Cuenta de Cloudinary propia** (decisión del usuario, §4.8.1). Spike de la 1.7 hecho: subida firmada por trozos, derivado listo en ~7 s para 4 min, entrega firmada con CORS, y el original sin firma da 404 (`RF-STO-02` corregido: no 401); `RF-STO-06` ya se comprueba al arrancar (también en las previews de Vercel, `VERCEL_ENV`). |
 | 2026-10-07 | 0.6.16 | **Pantalla de título** (§3.8.1, tarea 1.13): sale al entrar en el menú la primera vez de la sesión (no en un enlace directo a una pantalla interior), se desactiva con `bb:title`; teclas (todas entran salvo Tab y M; S, sin sonido); el disco es un lienzo 2D porque la puerta va por encima del lienzo del Escenario (§3.5 capa 1 corregido); columna sin diagonal en ≤ 960 px. Pendiente: la extrusión del logo capa a capa (Anexo E). |
 | 2026-10-07 | 0.6.15 | **Banco de la Fase 1** (tarea 1.11, §4.7.6, §4.17): 60 fps en escritorio y en Android emulado (CPU ×4; sin dispositivo real, decisión del usuario), y la sonda apaga el Escenario con una GPU por software. El contexto de audio pide la latencia mínima con puntero fino (`latencyHint: 0`): la parte de la app queda en ~4 ms, pero la salida de PipeWire (24–48 ms) deja `RD-SND-05` sin cumplir en Linux; decisión abierta para el GO/NO-GO. |

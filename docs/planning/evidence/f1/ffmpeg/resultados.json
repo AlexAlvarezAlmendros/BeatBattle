@@ -1,0 +1,14 @@
+{
+  "fecha": "2026-10-07",
+  "despliegue": "dpl_F3AmfKhTdVfAgiDjuMSmo17dpjag (proyecto de prueba beatbattle-ffmpeg-spike, fra1)",
+  "fichero": "beatbattle-dev/spike/ffmpeg-50mb (WAV 48 kHz 24 bit estéreo, 180 s, 51.840.044 bytes, seno de 997 Hz a −10 LUFS)",
+  "local": { "coldStart": true, "ffmpegMs": 4666, "integratedLufs": -10, "truePeakDbfs": -10, "waveform": { "bins": 1000, "seconds": 180 } },
+  "vercel": [
+    { "llamada": "primera (instancia precalentada al desplegar)", "coldStart": true, "msSinceBoot": 62736, "ffmpegMs": 3360, "totalMs": 3372, "integratedLufs": -10, "truePeakDbfs": -10, "memoryMb": 113, "region": "fra1" },
+    { "llamada": "caliente", "coldStart": false, "ffmpegMs": 2343, "totalMs": 2355, "paredMs": 2677, "integratedLufs": -10, "truePeakDbfs": -10, "memoryMb": 115 },
+    { "llamada": "caliente", "coldStart": false, "ffmpegMs": 2281, "totalMs": 2293, "paredMs": 2448, "integratedLufs": -10, "truePeakDbfs": -10, "memoryMb": 119 },
+    { "llamada": "fría (instancia nueva, arrancada 26 ms antes)", "coldStart": true, "msSinceBoot": 26, "ffmpegMs": 2706, "totalMs": 2717, "paredMs": 3656, "integratedLufs": -10, "truePeakDbfs": -10, "memoryMb": 124 }
+  ],
+  "rechazos": { "tokenMalo": 401, "publicIdFueraDelPrefijo": 422 },
+  "tamano": { "ffmpegBytes": 79826272, "ffmpegGzipMB": 28.1, "cacheDeBuildMB": 28.39, "limiteVercelSinComprimirMB": 250 }
+}

@@ -1,0 +1,10 @@
+{
+  "regions": ["fra1"],
+  "functions": {
+    "api/measure.js": {
+      "maxDuration": 60,
+      "memory": 2048,
+      "includeFiles": "node_modules/ffmpeg-static/ffmpeg"
+    }
+  }
+}
