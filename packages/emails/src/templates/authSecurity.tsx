@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource react */
 import { Button } from '../components/Button'
 import { Card } from '../components/Card'
 import { Layout } from '../components/Layout'

@@ -102,21 +102,37 @@ describe('loadEnv', () => {
 
   it('guarda §4.12: BB_TEST_CLOCK=1 con NODE_ENV=production impide arrancar', () => {
     for (const flag of ['1', 'true']) {
-      const e = envError({ NODE_ENV: 'production', BB_PUBLIC_URL: 'https://b.example', BB_TEST_CLOCK: flag })
+      const e = envError({
+        NODE_ENV: 'production',
+        BB_PUBLIC_URL: 'https://b.example',
+        BB_TEST_CLOCK: flag,
+        BETTER_AUTH_SECRET: 'x'.repeat(40),
+      })
       expect(e.issues).toEqual([
         { variable: 'BB_TEST_CLOCK', message: expect.stringContaining('NODE_ENV=production') },
       ])
     }
     // la guarda se informa aunque haya otros errores a la vez
     const both = envError({ NODE_ENV: 'production', BB_TEST_CLOCK: '1', PORT: 'x' })
-    expect(both.issues.map((i) => i.variable).sort()).toEqual(['BB_PUBLIC_URL', 'BB_TEST_CLOCK', 'PORT'])
+    expect(both.issues.map((i) => i.variable).sort()).toEqual([
+      'BB_PUBLIC_URL',
+      'BB_TEST_CLOCK',
+      'BETTER_AUTH_SECRET',
+      'PORT',
+    ])
   })
 
-  it('en producción exige BB_PUBLIC_URL y permite el reloj apagado', () => {
+  it('en producción exige BB_PUBLIC_URL y el secreto de Better Auth, y permite el reloj apagado', () => {
     expect(envError({ NODE_ENV: 'production' }).issues).toEqual([
+      { variable: 'BETTER_AUTH_SECRET', message: 'es obligatoria en producción' },
       { variable: 'BB_PUBLIC_URL', message: 'es obligatoria en producción' },
     ])
-    const c = loadEnv({ NODE_ENV: 'production', BB_PUBLIC_URL: 'https://b.example', BB_TEST_CLOCK: '0' })
+    const c = loadEnv({
+      NODE_ENV: 'production',
+      BB_PUBLIC_URL: 'https://b.example',
+      BB_TEST_CLOCK: '0',
+      BETTER_AUTH_SECRET: 'x'.repeat(40),
+    })
     expect(c.testClock).toBe(false)
     // en producción, sin ALLOWED_ORIGINS solo vale el origen público (nada de localhost)
     expect(c.allowedOrigins).toEqual(['https://b.example'])
@@ -124,6 +140,7 @@ describe('loadEnv', () => {
       NODE_ENV: 'production',
       BB_PUBLIC_URL: 'https://b.example',
       ALLOWED_ORIGINS: 'https://www.b.example',
+      BETTER_AUTH_SECRET: 'x'.repeat(40),
     })
     expect(extra.allowedOrigins).toEqual(['https://www.b.example', 'https://b.example'])
   })

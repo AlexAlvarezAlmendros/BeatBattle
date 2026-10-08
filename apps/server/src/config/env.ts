@@ -77,6 +77,13 @@ const EnvSchema = z.object({
   UNSUBSCRIBE_SECRET: z.string().min(32, { error: 'debe tener al menos 32 caracteres' }).optional(),
   /** Preview: los únicos destinatarios permitidos (direcciones o `@dominio`, separados por comas). */
   MAIL_PREVIEW_ALLOWLIST: z.string().optional(),
+  /** Secreto de Better Auth (§4.9): firma sesiones y tokens. Obligatorio en producción. */
+  BETTER_AUTH_SECRET: z.string().min(32, { error: 'debe tener al menos 32 caracteres' }).optional(),
+  /** OAuth (§4.9, `RF-AUTH-05`): cada proveedor, con su id y su secreto juntos o sin ninguno. */
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  DISCORD_CLIENT_ID: z.string().optional(),
+  DISCORD_CLIENT_SECRET: z.string().optional(),
 })
 
 export interface AppConfig {
@@ -99,7 +106,25 @@ export interface AppConfig {
   storage: StorageConfig | null
   /** Email (§4.19.1). */
   mail: MailConfig
+  /** Cuentas (§4.9). */
+  auth: AuthConfig
 }
+
+export interface OAuthClient {
+  clientId: string
+  clientSecret: string
+}
+
+export interface AuthConfig {
+  secret: string
+  /** Cookies `__Secure-` (solo HTTPS): en producción y preview. */
+  secureCookies: boolean
+  google: OAuthClient | null
+  discord: OAuthClient | null
+}
+
+/** Secreto de Better Auth de desarrollo y tests: nunca vale en producción (`loadEnv` exige otro). */
+export const DEV_AUTH_SECRET = 'beatbattle-dev-auth-secret-no-usar-en-produccion'
 
 /**
  * Transporte de email: `memory` en los tests, `workspace` con las credenciales del Workspace, `smtp`
@@ -247,6 +272,19 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
       message: 'la preview solo envía a una lista blanca: es obligatoria con el Workspace (§4.19.1)',
     })
 
+  // Cuentas (§4.9).
+  if (production && cleaned.BETTER_AUTH_SECRET === undefined)
+    issues.push({ variable: 'BETTER_AUTH_SECRET', message: 'es obligatoria en producción' })
+  for (const provider of ['GOOGLE', 'DISCORD'] as const) {
+    const id = `${provider}_CLIENT_ID` as const
+    const secret = `${provider}_CLIENT_SECRET` as const
+    if ((cleaned[id] === undefined) !== (cleaned[secret] === undefined))
+      issues.push({
+        variable: cleaned[id] === undefined ? id : secret,
+        message: 'el id y el secreto van juntos',
+      })
+  }
+
   let publicUrl = DEV_PUBLIC_URL
   if (cleaned.BB_PUBLIC_URL === undefined) {
     if (production) issues.push({ variable: 'BB_PUBLIC_URL', message: 'es obligatoria en producción' })
@@ -296,6 +334,18 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
             prefix: e.BB_CLOUDINARY_PREFIX,
           }
         : null,
+    auth: {
+      secret: e.BETTER_AUTH_SECRET ?? DEV_AUTH_SECRET,
+      secureCookies: production,
+      google:
+        e.GOOGLE_CLIENT_ID && e.GOOGLE_CLIENT_SECRET
+          ? { clientId: e.GOOGLE_CLIENT_ID, clientSecret: e.GOOGLE_CLIENT_SECRET }
+          : null,
+      discord:
+        e.DISCORD_CLIENT_ID && e.DISCORD_CLIENT_SECRET
+          ? { clientId: e.DISCORD_CLIENT_ID, clientSecret: e.DISCORD_CLIENT_SECRET }
+          : null,
+    },
     mail: {
       transport:
         e.NODE_ENV === 'test'

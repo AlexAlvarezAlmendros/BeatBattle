@@ -13,7 +13,12 @@ import { makeApp } from './helpers'
 const REPO_ROOT = fileURLToPath(new URL('../../../', import.meta.url))
 
 /** Mínimo para arrancar en producción, con BD en memoria y sin registro. */
-const PROD = { BB_PUBLIC_URL: 'https://battle.example', DATABASE_URL: ':memory:', LOG_LEVEL: 'silent' }
+const PROD = {
+  BB_PUBLIC_URL: 'https://battle.example',
+  DATABASE_URL: ':memory:',
+  LOG_LEVEL: 'silent',
+  BETTER_AUTH_SECRET: 'x'.repeat(40),
+}
 
 const apps: FastifyInstance[] = []
 const servers: Server[] = []
@@ -38,6 +43,7 @@ describe('serverlessEnv', () => {
       VERCEL_ENV: 'preview',
       VERCEL_BRANCH_URL: 'beatbattle-git-f3-otherpeople.vercel.app',
       VERCEL_URL: 'beatbattle-abc123-otherpeople.vercel.app',
+      BETTER_AUTH_SECRET: 'x'.repeat(40),
     }
     const config = loadEnv(serverlessEnv({ ...preview, ALLOWED_ORIGINS: 'https://extra.example' }))
     expect(config.allowedOrigins).toEqual([

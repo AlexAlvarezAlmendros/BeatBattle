@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource react */
 import { Column, Img, Link, Row, Section } from '@react-email/components'
 import { useEmail } from '../context'
 import images from '../images.json'

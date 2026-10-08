@@ -102,6 +102,11 @@ export interface DrainDeps {
   render: RenderEmail
   unsubscribeUrl: UnsubscribeUrl
   dailyLimit: number
+  /**
+   * Avisa de un envío fallido (para el registro): el id de la cola, el tipo, el intento y el error, nunca la
+   * dirección (§4.13 «Registros»).
+   */
+  onSendError?: (info: { id: string; kind: string; attempts: number; final: boolean; error: string }) => void
 }
 
 export interface DrainResult {
@@ -288,6 +293,13 @@ async function deliver(deps: DrainDeps, mailer: Mailer, row: OutboxRow): Promise
     }
     const attempts = row.attempts + 1
     const at = retryAt(deps.now(), attempts)
+    deps.onSendError?.({
+      id: row.id,
+      kind,
+      attempts,
+      final: at === null,
+      error: error instanceof Error ? `${error.name}: ${error.message}`.slice(0, 300) : 'desconocido',
+    })
     await db
       .update(emailOutbox)
       .set(at === null ? { status: 'failed', attempts } : { status: 'queued', attempts, notBefore: at })
