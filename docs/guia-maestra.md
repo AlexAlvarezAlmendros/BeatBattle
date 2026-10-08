@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.22 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.23 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2879,6 +2879,17 @@ si el envío falla, la operación no se pierde.
   panel.
 - La plantilla se renderiza al enviar a partir del `payload` guardado (los datos del momento del
   hecho) y de las preferencias actuales.
+- **Al enviar** (`apps/server/src/email/policy.ts`, funciones puras): el servicio sale siempre, también a
+  una dirección suprimida (es lo estrictamente necesario: verificar, recuperar, seguridad, recibos);
+  lo demás queda `suppressed` si la dirección está suprimida, `skipped` con su motivo si el aviso está
+  apagado (`pref_off`; el lunes combinado sale con el drop **o** los resultados activos), si es marketing
+  sin consentimiento (`no_consent`), si el suscriptor no está confirmado (`unsubscribed`), si la cuenta ya
+  no existe (`no_recipient`) o si la preview lo rechaza (`preview_allowlist`). Cada email se **reclama**
+  (`queued` → `sending` en una sola sentencia) antes de enviarlo: dos drenajes a la vez no lo envían dos
+  veces. Sin transporte, todo sigue en cola.
+- **Cupo**: el servicio puede gastar todo lo que queda en la ventana; el resto, lo que queda menos la
+  parte de la reserva (25 %) que el servicio aún no ha usado. Lo que no cabe se aplaza hasta que el envío
+  más antiguo de la ventana sale de ella. Como mucho 40 por ejecución.
 
 ```sql
 CREATE TABLE email_pref (
@@ -2886,7 +2897,8 @@ CREATE TABLE email_pref (
   monday_format TEXT NOT NULL DEFAULT 'combined',      -- combined | separate
   drop_on INTEGER NOT NULL DEFAULT 1, results_on INTEGER NOT NULL DEFAULT 1,
   reminder_on INTEGER NOT NULL DEFAULT 1, jury_call_on INTEGER NOT NULL DEFAULT 1,
-  first_votes_on INTEGER NOT NULL DEFAULT 1, progress_on INTEGER NOT NULL DEFAULT 1,
+  first_votes_on INTEGER NOT NULL DEFAULT 1, label_pick_on INTEGER NOT NULL DEFAULT 1,
+  progress_on INTEGER NOT NULL DEFAULT 1,
   season_on INTEGER NOT NULL DEFAULT 1,
   marketing_on INTEGER NOT NULL DEFAULT 0,             -- espejo del último consentimiento
   updated_at INTEGER NOT NULL
@@ -2910,6 +2922,7 @@ CREATE TABLE email_outbox (
   id TEXT PRIMARY KEY,
   idempotency_key TEXT NOT NULL UNIQUE,                 -- p. ej. 'battle.monday:<user>:2026-w41'
   user_id TEXT, subscriber_id TEXT, campaign_id TEXT,
+  to_address TEXT,                                      -- dirección suelta sin cuenta (account.deleted)
   kind TEXT NOT NULL, family TEXT NOT NULL,             -- service | battle | marketing
   priority INTEGER NOT NULL, payload TEXT NOT NULL,     -- JSON con los datos del hecho
   status TEXT NOT NULL,                                 -- queued | sending | sent | failed | skipped | suppressed (sin cupo: queued con not_before aplazado)
@@ -3378,6 +3391,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-08 | 0.6.23 | **Cola de salida** (tarea 2.8, §4.19.3): qué se decide al enviar (familias, interruptores, consentimiento, supresión, motivos de `skipped`), la reclamación que impide enviar dos veces y el reparto del cupo con la reserva de servicio. `email_pref.label_pick_on` (la Elección del sello no tenía interruptor) y `email_outbox.to_address` (para `account.deleted`, cuando la cuenta ya no existe). |
 | 2026-10-08 | 0.6.22 | **Better Auth fijado en la 1.7.7** (tarea 2.3, §4.9): la configuración de referencia compila tal cual contra sus tipos. Las tablas se generan con su CLI (`auth:schema`), que quita las cascadas (§4.11). `producer_profile` y `username_redirect` (§4.11): el acento es `red`, `white` o `wine` (quedaba «8 claves» de antes de la Arena). Los reservados y el formato del nombre, en `@beatbattle/shared`. |
 | 2026-10-08 | 0.6.21 | **Transporte de email** (tareas 2.2 y 2.7, §4.19.1). Mailpit en local sin Docker (`pnpm mail:dev`, versión fijada con su SHA-256). La interfaz `Mailer` es `send` y `close`: el cupo restante lo calcula la cola, no el transporte. La lista blanca de la preview es `MAIL_PREVIEW_ALLOWLIST`, y en producción el servidor no arranca con Mailpit, con un `From` distinto de la cuenta o sin clave de baja. |
 | 2026-10-08 | 0.6.20 | **Decisiones de la Fase 2** (del usuario): dominio `battle.otherpeople.es`; los emails salen de una dirección del **Google Workspace de `otherpeople.es`** (§4.19.1: `From` del dominio, `MAIL_DAILY_LIMIT` de 1.900 por defecto, DKIM/SPF/DMARC comprobados antes del primer envío); proveedores Google y Discord (§7). §5: la Fase 2 incluye `RF-NOTIF-17` y `-18` (presupuesto y transporte, que ninguna fase listaba) y `RNF-PRIV-01` y `-03`. Plan en `docs/planning/plans/02-cuentas-email.md`. |
