@@ -55,6 +55,28 @@ const EnvSchema = z.object({
     .default('beatbattle-dev'),
   /** Entorno de Vercel (`production`, `preview`, `development`): las previews también van con NODE_ENV=production. */
   VERCEL_ENV: z.string().optional(),
+  /** Email (§4.19.1): Mailpit en local (`smtp://127.0.0.1:1025`); nunca en producción ni en preview. */
+  SMTP_URL: z.string().optional(),
+  /** Dirección del Google Workspace de `otherpeople.es` y su contraseña de aplicación: las dos o ninguna. */
+  GMAIL_USER: z.email({ error: 'debe ser una dirección de email' }).optional(),
+  GMAIL_APP_PASSWORD: z.string().optional(),
+  EMAIL_FROM_NAME: z.string().default('Beat Battle · Other People'),
+  /** Sin exigir dominio con punto: en local vale `beatbattle@localhost`. */
+  EMAIL_FROM_ADDRESS: z
+    .string()
+    .regex(/^[^@\s]+@[^@\s]+$/, { error: 'debe ser una dirección de email' })
+    .optional(),
+  MAIL_REPLY_TO: z.email({ error: 'debe ser una dirección de email' }).optional(),
+  /** Cupo en ventana móvil de 24 h (§4.19.1): 1.900 con el Workspace. */
+  MAIL_DAILY_LIMIT: z.coerce
+    .number({ error: 'debe ser un número' })
+    .int({ error: 'debe ser un entero' })
+    .min(1, { error: 'debe ser al menos 1' })
+    .default(1900),
+  /** Clave HMAC de los enlaces de baja (§4.19.6). */
+  UNSUBSCRIBE_SECRET: z.string().min(32, { error: 'debe tener al menos 32 caracteres' }).optional(),
+  /** Preview: los únicos destinatarios permitidos (direcciones o `@dominio`, separados por comas). */
+  MAIL_PREVIEW_ALLOWLIST: z.string().optional(),
 })
 
 export interface AppConfig {
@@ -75,7 +97,30 @@ export interface AppConfig {
   trustProxy: boolean
   /** Cloudinary (§4.8.1); `null` sin credenciales (hasta que el entorno las tenga). */
   storage: StorageConfig | null
+  /** Email (§4.19.1). */
+  mail: MailConfig
 }
+
+/**
+ * Transporte de email: `memory` en los tests, `workspace` con las credenciales del Workspace, `smtp`
+ * (Mailpit) en local y `null` sin nada configurado (los emails se quedan en la cola, en `queued`).
+ */
+export type MailTransport = 'workspace' | 'smtp' | 'memory' | null
+
+export interface MailConfig {
+  transport: MailTransport
+  smtpUrl?: string
+  workspace?: { user: string; pass: string }
+  sender: { name: string; address: string; replyTo?: string }
+  dailyLimit: number
+  /** Clave de los tokens de baja; fuera de producción, una fija de desarrollo si no hay. */
+  unsubscribeSecret: string
+  /** Solo en la preview: destinatarios permitidos. `null` fuera de ella. */
+  previewAllowlist: readonly string[] | null
+}
+
+/** Clave de baja de desarrollo y tests: nunca vale en producción (`loadEnv` la exige allí). */
+export const DEV_UNSUBSCRIBE_SECRET = 'beatbattle-dev-unsubscribe-secret-no-usar-en-produccion'
 
 export interface StorageConfig {
   cloudName: string
@@ -170,6 +215,38 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
     for (const key of cloudinaryKeys.filter((k) => cleaned[k] === undefined))
       issues.push({ variable: key, message: 'las tres credenciales de Cloudinary van juntas' })
 
+  // Email (§4.19.1).
+  const preview = production && cleaned.VERCEL_ENV === 'preview'
+  if ((cleaned.GMAIL_USER === undefined) !== (cleaned.GMAIL_APP_PASSWORD === undefined))
+    for (const key of ['GMAIL_USER', 'GMAIL_APP_PASSWORD'] as const)
+      if (cleaned[key] === undefined)
+        issues.push({ variable: key, message: 'la dirección y la contraseña de aplicación van juntas' })
+  if (production && cleaned.SMTP_URL !== undefined)
+    issues.push({
+      variable: 'SMTP_URL',
+      message: 'solo en local (Mailpit): en producción y preview, el Workspace',
+    })
+  if (
+    production &&
+    cleaned.GMAIL_USER !== undefined &&
+    cleaned.EMAIL_FROM_ADDRESS !== undefined &&
+    cleaned.EMAIL_FROM_ADDRESS.toLowerCase() !== cleaned.GMAIL_USER.toLowerCase()
+  )
+    issues.push({
+      variable: 'EMAIL_FROM_ADDRESS',
+      message: 'debe ser la propia dirección del Workspace (remitente coherente con la cuenta, §4.19.1)',
+    })
+  if (production && cleaned.GMAIL_USER !== undefined && cleaned.UNSUBSCRIBE_SECRET === undefined)
+    issues.push({
+      variable: 'UNSUBSCRIBE_SECRET',
+      message: 'es obligatoria para enviar emails en producción',
+    })
+  if (preview && cleaned.GMAIL_USER !== undefined && cleaned.MAIL_PREVIEW_ALLOWLIST === undefined)
+    issues.push({
+      variable: 'MAIL_PREVIEW_ALLOWLIST',
+      message: 'la preview solo envía a una lista blanca: es obligatoria con el Workspace (§4.19.1)',
+    })
+
   let publicUrl = DEV_PUBLIC_URL
   if (cleaned.BB_PUBLIC_URL === undefined) {
     if (production) issues.push({ variable: 'BB_PUBLIC_URL', message: 'es obligatoria en producción' })
@@ -219,5 +296,31 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
             prefix: e.BB_CLOUDINARY_PREFIX,
           }
         : null,
+    mail: {
+      transport:
+        e.NODE_ENV === 'test'
+          ? 'memory'
+          : e.GMAIL_USER && e.GMAIL_APP_PASSWORD
+            ? 'workspace'
+            : e.SMTP_URL
+              ? 'smtp'
+              : null,
+      smtpUrl: e.SMTP_URL,
+      workspace:
+        e.GMAIL_USER && e.GMAIL_APP_PASSWORD ? { user: e.GMAIL_USER, pass: e.GMAIL_APP_PASSWORD } : undefined,
+      sender: {
+        name: e.EMAIL_FROM_NAME,
+        address: e.EMAIL_FROM_ADDRESS ?? e.GMAIL_USER ?? 'beatbattle@localhost',
+        replyTo: e.MAIL_REPLY_TO,
+      },
+      dailyLimit: e.MAIL_DAILY_LIMIT,
+      unsubscribeSecret: e.UNSUBSCRIBE_SECRET ?? DEV_UNSUBSCRIBE_SECRET,
+      previewAllowlist: preview
+        ? (e.MAIL_PREVIEW_ALLOWLIST ?? '')
+            .split(',')
+            .map((item) => item.trim())
+            .filter(Boolean)
+        : null,
+    },
   }
 }

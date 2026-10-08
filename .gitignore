@@ -24,3 +24,6 @@ playwright-report/
 
 .DS_Store
 __pycache__/
+
+# Mailpit sin Docker (tools/mailpit/mailpit.mjs): el binario descargado
+tools/mailpit/.bin/

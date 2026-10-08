@@ -38,6 +38,7 @@ pnpm typecheck           # TypeScript en todos los paquetes
 pnpm test                # Vitest en todos los paquetes
 pnpm e2e                 # Playwright (almacenamiento falso, reloj de prueba, Mailer en memoria)
 pnpm emails:dev          # visor de plantillas de email (React Email)
+pnpm mail:dev            # Mailpit en local sin Docker (SMTP 1025, bandeja en :8025)
 node tools/shot/shot.mjs <url> <png> [--eval=expr]   # captura con la GPU real
 node tools/shot/bench.mjs <url> [segundos]           # FPS y peor fotograma
 node tools/shot/ab.mjs [--otp-live]                  # A/B de la antigua prueba del sello (histórico, docs/planning/evidence/f0/ab)

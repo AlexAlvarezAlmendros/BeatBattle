@@ -313,8 +313,9 @@ cp apps/server/.env.example apps/server/.env
 la fase que las estrena; hoy el servidor solo lee las de la Fase 0 (puerto, orígenes permitidos, base
 de datos, reloj de prueba y registro). La base de datos local es un fichero
 (`apps/server/data/local.db`) y las migraciones se aplican al arrancar. El `.env` y la base de datos
-están en `.gitignore`. [`docker-compose.yml`](docker-compose.yml) trae Mailpit para cuando haya
-emails (Fase 2); hoy nada lo usa.
+están en `.gitignore`. Los emails de desarrollo caen en **Mailpit**: `pnpm mail:dev` descarga la
+versión fijada (con su SHA-256) la primera vez y la arranca sin Docker (SMTP en `127.0.0.1:1025`, bandeja
+en <http://localhost:8025>); con Docker, [`docker-compose.yml`](docker-compose.yml) hace lo mismo.
 
 ### Comprobar
 

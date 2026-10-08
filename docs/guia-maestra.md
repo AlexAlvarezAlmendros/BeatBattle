@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.20 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.21 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2827,14 +2827,19 @@ nodemailer con Gmail y contraseña de aplicación, con estas mejoras:
   **ventana móvil de 24 h**, como la cuenta Gmail, calculado sobre `email_outbox.sent_at`. El 25 %
   queda reservado para servicio. Lo que no cabe se aplaza moviendo su `not_before`
   (`RF-NOTIF-17`).
-- **Cabeceras**: `List-Unsubscribe` (opción `list` de nodemailer) y `List-Unsubscribe-Post`, más un
-  `Message-ID` propio por `email_outbox.id`.
+- **Cabeceras**: `List-Unsubscribe` (con la URL de baja en un clic) y `List-Unsubscribe-Post`, escritas
+  a mano (la opción `list` de nodemailer solo se aplica dentro de `sendMail`), más un `Message-ID` propio
+  por `email_outbox.id`.
 - Si Google restringiera las contraseñas de aplicación, nodemailer admite OAuth2 (XOAUTH2) con la
   misma cuenta sin cambiar nada más.
-- Interfaz `Mailer` en `apps/server/src/email` (`send`, `remainingQuota`) con tres
-  implementaciones: **Gmail** (producción y preview), **SMTP** contra **Mailpit** en local (bandeja
-  web en `localhost:8025`) y **memoria** en tests y E2E. La preview **nunca** envía a direcciones
-  reales: solo a una lista blanca.
+- Interfaz `Mailer` en `apps/server/src/email` (`send`, `close`) con tres implementaciones:
+  **Workspace** (producción y preview), **SMTP** contra **Mailpit** en local (`pnpm mail:dev`, sin
+  Docker; bandeja web en `localhost:8025`) y **memoria** en tests y E2E. El cupo restante no lo sabe el
+  transporte (Gmail no lo expone): lo calcula la cola sobre `email_outbox.sent_at` (§4.19.3). La preview
+  **nunca** envía a direcciones reales: solo a la lista blanca `MAIL_PREVIEW_ALLOWLIST` (direcciones o
+  `@dominio`); fuera de ella, el envío se rechaza. En producción y preview no se admite `SMTP_URL`, el
+  `From` tiene que ser la propia dirección del Workspace y `UNSUBSCRIBE_SECRET` es obligatoria; el
+  servidor no arranca si falta algo de esto.
 - Las campañas se componen y segmentan **en nuestro panel**; Gmail solo transporta.
 
 #### 4.19.2 Entregabilidad con Gmail
@@ -3366,6 +3371,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-08 | 0.6.21 | **Transporte de email** (tareas 2.2 y 2.7, §4.19.1). Mailpit en local sin Docker (`pnpm mail:dev`, versión fijada con su SHA-256). La interfaz `Mailer` es `send` y `close`: el cupo restante lo calcula la cola, no el transporte. La lista blanca de la preview es `MAIL_PREVIEW_ALLOWLIST`, y en producción el servidor no arranca con Mailpit, con un `From` distinto de la cuenta o sin clave de baja. |
 | 2026-10-08 | 0.6.20 | **Decisiones de la Fase 2** (del usuario): dominio `battle.otherpeople.es`; los emails salen de una dirección del **Google Workspace de `otherpeople.es`** (§4.19.1: `From` del dominio, `MAIL_DAILY_LIMIT` de 1.900 por defecto, DKIM/SPF/DMARC comprobados antes del primer envío); proveedores Google y Discord (§7). §5: la Fase 2 incluye `RF-NOTIF-17` y `-18` (presupuesto y transporte, que ninguna fase listaba) y `RNF-PRIV-01` y `-03`. Plan en `docs/planning/plans/02-cuentas-email.md`. |
 | 2026-10-08 | 0.6.19 | **Cierre de la Fase 1** (tarea 1.12, decisiones del usuario). `RD-SND-05` reformulado: **la mínima latencia posible**, con la parte de la app < 10 ms (mediana; p95 < 15) y la salida del sistema medida aparte; comparadas las configuraciones del contexto con la misma salida, `latencyHint: 0` da el menor total (base 2,7 ms frente a 10,7; salida igual), 27 ms con PipeWire a 24 ms y 43 ms cuando PipeWire sube a 40. `RNF-PERF-03` acepta el Android **emulado** mientras no haya dispositivo. `RD-VIS-02` a también con la arena en *shader* (test nuevo). Nuevo **`RD-MOT-06`** (§3.5, §3.8.7; hallazgo del jurado de la 1.12): nada visual reacciona a una entrada sin sellar; la trama queda en reposo mientras suena y el motor no expone el analizador de una fuente ciega. **Pantalla de título** (§3.8.1, jurado de la 1.12): una columna por debajo de 1280 px (antes 960: el cartel tapaba la columna en un iPad apaisado), pie de la diagonal fuera de la columna, texto sobre `--bb-scrim` y no sobre los rayos, cartel EN JUEGO como la maqueta (reloj grande con los días, número en rojo), «Crédito 01» en caja mixta, pegatina de «PRESENTA» de 64 px, respira el texto y no el cursor, M y S respetan los atajos apagados y la galleta no pinta texto por debajo de 12 px. |
 | 2026-10-07 | 0.6.18 | **ffmpeg en Vercel validado** (*spike* 1.8, §4.8.4): cabe (~80 MB de función) y mide un WAV de 52 MB en 3,7 s en frío con la sonoridad exacta. La descarga la hace Node y ffmpeg lee de la entrada estándar (el ffmpeg estático falla al resolver DNS); el binario va con `includeFiles` y su script de instalación tiene que estar permitido. El plan B queda como reserva. |

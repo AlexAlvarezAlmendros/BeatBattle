@@ -83,7 +83,7 @@ consentimiento y no se envía nada.
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
 | 2.1 | Registrar las decisiones de dominio, cuenta de envío y proveedores en el roadmap y la guía (§7, §4.19.1 con Workspace: `From` del dominio y `MAIL_DAILY_LIMIT` de 1.900; §5 con `RF-NOTIF-17` y `-18`, que ninguna fase listaba) | ✅ Hecho | — | §4.19.1, §5, §7 |
-| 2.2 | Mailpit en local sin Docker: `tools/mailpit` descarga el binario fijado (versión y SHA-256) a una carpeta ignorada y `pnpm mail:dev` lo arranca (SMTP 1025, bandeja en `localhost:8025`); `docker-compose.yml` queda para quien tenga Docker | ⬜ Listo | — | §4.19.1 · cierra lo pendiente de la 0.19 |
+| 2.2 | Mailpit en local sin Docker: `tools/mailpit` descarga el binario fijado (versión y SHA-256) a una carpeta ignorada y `pnpm mail:dev` lo arranca (SMTP 1025, bandeja en `localhost:8025`); `docker-compose.yml` queda para quien tenga Docker | ✅ Hecho | — | §4.19.1 · cierra lo pendiente de la 0.19 · **Hecho:** `pnpm mail:dev` descarga Mailpit v1.31.4 (SHA-256 de Linux y macOS, x64 y arm64) a `tools/mailpit/.bin/` y lo arranca; probado con un envío SMTP y con el `Mailer` |
 
 ### Cuentas en el servidor
 
@@ -98,7 +98,7 @@ consentimiento y no se envía nada.
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 2.7 | Interfaz `Mailer` (`send`, `remainingQuota`) con tres implementaciones: **Workspace** (nodemailer, `smtp.gmail.com:465`, TLS verificado, *pool* de 1 conexión a 1 mensaje/s, `Message-ID` propio, `List-Unsubscribe` y `List-Unsubscribe-Post`), **SMTP** (Mailpit) y **memoria**. Variables solo de entorno; la preview solo envía a la lista blanca | ⬜ Listo | — | §4.19.1 · `RF-NOTIF-18` |
+| 2.7 | Interfaz `Mailer` (`send`, `remainingQuota`) con tres implementaciones: **Workspace** (nodemailer, `smtp.gmail.com:465`, TLS verificado, *pool* de 1 conexión a 1 mensaje/s, `Message-ID` propio, `List-Unsubscribe` y `List-Unsubscribe-Post`), **SMTP** (Mailpit) y **memoria**. Variables solo de entorno; la preview solo envía a la lista blanca | ✅ Hecho | — | §4.19.1 · `RF-NOTIF-18` · **Hecho:** `apps/server/src/email/mailer.ts` y la configuración en `env.ts`; `mailer.test.ts` (rechazo de un SMTP con certificado autofirmado, cabeceras RFC 8058, `Message-ID`, lista blanca, reglas de producción) y un envío real a Mailpit con las cabeceras comprobadas |
 | 2.8 | Tablas de §4.19.3 (`email_pref`, `email_consent`, `email_subscriber`, `email_outbox`, `email_suppression`, `email_stat`) y la cola: encolar en el mismo `batch` que el hecho con clave de idempotencia; servicio enviado en la misma petición y, si falla, por el `tick`; `emailDrain` con presupuesto en ventana móvil de 24 h, 25 % reservado para servicio y reparto por prioridad; reintentos (1 min, 5 min, 30 min, 2 h → `failed`); preferencias, familia y supresión aplicadas **al enviar**. La política (presupuesto, espera, familia) en funciones puras con fast-check | ⬜ Listo | 2.7 | §4.19.3 · `RF-NOTIF-01`, `-02`, `-04`, `-17` · el `tick` con *lease* es de la 3.x: aquí `emailDrain` se llama desde los tests y desde un script |
 | 2.9 | Plantillas en el servidor: `renderEmail(kind, payload, prefs)` → asunto, *preheader*, HTML y texto plano, con los enlaces y el pie de baja según la familia | ⬜ Listo | 2.8, 2.13 | §4.19.4 |
 | 2.10 | Bajas: tokens HMAC (`UNSUBSCRIBE_SECRET`) sobre destinatario + tipo; `GET /api/unsubscribe` con la página «Baja» (ese tipo o todo lo no esencial) en el marco simple de la arena; `POST /api/unsubscribe/one-click` según RFC 8058 (exento de `Origin` y con `application/x-www-form-urlencoded`, como prevé `plugins/security.ts`); la baja de todo suprime por hash | ⬜ Listo | 2.8 | §2.12.4, §4.19.6 · `RF-NOTIF-05` |
@@ -163,4 +163,5 @@ para los avisos de las fases 3 a 7.
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-08 | 2.2, 2.7 | Mailpit sin Docker (`pnpm mail:dev`) y el `Mailer` con sus tres transportes. Guía v0.6.21: el cupo lo calcula la cola, lista blanca de la preview en `MAIL_PREVIEW_ALLOWLIST` y reglas de arranque en producción. |
 | 2026-10-08 | 2.1 | Plan creado a partir de §2.2, §2.3, §2.12, §4.9, §4.13, §4.14 y §4.19, con las decisiones del usuario (dominio, Workspace del sello, Google y Discord). Guía v0.6.20. |
