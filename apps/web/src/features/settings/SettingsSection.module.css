@@ -91,6 +91,7 @@
 .form {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-6);
   min-width: 0;
 }
 
@@ -139,4 +140,9 @@
   color: var(--bb-text-2);
   font-size: var(--bb-fs-sm);
   line-height: var(--bb-leading-body);
+}
+
+/* Un botón suelto al pie de la sección («Ver mi perfil»), a su ancho. */
+.start {
+  justify-self: start;
 }

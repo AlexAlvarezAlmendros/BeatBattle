@@ -33,6 +33,16 @@ export const ERROR_STATUS = {
   FILE_TOO_LARGE: 422,
   /** El audio de una entrada dura menos de 30 s o más de 4 min (`RF-ENT-03`). */
   DURATION_OUT_OF_RANGE: 422,
+  /** El nombre de productor ya es de otro, o es el anterior de alguien durante su redirección (`RF-PRF-03`). */
+  USERNAME_TAKEN: 409,
+  /** El nombre de productor está en la lista de reservados (`RF-AUTH-06`). */
+  USERNAME_RESERVED: 422,
+  /** El nombre de productor no cumple el formato: 3–20 caracteres de `[a-z0-9_.]`. */
+  USERNAME_INVALID: 422,
+  /** El nombre se cambió hace menos de 30 días (`RF-PRF-03`); `details.availableAt` dice cuándo se podrá. */
+  USERNAME_CHANGE_TOO_SOON: 409,
+  /** Un enlace del perfil no es `https://` de su sitio; `details.kind` dice cuál. */
+  INVALID_LINK: 422,
   /** Límite de frecuencia superado; la respuesta lleva `Retry-After`. */
   RATE_LIMITED: 429,
   /** Error inesperado; nunca lleva la pila ni mensajes internos. */

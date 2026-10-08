@@ -78,3 +78,24 @@
   width: var(--bb-space-4);
   height: var(--bb-space-4);
 }
+
+/* Varias líneas (la bio): el mismo campo, con relleno arriba y abajo y alto según `rows`. */
+.textarea {
+  padding-block: var(--bb-space-2);
+  line-height: var(--bb-leading-body);
+  resize: vertical;
+}
+
+/* La ayuda a la izquierda y el contador a la derecha. */
+.foot {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--bb-space-3);
+}
+
+.count {
+  margin-left: auto;
+  color: var(--bb-text-3);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+}
