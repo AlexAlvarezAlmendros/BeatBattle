@@ -10,6 +10,7 @@
     "dev": "pnpm --filter @beatbattle/web dev",
     "dev:server": "pnpm --filter @beatbattle/server dev",
     "dev:all": "pnpm --parallel --filter @beatbattle/web --filter @beatbattle/server dev",
+    "mail:dev": "node tools/mailpit/mailpit.mjs",
     "build": "pnpm --filter @beatbattle/web build && pnpm --filter @beatbattle/server build",
     "check": "biome check . && pnpm lint:tokens && pnpm lint:purity",
     "lint:tokens": "node tools/lint/check-tokens.mjs",

@@ -65,7 +65,8 @@ describe('bootServerless', () => {
   it('con MIGRATIONS_DIR vacía (como en .env.example) usa la carpeta incluida y arranca', async () => {
     const example = parseEnv(readFileSync(new URL('../.env.example', import.meta.url), 'utf8'))
     expect(example.MIGRATIONS_DIR).toBe('')
-    const app = await bootServerless({ ...example, ...PROD }, { cwd: REPO_ROOT })
+    // `.env.example` es el de local: su `SMTP_URL` (Mailpit) no se admite en producción (§4.19.1).
+    const app = await bootServerless({ ...example, SMTP_URL: '', ...PROD }, { cwd: REPO_ROOT })
     apps.push(app)
     const res = await app.inject({ method: 'GET', url: '/api/health' })
     expect(res.statusCode).toBe(200)
