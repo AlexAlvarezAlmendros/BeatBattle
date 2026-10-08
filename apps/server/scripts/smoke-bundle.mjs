@@ -12,6 +12,8 @@ process.env.BB_PUBLIC_URL ??= 'https://battle.example'
 process.env.DATABASE_URL = ':memory:'
 process.env.MIGRATIONS_DIR = fileURLToPath(new URL('../drizzle', import.meta.url))
 process.env.LOG_LEVEL = 'silent'
+// Producción exige el secreto de Better Auth (§4.9): uno de usar y tirar para el humo.
+process.env.BETTER_AUTH_SECRET ??= 'humo-del-bundle-secreto-de-prueba-de-32-caracteres'
 
 const { default: handler } = await import('../dist/vercel.mjs')
 assert.equal(typeof handler, 'function', 'dist/vercel.mjs no exporta un handler de Node')
