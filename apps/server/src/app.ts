@@ -2,15 +2,26 @@ import { randomUUID } from 'node:crypto'
 import Fastify, { type FastifyInstance } from 'fastify'
 import type { AppConfig } from './config/env'
 import type { Db } from './db/client'
+import { createMailer, type Mailer } from './email'
+import { createUnsubscribeLinks } from './email/unsubscribe'
 import { type Clock, systemClock } from './lib/clock'
+import { uuidv7 } from './lib/ids'
 import { type LogStream, loggerOptions } from './lib/logger'
 import { healthRoutes } from './modules/health/routes'
 import { createHealthService } from './modules/health/service'
 import { createCloudinaryStorage } from './modules/storage/cloudinary'
 import { storageSpikeRoutes } from './modules/storage/routes'
+import { unsubscribeRoutes } from './modules/unsubscribe/routes'
 import { registerClock } from './plugins/clock'
 import { registerErrorHandling } from './plugins/errors'
 import { BODY_LIMIT_BYTES, registerSecurity } from './plugins/security'
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    /** Transporte y enlaces de baja (§4.19): los usan los módulos que envían email. */
+    email: { mailer: Mailer | null; unsubscribeLinks: ReturnType<typeof createUnsubscribeLinks> }
+  }
+}
 
 export interface AppDeps {
   config: AppConfig
@@ -19,6 +30,11 @@ export interface AppDeps {
   clock?: Clock
   /** Destino del registro (solo tests: capturar líneas y comprobar que no hay PII). */
   logStream?: LogStream
+  /**
+   * Transporte de email; por defecto, el de la configuración (§4.19.1). Los tests pasan uno en memoria
+   * para leer lo enviado; `null`, sin transporte (los emails se quedan en cola).
+   */
+  mailer?: Mailer | null
 }
 
 /**
@@ -53,7 +69,18 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   registerSecurity(app, config)
   registerErrorHandling(app)
 
+  const mailer = deps.mailer === undefined ? createMailer(config.mail) : deps.mailer
+  const unsubscribeLinks = createUnsubscribeLinks({
+    publicUrl: config.publicUrl,
+    secret: config.mail.unsubscribeSecret,
+  })
+  app.decorate('email', { mailer, unsubscribeLinks })
+  app.addHook('onClose', async () => {
+    await mailer?.close()
+  })
+
   healthRoutes(app, createHealthService({ db }))
+  unsubscribeRoutes(app, { db, secret: config.mail.unsubscribeSecret, newId: () => uuidv7(clock) })
   // Spike de Cloudinary (tarea 1.7): solo fuera de producción.
   if (config.env !== 'production')
     storageSpikeRoutes(app, config.storage ? createCloudinaryStorage(config.storage) : null, {

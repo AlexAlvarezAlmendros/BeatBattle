@@ -7,6 +7,9 @@ export const BODY_LIMIT_BYTES = 64 * 1024
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 
+/** Cuerpos de formulario: solo en las rutas con `acceptForm` (la baja en un clic, RFC 8058). */
+export const FORM_TYPES = new Set(['application/x-www-form-urlencoded', 'multipart/form-data'])
+
 /**
  * Cabeceras de seguridad de toda respuesta de la API (`RNF-SEC-01`, parte de la API). Además, si la
  * ruta no fija otro, `Cache-Control: no-store`. Las usa también la respuesta 503 de la función de
@@ -25,7 +28,7 @@ declare module 'fastify' {
     /**
      * Exime la ruta de la comprobación de `Origin` (no del «solo JSON» ni del tamaño). Solo para
      * rutas que se autentican con su propio secreto o token y que no llama una página de un
-     * navegador. Ninguna ruta lo usa en la Fase 0.
+     * navegador. La usa `POST /api/unsubscribe/one-click` (tarea 2.10).
      *
      * Exenciones previstas:
      * - `GET /api/cron/tick` (Fase 3, §4.10 y §4.12) **no la necesita**: es GET, y las lecturas no
@@ -40,6 +43,11 @@ declare module 'fastify' {
      *   ruta descarta el cuerpo). La autentica el token HMAC de la URL (`UNSUBSCRIBE_SECRET`).
      */
     skipOriginCheck?: boolean
+    /**
+     * Admite además `application/x-www-form-urlencoded` y `multipart/form-data` (con el mismo tope de
+     * tamaño). Solo la baja en un clic (RFC 8058), que registra su parser dentro de su propio contexto.
+     */
+    acceptForm?: boolean
   }
 }
 
@@ -83,7 +91,10 @@ export function registerSecurity(app: FastifyInstance, config: AppConfig): void 
         throw appError('FORBIDDEN_ORIGIN', 'Petición rechazada: origen no permitido.')
     }
 
-    if (hasBody(req.headers) && mediaType(req.headers['content-type']) !== 'application/json')
+    const type = mediaType(req.headers['content-type'])
+    const formAllowed =
+      req.routeOptions.config.acceptForm === true && type !== undefined && FORM_TYPES.has(type)
+    if (hasBody(req.headers) && type !== 'application/json' && !formAllowed)
       throw appError('UNSUPPORTED_MEDIA_TYPE', 'Solo se acepta application/json.')
 
     const length = Number(req.headers['content-length'])

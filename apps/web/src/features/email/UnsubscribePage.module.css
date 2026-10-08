@@ -1,0 +1,49 @@
+/* Página de baja (§2.12.4, tarea 2.10): dos placas de menú y la ayuda de la elegida, en el panel. */
+.body {
+  display: grid;
+  gap: var(--bb-space-4);
+}
+
+.for {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-semibold);
+}
+
+.plates {
+  display: grid;
+  gap: var(--bb-space-3);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.help {
+  padding: var(--bb-space-4) var(--bb-space-5);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+.note {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-md);
+  line-height: var(--bb-leading-body);
+}
+
+.done {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-lg);
+  font-weight: var(--bb-weight-bold);
+  line-height: var(--bb-leading-body);
+}
+
+.settings {
+  justify-self: start;
+  min-height: var(--bb-target);
+  display: inline-flex;
+  align-items: center;
+  color: var(--bb-white);
+  font-weight: var(--bb-weight-bold);
+  border-bottom: var(--bb-stroke) solid var(--bb-red);
+}

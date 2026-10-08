@@ -31,7 +31,7 @@
       "credit": "Crédito",
       "creditValue": "01",
       "url": "battle.otherpeople.es",
-      "discSub": "{bpm}\u00a0BPM · {key}"
+      "discSub": "{bpm} BPM · {key}"
     },
     "dropAlert": {
       "title": "Avísame del próximo drop",
@@ -70,8 +70,8 @@
         "beats_other": "{count} beats",
         "signIn": "Entra para votar",
         "empty": "Sin beats que votar",
-        "help": "{count} sin votar. Escucha 30\u00a0s de cada uno y puntúalo de 1 a 5. Sin nombres hasta el domingo a las 23:59.",
-        "helpVisitor": "Entra para votar: escucha 30\u00a0s de cada beat y puntúalo de 1 a 5, sin saber de quién es.",
+        "help": "{count} sin votar. Escucha 30 s de cada uno y puntúalo de 1 a 5. Sin nombres hasta el domingo a las 23:59.",
+        "helpVisitor": "Entra para votar: escucha 30 s de cada beat y puntúalo de 1 a 5, sin saber de quién es.",
         "helpEmpty": "Cuando caiga el sample y lleguen las primeras entradas, aquí las escucharás y votarás."
       },
       "results": {
@@ -88,7 +88,7 @@
       },
       "howItWorks": {
         "label": "Cómo se juega",
-        "detail": "{minutes}\u00a0min",
+        "detail": "{minutes} min",
         "help": "Las reglas en un minuto: sample, flip, voto ciego, escucha mínima y Ronda justa."
       },
       "settings": {
@@ -108,7 +108,7 @@
       "kickerBefore": "Semana",
       "kickerAfter": "· escenario",
       "vinylLabel": "S{number}",
-      "bpm": "{bpm}\u00a0BPM",
+      "bpm": "{bpm} BPM",
       "bpmUnit": "BPM",
       "minUnit": "Min",
       "suggested": "Sugerido",
@@ -129,10 +129,10 @@
       "streakValue": "×{count}"
     },
     "chronicle": {
-      "insert": "{action}\u00a0· Crédito\u00a0{credit}",
-      "insertAction": "Inserta\u00a0tu\u00a0beat",
-      "inside": "Crédito\u00a0{credit}\u00a0· ya\u00a0estás\u00a0dentro",
-      "closed": "Envíos\u00a0cerrados\u00a0· votos\u00a0hasta\u00a0las\u00a023:59",
+      "insert": "{action} · Crédito {credit}",
+      "insertAction": "Inserta tu beat",
+      "inside": "Crédito {credit} · ya estás dentro",
+      "closed": "Envíos cerrados · votos hasta las 23:59",
       "credit": "{count}",
       "idle": {
         "nextDrop": "Próximo drop en el horno",
@@ -172,9 +172,9 @@
       "summary": "Aquí irá la subida o la edición de tu entrada de la semana.",
       "problems": {
         "unsupportedFormat": "Eso no suena a audio. Prueba con WAV, AIFF, FLAC o MP3.",
-        "fileTooLarge": "Tu archivo pesa {size}\u00a0MB. El máximo son 100\u00a0MB.",
-        "durationTooLong": "Tu beat dura {duration}. El máximo son 4\u00a0minutos.",
-        "durationTooShort": "Tu beat dura {duration}. El mínimo son 30\u00a0segundos."
+        "fileTooLarge": "Tu archivo pesa {size} MB. El máximo son 100 MB.",
+        "durationTooLong": "Tu beat dura {duration}. El máximo son 4 minutos.",
+        "durationTooShort": "Tu beat dura {duration}. El mínimo son 30 segundos."
       }
     },
     "profile": {
@@ -237,6 +237,23 @@
     "error": {
       "title": "Se ha rayado el disco",
       "summary": "Ya estamos en ello."
+    },
+    "unsubscribe": {
+      "title": "Baja de emails",
+      "summary": "Elige de qué te das de baja. El cambio vale desde ya y no hace falta entrar en tu cuenta.",
+      "loading": "Comprobando el enlace…",
+      "invalid": "Este enlace de baja no vale: puede que esté incompleto. Abre el último email que te llegó y pulsa su enlace de baja, o cambia tus avisos en Ajustes → Emails.",
+      "for": "Para {email}",
+      "menuTitle": "Elige",
+      "onlyThis": "Solo estos",
+      "onlyThisDetail": "{kind}",
+      "onlyThisHelp": "Dejarás de recibir «{kind}». El resto de avisos sigue igual.",
+      "all": "Todo lo no esencial",
+      "allHelp": "Ningún aviso ni novedad más. Solo los emails imprescindibles de tu cuenta: verificación, recuperación, seguridad y recibos.",
+      "doneThis": "Hecho: ya no recibirás «{kind}».",
+      "doneAll": "Hecho: ya solo recibirás los emails imprescindibles de tu cuenta.",
+      "error": "No se ha podido aplicar la baja. Vuelve a intentarlo en un momento.",
+      "settings": "Cambiar mis avisos en Ajustes"
     }
   },
   "settings": {
@@ -397,7 +414,7 @@
     },
     "waveform": {
       "label": "Forma de onda",
-      "progress": "Forma de onda, {percent}\u00a0% escuchado",
+      "progress": "Forma de onda, {percent} % escuchado",
       "seek": "Posición en el beat",
       "position": "{time} de {total}"
     },
@@ -423,7 +440,7 @@
       "index": "{index}"
     },
     "entryCell": {
-      "label": "{alias}, {bpm}\u00a0BPM, {key}, {state}",
+      "label": "{alias}, {bpm} BPM, {key}, {state}",
       "notVoted": "sin votar",
       "votedState": "votada {vote} de 5",
       "voted": "✓ Votada {vote}/5",
@@ -440,14 +457,14 @@
       "word4": "Muy bien",
       "word5": "Brutal",
       "star": "{stars} de 5 estrellas: {word}",
-      "asleep": "Las estrellas despiertan a los {threshold}\u00a0s: faltan {left}\u00a0s.",
+      "asleep": "Las estrellas despiertan a los {threshold} s: faltan {left} s.",
       "listen": "Escucha mínima",
-      "listenValue": "{heard} de {threshold}\u00a0segundos",
-      "listenCaption": "{heard} / {threshold}\u00a0s",
+      "listenValue": "{heard} de {threshold} segundos",
+      "listenCaption": "{heard} / {threshold} s",
       "awake": "Ya puedes puntuar.",
       "saving": "Guardando tu voto…",
       "saved": "{stars} de 5 · {word}. Voto guardado.",
-      "savedNext": "Pasas a la siguiente en 1\u00a0s; puedes cambiarlo hasta el cierre.",
+      "savedNext": "Pasas a la siguiente en 1 s; puedes cambiarlo hasta el cierre.",
       "savedChange": "Puedes cambiarlo hasta el cierre.",
       "error": "No se ha guardado tu voto. Vuelve a intentarlo."
     },
@@ -461,7 +478,7 @@
       "titleLabel": "Título",
       "notVoted": "Sin votar",
       "voted": "✓ Votada {vote}/5",
-      "listenHint": "Escucha {seconds}\u00a0s y desbloqueas las estrellas.",
+      "listenHint": "Escucha {seconds} s y desbloqueas las estrellas.",
       "votedHint": "Puedes cambiar tu voto hasta el cierre.",
       "preview": "Previa",
       "listen": "Escuchar",
@@ -495,19 +512,19 @@
         "sat": "S",
         "sun": "D"
       },
-      "daysCount_one": "{count}\u00a0día",
-      "daysCount_other": "{count}\u00a0días",
-      "hoursCount_one": "{count}\u00a0hora",
-      "hoursCount_other": "{count}\u00a0horas",
-      "minutesCount_one": "{count}\u00a0minuto",
-      "minutesCount_other": "{count}\u00a0minutos",
-      "secondsCount_one": "{count}\u00a0segundo",
-      "secondsCount_other": "{count}\u00a0segundos",
+      "daysCount_one": "{count} día",
+      "daysCount_other": "{count} días",
+      "hoursCount_one": "{count} hora",
+      "hoursCount_other": "{count} horas",
+      "minutesCount_one": "{count} minuto",
+      "minutesCount_other": "{count} minutos",
+      "secondsCount_one": "{count} segundo",
+      "secondsCount_other": "{count} segundos",
       "remaining": "Tiempo restante: {days}, {hours}, {minutes} y {seconds}",
       "milestone": {
-        "day": "Quedan 24\u00a0horas",
-        "hour": "Queda 1\u00a0hora",
-        "tenMinutes": "Quedan 10\u00a0minutos",
+        "day": "Quedan 24 horas",
+        "hour": "Queda 1 hora",
+        "tenMinutes": "Quedan 10 minutos",
         "ended": "Tiempo agotado"
       }
     },
@@ -520,20 +537,20 @@
     "listen": {
       "title": "Escucha (spike de Cloudinary)",
       "steps": "Subir, esperar el derivado y escuchar",
-      "intro": "Con pnpm dev:all y las credenciales de Cloudinary en apps/server/.env. Sube el WAV por trozos y firmado, espera al MP3 a 192\u00a0kb/s y lo reproduce por el bus de música.",
-      "generate": "Generar WAV de prueba (60\u00a0s)",
+      "intro": "Con pnpm dev:all y las credenciales de Cloudinary en apps/server/.env. Sube el WAV por trozos y firmado, espera al MP3 a 192 kb/s y lo reproduce por el bus de música.",
+      "generate": "Generar WAV de prueba (60 s)",
       "pick": "…o elegir un audio",
       "run": "Subir y escuchar",
       "remove": "Borrar de Cloudinary",
       "progress": "Subida",
-      "generated": "WAV de prueba: {size}\u00a0MB.",
+      "generated": "WAV de prueba: {size} MB.",
       "signed": "Subida firmada: {publicId}.",
-      "uploaded": "Subido por trozos en {seconds}\u00a0s.",
-      "eager": "Derivado MP3 listo {seconds}\u00a0s después de la subida.",
-      "eagerTimeout": "El derivado no ha llegado en 2\u00a0minutos.",
+      "uploaded": "Subido por trozos en {seconds} s.",
+      "eager": "Derivado MP3 listo {seconds} s después de la subida.",
+      "eagerTimeout": "El derivado no ha llegado en 2 minutos.",
       "unsigned": "Original sin firma: {status} (no se entrega: 401 o 404).",
       "cors": "Derivado firmado: {status}, {type}, CORS {origin}.",
-      "kbps": "Tasa del derivado: {kbps}\u00a0kb/s (se espera ~192).",
+      "kbps": "Tasa del derivado: {kbps} kb/s (se espera ~192).",
       "removed": "Recurso borrado."
     },
     "stage": {
@@ -541,12 +558,12 @@
       "controls": "Ráfagas",
       "intro": "El vinilo-sol es una vista anclada del Escenario. Las ráfagas pasan por el limitador de destellos: 3 por segundo como mucho. El ritmo de prueba mueve la trama de la cuña.",
       "vinylLabel": "S41",
-      "vinylSub": "92\u00a0BPM",
+      "vinylSub": "92 BPM",
       "sparks": "Chispas",
       "confetti": "Confeti",
       "benchStart": "Banco: 4.000 partículas",
       "benchStop": "Parar el banco",
-      "beatStart": "Ritmo de prueba (160\u00a0BPM)",
+      "beatStart": "Ritmo de prueba (160 BPM)",
       "beatStop": "Parar el ritmo",
       "status": {
         "granted": "Ráfaga autorizada.",
@@ -557,7 +574,7 @@
     "gallery": {
       "stars": {
         "label": "Tu nota para Tigre Púrpura, de 1 a 5",
-        "listen": "Escuchar 10\u00a0s más",
+        "listen": "Escuchar 10 s más",
         "reset": "Otra entrada"
       },
       "title": "Galería",
@@ -618,8 +635,8 @@
         "gain": "Subiendo (brillo)",
         "levelUp": "Subida de nivel (destello)",
         "hud": "Línea del HUD",
-        "normal": "Más de 24\u00a0h",
-        "urgent": "Menos de 24\u00a0h",
+        "normal": "Más de 24 h",
+        "urgent": "Menos de 24 h",
         "final": "Última hora",
         "ended": "Terminada",
         "live": "En vivo",
@@ -631,7 +648,7 @@
         "text": "Texto",
         "row": "Fila",
         "card": "Tarjeta",
-        "mini": "Mini (24\u00a0px)",
+        "mini": "Mini (24 px)",
         "collapsedMobile": "Plegada en móvil",
         "focusTitle": "Foco (título)",
         "otherText": "Otro texto"
@@ -657,7 +674,7 @@
           "cursor": "Cursor de juego"
         },
         "palette": {
-          "proportion": "Proporción aproximada: 70\u00a0% negro · 15\u00a0% granate · 10\u00a0% rojo · 5\u00a0% blanco",
+          "proportion": "Proporción aproximada: 70 % negro · 15 % granate · 10 % rojo · 5 % blanco",
           "brand": "Paleta del sello",
           "derived": "Derivados (mezclas hacia el negro)",
           "text": "Texto",
@@ -674,20 +691,20 @@
           "pair": "Par",
           "ratio": "Ratio",
           "rule": "Uso",
-          "text": "Aa · Texto 14\u00a0px",
-          "textLarge": "Aa · Grande 20\u00a0px",
+          "text": "Aa · Texto 14 px",
+          "textLarge": "Aa · Grande 20 px",
           "over": "{foreground} sobre {background}",
           "value": "{ratio}:1",
           "uses": {
             "anyText": "Cualquier texto",
-            "largeText": "Solo texto grande (≥ 24\u00a0px o ≥ 18,7\u00a0px en negrita) e iconos",
+            "largeText": "Solo texto grande (≥ 24 px o ≥ 18,7 px en negrita) e iconos",
             "unused": "No se usa",
             "pressed": "Pulsado",
             "disabled": "Deshabilitado (cumple aunque no lo exige)"
           }
         },
         "type": {
-          "display": "Display · Anybody cursiva 900, de 150 a 105\u00a0% de ancho",
+          "display": "Display · Anybody cursiva 900, de 150 a 105 % de ancho",
           "displaySample": "Elige modo",
           "hardSample": "Beat Battle",
           "accentsSample": "Gràcia · Próximo · Púrpura · ÀÓÚ",
@@ -701,25 +718,25 @@
           "labelSample": "Rótulo · cierre de envíos",
           "num": "Cifras · Oxanium, de ancho fijo",
           "numSample": "04:07:12:45",
-          "tabular": "1111 · 0000 · 92\u00a0BPM · 2.980\u00a0XP"
+          "tabular": "1111 · 0000 · 92 BPM · 2.980 XP"
         },
         "scale": {
-          "note": "Rem sobre 16\u00a0px: todo escala con el tamaño de texto. Ningún texto con información baja de 12\u00a0px (RD-VIS-05).",
+          "note": "Rem sobre 16 px: todo escala con el tamaño de texto. Ningún texto con información baja de 12 px (RD-VIS-05).",
           "sample": "Torneo semanal",
           "digits": "04:07:12",
-          "xs": "12\u00a0px · rótulos, teclas, chips",
-          "sm": "14\u00a0px",
-          "md": "16\u00a0px",
-          "lg": "20\u00a0px",
-          "xl": "20 → 24\u00a0px",
-          "xl2": "24 → 32\u00a0px",
-          "xl3": "36 → 48\u00a0px",
-          "plate": "25\u00a0px (19 en móvil) · placa del menú",
-          "plateOn": "31\u00a0px (22 en móvil) · placa elegida",
-          "title": "28 → 42\u00a0px · título de pantalla",
-          "alias": "30 → 46\u00a0px · alias",
-          "clock": "34\u00a0px · reloj de ronda",
-          "timer": "58\u00a0px · contador del umbral"
+          "xs": "12 px · rótulos, teclas, chips",
+          "sm": "14 px",
+          "md": "16 px",
+          "lg": "20 px",
+          "xl": "20 → 24 px",
+          "xl2": "24 → 32 px",
+          "xl3": "36 → 48 px",
+          "plate": "25 px (19 en móvil) · placa del menú",
+          "plateOn": "31 px (22 en móvil) · placa elegida",
+          "title": "28 → 42 px · título de pantalla",
+          "alias": "30 → 46 px · alias",
+          "clock": "34 px · reloj de ronda",
+          "timer": "58 px · contador del umbral"
         },
         "shape": {
           "cuts": "Chaflanes",
@@ -733,7 +750,7 @@
           "slants": "Paralelogramos y diagonal",
           "slant": "Placas del menú y medidores",
           "slantSm": "Etiquetas",
-          "slantToken": "--bb-slant · 18\u00a0px (12\u00a0px en móvil)",
+          "slantToken": "--bb-slant · 18 px (12 px en móvil)",
           "split": "Diagonal: banda roja, filete blanco, 17°",
           "tilts": "Inclinaciones",
           "tiltSticker": "Pegatina OTP",
@@ -797,16 +814,16 @@
           },
           "slap": "Pegatina OTP (OtpSlap)",
           "slapSize": {
-            "title": "Lockup del título · 120\u00a0px",
-            "menu": "Lockup del menú · 104\u00a0px",
-            "presents": "«Presenta» del título · 64\u00a0px",
-            "bar": "Barra de controles · 30\u00a0px de alto"
+            "title": "Lockup del título · 120 px",
+            "menu": "Lockup del menú · 104 px",
+            "presents": "«Presenta» del título · 64 px",
+            "bar": "Barra de controles · 30 px de alto"
           },
           "slapBarBefore": "Un juego de",
           "slapBarAfter": "Other People Records"
         },
         "cursor": {
-          "intro": "El foco es el cursor (§3.3): marco blanco de 3\u00a0px a 4\u00a0px de la pieza, que sigue su forma, con la etiqueta 1P en las listas. Una sola parada de tabulación por grupo; el ratón también mueve el cursor. Con el foco fuera del grupo, la elegida conserva el cursor: entero si el foco no está en ningún control, apagado si está en otro.",
+          "intro": "El foco es el cursor (§3.3): marco blanco de 3 px a 4 px de la pieza, que sigue su forma, con la etiqueta 1P en las listas. Una sola parada de tabulación por grupo; el ratón también mueve el cursor. Con el foco fuera del grupo, la elegida conserva el cursor: entero si el foco no está en ningún control, apagado si está en otro.",
           "static": "Cursor forzado",
           "staticSlant": "Paralelogramo con 1P a la izquierda",
           "staticCut": "Chaflán con 1P encima",
@@ -822,7 +839,7 @@
           },
           "menuHelp": {
             "play": "Pilla el sample, cocina tu flip y súbelo antes del domingo.",
-            "jury": "Escucha 30\u00a0s de cada beat y puntúalo de 1 a 5. Sin nombres hasta el domingo.",
+            "jury": "Escucha 30 s de cada beat y puntúalo de 1 a 5. Sin nombres hasta el domingo.",
             "results": "La semana sellada, con su ceremonia y su podio.",
             "settings": "Sonido, movimiento, modo serio y tamaño de texto."
           },
@@ -855,7 +872,7 @@
           "flashTitle": "flash.request() · como mucho 3 destellos por segundo (RD-MOT-04)",
           "flashButton": "Pedir destello",
           "flashIdle": "Pulsa varias veces seguidas: el cuarto destello en un segundo se deniega.",
-          "flashGranted": "Autorizado: {count} de 3 en el último segundo (área ≤ 25\u00a0%, opacidad ≤ 40\u00a0%).",
+          "flashGranted": "Autorizado: {count} de 3 en el último segundo (área ≤ 25 %, opacidad ≤ 40 %).",
           "flashDenied": "Denegado: ya van 3 destellos en el último segundo.",
           "flashSerious": "Modo serio: no se autoriza ningún destello."
         }
@@ -889,9 +906,9 @@
         "outline": "Contorno",
         "sizes": "Tamaños",
         "size": {
-          "sm": "sm · 40\u00a0px (objetivo de 44)",
-          "md": "md · 48\u00a0px",
-          "lg": "lg · 56\u00a0px"
+          "sm": "sm · 40 px (objetivo de 44)",
+          "md": "md · 48 px",
+          "lg": "lg · 56 px"
         },
         "iconOnly": "Solo icono"
       },
@@ -915,11 +932,11 @@
           "juryDetail": "16 sin votar",
           "playLocked": "Disponible el lunes",
           "accents": "Tildes en display",
-          "minute": "1\u00a0min",
+          "minute": "1 min",
           "resultsLocked": "Aún nada sellado",
           "help": {
             "play": "Pilla el sample, cocina tu flip y súbelo antes del domingo a las 20:00.",
-            "jury": "Escucha 30\u00a0s de cada beat y puntúalo de 1 a 5. Sin nombres hasta el domingo.",
+            "jury": "Escucha 30 s de cada beat y puntúalo de 1 a 5. Sin nombres hasta el domingo.",
             "results": "Aún no hay semanas selladas: la primera ceremonia, el domingo.",
             "settings": "Sonido, movimiento, modo serio y tamaño de texto."
           }
@@ -985,7 +1002,7 @@
           "mean": "Media final"
         },
         "wave": {
-          "threshold": "30\u00a0s",
+          "threshold": "30 s",
           "error": "No hemos podido cargar la onda"
         },
         "modal": {
@@ -1017,11 +1034,11 @@
         },
         "meter": {
           "xp": "Experiencia",
-          "xpText": "{value} de {max}\u00a0XP para el nivel {next}",
+          "xpText": "{value} de {max} XP para el nivel {next}",
           "start": "XP {value}",
           "end": "NV {next} · {max}",
           "full": "Lleno (éxito)",
-          "add": "{amount}\u00a0XP",
+          "add": "{amount} XP",
           "amount": "+40"
         },
         "clock": {
@@ -1061,11 +1078,11 @@
       },
       "player": {
         "season": "Temporada T4",
-        "seasonValue": "12\u00a0PTS · 9.º"
+        "seasonValue": "12 PTS · 9.º"
       },
       "chronicle": {
         "entry": "Nueva entrada: Tigre Púrpura",
-        "days": "Quedan 4\u00a0días",
+        "days": "Quedan 4 días",
         "votes": "340 votos esta semana"
       }
     }
@@ -1140,12 +1157,13 @@
       "legal": "Legal",
       "legalTitle": "Letra pequeña",
       "notFound": "Error 404",
-      "dev": "Desarrollo"
+      "dev": "Desarrollo",
+      "emails": "Correo"
     },
     "player": {
       "levelBefore": "Nv",
       "xp": "Experiencia",
-      "xpText": "{value} de {max}\u00a0XP para el nivel {next}",
+      "xpText": "{value} de {max} XP para el nivel {next}",
       "xpStart": "XP {value}",
       "xpEnd": "NV {next} · {max}"
     }
@@ -1177,7 +1195,7 @@
       },
       "vote": {
         "title": "Sube y vota",
-        "text": "Sube tu beat y entra al jurado: escucha 30\u00a0s de cada entrada y puntúala de 1 a 5.",
+        "text": "Sube tu beat y entra al jurado: escucha 30 s de cada entrada y puntúala de 1 a 5.",
         "gesture": "Votar",
         "keysLabel": "Teclas: del 1 al 5 para votar."
       }
@@ -1190,7 +1208,7 @@
       },
       "listen": {
         "title": "Escucha mínima",
-        "text": "Para votar, escucha 30\u00a0s de la entrada; saltar con la onda no cuenta."
+        "text": "Para votar, escucha 30 s de la entrada; saltar con la onda no cuenta."
       },
       "fairRound": {
         "title": "Ronda justa",
@@ -1204,6 +1222,21 @@
         "title": "El XP no puntúa",
         "text": "XP, logros, rachas y sorpresas nunca cambian la clasificación."
       }
+    }
+  },
+  "email": {
+    "kinds": {
+      "battleMonday": "Lunes de batalla",
+      "battleDrop": "Nuevo drop",
+      "battleResults": "Resultados",
+      "battleReminder": "Recordatorio para subir",
+      "battleJuryCall": "Última llamada del jurado",
+      "battleFirstVotes": "Primeros votos",
+      "battleLabelPick": "Elección del sello",
+      "gameProgress": "Rango y logros",
+      "seasonWrap": "Resumen de temporada",
+      "mktCampaign": "Novedades, campañas y packs de loops",
+      "mktReactivation": "Te echamos de menos"
     }
   }
 }
