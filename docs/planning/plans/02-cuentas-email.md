@@ -103,7 +103,7 @@ consentimiento y no se envía nada.
 | 2.9 | Plantillas en el servidor: `renderEmail(kind, payload, prefs)` → asunto, *preheader*, HTML y texto plano, con los enlaces y el pie de baja según la familia | ✅ Hecho | 2.8, 2.13 | §4.19.4 · **Hecho:** `email/render.ts` (`createRenderer`): la plantilla con el `payload` guardado, la familia y la página de baja del pie (mismo token que la de un clic); un tipo sin plantilla falla y la cola lo reintenta |
 | 2.10 | Bajas: tokens HMAC (`UNSUBSCRIBE_SECRET`) sobre destinatario + tipo; `GET /api/unsubscribe` con la página «Baja» (ese tipo o todo lo no esencial) en el marco simple de la arena; `POST /api/unsubscribe/one-click` según RFC 8058 (exento de `Origin` y con `application/x-www-form-urlencoded`, como prevé `plugins/security.ts`); la baja de todo suprime por hash | ✅ Hecho | 2.8 | §2.12.4, §4.19.6 · `RF-NOTIF-05` · **Hecho:** tokens HMAC, `GET`/`POST /api/unsubscribe` y la de un clic con formularios (`acceptForm` en su propio contexto); pantalla `/baja` mirada en el navegador (1440 y 390, hecho e inválido) y recorrida con el teclado; `unsubscribe.test.ts` (`RF-NOTIF-05`, `-16`, tokens manipulados, suscriptor), `UnsubscribePage.test.tsx` y `/baja` en las rutas del E2E (axe, texto, paleta y firma) |
 | 2.11 | `bounceScan`: lee el buzón por IMAP (`imapflow`), saca el destinatario de `X-Failed-Recipients` o del informe de entrega, suprime los permanentes (5.x.x) y mueve el aviso a `beatbattle/rebotes`. Probado con avisos de rebote de ejemplo; la conexión real, con la cuenta de Workspace (⚠️ credenciales del usuario) | ⬜ Listo | 2.8 | §4.19.2 · `RF-NOTIF-10` |
-| 2.12 | Preferencias y consentimientos: `GET`/`PUT /api/me/email-prefs` (un interruptor por aviso, formato del lunes, marketing, newsletter del sello), `email_consent` como historial que nunca se sobrescribe (fecha, versión del texto, origen, hash de IP) y espejo en `email_pref.marketing_on` | ⬜ Listo | 2.4, 2.8 | §2.12.4, §4.14 · `RF-NOTIF-01`, `-16` |
+| 2.12 | Preferencias y consentimientos: `GET`/`PUT /api/me/email-prefs` (un interruptor por aviso, formato del lunes, marketing, newsletter del sello), `email_consent` como historial que nunca se sobrescribe (fecha, versión del texto, origen, hash de IP) y espejo en `email_pref.marketing_on` | ✅ Hecho | 2.4, 2.8 | §2.12.4, §4.14 · `RF-NOTIF-01`, `-16` · **Hecho:** esquemas en `shared` (`emailPrefs.ts`), `modules/emailPrefs` y las casillas del registro en el *hook* del alta (`consents`); `ipHash` con sal semanal; `emailPrefs.test.ts` (4): `RF-NOTIF-16` en el registro y en Ajustes, valores por defecto y errores |
 
 ### Plantillas
 
@@ -163,6 +163,7 @@ para los avisos de las fases 3 a 7.
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-08 | 2.12 | Preferencias y consentimientos, con el historial. Guía v0.6.29. |
 | 2026-10-08 | 2.6 | Flujos de cuenta en el servidor. Una sonda del cambio de email destapó que el último enlace llega sin sesión: el aviso sale del token. Guía v0.6.28. |
 | 2026-10-08 | 2.5 | Guardas de ruta, con la de admin puesta sola en `/api/admin/*`. Guía v0.6.27. |
 | 2026-10-08 | 2.4 | Better Auth en Fastify, con los flujos de registro y verificación probados con la API y de verdad con Mailpit. Guía v0.6.26. |

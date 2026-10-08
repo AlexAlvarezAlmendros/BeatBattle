@@ -12,6 +12,7 @@ import { createUnsubscribeLinks } from './email/unsubscribe'
 import { type Clock, systemClock } from './lib/clock'
 import { uuidv7 } from './lib/ids'
 import { type LogStream, loggerOptions } from './lib/logger'
+import { emailPrefsRoutes } from './modules/emailPrefs/routes'
 import { healthRoutes } from './modules/health/routes'
 import { createHealthService } from './modules/health/service'
 import { createCloudinaryStorage } from './modules/storage/cloudinary'
@@ -95,11 +96,12 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     newId,
     onSendError: (info) => app.log.warn({ email: info }, 'envío de email fallido'),
   })
-  authRoutes(app, createAuth({ config, db, emails, now: () => clock.now() }))
+  authRoutes(app, createAuth({ config, db, emails, now: () => clock.now(), newId }))
   registerAdminGuard(app)
 
   healthRoutes(app, createHealthService({ db }))
   unsubscribeRoutes(app, { db, secret: config.mail.unsubscribeSecret, newId })
+  emailPrefsRoutes(app, { db, secret: config.auth.secret, newId })
   // Spike de Cloudinary (tarea 1.7): solo fuera de producción.
   if (config.env !== 'production')
     storageSpikeRoutes(app, config.storage ? createCloudinaryStorage(config.storage) : null, {
