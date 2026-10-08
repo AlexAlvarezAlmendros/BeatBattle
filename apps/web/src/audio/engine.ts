@@ -16,12 +16,24 @@ import { playSfx } from './synth'
 /** Separación mínima entre dos `ui.hover` (s): 8 por segundo como mucho (Anexo D). */
 export const HOVER_MIN_GAP = 1 / 8
 
-type ContextConstructor = new () => AudioContext
+type ContextConstructor = new (options?: AudioContextOptions) => AudioContext
 
 function contextConstructor(): ContextConstructor | null {
   if (typeof window === 'undefined') return null
   const legacy = (window as Window & { webkitAudioContext?: ContextConstructor }).webkitAudioContext
   return window.AudioContext ?? legacy ?? null
+}
+
+/**
+ * Latencia que se le pide al contexto (`RD-SND-05`: < 30 ms desde el clic en escritorio; tarea 1.11). Con
+ * puntero fino, la mínima del dispositivo (`0`): en Linux con PipeWire, la latencia base pasa de 10,7 ms
+ * (`interactive`, bloques de 512) a 2,7, y el total medido, de 35 a ~27 ms. En táctil, `interactive`: con
+ * un búfer mínimo, un móvil lento puede dar chasquidos.
+ */
+function latencyHint(): AudioContextLatencyCategory | number {
+  return typeof window.matchMedia === 'function' && window.matchMedia('(pointer: fine)').matches
+    ? 0
+    : 'interactive'
 }
 
 export class AudioEngine {
@@ -52,7 +64,7 @@ export class AudioEngine {
     const Context = contextConstructor()
     if (!Context) return
     if (!this.ctx) {
-      this.ctx = new Context()
+      this.ctx = new Context({ latencyHint: latencyHint() })
       this.mix = createMix(this.ctx)
       this.bank = makeNoiseBank(this.ctx)
       this.mix.setMuted(this.muted)
@@ -133,3 +145,11 @@ export class AudioEngine {
 
 /** El motor de la app (uno por pestaña). */
 export const audio = new AudioEngine()
+
+declare global {
+  interface Window {
+    /** El motor, para medir su latencia (`tools/shot/latency.mjs`, `RD-SND-05`). Solo en desarrollo. */
+    __bbAudio?: AudioEngine
+  }
+}
+if (import.meta.env.DEV && typeof window !== 'undefined') window.__bbAudio = audio
