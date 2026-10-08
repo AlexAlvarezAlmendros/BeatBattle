@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.21 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.22 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2350,8 +2350,10 @@ la misma API, para no depender de la red.
 
 ### 4.9 Autenticación (Better Auth)
 
-Configuración de referencia (se verifica contra la documentación de la versión fijada en la tarea
-2.1, porque la API de la librería cambia a menudo):
+Configuración de referencia. **Versión fijada: better-auth 1.7.7** (tarea 2.3; su CLI, el paquete `auth`,
+también 1.7.7). La configuración de abajo se compiló tal cual contra sus tipos y todas sus opciones existen.
+Cualquier cambio de versión va con los tests de integración de cada flujo en verde, porque la API de la
+librería cambia a menudo:
 
 ```ts
 export const auth = betterAuth({
@@ -2395,10 +2397,15 @@ export const auth = betterAuth({
 - **Fastify**: una ruta comodín `/api/auth/*` convierte la petición de Fastify en un `Request` de
   Fetch y la pasa a `auth.handler`. El resto de rutas obtienen la sesión con
   `auth.api.getSession({ headers })` en un `preHandler` que decora `request.user`.
-- **Tablas** generadas con la CLI de Better Auth para Drizzle: `user` (+ `username`,
-  `displayUsername`, `role`, `banned`, `banReason`, `banExpires`), `session` (+ `impersonatedBy`),
-  `account`, `verification` y `rateLimit`. Los datos de juego van en tablas propias (§4.11), no en
-  `user`.
+- **Tablas** generadas con la CLI de Better Auth para Drizzle (`pnpm --filter @beatbattle/server
+  auth:schema` → `src/db/auth-schema.ts`): `user` (+ `username`, `displayUsername`, `role`, `banned`,
+  `banReason`, `banExpires`), `session` (+ `impersonatedBy`), `account`, `verification` y `rate_limit`. La
+  CLI escribe `ON DELETE CASCADE` en las claves ajenas y el script las quita (§4.11: en Turso no ocurriría
+  y en local sí, así que los tests mentirían). Las opciones que cambian el esquema (plugins, rate limit
+  en la BD) viven en `src/auth/options.ts` y las usan a la vez el servidor y la CLI. Los datos de juego van
+  en tablas propias (§4.11), no en `user`.
+- **Nombres reservados y formato** (`RF-AUTH-06`) en `@beatbattle/shared` (`usernameProblem`), los mismos en
+  el servidor y en el formulario de registro.
 - **Cookies** solo del host (`battle.otherpeople.es`), **sin** `crossSubDomainCookies`: así no se
   comparten con `otherpeople.es` y las cuentas son independientes de verdad.
 - **Cliente**: `createAuthClient` de `better-auth/react` con `usernameClient()` y `adminClient()`.
@@ -2475,7 +2482,7 @@ CREATE TABLE producer_profile (
   card_number    INTEGER NOT NULL UNIQUE,              -- orden de alta, «#0042»
   bio            TEXT, city TEXT,
   links          TEXT NOT NULL DEFAULT '{}',           -- JSON: instagram, soundcloud, youtube, spotify, beatstars
-  accent         TEXT NOT NULL DEFAULT 'red',          -- una de las 8 claves de acento
+  accent         TEXT NOT NULL DEFAULT 'red',          -- red | white | wine: solo la paleta (§2.3)
   avatar_public_id TEXT,
   showcase       TEXT NOT NULL DEFAULT '[]',           -- JSON: hasta 3 ids de logro
   otp_affiliate  INTEGER NOT NULL DEFAULT 0,
@@ -3371,6 +3378,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-08 | 0.6.22 | **Better Auth fijado en la 1.7.7** (tarea 2.3, §4.9): la configuración de referencia compila tal cual contra sus tipos. Las tablas se generan con su CLI (`auth:schema`), que quita las cascadas (§4.11). `producer_profile` y `username_redirect` (§4.11): el acento es `red`, `white` o `wine` (quedaba «8 claves» de antes de la Arena). Los reservados y el formato del nombre, en `@beatbattle/shared`. |
 | 2026-10-08 | 0.6.21 | **Transporte de email** (tareas 2.2 y 2.7, §4.19.1). Mailpit en local sin Docker (`pnpm mail:dev`, versión fijada con su SHA-256). La interfaz `Mailer` es `send` y `close`: el cupo restante lo calcula la cola, no el transporte. La lista blanca de la preview es `MAIL_PREVIEW_ALLOWLIST`, y en producción el servidor no arranca con Mailpit, con un `From` distinto de la cuenta o sin clave de baja. |
 | 2026-10-08 | 0.6.20 | **Decisiones de la Fase 2** (del usuario): dominio `battle.otherpeople.es`; los emails salen de una dirección del **Google Workspace de `otherpeople.es`** (§4.19.1: `From` del dominio, `MAIL_DAILY_LIMIT` de 1.900 por defecto, DKIM/SPF/DMARC comprobados antes del primer envío); proveedores Google y Discord (§7). §5: la Fase 2 incluye `RF-NOTIF-17` y `-18` (presupuesto y transporte, que ninguna fase listaba) y `RNF-PRIV-01` y `-03`. Plan en `docs/planning/plans/02-cuentas-email.md`. |
 | 2026-10-08 | 0.6.19 | **Cierre de la Fase 1** (tarea 1.12, decisiones del usuario). `RD-SND-05` reformulado: **la mínima latencia posible**, con la parte de la app < 10 ms (mediana; p95 < 15) y la salida del sistema medida aparte; comparadas las configuraciones del contexto con la misma salida, `latencyHint: 0` da el menor total (base 2,7 ms frente a 10,7; salida igual), 27 ms con PipeWire a 24 ms y 43 ms cuando PipeWire sube a 40. `RNF-PERF-03` acepta el Android **emulado** mientras no haya dispositivo. `RD-VIS-02` a también con la arena en *shader* (test nuevo). Nuevo **`RD-MOT-06`** (§3.5, §3.8.7; hallazgo del jurado de la 1.12): nada visual reacciona a una entrada sin sellar; la trama queda en reposo mientras suena y el motor no expone el analizador de una fuente ciega. **Pantalla de título** (§3.8.1, jurado de la 1.12): una columna por debajo de 1280 px (antes 960: el cartel tapaba la columna en un iPad apaisado), pie de la diagonal fuera de la columna, texto sobre `--bb-scrim` y no sobre los rayos, cartel EN JUEGO como la maqueta (reloj grande con los días, número en rojo), «Crédito 01» en caja mixta, pegatina de «PRESENTA» de 64 px, respira el texto y no el cursor, M y S respetan los atajos apagados y la galleta no pinta texto por debajo de 12 px. |
