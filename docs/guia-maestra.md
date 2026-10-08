@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.19 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.20 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2779,12 +2779,12 @@ negocio en el panel de admin (participantes, votos, escuchas por semana) y Verce
 | Alto | 150 | 6.000 | ~4,5 GB | ~26 GB | Plan de pago + archivo en R2 |
 
 **Email (estimación).** Con 500 cuentas: ~500 del lunes + ~150 recordatorios y llamadas al jurado
-+ ~100 de servicio ≈ 750 por semana, con el pico del lunes. Con una cuenta de Gmail normal (cupo
-práctico de 450 al día, 25 % reservado para servicio), el Lunes de batalla llega el mismo día a unos
-330 destinatarios; el resto, en orden de prioridad (participantes → jurados → resto → suscriptores sin
-cuenta), el martes. Con Google Workspace (≈ 1.900 al día) llega a unos 1.400. El panel avisa al 80 %
-del cupo y cuando el envío del lunes no ha terminado a las 12:00: es la señal para pasar a Workspace
-o cambiar de transporte (la interfaz `Mailer` lo permite sin tocar lo demás).
++ ~100 de servicio ≈ 750 por semana, con el pico del lunes. Con el Workspace del sello (≈ 1.900 al
+día, 25 % reservado para servicio), el Lunes de batalla llega el mismo día a unos 1.400 destinatarios;
+lo que no quepa sale el martes en orden de prioridad (participantes → jurados → resto → suscriptores sin
+cuenta). Con un Gmail normal (450 al día) serían unos 330. El panel avisa al 80 % del cupo y cuando el
+envío del lunes no ha terminado a las 12:00: es la señal para cambiar de transporte (la interfaz
+`Mailer` lo permite sin tocar lo demás).
 
 **Política de retención** para contener el almacenamiento: a las 8 semanas del sellado, el original
 de cada entrada se sustituye por su derivado MP3 (se sube el derivado como recurso nuevo y se borra
@@ -2809,20 +2809,21 @@ el original); el top 3 conserva el original. El panel de uso (`RF-ADM-04`) avisa
 Decisión del usuario: **el mismo sistema que la web del sello** (`ReactOtpWeb/backend/services/emailService.js`),
 nodemailer con Gmail y contraseña de aplicación, con estas mejoras:
 
-- **Cuenta propia de BeatBattle**, no la del sello: comparten límite diario por cuenta y un lunes con
-  mucha actividad dejaría sin cupo las entradas y licencias del sello. Requiere verificación en dos
-  pasos para generar la contraseña de aplicación. Si `otherpeople.es` está en Google Workspace, una
-  dirección del dominio (p. ej. `batalla@otherpeople.es`) da más cupo y mejor entrega.
+- **Una dirección del Google Workspace de `otherpeople.es`** (decisión del usuario del 2026-10-08; p. ej.
+  `batalla@otherpeople.es`), propia de Beat Battle y no la que usa la tienda del sello: el límite diario es
+  por cuenta y un lunes con mucha actividad dejaría sin cupo las entradas y licencias del sello. Requiere
+  verificación en dos pasos para generar la contraseña de aplicación. El Workspace da más cupo (~2.000 al
+  día) y mejor entrega que un Gmail normal, con `From` del dominio.
 - **TLS verificado**: conexión a `smtp.gmail.com:465` con `secure: true` y **sin**
   `rejectUnauthorized: false` (el código del sello lo desactiva; aquí no se copia).
-- **Remitente coherente con la cuenta**: con Gmail normal, `From` es la propia dirección de Gmail con
-  nombre visible «Beat Battle · Other People»; con Workspace, la dirección del dominio. Nunca un
+- **Remitente coherente con la cuenta**: `From` es la dirección del Workspace con nombre visible «Beat
+  Battle · Other People» (con un Gmail normal sería la propia dirección de Gmail). Nunca un
   `From` de un dominio que la cuenta no controla (el sello usa `noreply@otherpeople.com`, que Gmail
   reescribe o manda a spam). `Reply-To` a un buzón real del sello.
 - **Ritmo**: un destinatario por mensaje (nunca CCO masiva), transporte en *pool* con una conexión y
   1 mensaje por segundo (`pool`, `maxConnections: 1`, `rateDelta`, `rateLimit` de nodemailer). En
   Vercel, cada `tick` envía como mucho 40 y cierra la conexión.
-- **Cupo diario** (`MAIL_DAILY_LIMIT`, por defecto 450 con Gmail normal y 1.900 con Workspace) en
+- **Cupo diario** (`MAIL_DAILY_LIMIT`, por defecto **1.900** con el Workspace; 450 con un Gmail normal) en
   **ventana móvil de 24 h**, como la cuenta Gmail, calculado sobre `email_outbox.sent_at`. El 25 %
   queda reservado para servicio. Lo que no cabe se aplaza moviendo su `not_before`
   (`RF-NOTIF-17`).
@@ -2846,8 +2847,9 @@ nodemailer con Gmail y contraseña de aplicación, con estas mejoras:
   `imapflow`), toma el destinatario de la cabecera `X-Failed-Recipients` o del informe de entrega
   (`Final-Recipient`) y, si el fallo es permanente (5.x.x), lo suprime. Después mueve el aviso a una
   etiqueta `beatbattle/rebotes`.
-- Con Workspace en el dominio del sello: DKIM de Google activado, SPF con `include:_spf.google.com` y
-  DMARC empezando en `p=none`.
+- Con el Workspace del sello: DKIM de Google activado, SPF con `include:_spf.google.com` y DMARC
+  empezando en `p=none`. Antes del primer envío real se comprueba qué tiene ya el DNS de `otherpeople.es`;
+  cualquier cambio en él lo confirma el usuario.
 - Antes del lanzamiento, cada plantilla pasa una prueba de spam (p. ej. mail-tester) con nota ≥ 9/10.
 
 #### 4.19.3 Cola de salida (patrón *outbox*)
@@ -2968,7 +2970,7 @@ arriba, siguiendo el recorrido del usuario: cuenta → sample → subir → vota
 |---|---|---|---|
 | 0 | **Fundaciones** | CI verde; la galería de componentes muestra los tokens y componentes base de la arena (§3); marco de juego y menú principal navegables con teclado; prueba de marca y de juego (`RD-VIS-02`) | `RD-VIS-*`, `RD-MOT-05`, `RF-OTP-01`, §4.4, §4.18 |
 | 1 | **Spike de sensación y audio** (GO/NO-GO) | Arena (trama en *shader*) + vista 3D + partículas a 60 fps en escritorio y ≥ 45 en Android medio (emulado); efectos con la parte de la app < 10 ms; analizador funcionando sobre un MP3 firmado de Cloudinary; ffmpeg mide sonoridad en Vercel en < 8 s | `RD-SND-*`, `RD-MOT-*`, `RNF-PERF-*`, §3.5, §4.8 |
-| 2 | **Cuentas y base de email** | E2E: registro → verificación → entrar con Google → perfil → borrar cuenta; cola de salida, preferencias, consentimientos y bajas funcionando | `RF-AUTH-*`, `RF-PRF-*`, `RF-NOTIF-01..05`, `RF-NOTIF-10`, `RF-NOTIF-16` |
+| 2 | **Cuentas y base de email** | E2E: registro → verificación → entrar con Google → perfil → borrar cuenta; cola de salida, presupuesto diario, preferencias, consentimientos y bajas funcionando | `RF-AUTH-*`, `RF-PRF-*`, `RF-NOTIF-01..05`, `RF-NOTIF-10`, `RF-NOTIF-16..18`, `RNF-PRIV-01`, `RNF-PRIV-03` |
 | 3 | **Semanas y samples** | El admin programa 3 semanas; con el reloj simulado, la home cambia de semana en la frontera, la descarga exige las bases y sale el email del drop (también a suscriptores sin cuenta) | `RF-DROP-*`, `RF-ADM-01/02`, `RF-NOTIF-09`, `RF-NOTIF-14` |
 | 4 | **Participar** | Subir un WAV de 60 MB por trozos, con BPM y tonalidad sugeridos, sonoridad medida en servidor y recibo por email | `RF-ENT-*`, `RF-STO-*`, `RF-NOTIF-06` |
 | 5 | **Escuchar y votar** | Dos usuarios se votan; todas las reglas `RF-VOTE-*` en verde; Modo Jurado completo con teclado; recordatorio, llamada al jurado y primeros votos | `RF-PLAY-*`, `RF-VOTE-*`, `RF-NOTIF-08`, `RF-NOTIF-13` |
@@ -3016,11 +3018,11 @@ Valores por defecto que la guía ya asume; se confirman o se cambian (y se regis
 
 | Decisión | Por defecto | Se cierra en |
 |---|---|---|
-| Dominio | `battle.otherpeople.es` | Antes de la Fase 2 (afecta a OAuth y cookies) |
+| Dominio | **Cerrada (2026-10-08): `battle.otherpeople.es`** | Antes de la Fase 2 (afecta a OAuth y cookies) |
 | Cuenta de Cloudinary | **Propia de BeatBattle**, mismo sistema que el sello | Antes de la Fase 4 |
-| Cuenta de Gmail para enviar | Cuenta propia de BeatBattle (no la del sello); una dirección de `otherpeople.es` si el dominio está en Google Workspace | Antes de la Fase 2 |
+| Cuenta de Gmail para enviar | **Cerrada (2026-10-08): una dirección del Google Workspace de `otherpeople.es`** (§4.19.1), propia de Beat Battle y no la de la tienda | Antes de la Fase 2 |
 | Newsletter del sello desde BeatBattle | Casilla opcional en el registro que da de alta en la newsletter del sello | Fase 9 |
-| Proveedores sociales | Google y Discord | Fase 2 |
+| Proveedores sociales | **Cerrada (2026-10-08): Google y Discord** | Fase 2 |
 | Premios | Sin premio material; visibilidad en el sello y Elección del sello. Si hay premios, revisar bases y fiscalidad (Anexo A) | Antes de la beta |
 | Origen y licencia de los samples | Samples propios del sello o de sus productores con licencia escrita para la competición | Antes de la Fase 3 |
 | Nombre de marca | «Beat Battle · un juego de Other People» | Fase 0 (afecta al logo y a los textos) |
@@ -3364,6 +3366,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-08 | 0.6.20 | **Decisiones de la Fase 2** (del usuario): dominio `battle.otherpeople.es`; los emails salen de una dirección del **Google Workspace de `otherpeople.es`** (§4.19.1: `From` del dominio, `MAIL_DAILY_LIMIT` de 1.900 por defecto, DKIM/SPF/DMARC comprobados antes del primer envío); proveedores Google y Discord (§7). §5: la Fase 2 incluye `RF-NOTIF-17` y `-18` (presupuesto y transporte, que ninguna fase listaba) y `RNF-PRIV-01` y `-03`. Plan en `docs/planning/plans/02-cuentas-email.md`. |
 | 2026-10-08 | 0.6.19 | **Cierre de la Fase 1** (tarea 1.12, decisiones del usuario). `RD-SND-05` reformulado: **la mínima latencia posible**, con la parte de la app < 10 ms (mediana; p95 < 15) y la salida del sistema medida aparte; comparadas las configuraciones del contexto con la misma salida, `latencyHint: 0` da el menor total (base 2,7 ms frente a 10,7; salida igual), 27 ms con PipeWire a 24 ms y 43 ms cuando PipeWire sube a 40. `RNF-PERF-03` acepta el Android **emulado** mientras no haya dispositivo. `RD-VIS-02` a también con la arena en *shader* (test nuevo). Nuevo **`RD-MOT-06`** (§3.5, §3.8.7; hallazgo del jurado de la 1.12): nada visual reacciona a una entrada sin sellar; la trama queda en reposo mientras suena y el motor no expone el analizador de una fuente ciega. **Pantalla de título** (§3.8.1, jurado de la 1.12): una columna por debajo de 1280 px (antes 960: el cartel tapaba la columna en un iPad apaisado), pie de la diagonal fuera de la columna, texto sobre `--bb-scrim` y no sobre los rayos, cartel EN JUEGO como la maqueta (reloj grande con los días, número en rojo), «Crédito 01» en caja mixta, pegatina de «PRESENTA» de 64 px, respira el texto y no el cursor, M y S respetan los atajos apagados y la galleta no pinta texto por debajo de 12 px. |
 | 2026-10-07 | 0.6.18 | **ffmpeg en Vercel validado** (*spike* 1.8, §4.8.4): cabe (~80 MB de función) y mide un WAV de 52 MB en 3,7 s en frío con la sonoridad exacta. La descarga la hace Node y ffmpeg lee de la entrada estándar (el ffmpeg estático falla al resolver DNS); el binario va con `includeFiles` y su script de instalación tiene que estar permitido. El plan B queda como reserva. |
 | 2026-10-07 | 0.6.17 | **Cuenta de Cloudinary propia** (decisión del usuario, §4.8.1). Spike de la 1.7 hecho: subida firmada por trozos, derivado listo en ~7 s para 4 min, entrega firmada con CORS, y el original sin firma da 404 (`RF-STO-02` corregido: no 401); `RF-STO-06` ya se comprueba al arrancar (también en las previews de Vercel, `VERCEL_ENV`). |
