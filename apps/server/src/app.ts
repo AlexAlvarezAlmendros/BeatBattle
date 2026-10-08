@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import Fastify, { type FastifyInstance } from 'fastify'
 import { createAuth } from './auth/auth'
+import { registerAdminGuard } from './auth/guards'
 import { authRoutes } from './auth/routes'
 import type { AppConfig } from './config/env'
 import type { Db } from './db/client'
@@ -95,6 +96,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     onSendError: (info) => app.log.warn({ email: info }, 'envío de email fallido'),
   })
   authRoutes(app, createAuth({ config, db, emails, now: () => clock.now() }))
+  registerAdminGuard(app)
 
   healthRoutes(app, createHealthService({ db }))
   unsubscribeRoutes(app, { db, secret: config.mail.unsubscribeSecret, newId })

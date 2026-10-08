@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.26 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.27 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2417,6 +2417,11 @@ export const auth = betterAuth({
   en tablas propias (§4.11), no en `user`.
 - **Nombres reservados y formato** (`RF-AUTH-06`) en `@beatbattle/shared` (`usernameProblem`), los mismos en
   el servidor y en el formulario de registro.
+- **Guardas** (`auth/guards.ts`), como `preHandler` de cada ruta: `requireSession` (401; una cuenta
+  bloqueada tampoco pasa), `requireVerified` (403 `EMAIL_NOT_VERIFIED`, `RF-AUTH-01`) y `requireAdmin`
+  (403). Un *hook* `onRoute` pone `requireAdmin` delante de **toda** ruta bajo `/api/admin`
+  (`RF-AUTH-03`): una ruta nueva no puede quedarse sin guarda por olvido. Bloquear con el plugin `admin`
+  revoca las sesiones (`RF-AUTH-02`).
 - **Cookies** solo del host (`battle.otherpeople.es`), **sin** `crossSubDomainCookies`: así no se
   comparten con `otherpeople.es` y las cuentas son independientes de verdad.
 - **Cliente**: `createAuthClient` de `better-auth/react` con `usernameClient()` y `adminClient()`.
@@ -3419,6 +3424,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-08 | 0.6.27 | **Guardas de ruta** (tarea 2.5, §4.9): `requireSession`, `requireVerified` y `requireAdmin`, y la guarda de admin puesta sola en toda ruta bajo `/api/admin`. Nuevo código `EMAIL_NOT_VERIFIED` (403). |
 | 2026-10-08 | 0.6.26 | **Better Auth en el servidor** (tarea 2.4, §4.9): la ruta comodín, la sesión en cada petición, la IP para el rate limit, los errores propios (`EMAIL_DISPOSABLE` y `USERNAME_RESERVED`, 422), el número de carta y los emails por la cola. La lista de dominios desechables es la comunitaria (CC0), como datos. Las plantillas llevan el pragma del JSX automático: con `tsx` fallaban fuera del paquete. |
 | 2026-10-08 | 0.6.25 | **Bajas y render de la cola** (tareas 2.9 y 2.10, §4.19.6): la página de baja es la pantalla `/baja?token=` de la web, sobre `GET` y `POST /api/unsubscribe`; la de un clic va en la cabecera. Qué apaga cada baja. El servidor renderiza la cola con `@beatbattle/emails` (`createRenderer`), y un tipo sin plantilla falla y se reintenta. |
 | 2026-10-08 | 0.6.24 | **Plantillas de email** (tareas 2.13 y 2.14, §3.8.12 y §4.19.4): el botón es una tabla con `bgcolor` en la celda, sin VML; las imágenes de la cabecera, con fondo negro propio; `renderEmail` y el contexto (URL pública, familia, página de baja, dirección postal); la galería y sus capturas. Chakra Petch como fuente web queda pendiente de una URL estable para sus ficheros. |
