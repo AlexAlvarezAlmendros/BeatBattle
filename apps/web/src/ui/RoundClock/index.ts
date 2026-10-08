@@ -1,2 +1,2 @@
 export * from './countdown'
-export { RoundClock, type RoundClockProps, WEEK_DAYS, type WeekBar } from './RoundClock'
+export { RoundClock, type RoundClockProps, RoundClockWeek, WEEK_DAYS, type WeekBar } from './RoundClock'

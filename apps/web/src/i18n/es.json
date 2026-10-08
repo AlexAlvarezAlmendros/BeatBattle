@@ -24,7 +24,8 @@
       "champion": "Campeón vigente",
       "championDetail": "S{week} · {title} · {score}",
       "inPlay": "En juego",
-      "billKicker": "Semana {number} · el sample",
+      "billKickerBefore": "Semana",
+      "billKickerAfter": "· el sample",
       "closes": "Cierre de envíos",
       "inBattle": "en la batalla",
       "credit": "Crédito",
@@ -798,6 +799,7 @@
           "slapSize": {
             "title": "Lockup del título · 120\u00a0px",
             "menu": "Lockup del menú · 104\u00a0px",
+            "presents": "«Presenta» del título · 64\u00a0px",
             "bar": "Barra de controles · 30\u00a0px de alto"
           },
           "slapBarBefore": "Un juego de",

@@ -26,14 +26,15 @@ export const REACTIVE_FPS = 30
  * de FFT 1024 del motor de audio) → paso bajo de 2 Hz → **tamaño de punto** de la trama (`uDotScale`, ≤ 15 %).
  * Nunca la luminancia del rojo ni el brillo de un área grande (`RNF-A11Y-04`). Mientras suena música, la
  * trama pinta a 30 fps; al parar vuelve al reposo y deja de pintar. Con «reducir movimiento» o con la pausa
- * de la barra (WCAG 2.2.2), quieta.
+ * de la barra (WCAG 2.2.2), quieta. Con una entrada sin sellar sonando, también quieta (`RD-MOT-06`, §1.3).
  */
 export function useReactiveDots(uniform: { value: number }, stats: ReactivityStats | null): void {
   const reactivity = useMemo(() => createReactivity(), [])
-  const [music, setMusic] = useState(audio.musicPlaying)
+  // Solo la música que se puede leer: con una entrada sin sellar, la trama en reposo (`RD-MOT-06`).
+  const [music, setMusic] = useState(audio.musicReactive)
   useEffect(() => {
-    setMusic(audio.musicPlaying)
-    return audio.onMusicChange(setMusic)
+    setMusic(audio.musicReactive)
+    return audio.onMusicChange(() => setMusic(audio.musicReactive))
   }, [])
   const reduced = useReducedMotion()
   const paused = useLoops((state) => state.paused)

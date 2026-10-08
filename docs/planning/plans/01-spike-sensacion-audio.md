@@ -1,8 +1,9 @@
 # Plan 01 — Spike de sensación y audio (GO/NO-GO)
 
-> Fase: 1 de 10 | Estado: 🔄 En curso | Iniciado: 2026-10-05 | Cerrado: —
+> Fase: 1 de 10 | Estado: ✅ Cerrada con **GO** | Iniciado: 2026-10-05 | Cerrado: 2026-10-08
 > Hito del roadmap: arena (trama en *shader*) + vista 3D + partículas a 60 fps en escritorio con GPU
-> integrada y ≥ 45 fps en un Android de gama media; efectos con < 30 ms de latencia; analizador de Web
+> integrada y ≥ 45 fps en un Android de gama media (emulado, decisión del usuario); efectos con la mínima
+> latencia posible (la parte de la app < 10 ms; antes, < 30 ms en total); analizador de Web
 > Audio funcionando sobre un MP3 firmado de Cloudinary; ffmpeg mide la sonoridad de un WAV de 50 MB en
 > Vercel en < 8 s. **Puerta GO/NO-GO** para empezar la Fase 2.
 >
@@ -63,8 +64,8 @@ ya dentro del monorepo (`apps/web/src/stage`, `apps/web/src/audio`, `packages/au
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 1.11 | Banco: `tools/shot/bench.mjs` en escritorio (GPU integrada AMD del portátil) con la arena en *shader* + vinilo-sol + 4.000 partículas; en Android de gama media (dispositivo real del usuario o, si no hay, emulación con limitación de CPU, dejándolo marcado como evidencia parcial). Latencia de efectos medida | ✅ Hecho | 1.3, 1.5, 1.6 | §4.17 · `RNF-PERF-03`, `RD-SND-05` · Escritorio: 60 fps a dpr 1 y 2 con todo (3 llamadas de dibujo). **Android emulado** (CPU ×4, 390 × 844, dpr 2,625; decisión del usuario, evidencia parcial): 60 fps; con GPU por software, la sonda apaga el Escenario. Latencia: la app, ~4 ms (`latencyHint: 0`); la salida de PipeWire, 24–48 ms: **`RD-SND-05` sin cumplir en Linux**, abierto para el GO/NO-GO (`evidence/f1/banco/`) |
-| 1.12 | Informe GO/NO-GO en este plan con evidencia (capturas, GIF y números en `docs/planning/evidence/f1/`); desviaciones llevadas a la guía con registro de cambios; decisión anotada en el roadmap | ⬜ Listo | 1.7, 1.8, 1.10, 1.11 | — · Incluye un pase del **jurado visual** de la arena con el Escenario WebGL frente al fondo estático (`RD-VIS-02` e) y el test de paleta de `RD-VIS-02` a con la arena en *shader* |
+| 1.11 | Banco: `tools/shot/bench.mjs` en escritorio (GPU integrada AMD del portátil) con la arena en *shader* + vinilo-sol + 4.000 partículas; en Android de gama media (dispositivo real del usuario o, si no hay, emulación con limitación de CPU, dejándolo marcado como evidencia parcial). Latencia de efectos medida | ✅ Hecho | 1.3, 1.5, 1.6 | §4.17 · `RNF-PERF-03`, `RD-SND-05` · Escritorio: 60 fps a dpr 1 y 2 con todo (3 llamadas de dibujo). **Android emulado** (CPU ×4, 390 × 844, dpr 2,625; decisión del usuario, evidencia parcial): 60 fps; con GPU por software, la sonda apaga el Escenario. Latencia: la app, ~4 ms (`latencyHint: 0`); la salida de PipeWire, 24–48 ms: **`RD-SND-05` sin cumplir en Linux**, abierto para el GO/NO-GO (`evidence/f1/banco/`) · En la 1.12, `RD-SND-05` se reformuló (decisión del usuario: la mínima posible, la parte de la app < 10 ms y el sistema aparte): **cumple** (3,3–3,5 ms) |
+| 1.12 | Informe GO/NO-GO en este plan con evidencia (capturas, GIF y números en `docs/planning/evidence/f1/`); desviaciones llevadas a la guía con registro de cambios; decisión anotada en el roadmap | ✅ Hecho | 1.7, 1.8, 1.10, 1.11 | — · Incluye un pase del **jurado visual** de la arena con el Escenario WebGL frente al fondo estático (`RD-VIS-02` e) y el test de paleta de `RD-VIS-02` a con la arena en *shader* · **GO** (informe abajo). Jurado de tres lentes: marca y juego pasan; accesibilidad, con un alto en la pantalla de título (el cartel tapaba la columna de 961 a 1279 px), corregido con un E2E nuevo (`evidence/f1/jurado/`). Paleta con la arena en *shader*: 0,000 % fuera. Hallazgo de marca: nuevo `RD-MOT-06` (nada visual reacciona a una entrada sin sellar) |
 
 ---
 
@@ -77,8 +78,10 @@ banco; más la función de medición de sonoridad desplegada en una *preview*.
 ## Criterio de aceptación (GO)
 
 1. ≥ 60 fps de media y peor fotograma < 25 ms en escritorio con GPU integrada a 1080p.
-2. ≥ 45 fps en Android de gama media con la calidad automática.
-3. Latencia de efecto desde el clic < 30 ms en escritorio.
+2. ≥ 45 fps en Android de gama media con la calidad automática (emulado: decisión del usuario del
+   2026-10-08, sin dispositivo).
+3. Latencia de efecto desde el clic: la mínima posible, con la parte de la app < 10 ms y la salida del
+   sistema medida aparte (`RD-SND-05` reformulado el 2026-10-08; antes, < 30 ms en total).
 4. El analizador recibe datos (no silencio) de un MP3 firmado de Cloudinary.
 5. El original sin firma no se puede descargar.
 6. ffmpeg cabe en la función y mide un WAV de 50 MB en < 8 s **o** el plan B queda especificado en la
@@ -89,12 +92,46 @@ banco; más la función de medición de sonoridad desplegada en una *preview*.
 **NO-GO** en 1 o 2 → se rebajan los presupuestos de §3.5 (menos capas, sin vistas 3D en móvil) y se
 repite el banco antes de seguir. **NO-GO** en 4 o 5 → se replantea el almacenamiento (§4.2).
 
+## Informe GO/NO-GO (2026-10-08, tarea 1.12)
+
+**Veredicto: GO.** Los ocho criterios se cumplen, con dos decisiones del usuario (Android emulado y
+`RD-SND-05` reformulado) y una lectura del criterio 1 que el informe deja a la vista.
+
+| # | Criterio | Resultado | Evidencia |
+|---|---|---|---|
+| 1 | ≥ 60 fps y peor fotograma < 25 ms a 1080p con GPU integrada | ✅ **En lo que depende de la app.** 59,7–60 fps y p99 de 16,8 ms con la arena, el vinilo y 4.000 partículas (3 llamadas de dibujo). El peor fotograma de 10 s llega a 24–44 ms, pero es uno suelto que también sale con el menú quieto: una traza de Chrome no tiene ninguna tarea de más de 2,7 ms en ningún hilo. Lo pierde el vsync del compositor del sistema | `evidence/f1/banco/` (1080p y traza) |
+| 2 | ≥ 45 fps en Android de gama media | ✅ 60 fps **emulado** (CPU ×4, 390 × 844, dpr 2,625); con una GPU por software, la sonda apaga el Escenario y la página sigue a 60. La emulación no reproduce una GPU móvil: un Android real, cuando lo haya | `evidence/f1/banco/` |
+| 3 | Latencia de efectos (reformulado) | ✅ La parte de la app, 3,3–3,5 ms de mediana. `latencyHint: 0` da el menor total (base de 2,7 ms frente a 10,7; la salida es la misma con todas las opciones). Con la salida de PipeWire (24–40 ms), el total es de 27–43 ms en este Linux | `evidence/f1/banco/`, `engine.test.ts` |
+| 4 | El analizador recibe datos de un MP3 firmado de Cloudinary | ✅ Nivel máximo de 202/255 a los 3 s, con `crossOrigin` y CORS `*` | `evidence/f1/cloudinary/` |
+| 5 | El original sin firma no se descarga | ✅ 404 (no 401: no revela ni que existe) | `evidence/f1/cloudinary/` |
+| 6 | ffmpeg cabe y mide un WAV de 50 MB en < 8 s | ✅ ~80 MB de función, 3,7 s en frío y ~2,5 s en caliente, −10,0 LUFS exactos | `evidence/f1/ffmpeg/` |
+| 7 | El motor de análisis portado pasa la batería del sello | ✅ 17/17 y paridad exacta con el motor original en las 15 pistas | 1.9, `analysis.test.ts` |
+| 8 | Ningún destello de más de 3 por segundo a 160 BPM | ✅ 0 destellos por segundo (oscilación de luminancia de 0,0006) | `evidence/f1/reactividad/` |
+
+Además:
+
+- **Jurado visual** (`RD-VIS-02` e): la arena en WebGL se ve igual que la estática en las tres lentes, y la
+  paleta con el *shader* da 0,000 % de píxeles fuera. La pantalla de título pasó por su primer jurado: el
+  hallazgo alto y los medios están corregidos (`evidence/f1/jurado/`).
+- **Integridad**: el jurado vio que la reactividad podía distinguir entradas en el futuro Modo Jurado.
+  Queda cerrado antes de construirlo, con `RD-MOT-06` y su guarda en el motor.
+- **Desviaciones llevadas a la guía:** v0.6.17 (Cloudinary: 404 y no 401), v0.6.18 (ffmpeg: Node descarga
+  y ffmpeg lee de la entrada estándar) y v0.6.19 (`RD-SND-05`, `RNF-PERF-03`, `RD-MOT-06` y la pantalla de
+  título).
+- **Entregable:** en lugar de una sola página `/dev/spike` hay tres: `/dev/escenario` (arena, vinilo,
+  partículas y banco), `/dev/escucha` (Cloudinary con analizador) y las estrellas en `/dev/galeria`. La
+  función de ffmpeg se desplegó en un proyecto de prueba de Vercel aparte (no en una *preview* del
+  proyecto, que aún no existe), y se borra al cerrar.
+- **Pendiente para más adelante:** la extrusión del logo capa a capa (Anexo E), la pegatina del arranque
+  a 4× (jurado, baja) y un Android real.
+
 ---
 
 ## Registro de avance
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-08 | 1.12 | **Hecha: GO de la Fase 1.** Decisiones del usuario: `RD-SND-05` reformulado (la mínima latencia posible, la parte de la app < 10 ms y el sistema aparte) y Android emulado aceptado. Comparadas las opciones de `latencyHint` con la misma salida, `0` es la mejor: base de 2,7 ms y 27 ms de total con PipeWire a 24. A 1080p, 60 fps; el peor fotograma suelto es del compositor del sistema (traza sin tareas de más de 2,7 ms). Jurado de tres lentes: el alto (el cartel tapaba la columna del título de 961 a 1279 px) y los medios, corregidos y verificados (E2E nuevo). Nuevo `RD-MOT-06`. Paleta con la arena en *shader*: 0,000 % fuera. Guía v0.6.19. Recursos de prueba: borrado el fichero de Cloudinary; el proyecto de Vercel, pendiente de que el usuario lo borre desde el panel. |
 | 2026-10-07 | 1.8 | **Hecha: GO.** Función de prueba en un proyecto de Vercel aparte (`beatbattle-ffmpeg-spike`, `fra1`, con confirmación del usuario) con `ffmpeg-static`: Node descarga el original firmado y lo pasa a ffmpeg por la entrada estándar (el ffmpeg estático falla al resolver DNS), que mide `ebur128` y saca la onda en una pasada. Con un WAV de 52 MB: 3,7 s de pared en frío, ~2,5 s en caliente, −10,0 LUFS y −10,0 dBFS sobre la referencia, 124 MB de memoria; el binario son 80 MB (28 MB comprimido). Guía v0.6.18 (§4.8.4). La 1.12 pasa a lista. |
 | 2026-10-07 | 1.7 | **Hecha.** Cuenta propia de BeatBattle (decisión del usuario). Subida firmada por trozos de 6 MB directo a Cloudinary como `authenticated` con `eager` `f_mp3,br_192k`, entrega con URL firmada del derivado y escucha por el bus de música con analizador. Con un WAV de 4 min: 7 trozos en 10,9 s y el MP3 listo 6,8 s después, a 192 kb/s y con CORS. El original sin firma da 404 y no 401: `RF-STO-02` corregido en la guía. Recursos de prueba borrados. La 1.8 pasa a lista. |
 | 2026-10-07 | 1.13 | **Hecha, con un pendiente.** Pantalla de título como la maqueta `00-titulo`: arranque «[OTP.] PRESENTA» saltable, logo que cae, *lockup*, disco de la semana en trama cortado por la diagonal y girando al BPM, «PULSA PARA EMPEZAR» que respira, «Entrar sin sonido [S]», campeón vigente y cartel EN JUEGO; al pulsar, `AudioContext`, `ui.enter` y la diagonal que se abre. Mirada en el navegador a 1440 × 900 y 390 × 844. Pendiente: la extrusión del logo capa a capa. Las pruebas (Vitest y Playwright) la apagan por configuración. |

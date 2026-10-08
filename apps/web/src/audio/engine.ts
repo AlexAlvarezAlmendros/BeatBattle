@@ -25,7 +25,7 @@ function contextConstructor(): ContextConstructor | null {
 }
 
 /**
- * Latencia que se le pide al contexto (`RD-SND-05`: < 30 ms desde el clic en escritorio; tarea 1.11). Con
+ * Latencia que se le pide al contexto (`RD-SND-05`: la mínima posible; la parte de la app < 10 ms). Con
  * puntero fino, la mínima del dispositivo (`0`): en Linux con PipeWire, la latencia base pasa de 10,7 ms
  * (`interactive`, bloques de 512) a 2,7, y el total medido, de 35 a ~27 ms. En táctil, `interactive`: con
  * un búfer mínimo, un móvil lento puede dar chasquidos.
@@ -46,6 +46,8 @@ export class AudioEngine {
   private lastHover = Number.NEGATIVE_INFINITY
   private loop: AudioBufferSourceNode | null = null
   private element: HTMLMediaElement | null = null
+  /** ¿Es el elemento que suena una entrada sin sellar? (`RD-MOT-06`) */
+  private elementBlind = false
   private elementSources = new WeakMap<HTMLMediaElement, MediaElementAudioSourceNode>()
   private musicListeners = new Set<(playing: boolean) => void>()
 
@@ -88,9 +90,26 @@ export class AudioEngine {
     this.mix?.setMusicPlaying(playing)
   }
 
-  /** Analizador del bus de música (tarea 1.6), o `null` sin contexto. */
+  /**
+   * Analizador del bus de música (tarea 1.6), o `null` sin contexto. También `null` mientras suena una
+   * fuente ciega (`RD-MOT-06`): nada visual lee una entrada sin sellar.
+   */
   get musicAnalyser(): AnalyserNode | null {
+    if (this.blindPlaying) return null
     return this.mix?.analyser ?? null
+  }
+
+  /** ¿Suena una entrada sin sellar (`attachElement` con `blind`)? */
+  private get blindPlaying(): boolean {
+    return this.elementBlind && this.element !== null && !this.element.paused
+  }
+
+  /**
+   * ¿Puede reaccionar lo visual a la música que suena? Sí con el sample y las entradas selladas; no con una
+   * entrada sin sellar (`RD-MOT-06`, §1.3: todas igual hasta el sellado, así que la arena queda en reposo).
+   */
+  get musicReactive(): boolean {
+    return this.musicPlaying && !this.blindPlaying
   }
 
   /** ¿Suena música (un bucle o un elemento de audio)? */
@@ -108,8 +127,11 @@ export class AudioEngine {
    * Lleva un `<audio>` por el bus de música (spike de la tarea 1.7; el reproductor es de la Fase 5): pasa
    * por el analizador (la trama reacciona) y por el *ducking*. El elemento necesita `crossOrigin` para que
    * el analizador vea el audio de Cloudinary. Devuelve con qué soltarlo. Hace falta el contexto.
+   *
+   * `blind` es obligatorio a propósito: una entrada de una semana sin sellar va con `true` y entonces nada
+   * visual la lee (`RD-MOT-06`); el sample y las entradas selladas, con `false`.
    */
-  attachElement(element: HTMLMediaElement): () => void {
+  attachElement(element: HTMLMediaElement, { blind }: { blind: boolean }): () => void {
     const { ctx, mix } = this
     if (!ctx || !mix) return () => {}
     let source = this.elementSources.get(element)
@@ -119,13 +141,17 @@ export class AudioEngine {
     }
     source.connect(mix.input.music)
     this.element = element
+    this.elementBlind = blind
     const update = () => this.announceMusic()
     for (const type of ['play', 'pause', 'ended'] as const) element.addEventListener(type, update)
     update()
     return () => {
       for (const type of ['play', 'pause', 'ended'] as const) element.removeEventListener(type, update)
       source.disconnect()
-      if (this.element === element) this.element = null
+      if (this.element === element) {
+        this.element = null
+        this.elementBlind = false
+      }
       this.announceMusic()
     }
   }

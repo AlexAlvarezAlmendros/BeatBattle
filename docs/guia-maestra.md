@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.18 · 2026-10-07 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.19 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -962,7 +962,7 @@ y sonido. La familia se reconoce por el color y por la firma, no por la maqueta 
 | Sitio | Forma |
 |---|---|
 | Pantalla de título y menú principal | Lockup «TORNEO SEMANAL DE PRODUCTORES **by** [OTP.]» junto al logo del juego (104–120 px de ancho; 62 px en móvil y siempre que el lockup mida menos de 27 rem, como en la composición intermedia y el escritorio con ventana baja: el lockup sigue al tamaño del logo, §3.8.3). Enlaza a `otherpeople.es` con el nombre «by Other People (abre la web del sello)». |
-| Arranque de la puerta | «[OTP.] PRESENTA», como el logo de editora antes del título (§3.8.1) |
+| Arranque de la puerta | «[OTP.] PRESENTA», como el logo de editora antes del título (§3.8.1): pegatina de 120 px en el arranque y de 64 px (44 en móvil) en la fila «PRESENTA» del título |
 | Barra de controles de todas las pantallas | «Un juego de [OTP.] Other People Records» en el centro (pegatina de 30 px; 24 px en móvil), enlazada al sello |
 | Autenticación, admin y legales | El marco simple (§3.8.14) conserva la barra de controles con la firma en el centro; en autenticación, además, el lockup del título junto al logo |
 | Ceremonia de resultados | Tapa la barra de controles, así que lleva la pegatina (30 px) en la esquina inferior, junto a «Saltar [Esc]» |
@@ -1396,7 +1396,10 @@ el bus de música; el Escenario lee la energía de la banda del bombo y el bajo 
 una puerta (por debajo del 35 % no se mueve nada; desde el 80 %, el máximo) y por un paso bajo de un polo
 a **2 Hz**, y de ahí sale la escala del tamaño de punto: de 1 a **1,15**. Mientras suena música la trama
 pinta a 30 fps; al parar vuelve al reposo y deja de pintar. Con «reducir movimiento» o con la pausa de la
-barra, quieta. Como el rojo de la marca es oscuro en luminancia relativa (0,21), ni la escala máxima fija
+barra, quieta. **Con una entrada sin sellar sonando, también quieta** (`RD-MOT-06`): si la trama latiera con
+su bombo, una entrada con más graves movería más la arena que otra, y §1.3 pide el mismo tratamiento
+para todas hasta el sellado (lo vio el jurado de la 1.12); el motor no da el analizador de una fuente
+ciega. Como el rojo de la marca es oscuro en luminancia relativa (0,21), ni la escala máxima fija
 movería la luminancia de la cuña el 0,1 que hace falta para un destello: medido con píxeles reales y un
 beat a 160 BPM (`tools/shot/flashes.mjs`), 0 destellos por segundo y una oscilación de 0,0006
 (`docs/planning/evidence/f1/reactividad/`).
@@ -1554,10 +1557,23 @@ Implementación (tarea 1.13, `TitleGate`):
   enlace directo a una pantalla interior (un enlace compartido) entra directo a lo que buscaba, sin puerta.
   Hasta que exista Opciones, se desactiva con `localStorage['bb:title'] = 'off'`.
 - **Teclas.** Cualquier tecla entra salvo Tab (recorre la puerta: empezar, sin sonido, el sonido) y M (cambia
-  el sonido sin entrar). S entra sin sonido. Intro sobre otro botón de la puerta lo acciona a él.
+  el sonido sin entrar). S entra sin sonido. Intro sobre otro botón de la puerta lo acciona a él. M y S son
+  atajos de una tecla: con ellos apagados (`RNF-A11Y-08`), M no hace nada y S entra como cualquier tecla.
+- **Composición** (maqueta `00-titulo`, ajustada por el jurado de la 1.12). El cartel EN JUEGO lleva «SEMANA
+  **41** · EL SAMPLE» con el número en rojo y, bajo una línea, «CIERRE DE ENVÍOS» encima del reloj en Oxanium
+  de 28 px (variante `bill` de `RoundClock`), las entradas a la derecha y la barra de la semana con los días
+  L–D debajo. El pie dice «Crédito 01» en caja mixta. La pegatina de «PRESENTA» mide 64 px (44 en móvil).
+  El texto de la columna (fila «PRESENTA», «PULSA PARA EMPEZAR» y la pista) va sobre `--bb-scrim`, como el
+  campeón: nunca sobre los rayos (`RD-VIS-05`). Respira el texto del botón, no el botón: el cursor de foco
+  no se apaga (`RNF-A11Y-01`). La galleta del disco no pinta ninguna línea por debajo de 12 px.
 - **El disco** es un lienzo 2D que gira en el compositor (`TitleDisc`), no una vista del Escenario: la puerta
-  va por encima de todo, también del lienzo. En una columna (≤ 960 px) no hay diagonal ni disco de fondo,
-  que cruzarían el texto (`RD-VIS-05`): el disco va como pieza entre «Entrar sin sonido» y el campeón.
+  va por encima de todo, también del lienzo. **Por debajo de 1280 px de ancho, una columna**, sin diagonal ni
+  disco de fondo, que cruzarían el texto (`RD-VIS-05`): el disco va como pieza entre «Entrar sin sonido» y el
+  campeón, y el logo no pasa de 880 px. Con el cartel a la derecha, la columna del título (que acaba hacia los
+  760 px) y el campeón solo caben desde 1280; entre 961 y 1279 (un iPad apaisado, un portátil con zoom) el
+  cartel tapaba «Entrar sin sonido» (E2E `RD-VIS-05 / WCAG 2.4.11` de `title.spec.ts`, de 1024 × 768 a
+  1920 × 1080). El pie de la diagonal nunca entra en la columna: en una ventana baja (1280 × 720) cortaba el
+  botón.
 - **Pendiente:** el logo es un único lienzo y entra entero con el golpe (1,12 → 1); que su extrusión se
   despliegue capa a capa pide pintarla en capas aparte.
 - **La salida**: la diagonal se abre hacia los dos lados (`clip-path`, `--bb-dur-slam`) y deja ver el menú.
@@ -1739,6 +1755,9 @@ tabla completa en filas de marcador con histograma. Nunca «K.O.» ni «gana a�
 Sin movimiento: podio quieto que aparece por fundidos, con los mismos textos.
 
 #### 3.8.7 Modo Jurado (VS)
+
+Mientras suena la entrada (sin sellar), la trama de la arena no reacciona al audio (`RD-MOT-06`): el VS se
+mueve por el reloj de la escena, igual para todas las entradas.
 
 **HUD de combate**: a la izquierda, «1P TÚ · JURADO» con el **medidor de escucha mínima** en tres
 tramos de 10 s («22 / 30 s»; al cumplirse, «✓ 30 / 30 s»). En el centro, la caja de ronda «RONDA 07 /
@@ -1957,11 +1976,12 @@ modo serio: se pierde espectáculo, nunca información ni función (`RNF-A11Y-03
 | `RD-MOT-03` | Variante de «reducir movimiento» para cada entrada del Anexo E | Revisión del catálogo + capturas con la preferencia emulada |
 | `RD-MOT-04` | Limitador de destellos: ≤ 3 por segundo, ≤ 25 % del área, ≤ 40 % de opacidad, nunca rojo saturado a pantalla completa; navegar no destella | Test unitario de `flash.request()` + medición de luminancia en la ceremonia con un beat a 160 BPM |
 | `RD-MOT-05` | Menús de juego: foco itinerante con una parada de tabulación, el foco es la selección y se ve como el cursor | E2E de teclado del menú, la rejilla, las pestañas y las estrellas |
+| `RD-MOT-06` | Nada visual reacciona a una entrada sin sellar (§1.3: todas igual hasta el sellado). Mientras suena una, la trama de la arena queda en reposo y el motor no expone el analizador; reaccionan el sample y las entradas selladas | Test del motor: con una fuente ciega (`attachElement(el, { blind: true })`, obligatorio decirlo) no hay analizador ni `musicReactive`; E2E del Modo Jurado (Fase 5): la escala de punto queda en 1 mientras suena una entrada |
 | `RD-SND-01` | Ningún sonido antes de la primera interacción | Test E2E: cargar la página sin interactuar no crea un `AudioContext` en marcha |
 | `RD-SND-02` | Efectos generados por código a partir de definiciones de datos | Revisión del paquete `audio` |
 | `RD-SND-03` | Bus de efectos con ducking de −6 dB mientras suena una entrada | Test de render *offline* |
 | `RD-SND-04` | Las estrellas tocan la pentatónica de la tonalidad de la semana, en orden ascendente | Test: con la semana en Do menor, la 1.ª estrella suena Do y la 5.ª suena Sib |
-| `RD-SND-05` | Latencia de un efecto desde el clic < 30 ms en escritorio | Medición con `AudioContext.outputLatency` y marca de tiempo del evento |
+| `RD-SND-05` | **La mínima latencia posible** de un efecto desde el clic. En escritorio, la parte de la app (del evento a que el bloque de audio sale del contexto: manejador + `AudioContext.baseLatency`) < 10 ms de mediana y < 15 ms de p95: contexto con la latencia mínima del dispositivo (`latencyHint: 0` con puntero fino; `interactive` en táctil, donde un búfer mínimo da chasquidos en móviles lentos), efectos programados en `currentTime` sin esperas añadidas (salvo el *hit-stop* declarado de una línea de tiempo, §3.6), `ui.press` con ataque ≤ 1 ms y el contexto nunca suspendido mientras la pestaña está visible. La salida del sistema (`AudioContext.outputLatency`) no la controla la app: se mide y se registra aparte, con el total | `tools/shot/latency.mjs` con ventana y la salida real (sin ventana, la salida es falsa): `appMs` cumple; `outputMs` y `totalMs` van a la evidencia. Si cambia la configuración del contexto, `--hint` compara las opciones con la misma salida y se queda la de menor total |
 | `RD-SND-06` | Silenciar con M y desde el HUD; volúmenes por bus en Opciones | Persisten entre sesiones |
 
 ---
@@ -2737,7 +2757,7 @@ negocio en el panel de admin (participantes, votos, escuchas por semana) y Verce
 | Fuentes (subconjunto latino) | ≈ 127 KB: Anybody cursiva 62, Chakra Petch 5 × ~10, Oxanium 14; precarga solo de Chakra Petch 700 (§3.2). Medido el 2026-10-03 (perfil de `RNF-PERF-02`, cinco cargas intercaladas): con Anybody y Chakra 600 precargadas, LCP 2,00 s y CLS 0,0002; sin precargas, 1,60 s y 0,0036; solo Chakra 700, 1,64 s y 0,0034 |
 | FPS | 60 en escritorio con GPU integrada; ≥ 45 en un Android de gama media con calidad automática (tarea 1.11: 60 en escritorio a dpr 1 y 2 con la arena, el vinilo y 4.000 partículas; 60 en un Android **emulado** con CPU ×4, a falta de un dispositivo real; `docs/planning/evidence/f1/banco/`) |
 | Inicio de reproducción tras el clic | < 600 ms en 4G |
-| Latencia de efectos | < 30 ms (`RD-SND-05`) |
+| Latencia de efectos | La parte de la app < 10 ms de mediana; la del sistema, medida aparte (`RD-SND-05`). 2026-10-08 en Linux con PipeWire: app 3,3–3,5 ms, salida 24–40 ms (la elige PipeWire), total 27–43 ms |
 | Partículas simultáneas | ≤ 4.000 (alta), ≤ 1.500 (media) |
 | Llamadas de dibujo del Escenario | < 120 |
 
@@ -2745,7 +2765,7 @@ negocio en el panel de admin (participantes, votos, escuchas por semana) y Verce
 |---|---|---|
 | `RNF-PERF-01` | Presupuestos de la tabla en la home y en la ficha de entrada | Lighthouse CI en móvil simulado |
 | `RNF-PERF-02` | LCP < 2,5 s | Lighthouse CI (Fase 10); hasta entonces, proyecto `perf` de Playwright sobre la build (4G lento, CPU ×4, 412×823): en local exige LCP < 2,5 s y en la CI que el LCP sea un texto (el título del escenario de la semana, §3.5) y salga con la primera pintura |
-| `RNF-PERF-03` | FPS del Escenario según la tabla | `tools/shot/bench.mjs` en escritorio y en un Android real (Fase 1) |
+| `RNF-PERF-03` | FPS del Escenario según la tabla | `tools/shot/bench.mjs` en escritorio y en Android: en la Fase 1, **emulado** (CPU ×4, pantalla y densidad de gama media; decisión del usuario del 2026-10-08, sin dispositivo); con un Android real cuando lo haya |
 | `RNF-PERF-04` | El Escenario no se descarga antes de la primera pintura | Traza de red: el trozo del Escenario empieza después de FCP |
 | `RNF-PERF-05` | Render pausado con la pestaña oculta | Test: `visibilitychange` detiene el bucle |
 
@@ -2947,7 +2967,7 @@ arriba, siguiendo el recorrido del usuario: cuenta → sample → subir → vota
 | # | Fase | Hito verificable | Requisitos principales |
 |---|---|---|---|
 | 0 | **Fundaciones** | CI verde; la galería de componentes muestra los tokens y componentes base de la arena (§3); marco de juego y menú principal navegables con teclado; prueba de marca y de juego (`RD-VIS-02`) | `RD-VIS-*`, `RD-MOT-05`, `RF-OTP-01`, §4.4, §4.18 |
-| 1 | **Spike de sensación y audio** (GO/NO-GO) | Arena (trama en *shader*) + vista 3D + partículas a 60 fps en escritorio y ≥ 45 en Android medio; efectos con < 30 ms; analizador funcionando sobre un MP3 firmado de Cloudinary; ffmpeg mide sonoridad en Vercel en < 8 s | `RD-SND-*`, `RD-MOT-*`, `RNF-PERF-*`, §3.5, §4.8 |
+| 1 | **Spike de sensación y audio** (GO/NO-GO) | Arena (trama en *shader*) + vista 3D + partículas a 60 fps en escritorio y ≥ 45 en Android medio (emulado); efectos con la parte de la app < 10 ms; analizador funcionando sobre un MP3 firmado de Cloudinary; ffmpeg mide sonoridad en Vercel en < 8 s | `RD-SND-*`, `RD-MOT-*`, `RNF-PERF-*`, §3.5, §4.8 |
 | 2 | **Cuentas y base de email** | E2E: registro → verificación → entrar con Google → perfil → borrar cuenta; cola de salida, preferencias, consentimientos y bajas funcionando | `RF-AUTH-*`, `RF-PRF-*`, `RF-NOTIF-01..05`, `RF-NOTIF-10`, `RF-NOTIF-16` |
 | 3 | **Semanas y samples** | El admin programa 3 semanas; con el reloj simulado, la home cambia de semana en la frontera, la descarga exige las bases y sale el email del drop (también a suscriptores sin cuenta) | `RF-DROP-*`, `RF-ADM-01/02`, `RF-NOTIF-09`, `RF-NOTIF-14` |
 | 4 | **Participar** | Subir un WAV de 60 MB por trozos, con BPM y tonalidad sugeridos, sonoridad medida en servidor y recibo por email | `RF-ENT-*`, `RF-STO-*`, `RF-NOTIF-06` |
@@ -3344,6 +3364,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-08 | 0.6.19 | **Cierre de la Fase 1** (tarea 1.12, decisiones del usuario). `RD-SND-05` reformulado: **la mínima latencia posible**, con la parte de la app < 10 ms (mediana; p95 < 15) y la salida del sistema medida aparte; comparadas las configuraciones del contexto con la misma salida, `latencyHint: 0` da el menor total (base 2,7 ms frente a 10,7; salida igual), 27 ms con PipeWire a 24 ms y 43 ms cuando PipeWire sube a 40. `RNF-PERF-03` acepta el Android **emulado** mientras no haya dispositivo. `RD-VIS-02` a también con la arena en *shader* (test nuevo). Nuevo **`RD-MOT-06`** (§3.5, §3.8.7; hallazgo del jurado de la 1.12): nada visual reacciona a una entrada sin sellar; la trama queda en reposo mientras suena y el motor no expone el analizador de una fuente ciega. **Pantalla de título** (§3.8.1, jurado de la 1.12): una columna por debajo de 1280 px (antes 960: el cartel tapaba la columna en un iPad apaisado), pie de la diagonal fuera de la columna, texto sobre `--bb-scrim` y no sobre los rayos, cartel EN JUEGO como la maqueta (reloj grande con los días, número en rojo), «Crédito 01» en caja mixta, pegatina de «PRESENTA» de 64 px, respira el texto y no el cursor, M y S respetan los atajos apagados y la galleta no pinta texto por debajo de 12 px. |
 | 2026-10-07 | 0.6.18 | **ffmpeg en Vercel validado** (*spike* 1.8, §4.8.4): cabe (~80 MB de función) y mide un WAV de 52 MB en 3,7 s en frío con la sonoridad exacta. La descarga la hace Node y ffmpeg lee de la entrada estándar (el ffmpeg estático falla al resolver DNS); el binario va con `includeFiles` y su script de instalación tiene que estar permitido. El plan B queda como reserva. |
 | 2026-10-07 | 0.6.17 | **Cuenta de Cloudinary propia** (decisión del usuario, §4.8.1). Spike de la 1.7 hecho: subida firmada por trozos, derivado listo en ~7 s para 4 min, entrega firmada con CORS, y el original sin firma da 404 (`RF-STO-02` corregido: no 401); `RF-STO-06` ya se comprueba al arrancar (también en las previews de Vercel, `VERCEL_ENV`). |
 | 2026-10-07 | 0.6.16 | **Pantalla de título** (§3.8.1, tarea 1.13): sale al entrar en el menú la primera vez de la sesión (no en un enlace directo a una pantalla interior), se desactiva con `bb:title`; teclas (todas entran salvo Tab y M; S, sin sonido); el disco es un lienzo 2D porque la puerta va por encima del lienzo del Escenario (§3.5 capa 1 corregido); columna sin diagonal en ≤ 960 px. Pendiente: la extrusión del logo capa a capa (Anexo E). |
