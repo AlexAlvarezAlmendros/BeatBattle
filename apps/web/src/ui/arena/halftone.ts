@@ -102,6 +102,17 @@ export const HALFTONE_SHAPES = {
   interiorWedge: (u, v) => (Math.max(0, (1 - u) * 0.9 + v * 0.55 - 0.95) / 0.5) ** 1.3,
   /** Tarjeta del escenario y piezas: crece hacia la derecha a partir del 35 %. */
   piece: (u) => (Math.max(0, u - 0.35) / 0.65) ** 1.4 * 0.95,
+  /**
+   * Disco de la pantalla de título (§3.8.1, maqueta `00-titulo`): anillo de trama entre la galleta (27 %) y
+   * el canto (98,5 %), con surcos y una sombra arriba a la derecha.
+   */
+  titleDisc: (u, v) => {
+    const r = Math.hypot(u - 0.5, v - 0.5) * 2
+    if (r > 0.985 || r < 0.27) return 0
+    const groove = 0.82 + 0.18 * Math.cos(r * 70)
+    const shade = 1 - 0.55 * Math.max(0, (u - 0.5) * 1.6 + (0.5 - v) * 0.6)
+    return ((r - 0.27) / 0.715) ** 0.9 * groove * shade * 0.95
+  },
 } satisfies Record<string, HalftoneShape>
 
 export type HalftoneShapeName = keyof typeof HALFTONE_SHAPES

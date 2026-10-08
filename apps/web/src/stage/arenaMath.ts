@@ -17,7 +17,7 @@ import type { HalftoneShapeName } from '../ui/arena/halftone'
 export const MIN_VISIBLE_RADIUS = 0.35
 
 /** Índice de cada forma en el *shader* (`uShape`). */
-export const SHAPE_INDEX: Record<Exclude<HalftoneShapeName, 'piece'>, number> = {
+export const SHAPE_INDEX: Record<Exclude<HalftoneShapeName, 'piece' | 'titleDisc'>, number> = {
   menuWedge: 0,
   menuWedgeMobile: 1,
   interiorWedge: 2,

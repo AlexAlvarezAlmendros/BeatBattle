@@ -1,0 +1,24 @@
+/* Disco de la pantalla de título (§3.8.1): un círculo con su canto tenue; lo coloca quien lo usa. */
+.disc {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  /* Al girar, el lienzo cuadrado ocupa más en diagonal: se recorta a su círculo y no desborda. */
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.rim {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: var(--bb-stroke) solid var(--bb-line);
+}

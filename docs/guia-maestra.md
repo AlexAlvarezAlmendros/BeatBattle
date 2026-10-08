@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.15 · 2026-10-07 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.16 · 2026-10-07 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1359,7 +1359,7 @@ del sello). Concentra en un contexto el fondo, las vistas 3D y las partículas.
 | Capa | Contenido | Notas |
 |---|---|---|
 | 0 · Arena | Fondo negro, **cuña granate** (`--bb-wine-2`) con **trama roja** en *shader*, **diagonal** roja con filete blanco, estallido de rayos, número de semana en contorno y viñeta. Cada pantalla define la posición de su cuña (menú: derecha; selección y perfil: izquierda; Jurado: lado de la entrada; resultados: suelo del podio) | 30 fps como mucho; la trama, al dpr del dispositivo hasta 2 (a 0,75, el valor del Silk del sello, los puntos se emborronan en una pantalla de densidad 2: medido en la 1.1). La reactividad al audio solo cambia **el tamaño de punto** de la trama (≤ 15 %, paso bajo ≤ 2 Hz); **nunca** la luminancia del rojo ni el brillo de un área grande |
-| 1 · Vistas ancladas | Vinilo-sol de la semana (gira **una vuelta por compás** al BPM del sample), podio con focos, carta con su pase, vinilos de medalla | Patrón `View` (drei, en el mismo lienzo); solo dibujan si el elemento es visible. Solo donde la arena está a la vista (pantalla de título, podio): el lienzo va detrás del contenido y, encima de él, los rayos y la viñeta; dentro de un panel opaco la pieza es DOM (el vinilo de la tarjeta del escenario gira en el compositor). El relevo con la pieza DOM no se nota: mismo pintor, tamaño y densidad, y los dos por CPU |
+| 1 · Vistas ancladas | Vinilo-sol de la semana (gira **una vuelta por compás** al BPM del sample), podio con focos, carta con su pase, vinilos de medalla | Patrón `View` (drei, en el mismo lienzo); solo dibujan si el elemento es visible. Solo donde la arena está a la vista (podio, ceremonias; la pantalla de título no, porque va por encima del lienzo, §3.8.1): el lienzo va detrás del contenido y, encima de él, los rayos y la viñeta; dentro de un panel opaco la pieza es DOM (el vinilo de la tarjeta del escenario gira en el compositor). El relevo con la pieza DOM no se nota: mismo pintor, tamaño y densidad, y los dos por CPU |
 | 2 · Partículas | Chispas rojas y blancas (voto de 5, VS), confeti en la paleta (ceremonia), ascuas (semana dorada) | Con presupuesto (§4.17) y **siempre** por el limitador de destellos (§3.6): sin su permiso no hay ráfaga, el círculo que barre una ráfaga ocupa como mucho el área autorizada (≤ 25 % de la ventana) y sus partículas no pasan de la opacidad autorizada (≤ 40 %). Se ven en la arena abierta (detrás de los paneles) |
 | 3 · Postproceso | Líneas de barrido sobre la cuña y grano al 6 % | Solo calidad alta; nunca bajo texto |
 
@@ -1547,6 +1547,23 @@ Primera visita de cada sesión, a pantalla completa (`dialog` con foco; el menú
 
 No aparece en autenticación, admin y legales, ni a quien la desactivó en Opciones. Sin movimiento: el
 título aparece montado y el aviso queda fijo.
+
+Implementación (tarea 1.13, `TitleGate`):
+
+- **Dónde.** Sale al entrar en el **menú** la primera vez de la sesión (`sessionStorage`). Quien llega por un
+  enlace directo a una pantalla interior (un enlace compartido) entra directo a lo que buscaba, sin puerta.
+  Hasta que exista Opciones, se desactiva con `localStorage['bb:title'] = 'off'`.
+- **Teclas.** Cualquier tecla entra salvo Tab (recorre la puerta: empezar, sin sonido, el sonido) y M (cambia
+  el sonido sin entrar). S entra sin sonido. Intro sobre otro botón de la puerta lo acciona a él.
+- **El disco** es un lienzo 2D que gira en el compositor (`TitleDisc`), no una vista del Escenario: la puerta
+  va por encima de todo, también del lienzo. En una columna (≤ 960 px) no hay diagonal ni disco de fondo,
+  que cruzarían el texto (`RD-VIS-05`): el disco va como pieza entre «Entrar sin sonido» y el campeón.
+- **Pendiente:** el logo es un único lienzo y entra entero con el golpe (1,12 → 1); que su extrusión se
+  despliegue capa a capa pide pintarla en capas aparte.
+- **La salida**: la diagonal se abre hacia los dos lados (`clip-path`, `--bb-dur-slam`) y deja ver el menú.
+- **LCP** (`RNF-PERF-02`): durante el arranque, el título ya está pintado debajo de la capa negra, así que
+  el LCP de la primera visita es un texto de la puerta y sale con la primera pintura (2,1–2,2 s en el perfil
+  de §4.17; si apareciera al acabar el arranque, 3,2 s). La prueba de rendimiento lo mide con y sin puerta.
 
 #### 3.8.2 Revelación del drop («¡NUEVO ESCENARIO!»)
 
@@ -3180,7 +3197,7 @@ efectos al 100 %; variación = desafinación aleatoria por disparo.
 | Chip de filtro | Relleno rojo que entra desde la izquierda; «SÍ/NO» cambia | 150 ms | `ui.toggle` | Cambio de color y texto |
 | Panel de ayuda | El texto nuevo entra 8 px desde la izquierda | 150 ms | — | Cambio de texto |
 | Transición de página | Diagonal que barre + paneles que entran desde ella | 240 + 280 ms | `nav.page` | Fundido de 150 ms |
-| Logo (título) | Cae de 1,12 a 1; la extrusión se despliega capa a capa; entran las líneas de velocidad | 280 ms, `--bb-ease-back` | `ui.enter` al pulsar | Aparece montado |
+| Logo (título) | Cae de 1,12 a 1; la extrusión se despliega capa a capa (pendiente: hoy entra entero, §3.8.1); entran las líneas de velocidad | 280 ms, `--bb-ease-back` | `ui.enter` al pulsar | Aparece montado |
 | «PULSA PARA EMPEZAR» | Respira (1 ↔ 0,55) | 2.000 ms en bucle | — | Fijo |
 | Vinilo-sol | Una vuelta por compás al BPM del sample | 4 tiempos | — | Quieto |
 | Reloj de ronda | Persiana por dígito; ≤ 24 h rojo; ≤ 1 h el marco late | 150 ms; latido 1 Hz | `clock.tick` (últimos 10 s), `clock.heartbeat` | Cambio de texto; color sin latido |
@@ -3318,6 +3335,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-07 | 0.6.16 | **Pantalla de título** (§3.8.1, tarea 1.13): sale al entrar en el menú la primera vez de la sesión (no en un enlace directo a una pantalla interior), se desactiva con `bb:title`; teclas (todas entran salvo Tab y M; S, sin sonido); el disco es un lienzo 2D porque la puerta va por encima del lienzo del Escenario (§3.5 capa 1 corregido); columna sin diagonal en ≤ 960 px. Pendiente: la extrusión del logo capa a capa (Anexo E). |
 | 2026-10-07 | 0.6.15 | **Banco de la Fase 1** (tarea 1.11, §4.7.6, §4.17): 60 fps en escritorio y en Android emulado (CPU ×4; sin dispositivo real, decisión del usuario), y la sonda apaga el Escenario con una GPU por software. El contexto de audio pide la latencia mínima con puntero fino (`latencyHint: 0`): la parte de la app queda en ~4 ms, pero la salida de PipeWire (24–48 ms) deja `RD-SND-05` sin cumplir en Linux; decisión abierta para el GO/NO-GO. |
 | 2026-10-07 | 0.6.14 | **Estrellas** (§3.8.4, tarea 1.5): teclado completo (flechas, Inicio, Fin, 1–5; el cursor pasa a la votada), estado «guardando» y vuelta atrás si el servidor no guarda, chispas del DOM por el limitador de destellos (el lienzo va detrás del panel opaco) y temblor por `onImpact`. Efecto `vote.unlocked` del Anexo D. Anexo E: el medidor de escucha va por tramos de 10 s (se quedó en 15 con el cambio a 30 s de la 0.6.11). |
 | 2026-10-07 | 0.6.13 | **Reactividad al audio** (§3.5, tarea 1.6): analizador de FFT 1024 en el bus de música, banda de 40–160 Hz, puerta, paso bajo de un polo a 2 Hz y escala de punto de 1 a 1,15; la trama a 30 fps mientras suena y en reposo al parar. Medición de destellos con píxeles reales y un beat a 160 BPM (`tools/shot/flashes.mjs`): 0 por segundo (`RNF-A11Y-04`). Trozo del Escenario: 249,8 kB gz. |

@@ -54,7 +54,16 @@ export default defineConfig({
     // y de la pausa (`stage.spec.ts`) la quitan.
     storageState: {
       cookies: [],
-      origins: [{ origin: webOrigin, localStorage: [{ name: 'bb:quality', value: 'alta' }] }],
+      origins: [
+        {
+          origin: webOrigin,
+          localStorage: [
+            { name: 'bb:quality', value: 'alta' },
+            // Sin la pantalla de título (1.13): taparía cada página; sus pruebas la vuelven a encender.
+            { name: 'bb:title', value: 'off' },
+          ],
+        },
+      ],
     },
     trace: ci ? 'on-first-retry' : 'retain-on-failure',
     ...(ci

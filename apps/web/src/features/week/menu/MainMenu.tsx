@@ -6,6 +6,7 @@ import {
   useId,
   useLayoutEffect,
   useRef,
+  useState,
 } from 'react'
 import { MOBILE_QUERY } from '../../../app/layout/ArenaBackdrop'
 import { Chronicle, CreditLine } from '../../../app/layout/Chronicle'
@@ -27,6 +28,8 @@ import { TitleLockup } from '../../../ui/TitleLockup'
 import styles from './MainMenu.module.css'
 import { MENU_MODES, type MenuMode, type MenuModel } from './model'
 import { StageCard } from './StageCard'
+import { TitleGate } from './TitleGate'
+import { shouldShowTitle } from './titleGate'
 
 interface ModeEntry {
   mode: MenuMode
@@ -188,7 +191,9 @@ export function menuEntries({ week, player, lastSealed }: MenuModel): ModeEntry[
  * sigue siendo «Saltar al contenido»); pero si el foco no está en ningún control, las flechas e Intro
  * van al menú, como en una recreativa.
  */
-export function MainMenu({ model }: { model: MenuModel }) {
+export function MainMenu({ model, title }: { model: MenuModel; title?: boolean }) {
+  // Pantalla de título (§3.8.1, 1.13): la primera vez en la sesión, salvo que esté desactivada.
+  const [gate, setGate] = useState(() => title ?? shouldShowTitle())
   const entries = menuEntries(model)
   const titleId = useId()
   const helpId = useId()
@@ -241,6 +246,7 @@ export function MainMenu({ model }: { model: MenuModel }) {
       data-week={week ? week.phase : 'empty'}
       data-modes-first={modesFirst || undefined}
     >
+      {gate && <TitleGate model={model} onDone={() => setGate(false)} />}
       <h1 className="sr-only">{t('pages.home.title')}</h1>
 
       {player && (

@@ -18,6 +18,7 @@ function sampleWeek(phase: MenuWeek['phase']): MenuWeek {
     title: t('dev.menu.week.title'),
     credits: t('dev.menu.week.credits'),
     range: t('dev.menu.week.range'),
+    code: '2026-W41',
     bpm: 92,
     musicalKey: t('dev.menu.week.key'),
     durationSeconds: 72,
@@ -48,7 +49,7 @@ const SAMPLE_PLAYER: MenuPlayer = {
  * `/dev/menu` — el menú principal con los datos de muestra de las maquetas aprobadas, para compararlo
  * con ellas (`docs/planning/evidence/f0/arena/01-menu-*.png`). Solo en desarrollo. Parámetros:
  * `?estado=abierta` (por defecto), `votacion` o `vacio`; `?visitante` quita la sesión; `?subida`, el
- * jugador ya ha subido su entrada.
+ * jugador ya ha subido su entrada; `?titulo` enseña la pantalla de título aunque ya se haya visto (1.13).
  */
 export function DevMenuPage() {
   const [params] = useSearchParams()
@@ -66,13 +67,20 @@ export function DevMenuPage() {
           season: { label: t('dev.menu.player.season'), value: t('dev.menu.player.seasonValue') },
           streak: 3,
         },
+    season: 'T4',
+    champion: {
+      producer: 'KAIRO.WAV',
+      week: 40,
+      title: t('dev.menu.champion.title'),
+      score: t('dev.menu.champion.score'),
+    },
     lastSealed: { number: 40, unseen: true },
     chronicle: [t('dev.menu.chronicle.entry'), t('dev.menu.chronicle.days'), t('dev.menu.chronicle.votes')],
   }
   return (
     <>
       <DocumentTitle page={t('dev.menu.title')} />
-      <MainMenu model={model} />
+      <MainMenu model={model} title={params.has('titulo') || undefined} />
     </>
   )
 }

@@ -1,0 +1,486 @@
+/*
+ * Puerta de entrada (§3.8.1, maqueta `00-titulo`): pantalla completa, por encima de todo (`--bb-z-gate`),
+ * con su propia arena (rayos, el disco de la semana cortado por la diagonal y la viñeta). En escritorio, la
+ * composición de la maqueta; en móvil, una columna que se desplaza dentro de la puerta.
+ */
+.gate {
+  /*
+   * La diagonal que abre la pantalla al entrar: de la de la maqueta (74 % arriba, 56 % abajo) hacia fuera.
+   * El hueco es un paralelogramo dentro del rectángulo (`evenodd`); el recorrido vuelve a su primera esquina
+   * y el cierre va por el borde de arriba, sin encerrar nada (si no, recortaba un triángulo).
+   */
+  --open-a: 74%;
+  --open-b: 74%;
+  --open-c: 56%;
+  --open-d: 56%;
+  position: fixed;
+  inset: 0;
+  z-index: var(--bb-z-gate);
+  overflow: hidden auto;
+  background: var(--bb-black);
+  color: var(--bb-white);
+  clip-path: polygon(
+    evenodd,
+    0 0,
+    100% 0,
+    100% 100%,
+    0 100%,
+    0 0,
+    var(--open-a) 0,
+    var(--open-b) 0,
+    var(--open-d) 100%,
+    var(--open-c) 100%,
+    var(--open-a) 0
+  );
+  transition: clip-path var(--bb-dur-slam) var(--bb-ease-in-out);
+}
+
+.gate:focus {
+  outline: none;
+}
+
+/* Al entrar, la diagonal se abre hacia los dos lados y deja ver el menú (la puerta se va al acabar). */
+.gate[data-phase="leaving"] {
+  --open-a: -90%;
+  --open-b: 210%;
+  --open-c: -110%;
+  --open-d: 190%;
+  clip-path: polygon(
+    evenodd,
+    0 0,
+    100% 0,
+    100% 100%,
+    0 100%,
+    0 0,
+    var(--open-a) 0,
+    var(--open-b) 0,
+    var(--open-d) 100%,
+    var(--open-c) 100%,
+    var(--open-a) 0
+  );
+}
+
+/* ── Arena de la puerta ─────────────────────────────────────────────────────────────────── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.burst {
+  position: absolute;
+  inset: 0;
+  background: repeating-conic-gradient(
+    from 0deg at 34% 40%,
+    var(--bb-tex-ray-ink) 0 var(--bb-tex-ray-width),
+    transparent var(--bb-tex-ray-width) var(--bb-tex-ray-step)
+  );
+  mask: radial-gradient(circle at 34% 40%, var(--bb-black) 18%, transparent 60%);
+}
+
+.disc {
+  position: absolute;
+  top: var(--bb-space-6);
+  left: calc(50% + var(--bb-space-2));
+  width: min(calc(var(--bb-space-16) * 11.875), 85vh);
+}
+
+.slash {
+  position: absolute;
+  inset: 0;
+}
+
+.slashRed {
+  background: var(--bb-red);
+  clip-path: polygon(71% 0, 74.4% 0, 56.4% 100%, 53% 100%);
+}
+
+.slashBlack {
+  background: var(--bb-black);
+  clip-path: polygon(74.4% 0, 75.4% 0, 57.4% 100%, 56.4% 100%);
+}
+
+.slashWhite {
+  background: var(--bb-white);
+  clip-path: polygon(75.4% 0, 75.7% 0, 57.7% 100%, 57.4% 100%);
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 45%, transparent 55%, var(--bb-tex-vignette-ink) 100%);
+}
+
+/* ── Arranque: «[OTP.] PRESENTA» sobre negro ─────────────────────────────────────────────── */
+.boot {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  display: none;
+  place-content: center;
+  justify-items: center;
+  gap: var(--bb-space-4);
+  background: var(--bb-black);
+}
+
+.gate[data-phase="boot"] .boot {
+  display: grid;
+}
+
+.bootSlap {
+  animation: bb-gate-slap var(--bb-dur-slam) var(--bb-ease-back);
+}
+
+@keyframes bb-gate-slap {
+  from {
+    opacity: 0;
+    scale: 1.4;
+  }
+}
+
+.presents {
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label-wide);
+  text-transform: uppercase;
+}
+
+/* ── Título ─────────────────────────────────────────────────────────────────────────────── */
+.screen {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+  padding-bottom: calc(var(--bb-space-16) * 2.5);
+}
+
+/*
+ * Durante el arranque el título ya está pintado debajo de la capa negra: así su texto sale con la primera
+ * pintura y es el LCP de la primera visita (`RNF-PERF-02`; si apareciera al acabar el arranque, el LCP
+ * llegaba a ~1,2 s después). Sus animaciones empiezan al acabar el arranque.
+ */
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--bb-space-5) var(--bb-space-12) 0;
+}
+
+.kicker {
+  color: var(--bb-text-2);
+}
+
+.presentsRow {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-3);
+  margin: var(--bb-space-8) 0 0 calc(var(--bb-space-16) * 1.625);
+}
+
+.title {
+  width: min(calc(var(--bb-space-16) * 13.75), 60vw);
+  padding: var(--bb-space-1) 0 0 calc(var(--bb-space-16) * 1.15);
+}
+
+.logo {
+  display: block;
+  width: 100%;
+}
+
+.gate[data-phase="title"] .logo {
+  animation: bb-gate-logo var(--bb-dur-slam) var(--bb-ease-back);
+}
+
+@keyframes bb-gate-logo {
+  from {
+    opacity: 0;
+    scale: 1.12;
+  }
+}
+
+.lockup {
+  margin: calc(-1 * var(--bb-space-1)) 0 0 var(--bb-space-8);
+}
+
+.start {
+  display: grid;
+  justify-items: start;
+  gap: var(--bb-space-3);
+  margin: var(--bb-space-12) 0 0 calc(var(--bb-space-16) * 1.625);
+}
+
+.startButton {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-4);
+  padding: var(--bb-space-2) var(--bb-space-3);
+  border: 0;
+  background: transparent;
+  color: var(--bb-white);
+  font-family: var(--bb-font-display);
+  /* 40 px en escritorio (maqueta): el 2xl (32) × 1,25. */
+  font-size: calc(var(--bb-fs-2xl) * 1.25);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-button);
+  line-height: 1;
+  text-shadow: var(--bb-shadow-hard);
+  text-transform: uppercase;
+  cursor: pointer;
+  animation: bb-gate-breathe var(--bb-loop-breathe) var(--bb-ease-in-out) infinite;
+}
+
+/* «PULSA PARA EMPEZAR» respira (2 s, 1 ↔ 0,55; §3.6 «Bucles»): quieto sin movimiento o con la pausa. */
+@keyframes bb-gate-breathe {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.tri {
+  width: var(--bb-space-4);
+  height: var(--bb-space-6);
+  background: var(--bb-red);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+
+.triLeft {
+  scale: -1 1;
+}
+
+.hint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bb-space-2) var(--bb-space-5);
+  margin-left: var(--bb-space-9);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.muted {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+  min-height: var(--bb-target);
+  padding: 0;
+  border: 0;
+  border-bottom: var(--bb-stroke) solid var(--bb-red);
+  background: transparent;
+  color: var(--bb-white);
+  font: inherit;
+  font-weight: var(--bb-weight-bold);
+  cursor: pointer;
+}
+
+/* ── Abajo: el campeón vigente y el cartel EN JUEGO ─────────────────────────────────────── */
+.champion {
+  position: absolute;
+  bottom: calc(var(--bb-space-16) * 1.5);
+  left: calc(var(--bb-space-16) * 1.625);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bb-space-3);
+  padding: var(--bb-space-2) var(--bb-space-3) var(--bb-space-2) var(--bb-space-2);
+  background: var(--bb-scrim);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.medal {
+  width: var(--bb-space-9);
+  height: var(--bb-space-9);
+}
+
+.championName {
+  color: var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-xl);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-plate);
+  letter-spacing: normal;
+}
+
+.bill {
+  position: absolute;
+  right: var(--bb-space-12);
+  bottom: calc(var(--bb-space-16) * 1.5);
+  width: calc(var(--bb-space-16) * 7.0625);
+  padding: var(--bb-space-5) var(--bb-space-6);
+}
+
+.billTag {
+  position: absolute;
+  top: calc(-1 * var(--bb-space-4));
+  left: calc(-1 * var(--bb-space-3));
+}
+
+.billTitle {
+  margin-top: var(--bb-space-2);
+  /* 36 px en escritorio (maqueta): el 2xl (32) × 1,125. */
+  font-size: calc(var(--bb-fs-2xl) * 1.125);
+}
+
+.billChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-2);
+  margin-top: var(--bb-space-3);
+}
+
+.billClock {
+  margin-top: var(--bb-space-4);
+  padding-top: var(--bb-space-3);
+  border-top: var(--bb-stroke-hair) solid var(--bb-line);
+}
+
+.billRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--bb-space-4);
+}
+
+.billEntries {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-xs);
+  text-align: right;
+}
+
+.billEntries b {
+  display: block;
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xl);
+}
+
+.footer {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--bb-space-4);
+  padding: var(--bb-space-4) var(--bb-space-12);
+  border-top: var(--bb-stroke) dashed var(--bb-red);
+  background: var(--bb-black);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.credit em {
+  color: var(--bb-red);
+  font-style: normal;
+}
+
+.url {
+  color: var(--bb-text-2);
+}
+
+/* En escritorio, el disco va en la arena de fondo; la copia de la columna no se pinta (ni gira). */
+.discInline {
+  display: none;
+}
+
+/* ── Móvil y ventana estrecha: una columna ──────────────────────────────────────────────── */
+@media (max-width: 960px) {
+  /* Sin diagonal ni disco de fondo: cruzarían el texto de la columna (`RD-VIS-05`). */
+  .disc,
+  .slash {
+    display: none;
+  }
+
+  .discInline {
+    display: block;
+    width: min(calc(var(--bb-space-16) * 6), 72vw);
+    margin: var(--bb-space-8) auto 0;
+  }
+
+  .startButton {
+    max-width: calc(100vw - 2 * var(--bb-gutter) - 2 * var(--bb-space-2));
+    font-size: var(--bb-fs-2xl);
+  }
+
+  .start {
+    margin-right: var(--bb-gutter);
+  }
+
+  .top,
+  .footer {
+    padding-inline: var(--bb-gutter);
+  }
+
+  .presentsRow,
+  .start {
+    margin-left: var(--bb-gutter);
+  }
+
+  .title {
+    width: calc(100% - 2 * var(--bb-gutter));
+    padding-left: var(--bb-gutter);
+  }
+
+  .lockup {
+    margin-left: 0;
+  }
+
+  .hint {
+    margin-left: 0;
+  }
+
+  .screen {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0;
+  }
+
+  .champion,
+  .bill,
+  .footer {
+    position: relative;
+    inset: auto;
+  }
+
+  .champion {
+    margin: var(--bb-space-8) var(--bb-gutter) 0;
+  }
+
+  .bill {
+    width: auto;
+    margin: var(--bb-space-8) var(--bb-gutter);
+  }
+
+  .footer {
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: auto;
+  }
+}
+
+/* Sin movimiento (Anexo E): el título montado, el aviso fijo y se entra sin la diagonal. */
+@media (prefers-reduced-motion: reduce) {
+  .gate,
+  .gate[data-phase="title"] .logo,
+  .bootSlap,
+  .startButton {
+    animation: none;
+    transition: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .gate[data-phase="title"] .logo,
+:global(:root[data-motion="reduced"]) .startButton,
+:global(:root[data-loops="paused"]) .startButton {
+  animation: none;
+}

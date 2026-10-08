@@ -19,6 +19,8 @@ export interface MenuWeek {
   credits: string
   /** Rango de fechas («5–11 oct · 2026-W41»). */
   range: string
+  /** Semana ISO («2026-W41»): la pantalla de título la enseña arriba (§3.8.1). */
+  code: string
   bpm: number
   /** Tonalidad en palabras («Re menor», §3.2). */
   musicalKey: string
@@ -54,8 +56,26 @@ export interface MenuPlayer {
   unvoted: number
 }
 
+/**
+ * Campeón vigente (§3.8.1): el 1.º de la última semana sellada. Su puntuación ya es pública (la semana
+ * está sellada: `RF-PLAY-05` solo protege lo que no lo está).
+ */
+export interface MenuChampion {
+  /** Nombre del productor («KAIRO.WAV»). */
+  producer: string
+  week: number
+  /** Título de la entrada ganadora. */
+  title: string
+  /** Puntuación ya formateada («4,62»). */
+  score: string
+}
+
 export interface MenuModel {
   week: MenuWeek | null
+  /** Temporada en juego («T4»), si la hay. */
+  season: string | null
+  /** Campeón de la última semana sellada, si la hay. */
+  champion: MenuChampion | null
   player: MenuPlayer | null
   /** Última semana sellada y si tiene ceremonia sin ver. */
   lastSealed: { number: number; unseen: boolean } | null
