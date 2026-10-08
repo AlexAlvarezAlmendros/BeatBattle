@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.29 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.30 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2888,7 +2888,11 @@ nodemailer con Gmail y contraseña de aplicación, con estas mejoras:
   `bounceScan` los lee por IMAP (`imap.gmail.com`, misma contraseña de aplicación, librería
   `imapflow`), toma el destinatario de la cabecera `X-Failed-Recipients` o del informe de entrega
   (`Final-Recipient`) y, si el fallo es permanente (5.x.x), lo suprime. Después mueve el aviso a una
-  etiqueta `beatbattle/rebotes`.
+  etiqueta `beatbattle/rebotes`. Los temporales (4.x.x, `Action: delayed`) no suprimen; un aviso sin
+  informe de entrega cuenta como permanente solo si trae `X-Failed-Recipients` (Gmail la pone en los
+  definitivos). El lector del aviso es puro (`parseBounce`) y el buzón va detrás de una interfaz
+  (`BounceMailbox`): `imapflow` (2.2.5) en producción, un falso en los tests. Hasta el `tick` de la
+  Fase 3 se lanza a mano: `pnpm --filter @beatbattle/server bounces`.
 - Con el Workspace del sello: DKIM de Google activado, SPF con `include:_spf.google.com` y DMARC
   empezando en `p=none`. Antes del primer envío real se comprueba qué tiene ya el DNS de `otherpeople.es`;
   cualquier cambio en él lo confirma el usuario.
@@ -3439,6 +3443,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-08 | 0.6.30 | **Rebotes** (tarea 2.11, §4.19.2): qué cuenta como permanente, el lector puro, el buzón detrás de una interfaz e `imapflow` fijado en la 2.2.5. La conexión real con el Workspace está pendiente de sus credenciales. |
 | 2026-10-08 | 0.6.29 | **Preferencias y consentimientos** (tarea 2.12, §2.12.4): la API de Ajustes → Emails, las casillas del registro en el propio alta y el historial que solo añade cuando cambia el valor, con la versión del texto y el hash de la IP (sal semanal). |
 | 2026-10-08 | 0.6.28 | **Flujos de cuenta** (tarea 2.6, §2.3): el cambio de email se aprueba desde la dirección actual con un email nuevo del catálogo, `auth.change_email` (§2.12, Anexo H), y avisa a las dos direcciones; cambiar la contraseña y cerrar las demás sesiones avisan con `auth.security`. En Better Auth, una redirección (302) es un `APIError`: los *hooks* la tratan como éxito. |
 | 2026-10-08 | 0.6.27 | **Guardas de ruta** (tarea 2.5, §4.9): `requireSession`, `requireVerified` y `requireAdmin`, y la guarda de admin puesta sola en toda ruta bajo `/api/admin`. Nuevo código `EMAIL_NOT_VERIFIED` (403). |
