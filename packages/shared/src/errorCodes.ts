@@ -16,6 +16,8 @@ export const ERROR_STATUS = {
   FORBIDDEN: 403,
   /** Escritura con `Origin` ausente o fuera de `ALLOWED_ORIGINS` (`RNF-SEC-05`). */
   FORBIDDEN_ORIGIN: 403,
+  /** Descargar, subir o votar sin el email verificado (`RF-AUTH-01`); la UI ofrece «Reenviar email». */
+  EMAIL_NOT_VERIFIED: 403,
   NOT_FOUND: 404,
   /** El estado actual impide la operación (duplicado, fase cerrada…). */
   CONFLICT: 409,
