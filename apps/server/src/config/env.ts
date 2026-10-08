@@ -44,6 +44,17 @@ const EnvSchema = z.object({
   LOG_LEVEL: z.enum(LOG_LEVELS, { error: `debe ser uno de: ${LOG_LEVELS.join(', ')}` }).default('info'),
   /** Detrás de un proxy (Vercel, Caddy) la IP real llega en `X-Forwarded-For`. */
   TRUST_PROXY: bool.default('0'),
+  /** Cloudinary (§4.8): las tres juntas o ninguna (sin ellas no hay almacenamiento de audio). */
+  CLOUDINARY_CLOUD_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
+  /** Prefijo de carpetas por entorno (`RF-STO-06`): `beatbattle` solo en producción. */
+  BB_CLOUDINARY_PREFIX: z
+    .string()
+    .regex(/^[a-z0-9][a-z0-9-]*$/, { error: 'solo minúsculas, números y guiones' })
+    .default('beatbattle-dev'),
+  /** Entorno de Vercel (`production`, `preview`, `development`): las previews también van con NODE_ENV=production. */
+  VERCEL_ENV: z.string().optional(),
 })
 
 export interface AppConfig {
@@ -62,7 +73,20 @@ export interface AppConfig {
   testClock: boolean
   logLevel: LogLevel
   trustProxy: boolean
+  /** Cloudinary (§4.8.1); `null` sin credenciales (hasta que el entorno las tenga). */
+  storage: StorageConfig | null
 }
+
+export interface StorageConfig {
+  cloudName: string
+  apiKey: string
+  apiSecret: string
+  /** `beatbattle` en producción; `beatbattle-dev` o `beatbattle-preview-<pr>` fuera (`RF-STO-06`). */
+  prefix: string
+}
+
+/** El prefijo de producción: solo lo puede usar producción de verdad (`RF-STO-06`). */
+export const PRODUCTION_PREFIX = 'beatbattle'
 
 export interface EnvIssue {
   variable: string
@@ -131,6 +155,21 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
 
   if (production && testClock) issues.push(TEST_CLOCK_IN_PRODUCTION)
 
+  // RF-STO-06: el prefijo de producción, solo en producción de verdad (en Vercel, también VERCEL_ENV).
+  const realProduction =
+    production && (cleaned.VERCEL_ENV === undefined || cleaned.VERCEL_ENV === 'production')
+  if ((cleaned.BB_CLOUDINARY_PREFIX ?? 'beatbattle-dev') === PRODUCTION_PREFIX && !realProduction)
+    issues.push({
+      variable: 'BB_CLOUDINARY_PREFIX',
+      message:
+        '«beatbattle» es el prefijo de producción: fuera de ella, beatbattle-dev o beatbattle-preview-<pr> (RF-STO-06)',
+    })
+  const cloudinaryKeys = ['CLOUDINARY_CLOUD_NAME', 'CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET'] as const
+  const present = cloudinaryKeys.filter((key) => cleaned[key] !== undefined)
+  if (present.length > 0 && present.length < cloudinaryKeys.length)
+    for (const key of cloudinaryKeys.filter((k) => cleaned[k] === undefined))
+      issues.push({ variable: key, message: 'las tres credenciales de Cloudinary van juntas' })
+
   let publicUrl = DEV_PUBLIC_URL
   if (cleaned.BB_PUBLIC_URL === undefined) {
     if (production) issues.push({ variable: 'BB_PUBLIC_URL', message: 'es obligatoria en producción' })
@@ -171,5 +210,14 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
     testClock,
     logLevel: e.LOG_LEVEL,
     trustProxy: truthy(e.TRUST_PROXY),
+    storage:
+      e.CLOUDINARY_CLOUD_NAME && e.CLOUDINARY_API_KEY && e.CLOUDINARY_API_SECRET
+        ? {
+            cloudName: e.CLOUDINARY_CLOUD_NAME,
+            apiKey: e.CLOUDINARY_API_KEY,
+            apiSecret: e.CLOUDINARY_API_SECRET,
+            prefix: e.BB_CLOUDINARY_PREFIX,
+          }
+        : null,
   }
 }

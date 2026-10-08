@@ -1,0 +1,57 @@
+/* Spike de Cloudinary (`/dev/escucha`): un panel con los pasos y lo que va saliendo. */
+.page {
+  display: grid;
+  flex: 1;
+  align-items: start;
+}
+
+.panel {
+  display: grid;
+  gap: var(--bb-space-4);
+  max-width: calc(var(--bb-space-16) * 12);
+  padding: var(--bb-space-6);
+}
+
+.intro {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bb-space-3);
+}
+
+.file {
+  display: grid;
+  gap: var(--bb-space-1);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.progress {
+  width: 100%;
+  accent-color: var(--bb-red);
+}
+
+.log {
+  display: grid;
+  gap: var(--bb-space-2);
+  padding-left: var(--bb-space-5);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.log li[data-ok="true"] {
+  color: var(--bb-white);
+}
+
+.log li[data-ok="false"] {
+  color: var(--bb-red);
+}
+
+.player {
+  width: 100%;
+}

@@ -6,6 +6,8 @@ import { type Clock, systemClock } from './lib/clock'
 import { type LogStream, loggerOptions } from './lib/logger'
 import { healthRoutes } from './modules/health/routes'
 import { createHealthService } from './modules/health/service'
+import { createCloudinaryStorage } from './modules/storage/cloudinary'
+import { storageSpikeRoutes } from './modules/storage/routes'
 import { registerClock } from './plugins/clock'
 import { registerErrorHandling } from './plugins/errors'
 import { BODY_LIMIT_BYTES, registerSecurity } from './plugins/security'
@@ -52,6 +54,11 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   registerErrorHandling(app)
 
   healthRoutes(app, createHealthService({ db }))
+  // Spike de Cloudinary (tarea 1.7): solo fuera de producción.
+  if (config.env !== 'production')
+    storageSpikeRoutes(app, config.storage ? createCloudinaryStorage(config.storage) : null, {
+      webOrigin: config.publicUrl,
+    })
 
   return app
 }
