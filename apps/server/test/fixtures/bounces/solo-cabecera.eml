@@ -1,0 +1,7 @@
+From: Mail Delivery Subsystem <mailer-daemon@googlemail.com>
+To: batalla@otherpeople.es
+X-Failed-Recipients: otro@example.org
+Subject: Delivery Status Notification (Failure)
+Content-Type: text/plain
+
+Message blocked.

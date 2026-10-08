@@ -6,6 +6,7 @@
     "dev": "tsx watch --env-file-if-exists=.env src/index.ts",
     "start": "tsx --env-file-if-exists=.env src/index.ts",
     "db:generate": "drizzle-kit generate",
+    "bounces": "tsx --env-file-if-exists=.env src/scripts/bounceScan.ts",
     "auth:schema": "auth generate --config src/auth/schema.cli.ts --adapter drizzle --dialect sqlite --output src/db/auth-schema.ts --yes && node scripts/auth-schema-post.mjs",
     "build": "vite build --config build.config.mjs && node scripts/smoke-bundle.mjs",
     "typecheck": "tsc -p tsconfig.json",
@@ -19,6 +20,7 @@
     "cloudinary": "2.11.0",
     "drizzle-orm": "0.45.3",
     "fastify": "5.12.5",
+    "imapflow": "2.2.5",
     "nodemailer": "10.0.16",
     "zod": "4.6.5"
   },

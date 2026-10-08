@@ -1,0 +1,27 @@
+Delivered-To: batalla@otherpeople.es
+From: Mail Delivery Subsystem <mailer-daemon@googlemail.com>
+To: batalla@otherpeople.es
+X-Failed-Recipients: noexiste@example.com
+Subject: Delivery Status Notification (Failure)
+Content-Type: multipart/report; boundary="000000000000abc"; report-type=delivery-status
+
+--000000000000abc
+Content-Type: text/plain; charset="UTF-8"
+
+** Address not found **
+
+Your message wasn't delivered to noexiste@example.com because the address couldn't be found.
+
+--000000000000abc
+Content-Type: message/delivery-status
+
+Reporting-MTA: dns; googlemail.com
+Received-From-MTA: dns; batalla@otherpeople.es
+
+Final-Recipient: rfc822; NoExiste@Example.com
+Action: failed
+Status: 5.1.1
+Remote-MTA: dns; mx.example.com. (192.0.2.1, the server for the domain example.com.)
+Diagnostic-Code: smtp; 550 5.1.1 The email account that you tried to reach does not exist.
+
+--000000000000abc--
