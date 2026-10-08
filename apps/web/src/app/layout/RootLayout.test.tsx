@@ -65,6 +65,7 @@ describe('RootLayout: marco de juego (0.23, §3.4.1)', () => {
       role: 'user' as const,
       cardNumber: 7,
       xp: 0,
+      avatarUrl: null,
     }
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ data: me }), { headers: { 'content-type': 'application/json' } }),

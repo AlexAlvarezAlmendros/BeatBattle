@@ -106,3 +106,12 @@ export const OwnProfileSchema = PublicProfileSchema.extend({
   usernameChangeAvailableAt: z.number().int().nullable(),
 })
 export type OwnProfile = z.infer<typeof OwnProfileSchema>
+
+/** Avatar (tarea 2.19, `RF-PRF-02`): formatos y tamaño que se aceptan antes de firmar la subida. */
+export const AVATAR_MIMES = ['image/png', 'image/jpeg', 'image/webp'] as const
+export const AVATAR_MAX_BYTES = 10 * 1024 * 1024
+/** Lado del avatar entregado (§4.8.3). */
+export const AVATAR_SIZE = 256
+
+/** `PUT /api/me/avatar`: el `public_id` que devolvió la firma, una vez subida la imagen. */
+export const AvatarConfirmSchema = z.object({ publicId: z.string().min(1).max(200) }).strict()

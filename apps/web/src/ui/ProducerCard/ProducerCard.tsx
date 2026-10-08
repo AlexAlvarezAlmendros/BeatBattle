@@ -18,12 +18,14 @@ export interface ProducerCardProps {
   showcase?: readonly string[]
   /** «10/2026»: mes y año de alta. */
   since: string
+  /** Foto del avatar (256 px, cuadrada); sin ella, el monograma. */
+  avatarUrl?: string | null
   className?: string
 }
 
 /**
  * Carta de productor, anverso plano (guía §3.4.4; versión simple de la Fase 2, tareas 2.17 y 2.18): número
- * de alta, sello de nivel con su arco, retrato en monograma (sin foto todavía), nombre, rango en rojo, tres
+ * de alta, sello de nivel con su arco, retrato (la foto en duotono rojo y negro o, sin ella, el monograma), nombre, rango en rojo, tres
  * estadísticas, vitrina de tres logros y el pie con la pegatina OTP. La carta 3D colgada de su pase llega
  * con la capa de juego (Fase 7).
  */
@@ -37,6 +39,7 @@ export function ProducerCard({
   stats,
   showcase = [],
   since,
+  avatarUrl,
   className,
 }: ProducerCardProps) {
   const slots = [0, 1, 2].map((i) => showcase[i] ?? null)
@@ -59,8 +62,12 @@ export function ProducerCard({
           <span className={styles.sealInner}>{level}</span>
         </span>
       </header>
-      <div className={styles.portrait} aria-hidden="true">
-        <span className={styles.monogram}>{initials}</span>
+      <div className={styles.portrait} aria-hidden="true" data-photo={avatarUrl ? '' : undefined}>
+        {avatarUrl ? (
+          <img className={styles.photo} src={avatarUrl} alt="" width={256} height={256} loading="lazy" />
+        ) : (
+          <span className={styles.monogram}>{initials}</span>
+        )}
       </div>
       <p className={cx('bb-display', styles.name)}>{name}</p>
       <p className={styles.rank}>{rank}</p>

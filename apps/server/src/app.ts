@@ -19,9 +19,10 @@ import { createHealthService } from './modules/health/service'
 import { meRoutes } from './modules/me/routes'
 import { sessionsRoutes } from './modules/me/sessions'
 import { profileRoutes } from './modules/profile/routes'
-import { createCloudinaryStorage } from './modules/storage/cloudinary'
+import { createCloudinaryStorage, type ImageStorage } from './modules/storage/cloudinary'
 import { storageSpikeRoutes } from './modules/storage/routes'
 import { unsubscribeRoutes } from './modules/unsubscribe/routes'
+import { uploadsRoutes } from './modules/uploads/routes'
 import { registerClock } from './plugins/clock'
 import { registerErrorHandling } from './plugins/errors'
 import { BODY_LIMIT_BYTES, registerSecurity } from './plugins/security'
@@ -45,6 +46,8 @@ export interface AppDeps {
    * para leer lo enviado; `null`, sin transporte (los emails se quedan en cola).
    */
   mailer?: Mailer | null
+  /** Imágenes (avatares, §4.8); por defecto, Cloudinary si está configurado. Los tests pasan una falsa. */
+  images?: ImageStorage | null
 }
 
 /**
@@ -106,12 +109,16 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   healthRoutes(app, createHealthService({ db }))
   unsubscribeRoutes(app, { db, secret: config.mail.unsubscribeSecret, newId })
   emailPrefsRoutes(app, { db, secret: config.auth.secret, newId })
-  meRoutes(app, { db })
   sessionsRoutes(app, { db })
-  profileRoutes(app, { db, rateLimiter: createRateLimiter({ db }) })
+  const rateLimiter = createRateLimiter({ db })
+  const storage = config.storage ? createCloudinaryStorage(config.storage) : null
+  const images = deps.images === undefined ? storage : deps.images
+  meRoutes(app, { db, images })
+  profileRoutes(app, { db, images, rateLimiter })
+  uploadsRoutes(app, { images, rateLimiter, newId })
   // Spike de Cloudinary (tarea 1.7): solo fuera de producción.
   if (config.env !== 'production')
-    storageSpikeRoutes(app, config.storage ? createCloudinaryStorage(config.storage) : null, {
+    storageSpikeRoutes(app, storage, {
       webOrigin: config.publicUrl,
     })
 

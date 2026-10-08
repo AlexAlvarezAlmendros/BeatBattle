@@ -29,6 +29,7 @@ const ME = {
   role: 'user' as const,
   cardNumber: 7,
   xp: 0,
+  avatarUrl: null,
 }
 
 const PREFS = {

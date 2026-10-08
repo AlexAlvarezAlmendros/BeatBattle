@@ -62,6 +62,7 @@ export function ProfilePage() {
             rank={rank}
             stats={{ wins: 0, podiums: 0, weeks: 0 }}
             since={`${String(joined.getMonth() + 1).padStart(2, '0')}/${joined.getFullYear()}`}
+            avatarUrl={profile.avatarUrl}
           />
         </div>
       }

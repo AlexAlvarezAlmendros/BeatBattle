@@ -12,7 +12,7 @@ import {
   USERNAME_MAX,
 } from '@beatbattle/shared'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { type FormEvent, useState } from 'react'
+import { type ChangeEvent, type FormEvent, useRef, useState } from 'react'
 import { paths } from '../../app/paths'
 import { DATE_FORMATS, formatDate, t } from '../../i18n'
 import { ApiClientError, apiFetch } from '../../net/api'
@@ -20,7 +20,8 @@ import { Button } from '../../ui/Button'
 import { TextAreaField, TextField } from '../../ui/Field'
 import { Done, PaperNotice } from '../account/FormBits'
 import { RequireSession } from '../account/RequireSession'
-import { useSession } from '../account/session'
+import { initialsOf, useSession } from '../account/session'
+import { avatarProblem, deleteAvatar, uploadAvatar } from './avatarUpload'
 import { SettingsGroup, SettingsSection, SettingsStatus } from './SettingsSection'
 import styles from './SettingsSection.module.css'
 
@@ -90,6 +91,7 @@ function ProfileEditor() {
     )
   return (
     <>
+      <AvatarForm profile={profile.data} />
       <UsernameForm profile={profile.data} />
       <CardForm profile={profile.data} />
       <Button to={paths.profile(profile.data.username)} variant="outline" className={styles.start}>
@@ -280,5 +282,100 @@ function CardForm({ profile }: { profile: OwnProfile }) {
         <SettingsStatus>{state === 'saved' ? t('settings.profile.saved') : ''}</SettingsStatus>
       </SettingsGroup>
     </form>
+  )
+}
+
+/**
+ * El avatar (tarea 2.19, `RF-PRF-02`): la vista previa en duotono, como en la carta, «Subir foto» (abre el
+ * selector de archivos), «Quitar foto» y el estado. La imagen va directa a Cloudinary con la firma del
+ * servidor; aquí solo se comprueba el tipo y el tamaño antes de pedirla.
+ */
+function AvatarForm({ profile }: { profile: OwnProfile }) {
+  const client = useQueryClient()
+  const input = useRef<HTMLInputElement>(null)
+  const [state, setState] = useState<'idle' | 'busy' | 'done' | 'removed'>('idle')
+  const [error, setError] = useState<string | null>(null)
+
+  const run = async (action: () => Promise<OwnProfile>, next: 'done' | 'removed') => {
+    setError(null)
+    setState('busy')
+    try {
+      client.setQueryData(PROFILE_KEY, await action())
+      setState(next)
+    } catch (caught) {
+      const code = caught instanceof ApiClientError ? caught.code : null
+      setError(
+        code === 'SERVICE_UNAVAILABLE'
+          ? t('settings.profile.avatar.errors.unavailable')
+          : code === 'RATE_LIMITED'
+            ? t('settings.profile.errors.rateLimited')
+            : t('settings.profile.avatar.errors.failed'),
+      )
+      setState('idle')
+    }
+  }
+
+  const choose = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    const problem = avatarProblem(file)
+    if (problem) return setError(t(`settings.profile.avatar.errors.${problem}`))
+    void run(() => uploadAvatar(file), 'done')
+  }
+
+  return (
+    <SettingsGroup
+      title={t('settings.profile.avatar.title')}
+      help={t('settings.profile.avatar.help')}
+      layout="stack"
+    >
+      <div className={styles.avatarRow}>
+        <div className={styles.avatar} data-photo={profile.avatarUrl ? '' : undefined}>
+          {profile.avatarUrl ? (
+            <img src={profile.avatarUrl} alt={t('settings.profile.avatar.preview')} width={96} height={96} />
+          ) : (
+            <span aria-hidden="true">{initialsOf(profile.displayUsername)}</span>
+          )}
+        </div>
+        <div className={styles.controls}>
+          <input
+            ref={input}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="sr-only"
+            tabIndex={-1}
+            aria-hidden="true"
+            onChange={choose}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            loading={state === 'busy'}
+            onClick={() => input.current?.click()}
+          >
+            {profile.avatarUrl ? t('settings.profile.avatar.change') : t('settings.profile.avatar.upload')}
+          </Button>
+          {profile.avatarUrl && (
+            <Button variant="outline" size="sm" onClick={() => void run(deleteAvatar, 'removed')}>
+              {t('settings.profile.avatar.remove')}
+            </Button>
+          )}
+        </div>
+      </div>
+      {error ? (
+        <PaperNotice>{error}</PaperNotice>
+      ) : (
+        <SettingsStatus busy={state === 'busy'}>
+          {state === 'busy'
+            ? t('settings.profile.avatar.uploading')
+            : state === 'done'
+              ? t('settings.profile.avatar.done')
+              : state === 'removed'
+                ? t('settings.profile.avatar.removed')
+                : ''}
+        </SettingsStatus>
+      )}
+    </SettingsGroup>
   )
 }

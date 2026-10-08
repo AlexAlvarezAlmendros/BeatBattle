@@ -48,6 +48,8 @@ export interface MenuPlayer {
   level: number
   rank: string
   xp: { value: number; min: number; max: number }
+  /** Foto del avatar (64 px); sin ella, el monograma. */
+  avatarUrl?: string | null
   season?: { label: string; value: string }
   streak?: number
   /** Ya ha subido su entrada esta semana (Jugar pasa a «Editar mi entrada» y el cursor, a Jurado). */
