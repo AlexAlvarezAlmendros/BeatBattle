@@ -7,11 +7,22 @@
     ".": "./src/index.ts"
   },
   "scripts": {
+    "dev": "email dev --dir preview --port 3030",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@beatbattle/shared": "workspace:^",
+    "@react-email/components": "1.0.12",
+    "@react-email/render": "2.1.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
   "devDependencies": {
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "react-email": "6.11.1",
+    "tsx": "4.23.15",
     "typescript": "7.0.2",
     "vitest": "5.0.3"
   }

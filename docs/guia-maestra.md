@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.23 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.24 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1840,8 +1840,10 @@ primera como de Beat Battle, con la firma del sello:
   ignoran el CSS de fondo) con la cuña granate como imagen; cabecera con el **logo del juego** como
   imagen (con su extrusión, para que sobreviva a cualquier cliente) y la **pegatina OTP** al lado;
   cuerpo en tarjetas `#0e0e10` con marco de chaflán dibujado en la imagen o con borde de 2 px; botón
-  «a prueba de balas» (tabla + VML para Outlook) rectangular en `#e6003a` con texto blanco; y el pie
-  con la firma y la baja.
+  «a prueba de balas» rectangular en `#e6003a` con texto blanco (tabla con el color en `bgcolor` de la
+  celda: al ser rectangular, Outlook lo pinta igual sin VML); y el pie con la firma y la baja. El logo y
+  la pegatina de la cabecera salen de `tools/brand/email-images.mjs` (el `GameLogo` real a 2×) con **fondo
+  negro propio**.
 - **Tipografía**: Chakra Petch como fuente web con alternativa Arial y Helvetica (Gmail no carga
   fuentes web, así que allí se verá con la alternativa). Cifras en imagen solo en la cuenta atrás en
   vivo (GIF).
@@ -2960,8 +2962,15 @@ CREATE TABLE entry_receipt_seq (week_id TEXT PRIMARY KEY, last INTEGER NOT NULL)
 - `packages/emails`: una plantilla de React Email por id del catálogo (§2.12), con componentes
   compartidos (cabecera, tarjeta, botón a prueba de balas, ticket, cuenta atrás, pie con baja).
   Cada una exporta `subject(payload)`, `preheader(payload)`, el HTML y el texto plano.
-- `pnpm emails:dev` abre el visor de React Email con *fixtures* de cada plantilla; las capturas de
-  la galería de emails entran en las pruebas visuales.
+- `pnpm emails:dev` abre el visor de React Email con *fixtures* de cada plantilla
+  (`packages/emails/preview/`). La galería (`scripts/gallery.tsx` + `tools/shot/emails.mjs`) deja el HTML,
+  el texto plano y las capturas a 600 y 390 px (`docs/planning/evidence/f2/emails/`).
+- `renderEmail(plantilla, payload, contexto)` saca asunto, *preheader*, HTML y texto plano del mismo árbol.
+  El contexto lleva la URL pública, la familia, la **página** de baja (`GET /api/unsubscribe?token=`, el
+  enlace visible del pie; la de un clic va en la cabecera `List-Unsubscribe`) y la dirección postal del
+  sello para el pie, si está configurada.
+- Pendiente: Chakra Petch como fuente web. Hace falta servir sus `woff2` en una URL pública estable;
+  mientras tanto se ve la alternativa (Arial o Helvetica), como en Gmail.
 - Enlaces con UTM (`utm_source=email&utm_campaign=<id>`) y, en campañas, a través de
   `/r/:linkId` para contar clics en agregado.
 
@@ -3391,6 +3400,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-08 | 0.6.24 | **Plantillas de email** (tareas 2.13 y 2.14, §3.8.12 y §4.19.4): el botón es una tabla con `bgcolor` en la celda, sin VML; las imágenes de la cabecera, con fondo negro propio; `renderEmail` y el contexto (URL pública, familia, página de baja, dirección postal); la galería y sus capturas. Chakra Petch como fuente web queda pendiente de una URL estable para sus ficheros. |
 | 2026-10-08 | 0.6.23 | **Cola de salida** (tarea 2.8, §4.19.3): qué se decide al enviar (familias, interruptores, consentimiento, supresión, motivos de `skipped`), la reclamación que impide enviar dos veces y el reparto del cupo con la reserva de servicio. `email_pref.label_pick_on` (la Elección del sello no tenía interruptor) y `email_outbox.to_address` (para `account.deleted`, cuando la cuenta ya no existe). |
 | 2026-10-08 | 0.6.22 | **Better Auth fijado en la 1.7.7** (tarea 2.3, §4.9): la configuración de referencia compila tal cual contra sus tipos. Las tablas se generan con su CLI (`auth:schema`), que quita las cascadas (§4.11). `producer_profile` y `username_redirect` (§4.11): el acento es `red`, `white` o `wine` (quedaba «8 claves» de antes de la Arena). Los reservados y el formato del nombre, en `@beatbattle/shared`. |
 | 2026-10-08 | 0.6.21 | **Transporte de email** (tareas 2.2 y 2.7, §4.19.1). Mailpit en local sin Docker (`pnpm mail:dev`, versión fijada con su SHA-256). La interfaz `Mailer` es `send` y `close`: el cupo restante lo calcula la cola, no el transporte. La lista blanca de la preview es `MAIL_PREVIEW_ALLOWLIST`, y en producción el servidor no arranca con Mailpit, con un `From` distinto de la cuenta o sin clave de baja. |
