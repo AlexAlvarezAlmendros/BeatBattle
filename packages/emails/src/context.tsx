@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource react */
 import { createContext, useContext } from 'react'
 
 export type EmailFamily = 'service' | 'battle' | 'marketing'

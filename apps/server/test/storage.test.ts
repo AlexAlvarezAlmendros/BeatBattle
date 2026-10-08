@@ -29,6 +29,7 @@ describe('configuración de Cloudinary (§4.8.1)', () => {
       BB_PUBLIC_URL: 'https://battle.otherpeople.es',
       BB_CLOUDINARY_PREFIX: 'beatbattle',
       ...CREDS,
+      BETTER_AUTH_SECRET: 'x'.repeat(40),
     })
     expect(prod.storage?.prefix).toBe('beatbattle')
   })

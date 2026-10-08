@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource react */
 import { EmailProvider } from '../src/context'
 import { authWelcome } from '../src/templates/authWelcome'
 

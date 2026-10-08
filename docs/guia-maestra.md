@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.25 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.26 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2397,8 +2397,17 @@ export const auth = betterAuth({
 ```
 
 - **Fastify**: una ruta comodín `/api/auth/*` convierte la petición de Fastify en un `Request` de
-  Fetch y la pasa a `auth.handler`. El resto de rutas obtienen la sesión con
-  `auth.api.getSession({ headers })` en un `preHandler` que decora `request.user`.
+  Fetch y la pasa a `auth.handler` (cada `Set-Cookie` por separado). El resto de rutas obtienen la sesión
+  con `auth.api.getSession({ headers })` en un `preHandler` que decora `request.user` y
+  `request.session`. La IP la resuelve Fastify (con `trustProxy`) y llega a Better Auth en la cabecera
+  interna `x-bb-client-ip` (se borra la que venga de fuera): con ella cuenta el rate limit por IP.
+- **Errores propios** desde los *hooks* de la BD, como `APIError` de Better Auth con 422:
+  `EMAIL_DISPOSABLE` (registro y cambio de email, `RF-AUTH-09`) y `USERNAME_RESERVED` (el plugin
+  `username` solo mira el formato, `RF-AUTH-06`). Los demás son los de Better Auth
+  (`USERNAME_IS_ALREADY_TAKEN`, `PASSWORD_TOO_SHORT`, `PASSWORD_COMPROMISED`, `EMAIL_NOT_VERIFIED`…).
+- Al crear la cuenta, su `producer_profile` con el siguiente número de carta. Los emails de verificación y
+  recuperación salen por la cola en la misma petición (`ServiceEmails.sendNow`). Un envío fallido queda en
+  el registro con su tipo e intento, sin la dirección.
 - **Tablas** generadas con la CLI de Better Auth para Drizzle (`pnpm --filter @beatbattle/server
   auth:schema` → `src/db/auth-schema.ts`): `user` (+ `username`, `displayUsername`, `role`, `banned`,
   `banReason`, `banExpires`), `session` (+ `impersonatedBy`), `account`, `verification` y `rate_limit`. La
@@ -3410,6 +3419,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-08 | 0.6.26 | **Better Auth en el servidor** (tarea 2.4, §4.9): la ruta comodín, la sesión en cada petición, la IP para el rate limit, los errores propios (`EMAIL_DISPOSABLE` y `USERNAME_RESERVED`, 422), el número de carta y los emails por la cola. La lista de dominios desechables es la comunitaria (CC0), como datos. Las plantillas llevan el pragma del JSX automático: con `tsx` fallaban fuera del paquete. |
 | 2026-10-08 | 0.6.25 | **Bajas y render de la cola** (tareas 2.9 y 2.10, §4.19.6): la página de baja es la pantalla `/baja?token=` de la web, sobre `GET` y `POST /api/unsubscribe`; la de un clic va en la cabecera. Qué apaga cada baja. El servidor renderiza la cola con `@beatbattle/emails` (`createRenderer`), y un tipo sin plantilla falla y se reintenta. |
 | 2026-10-08 | 0.6.24 | **Plantillas de email** (tareas 2.13 y 2.14, §3.8.12 y §4.19.4): el botón es una tabla con `bgcolor` en la celda, sin VML; las imágenes de la cabecera, con fondo negro propio; `renderEmail` y el contexto (URL pública, familia, página de baja, dirección postal); la galería y sus capturas. Chakra Petch como fuente web queda pendiente de una URL estable para sus ficheros. |
 | 2026-10-08 | 0.6.23 | **Cola de salida** (tarea 2.8, §4.19.3): qué se decide al enviar (familias, interruptores, consentimiento, supresión, motivos de `skipped`), la reclamación que impide enviar dos veces y el reparto del cupo con la reserva de servicio. `email_pref.label_pick_on` (la Elección del sello no tenía interruptor) y `email_outbox.to_address` (para `account.deleted`, cuando la cuenta ya no existe). |

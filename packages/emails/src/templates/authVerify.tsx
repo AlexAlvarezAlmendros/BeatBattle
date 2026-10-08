@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource react */
 import { Link } from '@react-email/components'
 import { Button } from '../components/Button'
 import { Card } from '../components/Card'

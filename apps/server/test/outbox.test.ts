@@ -237,8 +237,10 @@ describe('cola de salida (§4.19.3)', () => {
     expect(await status(h.db, id)).toMatchObject({ status: 'sent' })
   })
 
-  it('reintentos a 1 min, 5 min, 30 min y 2 h; después, failed', async () => {
+  it('reintentos a 1 min, 5 min, 30 min y 2 h; después, failed (y cada fallo se avisa sin la dirección)', async () => {
     const h = await harness()
+    const errors: unknown[] = []
+    h.deps.onSendError = (info) => errors.push(info)
     await addUser(h.db, 'aina')
     const id = await h.enqueue('auth.verify', { userId: 'aina' })
     h.mailer.failNext(10)
@@ -253,6 +255,9 @@ describe('cola de salida (§4.19.3)', () => {
       await emailDrain(h.deps)
     }
     expect(await status(h.db, id)).toMatchObject({ status: 'failed', attempts: 5 })
+    expect(errors).toHaveLength(5)
+    expect(errors.at(-1)).toMatchObject({ kind: 'auth.verify', attempts: 5, final: true })
+    expect(JSON.stringify(errors)).not.toContain('@example.com')
   })
 
   it('dos drenajes a la vez no envían dos veces el mismo email', async () => {

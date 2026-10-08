@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource react */
 import { Card } from '../components/Card'
 import { Layout } from '../components/Layout'
 import { Heading, Kicker, Paragraph } from '../components/Text'

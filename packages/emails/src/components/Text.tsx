@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource react */
 import { Heading as BaseHeading, Text as BaseText } from '@react-email/components'
 import type { ReactNode } from 'react'
 import { mail } from '../theme'

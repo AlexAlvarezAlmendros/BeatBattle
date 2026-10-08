@@ -1,8 +1,12 @@
 import { randomUUID } from 'node:crypto'
 import Fastify, { type FastifyInstance } from 'fastify'
+import { createAuth } from './auth/auth'
+import { authRoutes } from './auth/routes'
 import type { AppConfig } from './config/env'
 import type { Db } from './db/client'
 import { createMailer, type Mailer } from './email'
+import { createRenderer } from './email/render'
+import { createServiceEmails } from './email/service'
 import { createUnsubscribeLinks } from './email/unsubscribe'
 import { type Clock, systemClock } from './lib/clock'
 import { uuidv7 } from './lib/ids'
@@ -79,8 +83,21 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     await mailer?.close()
   })
 
+  const newId = () => uuidv7(clock)
+  const emails = createServiceEmails({
+    db,
+    mailer,
+    now: () => clock.now(),
+    render: createRenderer({ publicUrl: config.publicUrl }),
+    unsubscribeUrl: unsubscribeLinks.oneClick,
+    dailyLimit: config.mail.dailyLimit,
+    newId,
+    onSendError: (info) => app.log.warn({ email: info }, 'envío de email fallido'),
+  })
+  authRoutes(app, createAuth({ config, db, emails, now: () => clock.now() }))
+
   healthRoutes(app, createHealthService({ db }))
-  unsubscribeRoutes(app, { db, secret: config.mail.unsubscribeSecret, newId: () => uuidv7(clock) })
+  unsubscribeRoutes(app, { db, secret: config.mail.unsubscribeSecret, newId })
   // Spike de Cloudinary (tarea 1.7): solo fuera de producción.
   if (config.env !== 'production')
     storageSpikeRoutes(app, config.storage ? createCloudinaryStorage(config.storage) : null, {

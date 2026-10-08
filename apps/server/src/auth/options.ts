@@ -1,4 +1,4 @@
-import { isAllowedUsername, USERNAME_MAX, USERNAME_MIN } from '@beatbattle/shared'
+import { USERNAME_MAX, USERNAME_MIN, usernameProblem } from '@beatbattle/shared'
 import { admin, haveIBeenPwned, username } from 'better-auth/plugins'
 
 /**
@@ -13,11 +13,15 @@ export const AUTH_BASE_PATH = '/api/auth'
 export function authPlugins() {
   return [
     // `RF-AUTH-06`: se guarda en minúsculas (único sin distinguir mayúsculas) y `displayUsername`
-    // conserva cómo lo escribió. Los reservados devuelven `USERNAME_RESERVED` desde un hook (2.4).
+    // conserva cómo lo escribió. El plugin solo mira el formato: los reservados los rechaza un hook de la
+    // BD con su propio código, `USERNAME_RESERVED` (`auth.ts`).
     username({
       minUsernameLength: USERNAME_MIN,
       maxUsernameLength: USERNAME_MAX,
-      usernameValidator: isAllowedUsername,
+      usernameValidator: (name) => {
+        const problem = usernameProblem(name)
+        return problem === null || problem === 'USERNAME_RESERVED'
+      },
     }),
     admin(),
     haveIBeenPwned(),

@@ -129,6 +129,7 @@ describe('transporte de email (§4.19.1)', () => {
       GMAIL_APP_PASSWORD: 'abcd efgh ijkl mnop',
       UNSUBSCRIBE_SECRET: 'x'.repeat(40),
       MAIL_PREVIEW_ALLOWLIST: '@otherpeople.es',
+      BETTER_AUTH_SECRET: 'x'.repeat(40),
     })
     const mailer = createMailer(config.mail)
     await expect(mailer?.send(EMAIL)).rejects.toBeInstanceOf(RecipientNotAllowedError)
@@ -145,7 +146,11 @@ describe('transporte de email (§4.19.1)', () => {
 })
 
 describe('configuración del email (§4.19.1)', () => {
-  const PROD = { NODE_ENV: 'production', BB_PUBLIC_URL: 'https://battle.otherpeople.es' }
+  const PROD = {
+    NODE_ENV: 'production',
+    BB_PUBLIC_URL: 'https://battle.otherpeople.es',
+    BETTER_AUTH_SECRET: 'x'.repeat(40),
+  }
   const issues = (source: Record<string, string>) => {
     try {
       loadEnv(source)
