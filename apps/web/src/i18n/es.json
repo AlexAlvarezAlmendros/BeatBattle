@@ -531,6 +531,24 @@
     "gameLogo": {
       "beat": "BEAT",
       "battle": "BATTLE"
+    },
+    "field": {
+      "show": "Ver {label}",
+      "hide": "Ocultar {label}",
+      "showShort": "Ver",
+      "hideShort": "Ocultar"
+    },
+    "producerCard": {
+      "label": "Carta de luchador de {name}, número {number}",
+      "level": "Nivel {level}",
+      "stats": {
+        "wins": "Victorias",
+        "podiums": "Podios",
+        "weeks": "Semanas"
+      },
+      "showcase": "Vitrina de logros",
+      "emptySlot": "Hueco vacío",
+      "since": "Beat Battle · desde {since}"
     }
   },
   "dev": {
@@ -1237,6 +1255,125 @@
       "seasonWrap": "Resumen de temporada",
       "mktCampaign": "Novedades, campañas y packs de loops",
       "mktReactivation": "Te echamos de menos"
+    }
+  },
+  "account": {
+    "errors": {
+      "invalidEmailOrPassword": "El email y la contraseña no coinciden.",
+      "invalidUsernameOrPassword": "El nombre de productor y la contraseña no coinciden.",
+      "emailNotVerified": "Antes de entrar, confirma tu email con el enlace que te enviamos.",
+      "userAlreadyExists": "Ya hay una cuenta con ese email. ¿Quieres entrar?",
+      "userAlreadyExistsUseAnotherEmail": "Ya hay una cuenta con ese email. ¿Quieres entrar?",
+      "usernameIsAlreadyTaken": "Ese nombre ya lo tiene otro productor.",
+      "usernameReserved": "Ese nombre está reservado. Elige otro.",
+      "invalidUsername": "Solo letras sin tilde, números, punto y guion bajo.",
+      "usernameTooShort": "El nombre necesita al menos 3 caracteres.",
+      "usernameTooLong": "El nombre puede tener como mucho 20 caracteres.",
+      "passwordTooShort": "La contraseña necesita al menos 12 caracteres.",
+      "passwordTooLong": "La contraseña puede tener como mucho 128 caracteres.",
+      "passwordCompromised": "Esa contraseña aparece en filtraciones conocidas. Elige otra.",
+      "emailDisposable": "Ese dominio de email no se admite: usa uno que vayas a seguir leyendo.",
+      "invalidEmail": "Ese email no parece válido.",
+      "invalidToken": "El enlace no es válido o ya se ha usado.",
+      "tokenExpired": "El enlace ha caducado. Pide otro.",
+      "tooManyRequests": "Demasiados intentos seguidos. Espera un poco y vuelve a probar.",
+      "unknown": "Algo ha fallado. Vuelve a intentarlo en un momento."
+    },
+    "strength": {
+      "label": "Fortaleza",
+      "loading": "Midiendo…",
+      "levels": {
+        "score0": "Muy débil",
+        "score1": "Débil",
+        "score2": "Aceptable",
+        "score3": "Fuerte",
+        "score4": "Muy fuerte"
+      }
+    },
+    "fields": {
+      "identity": "Email o nombre de productor",
+      "email": "Email",
+      "username": "Nombre de productor",
+      "password": "Contraseña",
+      "newPassword": "Contraseña nueva"
+    },
+    "social": {
+      "label": "Entrar con otra cuenta",
+      "signIn": {
+        "google": "Entrar con Google",
+        "discord": "Entrar con Discord"
+      },
+      "signUp": {
+        "google": "Crear cuenta con Google",
+        "discord": "Crear cuenta con Discord"
+      }
+    },
+    "signIn": {
+      "summary": "Vuelve a la batalla con tu email o tu nombre de productor.",
+      "submit": "Entrar",
+      "forgot": "¿Has olvidado la contraseña?",
+      "create": "Crear una cuenta"
+    },
+    "signUp": {
+      "summary": "Una cuenta para subir tu flip, votar y ganar tu carta de luchador.",
+      "usernameHint": "3–20 caracteres: letras sin tilde, números, punto y guion bajo. Así te verán en la batalla.",
+      "passwordHint": "Al menos 12 caracteres. Una frase que recuerdes vale más que símbolos raros.",
+      "noticesTitle": "Avisos de la batalla por email",
+      "noticesHelp": "Llegan por email y se pueden quitar cuando quieras, uno a uno o todos, desde el propio email o en Ajustes.",
+      "consentsTitle": "Además, si quieres",
+      "legalBefore": "Al crear la cuenta aceptas las",
+      "legalRules": "bases de la competición",
+      "legalAnd": "y la",
+      "legalPrivacy": "política de privacidad",
+      "submit": "Crear cuenta",
+      "haveAccount": "Ya tengo cuenta: entrar"
+    },
+    "notices": {
+      "dropOn": "Nuevo drop cada lunes",
+      "resultsOn": "Resultados de la semana",
+      "reminderOn": "Recordatorio para subir",
+      "juryCallOn": "Última llamada del jurado",
+      "firstVotesOn": "Primeros votos de mi beat",
+      "labelPickOn": "Elección del sello",
+      "progressOn": "Rango y logros",
+      "seasonOn": "Resumen de temporada"
+    },
+    "consents": {
+      "marketing": "Novedades, campañas y packs exclusivos de loops de Beat Battle",
+      "otpNewsletter": "La newsletter de Other People Records"
+    },
+    "verify": {
+      "sentTo": "Te hemos enviado un enlace a {email}. Ábrelo para confirmar tu email y entrar.",
+      "sent": "Te hemos enviado un enlace por email. Ábrelo para confirmar tu email y entrar.",
+      "expires": "El enlace dura 24 horas. Si no lo ves, mira en el correo no deseado.",
+      "resend": "Reenviar el email",
+      "resent": "Enviado otra vez.",
+      "wait": "Podrás pedir otro en {seconds} s",
+      "done": "Email confirmado, {name}. Ya estás en la batalla.",
+      "continue": "Ver mi carta"
+    },
+    "recover": {
+      "summary": "Escribe el email de tu cuenta y te mandamos un enlace para elegir una contraseña nueva.",
+      "request": "Enviar el enlace",
+      "sent": "Si hay una cuenta con ese email, ya te hemos enviado el enlace.",
+      "expires": "Dura 1 hora y solo sirve una vez.",
+      "choose": "Elige tu contraseña nueva.",
+      "sessions": "Al guardarla se cerrarán todas tus sesiones abiertas, también en otros dispositivos.",
+      "save": "Guardar la contraseña",
+      "changed": "Contraseña cambiada. Entra con la nueva."
+    },
+    "welcome": {
+      "title": "Bienvenido a la batalla",
+      "summary": "{name}, tu carta de luchador ya está impresa. Ahora toca ganarse lo que lleva dentro.",
+      "goalTitle": "Tu primer logro",
+      "goalName": "Primer sample",
+      "goalHow": "Descarga el sample de la semana en cuanto caiga el lunes.",
+      "play": "Ir al menú",
+      "profile": "Completar mi perfil"
+    },
+    "require": {
+      "loading": "Comprobando tu sesión…",
+      "settings": "Entra en tu cuenta para cambiar tus ajustes."
     }
   }
 }

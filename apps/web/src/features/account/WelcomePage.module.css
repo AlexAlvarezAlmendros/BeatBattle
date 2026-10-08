@@ -1,0 +1,60 @@
+/*
+ * Bienvenida (§3.8.9): la carta sale de una ranura de abajo arriba (la «impresión»). La ranura es una línea
+ * blanca con la carta recortada por encima de ella. Sin movimiento, la carta ya está fuera (Anexo E).
+ */
+.slot {
+  display: grid;
+  justify-items: center;
+  padding-bottom: var(--bb-space-4);
+  border-bottom: var(--bb-stroke-cursor) solid var(--bb-white);
+  overflow: hidden;
+}
+
+.print {
+  display: grid;
+  justify-items: center;
+  width: 100%;
+  animation: bb-card-print var(--bb-dur-reward) var(--bb-ease-out) backwards;
+}
+
+@keyframes bb-card-print {
+  from {
+    translate: 0 110%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .print {
+    animation: none;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .print {
+  animation: none;
+}
+
+.body {
+  display: grid;
+  gap: var(--bb-space-4);
+}
+
+.goal {
+  display: grid;
+  gap: var(--bb-space-1);
+  padding: var(--bb-space-4);
+  border: var(--bb-stroke) solid var(--bb-line-strong);
+  background: var(--bb-panel-2);
+}
+
+.goalName {
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-lg);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  text-transform: uppercase;
+}
+
+.goalHow {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}

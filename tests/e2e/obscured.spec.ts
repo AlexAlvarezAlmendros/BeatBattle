@@ -55,7 +55,9 @@ function measureFocus(element: Element) {
   const floats = position === 'sticky' || position === 'fixed'
   const covered =
     !inBar && floats && barBox && barBox.top < window.innerHeight ? Math.max(0, box.bottom - barBox.top) : 0
-  const label = (element.getAttribute('aria-label') ?? element.textContent ?? element.tagName)
+  // Un campo de formulario no tiene texto: su nombre es el de su <label> (si no, dos campos serían «el mismo»).
+  const fieldLabel = (element as HTMLInputElement).labels?.[0]?.textContent
+  const label = (element.getAttribute('aria-label') ?? fieldLabel ?? (element.textContent || element.tagName))
     .trim()
     .slice(0, 32)
   return {

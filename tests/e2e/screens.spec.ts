@@ -155,8 +155,9 @@ test.describe('1440 × 900', () => {
     expect(Math.abs(above - below), `arriba ${above} px · abajo ${below} px`).toBeLessThanOrEqual(64)
     // El logo al tamaño del de `00-titulo` (unos 750 px de «BATTLE»): llena el alto, no se queda arriba.
     expect(box.title.bottom - box.title.top).toBeGreaterThanOrEqual(330)
-    // El pie del panel, a la altura del lockup.
-    expect(Math.abs(box.panel.bottom - box.title.bottom)).toBeLessThanOrEqual(4)
+    // Con el formulario de verdad (Fase 2) el panel es más alto que el logo: ya no acaba a la altura del
+    // lockup, pero el bloque sigue centrado y cabe entre el HUD y la barra (§3.8.14).
+    expect(box.panel.bottom).toBeLessThanOrEqual(box.bar.top)
   })
 
   for (const { path, heading } of FEW_SCREENS) {
@@ -580,8 +581,6 @@ for (const { path, heading, start, enter } of [
     enter: '/legal/bases',
   },
   { path: '/esto-no-existe', heading: 'Bonus stage', start: 'Volver al menú', enter: '/' },
-  { path: '/entrar', heading: 'Entrar', start: 'Volver al menú', enter: '/' },
-  { path: '/registro', heading: 'Crear cuenta', start: 'Volver al menú', enter: '/' },
 ]) {
   test(`RD-VIS-02 d: en ${path}, el cursor empieza en «${start}» y ↑↓ e Intro van a él (sin accionarlo) con el foco en ningún control (§3.8.14)`, async ({
     page,
@@ -613,6 +612,36 @@ for (const { path, heading, start, enter } of [
 }
 
 /**
+ * Las pantallas de formulario (§3.8.14, Fase 2): su primer elemento de juego es el **primer campo**. En
+ * reposo (foco en ningún control), ↑, ↓ e Intro lo enfocan sin enviar nada; el primer Tab sigue siendo
+ * «Saltar al contenido».
+ */
+for (const { path, heading, field } of [
+  { path: '/entrar', heading: 'Entrar', field: 'Email o nombre de productor' },
+  { path: '/registro', heading: 'Crear cuenta', field: 'Email' },
+]) {
+  test(`RD-VIS-02 d: en ${path}, ↑↓ e Intro en reposo van al primer campo, sin enviar (§3.8.14)`, async ({
+    page,
+  }) => {
+    await open(page, path, heading)
+    const first = page.getByRole('main').getByLabel(field, { exact: true })
+    await expect(page.locator('body')).toBeFocused()
+    await page.keyboard.press('ArrowDown')
+    await expect(first).toBeFocused()
+    await page.getByRole('main').focus()
+    await page.keyboard.press('ArrowUp')
+    await expect(first).toBeFocused()
+    await page.getByRole('main').focus()
+    await page.keyboard.press('Enter')
+    await expect(first).toBeFocused()
+    await expect(page).toHaveURL(path)
+    await open(page, path, heading)
+    await page.keyboard.press('Tab')
+    await expect(page.getByRole('link', { name: 'Saltar al contenido' })).toBeFocused()
+  })
+}
+
+/**
  * Intro no rebota entre pantallas (revisión de la 0.28): al cambiar de pantalla el foco va al `<main>`,
  * que cuenta como reposo. Si Intro accionara el primer elemento de juego, dos Intro seguidas desde el
  * menú volvían al menú; y con la tecla mantenida, sus repeticiones entraban en la opción elegida de la
@@ -620,7 +649,7 @@ for (const { path, heading, start, enter } of [
  * unas diez veces por segundo. Desde el menú, el cursor está en «Jurado», que sin sesión lleva a
  * «/entrar».
  */
-test('RD-VIS-02 d: dos Intro seguidas desde el menú se quedan en la pantalla nueva (la segunda solo lleva el cursor a «Volver al menú», §3.8.14)', async ({
+test('RD-VIS-02 d: dos Intro seguidas desde el menú se quedan en la pantalla nueva (la segunda solo enfoca el primer campo, sin enviar, §3.8.14)', async ({
   page,
 }) => {
   await open(page, '/', 'Beat Battle')
@@ -628,7 +657,9 @@ test('RD-VIS-02 d: dos Intro seguidas desde el menú se quedan en la pantalla nu
   await expect(page).toHaveURL('/entrar')
   await expect(page.getByRole('main')).toBeFocused()
   await page.keyboard.press('Enter')
-  await expectCursor(page.getByRole('main').getByRole('link', { name: 'Volver al menú', exact: true }))
+  await expect(
+    page.getByRole('main').getByLabel('Email o nombre de productor', { exact: true }),
+  ).toBeFocused()
   await page.waitForTimeout(300)
   await expect(page).toHaveURL('/entrar')
 })
@@ -1043,17 +1074,15 @@ test.describe('1920 × 1080', () => {
 test.describe('390 × 844', () => {
   test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
 
-  test('RD-VIS-02 e: en móvil, el panel de la autenticación queda anclado al pie, encima de la barra', async ({
+  test('RD-VIS-02 e: en móvil, el panel de la autenticación sigue al logo y su primer campo se ve sin desplazar', async ({
     page,
   }) => {
     await open(page, '/entrar', 'Entrar')
     await settle(page)
-    const box = await boxes(page, { title: 'main [data-title-piece]', panel: PANEL })
-    const gap = box.bar.top - box.panel.bottom
-    expect(gap, `${gap} px entre el panel y la barra`).toBeGreaterThanOrEqual(0)
-    expect(gap, `${gap} px entre el panel y la barra`).toBeLessThanOrEqual(24)
-    // El logo, entre el título y el panel (no pegado arriba con el hueco debajo).
-    expect(box.panel.top - box.title.bottom).toBeGreaterThanOrEqual(48)
+    const box = await boxes(page, { title: 'main [data-title-piece]', panel: PANEL, field: 'main input' })
+    // El logo, entre el título y el panel; el formulario empieza en la primera vista.
+    expect(box.title.bottom).toBeLessThanOrEqual(box.panel.top)
+    expect(box.field.bottom, 'primer campo sobre la barra').toBeLessThanOrEqual(box.bar.top)
   })
 
   test('RD-VIS-02 e / §3.8.11: en móvil, el subtítulo de la 404 va con el titular, antes del pad, y se ve sin desplazar', async ({
@@ -1250,28 +1279,23 @@ for (const viewport of [
       { path: '/entrar', heading: 'Entrar' },
       { path: '/registro', heading: 'Crear cuenta' },
     ])
-      test(`RD-VIS-02 e / §3.8.14: en ${path}, el panel acaba sobre la barra y «Volver al menú» se ve entero con su anillo, sin desplazar (G4)`, async ({
+      test(`RD-VIS-02 e / §3.8.14: en ${path}, el primer campo se ve sin desplazar y «Volver al menú», al pie del formulario, se alcanza desplazando y se ve entero (G4)`, async ({
         page,
       }) => {
         await open(page, path, heading)
         await settle(page)
-        const box = await boxes(page, {
-          title: 'main [data-title-piece]',
-          panel: PANEL,
-          back: 'main a[href="/"]',
-        })
-        expect(
-          box.panel.bottom,
-          `panel hasta ${box.panel.bottom}, barra en ${box.bar.top}`,
-        ).toBeLessThanOrEqual(box.bar.top)
-        // El anillo del foco: 4 px de hueco y 3 de trazo.
-        expect(box.back.bottom + 7, 'anillo de «Volver al menú»').toBeLessThanOrEqual(box.bar.top)
-        // El logo, entre la cabeza y el panel.
+        const box = await boxes(page, { title: 'main [data-title-piece]', panel: PANEL, field: 'main input' })
+        // El logo, entre la cabeza y el panel; el primer campo, en la primera vista.
         expect(box.title.bottom).toBeLessThanOrEqual(box.panel.top)
-        await expect(page.getByRole('main').getByRole('link', { name: 'Volver al menú' })).toBeInViewport({
-          ratio: 1,
-        })
+        expect(
+          box.field.bottom,
+          `primer campo hasta ${box.field.bottom}, barra en ${box.bar.top}`,
+        ).toBeLessThanOrEqual(box.bar.top)
         expect(await page.evaluate(() => scrollY)).toBe(0)
+        // El formulario no cabe sobre la barra: la salida se alcanza desplazando y se ve entera.
+        const back = page.getByRole('main').getByRole('link', { name: 'Volver al menú' })
+        await back.scrollIntoViewIfNeeded()
+        await expect(back).toBeInViewport({ ratio: 1 })
       })
   })
 }

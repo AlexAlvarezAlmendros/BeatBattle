@@ -15,6 +15,7 @@ import { type LogStream, loggerOptions } from './lib/logger'
 import { emailPrefsRoutes } from './modules/emailPrefs/routes'
 import { healthRoutes } from './modules/health/routes'
 import { createHealthService } from './modules/health/service'
+import { meRoutes } from './modules/me/routes'
 import { createCloudinaryStorage } from './modules/storage/cloudinary'
 import { storageSpikeRoutes } from './modules/storage/routes'
 import { unsubscribeRoutes } from './modules/unsubscribe/routes'
@@ -102,6 +103,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   healthRoutes(app, createHealthService({ db }))
   unsubscribeRoutes(app, { db, secret: config.mail.unsubscribeSecret, newId })
   emailPrefsRoutes(app, { db, secret: config.auth.secret, newId })
+  meRoutes(app, { db })
   // Spike de Cloudinary (tarea 1.7): solo fuera de producción.
   if (config.env !== 'production')
     storageSpikeRoutes(app, config.storage ? createCloudinaryStorage(config.storage) : null, {

@@ -50,3 +50,156 @@
     width: calc(100% - var(--bb-space-12));
   }
 }
+
+/* ── Formularios de cuenta (tarea 2.15): campos en el panel opaco, avisos y enlaces ───────────────── */
+.panel {
+  display: grid;
+  /* Una columna que puede encogerse: el texto de un botón no estira el panel. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-6);
+}
+
+.form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-4);
+}
+
+/* Nada del formulario estira el panel: los elementos de la rejilla pueden encogerse. */
+.form > * {
+  min-width: 0;
+}
+
+.lead {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-md);
+  line-height: var(--bb-leading-body);
+}
+
+.note {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  line-height: var(--bb-leading-body);
+}
+
+.choices {
+  display: grid;
+  gap: var(--bb-space-3);
+  /* Un `fieldset` mide por defecto lo que su contenido más ancho (`min-content`) y desbordaba el panel. */
+  min-inline-size: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.legend {
+  padding: 0;
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.legendHelp {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  line-height: var(--bb-leading-body);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-2);
+}
+
+.legal {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  line-height: var(--bb-leading-body);
+}
+
+.legal a,
+.links a,
+.inlineAction {
+  color: var(--bb-white);
+  font-weight: var(--bb-weight-bold);
+  text-decoration: underline;
+  text-underline-offset: var(--bb-space-1);
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--bb-space-3);
+  font-size: var(--bb-fs-sm);
+}
+
+.links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bb-target);
+}
+
+.inlineAction {
+  min-height: var(--bb-target);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bb-black);
+  font: inherit;
+  cursor: pointer;
+}
+
+.social {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-3);
+  padding-top: var(--bb-space-4);
+  border-top: var(--bb-stroke-hair) solid var(--bb-line);
+}
+
+/* Aviso de papel (§3.2 «Estados»): blanco con texto negro (21:1) e icono. */
+.paper {
+  display: flex;
+  gap: var(--bb-space-3);
+  padding: var(--bb-space-3) var(--bb-space-4);
+  background: var(--bb-white);
+  color: var(--bb-black);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-semibold);
+  line-height: var(--bb-leading-body);
+}
+
+.paperIcon {
+  flex: none;
+  width: var(--bb-space-5);
+  height: var(--bb-space-5);
+}
+
+.done {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--bb-space-2);
+  color: var(--bb-white);
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-semibold);
+  line-height: var(--bb-leading-body);
+}
+
+.doneIcon {
+  flex: none;
+  width: var(--bb-space-5);
+  height: var(--bb-space-5);
+}
+
+.strength {
+  display: grid;
+  gap: var(--bb-space-1);
+}
+
+.strengthWarning {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-xs);
+}

@@ -164,6 +164,9 @@ versión hasta que se mezcle la PR nueva de `feat/f0-fundaciones` con el redise�
   `battle.otherpeople.es`; los emails salen de una dirección del **Google Workspace de `otherpeople.es`**
   (cupo de ~1.900 al día, `From` del dominio; el DNS del sello se revisa antes del primer envío real y
   cualquier cambio en él se confirma); Google y Discord como proveedores sociales.
+- 2026-10-08 — **La dirección es `contacto@otherpeople.es`** (decisión del usuario, guía v0.6.31). Riesgo
+  anotado: comparte cupo diario si la web del sello también envía desde ella. Confirmados además la
+  creación de las apps OAuth de Google y Discord y las subidas de avatares de prueba a Cloudinary.
 
 ## Decisiones abiertas
 
