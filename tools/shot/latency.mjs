@@ -7,6 +7,7 @@
 // Necesita el servidor de desarrollo (`window.__bbAudio`).
 //
 // Uso: node tools/shot/latency.mjs [url=http://localhost:5173/dev/escenario] [clics=20] [--headed] [--cpu=4]
+//      [--hint=interactive|balanced|<segundos>]
 // Salida: una línea JSON con la mediana y el p95 de cada parte y del total, y el dispositivo de salida.
 import { chromium } from '@playwright/test'
 
@@ -27,6 +28,19 @@ const page = await browser.newPage({ viewport: { width: 1280, height: 800 } })
 if (opt.cpu) {
   const cdp = await page.context().newCDPSession(page)
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: Number(opt.cpu) })
+}
+// `--hint=interactive|balanced|playback|<segundos>` fuerza el `latencyHint` del contexto, para comparar
+// configuraciones con la misma salida del sistema.
+if (opt.hint) {
+  const hint = Number.isNaN(Number(opt.hint)) ? opt.hint : Number(opt.hint)
+  await page.addInitScript((latencyHint) => {
+    const Native = window.AudioContext
+    window.AudioContext = class extends Native {
+      constructor(options = {}) {
+        super({ ...options, latencyHint })
+      }
+    }
+  }, hint)
 }
 await page.addInitScript(() => {
   window.__latency = []
@@ -81,6 +95,8 @@ console.log(
     handlerMs: stats(samples.map((s) => s.handler)),
     baseMs: stats(samples.map((s) => s.base)),
     outputMs: stats(samples.map((s) => s.output)),
+    // La parte de la app (`RD-SND-05`: < 10 ms): del evento a que el bloque sale del contexto.
+    appMs: stats(samples.map((s) => s.handler + s.base)),
     totalMs: stats(samples.map((s) => s.handler + s.base + s.output)),
     sink,
   }),

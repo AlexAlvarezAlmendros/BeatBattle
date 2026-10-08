@@ -4,6 +4,7 @@ import { useSound } from '../../../app/layout/soundStore'
 import { audio } from '../../../audio/engine'
 import { t } from '../../../i18n'
 import { type MatchMediaController, mockMatchMedia } from '../../../ui/hooks/mockMatchMedia'
+import { useShortcuts } from '../../../ui/shortcuts'
 import type { MenuModel } from './model'
 import { TitleGate } from './TitleGate'
 import { markTitleSeen, shouldShowTitle, TITLE_KEY, TITLE_SEEN_KEY } from './titleGate'
@@ -116,6 +117,23 @@ describe('pantalla de título (§3.8.1, 1.13)', () => {
     expect(useSound.getState().enabled).toBe(true)
     expect(phase()).toBe('title')
     expect(onDone).not.toHaveBeenCalled()
+  })
+
+  it('RNF-A11Y-08: con los atajos de una tecla apagados, M no cambia el sonido y S entra como otra tecla', () => {
+    useShortcuts.setState({ enabled: false })
+    try {
+      const onDone = vi.fn()
+      render(<TitleGate model={MODEL} onDone={onDone} />)
+      act(() => vi.advanceTimersByTime(1200))
+      fireEvent.keyDown(gate(), { key: 'm' })
+      expect(useSound.getState().enabled).toBe(true)
+      expect(phase()).toBe('title')
+      fireEvent.keyDown(gate(), { key: 's' })
+      expect(useSound.getState().enabled).toBe(true)
+      expect(play).toHaveBeenCalledWith('ui.enter')
+    } finally {
+      useShortcuts.setState({ enabled: true })
+    }
   })
 
   it('un clic o un toque en cualquier sitio entra', () => {

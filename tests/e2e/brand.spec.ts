@@ -104,6 +104,48 @@ for (const { path, heading, viewport } of SCREENS) {
   })
 }
 
+/**
+ * (a) con la arena en *shader* (tarea 1.12): las capturas de arriba van con «reducir movimiento», que deja
+ * la arena estática; aquí `bb:stage` = `on` y la calidad alta encienden el Escenario (la trama de la cuña
+ * en WebGL, §3.5) y se mide lo mismo. Sin WebGL se salta: es el caso estático de arriba.
+ */
+const STAGE_SCREENS = [
+  { path: '/', heading: 'Beat Battle', viewport: { width: 1440, height: 900 } },
+  { path: '/dev/menu', heading: 'Beat Battle', viewport: { width: 1440, height: 900 } },
+  { path: '/dev/menu', heading: 'Beat Battle', viewport: { width: 390, height: 844 } },
+  { path: '/semana/2026-41', heading: 'Semana', viewport: { width: 1440, height: 900 } },
+  { path: '/jurado', heading: 'Modo Jurado', viewport: { width: 1440, height: 900 } },
+  { path: '/como-funciona', heading: 'Cómo se juega', viewport: { width: 1440, height: 900 } },
+]
+
+for (const { path, heading, viewport } of STAGE_SCREENS) {
+  test(`RD-VIS-02 a: ${path} a ${viewport.width}×${viewport.height} con la arena en shader usa solo la paleta y es ≥ 60 % negro`, async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('bb:stage', 'on')
+      window.localStorage.setItem('bb:quality', 'alta')
+    })
+    await page.setViewportSize(viewport)
+    await page.goto(path)
+    await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toHaveText(heading)
+    const webgl = await page.evaluate(() => {
+      const canvas = document.createElement('canvas')
+      return (canvas.getContext('webgl2') ?? canvas.getContext('webgl')) !== null
+    })
+    test.skip(!webgl, 'sin WebGL: se queda la arena estática')
+    await expect(page.locator('[data-stage-live]')).toBeAttached({ timeout: 20_000 })
+    await settle(page)
+    const stats = await measure(page, await page.screenshot())
+    const outside = stats.outside / stats.pixels
+    const dark = stats.dark / stats.pixels
+    const summary = `fuera ${(outside * 100).toFixed(3)} % · negro ${(dark * 100).toFixed(1)} % · ${stats.samples.join(' ')}`
+    test.info().annotations.push({ type: 'paleta', description: summary })
+    expect(outside, summary).toBeLessThanOrEqual(0.001)
+    expect(dark, summary).toBeGreaterThanOrEqual(0.6)
+  })
+}
+
 for (const { path, heading } of ROUTES) {
   test(`RD-VIS-02 b / RF-OTP-01: la firma del sello se ve en ${path}`, async ({ page }) => {
     await page.goto(path)

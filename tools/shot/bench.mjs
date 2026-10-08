@@ -17,7 +17,7 @@
 //                           play o abrir una ceremonia para medir el peor caso
 //   --shot=salida.png       captura al terminar
 //   --headed                con ventana visible
-// Salida: una línea JSON con { frames, fps, p99ms, worstMs, longFrames, drawCallsMax, drawCallsAvg,
+// Salida: una línea JSON con { frames, fps, p99ms, worstMs, longFrames, slow, drawCallsMax, drawCallsAvg,
 // stageFps, quality, renderer }. `fps` es el ritmo de `requestAnimationFrame` (lo que da la página);
 // `stageFps`, los fotogramas que pinta de verdad el Escenario (`window.__bbStage.frames`, solo con el
 // servidor de desarrollo), que va a su ritmo: 60 como mucho con algo animándose, 30 la trama sola, nada quieto (`renderer` es la GPU que ve WebGL: así se distingue la GPU real de SwiftShader).
@@ -102,12 +102,15 @@ const res = await page.evaluate(async (secs) => {
   const stageStart = window.__bbStage?.frames ?? null
   const times = []
   const draws = []
+  const at = []
   let last = performance.now()
+  const start = last
   const end = last + secs * 1000
   window.__benchDraws = 0
   await new Promise((resolve) => {
     const step = (t) => {
       times.push(t - last)
+      at.push(t - start)
       draws.push(window.__benchDraws)
       window.__benchDraws = 0
       last = t
@@ -119,6 +122,7 @@ const res = await page.evaluate(async (secs) => {
   // El primer intervalo incluye el tiempo hasta el primer fotograma: no cuenta.
   times.shift()
   draws.shift()
+  at.shift()
   const stageEnd = window.__bbStage?.frames ?? null
   const sorted = [...times].sort((a, b) => a - b)
   const avg = times.reduce((a, b) => a + b, 0) / times.length
@@ -129,6 +133,11 @@ const res = await page.evaluate(async (secs) => {
     p99ms: Math.round(sorted[Math.max(0, Math.ceil(sorted.length * 0.99) - 1)] * 10) / 10,
     worstMs: Math.round(sorted.at(-1) * 10) / 10,
     longFrames: times.filter((t) => t > 33.4).length,
+    // Cuándo cae cada fotograma lento (> 20 ms), en segundos desde que empieza a medir: un tropiezo al
+    // principio es calentamiento; uno periódico, trabajo de la escena.
+    slow: times
+      .map((ms, i) => ({ s: Math.round(at[i] / 100) / 10, ms: Math.round(ms * 10) / 10 }))
+      .filter(({ ms }) => ms > 20),
     drawCallsMax: Math.max(0, ...draws),
     drawCallsAvg: Math.round((draws.reduce((a, b) => a + b, 0) / Math.max(1, draws.length)) * 10) / 10,
     stageFps: stageStart === null ? null : Math.round(((stageEnd - stageStart) / secs) * 10) / 10,

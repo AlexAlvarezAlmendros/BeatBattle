@@ -52,3 +52,55 @@ Lectura:
   **`RD-SND-05` (< 30 ms en escritorio) no se cumple en esta máquina**. Falta medir en macOS y Windows, cuya
   salida suele ser de ~10 ms.
 - Sin ventana (*headless*) la salida es falsa y los tiempos no valen: no se usan.
+
+## Comparación de `latencyHint` y criterio nuevo (tarea 1.12, 2026-10-08)
+
+Decisión del usuario: **la mínima latencia posible**, con `RD-SND-05` reformulado (guía v0.6.19): la parte
+de la app < 10 ms de mediana (p95 < 15 ms) y la salida del sistema medida aparte. La medida de la 1.11
+comparaba `interactive` y `0` en momentos distintos, y PipeWire había cambiado de salida entre una y otra
+(24 → 40 ms): por eso `0` parecía peor en el total. Ahora `latency.mjs --hint=` fuerza el `latencyHint` y
+se intercalan las opciones, cuatro rondas de 25 clics cada una (`latencia-hints.jsonl`):
+
+| `latencyHint` | Latencia base | Salida (mediana, p95) | Total (mediana) |
+|---|---|---|---|
+| **`0`** (el del motor con puntero fino) | **2,7 ms** | 24 ms (40); 40 ms (48) en la ronda 4 | **27,3 ms** en 3 de 4 rondas; 43,4 en la 4 |
+| `0.005` | 10,7 ms | 24 ms (40) | 35,2–35,5 ms |
+| `0.01` | 10,7 ms | 24 ms (40) | 35,2 ms |
+| `interactive` | 10,7 ms | 24 ms (40) | 35,3 ms |
+| `balanced` | 10,0 ms | 24–32 ms (40–48) | 34,6–42,7 ms |
+
+Lectura:
+
+- `latencyHint: 0` es la mejor opción: le quita 8 ms a la base y la salida es la misma con todas. Con
+  PipeWire a 24 ms, el total es de **27 ms**.
+- La salida la decide PipeWire (*quantum* de 1024 a 48 kHz por defecto, entre 32 y 2048 según las demás
+  aplicaciones): pasa de 24 a 40 ms sin que la app cambie nada. En el portátil de pruebas se puede bajar
+  con `pw-metadata -n settings 0 clock.force-quantum 256`, pero eso es del sistema, no de la app.
+- Con el criterio nuevo (`appMs`, tres medidas de 30 clics con el motor tal cual): mediana **3,3–3,5 ms**
+  y p95 de 4,1–4,4 ms (10,1 ms en una ronda con tres agentes del jurado usando la CPU a la vez). Cumple.
+- El motor ya estaba en el mínimo de su parte: efectos en `currentTime` sin esperas, `ui.press` con ataque
+  de 1 ms y el contexto nunca suspendido (`engine.test.ts`, `RD-SND-05`).
+
+## 1080p y peor fotograma (criterio 1 del GO, tarea 1.12)
+
+El criterio 1 del plan pide ≥ 60 fps y un peor fotograma < 25 ms a 1080p. `bench.mjs` a 1920 × 1080, con
+calidad alta y ventana (10 s por medida; `slow` dice en qué segundo cae cada fotograma de más de 20 ms):
+
+| Página | Medidas | fps | p99 | Peor fotograma |
+|---|---|---|---|---|
+| `/dev/escenario?banco` (arena, vinilo y 4.000 partículas), dpr 1 | 12 | 59,7–60 | 16,8 ms | 24,1–44,2 ms |
+| `/dev/escenario?banco`, dpr 2 | 1 | 60 | 16,8 ms | 16,8 ms |
+| `/dev/escenario` (arena y vinilo, sin ráfagas) | 4 | 59,7–59,9 | 16,8 ms | 33,3–43,7 ms |
+| `/dev/menu` quieto (el Escenario no pinta) | 3 | 59,9–60 | 16,8 ms | 16,8–33,4 ms |
+
+Lectura:
+
+- El fotograma lento es **uno suelto, a un segundo cualquiera** (1,2 s, 4,3 s, 5 s, 7 s…), seguido de dos de
+  ~25 ms que recuperan el ritmo. Sale también **con el menú quieto**, sin el Escenario pintando, y sin
+  partículas.
+- Una traza de Chrome (`devtools.timeline`, `v8.gc`, `gpu`; 48.240 eventos) durante una medida con un
+  fotograma de 27 ms: la tarea más larga del hilo principal de la página es de **1,7 ms**; en la GPU, 1,4 ms;
+  en el navegador, 2,7 ms. Ninguna recogida de basura pasa de 0,7 ms. Lo que se pierde no es trabajo de
+  Chrome: es el vsync del compositor del sistema (Wayland).
+- **Cumple en lo que depende de la app:** 60 fps, p99 de 16,8 ms y tareas de 2 ms como mucho. El peor
+  fotograma de > 25 ms lo pone el sistema cada pocos segundos, también con la página quieta.

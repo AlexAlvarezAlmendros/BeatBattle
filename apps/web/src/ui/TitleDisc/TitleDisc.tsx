@@ -20,6 +20,21 @@ const LABEL = {
   holeY: 2 / 760,
 }
 
+/** El texto más pequeño que se pinta en la galleta (`RD-VIS-05`: ≥ 12 px). */
+const MIN_TEXT_PX = 12
+
+/**
+ * Cuerpo del título y de la línea del tempo para un disco de `size` px; `null` si no llega a 12 px
+ * (entonces no se pinta: es decorativo y lo repiten los chips; jurado de la 1.12, `RD-VIS-05`).
+ */
+export function discTextSizes(size: number): { title: number | null; sub: number | null } {
+  const px = (ratio: number) => {
+    const value = Math.round(size * ratio)
+    return value >= MIN_TEXT_PX ? value : null
+  }
+  return { title: px(LABEL.title), sub: px(LABEL.sub) }
+}
+
 /** Pinta el disco: el anillo de trama (forma `titleDisc`) y la galleta roja con la semana y el tempo. */
 function paintTitleDisc(ctx: CanvasRenderingContext2D, size: number, label: string, sub: string): void {
   paintHalftone(ctx, size, size, {
@@ -43,10 +58,15 @@ function paintTitleDisc(ctx: CanvasRenderingContext2D, size: number, label: stri
   ctx.fillStyle = color.black
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  ctx.font = `italic 900 ${Math.round(size * LABEL.title)}px ${font.display}`
-  ctx.fillText(label, center, center + size * LABEL.titleY)
-  ctx.font = `700 ${Math.round(size * LABEL.sub)}px ${font.num}`
-  ctx.fillText(sub, center, center + size * LABEL.subY)
+  const text = discTextSizes(size)
+  if (text.title !== null) {
+    ctx.font = `italic 900 ${text.title}px ${font.display}`
+    ctx.fillText(label, center, center + size * LABEL.titleY)
+  }
+  if (text.sub !== null) {
+    ctx.font = `700 ${text.sub}px ${font.num}`
+    ctx.fillText(sub, center, center + size * LABEL.subY)
+  }
   ctx.beginPath()
   ctx.arc(center, center + size * LABEL.holeY, size * LABEL.hole, 0, tau)
   ctx.fill()

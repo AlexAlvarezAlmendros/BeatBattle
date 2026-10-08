@@ -6,9 +6,9 @@ import styles from './OtpSlap.module.css'
 import manifest from './otp-slap.json'
 
 /** Tamaños de la pegatina (§3.1 «La firma»). */
-export type OtpSlapSize = 'title' | 'menu' | 'bar'
+export type OtpSlapSize = 'title' | 'menu' | 'presents' | 'bar'
 
-export const OTP_SLAP_SIZES: readonly OtpSlapSize[] = ['title', 'menu', 'bar']
+export const OTP_SLAP_SIZES: readonly OtpSlapSize[] = ['title', 'menu', 'presents', 'bar']
 
 /** Imágenes generadas por `tools/brand/otp-slap.mjs` (en `public/img`), a 1× y 2×. */
 export const OTP_SLAP = {

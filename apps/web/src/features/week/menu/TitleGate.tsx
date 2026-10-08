@@ -16,7 +16,8 @@ import { Key } from '../../../ui/Key'
 import { Medal } from '../../../ui/Medal'
 import { lockScroll, pushModalLayer, trapTab } from '../../../ui/Modal/focus'
 import { OtpSlapImage } from '../../../ui/OtpSlap'
-import { RoundClock } from '../../../ui/RoundClock'
+import { RoundClock, RoundClockWeek } from '../../../ui/RoundClock'
+import { singleKeyAllowed } from '../../../ui/shortcuts'
 import { Tag } from '../../../ui/Tag'
 import { TitleDisc } from '../../../ui/TitleDisc'
 import { TitleLockup } from '../../../ui/TitleLockup'
@@ -112,8 +113,11 @@ export function TitleGate({ model, onDone }: { model: MenuModel; onDone: () => v
       if (root.current && trapTab(root.current, event.shiftKey)) event.preventDefault()
       return
     }
+    // M (sonido) y S (sin sonido) son atajos de una tecla: con ellos apagados (`RNF-A11Y-08`, WCAG 2.1.4),
+    // M no hace nada y S entra como cualquier otra tecla.
+    const shortcuts = singleKeyAllowed()
     if (event.key === 'm' || event.key === 'M') {
-      if (!event.ctrlKey && !event.metaKey && !event.altKey) toggleSound()
+      if (shortcuts && !event.ctrlKey && !event.metaKey && !event.altKey) toggleSound()
       return
     }
     if (KEYS_THAT_STAY.has(event.key) || event.ctrlKey || event.metaKey || event.altKey) return
@@ -122,7 +126,7 @@ export function TitleGate({ model, onDone }: { model: MenuModel; onDone: () => v
     if ((event.key === 'Enter' || event.key === ' ') && target !== start.current && target.closest('button'))
       return
     event.preventDefault()
-    enter(event.key === 's' || event.key === 'S')
+    enter(shortcuts && (event.key === 's' || event.key === 'S'))
   }
 
   const discSub = week
@@ -185,7 +189,7 @@ export function TitleGate({ model, onDone }: { model: MenuModel; onDone: () => v
         </div>
 
         <div className={styles.presentsRow}>
-          <OtpSlapImage size="bar" />
+          <OtpSlapImage size="presents" />
           <span className={styles.presents}>{t('home.gate.presents')}</span>
         </div>
 
@@ -206,9 +210,12 @@ export function TitleGate({ model, onDone }: { model: MenuModel; onDone: () => v
             onClick={() => enter(false)}
           >
             <Cursor />
-            <span className={cx(styles.tri, styles.triLeft)} aria-hidden="true" />
-            {t('home.gate.start')}
-            <span className={styles.tri} aria-hidden="true" />
+            {/* Respira el texto, no el botón: el cursor de foco no se apaga (`RNF-A11Y-01`). */}
+            <span className={styles.startText}>
+              <span className={cx(styles.tri, styles.triLeft)} aria-hidden="true" />
+              {t('home.gate.start')}
+              <span className={styles.tri} aria-hidden="true" />
+            </span>
           </button>
           <p id={hintId} className={styles.hint}>
             <span>{t('home.gate.hint')}</span>
@@ -229,7 +236,7 @@ export function TitleGate({ model, onDone }: { model: MenuModel; onDone: () => v
         )}
 
         {model.champion && (
-          <p className={styles.champion}>
+          <p className={styles.champion} data-title-champion="">
             <Medal place={1} className={styles.medal} />
             <span className={styles.championLabel}>{t('home.gate.champion')}</span>
             <b className={styles.championName}>{model.champion.producer}</b>
@@ -244,11 +251,20 @@ export function TitleGate({ model, onDone }: { model: MenuModel; onDone: () => v
         )}
 
         {week && (
-          <Frame as="aside" cut="lg" className={styles.bill} aria-labelledby={`${titleId}-bill`}>
+          <Frame
+            as="aside"
+            cut="lg"
+            className={styles.bill}
+            aria-labelledby={`${titleId}-bill`}
+            data-title-bill=""
+          >
             <span className={styles.billTag}>
               <Tag tone="red">{t('home.gate.inPlay')}</Tag>
             </span>
-            <span className="bb-label">{t('home.gate.billKicker', { number: week.number })}</span>
+            <span className="bb-label">
+              {t('home.gate.billKickerBefore')} <b className={styles.billNumber}>{week.number}</b>{' '}
+              {t('home.gate.billKickerAfter')}
+            </span>
             <h2 id={`${titleId}-bill`} className={cx('bb-display', styles.billTitle)}>
               {week.title}
             </h2>
@@ -259,19 +275,13 @@ export function TitleGate({ model, onDone }: { model: MenuModel; onDone: () => v
             </div>
             <div className={styles.billClock}>
               <div className={styles.billRow}>
-                <div>
-                  <RoundClock
-                    variant="inline"
-                    target={week.closesAt}
-                    label={t('home.gate.closes')}
-                    week={week.weekBar}
-                  />
-                </div>
+                <RoundClock variant="bill" target={week.closesAt} label={t('home.gate.closes')} />
                 <span className={styles.billEntries}>
                   <b>{week.entries}</b>
                   {t('home.gate.inBattle')}
                 </span>
               </div>
+              <RoundClockWeek week={week.weekBar} className={styles.billWeek} />
             </div>
           </Frame>
         )}

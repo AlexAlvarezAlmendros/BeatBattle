@@ -87,23 +87,44 @@
 }
 
 .slash {
+  /*
+   * El pie de la diagonal nunca entra en la columna del título (que acaba hacia los 790 px desde 1280 px
+   * de ancho): en una ventana baja (1280 × 720) el botón queda más abajo y la diagonal lo cortaba (jurado
+   * de la 1.12, `RD-VIS-05`). A 1440 × 900 manda el 53 % de la maqueta.
+   */
+  --slash-floor: calc(var(--bb-space-16) * 12.35);
   position: absolute;
   inset: 0;
 }
 
 .slashRed {
   background: var(--bb-red);
-  clip-path: polygon(71% 0, 74.4% 0, 56.4% 100%, 53% 100%);
+  clip-path: polygon(
+    71% 0,
+    74.4% 0,
+    max(56.4%, calc(var(--slash-floor) + 3.4%)) 100%,
+    max(53%, var(--slash-floor)) 100%
+  );
 }
 
 .slashBlack {
   background: var(--bb-black);
-  clip-path: polygon(74.4% 0, 75.4% 0, 57.4% 100%, 56.4% 100%);
+  clip-path: polygon(
+    74.4% 0,
+    75.4% 0,
+    max(57.4%, calc(var(--slash-floor) + 4.4%)) 100%,
+    max(56.4%, calc(var(--slash-floor) + 3.4%)) 100%
+  );
 }
 
 .slashWhite {
   background: var(--bb-white);
-  clip-path: polygon(75.4% 0, 75.7% 0, 57.7% 100%, 57.4% 100%);
+  clip-path: polygon(
+    75.4% 0,
+    75.7% 0,
+    max(57.7%, calc(var(--slash-floor) + 4.7%)) 100%,
+    max(57.4%, calc(var(--slash-floor) + 4.4%)) 100%
+  );
 }
 
 .vignette {
@@ -177,7 +198,11 @@
   display: flex;
   align-items: center;
   gap: var(--bb-space-3);
+  width: fit-content;
   margin: var(--bb-space-8) 0 0 calc(var(--bb-space-16) * 1.625);
+  /* Como el campeón: el texto nunca sobre los rayos (`RD-VIS-05`, jurado de la 1.12). */
+  padding: var(--bb-space-1) var(--bb-space-3) var(--bb-space-1) var(--bb-space-1);
+  background: var(--bb-scrim);
 }
 
 .title {
@@ -218,7 +243,7 @@
   gap: var(--bb-space-4);
   padding: var(--bb-space-2) var(--bb-space-3);
   border: 0;
-  background: transparent;
+  background: var(--bb-scrim);
   color: var(--bb-white);
   font-family: var(--bb-font-display);
   /* 40 px en escritorio (maqueta): el 2xl (32) × 1,25. */
@@ -230,6 +255,12 @@
   text-shadow: var(--bb-shadow-hard);
   text-transform: uppercase;
   cursor: pointer;
+}
+
+.startText {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-4);
   animation: bb-gate-breathe var(--bb-loop-breathe) var(--bb-ease-in-out) infinite;
 }
 
@@ -256,7 +287,10 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--bb-space-2) var(--bb-space-5);
+  width: fit-content;
   margin-left: var(--bb-space-9);
+  padding-inline: var(--bb-space-3);
+  background: var(--bb-scrim);
   color: var(--bb-text-2);
   font-size: var(--bb-fs-sm);
 }
@@ -349,6 +383,14 @@
   gap: var(--bb-space-4);
 }
 
+.billNumber {
+  color: var(--bb-red);
+}
+
+.billWeek {
+  margin-top: var(--bb-space-3);
+}
+
 .billEntries {
   color: var(--bb-text-2);
   font-size: var(--bb-fs-xs);
@@ -379,6 +421,13 @@
   text-transform: uppercase;
 }
 
+/* «Crédito 01» en caja mixta y en Oxanium, como el crédito de la barra del menú (maqueta `00-titulo`). */
+.credit {
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+  text-transform: none;
+}
+
 .credit em {
   color: var(--bb-red);
   font-style: normal;
@@ -393,8 +442,13 @@
   display: none;
 }
 
-/* ── Móvil y ventana estrecha: una columna ──────────────────────────────────────────────── */
-@media (max-width: 960px) {
+/*
+ * ── Móvil y ventana de menos de 1280 px: una columna ─────────────────────────────────────────
+ * Con el cartel EN JUEGO a la derecha, la columna del título (que acaba hacia los 760 px) y el campeón
+ * (700 px) solo caben desde 1280 px: entre 961 y 1279 (un iPad apaisado, un portátil con zoom del 125 %)
+ * el cartel tapaba «Entrar sin sonido» (jurado de la 1.12; `title.spec.ts`).
+ */
+@media (max-width: 1279px) {
   /* Sin diagonal ni disco de fondo: cruzarían el texto de la columna (`RD-VIS-05`). */
   .disc,
   .slash {
@@ -427,7 +481,8 @@
   }
 
   .title {
-    width: calc(100% - 2 * var(--bb-gutter));
+    /* En una ventana de tableta, no más ancho que en escritorio (880 px). */
+    width: min(calc(100% - 2 * var(--bb-gutter)), calc(var(--bb-space-16) * 13.75));
     padding-left: var(--bb-gutter);
   }
 
@@ -473,14 +528,14 @@
   .gate,
   .gate[data-phase="title"] .logo,
   .bootSlap,
-  .startButton {
+  .startText {
     animation: none;
     transition: none;
   }
 }
 
 :global(:root[data-motion="reduced"]) .gate[data-phase="title"] .logo,
-:global(:root[data-motion="reduced"]) .startButton,
-:global(:root[data-loops="paused"]) .startButton {
+:global(:root[data-motion="reduced"]) .startText,
+:global(:root[data-loops="paused"]) .startText {
   animation: none;
 }

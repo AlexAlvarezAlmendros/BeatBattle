@@ -32,6 +32,11 @@
   width: min(calc(104px * var(--lockup-scale, 1)), 120px);
 }
 
+/* «[OTP.] PRESENTA» en la pantalla de título: 64 px, como la maqueta `00-titulo` (44 en móvil). */
+.presents {
+  width: 64px;
+}
+
 .bar {
   width: auto;
 }
@@ -45,6 +50,10 @@
   .title,
   .menu {
     width: 62px;
+  }
+
+  .presents {
+    width: 44px;
   }
 
   .bar img {

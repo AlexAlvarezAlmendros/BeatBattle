@@ -62,7 +62,8 @@ export function ListenSpikePage() {
     const element = player.current
     if (!streamUrl || !element) return
     audio.unlock()
-    return audio.attachElement(element)
+    // Un ritmo de prueba, no una entrada: la trama puede leerlo.
+    return audio.attachElement(element, { blind: false })
   }, [streamUrl])
 
   const generate = async () => {

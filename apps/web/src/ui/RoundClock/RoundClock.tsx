@@ -37,11 +37,13 @@ export interface RoundClockProps {
   /** La barra de la semana; sin ella, solo los dígitos. */
   week?: WeekBar
   /**
-   * `hud` (la caja del centro del HUD) o `inline` (una fila, dentro de la tarjeta de la semana en móvil).
+   * `hud` (la caja del centro del HUD), `inline` (una fila, dentro de la tarjeta de la semana en móvil) o
+   * `bill` (el cartel EN JUEGO de la pantalla de título: el rótulo encima y los dígitos grandes, sin marco;
+   * la barra de la semana va aparte, con `RoundClockWeek`, debajo de la fila del cartel).
    * En línea, la fecha absoluta (`when`) solo se ve con teclado y ratón: en un móvil táctil la tarjeta va
    * plegada como en la maqueta; en una ventana estrecha o ampliada, no se pierde (WCAG 1.4.10).
    */
-  variant?: 'hud' | 'inline'
+  variant?: 'hud' | 'inline' | 'bill'
   /** Se llama una vez al llegar a cero. */
   onEnd?: () => void
   className?: string
@@ -138,6 +140,15 @@ export function RoundClock({
         {announcement}
       </p>
     </Frame>
+  )
+}
+
+/** La barra de la semana suelta, con los días L–D (el cartel de la pantalla de título). */
+export function RoundClockWeek({ week, className }: { week: WeekBar; className?: string }) {
+  return (
+    <div className={className}>
+      <WeekSegments week={week} labels />
+    </div>
   )
 }
 

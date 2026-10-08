@@ -29,8 +29,8 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 | # | Fase | Estado | Plan | Hito |
 |---|------|--------|------|------|
 | 0 | Fundaciones | ✅ Cerrada (2026-10-04, con la dirección «Arena»; PR nueva pendiente de revisión) | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes de la arena (guía v0.6 §3); marco de juego y menú principal navegables con teclado; prueba de marca y de juego (`RD-VIS-02`) |
-| 1 | Spike de sensación y audio | 🔄 En curso (1.1–1.11 y 1.13 hechas; 1.12, el cierre, lista) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio; efectos < 30 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
-| 2 | Cuentas y base de email | 🔒 Bloqueada (F0, GO de F1) | — (se crea al llegar) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, preferencias, consentimientos y bajas |
+| 1 | Spike de sensación y audio | ✅ Cerrada con **GO** (2026-10-08) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio (emulado); efectos con la parte de la app < 10 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
+| 2 | Cuentas y base de email | ⬜ Lista (GO de F1 el 2026-10-08; antes, las decisiones de dominio, Gmail y proveedores) | — (se crea al llegar) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, preferencias, consentimientos y bajas |
 | 3 | Semanas y samples | 🔒 Bloqueada (F2) | — | 3 semanas programadas; cambio de semana en la frontera con reloj simulado; email del drop (también sin cuenta) |
 | 4 | Participar | 🔒 Bloqueada (F3) | — | WAV de 60 MB por trozos con BPM, tonalidad y sonoridad medida; recibo por email |
 | 5 | Escuchar y votar | 🔒 Bloqueada (F4) | — | Todas las reglas `RF-VOTE-*` en verde; Modo Jurado con teclado; recordatorio y llamada al jurado |
@@ -43,9 +43,10 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 
 ## Foco actual
 
-**Fase 1, spike GO/NO-GO** ([plan 01](plans/01-spike-sensacion-audio.md), replanificado para la Arena):
-1.1 (la arena en *shader*), 1.2 (sonda y calidad), 1.3 (vistas y partículas), 1.4 (motor de audio), 1.5 (estrellas), 1.6 (reactividad), 1.9 (motor de análisis), 1.10 (onda y sonoridad), 1.11 (banco, con Android emulado) y 1.13 (pantalla de título) están hechas;
-1.7 (Cloudinary, cuenta propia) y 1.8 (ffmpeg en Vercel: **GO**, 3,7 s en frío para 52 MB) están hechas. Queda la 1.12, el informe GO/NO-GO con el jurado visual.
+**Fase 1 cerrada con GO** el 2026-10-08 ([plan 01](plans/01-spike-sensacion-audio.md), informe en el plan):
+la capa de juego va a 60 fps, los efectos con la mínima latencia de la app (3,3 ms), Cloudinary con
+analizador y ffmpeg en Vercel funcionan. Siguiente: la **Fase 2** (cuentas y base de email), que necesita
+antes cerrar el dominio, la cuenta de Gmail para enviar y los proveedores sociales (decisiones abiertas).
 
 La **Fase 0** se cerró el 2026-10-04 con la dirección de arte «Arena» (tareas 0.21–0.28; guía v0.6.8;
 acta del jurado en `docs/planning/evidence/f0/arena/jurado.md`). La PR #1 se mezcló el 2026-10-04 con el
@@ -147,6 +148,18 @@ versión hasta que se mezcle la PR nueva de `feat/f0-fundaciones` con el redise�
 - 2026-10-07 — **Cuenta de Cloudinary propia de BeatBattle** (decisión del usuario): compartir la del
   sello arriesgaba su cuota y las descargas de su tienda. Guía v0.6.17 (§4.8.1).
 
+- 2026-10-08 — **Latencia de los efectos** (decisión del usuario, `RD-SND-05` reformulado en la guía
+  v0.6.19): **la mínima posible**. Se exige la parte de la app (< 10 ms de mediana) y la salida del sistema
+  se mide aparte, porque la app no la controla (PipeWire, 24–40 ms en el portátil). El motor ya está en el
+  mínimo: `latencyHint: 0` con puntero fino, efectos en `currentTime`, ataque de 1 ms en `ui.press` y el
+  contexto nunca suspendido.
+
+- 2026-10-08 — **Android emulado para el GO** (decisión del usuario): sin dispositivo, `RNF-PERF-03` se
+  cierra con la emulación (CPU ×4); con un Android real cuando lo haya.
+
+- 2026-10-08 — **GO de la Fase 1** (tarea 1.12): los ocho criterios del plan 01 se cumplen; el informe y
+  sus evidencias están en el plan.
+
 ## Decisiones abiertas
 
 Cada una tiene un valor por defecto que la guía ya asume (§7).
@@ -160,8 +173,6 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 | Premios | Sin premio material; visibilidad y Elección del sello | Antes de la beta | Con premios, revisar bases y fiscalidad |
 | Origen y licencia de los samples | Del sello o de sus productores, con licencia escrita | Antes de F3 | — |
 | Nombre de marca | «Beat Battle · un juego de Other People» | F0 (0.24) | Logo, lockup «by [OTP.]» y textos |
-| Latencia de efectos en Linux (`RD-SND-05`) | La parte de la app es de ~4 ms; la salida del sistema (PipeWire, 24–48 ms) deja el total en 35–51 ms en el portátil | GO/NO-GO de la Fase 1 | Opciones: medir en macOS/Windows y aceptar Linux como excepción, o reformular el criterio como «latencia propia < 10 ms + la del sistema medida aparte». Evidencia en `evidence/f1/banco/` |
-| Rendimiento en un Android real (`RNF-PERF-03`) | Emulado (CPU ×4, GPU del portátil): 60 fps | GO/NO-GO de la Fase 1 | Sin dispositivo, por decisión del usuario; la emulación no reproduce una GPU móvil |
 | Móviles de 781 a ~840 px de alto (360×800, 375×812, 393×786) | El menú con todos los datos se desplaza 35–94 px (la placa enfocada siempre se ve) | Antes de la beta | Opciones: subir el móvil bajo hasta ~840 px (cabe, con una franja vacía de ~180 px a 375×812) o un paso intermedio con el logo en una línea y la tarjeta sin plegar. Acta de la 0.28 |
 | Dorado como excepción | No: medallas y semana dorada en la paleta | Antes de F6 | Si se aprueba, `#f5c542` solo para el 1.º, la carta de campeón y la semana dorada (guía §3.2, §7) |
 | Pase de la carta | Cinta propia con física | F7 | Alternativa: expositor giratorio si se percibe como pieza del sello (guía §3.4.4) |
@@ -173,6 +184,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-08 | F1 | **Fase 1 cerrada con GO** (1.12): `RD-SND-05` reformulado y Android emulado (decisiones del usuario), jurado visual de tres lentes con sus hallazgos corregidos, nuevo `RD-MOT-06` (guía v0.6.19). La Fase 2 pasa a lista. |
 | 2026-10-07 | F1 | 1.8 hecha: ffmpeg cabe en una función de Vercel y mide 52 MB en 3,7 s en frío (guía v0.6.18). La 1.12 pasa a lista. |
 | 2026-10-07 | F1 | 1.7 hecha con la cuenta propia de Cloudinary: subida por trozos, derivado MP3 en ~7 s para 4 min, entrega firmada con CORS (guía v0.6.17). |
 | 2026-10-07 | F1 | 1.13 hecha: la pantalla de título «PULSA PARA EMPEZAR» como la maqueta, con la extrusión del logo capa a capa pendiente (guía v0.6.16). |
