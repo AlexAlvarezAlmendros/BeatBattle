@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.41 · 2026-10-09 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.42 · 2026-10-09 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -325,7 +325,7 @@ semana («usa solo el primer compás», «nada de 808»; no puntúa, da un logro
 
 **Descarga.** Botón «Pillar el sample». La primera vez de cada semana abre el modal de **bases de
 la semana** (resumen de 5 puntos + enlace a las bases completas, Anexo A) con casilla obligatoria.
-Aceptadas, se genera una URL firmada de descarga con 1 h de validez (`fl_attachment`, como en Other
+Se descarga mientras la semana está `open` (con los envíos abiertos; en `voting` ya no sirve para nada, §2.1). Aceptadas, se genera una URL firmada de descarga con 1 h de validez (`fl_attachment`, como en Other
 People) y empieza la descarga del WAV original; si hay stems, segundo botón para el zip.
 
 **Contenido del sample.** Lo carga el admin (§2.14) con: audio original (WAV o AIFF, ≤ 100 MB), zip
@@ -339,7 +339,7 @@ extra y 8 *chops* (marcas de inicio y fin) para el kit sonoro de la semana (§3.
 | `RF-DROP-07` | La URL de descarga caduca en 1 h y fuerza la descarga como adjunto | La URL contiene firma y `fl_attachment`; pasada 1 h, Cloudinary responde 401 |
 | `RF-DROP-08` | Se registra la primera descarga y el número de descargas por usuario y semana | `sample_download` con `first_at` y `count`; el recuento total aparece en el panel de admin |
 | `RF-DROP-09` | El sample se puede escuchar sin cuenta (versión de escucha en MP3) | Visitante → el reproductor suena; la descarga pide entrar |
-| `RF-DROP-10` | Cuenta atrás hasta el cierre de envíos (fase `open`) o de votos (fase `voting`) | Con el reloj simulado a 1 h del cierre, el reloj de ronda muestra `00:00:59:59` y pasa a modo «última hora» (§3.3, §3.6) |
+| `RF-DROP-10` | Cuenta atrás hasta el cierre de envíos (fase `open`) o de votos (fase `voting`) | Con el reloj simulado a 59 min 59 s del cierre, el reloj de ronda muestra `00:00:59:59` y está en modo «última hora»; a 1 h y 1 s, `00:01:00:01` y sin ese modo (§3.3, §3.6; `LAST_HOUR_MS`, Anexo B) |
 | `RF-DROP-11` | La primera visita de cada usuario a una semana nueva muestra la **revelación del drop** (§3.8.2), una sola vez y repetible desde la ficha | Segunda visita → no se repite; «Ver otra vez» la reproduce |
 
 ### 2.5 Participar: subir una entrada
@@ -2197,8 +2197,8 @@ tests de propiedades.
 
 | Módulo | Funciones principales |
 |---|---|
-| `calendar` | `scheduleWeek(lunesLocal, tz)` → instantes UTC de las fronteras; `isoWeekLabel`; `seasonOf(semana)` |
-| `phase` | `phaseOf(semana, now)`; `canSubmit`, `canVote`, `canDownload` |
+| `calendar` | `scheduleWeek(lunesLocal, tz)` → instantes UTC de las fronteras; `mondayOf(instante)`, `nextMonday`; `isoWeekLabel` («2026-W41»), `weekSlug` («2026-w41») y `mondayOfSlug`; `seasonOf(lunes)` («2026-T4») |
+| `phase` | `phaseOf(semana, now)`; `canSubmit`, `canVote`, `canDownload` (solo en `open`); `countdownOf(semana, now)` → cierre, lo que falta y «hora loca» |
 | `listen` | `listenThresholdMs(duracionMs)` |
 | `scoring` | `bayes(votos, m, C)`; `mean`; `median`; `histogram` |
 | `ranking` | `rank(entradas, votos) → Result[]` con desempates, ex aequo y elegibilidad de podio |
@@ -3243,6 +3243,7 @@ no aplica: BeatBattle deja de copiar la web del sello (§3.1).
 |---|---|
 | Cierre de envíos | Domingo 20:00 (Madrid) |
 | Cierre de votos | Domingo 23:59:59 (Madrid); se guarda como el instante exclusivo del lunes 00:00:00.000 (`VOTING_CLOSE_EXCLUSIVE_AT`), así la ventana de solo votación dura 4 h justas; `VOTING_CLOSE_DISPLAY_AT` es solo para mostrar |
+| Hora loca | La última hora antes de cada cierre (`LAST_HOUR_MS` = 3 600 000, incluida la marca de 1 h justa): el reloj de ronda late (§3.3, §3.6) |
 | Umbral de escucha | 30 s (`LISTEN_THRESHOLD_MS`; la entrada entera si dura menos) |
 | Peso del previo bayesiano `C` | 5 |
 | Votos mínimos para el podio | 3 |
@@ -3536,6 +3537,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-09 | 0.6.42 | **Calendario y fases** (tareas 3.1 y 3.2, §4.5, Anexo B): `calendar` y `phase` en `packages/rules`. Se añade al Anexo B la «hora loca» (`LAST_HOUR_MS`, 1 h, incluida la marca justa) y §2.4 precisa que el sample se descarga solo en `open`. El criterio de `RF-DROP-10` se precisa: con 59 min 59 s por delante, `00:00:59:59` en modo «última hora»; con 1 h y 1 s, `00:01:00:01` sin él. |
 | 2026-10-09 | 0.6.41 | **Lista blanca en local con Gmail** (tarea 2.28, §4.19.1): con las credenciales del Workspace en `.env`, el servidor de desarrollo solo envía a `MAIL_PREVIEW_ALLOWLIST` (vacía: nada). |
 | 2026-10-09 | 0.6.40 | **Efectos de la interfaz** (tarea 2.27, §3.7.3, Anexo D): las definiciones de `ui.move`, `ui.toggle`, `ui.open`/`ui.close`, `ui.error`, `ui.success` y `nav.page` (las tonales, en la tonalidad de la semana), calibradas al nivel del Anexo D en el render offline, y dónde suenan; tope de 12 por segundo para `ui.move`. |
 | 2026-10-09 | 0.6.39 | **Google y Discord** (tarea 2.22, §4.9): unión de cuentas solo con el email verificado por el proveedor y la cuenta local verificada (sin `trustedProviders`), nombre de productor para las altas sociales y el aviso en `/entrar` cuando no se puede unir. |
