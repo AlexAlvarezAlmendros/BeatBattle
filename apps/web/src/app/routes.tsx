@@ -77,6 +77,7 @@ const accountSettings = () => import('../features/settings/AccountSettings')
 const emailSettings = () => import('../features/settings/EmailSettings')
 const sessionsSettings = () => import('../features/settings/SessionsSettings')
 const profileSettings = () => import('../features/settings/ProfileSettings')
+const privacySettings = () => import('../features/settings/PrivacySettings')
 const auth = () => import('../features/auth/AuthPages')
 
 export interface CreateRoutesOptions {
@@ -208,7 +209,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
                 { path: 'perfil', lazy: page(profileSettings, (m) => m.ProfileSettingsPage) },
                 { path: 'emails', lazy: page(emailSettings, (m) => m.EmailSettingsPage) },
                 { path: 'sesiones', lazy: page(sessionsSettings, (m) => m.SessionsSettingsPage) },
-                { path: 'privacidad', lazy: page(settings, (m) => m.PrivacySettingsPage) },
+                { path: 'privacidad', lazy: page(privacySettings, (m) => m.PrivacySettingsPage) },
                 { path: 'accesibilidad', lazy: page(settings, (m) => m.AccessibilitySettingsPage) },
               ],
             },

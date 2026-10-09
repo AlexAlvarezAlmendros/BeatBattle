@@ -29,3 +29,9 @@ export const ActiveSessionSchema = z.object({
 })
 export type ActiveSession = z.infer<typeof ActiveSessionSchema>
 export const ActiveSessionListSchema = z.array(ActiveSessionSchema)
+
+/**
+ * `DELETE /api/me` (tarea 2.21, `RF-PRF-04`): confirmación escrita, el nombre de productor tal cual (sin
+ * distinguir mayúsculas).
+ */
+export const AccountDeleteSchema = z.object({ confirm: z.string().trim().min(1).max(40) }).strict()

@@ -13,6 +13,7 @@ import { type Clock, systemClock } from './lib/clock'
 import { uuidv7 } from './lib/ids'
 import { type LogStream, loggerOptions } from './lib/logger'
 import { createRateLimiter } from './lib/rateLimit'
+import { accountRoutes } from './modules/account/routes'
 import { emailPrefsRoutes } from './modules/emailPrefs/routes'
 import { healthRoutes } from './modules/health/routes'
 import { createHealthService } from './modules/health/service'
@@ -21,6 +22,7 @@ import { sessionsRoutes } from './modules/me/sessions'
 import { profileRoutes } from './modules/profile/routes'
 import { createCloudinaryStorage, type ImageStorage } from './modules/storage/cloudinary'
 import { storageSpikeRoutes } from './modules/storage/routes'
+import { testingRoutes } from './modules/testing/routes'
 import { unsubscribeRoutes } from './modules/unsubscribe/routes'
 import { uploadsRoutes } from './modules/uploads/routes'
 import { registerClock } from './plugins/clock'
@@ -116,6 +118,9 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   meRoutes(app, { db, images })
   profileRoutes(app, { db, images, rateLimiter })
   uploadsRoutes(app, { images, rateLimiter, newId })
+  accountRoutes(app, { db, images, emails, rateLimiter })
+  // El buzón de los E2E: solo en test, nunca en desarrollo ni en producción.
+  if (config.env === 'test') testingRoutes(app, mailer)
   // Spike de Cloudinary (tarea 1.7): solo fuera de producción.
   if (config.env !== 'production')
     storageSpikeRoutes(app, storage, {

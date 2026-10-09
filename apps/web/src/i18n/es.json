@@ -433,7 +433,24 @@
     },
     "privacy": {
       "title": "Privacidad",
-      "summary": "Aquí irán la exportación de tus datos y el borrado de la cuenta."
+      "summary": "Descarga todo lo que guardamos de ti o borra tu cuenta.",
+      "require": "Entra para descargar tus datos o borrar tu cuenta.",
+      "export": {
+        "title": "Tus datos",
+        "help": "Un archivo JSON con tu cuenta, tu perfil, tus sesiones, tus preferencias y permisos de email, y tus entradas, votos, XP y logros cuando los tengas.",
+        "download": "Descargar mis datos"
+      },
+      "delete": {
+        "title": "Borrar la cuenta",
+        "gone": "Se borran tu perfil, tu avatar, tus sesiones, tus preferencias y permisos, y tus votos y entradas de semanas sin sellar con sus audios.",
+        "kept": "Las entradas de semanas ya selladas siguen en su clasificación como «Productor eliminado», sin tu nombre. De tu email solo queda una huella cifrada si te diste de baja o rebotó.",
+        "confirmLabel": "Escribe tu nombre de productor para confirmar",
+        "confirmHint": "Tu nombre es {name}. No se puede deshacer.",
+        "submit": "Borrar mi cuenta",
+        "mismatch": "No coincide con tu nombre de productor.",
+        "done": "Cuenta borrada. Te hemos enviado un último email.",
+        "error": "No se ha podido borrar la cuenta. Vuelve a probar en un momento."
+      }
     },
     "accessibility": {
       "title": "Accesibilidad",
