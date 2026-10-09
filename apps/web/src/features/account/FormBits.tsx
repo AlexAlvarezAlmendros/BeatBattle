@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { audio } from '../../audio/engine'
 import { t } from '../../i18n'
 import { Icon } from '../../ui/Icon'
 import { Meter } from '../../ui/Meter'
@@ -23,6 +24,10 @@ export function PaperNotice({
   action?: ReactNode
   live?: boolean
 }) {
+  // Un aviso que sale (región viva) es un error de lo que se acaba de hacer: suena (`ui.error`, Anexo E).
+  useEffect(() => {
+    if (live) audio.play('ui.error')
+  }, [live])
   return (
     <div className={styles.paper} role={live ? 'alert' : undefined}>
       <Icon name="alert" className={styles.paperIcon} />
@@ -42,7 +47,10 @@ export function PaperNotice({
  */
 export function Done({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLParagraphElement>(null)
-  useEffect(() => ref.current?.focus(), [])
+  useEffect(() => {
+    ref.current?.focus()
+    audio.play('ui.success')
+  }, [])
   return (
     <p ref={ref} className={styles.done} tabIndex={-1} data-focus-target="done">
       <Icon name="check" className={styles.doneIcon} />
@@ -92,5 +100,11 @@ export function StrengthMeter({ password, userInputs }: { password: string; user
  * Va al fotograma siguiente, cuando React ya ha pintado los errores.
  */
 export function focusFirstInvalid(form: HTMLFormElement | null): void {
-  requestAnimationFrame(() => form?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus())
+  requestAnimationFrame(() => {
+    const field = form?.querySelector<HTMLElement>('[aria-invalid="true"]')
+    if (!field) return
+    field.focus()
+    // Un campo con error también suena (`ui.error`, Anexo E); el equivalente visual es su borde y su motivo.
+    audio.play('ui.error')
+  })
 }

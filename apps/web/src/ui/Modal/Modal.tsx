@@ -12,6 +12,7 @@ import {
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
+import { audio } from '../../audio/engine'
 import { t } from '../../i18n'
 import { Button } from '../Button'
 import { frameAttributes } from '../Frame'
@@ -145,7 +146,7 @@ export interface ModalProps {
  * - Se pueden apilar (un modal abierto desde otro): solo el de arriba atiende Tab, Esc y el foco.
  * - Entra con la diagonal: se desliza desde la izquierda con fundido (`--bb-dur-base`); con «reducir
  *   movimiento», solo fundido (Anexo E).
- * - El sonido (`ui.open`) lo cablea la Fase 1.
+ * - Suena al abrir (`ui.open`) y al cerrar (`ui.close`), Anexo E (tarea 2.27); nada al montarse cerrado.
  */
 export function Modal({
   open,
@@ -159,6 +160,14 @@ export function Modal({
 }: ModalProps) {
   // Dónde estaba el foco antes de abrir (lo anota la capa justo antes de mover el foco al diálogo).
   const returnFocus = useRef<HTMLElement | null>(null)
+
+  // El soplo de ruido al abrir y al cerrar (Anexo E), solo cuando cambia: montarlo cerrado no suena.
+  const wasOpen = useRef(open)
+  useEffect(() => {
+    if (open === wasOpen.current) return
+    wasOpen.current = open
+    audio.play(open ? 'ui.open' : 'ui.close')
+  }, [open])
 
   // Al cerrar, el foco vuelve en el acto, sin esperar a la animación de salida. Tiene que ser en la
   // fase de diseño: en la limpieza de un efecto (fase de mutación), React devolvería el foco al

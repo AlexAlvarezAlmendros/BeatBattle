@@ -1,3 +1,4 @@
+import type { SfxId } from '@beatbattle/audio'
 import {
   type FocusEvent,
   type KeyboardEvent,
@@ -8,6 +9,7 @@ import {
   useRef,
   useState,
 } from 'react'
+import { audio } from '../../audio/engine'
 import { activatesNatively, clampIndex, isCharacterKey, isEditableTarget, typeaheadMatch } from './roving'
 
 /**
@@ -66,6 +68,13 @@ export interface RovingCoreOptions {
   onMove?: (index: number) => void
   /** Intro, espacio, clic o toque sobre una opción habilitada. */
   onActivate?: (index: number) => void
+  /**
+   * Efecto al activar una opción (Anexo E): `ui.press` en los menús (por defecto) y `ui.toggle` en las
+   * pestañas; `null`, sin sonido (cuando lo pone otra pieza).
+   */
+  activateSfx?: SfxId | null
+  /** Efecto al mover el cursor (Anexo E): `ui.move` por defecto; `null` donde mover ya elige (pestañas). */
+  moveSfx?: SfxId | null
 }
 
 export interface MoveOptions {
@@ -84,6 +93,11 @@ export function useRovingCore<E extends HTMLElement>(options: RovingCoreOptions)
   // Las opciones cambian en cada render (funciones en línea): los manejadores leen siempre las últimas.
   const latest = useRef(options)
   latest.current = options
+  // Estable: lee las opciones del momento por `latest`.
+  const playMove = useCallback(() => {
+    const sfx = latest.current.moveSfx === undefined ? 'ui.move' : latest.current.moveSfx
+    if (sfx) audio.play(sfx)
+  }, [])
 
   const moveTo = useCallback((index: number, { focus = true, preventScroll = false }: MoveOptions = {}) => {
     const { count: total, onMove } = latest.current
@@ -115,6 +129,8 @@ export function useRovingCore<E extends HTMLElement>(options: RovingCoreOptions)
       const next = navigate(event.key, current)
       if (next !== null) {
         event.preventDefault()
+        // El tic del cursor (`ui.move`, Anexo E), solo si de verdad cambia de opción.
+        if (next !== current) playMove()
         moveTo(next)
         return
       }
@@ -135,10 +151,11 @@ export function useRovingCore<E extends HTMLElement>(options: RovingCoreOptions)
         // Sin coincidencia, la tecla sigue su camino (las teclas globales de la pantalla, como M).
         if (match === null) return
         event.preventDefault()
+        if (match !== current) playMove()
         moveTo(match)
       }
     },
-    [moveTo],
+    [moveTo, playMove],
   )
 
   const getItemBaseProps = (index: number, handlers: ItemHandlers<E> = {}): RovingItemBaseProps<E> => {
@@ -170,6 +187,7 @@ export function useRovingCore<E extends HTMLElement>(options: RovingCoreOptions)
         const focused = document.activeElement
         const owns =
           !focused || focused === document.body || elements.current.some((element) => element === focused)
+        playMove()
         moveTo(index, { focus: owns, preventScroll: true })
       },
       onClick: (event) => {
@@ -179,6 +197,8 @@ export function useRovingCore<E extends HTMLElement>(options: RovingCoreOptions)
           event.preventDefault()
           return
         }
+        const sfx = latest.current.activateSfx === undefined ? 'ui.press' : latest.current.activateSfx
+        if (sfx) audio.play(sfx)
         latest.current.onActivate?.(index)
       },
     }

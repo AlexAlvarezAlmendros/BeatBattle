@@ -1480,7 +1480,9 @@
       "signUp": {
         "google": "Crear cuenta con Google",
         "discord": "Crear cuenta con Discord"
-      }
+      },
+      "notLinked": "Ya hay una cuenta con ese email y no podemos unirla: el proveedor no ha confirmado el email o tu cuenta aún no está verificada. Entra con tu email y tu contraseña.",
+      "failed": "No se ha podido entrar con ese proveedor. Vuelve a probar o entra con tu email."
     },
     "signIn": {
       "summary": "Vuelve a la batalla con tu email o tu nombre de productor.",

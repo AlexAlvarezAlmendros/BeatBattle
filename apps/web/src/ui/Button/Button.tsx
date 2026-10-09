@@ -12,6 +12,7 @@ import {
   useRef,
 } from 'react'
 import { Link, type To } from 'react-router'
+import { audio } from '../../audio/engine'
 import { t } from '../../i18n'
 import { announce, ensureAnnouncer } from '../announce'
 import { Cursor } from '../Cursor'
@@ -99,6 +100,7 @@ export type ButtonProps = BaseProps & (AsButton | AsRouterLink | AsAnchor)
 type AnyHandlers = {
   onClick?: (event: MouseEvent<HTMLElement>) => void
   onPointerDown?: (event: PointerEvent<HTMLElement>) => void
+  onPointerEnter?: (event: PointerEvent<HTMLElement>) => void
   onPointerUp?: (event: PointerEvent<HTMLElement>) => void
   onPointerLeave?: (event: PointerEvent<HTMLElement>) => void
   onPointerCancel?: (event: PointerEvent<HTMLElement>) => void
@@ -200,6 +202,12 @@ export function Button(props: ButtonProps) {
   }
 
   const eventProps = {
+    // Sonidos de la interfaz (Anexo E): `ui.hover` al pasar el ratón (el motor lo limita a 8 por segundo)
+    // y `ui.press` al pulsar; nada si el botón está deshabilitado o cargando.
+    onPointerEnter: (event: PointerEvent<HTMLElement>) => {
+      handlers.onPointerEnter?.(event)
+      if (!inert && event.pointerType === 'mouse') audio.play('ui.hover')
+    },
     onPointerDown: (event: PointerEvent<HTMLElement>) => {
       handlers.onPointerDown?.(event)
       if (event.button === 0) squish(true)
@@ -229,6 +237,7 @@ export function Button(props: ButtonProps) {
         event.preventDefault()
         return
       }
+      audio.play('ui.press')
       handlers.onClick?.(event)
     },
   }

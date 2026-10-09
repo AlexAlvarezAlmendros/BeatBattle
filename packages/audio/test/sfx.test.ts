@@ -13,6 +13,13 @@ const ANNEX_D: Record<string, { duration: number; levelDb: number; jitter: numbe
   'xp.gain': { duration: 0.09, levelDb: -22, jitter: 0 },
   'level.up': { duration: 1.6, levelDb: -8, jitter: 0 },
   'star.vote.5': { duration: 0.6, levelDb: -10, jitter: 0 },
+  'ui.move': { duration: 0.02, levelDb: -28, jitter: 0 },
+  'ui.toggle': { duration: 0.06, levelDb: -20, jitter: 0 },
+  'ui.open': { duration: 0.22, levelDb: -20, jitter: 0 },
+  'ui.close': { duration: 0.22, levelDb: -20, jitter: 0 },
+  'ui.error': { duration: 0.28, levelDb: -14, jitter: 0 },
+  'ui.success': { duration: 0.3, levelDb: -16, jitter: 0 },
+  'nav.page': { duration: 0.24, levelDb: -24, jitter: 0 },
 }
 
 describe('catálogo de efectos (Anexo D, 1.4)', () => {
@@ -65,5 +72,17 @@ describe('catálogo de efectos (Anexo D, 1.4)', () => {
     const capped = sfxCatalog(undefined, 50)['xp.gain'].layers[0]?.freq?.[0] ?? 0
     expect(combo).toBeGreaterThan(base)
     expect(capped).toBe(sfxCatalog(undefined, 7)['xp.gain'].layers[0]?.freq?.[0])
+  })
+
+  it('§3.7.1: los efectos de la interfaz con nota van en la tonalidad de la semana', () => {
+    const minor = sfxCatalog({ tonic: 0, mode: 'minor' })
+    const other = sfxCatalog({ tonic: 2, mode: 'minor' })
+    expect(minor['ui.toggle'].layers[0]?.freq?.[0]).not.toBe(other['ui.toggle'].layers[0]?.freq?.[0])
+    expect(minor['ui.error'].layers[0]?.freq?.[0]).not.toBe(other['ui.error'].layers[0]?.freq?.[0])
+    // Segunda menor en el error; quinta en el conmutador.
+    const [a, b] = minor['ui.error'].layers.map((layer) => layer.freq?.[0] ?? 0)
+    expect((b as number) / (a as number)).toBeCloseTo(2 ** (1 / 12))
+    const [c, d] = minor['ui.toggle'].layers.map((layer) => layer.freq?.[0] ?? 0)
+    expect((d as number) / (c as number)).toBeCloseTo(2 ** (7 / 12))
   })
 })

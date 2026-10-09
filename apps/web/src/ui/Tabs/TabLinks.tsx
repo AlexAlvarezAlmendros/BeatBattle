@@ -7,6 +7,7 @@ import {
   useNavigation,
   useNavigationType,
 } from 'react-router'
+import { audio } from '../../audio/engine'
 import { t } from '../../i18n'
 import { Cursor } from '../Cursor'
 import { cx } from '../forceState'
@@ -103,6 +104,8 @@ export function TabLinks({
     initialIndex: Math.max(0, current),
     hoverMoves: false,
     navigate: (key, index) => listNavigation(key, index, links.length, { orientation: 'horizontal' }),
+    // Cambiar de sección suena a conmutador (Anexo E: pestañas Q/E, `ui.toggle`).
+    activateSfx: 'ui.toggle',
   })
   const { moveTo } = roving
 
@@ -126,6 +129,7 @@ export function TabLinks({
       const from = Math.max(0, requested.current ?? target)
       const next = (from + (key === 'e' ? 1 : -1) + links.length) % links.length
       requested.current = next
+      audio.play('ui.toggle')
       void navigate(links[next]!.to, inside ? { state: KEEP_TAB_FOCUS } : undefined)
     }
     document.addEventListener('keydown', onKey)
