@@ -293,6 +293,13 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
                     (m) => m.AdminPage,
                   ),
                 },
+                {
+                  path: 'samples/:id',
+                  lazy: page(
+                    () => import('../features/admin/SampleEditorPage'),
+                    (m) => m.SampleEditorPage,
+                  ),
+                },
               ],
             },
             {

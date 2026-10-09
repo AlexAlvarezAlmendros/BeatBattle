@@ -1,0 +1,120 @@
+/*
+ * Panel de administración (§2.14): la misma estética en modo denso. Tablas con filetes, sin efectos ni
+ * animaciones; los huecos del calendario en rojo (`RF-ADM-02`).
+ */
+.panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-8);
+  width: 100%;
+}
+
+.section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-3);
+}
+
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bb-space-3);
+}
+
+.heading {
+  color: var(--bb-red);
+  font-size: var(--bb-fs-md);
+}
+
+.subheading {
+  margin-top: var(--bb-space-3);
+  color: var(--bb-white);
+}
+
+.summary,
+.muted {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: var(--bb-stroke-hair) solid var(--bb-line-strong);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--bb-fs-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--bb-space-2) var(--bb-space-3);
+  border-bottom: var(--bb-stroke-hair) solid var(--bb-line);
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table th {
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.table tr[data-gap] td {
+  background: var(--bb-wine);
+}
+
+.gap {
+  color: var(--bb-white);
+  font-weight: var(--bb-weight-bold);
+  border-left: var(--bb-space-1) solid var(--bb-red);
+  padding-left: var(--bb-space-2);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bb-target);
+  color: var(--bb-white);
+  font-weight: var(--bb-weight-bold);
+  border-bottom: var(--bb-stroke) solid var(--bb-red);
+}
+
+.form {
+  display: grid;
+  gap: var(--bb-space-3);
+  max-width: 48rem;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--bb-space-3);
+}
+
+.select {
+  display: grid;
+  gap: var(--bb-space-1);
+}
+
+.select select {
+  min-height: var(--bb-target);
+  padding: 0 var(--bb-space-3);
+  border: var(--bb-stroke) solid var(--bb-line-strong);
+  background: var(--bb-panel);
+  color: var(--bb-white);
+  font: inherit;
+}
+
+.submit {
+  justify-self: start;
+}
