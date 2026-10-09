@@ -51,7 +51,13 @@ function SocialButtons({ verb }: { verb: 'signIn' | 'signUp' }) {
   const [busy, setBusy] = useState<string | null>(null)
   const go = async (provider: 'google' | 'discord') => {
     setBusy(provider)
-    await authClient.signIn.social({ provider, callbackURL: '/', newUserCallbackURL: paths.welcome() })
+    // Si el proveedor no deja entrar o la cuenta no se puede unir, Better Auth vuelve a `/entrar?error=…`.
+    await authClient.signIn.social({
+      provider,
+      callbackURL: '/',
+      newUserCallbackURL: paths.welcome(),
+      errorCallbackURL: paths.signIn(),
+    })
     setBusy(null)
   }
   return (
@@ -81,6 +87,8 @@ export function SignInPage() {
   const [errors, setErrors] = useState<Errors>({})
   const [busy, setBusy] = useState(false)
   const [resent, setResent] = useState(false)
+  // Vuelta de Google o Discord con un error (`RF-AUTH-05`): la cuenta del mismo email no se ha unido.
+  const socialError = params.get('error')
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
@@ -113,6 +121,13 @@ export function SignInPage() {
       summary={t('account.signIn.summary')}
     >
       <form className={styles.form} onSubmit={submit} noValidate>
+        {socialError && (
+          <PaperNotice>
+            {socialError === 'account_not_linked'
+              ? t('account.social.notLinked')
+              : t('account.social.failed')}
+          </PaperNotice>
+        )}
         <TextField
           label={t('account.fields.identity')}
           autoComplete="username"

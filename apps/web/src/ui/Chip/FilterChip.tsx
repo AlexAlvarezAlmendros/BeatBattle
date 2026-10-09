@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import { audio } from '../../audio/engine'
 import { t } from '../../i18n'
 import { Cursor } from '../Cursor'
 import { frameAttributes } from '../Frame'
@@ -45,7 +46,14 @@ export function FilterChip({
       className={cx(styles.filterChip, variant === 'plate' && styles.plate, className)}
       onClick={(event) => {
         onClick?.(event)
-        if (!event.defaultPrevented) onChange?.(!pressed)
+        if (event.defaultPrevented) return
+        // Conmutador (Anexo E): `ui.toggle`.
+        audio.play('ui.toggle')
+        onChange?.(!pressed)
+      }}
+      onPointerEnter={(event) => {
+        rest.onPointerEnter?.(event)
+        if (event.pointerType === 'mouse') audio.play('ui.hover')
       }}
       {...forceStateAttr(state)}
     >

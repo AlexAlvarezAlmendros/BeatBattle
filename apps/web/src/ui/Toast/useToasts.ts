@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { audio } from '../../audio/engine'
 
 export type ToastTone = 'info' | 'success' | 'error'
 
@@ -41,6 +42,9 @@ export const useToasts = create<ToastStore>((set) => ({
     const id = `toast-${sequence}`
     const toast: ToastData = { duration: TOAST_DURATION_MS, ...input, id }
     set((state) => ({ toasts: [...state.toasts, toast].slice(-TOAST_LIMIT) }))
+    // Suena con su tono (Anexo E): los de error y de éxito; el informativo, en silencio.
+    if (toast.tone === 'error') audio.play('ui.error')
+    else if (toast.tone === 'success') audio.play('ui.success')
     return id
   },
   dismiss: (id) => set((state) => ({ toasts: state.toasts.filter((toast) => toast.id !== id) })),

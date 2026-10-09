@@ -15,6 +15,11 @@ import { playSfx } from './synth'
 
 /** Separación mínima entre dos `ui.hover` (s): 8 por segundo como mucho (Anexo D). */
 export const HOVER_MIN_GAP = 1 / 8
+/** Y entre dos `ui.move`, el tic del cursor: 12 por segundo como mucho (Anexo D). */
+export const MOVE_MIN_GAP = 1 / 12
+
+/** Los efectos con tope de frecuencia: los que se disparan al pasar por encima o al recorrer un menú. */
+const MIN_GAP: Partial<Record<SfxId, number>> = { 'ui.hover': HOVER_MIN_GAP, 'ui.move': MOVE_MIN_GAP }
 
 type ContextConstructor = new (options?: AudioContextOptions) => AudioContext
 
@@ -43,7 +48,7 @@ export class AudioEngine {
   private key: Key = DEFAULT_KEY
   private catalog: Record<SfxId, SfxDef> = sfxCatalog(DEFAULT_KEY)
   private muted = false
-  private lastHover = Number.NEGATIVE_INFINITY
+  private lastPlayed = new Map<SfxId, number>()
   private loop: AudioBufferSourceNode | null = null
   private element: HTMLMediaElement | null = null
   /** ¿Es el elemento que suena una entrada sin sellar? (`RD-MOT-06`) */
@@ -189,13 +194,17 @@ export class AudioEngine {
     for (const listener of this.musicListeners) listener(false)
   }
 
-  /** Dispara un efecto. Sin contexto, en silencio o con `ui.hover` demasiado seguido, no hace nada. */
+  /**
+   * Dispara un efecto. Sin contexto (no ha habido ningún gesto), en silencio o con `ui.hover` o `ui.move`
+   * demasiado seguidos, no hace nada.
+   */
   play(id: SfxId, options: { xpCombo?: number } = {}): void {
     const { ctx, mix, bank } = this
     if (!ctx || !mix || !bank || this.muted || ctx.state !== 'running') return
-    if (id === 'ui.hover') {
-      if (ctx.currentTime - this.lastHover < HOVER_MIN_GAP) return
-      this.lastHover = ctx.currentTime
+    const gap = MIN_GAP[id]
+    if (gap !== undefined) {
+      if (ctx.currentTime - (this.lastPlayed.get(id) ?? Number.NEGATIVE_INFINITY) < gap) return
+      this.lastPlayed.set(id, ctx.currentTime)
     }
     const def =
       id === 'xp.gain' && options.xpCombo ? sfxCatalog(this.key, options.xpCombo)[id] : this.catalog[id]

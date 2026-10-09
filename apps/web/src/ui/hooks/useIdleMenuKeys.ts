@@ -1,4 +1,5 @@
 import { type RefObject, useEffect } from 'react'
+import { audio } from '../../audio/engine'
 import { isIdleFocus } from './roving'
 import type { RovingMenu } from './useRovingMenu'
 
@@ -47,6 +48,8 @@ export function useIdleMenuKeys(
       }
       const next =
         event.key === 'Home' ? 0 : event.key === 'End' ? count - 1 : (current + (step ?? 0) + count) % count
+      // El tic del cursor también con el foco en reposo (Anexo E: `ui.move`).
+      if (next !== current) audio.play('ui.move')
       menu.moveTo(next)
     }
     document.addEventListener('keydown', onKeyDown)

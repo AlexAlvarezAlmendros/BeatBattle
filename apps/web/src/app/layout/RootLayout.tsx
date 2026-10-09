@@ -1,5 +1,6 @@
 import { type MouseEvent, useEffect, useRef } from 'react'
 import { Outlet, ScrollRestoration, useLocation, useNavigation, useNavigationType } from 'react-router'
+import { audio } from '../../audio/engine'
 import { useSession } from '../../features/account/session'
 import { t } from '../../i18n'
 import { keepsTabFocus } from '../../ui/Tabs'
@@ -50,6 +51,9 @@ export function RootLayout() {
   )
 }
 
+/** La primera parte de la ruta: `/ajustes/emails` → `ajustes`. */
+const sectionOf = (path: string) => path.split('/')[1] ?? ''
+
 function GameFrame() {
   const mainRef = useRef<HTMLElement>(null)
   const location = useLocation()
@@ -74,6 +78,9 @@ function GameFrame() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: solo al cambiar de pantalla (con el estado de esa navegación)
   useEffect(() => {
     if (previousPathname.current === pathname) return
+    // El barrido de la diagonal al cambiar de pantalla (`nav.page`, Anexo E). Entre secciones de la misma
+    // pantalla (las pestañas de Opciones o de los legales) ya suena el conmutador.
+    if (sectionOf(previousPathname.current) !== sectionOf(pathname)) audio.play('nav.page')
     previousPathname.current = pathname
     // Q/E desde las pestañas: `TabLinks` ya ha llevado el foco a la de la sección nueva.
     if (keepsTabFocus(location.state, navigationType)) return
