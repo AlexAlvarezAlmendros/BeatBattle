@@ -160,7 +160,42 @@
     },
     "week": {
       "title": "Semana",
-      "summary": "Aquí irá la semana «{slug}», en curso o pasada: su sample y sus entradas."
+      "documentTitle": "Semana {number} · {title}",
+      "kicker": "Semana {number} · escenario",
+      "origin": "Origen: {origin}",
+      "listen": "Escuchar el sample «{title}»",
+      "pause": "Pausar el sample «{title}»",
+      "wave": "Forma de onda del sample",
+      "closes": "Cierre de envíos",
+      "votes": "Cierre de votos",
+      "sealed": "Semana sellada",
+      "challenge": "Reto",
+      "challengeNote": "No puntúa: da un logro.",
+      "download": "Pillar el sample",
+      "stems": "Pillar los stems",
+      "signInToDownload": "Entra para descargarlo",
+      "closedReason": "Los envíos de esta semana están cerrados",
+      "unverified": "Verifica tu email para descargar el sample.",
+      "downloading": "Descarga en marcha. El enlace dura 1 hora.",
+      "downloadError": "No hemos podido preparar la descarga. Prueba otra vez.",
+      "license": "Licencia de uso",
+      "replay": "Ver la revelación otra vez",
+      "rules": {
+        "title": "Bases de la semana {number}",
+        "summary": "Antes de pillar el sample, lo esencial de las bases:",
+        "points": {
+          "sample": "Tu beat usa el sample de la semana de forma reconocible; el resto del material es tuyo o libre de derechos.",
+          "license": "El sample solo se usa dentro de la batalla y para difundir tu entrada sin ánimo de lucro.",
+          "rights": "Tu beat sigue siendo tuyo: das al sello permiso para alojarlo, ponerlo en streaming y promocionarlo.",
+          "one": "Una entrada por persona y semana; con voto ciego, el título no dice quién eres.",
+          "fair": "Votos limpios: nada de cuentas múltiples ni acuerdos de voto."
+        },
+        "full": "Leer las bases completas",
+        "accept": "Acepto las bases de la semana {number}",
+        "required": "Marca que aceptas las bases para seguir.",
+        "submit": "Aceptar y descargar",
+        "cancel": "Ahora no"
+      }
     },
     "weekResults": {
       "title": "Resultados",
@@ -1599,5 +1634,10 @@
     "clockWhenVoting": "Envíos cerrados · votos hasta las 23:59",
     "nextDrop": "Cae el {date}",
     "noGenre": "Libre"
+  },
+  "reveal": {
+    "label": "Nuevo escenario: semana {number}",
+    "week": "SEMANA {number}",
+    "skip": "Saltar"
   }
 }
