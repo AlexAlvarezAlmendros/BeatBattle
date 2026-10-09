@@ -59,6 +59,11 @@ export interface ScreenPageProps {
    */
   panelFirst?: boolean
   /**
+   * Sin pieza, el panel ocupa las dos columnas (el panel de admin en modo denso, §2.14: tablas anchas).
+   * Las demás pantallas sin pieza dejan la columna de la cuña vacía a propósito.
+   */
+  wide?: boolean
+  /**
    * Dónde va la pieza en su columna, en escritorio: centrada en el alto del panel (por defecto) o arriba
    * (`start`), alineada con el panel, para las pantallas cuyo panel puede ser mucho más alto que la
    * ventana (las secciones de Opciones que funcionan: su emblema no debe quedar fuera de la vista).
@@ -267,6 +272,7 @@ export function ScreenPage({
   layout = 'interior',
   fill = false,
   panelFirst = false,
+  wide = false,
   pieceAlign = 'center',
   titleMinFontPx,
   titleInHud,
@@ -333,6 +339,7 @@ export function ScreenPage({
       data-layout={layout}
       data-fill={fill || undefined}
       data-panel-first={panelFirst || undefined}
+      data-wide={wide || undefined}
       data-piece-align={pieceAlign === 'start' ? 'start' : undefined}
     >
       <DocumentTitle page={documentTitle ?? undefined} />
