@@ -73,6 +73,7 @@ export const SFX_IDS = [
   'vote.unlocked',
   'xp.gain',
   'level.up',
+  'drop.needle',
 ] as const
 
 export type SfxId = (typeof SFX_IDS)[number]
@@ -316,6 +317,44 @@ export function sfxCatalog(key: Key = DEFAULT_KEY, xpCombo = 0): Record<SfxId, S
           gain: 0.25,
           delay: 0.12,
         }),
+      ],
+    },
+    // La aguja cae (revelación del drop, §3.8.2): un clic seco y un crujido corto de vinilo, chasquidos
+    // sueltos sobre un siseo filtrado. No es tonal: no cambia con la tonalidad de la semana.
+    'drop.needle': {
+      jitter: 0,
+      levelDb: -12,
+      duration: 1,
+      layers: [
+        noise({
+          noise: 'white',
+          filter: { type: 'highpass', freq: at(2500), q: 0.7 },
+          attack: 0.001,
+          decay: 0.02,
+          dur: 0.03,
+          gain: 0.85,
+        }),
+        tone({ freq: [1800, 500], attack: 0.001, decay: 0.03, dur: 0.05, gain: 0.5 }),
+        noise({
+          noise: 'pink',
+          filter: { type: 'bandpass', freq: at(2400), q: 0.8 },
+          attack: 0.05,
+          decay: 0.7,
+          dur: 0.92,
+          gain: 0.2,
+          delay: 0.04,
+        }),
+        ...[0.13, 0.26, 0.4, 0.55, 0.63, 0.79].map((delay) =>
+          noise({
+            noise: 'white',
+            filter: { type: 'highpass', freq: at(4000), q: 0.7 },
+            attack: 0.001,
+            decay: 0.006,
+            dur: 0.012,
+            gain: 0.55,
+            delay,
+          }),
+        ),
       ],
     },
     'vote.locked': {

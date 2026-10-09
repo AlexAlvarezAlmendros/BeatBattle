@@ -109,10 +109,10 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             {
               path: 'semana/:slug',
               handle: handle('public', interior('week', 'pages.week.title')),
-              lazy: page(
-                () => import('../features/week/WeekPage'),
-                (m) => m.WeekPage,
-              ),
+              lazy: async () => {
+                const m = await import('../features/week/WeekPage')
+                return { Component: m.WeekPage, loader: m.weekLoader }
+              },
             },
             {
               path: 'semana/:slug/resultados',

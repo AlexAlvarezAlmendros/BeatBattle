@@ -1,0 +1,155 @@
+/*
+ * Ficha del drop (§2.4, §3.8.14; tarea 3.16): el vinilo-sol en la cuña y el panel con los créditos, los
+ * chips, la onda reproducible, la cuenta atrás, el reto, las acciones y la licencia.
+ */
+.piece {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.vinyl {
+  width: min(100%, 26rem);
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: var(--bb-space-5);
+}
+
+.head {
+  display: grid;
+  gap: var(--bb-space-1);
+}
+
+.title {
+  min-width: 0;
+  overflow-x: clip;
+  overflow-y: visible;
+  color: var(--bb-white);
+  font-size: var(--bb-fs-3xl);
+  text-shadow: var(--bb-shadow-hard);
+  white-space: nowrap;
+}
+
+.credits {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-md);
+  line-height: var(--bb-leading-body);
+}
+
+.origin,
+.note {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-2);
+}
+
+.player {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--bb-space-4);
+}
+
+.wave {
+  min-width: 0;
+}
+
+.time {
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-sm);
+}
+
+.clock {
+  justify-self: start;
+}
+
+.sealed {
+  margin: 0;
+}
+
+.challenge {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-md);
+  line-height: var(--bb-leading-body);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-3);
+}
+
+.replay {
+  justify-self: start;
+}
+
+.license {
+  border-top: var(--bb-stroke-hair) solid var(--bb-line);
+  padding-top: var(--bb-space-3);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+.license summary {
+  min-height: var(--bb-target);
+  display: flex;
+  align-items: center;
+  color: var(--bb-white);
+  cursor: pointer;
+}
+
+/* Modal de las bases. */
+.rulesList {
+  display: grid;
+  gap: var(--bb-space-2);
+  margin: 0 0 var(--bb-space-4);
+  padding-left: var(--bb-space-5);
+  color: var(--bb-white);
+  font-size: var(--bb-fs-md);
+  line-height: var(--bb-leading-body);
+}
+
+.rulesLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bb-target);
+  color: var(--bb-white);
+  font-weight: var(--bb-weight-bold);
+  border-bottom: var(--bb-stroke) solid var(--bb-red);
+}
+
+.rulesCheck {
+  margin-top: var(--bb-space-4);
+}
+
+.rulesError {
+  margin-top: var(--bb-space-2);
+  color: var(--bb-white);
+  font-size: var(--bb-fs-sm);
+}
+
+@media (max-width: 720px) {
+  .title {
+    display: none;
+  }
+
+  .player {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .time {
+    grid-column: 2;
+  }
+}

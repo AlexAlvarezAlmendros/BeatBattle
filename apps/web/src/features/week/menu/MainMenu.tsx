@@ -191,7 +191,16 @@ export function menuEntries({ week, player, lastSealed }: MenuModel): ModeEntry[
  * sigue siendo «Saltar al contenido»); pero si el foco no está en ningún control, las flechas e Intro
  * van al menú, como en una recreativa.
  */
-export function MainMenu({ model, title }: { model: MenuModel; title?: boolean }) {
+export function MainMenu({
+  model,
+  title,
+  afterTitle,
+}: {
+  model: MenuModel
+  title?: boolean
+  /** Lo que se enseña al salir de la pantalla de título (la revelación del drop, §3.8.2). */
+  afterTitle?: ReactNode
+}) {
   // Pantalla de título (§3.8.1, 1.13): la primera vez en la sesión, salvo que esté desactivada.
   const [gate, setGate] = useState(() => title ?? shouldShowTitle())
   const entries = menuEntries(model)
@@ -246,7 +255,7 @@ export function MainMenu({ model, title }: { model: MenuModel; title?: boolean }
       data-week={week ? week.phase : 'empty'}
       data-modes-first={modesFirst || undefined}
     >
-      {gate && <TitleGate model={model} onDone={() => setGate(false)} />}
+      {gate ? <TitleGate model={model} onDone={() => setGate(false)} /> : afterTitle}
       <h1 className="sr-only">{t('pages.home.title')}</h1>
 
       {player && (

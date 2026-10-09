@@ -1,0 +1,149 @@
+/*
+ * Revelación del drop (§3.8.2): capa a toda la pantalla sobre el menú. Los tiempos de cada paso viven en
+ * `REVEAL_TIMELINE` (la línea de tiempo de la ceremonia, §3.6); aquí, solo cómo entra cada pieza.
+ */
+.reveal {
+  position: fixed;
+  inset: 0;
+  z-index: var(--bb-z-ceremony);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  justify-items: center;
+  gap: var(--bb-space-4);
+  padding: var(--bb-space-10) var(--bb-space-6) var(--bb-space-8);
+  cursor: pointer;
+}
+
+.shade {
+  position: absolute;
+  inset: 0;
+  background: var(--bb-black);
+  opacity: 0.88;
+  animation: bb-reveal-fade var(--bb-dur-slow) var(--bb-ease-out) both;
+}
+
+.announcer {
+  position: relative;
+  width: min(100%, 40rem);
+}
+
+.stageArea {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 0;
+}
+
+.vinylDrop {
+  position: relative;
+  width: min(60vmin, 26rem);
+  aspect-ratio: 1;
+  animation: bb-reveal-drop var(--bb-dur-reward) var(--bb-ease-out) both;
+}
+
+.vinyl {
+  width: 100%;
+}
+
+/* La aguja: un brazo blanco que se posa sobre el borde del vinilo. */
+.needle {
+  position: absolute;
+  top: 6%;
+  right: -4%;
+  width: 40%;
+  height: var(--bb-space-2);
+  background: var(--bb-white);
+  transform-origin: 100% 50%;
+  /* Apoyada: el ángulo de la diagonal más el giro de un sello. */
+  rotate: calc(-1 * (var(--bb-split-angle) + var(--bb-tilt-stamp)));
+  animation: bb-reveal-needle var(--bb-dur-slam) var(--bb-ease-snap) both;
+}
+
+.titleBlock {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-3);
+  width: min(100%, 48rem);
+  text-align: center;
+}
+
+.title {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-3xl);
+  line-height: var(--bb-leading-display);
+  text-shadow: var(--bb-shadow-hard);
+  animation: bb-reveal-stamp var(--bb-dur-slam) var(--bb-ease-snap) both;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--bb-space-3);
+}
+
+.chip {
+  min-width: 9ch;
+  padding: var(--bb-space-2) var(--bb-space-4);
+  border: var(--bb-stroke) solid var(--bb-white);
+  background: var(--bb-black);
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-lg);
+  text-align: center;
+}
+
+.chip b {
+  color: var(--bb-white);
+}
+
+.chip[data-spinning] b {
+  color: var(--bb-red);
+}
+
+.skip {
+  position: relative;
+  justify-self: end;
+}
+
+/* Sin movimiento (Anexo E): solo un fundido, con los datos ya fijos. */
+.reveal[data-reduced] .vinylDrop,
+.reveal[data-reduced] .needle,
+.reveal[data-reduced] .title {
+  animation: none;
+}
+
+@keyframes bb-reveal-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes bb-reveal-drop {
+  from {
+    translate: 0 calc(-110vh * var(--bb-motion));
+    rotate: calc(-540deg * var(--bb-motion));
+  }
+}
+
+@keyframes bb-reveal-needle {
+  from {
+    /* Levantada antes de posarse. */
+    rotate: calc(-2 * var(--bb-split-angle) - 3 * var(--bb-tilt-stamp));
+  }
+}
+
+@keyframes bb-reveal-stamp {
+  from {
+    scale: calc(1 + 0.12 * var(--bb-motion));
+    opacity: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .title {
+    font-size: var(--bb-fs-2xl);
+  }
+}

@@ -1,3 +1,4 @@
+import { scheduleWeek } from '@beatbattle/rules'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -31,7 +32,6 @@ const tk = (key: string) => {
 /** Rutas de §2.18 → clave del `<h1>` y título esperado de la pestaña. */
 const PAGES: { path: string; heading: string; title: string }[] = [
   { path: '/', heading: 'pages.home.title', title: documentTitle() },
-  { path: '/semana/2026-41', heading: 'pages.week.title', title: documentTitle(tk('pages.week.title')) },
   {
     path: '/semana/2026-41/resultados',
     heading: 'pages.weekResults.title',
@@ -123,9 +123,53 @@ describe('router (0.10, guía §2.18)', () => {
     vi.unstubAllGlobals()
   })
 
-  it('las páginas con parámetros los reciben', async () => {
-    renderAt('/semana/2026-41')
-    expect(await screen.findByText(/«2026-41»/)).toBeInTheDocument()
+  it('/semana/:slug pinta la ficha del drop con el título del sample (y 404 si no existe)', async () => {
+    const W41 = scheduleWeek({ year: 2026, month: 10, day: 5 })
+    const week = {
+      number: 41,
+      slug: '2026-w41',
+      label: '2026-W41',
+      seasonId: '2026-T4',
+      phase: 'open',
+      ...W41,
+      challenge: null,
+      golden: false,
+      sample: {
+        title: 'Lluvia en Gràcia',
+        credits: 'Other People Records',
+        origin: null,
+        licenseText: 'Uso libre',
+        bpm: 92,
+        musicalKey: 'Dm',
+        genreHint: null,
+        durationMs: 72_000,
+        peaks: btoa('\u0000\u0000'),
+        chops: [],
+        hasStems: false,
+        coverUrl: '/cover',
+        streamUrl: '/stream',
+      },
+      viewer: null,
+    }
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) =>
+        String(input).endsWith('/api/weeks/2026-w41')
+          ? new Response(JSON.stringify({ data: week }), { headers: { 'content-type': 'application/json' } })
+          : new Response(JSON.stringify({ error: { code: 'NOT_FOUND', message: '' } }), {
+              status: 404,
+              headers: { 'content-type': 'application/json' },
+            }),
+      ),
+    )
+    renderAt('/semana/2026-w41')
+    expect(await h1('Lluvia en Gràcia')).toBeInTheDocument()
+    await waitFor(() =>
+      expect(document.title).toBe(
+        documentTitle(t('pages.week.documentTitle', { number: 41, title: 'Lluvia en Gràcia' })),
+      ),
+    )
+    vi.unstubAllGlobals()
   })
 
   it('todas las páginas están dentro del marco: saltar al contenido, HUD, <main id="contenido"> y barra con la firma', async () => {
@@ -176,7 +220,7 @@ describe('router (0.10, guía §2.18)', () => {
     expect(screen.getByRole('main')).toHaveFocus()
   })
 
-  it.each(['/no-existe', '/semana', '/semana/2026-41/otra', '/ajustes/nada', '/admin/nada', '/legal/nada'])(
+  it.each(['/no-existe', '/semana', '/semana/2026-w41/otra', '/ajustes/nada', '/admin/nada', '/legal/nada'])(
     '%s → 404 dentro del marco: «BONUS STAGE» de titular y «Página no encontrada» en la pestaña',
     async (path) => {
       renderAt(path)
