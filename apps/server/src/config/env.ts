@@ -53,6 +53,15 @@ const EnvSchema = z.object({
     .string()
     .regex(/^[a-z0-9][a-z0-9-]*$/, { error: 'solo minúsculas, números y guiones' })
     .default('beatbattle-dev'),
+  /**
+   * Almacenamiento falso en disco (§4.8.6) en esta carpeta, en vez de Cloudinary: E2E y desarrollo sin
+   * red. Prohibido en producción.
+   */
+  BB_FAKE_STORAGE: z.string().optional(),
+  /** ffmpeg para medir el audio (§4.8.4); por defecto, el de `ffmpeg-static`. */
+  FFMPEG_PATH: z.string().optional(),
+  /** Secreto de `/api/cron/tick` (§4.12): Vercel Cron y GitHub Actions lo mandan como `Bearer`. */
+  CRON_SECRET: z.string().min(32, { error: 'debe tener al menos 32 caracteres' }).optional(),
   /** Entorno de Vercel (`production`, `preview`, `development`): las previews también van con NODE_ENV=production. */
   VERCEL_ENV: z.string().optional(),
   /** Email (§4.19.1): Mailpit en local (`smtp://127.0.0.1:1025`); nunca en producción ni en preview. */
@@ -104,6 +113,10 @@ export interface AppConfig {
   trustProxy: boolean
   /** Cloudinary (§4.8.1); `null` sin credenciales (hasta que el entorno las tenga). */
   storage: StorageConfig | null
+  /** Carpeta del almacenamiento falso en disco (`BB_FAKE_STORAGE`); `null` con Cloudinary o sin nada. */
+  fakeStorageDir: string | null
+  /** Secreto de `/api/cron/tick`; sin él la ruta responde 503 (§4.12). */
+  cronSecret: string | null
   /** Email (§4.19.1). */
   mail: MailConfig
   /** Cuentas (§4.9). */
@@ -243,6 +256,12 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
     for (const key of cloudinaryKeys.filter((k) => cleaned[k] === undefined))
       issues.push({ variable: key, message: 'las tres credenciales de Cloudinary van juntas' })
 
+  if (production && cleaned.BB_FAKE_STORAGE !== undefined)
+    issues.push({
+      variable: 'BB_FAKE_STORAGE',
+      message: 'el almacenamiento falso es solo para E2E y desarrollo',
+    })
+
   // Email (§4.19.1).
   const preview = production && cleaned.VERCEL_ENV === 'preview'
   if ((cleaned.GMAIL_USER === undefined) !== (cleaned.GMAIL_APP_PASSWORD === undefined))
@@ -337,6 +356,8 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
             prefix: e.BB_CLOUDINARY_PREFIX,
           }
         : null,
+    fakeStorageDir: e.BB_FAKE_STORAGE ?? null,
+    cronSecret: e.CRON_SECRET ?? null,
     auth: {
       secret: e.BETTER_AUTH_SECRET ?? DEV_AUTH_SECRET,
       secureCookies: production,

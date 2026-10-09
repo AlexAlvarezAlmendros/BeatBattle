@@ -6,6 +6,7 @@ import { createTestDb } from '../src/db/testDb'
 import type { MemoryMailer } from '../src/email/mailer'
 import { type FixedClock, fixedClock } from '../src/lib/clock'
 import type { ImageStorage } from '../src/modules/storage/cloudinary'
+import type { SampleStorage } from '../src/modules/storage/samples'
 
 /** Origen permitido por defecto en tests (el de Vite en local). */
 export const ORIGIN = 'http://localhost:5173'
@@ -43,6 +44,8 @@ export interface MakeAppOptions {
   db?: Db
   /** Imágenes falsas (avatares); por defecto, ninguna. */
   images?: ImageStorage | null
+  /** Samples (almacenamiento falso en disco); por defecto, ninguno. */
+  samples?: SampleStorage | null
 }
 
 export async function makeApp(options: MakeAppOptions = {}): Promise<TestApp> {
@@ -55,6 +58,7 @@ export async function makeApp(options: MakeAppOptions = {}): Promise<TestApp> {
     db,
     clock,
     images: options.images ?? null,
+    samples: options.samples ?? null,
     logStream: { write: (line) => logs.push(line) },
   })
   options.routes?.(app)
