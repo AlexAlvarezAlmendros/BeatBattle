@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.40 · 2026-10-09 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.41 · 2026-10-09 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2967,6 +2967,9 @@ nodemailer con Gmail y contraseña de aplicación, con estas mejoras:
   `@dominio`); fuera de ella, el envío se rechaza. En producción y preview no se admite `SMTP_URL`, el
   `From` tiene que ser la propia dirección del Workspace y `UNSUBSCRIBE_SECRET` es obligatoria; el
   servidor no arranca si falta algo de esto.
+- **Local con Gmail** (tarea 2.28): si `.env` tiene las credenciales del Workspace, el servidor de
+  desarrollo también envía solo a `MAIL_PREVIEW_ALLOWLIST`; sin lista, no sale ningún email (quedan
+  `skipped` con `preview_allowlist`). Con Mailpit no hace falta: nada sale de la máquina.
 - Las campañas se componen y segmentan **en nuestro panel**; Gmail solo transporta.
 
 #### 4.19.2 Entregabilidad con Gmail
@@ -3533,6 +3536,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-09 | 0.6.41 | **Lista blanca en local con Gmail** (tarea 2.28, §4.19.1): con las credenciales del Workspace en `.env`, el servidor de desarrollo solo envía a `MAIL_PREVIEW_ALLOWLIST` (vacía: nada). |
 | 2026-10-09 | 0.6.40 | **Efectos de la interfaz** (tarea 2.27, §3.7.3, Anexo D): las definiciones de `ui.move`, `ui.toggle`, `ui.open`/`ui.close`, `ui.error`, `ui.success` y `nav.page` (las tonales, en la tonalidad de la semana), calibradas al nivel del Anexo D en el render offline, y dónde suenan; tope de 12 por segundo para `ui.move`. |
 | 2026-10-09 | 0.6.39 | **Google y Discord** (tarea 2.22, §4.9): unión de cuentas solo con el email verificado por el proveedor y la cuenta local verificada (sin `trustedProviders`), nombre de productor para las altas sociales y el aviso en `/entrar` cuando no se puede unir. |
 | 2026-10-09 | 0.6.38 | **Jurado visual de la Fase 2** (tarea 2.25, acta en `docs/planning/evidence/f2/jurado/`): placa de opción del chip de filtro (§3.3), botón deshabilitado neutro y etiquetas largas que parten (§3.3), emblema de Opciones arriba y en `sticky` y la carta como pieza de Perfil (§3.8.14), el panel del diseño de título nunca por debajo de 26 rem y la baja con el logo como pieza (§3.8.14), cabecera de los emails con la cuña (§3.8.12), duotono con trama y nombres ajustados a una línea (§3.4.1, §3.4.4). |
