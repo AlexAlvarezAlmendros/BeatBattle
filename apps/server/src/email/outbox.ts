@@ -277,9 +277,12 @@ async function deliver(deps: DrainDeps, mailer: Mailer, row: OutboxRow): Promise
     const rendered = await deps.render(row, { to: recipient.email, unsubscribeUrl })
     const { providerId } = await mailer.send({ id: row.id, to: recipient.email, ...rendered, unsubscribeUrl })
     const sentAt = deps.now()
+    // Una dirección suelta (sin cuenta ni suscripción, p. ej. `account.deleted`) no se guarda más allá del
+    // envío (§4.14): la fila se queda sin dirección ni datos.
+    const scrub = row.toAddress ? { toAddress: null, payload: '{}' } : {}
     await db
       .update(emailOutbox)
-      .set({ status: 'sent', sentAt, providerId, attempts: row.attempts + 1 })
+      .set({ status: 'sent', sentAt, providerId, attempts: row.attempts + 1, ...scrub })
       .where(eq(emailOutbox.id, row.id))
     await bumpStat(db, `kind:${kind}`, 'sent', sentAt)
     return 'sent'

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import type { SettingsSectionKey } from '../../app/paths'
 import { ScreenPage } from '../../app/ScreenPage'
 import { t } from '../../i18n'
+import { frameAttributes } from '../../ui/Frame'
 import { Key } from '../../ui/Key'
 import { SettingsTabs } from './SettingsLayout'
 import styles from './SettingsSection.module.css'
@@ -28,7 +29,12 @@ export function SettingsSection({
       titlePlacement="tabs"
       summary={summary}
       piece={
-        <div className={styles.emblem} aria-hidden="true">
+        <div
+          {...frameAttributes({ cut: 'lg' })}
+          className={styles.emblem}
+          aria-hidden="true"
+          data-settings-emblem=""
+        >
           <span className="bb-label">{t('frame.plates.settings')}</span>
           <span className={`bb-display ${styles.emblemTitle}`}>{title}</span>
           <span className={styles.emblemKeys}>

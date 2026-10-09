@@ -770,7 +770,13 @@ for (const viewport of [
  * 1024 × 768, «TAMAÑO / DE / TEXTO» partía en tres).
  */
 /** Secciones de Opciones que ya funcionan (§3.8.14): su cuña lleva el emblema, no la vista previa. */
-const WORKING_SETTINGS = ['/ajustes/cuenta', '/ajustes/perfil', '/ajustes/emails', '/ajustes/sesiones']
+const WORKING_SETTINGS = [
+  '/ajustes/cuenta',
+  '/ajustes/perfil',
+  '/ajustes/emails',
+  '/ajustes/sesiones',
+  '/ajustes/privacidad',
+]
 
 for (const viewport of [
   { width: 1440, height: 900 },
@@ -995,11 +1001,11 @@ for (const colorScheme of ['dark', 'light'] as const) {
       page,
     }) => {
       await page.emulateMedia({ forcedColors: 'active', colorScheme })
-      // Movimiento: conmutadores «◀ NO ▶»; Privacidad: acciones «Pedir ▸» y «Borrar ▸» (Cuenta y Perfil
-      // ya funcionan).
+      // Movimiento: conmutadores «◀ NO ▶»; Accesibilidad: el de la puerta de entrada (Cuenta, Perfil y
+      // Privacidad, con sus acciones «Cambiar ▸», ya funcionan).
       for (const { path, heading, arrows } of [
         { path: '/ajustes/movimiento', heading: 'Movimiento', arrows: 6 },
-        { path: '/ajustes/privacidad', heading: 'Privacidad', arrows: 2 },
+        { path: '/ajustes/accesibilidad', heading: 'Accesibilidad', arrows: 2 },
       ]) {
         await open(page, path, heading)
         await settle(page)
@@ -1770,13 +1776,14 @@ test.describe('arena tras navegar con movimiento', () => {
         ['/ajustes/sonido', 'Sonido y efectos', '/ajustes/movimiento', 'Movimiento'],
         ['/ajustes/sesiones', 'Sesiones', '/ajustes/privacidad', 'Privacidad'],
       ] as const) {
+        // Las secciones que ya funcionan llevan su emblema en vez del tablero de la vista previa.
         await open(page, from, fromHeading)
         await settle(page)
         await page.keyboard.press('e')
         await expect(page).toHaveURL(to)
         await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toHaveText(heading)
         await settle(page)
-        await expectLeftOfDiagonal(page, 'figure')
+        await expectLeftOfDiagonal(page, 'figure, [data-settings-emblem]')
         await expectRaysFromPiece(page)
       }
     })
