@@ -74,6 +74,13 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions<T>): Pr
     throw new ApiClientError('NETWORK_ERROR', 0, 'No hay conexión con el servidor.')
   }
 
+  // 204 (aceptar las bases, marcar algo como visto, borrar): sin cuerpo; el esquema dice si se esperaba.
+  if (res.status === 204) {
+    const empty = schema.safeParse(undefined)
+    if (empty.success) return empty.data
+    throw new ApiClientError('BAD_RESPONSE', res.status, 'Respuesta vacía inesperada del servidor (204).')
+  }
+
   let json: unknown
   try {
     json = await res.json()

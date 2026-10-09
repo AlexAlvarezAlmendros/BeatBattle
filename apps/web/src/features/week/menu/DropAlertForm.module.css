@@ -1,0 +1,25 @@
+/* «Avísame del próximo drop» (§2.12.3): el campo y el botón en una fila; en móvil, uno bajo otro. */
+.form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--bb-space-3);
+}
+
+.submit {
+  align-self: end;
+}
+
+.status {
+  grid-column: 1 / -1;
+}
+
+.status:empty {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
