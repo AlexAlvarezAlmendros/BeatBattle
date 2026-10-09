@@ -60,6 +60,7 @@ export function playerOf(me: Me): MenuPlayer {
     level: progress.level,
     rank: t(`rank.${rankTitle(progress.level)}`),
     xp: { value: me.xp, min: progress.levelXp, max: progress.nextLevelXp ?? progress.levelXp },
+    avatarUrl: me.avatarUrl,
     uploaded: false,
     unvoted: 0,
   }

@@ -5,6 +5,7 @@ import type { Db } from '../src/db/client'
 import { createTestDb } from '../src/db/testDb'
 import type { MemoryMailer } from '../src/email/mailer'
 import { type FixedClock, fixedClock } from '../src/lib/clock'
+import type { ImageStorage } from '../src/modules/storage/cloudinary'
 
 /** Origen permitido por defecto en tests (el de Vite en local). */
 export const ORIGIN = 'http://localhost:5173'
@@ -40,6 +41,8 @@ export interface MakeAppOptions {
   /** Rutas extra de prueba, registradas antes de `ready()`. */
   routes?: (app: FastifyInstance) => void
   db?: Db
+  /** Imágenes falsas (avatares); por defecto, ninguna. */
+  images?: ImageStorage | null
 }
 
 export async function makeApp(options: MakeAppOptions = {}): Promise<TestApp> {
@@ -47,7 +50,13 @@ export async function makeApp(options: MakeAppOptions = {}): Promise<TestApp> {
   const config = testConfig({ ...options.config, logLevel: options.logLevel ?? 'silent' })
   const db = options.db ?? (await createTestDb())
   const clock = fixedClock(T0)
-  const app = buildApp({ config, db, clock, logStream: { write: (line) => logs.push(line) } })
+  const app = buildApp({
+    config,
+    db,
+    clock,
+    images: options.images ?? null,
+    logStream: { write: (line) => logs.push(line) },
+  })
   options.routes?.(app)
   await app.ready()
   return { app, db, clock, config, logs }

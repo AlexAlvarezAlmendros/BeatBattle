@@ -10,14 +10,16 @@ export interface PlayerCardProps {
   level: number
   rank: string
   xp: { value: number; min: number; max: number }
+  /** Foto del avatar; pasa por el duotono rojo y negro (§3.4.1). */
+  avatarUrl?: string | null
 }
 
 /**
  * El jugador en el HUD (guía §3.4.1, con sesión): «1P» en display rojo, avatar en marco de chaflán con
- * borde rojo y fondo granate (monograma sin foto), nombre, nivel y rango, y el medidor de XP segmentado
+ * borde rojo y fondo granate (la foto en duotono o, sin ella, el monograma), nombre, nivel y rango, y el medidor de XP segmentado
  * con «XP 2.980 · NV 8 · 3.350». En móvil, avatar, nombre, nivel y XP en una fila.
  */
-export function PlayerCard({ name, initials, level, rank, xp }: PlayerCardProps) {
+export function PlayerCard({ name, initials, level, rank, xp, avatarUrl }: PlayerCardProps) {
   const next = level + 1
   return (
     <div className={styles.player}>
@@ -25,7 +27,13 @@ export function PlayerCard({ name, initials, level, rank, xp }: PlayerCardProps)
         {t('ui.cursor.player')}
       </span>
       <Frame as="span" cut="md" className={styles.avatar} aria-hidden="true">
-        {initials}
+        {avatarUrl ? (
+          <span className={styles.photo}>
+            <img src={avatarUrl} alt="" width={64} height={64} />
+          </span>
+        ) : (
+          initials
+        )}
       </Frame>
       <div className={styles.text}>
         <p className={styles.name}>{name}</p>

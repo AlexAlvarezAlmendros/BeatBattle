@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.34 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.35 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -290,6 +290,16 @@ historial de entradas con su posición.
   la web cambia la URL de `/p/<anterior>` a `/p/<nuevo>` (la página es la misma SPA; el 301 de la propia
   `/p/` llegará con `api/share.ts`, la función de las páginas compartibles, en la Fase 6). El `update-user` de Better Auth
   no puede cambiar el nombre (403): se saltaría el plazo y la redirección.
+- **Avatar** (`RF-PRF-02`). `POST /api/uploads/sign` con `{ kind: 'avatar', mime, bytes }` (cuenta
+  verificada; PNG, JPG o WebP de hasta 10 MB; 10 firmas por hora) devuelve los parámetros firmados para
+  `image/upload`: el `public_id` en `<prefijo>/avatars/<userId>/<uuid>`, los formatos, `overwrite=false` y
+  una transformación de entrada `c_limit,w_1024,h_1024` (el original nunca pasa de 1024 px). El navegador
+  sube directo a Cloudinary y confirma con `PUT /api/me/avatar { publicId }`: el servidor comprueba que es
+  de la carpeta de la cuenta (solo existe si él lo firmó, así que el avatar no necesita `upload_intent`) y
+  que la imagen está en la Admin API, y borra la anterior. `DELETE /api/me/avatar` vuelve al monograma. Se
+  entrega con `c_fill,g_auto` y `f_auto,q_auto`: 256 px en el perfil y 64 px en el HUD (`GET /api/me`
+  lleva `avatarUrl`). En la carta y en el HUD, en duotono rojo y negro (§3.4.1). Sin Cloudinary
+  configurado, firmar responde 503 y nadie tiene avatar.
 
 | Id | Requisito | Aceptación |
 |---|---|---|
@@ -3477,6 +3487,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-08 | 0.6.35 | **Avatar** (tarea 2.19, §2.3, §4.8): subida firmada a `image/upload` en la carpeta de la cuenta, sin `upload_intent` (la carpeta la fija la firma), transformación de entrada a 1024 px, entrega a 256 y 64 px en AVIF o WebP, foto en duotono en la carta y en el HUD, y `avatarUrl` en `GET /api/me`. |
 | 2026-10-08 | 0.6.34 | **Perfil** (tarea 2.18, §2.3, §3.8.10): `/p/:username` con lo que ya existe y el estado vacío de lo que llega después, Ajustes → Perfil, enlaces solo de su sitio, cambio de nombre con plazo de 30 días y 301 en la API (el de la página llega con `api/share.ts` en la Fase 6), `update-user` bloqueado para el nombre, y los códigos de error del perfil (§2.3). |
 | 2026-10-08 | 0.6.33 | **Ajustes → Cuenta, Emails y Sesiones** (tareas 2.16 y 2.20, §2.3, §2.12.4, §3.8.14): las tres secciones funcionan, con el emblema en la cuña; `GET`/`DELETE /api/me/sessions` en lugar de `list-sessions` de Better Auth (que expone los tokens); el email desechable se rechaza al pedir el cambio; el HUD lleva la ficha del jugador con sesión en todas las pantallas de juego (§3.4.1). |
 | 2026-10-08 | 0.6.32 | **Pantallas de cuenta y bienvenida** (tareas 2.15 y 2.17, §3.8.9, §3.8.14): entrar con email o nombre, registro con medidor diferido y casillas, verificar y recuperar, `GET /api/me` para el HUD (sin el cliente de Better Auth en la primera pintura), lo que pide sesión se pide dentro del panel, y la bienvenida con la carta plana y el primer logro por ganar (ninguno se gana al registrarse). |

@@ -103,6 +103,7 @@ describe('perfil público (§3.8.10)', () => {
         role: 'user',
         cardNumber: 42,
         xp: 0,
+        avatarUrl: null,
       },
     })
     renderProfile('/p/kairo.wav')

@@ -13,6 +13,7 @@ const ME = {
   role: 'user' as const,
   cardNumber: 42,
   xp: 0,
+  avatarUrl: null,
 }
 
 afterEach(() => useSession.setState({ status: 'loading', me: null }))

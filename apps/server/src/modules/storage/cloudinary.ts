@@ -34,7 +34,37 @@ export interface ResourceInfo {
   stream: { status: 'pending' | 'processed' | 'failed'; bytes: number | null }
 }
 
-export interface CloudinaryStorage {
+/** Una imagen subida, según la Admin API. */
+export interface ImageInfo {
+  publicId: string
+  format: string
+  width: number
+  height: number
+  bytes: number
+  version: number
+}
+
+/**
+ * Imágenes públicas (`image` / `upload`, §4.8.1): de momento, el avatar (tarea 2.19). Se sube directo del
+ * navegador con firma; el servidor fija el `public_id`, los formatos y una transformación de entrada que
+ * deja el original en 1024 px como mucho. Se entrega recortada a cuadrado con `c_fill,g_auto` y en el
+ * mejor formato que acepte el navegador (`f_auto`: AVIF o WebP).
+ */
+export interface ImageStorage {
+  readonly prefix: string
+  signImageUpload(input: { publicId: string; nowMs: number; tags: readonly string[] }): SignedUpload
+  verifyImage(publicId: string): Promise<ImageInfo | null>
+  /** URL de entrega cuadrada de `size` px (§4.8.3: 64, 256, 512, 1024). */
+  imageUrl(publicId: string, input: { size: number; version?: number }): string
+  removeImage(publicId: string): Promise<void>
+}
+
+/** Formatos de imagen que se aceptan al subir. */
+export const IMAGE_FORMATS = 'png,jpg,jpeg,webp'
+/** Transformación de entrada: el original nunca pasa de 1024 px de lado. */
+export const IMAGE_INCOMING = 'c_limit,w_1024,h_1024'
+
+export interface CloudinaryStorage extends ImageStorage {
   readonly prefix: string
   signUpload(input: { publicId: string; nowMs: number }): SignedUpload
   /** URL firmada del derivado de escucha (la única forma de oír una entrada). */
@@ -117,6 +147,64 @@ export function createCloudinaryStorage(config: StorageConfig): CloudinaryStorag
         if ((error as { error?: { http_code?: number } }).error?.http_code === 404) return null
         throw error
       }
+    },
+    signImageUpload({ publicId, nowMs, tags }) {
+      const params: Record<string, string> = {
+        public_id: publicId,
+        timestamp: String(Math.floor(nowMs / 1000)),
+        allowed_formats: IMAGE_FORMATS,
+        transformation: IMAGE_INCOMING,
+        overwrite: 'false',
+        tags: ['bb', ...tags].join(','),
+      }
+      const signature = cloudinary.utils.api_sign_request(params, config.apiSecret)
+      return {
+        uploadUrl: `https://api.cloudinary.com/v1_1/${config.cloudName}/image/upload`,
+        publicId,
+        fields: { ...params, signature, api_key: config.apiKey },
+      }
+    },
+    async verifyImage(publicId) {
+      try {
+        const resource = await cloudinary.api.resource(publicId, {
+          ...credentials(config),
+          resource_type: 'image',
+          type: 'upload',
+        })
+        return {
+          publicId: resource.public_id,
+          format: resource.format,
+          width: resource.width,
+          height: resource.height,
+          bytes: resource.bytes,
+          version: resource.version,
+        }
+      } catch (error) {
+        if ((error as { error?: { http_code?: number } }).error?.http_code === 404) return null
+        throw error
+      }
+    },
+    imageUrl(publicId, { size, version }) {
+      return cloudinary.url(publicId, {
+        cloud_name: config.cloudName,
+        resource_type: 'image',
+        type: 'upload',
+        secure: true,
+        version,
+        transformation: [
+          { crop: 'fill', gravity: 'auto', width: size, height: size },
+          { fetch_format: 'auto', quality: 'auto' },
+        ],
+        urlAnalytics: false,
+      })
+    },
+    async removeImage(publicId) {
+      await cloudinary.uploader.destroy(publicId, {
+        ...credentials(config),
+        resource_type: 'image',
+        type: 'upload',
+        invalidate: true,
+      })
     },
     async remove(publicId) {
       await cloudinary.uploader.destroy(publicId, {

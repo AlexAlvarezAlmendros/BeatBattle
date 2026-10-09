@@ -16,6 +16,7 @@ describe('GET /api/me', () => {
       role: 'user',
       cardNumber: 1,
       xp: 0,
+      avatarUrl: null,
     })
   })
 })

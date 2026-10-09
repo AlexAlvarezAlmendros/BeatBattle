@@ -367,6 +367,23 @@
         "invalidLink": "Ese enlace no es de {site}: tiene que ser una dirección https:// de su web.",
         "rateLimited": "Demasiados cambios seguidos. Espera un poco y vuelve a probar.",
         "unknown": "No se ha podido guardar. Vuelve a probar en un momento."
+      },
+      "avatar": {
+        "title": "Avatar",
+        "help": "PNG, JPG o WebP de hasta 10 MB. Se recorta a cuadrado y en tu carta sale en rojo y negro.",
+        "upload": "Subir foto",
+        "change": "Cambiar foto",
+        "remove": "Quitar foto",
+        "uploading": "Subiendo…",
+        "done": "Foto puesta.",
+        "removed": "Foto quitada: vuelve tu monograma.",
+        "preview": "Tu avatar",
+        "errors": {
+          "type": "Esa imagen no vale: usa PNG, JPG o WebP.",
+          "size": "La imagen pasa de 10 MB.",
+          "unavailable": "Ahora mismo no se pueden subir fotos. Vuelve a probar más tarde.",
+          "failed": "No se ha podido subir la foto. Vuelve a probar."
+        }
       }
     },
     "emails": {

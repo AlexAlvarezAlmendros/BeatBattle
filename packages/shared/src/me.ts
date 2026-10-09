@@ -10,6 +10,8 @@ export const MeSchema = z.object({
   role: z.enum(['user', 'admin']),
   cardNumber: z.number().int(),
   xp: z.number().int(),
+  /** Foto del avatar a 64 px para el HUD (§3.4.1); sin foto, `null` y el monograma. */
+  avatarUrl: z.string().nullable(),
 })
 export type Me = z.infer<typeof MeSchema>
 
