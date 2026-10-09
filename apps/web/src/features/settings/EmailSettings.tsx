@@ -69,9 +69,14 @@ function EmailPrefsForm() {
   const set = (patch: EmailPrefsUpdate) => save.mutate(patch)
   return (
     <>
-      <SettingsGroup title={t('settings.emails.notices.title')} help={t('settings.emails.notices.help')}>
+      <SettingsGroup
+        title={t('settings.emails.notices.title')}
+        help={t('settings.emails.notices.help')}
+        layout="plates"
+      >
         {NOTICE_KEYS.map((key) => (
           <FilterChip
+            variant="plate"
             key={key}
             label={t(`account.notices.${key}`)}
             pressed={value[key]}
@@ -79,21 +84,32 @@ function EmailPrefsForm() {
           />
         ))}
       </SettingsGroup>
-      <SettingsGroup title={t('settings.emails.monday.title')} help={t('settings.emails.monday.help')}>
+      <SettingsGroup
+        title={t('settings.emails.monday.title')}
+        help={t('settings.emails.monday.help')}
+        layout="plates"
+      >
         <FilterChip
+          variant="plate"
           label={t('settings.emails.monday.label')}
           pressed={value.mondayFormat === 'combined'}
           onChange={(pressed) => set({ mondayFormat: pressed ? 'combined' : 'separate' })}
         />
       </SettingsGroup>
-      <SettingsGroup title={t('settings.emails.consents.title')} help={t('settings.emails.consents.help')}>
+      <SettingsGroup
+        title={t('settings.emails.consents.title')}
+        help={t('settings.emails.consents.help')}
+        layout="plates"
+      >
         <FilterChip
+          variant="plate"
           label={t('account.consents.marketing')}
           pressed={value.marketing}
           onChange={(pressed) => set({ marketing: pressed })}
           data-consent-version={CONSENT_TEXT_VERSIONS.marketing}
         />
         <FilterChip
+          variant="plate"
           label={t('account.consents.otpNewsletter')}
           pressed={value.otpNewsletter}
           onChange={(pressed) => set({ otpNewsletter: pressed })}

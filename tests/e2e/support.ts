@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, type Locator, type Page } from '@playwright/test'
+import { expect, type Locator, type Page, test } from '@playwright/test'
 
 /**
  * Ayudantes compartidos de los E2E (tarea 0.13): errores de la página, espera a que terminen las
@@ -243,4 +243,19 @@ export async function expectCursor(locator: Locator): Promise<void> {
 export async function installClockWithoutStage(page: Page): Promise<void> {
   await page.addInitScript(() => window.localStorage.setItem('bb:stage', 'off'))
   await page.clock.install()
+}
+
+/**
+ * Sufijo de las cuentas que crea un E2E: único por repetición e intento (`--repeat-each`, reintentos de la
+ * CI), porque la BD de los E2E es la misma durante toda la ejecución y el nombre y el email son únicos.
+ */
+export function runSuffix(): string {
+  const info = test.info()
+  return `${info.repeatEachIndex}${info.retry}`
+}
+
+/** IP propia de un E2E que registra cuentas (`X-Forwarded-For`): el registro admite 3 por hora y por IP. */
+export function testIp(slot: number): string {
+  const info = test.info()
+  return `198.51.${100 + info.repeatEachIndex * 4 + info.retry}.${slot}`
 }

@@ -1,7 +1,8 @@
-import type { CSSProperties } from 'react'
+import { type CSSProperties, useRef } from 'react'
 import { t } from '../../i18n'
 import { frameAttributes } from '../Frame'
 import { cx } from '../forceState'
+import { useFitText } from '../hooks/useFitText'
 import { OtpSlapImage } from '../OtpSlap'
 import styles from './ProducerCard.module.css'
 
@@ -42,6 +43,9 @@ export function ProducerCard({
   avatarUrl,
   className,
 }: ProducerCardProps) {
+  const nameRef = useRef<HTMLParagraphElement>(null)
+  // El nombre en una línea (§3.4.4): baja la anchura y después el cuerpo antes que partir a mitad de palabra.
+  useFitText(nameRef, name, { minFontPx: 14 })
   const slots = [0, 1, 2].map((i) => showcase[i] ?? null)
   const arc = Math.max(0, Math.min(1, levelFraction))
   return (
@@ -59,17 +63,24 @@ export function ProducerCard({
           style={{ '--seal-arc': `${arc * 360}deg` } as CSSProperties}
           aria-label={t('ui.producerCard.level', { level })}
         >
-          <span className={styles.sealInner}>{level}</span>
+          <span className={styles.sealInner}>
+            <span className={styles.sealLabel} aria-hidden="true">
+              {t('ui.producerCard.levelShort')}
+            </span>
+            {level}
+          </span>
         </span>
       </header>
-      <div className={styles.portrait} aria-hidden="true" data-photo={avatarUrl ? '' : undefined}>
+      <div className={styles.portrait} aria-hidden="true" data-duotone={avatarUrl ? '' : undefined}>
         {avatarUrl ? (
-          <img className={styles.photo} src={avatarUrl} alt="" width={256} height={256} loading="lazy" />
+          <img src={avatarUrl} alt="" width={256} height={256} loading="lazy" />
         ) : (
           <span className={styles.monogram}>{initials}</span>
         )}
       </div>
-      <p className={cx('bb-display', styles.name)}>{name}</p>
+      <p ref={nameRef} className={cx('bb-display', styles.name)}>
+        {name}
+      </p>
       <p className={styles.rank}>{rank}</p>
       <dl className={styles.stats}>
         {(['wins', 'podiums', 'weeks'] as const).map((key) => (

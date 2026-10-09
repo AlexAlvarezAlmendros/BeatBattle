@@ -5,7 +5,7 @@ import { t } from '../../i18n'
 import { apiFetch } from '../../net/api'
 import { Button } from '../../ui/Button'
 import { TextField } from '../../ui/Field'
-import { Done, PaperNotice } from '../account/FormBits'
+import { Done, focusFirstInvalid, PaperNotice } from '../account/FormBits'
 import { RequireSession } from '../account/RequireSession'
 import { useSession } from '../account/session'
 import { SettingsGroup, SettingsSection } from './SettingsSection'
@@ -52,8 +52,13 @@ function DeleteAccount({ onDeleted }: { onDeleted: () => void }) {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
+    const form = event.currentTarget as HTMLFormElement
     setError(null)
-    if (!matches) return setMismatch(true)
+    if (!matches) {
+      setMismatch(true)
+      focusFirstInvalid(form)
+      return
+    }
     setState('busy')
     try {
       await apiFetch('/api/me', {
@@ -75,6 +80,7 @@ function DeleteAccount({ onDeleted }: { onDeleted: () => void }) {
       <SettingsGroup title={t('settings.privacy.delete.title')} layout="stack">
         <p className="settings-option-help">{t('settings.privacy.delete.gone')}</p>
         <p className="settings-option-help">{t('settings.privacy.delete.kept')}</p>
+        <PaperNotice live={false}>{t('settings.privacy.delete.warning')}</PaperNotice>
         <TextField
           label={t('settings.privacy.delete.confirmLabel')}
           hint={t('settings.privacy.delete.confirmHint', { name: username })}
@@ -89,7 +95,8 @@ function DeleteAccount({ onDeleted }: { onDeleted: () => void }) {
           error={mismatch ? t('settings.privacy.delete.mismatch') : null}
         />
         {error && <PaperNotice>{error}</PaperNotice>}
-        <Button type="submit" variant="cta" loading={state === 'busy'} disabled={!matches}>
+        {/* Activo siempre (Intro en el campo envía); sin coincidencia, el error va en el campo. */}
+        <Button type="submit" variant="outline" loading={state === 'busy'}>
           {t('settings.privacy.delete.submit')}
         </Button>
       </SettingsGroup>

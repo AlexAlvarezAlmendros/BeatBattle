@@ -1,5 +1,7 @@
+import { useRef } from 'react'
 import { formatNumber, t } from '../../i18n'
 import { Frame } from '../../ui/Frame'
+import { useFitText } from '../../ui/hooks/useFitText'
 import { Meter } from '../../ui/Meter'
 import styles from './PlayerCard.module.css'
 
@@ -21,6 +23,8 @@ export interface PlayerCardProps {
  */
 export function PlayerCard({ name, initials, level, rank, xp, avatarUrl }: PlayerCardProps) {
   const next = level + 1
+  const nameRef = useRef<HTMLParagraphElement>(null)
+  useFitText(nameRef, name, { minFontPx: 12 })
   return (
     <div className={styles.player}>
       <span className={styles.p1} aria-hidden="true">
@@ -28,7 +32,7 @@ export function PlayerCard({ name, initials, level, rank, xp, avatarUrl }: Playe
       </span>
       <Frame as="span" cut="md" className={styles.avatar} aria-hidden="true">
         {avatarUrl ? (
-          <span className={styles.photo}>
+          <span className={styles.photo} data-duotone="">
             <img src={avatarUrl} alt="" width={64} height={64} />
           </span>
         ) : (
@@ -36,7 +40,9 @@ export function PlayerCard({ name, initials, level, rank, xp, avatarUrl }: Playe
         )}
       </Frame>
       <div className={styles.text}>
-        <p className={styles.name}>{name}</p>
+        <p ref={nameRef} className={styles.name}>
+          {name}
+        </p>
         <p className={styles.rank}>
           {t('frame.player.levelBefore')} <b>{level}</b> · {rank}
         </p>

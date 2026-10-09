@@ -47,7 +47,7 @@ describe('CONTINUAR PARTIDA (/entrar)', () => {
       email: 'aina@example.com',
       callbackURL: '/verificar',
     })
-    expect(await screen.findByRole('status')).toHaveTextContent('Enviado otra vez.')
+    expect(await screen.findByText('Enviado otra vez.')).toBeInTheDocument()
   })
 })
 
@@ -108,7 +108,7 @@ describe('/recuperar', () => {
     renderInRouter(<RecoverPage />, '/recuperar')
     await userEvent.type(screen.getByLabelText('Email'), 'aina@example.com')
     await userEvent.click(screen.getByRole('button', { name: /Enviar el enlace/ }))
-    expect(await screen.findByRole('status')).toHaveTextContent('ya te hemos enviado el enlace')
+    expect(await screen.findByText(/ya te hemos enviado el enlace/)).toBeInTheDocument()
     client.resetPassword.mockResolvedValue({ data: { status: true } })
     renderInRouter(<RecoverPage />, '/recuperar?token=abc')
     expect(screen.getByText(/se cerrarán todas tus sesiones/)).toBeInTheDocument()

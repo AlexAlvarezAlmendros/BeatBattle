@@ -1,0 +1,47 @@
+/*
+ * Foto en duotono rojo y negro con trama (guía §3.4.1: el avatar en el HUD, la carta y Ajustes → Perfil):
+ * la imagen en grises, multiplicada por rojo (los blancos quedan rojos y las sombras negras: ninguna foto
+ * trae otros colores a la paleta) y con la trama de puntos de las piezas encima. Es un atributo, como el
+ * marco: `data-duotone` en la caja que contiene el `<img>`, que ocupa la caja entera.
+ */
+:where([data-duotone]) {
+  position: relative;
+}
+
+/* Especificidad 0 en la posición: una pieza que coloca la foto (el HUD, `absolute`) siempre gana. */
+[data-duotone] {
+  isolation: isolate;
+  overflow: hidden;
+}
+
+[data-duotone] img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  filter: grayscale(1) contrast(1.15);
+}
+
+/* El rojo, multiplicado. */
+[data-duotone]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--bb-red);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* La trama de puntos de las piezas (`--bb-tex-halftone-cell-piece`), en negro, sobre el duotono. */
+[data-duotone]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(circle, var(--bb-black) 0 var(--bb-tex-fill-dot), transparent var(--bb-tex-fill-dot)) 0 0
+    / var(--bb-tex-halftone-cell-piece) var(--bb-tex-halftone-cell-piece);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}

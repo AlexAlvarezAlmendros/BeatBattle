@@ -12,6 +12,12 @@ export interface FilterChipProps
   onChange?: (pressed: boolean) => void
   /** Estado forzado para la galería. */
   state?: InteractionState
+  /**
+   * `plate`: placa de opción a todo el ancho de su celda, con el nombre a la izquierda y «SÍ | NO» a la
+   * derecha, como una opción de menú de juego. Encendida, solo la casilla «SÍ» va en rojo (no la placa
+   * entera): en listas largas de conmutadores, nueve placas rojas se leían como nueve cursores (§3.3).
+   */
+  variant?: 'chip' | 'plate'
 }
 
 /**
@@ -24,6 +30,7 @@ export function FilterChip({
   pressed,
   onChange,
   state,
+  variant = 'chip',
   className,
   onClick,
   ...rest
@@ -35,7 +42,7 @@ export function FilterChip({
       {...frameAttributes({ cut: 'sm' })}
       data-cursor=""
       aria-pressed={pressed}
-      className={cx(styles.filterChip, className)}
+      className={cx(styles.filterChip, variant === 'plate' && styles.plate, className)}
       onClick={(event) => {
         onClick?.(event)
         if (!event.defaultPrevented) onChange?.(!pressed)

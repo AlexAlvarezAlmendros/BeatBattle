@@ -130,8 +130,8 @@ consentimiento y no se envía nada.
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
 | 2.23 | Auditoría de cookies en E2E: solo `__Secure-bb.*` técnicas | ✅ Hecho | 2.15 | §4.14 · `RNF-PRIV-03` · **Hecho:** E2E `cookies.spec.ts` (registro, verificación con el buzón de test y la app con sesión: solo `bb.*`, `HttpOnly`, `SameSite=Lax`) y `cookies.test.ts` en el servidor para la variante de producción (`__Secure-bb.*`, `Secure`). Buzón de los E2E `GET /api/test/mailbox` (solo `NODE_ENV=test`), que también usará la 2.24 |
-| 2.24 | E2E del hito: registro → email capturado (`Mailer` en memoria) → verificar → bienvenida → perfil → bajas → borrar cuenta; «A contra B»; entrar con Google simulado | ⬜ Listo | 2.10, 2.17, 2.18, 2.21, 2.22 | §5 · `RF-AUTH-04`, `RNF-SEC-03` |
-| 2.25 | Jurado visual de tres lentes sobre las pantallas nuevas (autenticación, bienvenida, perfil, Ajustes, baja) y la galería de emails, con los tamaños de ventana reales | ⬜ Listo | 2.15–2.21 | §3.10 · `RD-VIS-02` e |
+| 2.24 | E2E del hito: registro → email capturado (`Mailer` en memoria) → verificar → bienvenida → perfil → bajas → borrar cuenta; «A contra B»; entrar con Google simulado | 🔄 En curso | 2.10, 2.17, 2.18, 2.21, 2.22 | §5 · `RF-AUTH-04`, `RNF-SEC-03` · **Hecho todo menos Google:** `account-journey.spec.ts`: registro por la interfaz (quitando un aviso) → email del buzón de test → verificar → bienvenida → HUD con el jugador → editar el perfil y verlo en público → avisos del registro en Ajustes → baja de todo desde el enlace de un aviso → borrar la cuenta (HUD de visitante, perfil 404, no se puede entrar, «Tu cuenta se ha borrado» en el buzón); y «A contra B» (sesiones, perfil, borrado y rutas propias sin sesión). Estable con `--repeat-each=3`. **Falta:** entrar con Google simulado, cuando la 2.22 tenga el proveedor |
+| 2.25 | Jurado visual de tres lentes sobre las pantallas nuevas (autenticación, bienvenida, perfil, Ajustes, baja) y la galería de emails, con los tamaños de ventana reales | ✅ Hecho | 2.15–2.21 | §3.10 · `RD-VIS-02` e · **Hecho:** tres jurados (marca, juego y accesibilidad) en tres pases sobre 64 capturas en los tamaños reales, contraste alto, sin movimiento, nombre de 19 caracteres y página desplazada; los tres pasan al tercer pase con todas las altas y medias corregidas (reflujo de botones y campos, emblema arriba y `sticky`, nombres a una línea, panel del diseño de título ≥ 26 rem, placas de opción, cuña en los emails, foco y errores, estados vacíos del perfil…). Acta en `docs/planning/evidence/f2/jurado/README.md` con las bajas abiertas y su motivo. E2E nuevo `reflow.spec.ts` |
 | 2.26 | Cierre de la fase: cobertura de ids, criterio de aceptación y hito del roadmap | ⬜ Listo | todas | — |
 
 Las tareas 2.2, 2.3, 2.7 y 2.13 no dependen de nada y pueden ir en paralelo.
@@ -163,6 +163,8 @@ para los avisos de las fases 3 a 7.
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-09 | 2.25 | Jurado visual de la Fase 2: pasa al tercer pase. Guía v0.6.38. |
+| 2026-10-09 | 2.24 | E2E del hito sin el tramo de Google (espera a la 2.22). Guía v0.6.37. |
 | 2026-10-09 | 2.21, 2.23 | Exportar y borrar la cuenta, y auditoría de cookies. Guía v0.6.36. |
 | 2026-10-08 | 2.19 | Avatar con subida firmada a Cloudinary, comprobado con la cuenta real (prefijo de desarrollo). Guía v0.6.35. |
 | 2026-10-08 | 2.18 | Perfil público y Ajustes → Perfil, con cambio de nombre y redirección. Guía v0.6.34. |

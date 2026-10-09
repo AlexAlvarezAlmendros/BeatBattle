@@ -60,7 +60,7 @@ interface BaseProps {
   loadingLabel?: string
   status?: ButtonStatus
   /**
-   * Deshabilitado: 45 % de opacidad y `aria-disabled` (sigue siendo enfocable para que se lea el
+   * Deshabilitado: panel neutro con texto de deshabilitado y `aria-disabled` (sigue siendo enfocable para que se lea el
    * motivo). Los clics no hacen nada.
    */
   disabled?: boolean
@@ -118,7 +118,7 @@ type AnyHandlers = {
  *   movimiento», ni avance ni escala (Anexo E).
  * - **Cargando**: la onda de 5 barras sustituye al texto sin cambiar el ancho; `aria-busy` y el foco
  *   se queda en el botón, pero los clics no hacen nada.
- * - **Deshabilitado**: 45 %, `aria-disabled` y el motivo en texto al lado (`disabledReason`).
+ * - **Deshabilitado**: panel neutro, `aria-disabled` y el motivo en texto al lado (`disabledReason`).
  * - **Éxito**: check y texto. **Error**: aviso de papel (blanco con texto negro, 21:1), icono de alerta y
  *   una sacudida corta. Los dos se nombran («Subido (Hecho)») y se anuncian al pasar a ellos (WCAG 4.1.3).
  * - El sonido (`ui.press`) lo cablea la Fase 1.

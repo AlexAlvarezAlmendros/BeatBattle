@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -63,11 +63,15 @@ describe('Ajustes → Privacidad (§4.14)', () => {
     renderPage()
     expect(screen.getByText(t('settings.privacy.delete.kept'))).toBeInTheDocument()
     const submit = screen.getByRole('button', { name: t('settings.privacy.delete.submit') })
-    expect(submit).toHaveAttribute('aria-disabled', 'true')
-    await userEvent.type(screen.getByLabelText(t('settings.privacy.delete.confirmLabel')), 'AINA.BEATS')
-    expect(submit).not.toHaveAttribute('aria-disabled')
+    // Sin la confirmación, el error va en el campo y el foco a él; no se llama a la API.
     await userEvent.click(submit)
-    expect(await screen.findByText(t('settings.privacy.delete.done'))).toBeInTheDocument()
+    const field = screen.getByLabelText(t('settings.privacy.delete.confirmLabel'))
+    expect(screen.getByText(t('settings.privacy.delete.mismatch'))).toBeInTheDocument()
+    await waitFor(() => expect(field).toHaveFocus())
+    expect(calls).toHaveLength(0)
+    await userEvent.type(field, 'AINA.BEATS')
+    await userEvent.click(submit)
+    expect((await screen.findByText(t('settings.privacy.delete.done'))).closest('p')).toHaveFocus()
     expect(calls).toEqual([{ method: 'DELETE', url: '/api/me', body: { confirm: 'AINA.BEATS' } }])
     expect(useSession.getState().status).toBe('anonymous')
   })

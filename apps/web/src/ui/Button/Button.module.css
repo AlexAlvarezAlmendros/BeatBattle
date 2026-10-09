@@ -7,10 +7,12 @@
 .button {
   --frame-border: var(--bb-white);
   --frame-fill: var(--bb-black);
+  /* El alto de cada tamaño; cuando la etiqueta parte en dos líneas, es el mínimo. */
+  --button-h: var(--bb-space-12);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: var(--bb-space-12);
+  height: var(--button-h);
   padding: 0 var(--bb-space-5) 0 calc(var(--bb-space-5) - var(--bb-stroke));
   border: 0;
   background: transparent;
@@ -74,17 +76,17 @@
 
 /* ── Tamaños (§3.3): 40, 48 y 56 px ─────────────────────────────────────────────────────── */
 .sm {
-  height: var(--bb-space-10);
+  --button-h: var(--bb-space-10);
   padding-inline: var(--bb-space-4) var(--bb-space-4);
   font-size: var(--bb-fs-sm);
 }
 
 .md {
-  height: var(--bb-space-12);
+  --button-h: var(--bb-space-12);
 }
 
 .lg {
-  height: var(--bb-space-14);
+  --button-h: var(--bb-space-14);
   padding-inline: var(--bb-space-6) var(--bb-space-7);
   font-size: var(--bb-fs-lg);
 }
@@ -104,8 +106,8 @@
 }
 
 .iconOnly.sm {
+  --button-h: var(--bb-target);
   width: var(--bb-target);
-  height: var(--bb-target);
 }
 
 .iconOnly.lg {
@@ -114,6 +116,16 @@
 
 .full {
   width: 100%;
+  /* A todo lo ancho, una etiqueta larga parte en dos líneas dentro del marco en vez de salirse. */
+  height: auto;
+  min-height: var(--button-h);
+  padding-block: var(--bb-space-2);
+  white-space: normal;
+}
+
+.full .text {
+  text-align: center;
+  text-wrap: balance;
 }
 
 /* ── Hover: avanza 4 px (sin movimiento, nada) ─────────────────────────────────────────── */
@@ -147,8 +159,15 @@
 }
 
 /* ── Deshabilitado: 45 % y el motivo al lado ────────────────────────────────────────────── */
+/*
+ * Deshabilitado: el mismo en todas las variantes (jurado de la 2.25), panel neutro con borde de reposo y
+ * texto de deshabilitado (`--bb-text-4`; WCAG no pide contraste a un control inactivo). Antes el primario bajaba la opacidad del rojo y quedaba
+ * un rojo apagado bajo el texto, que §3.2 no admite.
+ */
 .button[aria-disabled="true"]:not([aria-busy="true"]) {
-  opacity: 0.45;
+  --frame-border: var(--bb-line-strong);
+  --frame-fill: var(--bb-panel);
+  color: var(--bb-text-4);
   cursor: not-allowed;
 }
 
@@ -257,4 +276,27 @@
 :global(:root[data-motion="reduced"]) .loaderBar,
 :global(:root[data-motion="reduced"]) .button[data-status="error"] {
   animation: none;
+}
+
+/*
+ * Móvil (≤ 720 px, WCAG 1.4.10): una etiqueta larga («Crear cuenta con Discord») parte en dos líneas
+ * dentro de su marco en vez de salirse; el botón crece en alto desde sus 48 px.
+ */
+@media (max-width: 720px) {
+  .button:not(.iconOnly) {
+    max-width: 100%;
+    height: auto;
+    min-height: var(--button-h);
+    padding-block: var(--bb-space-2);
+    white-space: normal;
+  }
+
+  .content {
+    min-width: 0;
+  }
+
+  .text {
+    text-align: center;
+    text-wrap: balance;
+  }
 }

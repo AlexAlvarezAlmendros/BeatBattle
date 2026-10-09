@@ -107,7 +107,8 @@ describe('Ajustes → Perfil (§2.3)', () => {
     expect(submit).toHaveAttribute('aria-disabled', 'true')
     await userEvent.clear(field)
     await userEvent.type(field, 'aina.beats')
-    await userEvent.click(submit)
+    // Habilitado, el botón se vuelve a montar (sin el motivo de deshabilitado): se busca otra vez.
+    await userEvent.click(screen.getByRole('button', { name: t('settings.profile.username.submit') }))
     expect(
       await screen.findByText(/Ya lo cambiaste hace menos de 30.días\. Podrás el 7 de noviembre de 2026\./),
     ).toBeInTheDocument()

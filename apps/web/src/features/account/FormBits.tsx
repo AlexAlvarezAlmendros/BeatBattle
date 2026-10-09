@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { t } from '../../i18n'
 import { Icon } from '../../ui/Icon'
 import { Meter } from '../../ui/Meter'
@@ -10,10 +10,21 @@ import { type PasswordStrength, passwordStrength } from './passwordStrength'
  * (tarea 2.15) y Ajustes → Cuenta (tarea 2.16).
  */
 
-/** Aviso de papel (§3.2 «Estados»): blanco con texto negro e icono de alerta; se anuncia al salir. */
-export function PaperNotice({ children, action }: { children: ReactNode; action?: ReactNode }) {
+/**
+ * Aviso de papel (§3.2 «Estados»): blanco con texto negro e icono de alerta. Por defecto se anuncia al
+ * salir (`role="alert"`); `live={false}` para un aviso fijo de la página (que no debe anunciarse al cargar).
+ */
+export function PaperNotice({
+  children,
+  action,
+  live = true,
+}: {
+  children: ReactNode
+  action?: ReactNode
+  live?: boolean
+}) {
   return (
-    <div className={styles.paper} role="alert">
+    <div className={styles.paper} role={live ? 'alert' : undefined}>
       <Icon name="alert" className={styles.paperIcon} />
       <div>
         <p>{children}</p>
@@ -23,10 +34,17 @@ export function PaperNotice({ children, action }: { children: ReactNode; action?
   )
 }
 
-/** Éxito (§3.2): check y texto. */
+/**
+ * Éxito (§3.2): check y texto. Al aparecer recibe el foco (jurado de la 2.25, WCAG 2.4.3 y 4.1.3): suele
+ * sustituir al formulario o al control que se acaba de usar, que desaparece; con el foco aquí, el lector lo
+ * lee y el teclado no vuelve al principio de la página. Una región viva que se monta ya llena no siempre se
+ * anuncia.
+ */
 export function Done({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLParagraphElement>(null)
+  useEffect(() => ref.current?.focus(), [])
   return (
-    <p className={styles.done} role="status">
+    <p ref={ref} className={styles.done} tabIndex={-1} data-focus-target="done">
       <Icon name="check" className={styles.doneIcon} />
       <span>{children}</span>
     </p>
@@ -66,4 +84,13 @@ export function StrengthMeter({ password, userInputs }: { password: string; user
       {strength?.warning && <p className={styles.strengthWarning}>{strength.warning}</p>}
     </div>
   )
+}
+
+/**
+ * Tras una validación local fallida, el foco al primer campo con error del formulario (jurado de la 2.25,
+ * WCAG 3.3.1): el error se lee con el campo (`aria-describedby`) aunque quede lejos del botón de enviar.
+ * Va al fotograma siguiente, cuando React ya ha pintado los errores.
+ */
+export function focusFirstInvalid(form: HTMLFormElement | null): void {
+  requestAnimationFrame(() => form?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus())
 }

@@ -1,0 +1,62 @@
+/*
+ * Pantalla de título de la autenticación (§3.8.14; maqueta `00-titulo`): el logo grande con su lockup
+ * en una fila (la firma nunca salta de línea) como pieza de la izquierda.
+ */
+.title {
+  display: grid;
+  width: 100%;
+}
+
+.logo {
+  width: 100%;
+  margin-left: calc(-1 * var(--bb-space-3));
+}
+
+.lockup {
+  margin: calc(-1 * var(--bb-space-1)) 0 0 var(--bb-space-2);
+}
+
+/*
+ * Móvil (≤ 720 px): el lockup, debajo de la zona opaca del logo, como en el menú (§3.1 v0.6.7: la
+ * pegatina nunca pisa el logo, tampoco en la autenticación; `MainMenu.module.css`). La firma cuelga de la
+ * fila (`--lockup-signature-hang`): la fila mide lo que la cinta y la pegatina sobresale unos 7 px por
+ * arriba y por abajo; el lienzo del logo en dos líneas deja unos 7 px transparentes al pie, así que basta
+ * con separarlo `--bb-space-1` hacia abajo, nunca hacia arriba. El lockup ocupa su alto real en la rejilla
+ * de la pieza (también con la cinta en dos líneas, con el espaciado de WCAG 1.4.12: empuja el panel en vez
+ * de subir sobre el logo); lo que cuelga la firma por debajo (8 px) cae en la separación de la rejilla
+ * hasta el panel (`--bb-space-6` como poco). Antes subía `--bb-space-2` dentro del logo y la pegatina de
+ * 62 px pisaba el pie de «LE» de BATTLE (cuarto pase del jurado, P1).
+ */
+@media (max-width: 720px) {
+  .logo {
+    margin-left: 0;
+  }
+
+  .lockup {
+    --lockup-signature-hang: calc(-1 * var(--bb-space-2));
+    margin: var(--bb-space-1) 0 0;
+  }
+}
+
+/*
+ * Móvil bajo y estrecho (< 360 px de ancho y ≤ 700 de alto; §3.8.14 «en móvil, el panel va anclado al
+ * pie»; sexto pase del jurado, G4): a 320 × 568 el pie del panel y «Volver al menú», la única salida en
+ * táctil, quedaban bajo la barra (514) con su anillo. El logo cede alto (`--bb-space-12` menos de ancho:
+ * 240 px a 320, del ancho del lockup, que no se mueve) y, con la cabeza más cerca (`ScreenPage`), el
+ * panel acaba sobre la barra, como la 404 en el móvil bajo.
+ */
+@media (max-width: 359px) and (max-height: 700px) {
+  .logo {
+    width: calc(100% - var(--bb-space-12));
+  }
+}
+
+/*
+ * De 961 a 1279 px el panel guarda sus 26 rem y el logo es más estrecho, así que mide menos de alto: el
+ * lockup baja un poco para que la pegatina (que cuelga de la fila) no toque el pie del logo (§3.1).
+ */
+@media (min-width: 961px) and (max-width: 1279px) {
+  .lockup {
+    margin-top: var(--bb-space-4);
+  }
+}

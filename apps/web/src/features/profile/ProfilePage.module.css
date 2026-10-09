@@ -26,15 +26,19 @@
 
 .head {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--bb-space-2);
   min-width: 0;
 }
 
 .name {
+  min-width: 0;
+  overflow-x: clip;
+  overflow-y: visible;
   color: var(--bb-white);
   font-size: var(--bb-fs-3xl);
   text-shadow: var(--bb-shadow-hard);
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 
 .meta {
@@ -113,26 +117,105 @@
   line-height: var(--bb-leading-body);
 }
 
-/* Tres teselas por fila desde 721 px (en móvil, la lista pasa a filas de clave y valor) y seis desde 1100. */
+/* Tres teselas por fila desde 721 px (en móvil, la lista pasa a filas de clave y valor) y seis desde 1600. */
+/* Posiciones sin semanas selladas: la rejilla de la gráfica con su eje a la derecha y el texto encima. */
+.chart {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  min-height: calc(var(--bb-plate-h) * 2);
+  border: var(--bb-stroke-hair) solid var(--bb-line-strong);
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      var(--bb-line) 0 var(--bb-stroke-hair),
+      transparent var(--bb-stroke-hair) var(--bb-space-8)
+    ),
+    var(--bb-panel);
+}
+
+.chartAxis {
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  margin: 0;
+  padding: var(--bb-space-2) var(--bb-space-2) var(--bb-space-2) 0;
+  color: var(--bb-text-3);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  list-style: none;
+  text-align: right;
+}
+
+/* Cada marca del eje, sobre el panel: la rejilla nunca pasa por debajo del texto (`RD-VIS-05`). */
+.chartAxis li {
+  padding-inline: var(--bb-space-1);
+  background: var(--bb-panel);
+}
+
+.chartEmpty {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  justify-self: center;
+  max-width: 24ch;
+  padding: var(--bb-space-2) var(--bb-space-3);
+  background: var(--bb-panel);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+  text-align: center;
+}
+
+/* La vitrina vacía: seis huecos por fila en silueta, con «???». */
+.achievements {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--bb-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.achievements li {
+  display: grid;
+  place-items: center;
+  height: var(--bb-space-12);
+  border: var(--bb-stroke) dashed var(--bb-line-strong);
+  color: var(--bb-text-3);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-extrabold);
+}
+
 @media (min-width: 721px) {
   .tiles {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
-@media (min-width: 1100px) {
+/* Seis teselas por fila solo con sitio para «MEJOR PUESTO» (antes, a 1366 y 1440 pisaba el borde). */
+@media (min-width: 1600px) {
   .tiles {
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
+}
 
+@media (min-width: 1100px) {
   .columns {
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   }
 }
 
-/* En móvil la cabeza de la pantalla ya enseña el nombre en display: el del panel sobra. */
+/* En móvil la cabeza de la pantalla ya enseña el nombre en display: el del panel sobra. La vitrina, de cuatro. */
 @media (max-width: 720px) {
   .name {
     display: none;
+  }
+
+  .achievements {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

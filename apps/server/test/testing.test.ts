@@ -14,6 +14,15 @@ describe('buzón de los E2E (§4.15)', () => {
     })
   })
 
+  it('con NODE_ENV=test da el enlace de baja de un aviso', async () => {
+    const t = await makeApp()
+    const res = await t.app.inject({
+      method: 'GET',
+      url: '/api/test/unsubscribe-link?to=Aina@example.com&kind=battle.drop',
+    })
+    expect(res.json().data.url).toMatch(/\/baja\?token=/)
+  })
+
   it('fuera de test la ruta no existe', async () => {
     const t = await makeApp({ config: { env: 'development' } })
     expect(

@@ -35,9 +35,8 @@ describe('página de baja (§2.12.4)', () => {
     expect(screen.getByRole('menuitem', { name: /Solo estos/ })).toHaveTextContent('Recordatorio para subir')
     const user = userEvent.setup()
     await user.keyboard('{ArrowDown}{Enter}')
-    expect(await screen.findByRole('status')).toHaveTextContent(
-      'ya solo recibirás los emails imprescindibles',
-    )
+    expect(await screen.findByText(/ya solo recibirás los emails imprescindibles/)).toHaveFocus()
+    expect(document.activeElement).toHaveTextContent('ya solo recibirás los emails imprescindibles')
     expect(calls.at(-1)).toMatchObject({ method: 'POST', body: { token: 'abc', scope: 'all' } })
   })
 
@@ -45,7 +44,7 @@ describe('página de baja (§2.12.4)', () => {
     const calls = mockApi()
     renderInRouter(<UnsubscribePage />, '/baja?token=abc')
     await userEvent.click(await screen.findByRole('menuitem', { name: /Solo estos/ }))
-    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('«Recordatorio para subir»'))
+    await waitFor(() => expect(document.activeElement).toHaveTextContent('«Recordatorio para subir»'))
     expect(calls.at(-1)?.body).toEqual({ token: 'abc', scope: 'kind' })
   })
 

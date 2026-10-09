@@ -1161,7 +1161,10 @@ test.describe('390 × 844', () => {
       page,
     }) => {
       await page.goto(path)
-      await expect(page.locator(PIECE)).toBeVisible()
+      // Las secciones de Opciones que funcionan no llevan pieza en móvil (la cabeza ya nombra la sección).
+      if (WORKING_SETTINGS.includes(path))
+        await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toBeAttached()
+      else await expect(page.locator(PIECE)).toBeVisible()
       await settle(page)
       const share = await wineShare(page)
       test.info().annotations.push({ type: 'granate', description: `${path}: ${(share * 100).toFixed(2)} %` })
