@@ -17,6 +17,7 @@ describe('balance: semana y voto (Anexo B)', () => {
       weekOffset: 1,
     })
     expect(balance.VOTING_CLOSE_DISPLAY_AT).toEqual({ isoWeekday: 7, hour: 23, minute: 59, second: 59 })
+    expect(balance.LAST_HOUR_MS).toBe(3_600_000)
   })
 
   // Anexo B: el cierre de votos se guarda como el instante exclusivo del lunes 00:00:00.000, así la

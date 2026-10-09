@@ -1,6 +1,7 @@
 // Puntos de temporada (guía §2.9, Anexo B): 25, 18, 15, 12, 10, 8, 6, 4, 2, 1 del 1.º al 10.º y 1
 // por cada entrada clasificada fuera del top 10. La clasificación de la temporada con sus
-// desempates (`seasonStandings`) y la temporada de una semana (`seasonOf`) llegan en la Fase 7.
+// desempates (`seasonStandings`) llega en la Fase 7; la temporada de una semana (`seasonOf`) está en
+// `calendar`.
 
 import { SEASON_POINTS_BY_POSITION, SEASON_POINTS_QUALIFIED_OUTSIDE_TOP } from './balance'
 import { assertIntegerInRange } from './internal/guards'
