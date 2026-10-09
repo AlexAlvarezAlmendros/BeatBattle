@@ -12,3 +12,18 @@ export const MeSchema = z.object({
   xp: z.number().int(),
 })
 export type Me = z.infer<typeof MeSchema>
+
+/**
+ * Una sesión abierta en Ajustes → Sesiones (§2.3, `RF-AUTH-10`, tarea 2.20): el navegador resumido
+ * («Chrome en Linux», nunca la cadena entera), su última actividad y si es la de esta petición. Ni el token
+ * ni la IP salen del servidor.
+ */
+export const ActiveSessionSchema = z.object({
+  id: z.string(),
+  device: z.string().nullable(),
+  createdAt: z.number().int(),
+  lastActiveAt: z.number().int(),
+  current: z.boolean(),
+})
+export type ActiveSession = z.infer<typeof ActiveSessionSchema>
+export const ActiveSessionListSchema = z.array(ActiveSessionSchema)

@@ -136,10 +136,15 @@ describe('flujos de cuenta (§2.3)', () => {
   it('RF-AUTH-09: tampoco se puede cambiar a un email desechable', async () => {
     const t = await makeApp({ routes })
     const { cookie } = await createAccount(t, { email: 'aina@example.com', username: 'aina' })
-    await post(t, '/api/auth/change-email', cookie, {
+    const sent = mailer(t).sent.length
+    const res = await post(t, '/api/auth/change-email', cookie, {
       newEmail: 'x@mailinator.com',
       callbackURL: '/ajustes/cuenta',
     })
+    // Se rechaza al pedirlo, con su código, y no sale ningún email.
+    expect(res.statusCode).toBe(422)
+    expect(res.json()).toMatchObject({ code: 'EMAIL_DISPOSABLE' })
+    expect(mailer(t).sent.length).toBe(sent)
     const link = mailer(t)
       .lastTo('aina@example.com')
       ?.text.match(/https?:\/\/\S+verify-email\?\S+/)?.[0]

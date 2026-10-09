@@ -1,0 +1,142 @@
+/* Secciones de Opciones que funcionan (Fase 2): el emblema de la cuña y los grupos del panel. */
+.emblem {
+  display: grid;
+  gap: var(--bb-space-3);
+  justify-items: start;
+  padding: var(--bb-space-6);
+  background: var(--bb-panel-veil);
+}
+
+.emblemTitle {
+  font-size: var(--bb-fs-title);
+  line-height: 1;
+}
+
+.emblemKeys {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-6);
+}
+
+.group {
+  display: grid;
+  gap: var(--bb-space-3);
+  min-inline-size: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.legend {
+  /* En un `fieldset` la leyenda no es elemento de la rejilla: su aire va aparte. */
+  margin-bottom: var(--bb-space-2);
+  padding: 0;
+  color: var(--bb-white);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.help {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  line-height: var(--bb-leading-body);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-2);
+}
+
+.status {
+  min-height: calc(var(--bb-fs-sm) * var(--bb-leading-body));
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+/* En táctil no hay Q/E (§3.3 «Pestañas en móvil»): el emblema solo dice la sección. */
+@media (pointer: coarse) {
+  .emblemKeys {
+    display: none;
+  }
+}
+
+/* Un formulario apilado: los campos a todo lo ancho y el botón a su ancho, a la izquierda. */
+.stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: stretch;
+  gap: var(--bb-space-4);
+}
+
+.stack > button,
+.stack > a {
+  justify-self: start;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+}
+
+/*
+ * Ajustes → Sesiones: una fila por sesión con un filete entre ellas, como las de la ayuda de Opciones: el
+ * navegador (en display, con «Esta sesión» al lado), la actividad debajo y «Cerrar» a la derecha.
+ */
+.sessions {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  border-top: var(--bb-stroke-hair) solid var(--bb-line);
+  list-style: none;
+}
+
+.session {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--bb-space-3);
+  padding: var(--bb-space-3) 0;
+  border-bottom: var(--bb-stroke-hair) solid var(--bb-line);
+}
+
+.sessionBody {
+  display: grid;
+  gap: var(--bb-space-1);
+  min-width: 0;
+}
+
+.sessionDevice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bb-space-2);
+  color: var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-plate);
+  line-height: var(--bb-leading-label);
+  text-transform: uppercase;
+}
+
+.sessionMeta {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}

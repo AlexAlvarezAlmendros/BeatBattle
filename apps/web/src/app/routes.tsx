@@ -73,6 +73,9 @@ function Redirecting() {
 }
 
 const settings = () => import('../features/settings/SettingsPages')
+const accountSettings = () => import('../features/settings/AccountSettings')
+const emailSettings = () => import('../features/settings/EmailSettings')
+const sessionsSettings = () => import('../features/settings/SessionsSettings')
 const auth = () => import('../features/auth/AuthPages')
 
 export interface CreateRoutesOptions {
@@ -200,10 +203,10 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
                 },
                 { path: 'sonido', lazy: page(settings, (m) => m.SoundSettingsPage) },
                 { path: 'movimiento', lazy: page(settings, (m) => m.MotionSettingsPage) },
-                { path: 'cuenta', lazy: page(settings, (m) => m.AccountSettingsPage) },
+                { path: 'cuenta', lazy: page(accountSettings, (m) => m.AccountSettingsPage) },
                 { path: 'perfil', lazy: page(settings, (m) => m.ProfileSettingsPage) },
-                { path: 'emails', lazy: page(settings, (m) => m.EmailSettingsPage) },
-                { path: 'sesiones', lazy: page(settings, (m) => m.SessionsSettingsPage) },
+                { path: 'emails', lazy: page(emailSettings, (m) => m.EmailSettingsPage) },
+                { path: 'sesiones', lazy: page(sessionsSettings, (m) => m.SessionsSettingsPage) },
                 { path: 'privacidad', lazy: page(settings, (m) => m.PrivacySettingsPage) },
                 { path: 'accesibilidad', lazy: page(settings, (m) => m.AccessibilitySettingsPage) },
               ],

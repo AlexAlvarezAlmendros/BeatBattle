@@ -270,7 +270,24 @@
     },
     "account": {
       "title": "Cuenta",
-      "summary": "Aquí irán el email, la contraseña y los accesos con Google o Discord."
+      "summary": "El email con el que entras y tu contraseña.",
+      "require": "Entra para cambiar tu email o tu contraseña.",
+      "email": {
+        "title": "Email",
+        "current": "Ahora entras con {email}.",
+        "newLabel": "Email nuevo",
+        "submit": "Cambiar email",
+        "sent": "Te hemos escrito a tu dirección actual: aprueba el cambio desde allí. Después te llegará otro enlace a la nueva para confirmarla.",
+        "same": "Es la dirección que ya tienes."
+      },
+      "password": {
+        "title": "Contraseña",
+        "current": "Contraseña actual",
+        "closeOthers": "Cerrar las demás sesiones",
+        "closeOthersHelp": "Si alguien más conocía la contraseña, lo saca de la cuenta en todos los demás navegadores.",
+        "submit": "Cambiar contraseña",
+        "changed": "Contraseña cambiada. Te hemos enviado un aviso por email."
+      }
     },
     "profile": {
       "title": "Perfil",
@@ -278,11 +295,48 @@
     },
     "emails": {
       "title": "Emails",
-      "summary": "Aquí irán los avisos de la batalla, el marketing y las horas de silencio."
+      "summary": "Qué te escribimos. Los emails de servicio (verificar, recuperar y avisos de seguridad) llegan siempre.",
+      "require": "Entra para elegir qué emails te llegan.",
+      "notices": {
+        "title": "Avisos de la batalla",
+        "help": "Activos de entrada. Cada uno se apaga aquí o desde el enlace de baja del propio email."
+      },
+      "monday": {
+        "title": "El lunes",
+        "label": "Drop y resultados en un solo email",
+        "help": "Si lo apagas, el drop y los resultados llegan por separado."
+      },
+      "consents": {
+        "title": "Permisos",
+        "help": "Solo te escribimos esto si lo marcas, y lo quitas cuando quieras."
+      },
+      "rules": "Nada que no sea de servicio sale entre las 22:00 y las 08:00 (hora de Madrid), y te llegan como mucho 3 a la semana.",
+      "saving": "Guardando…",
+      "saved": "Guardado.",
+      "loadError": "No se han podido leer tus preferencias.",
+      "saveError": "No se ha podido guardar el cambio. Vuelve a probar.",
+      "retry": "Reintentar"
     },
     "sessions": {
       "title": "Sesiones",
-      "summary": "Aquí irán tus sesiones activas y el cierre de las que no reconozcas."
+      "summary": "Dónde tienes la cuenta abierta. Si ves una que no reconoces, ciérrala y cambia la contraseña.",
+      "require": "Entra para ver dónde tienes la cuenta abierta.",
+      "listTitle": "Sesiones abiertas",
+      "current": "Esta sesión",
+      "unknownDevice": "Navegador desconocido",
+      "lastActive": "Última actividad: {date}",
+      "opened": "Abierta el {date}",
+      "close": "Cerrar",
+      "closeLabel": "Cerrar la sesión de {device}",
+      "closeOthers": "Cerrar las demás",
+      "closeOthersHelp": "Cierra todas menos esta y te avisa por email.",
+      "closed": "Sesión cerrada.",
+      "closedOthers": "Hemos cerrado las demás sesiones.",
+      "alone": "No tienes la cuenta abierta en ningún otro sitio.",
+      "activityNote": "La última actividad se actualiza como mucho una vez al día.",
+      "loadError": "No se han podido leer tus sesiones.",
+      "actionError": "No se ha podido cerrar. Vuelve a probar.",
+      "retry": "Reintentar"
     },
     "privacy": {
       "title": "Privacidad",
@@ -365,7 +419,8 @@
         "textSize": "Tamaño de texto",
         "gate": "Puerta de entrada"
       }
-    }
+    },
+    "changeSection": "cambiar sección"
   },
   "legal": {
     "summary": "Aquí irá el texto de este documento legal.",
@@ -1277,7 +1332,9 @@
       "invalidToken": "El enlace no es válido o ya se ha usado.",
       "tokenExpired": "El enlace ha caducado. Pide otro.",
       "tooManyRequests": "Demasiados intentos seguidos. Espera un poco y vuelve a probar.",
-      "unknown": "Algo ha fallado. Vuelve a intentarlo en un momento."
+      "unknown": "Algo ha fallado. Vuelve a intentarlo en un momento.",
+      "invalidPassword": "La contraseña actual no es correcta.",
+      "credentialAccountNotFound": "Tu cuenta entra con Google o Discord: no tiene contraseña que cambiar."
     },
     "strength": {
       "label": "Fortaleza",

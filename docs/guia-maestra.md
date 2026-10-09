@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.32 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.33 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -257,8 +257,17 @@ animación de bienvenida (§3.8.9). Los dominios de email desechables se rechaza
 **Cambio de email.** Se aprueba desde la dirección actual (`auth.change_email`), después la nueva recibe
 su verificación y, al verificarla, las dos reciben `auth.security`. El último enlace puede abrirse sin
 sesión (otro navegador): el aviso sale del propio token de verificación, sin estado en memoria.
+El dominio desechable se rechaza al **pedir** el cambio (`EMAIL_DISPOSABLE`), antes de mandar ningún email.
 **Contraseña.** Cambiarla o «Cerrar las demás» sesiones avisa con `auth.security` (qué, cuándo y desde
 qué navegador, resumido: «Chrome en Linux»); restablecerla revoca todas las sesiones (`RF-AUTH-08`).
+Cambiarla pide la actual y, por defecto, cierra las demás sesiones.
+
+**Sesiones** (Ajustes → Sesiones, `RF-AUTH-10`). `GET /api/me/sessions` da, de cada sesión abierta, el
+navegador resumido, cuándo se abrió, su última actividad (Better Auth la renueva como mucho una vez al
+día) y si es la actual, que va primero; nunca el token ni la IP. `DELETE /api/me/sessions/:id` cierra una
+de la propia cuenta (la actual no: para eso se sale). «Cerrar las demás» es
+`/api/auth/revoke-other-sessions`, que avisa. No se usa `list-sessions` de Better Auth: devuelve el
+token de cada sesión al navegador y exige una sesión de menos de un día.
 
 **Perfil público** (`/p/:username`): avatar, nombre, rango y nivel, bio (160 caracteres), ciudad,
 enlaces (Instagram, SoundCloud, YouTube, Spotify, BeatStars), color de acento (rojo, blanco o
@@ -1251,8 +1260,9 @@ con su propia firma, §3.1) y las de autenticación, admin y legales, que usan u
 - **HUD superior** (rejilla de tres columnas, medianil de 48 px):
   - **Izquierda, el jugador**: «1P» en display rojo, avatar en marco de chaflán con borde rojo y
     fondo granate (monograma si no hay foto; la foto pasa por un duotono rojo y negro con trama),
-    nombre, nivel y rango, y el **medidor de XP** segmentado con «XP 2.980 · NV 8 · 3.350». Sin
-    sesión: «1P · PULSA PARA UNIRTE» (lleva a `/entrar`).
+    nombre, nivel y rango, y el **medidor de XP** segmentado con «XP 2.980 · NV 8 · 3.350», en
+    todas las pantallas del marco de juego. Sin sesión (o mientras se lee): «1P · PULSA PARA UNIRTE»
+    (lleva a `/entrar`).
   - **Centro, el contexto**: el reloj de ronda (menú, título, selección), el contador del umbral
     (Modo Jurado) o la placa de título (pantallas interiores).
   - **Derecha**: temporada («T4 · 12 PTS · 9.º»), racha («×3») y el botón de sonido (44 px,
@@ -1946,7 +1956,7 @@ las pantallas de texto sin pieza, como la galería, no los llevan.
 | **Archivo** (`/semanas`) | «Selección de escenario»: rejilla de semanas selladas (vinilo-sol en miniatura, número de entradas y podio), con flechas y Q/E |
 | **Temporada** | Clasificación de torneo con puntos tipo F1; el top 3 en peanas pequeñas |
 | **Cómo se juega** | «Lista de movimientos», un menú de juego en la cuña (cursor con 1P, ↑↓, Intro): 1 Pilla el sample · 2 Flipea el sample · 3 Sube y vota, cada uno con sus teclas o su gesto como ayuda («[INTRO] Jugar», «En tu estudio», «[1]–[5] Votar») y «HECHO» para quien lo ha completado (con las cuentas, Fase 2), más «Bases de la competición [B]» y «Volver al menú [Esc]»; a la derecha, las reglas de juego limpio en 5 filas con índice (voto ciego, escucha mínima, Ronda justa, media bayesiana, el XP no puntúa), cada una con su nombre en display y una línea de explicación |
-| **Ajustes = OPCIONES** | Pestañas Q/E (Sonido · Movimiento · Cuenta · Perfil · Emails · Sesiones · Privacidad · Accesibilidad; `/ajustes` lleva a Sonido); cada opción es una placa con «◀ SÍ ▶» o un medidor de 10 pasos que se cambia con ←/→: volumen por bus, reducir movimiento, sin sonido, **modo serio**, tamaño de texto, calidad visual, puerta de entrada y atajos de una tecla (Accesibilidad, `RNF-A11Y-08`). Mientras no funcionan (Fase 2), la cuña enseña las placas de la sección en vista previa, quietas («Todavía no hacen nada»), sobre un tablero opaco con su pie, con su nombre en display y su valor o medidor (en un tablero estrecho, por debajo de 20 rem, el medidor baja bajo el nombre; por debajo de 22 rem, el nombre baja de 125 a 105 %), y el granate queda en el rango de las maquetas (≤ 24,5 % a 1440 px, ≤ 18 % en móvil; por debajo de 360 px, donde las pestañas ocupan varias filas, la cuña, que es fija, empieza bajo ellas y al desplazar la vista previa pasa sobre negro); el sello «EN OBRAS» pasa al panel |
+| **Ajustes = OPCIONES** | Pestañas Q/E (Sonido · Movimiento · Cuenta · Perfil · Emails · Sesiones · Privacidad · Accesibilidad; `/ajustes` lleva a Sonido); cada opción es una placa con «◀ SÍ ▶» o un medidor de 10 pasos que se cambia con ←/→: volumen por bus, reducir movimiento, sin sonido, **modo serio**, tamaño de texto, calidad visual, puerta de entrada y atajos de una tecla (Accesibilidad, `RNF-A11Y-08`). Mientras no funcionan (Fase 2), la cuña enseña las placas de la sección en vista previa, quietas («Todavía no hacen nada»), sobre un tablero opaco con su pie, con su nombre en display y su valor o medidor (en un tablero estrecho, por debajo de 20 rem, el medidor baja bajo el nombre; por debajo de 22 rem, el nombre baja de 125 a 105 %), y el granate queda en el rango de las maquetas (≤ 24,5 % a 1440 px, ≤ 18 % en móvil; por debajo de 360 px, donde las pestañas ocupan varias filas, la cuña, que es fija, empieza bajo ellas y al desplazar la vista previa pasa sobre negro); el sello «EN OBRAS» pasa al panel. Las secciones que ya funcionan (Cuenta, Emails y Sesiones desde la Fase 2) llevan en la cuña su **emblema**: «OPCIONES», el nombre de la sección en display y «[Q] [E] cambiar sección» (sin las teclas en táctil); el panel, sus grupos con título (conmutadores en fila o formulario apilado) y una línea de estado que anuncia «Guardado.» |
 | **Autenticación** | Tarea 2.15: entrar con email **o** nombre de productor; el registro lleva el medidor `zxcvbn-ts` (cargado al escribir la contraseña, nunca con la página) con el medidor segmentado del juego, los avisos como chips «SÍ / NO» (marcados) y los dos consentimientos (desmarcados); los errores van en el campo al que pertenecen o, si no son de un campo, en un aviso de papel; `/verificar` (enviado, reenviar con espera de 60 s, enlace caducado o usado, verificado) y `/recuperar` (pedir el enlace; con `?token=`, la contraseña nueva avisando de que se cierran las sesiones). Lo que pide sesión lo dice dentro del panel («Entra para…», `RequireSession`), sin redirigir: la protección es la del servidor. **Con el formulario de verdad** (Fase 2) el panel es más alto que el logo: en escritorio el bloque sigue centrado entre el HUD y la barra, pero el pie del panel ya no va a la altura del lockup; en móvil el panel sigue al logo, el **primer campo se ve sin desplazar** (de 320 × 568 a 390 × 844) y la página se desplaza para el resto, con «Volver al menú» al pie (el formulario no cabe sobre la barra). El primer elemento de juego es el primer campo: en reposo, ↑↓ e Intro lo enfocan sin enviar nada (`useIdleFormKeys`). «CONTINUAR PARTIDA» (entrar) y «NUEVO JUGADOR» (registro) como pantalla de título (maqueta `00-titulo`): a la izquierda, sobre los rayos, el logo con el mismo lockup que el menú («TORNEO SEMANAL DE PRODUCTORES by [OTP.]», en una fila); el bloque del logo y el panel se centra en vertical entre el HUD y la barra, con el pie del panel alineado con el del lockup y un ancho de panel acotado; en móvil, el panel va anclado al pie y acaba sobre la barra (en el móvil bajo la cabeza se acerca al logo y el panel se aprieta; por debajo de 360 px el logo cede alto); campos normales y accesibles en paneles opacos; Google y Discord como botones neutros; abajo, la barra de controles con sus teclas y la firma |
 | **Admin y legales** | Marco simple: HUD sin capa de juego, paneles y tablas, y la barra de controles con sus teclas y la firma en el centro; sin anunciador ni puerta. Los legales usan la plantilla de las interiores (mientras no estén los textos, Fase 10, el sello «EN OBRAS» en la columna de la pieza) y sus pestañas van en una fila de rótulos cortos («BASES · TÉRMINOS · PRIVACIDAD · COOKIES»; el nombre completo, en el título del panel), también en móvil a partir de 360 px |
 
@@ -3450,6 +3460,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-08 | 0.6.33 | **Ajustes → Cuenta, Emails y Sesiones** (tareas 2.16 y 2.20, §2.3, §2.12.4, §3.8.14): las tres secciones funcionan, con el emblema en la cuña; `GET`/`DELETE /api/me/sessions` en lugar de `list-sessions` de Better Auth (que expone los tokens); el email desechable se rechaza al pedir el cambio; el HUD lleva la ficha del jugador con sesión en todas las pantallas de juego (§3.4.1). |
 | 2026-10-08 | 0.6.32 | **Pantallas de cuenta y bienvenida** (tareas 2.15 y 2.17, §3.8.9, §3.8.14): entrar con email o nombre, registro con medidor diferido y casillas, verificar y recuperar, `GET /api/me` para el HUD (sin el cliente de Better Auth en la primera pintura), lo que pide sesión se pide dentro del panel, y la bienvenida con la carta plana y el primer logro por ganar (ninguno se gana al registrarse). |
 | 2026-10-08 | 0.6.31 | **Dirección de envío** (decisión del usuario): `contacto@otherpeople.es` (§4.19.1, §7), con el riesgo de cupo compartido con la web del sello anotado. |
 | 2026-10-08 | 0.6.30 | **Rebotes** (tarea 2.11, §4.19.2): qué cuenta como permanente, el lector puro, el buzón detrás de una interfaz e `imapflow` fijado en la 2.2.5. La conexión real con el Workspace está pendiente de sus credenciales. |

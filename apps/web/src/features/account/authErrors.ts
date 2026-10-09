@@ -23,24 +23,28 @@ const KNOWN = [
   'INVALID_TOKEN',
   'TOKEN_EXPIRED',
   'TOO_MANY_REQUESTS',
+  'INVALID_PASSWORD',
+  'CREDENTIAL_ACCOUNT_NOT_FOUND',
 ] as const
 export type AuthErrorCode = (typeof KNOWN)[number]
 
 /** El campo al que pertenece cada error (para pintarlo debajo de él); el resto va en el aviso del formulario. */
-export const FIELD_OF: Partial<Record<AuthErrorCode, 'email' | 'username' | 'password'>> = {
-  USER_ALREADY_EXISTS: 'email',
-  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: 'email',
-  EMAIL_DISPOSABLE: 'email',
-  INVALID_EMAIL: 'email',
-  USERNAME_IS_ALREADY_TAKEN: 'username',
-  USERNAME_RESERVED: 'username',
-  INVALID_USERNAME: 'username',
-  USERNAME_TOO_SHORT: 'username',
-  USERNAME_TOO_LONG: 'username',
-  PASSWORD_TOO_SHORT: 'password',
-  PASSWORD_TOO_LONG: 'password',
-  PASSWORD_COMPROMISED: 'password',
-}
+export const FIELD_OF: Partial<Record<AuthErrorCode, 'email' | 'username' | 'password' | 'currentPassword'>> =
+  {
+    INVALID_PASSWORD: 'currentPassword',
+    USER_ALREADY_EXISTS: 'email',
+    USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: 'email',
+    EMAIL_DISPOSABLE: 'email',
+    INVALID_EMAIL: 'email',
+    USERNAME_IS_ALREADY_TAKEN: 'username',
+    USERNAME_RESERVED: 'username',
+    INVALID_USERNAME: 'username',
+    USERNAME_TOO_SHORT: 'username',
+    USERNAME_TOO_LONG: 'username',
+    PASSWORD_TOO_SHORT: 'password',
+    PASSWORD_TOO_LONG: 'password',
+    PASSWORD_COMPROMISED: 'password',
+  }
 
 export function authErrorCode(
   error: { code?: string; status?: number } | null | undefined,
@@ -58,3 +62,17 @@ export function authErrorText(code: AuthErrorCode | 'UNKNOWN'): string {
   // biome-ignore lint/suspicious/noExplicitAny: la clave sale del código, que es de la lista de arriba
   return t(`account.errors.${keyOf(code)}` as any)
 }
+
+/** Errores de un formulario de cuenta: el de cada campo y el del aviso del formulario. */
+export type Errors = Partial<
+  Record<'email' | 'username' | 'password' | 'currentPassword' | 'form', AuthErrorCode | 'UNKNOWN'>
+>
+
+/** Reparte un error de la API entre el campo al que pertenece y el aviso del formulario. */
+export function placeError(error: { code?: string; status?: number } | null | undefined): Errors {
+  const code = authErrorCode(error)
+  const field = code === 'UNKNOWN' ? undefined : FIELD_OF[code]
+  return field ? { [field]: code } : { form: code }
+}
+
+export const textOf = (code: AuthErrorCode | 'UNKNOWN' | undefined) => (code ? authErrorText(code) : null)
