@@ -22,6 +22,13 @@
       "when": 1791458051727,
       "tag": "0002_email",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1791578801079,
+      "tag": "0003_semanas",
+      "breakpoints": true
     }
   ]
 }

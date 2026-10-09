@@ -13,6 +13,7 @@ import { type Clock, systemClock } from './lib/clock'
 import { uuidv7 } from './lib/ids'
 import { type LogStream, loggerOptions } from './lib/logger'
 import { createRateLimiter } from './lib/rateLimit'
+import { type AudioMeasurement, measureAudio } from './media/measure'
 import { accountRoutes } from './modules/account/routes'
 import { emailPrefsRoutes } from './modules/emailPrefs/routes'
 import { healthRoutes } from './modules/health/routes'
@@ -20,11 +21,22 @@ import { createHealthService } from './modules/health/service'
 import { meRoutes } from './modules/me/routes'
 import { sessionsRoutes } from './modules/me/sessions'
 import { profileRoutes } from './modules/profile/routes'
+import { samplesRoutes } from './modules/samples/routes'
+import { createSamplesService } from './modules/samples/service'
 import { createCloudinaryStorage, type ImageStorage } from './modules/storage/cloudinary'
+import { fakeStorageRoutes } from './modules/storage/fakeRoutes'
 import { storageSpikeRoutes } from './modules/storage/routes'
+import {
+  createCloudinarySampleStorage,
+  createDiskSampleStorage,
+  type DiskSampleStorage,
+  type SampleStorage,
+} from './modules/storage/samples'
 import { testingRoutes } from './modules/testing/routes'
 import { unsubscribeRoutes } from './modules/unsubscribe/routes'
 import { uploadsRoutes } from './modules/uploads/routes'
+import { weeksRoutes } from './modules/weeks/routes'
+import { createWeeksService } from './modules/weeks/service'
 import { registerClock } from './plugins/clock'
 import { registerErrorHandling } from './plugins/errors'
 import { BODY_LIMIT_BYTES, registerSecurity } from './plugins/security'
@@ -50,6 +62,13 @@ export interface AppDeps {
   mailer?: Mailer | null
   /** Imágenes (avatares, §4.8); por defecto, Cloudinary si está configurado. Los tests pasan una falsa. */
   images?: ImageStorage | null
+  /**
+   * Samples (§4.8, Fase 3); por defecto, el falso en disco con `BB_FAKE_STORAGE` o Cloudinary si está
+   * configurado. Los tests pasan uno en una carpeta temporal.
+   */
+  samples?: SampleStorage | null
+  /** Medición del audio (§4.8.4); por defecto, ffmpeg. */
+  measure?: (source: ReadableStream<Uint8Array>) => Promise<AudioMeasurement>
 }
 
 /**
@@ -119,6 +138,27 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   profileRoutes(app, { db, images, rateLimiter })
   uploadsRoutes(app, { images, rateLimiter, newId })
   accountRoutes(app, { db, images, emails, rateLimiter })
+
+  const samples =
+    deps.samples !== undefined
+      ? deps.samples
+      : config.fakeStorageDir
+        ? createDiskSampleStorage({ root: config.fakeStorageDir, baseUrl: '', secret: config.auth.secret })
+        : config.storage
+          ? createCloudinarySampleStorage(config.storage)
+          : null
+  if (samples && 'put' in samples && config.env !== 'production')
+    fakeStorageRoutes(app, samples as DiskSampleStorage)
+  samplesRoutes(
+    app,
+    createSamplesService({
+      db,
+      storage: samples,
+      measure: deps.measure ?? ((source) => measureAudio(source)),
+      newId,
+    }),
+  )
+  weeksRoutes(app, createWeeksService({ db, storage: samples, newId }))
   // El buzón de los E2E: solo en test, nunca en desarrollo ni en producción.
   if (config.env === 'test') testingRoutes(app, mailer)
   // Spike de Cloudinary (tarea 1.7): solo fuera de producción.
