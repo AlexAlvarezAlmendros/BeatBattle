@@ -1,8 +1,9 @@
-import type { ReactNode } from 'react'
+import { type ReactNode, useId, useRef } from 'react'
 import type { SettingsSectionKey } from '../../app/paths'
 import { ScreenPage } from '../../app/ScreenPage'
 import { t } from '../../i18n'
 import { frameAttributes } from '../../ui/Frame'
+import { useFitText } from '../../ui/hooks/useFitText'
 import { Key } from '../../ui/Key'
 import { SettingsTabs } from './SettingsLayout'
 import styles from './SettingsSection.module.css'
@@ -15,32 +16,43 @@ import styles from './SettingsSection.module.css'
 export function SettingsSection({
   section,
   summary,
+  piece,
   children,
 }: {
   section: SettingsSectionKey
   summary?: ReactNode
+  /** Una pieza propia en vez del emblema (Perfil: la carta en vista previa). */
+  piece?: ReactNode
   children: ReactNode
 }) {
   const title = t(`settings.${section}.title`)
+  const titleRef = useRef<HTMLSpanElement>(null)
+  // El título del emblema en una línea: con «PRIVACIDAD» la columna ya no se ensancha (jurado de la 2.25).
+  useFitText(titleRef, title)
   return (
     <ScreenPage
       title={title}
       kicker={t('frame.plates.settings')}
       titlePlacement="tabs"
+      pieceAlign="start"
       summary={summary}
       piece={
-        <div
-          {...frameAttributes({ cut: 'lg' })}
-          className={styles.emblem}
-          aria-hidden="true"
-          data-settings-emblem=""
-        >
-          <span className="bb-label">{t('frame.plates.settings')}</span>
-          <span className={`bb-display ${styles.emblemTitle}`}>{title}</span>
-          <span className={styles.emblemKeys}>
-            <Key>Q</Key> <Key>E</Key> {t('settings.changeSection')}
-          </span>
-        </div>
+        piece ?? (
+          <div
+            {...frameAttributes({ cut: 'lg' })}
+            className={styles.emblem}
+            aria-hidden="true"
+            data-settings-emblem=""
+          >
+            <span className="bb-label">{t('frame.plates.settings')}</span>
+            <span ref={titleRef} className={`bb-display ${styles.emblemTitle}`}>
+              {title}
+            </span>
+            <span className={styles.emblemKeys}>
+              <Key>Q</Key> <Key>E</Key> {t('settings.changeSection')}
+            </span>
+          </div>
+        )
       }
       tabs={<SettingsTabs />}
       documentTitle={t('settings.pageTitle', { section: title })}
@@ -52,7 +64,8 @@ export function SettingsSection({
 
 /**
  * Un grupo de opciones con su título (un `fieldset`, que no estira el panel): conmutadores en fila que
- * saltan de línea (`chips`) o un formulario apilado (`stack`).
+ * saltan de línea (`chips`), placas de opción en una rejilla de columnas iguales (`plates`, con
+ * `FilterChip variant="plate"`) o un formulario apilado (`stack`).
  */
 export function SettingsGroup({
   title,
@@ -62,14 +75,19 @@ export function SettingsGroup({
 }: {
   title: string
   help?: ReactNode
-  layout?: 'chips' | 'stack'
+  layout?: 'chips' | 'stack' | 'plates'
   children: ReactNode
 }) {
+  const helpId = useId()
   return (
-    <fieldset className={styles.group}>
+    <fieldset className={styles.group} aria-describedby={help ? helpId : undefined}>
       <legend className={styles.legend}>{title}</legend>
-      {help && <p className={styles.help}>{help}</p>}
-      <div className={layout === 'chips' ? styles.controls : styles.stack}>{children}</div>
+      {help && (
+        <p id={helpId} className={styles.help}>
+          {help}
+        </p>
+      )}
+      <div className={styles[layout === 'chips' ? 'controls' : layout]}>{children}</div>
     </fieldset>
   )
 }

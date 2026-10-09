@@ -9,5 +9,10 @@
     "path": "/img/email/otp-slap@2x.png",
     "width": 136,
     "height": 98
+  },
+  "header": {
+    "path": "/img/email/header@2x.png",
+    "width": 568,
+    "height": 151
   }
 }

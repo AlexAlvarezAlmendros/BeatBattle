@@ -9,7 +9,8 @@
  *
  *   node tools/brand/email-images.mjs [http://localhost:5173]
  *
- * Deja en `apps/web/public/img/email/` `logo@2x.png` y `otp-slap@2x.png`, y sus medidas a 1× en
+ * Deja en `apps/web/public/img/email/` `logo@2x.png`, `otp-slap@2x.png` y `header@2x.png` (la cabecera
+ * entera: la cuña granate con el logo y la pegatina), y sus medidas a 1× en
  * `packages/emails/src/images.json` (las usa la cabecera para el `width`/`height` de cada `<img>`). Las
  * imágenes se commitean: la build y la CI no necesitan Chrome.
  */
@@ -62,9 +63,61 @@ try {
       const slap = new Image()
       slap.src = slapUrl
       await slap.decode()
+      /**
+       * La cabecera entera (§3.8.12, jurado de la 2.25): la cuña granate con su diagonal roja y blanca, como
+       * la arena, y encima el logo con la pegatina a su lado (el lockup «by OTP.»), sobre negro propio.
+       * Los colores salen de los tokens de la web (`getComputedStyle`), nunca de números sueltos.
+       */
+      const header = (width) => {
+        const token = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+        const scale = 2
+        const logoW = logo.width
+        const logoH = logo.height
+        const slapW = slap.naturalWidth / 2
+        const slapH = slap.naturalHeight / 2
+        const canvas = document.createElement('canvas')
+        canvas.width = width * scale
+        canvas.height = logoH + 4 * pad * scale
+        const ctx = canvas.getContext('2d')
+        const h = canvas.height
+        const w = canvas.width
+        ctx.fillStyle = token('--bb-black')
+        ctx.fillRect(0, 0, w, h)
+        // La cuña: de la izquierda hasta la diagonal, que sube hacia la derecha (17° de la vertical).
+        const slope = Math.tan((17 * Math.PI) / 180) * h
+        const top = logoW + 4 * pad * scale + slapW + slope
+        ctx.fillStyle = token('--bb-wine-2')
+        ctx.beginPath()
+        ctx.moveTo(0, 0)
+        ctx.lineTo(top, 0)
+        ctx.lineTo(top - slope, h)
+        ctx.lineTo(0, h)
+        ctx.closePath()
+        ctx.fill()
+        // La diagonal: el trazo rojo y, a su lado, el blanco fino.
+        const stroke = (color, offset, lineWidth) => {
+          ctx.strokeStyle = color
+          ctx.lineWidth = lineWidth
+          ctx.beginPath()
+          ctx.moveTo(top + offset, 0)
+          ctx.lineTo(top - slope + offset, h)
+          ctx.stroke()
+        }
+        stroke(token('--bb-red'), 4 * scale, 5 * scale)
+        stroke(token('--bb-white'), 11 * scale, 1.5 * scale)
+        // El logo y, al pie de su derecha, la pegatina (el lockup de la web).
+        ctx.drawImage(logo, 2 * pad * scale, 2 * pad * scale, logoW, logoH)
+        ctx.drawImage(slap, 2 * pad * scale + logoW + 2 * pad, h - 2 * pad * scale - slapH, slapW, slapH)
+        return {
+          data: canvas.toDataURL('image/png'),
+          width: canvas.width / scale,
+          height: canvas.height / scale,
+        }
+      }
       return {
         logo: onBlack(logo, logo.width, logo.height),
         slap: onBlack(slap, slap.naturalWidth, slap.naturalHeight),
+        header: header(568),
       }
     },
     { pad: PAD, slapUrl },
@@ -72,7 +125,7 @@ try {
   await mkdir(OUT, { recursive: true })
   const manifest = {}
   for (const [name, image] of Object.entries(images)) {
-    const file = name === 'logo' ? 'logo@2x.png' : 'otp-slap@2x.png'
+    const file = { logo: 'logo@2x.png', slap: 'otp-slap@2x.png', header: 'header@2x.png' }[name]
     await writeFile(path.join(OUT, file), Buffer.from(image.data.split(',')[1], 'base64'))
     manifest[name] = {
       path: `/img/email/${file}`,

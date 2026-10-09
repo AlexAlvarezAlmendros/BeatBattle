@@ -66,7 +66,8 @@ describe('perfil público (§3.8.10)', () => {
     const links = screen.getByRole('navigation', {
       name: t('pages.profile.linksLabel', { name: 'Kairo.wav' }),
     })
-    const instagram = within(links).getByRole('link', { name: 'Instagram' })
+    const instagram = within(links).getByRole('link', { name: /^Instagram/ })
+    expect(instagram).toHaveTextContent(t('pages.profile.newTab'))
     expect(instagram).toHaveAttribute('href', 'https://instagram.com/kairo.wav')
     expect(instagram).toHaveAttribute('rel', 'noopener noreferrer me')
     expect(within(links).queryByRole('link', { name: t('pages.profile.edit') })).toBeNull()

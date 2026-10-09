@@ -1,3 +1,4 @@
+import { levelProgress, rankTitle } from '@beatbattle/rules'
 import {
   ACCENTS,
   type Accent,
@@ -18,6 +19,7 @@ import { DATE_FORMATS, formatDate, t } from '../../i18n'
 import { ApiClientError, apiFetch } from '../../net/api'
 import { Button } from '../../ui/Button'
 import { TextAreaField, TextField } from '../../ui/Field'
+import { ProducerCard } from '../../ui/ProducerCard'
 import { Done, PaperNotice } from '../account/FormBits'
 import { RequireSession } from '../account/RequireSession'
 import { initialsOf, useSession } from '../account/session'
@@ -33,8 +35,13 @@ const PROFILE_KEY = ['me', 'profile'] as const
  * avatar llega con la 2.19.
  */
 export function ProfileSettingsPage() {
+  const signedIn = useSession((state) => state.status === 'signedIn')
   return (
-    <SettingsSection section="profile" summary={t('settings.profile.summary')}>
+    <SettingsSection
+      section="profile"
+      summary={t('settings.profile.summary')}
+      piece={signedIn ? <CardPiece /> : undefined}
+    >
       <RequireSession reason={t('settings.profile.require')}>
         <ProfileEditor />
       </RequireSession>
@@ -94,9 +101,6 @@ function ProfileEditor() {
       <AvatarForm profile={profile.data} />
       <UsernameForm profile={profile.data} />
       <CardForm profile={profile.data} />
-      <Button to={paths.profile(profile.data.username)} variant="outline" className={styles.start}>
-        {t('settings.profile.see')}
-      </Button>
     </>
   )
 }
@@ -154,6 +158,7 @@ function UsernameForm({ profile }: { profile: OwnProfile }) {
           variant="outline"
           loading={state === 'busy'}
           disabled={username.trim() === profile.displayUsername}
+          disabledReason={t('settings.profile.username.unchanged')}
         >
           {t('settings.profile.username.submit')}
         </Button>
@@ -258,27 +263,34 @@ function CardForm({ profile }: { profile: OwnProfile }) {
         help={t('settings.profile.links.hint')}
         layout="stack"
       >
-        {PROFILE_LINK_KINDS.map((kind) => (
-          <TextField
-            key={kind}
-            label={t(`pages.profile.links.${kind}`)}
-            type="url"
-            inputMode="url"
-            autoCapitalize="none"
-            spellCheck={false}
-            maxLength={LINK_MAX}
-            value={links[kind]}
-            onChange={(event) => {
-              setLinks((current) => ({ ...current, [kind]: event.target.value }))
-              edited()
-            }}
-            error={error?.kind === kind ? error.text : null}
-          />
-        ))}
+        <div className={styles.fieldGrid}>
+          {PROFILE_LINK_KINDS.map((kind) => (
+            <TextField
+              key={kind}
+              label={t(`pages.profile.links.${kind}`)}
+              type="url"
+              inputMode="url"
+              autoCapitalize="none"
+              spellCheck={false}
+              maxLength={LINK_MAX}
+              value={links[kind]}
+              onChange={(event) => {
+                setLinks((current) => ({ ...current, [kind]: event.target.value }))
+                edited()
+              }}
+              error={error?.kind === kind ? error.text : null}
+            />
+          ))}
+        </div>
         {error && !error.kind && <PaperNotice>{error.text}</PaperNotice>}
-        <Button type="submit" loading={state === 'busy'} keyHint={t('frame.keys.glyph.enter')}>
-          {t('settings.profile.save')}
-        </Button>
+        <div className={styles.actionsRow}>
+          <Button type="submit" loading={state === 'busy'} keyHint={t('frame.keys.glyph.enter')}>
+            {t('settings.profile.save')}
+          </Button>
+          <Button to={paths.profile(profile.username)} variant="outline">
+            {t('settings.profile.see')}
+          </Button>
+        </div>
         <SettingsStatus>{state === 'saved' ? t('settings.profile.saved') : ''}</SettingsStatus>
       </SettingsGroup>
     </form>
@@ -331,7 +343,7 @@ function AvatarForm({ profile }: { profile: OwnProfile }) {
       layout="stack"
     >
       <div className={styles.avatarRow}>
-        <div className={styles.avatar} data-photo={profile.avatarUrl ? '' : undefined}>
+        <div className={styles.avatar} data-duotone={profile.avatarUrl ? '' : undefined}>
           {profile.avatarUrl ? (
             <img src={profile.avatarUrl} alt={t('settings.profile.avatar.preview')} width={96} height={96} />
           ) : (
@@ -377,5 +389,37 @@ function AvatarForm({ profile }: { profile: OwnProfile }) {
         </SettingsStatus>
       )}
     </SettingsGroup>
+  )
+}
+
+/**
+ * La pieza de Perfil (§3.8.14, jurado de la 2.25): la carta de productor como la ven los demás, con lo
+ * guardado (nombre, nivel, número y foto). Sin sesión, el emblema de la sección.
+ */
+function CardPiece() {
+  const me = useSession((state) => state.me)
+  const profile = useQuery({
+    queryKey: PROFILE_KEY,
+    queryFn: ({ signal }) => apiFetch('/api/me/profile', { schema: OwnProfileSchema, signal }),
+    enabled: me !== null,
+  })
+  if (!me || !profile.data) return null
+  const data = profile.data
+  const progress = levelProgress(data.xp)
+  const joined = new Date(data.joinedAt)
+  return (
+    <div className={styles.cardPiece} aria-hidden="true">
+      <ProducerCard
+        name={data.displayUsername}
+        initials={initialsOf(data.displayUsername)}
+        cardNumber={data.cardNumber}
+        level={progress.level}
+        levelFraction={progress.fraction}
+        rank={t(`rank.${rankTitle(progress.level)}`)}
+        stats={{ wins: 0, podiums: 0, weeks: 0 }}
+        since={`${String(joined.getMonth() + 1).padStart(2, '0')}/${joined.getFullYear()}`}
+        avatarUrl={data.avatarUrl}
+      />
+    </div>
   )
 }

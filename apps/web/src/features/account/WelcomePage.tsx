@@ -31,6 +31,8 @@ export function WelcomePage() {
       title={t('account.welcome.title')}
       kicker={t('frame.plates.signUp')}
       summary={t('account.welcome.summary', { name: me.displayUsername })}
+      // «Ir al menú» ya hace lo de «Volver al menú» (jurado de la 2.25): sin el duplicado; Esc sigue en la barra.
+      actions={null}
       piece={
         <div className={styles.slot} data-welcome-slot="">
           <div className={styles.print}>

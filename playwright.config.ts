@@ -121,6 +121,9 @@ export default defineConfig({
         BB_PUBLIC_URL: webOrigin,
         ALLOWED_ORIGINS: webOrigin,
         BB_TEST_CLOCK: '1',
+        // Los E2E que registran cuentas mandan su propia IP en `X-Forwarded-For`: el registro admite 3 altas
+        // por hora y por IP (§4.13) y todos los workers salen de 127.0.0.1.
+        TRUST_PROXY: '1',
         LOG_LEVEL: 'warn',
       },
     },

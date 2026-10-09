@@ -5,9 +5,15 @@
 .slot {
   display: grid;
   justify-items: center;
+  justify-self: stretch;
+  width: 100%;
   padding-bottom: var(--bb-space-4);
   border-bottom: var(--bb-stroke-cursor) solid var(--bb-white);
-  overflow: hidden;
+  /*
+   * La carta sale de la ranura: se recorta solo por debajo de su filete, nunca por los lados ni por arriba
+   * (la carta girada y la pegatina OTP, la firma, sobresalen; jurado de la 2.25).
+   */
+  clip-path: inset(-50% -50% 0 -50%);
 }
 
 .print {

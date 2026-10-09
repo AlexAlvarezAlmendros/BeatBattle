@@ -7,14 +7,13 @@ import { t } from '../../i18n'
 import { Button } from '../../ui/Button'
 import { FilterChip } from '../../ui/Chip'
 import { TextField } from '../../ui/Field'
-import { GameLogo } from '../../ui/GameLogo'
 import { useIdleFormKeys } from '../../ui/hooks/useIdleFormKeys'
-import { TitleLockup } from '../../ui/TitleLockup'
 import { authClient } from '../account/authClient'
 import { authErrorCode, authErrorText, type Errors, placeError, textOf } from '../account/authErrors'
-import { Done, PaperNotice, StrengthMeter } from '../account/FormBits'
+import { Done, focusFirstInvalid, PaperNotice, StrengthMeter } from '../account/FormBits'
 import { useSession } from '../account/session'
 import styles from './AuthPages.module.css'
+import { TitlePiece } from './TitlePiece'
 
 /*
  * Pantallas de cuenta (guía §2.3, §3.8.14; tarea 2.15): «CONTINUAR PARTIDA» (`/entrar`), «NUEVO JUGADOR»
@@ -23,16 +22,6 @@ import styles from './AuthPages.module.css'
  * elemento de cada pantalla es el primer campo. Los errores dicen lo que pasa con las palabras de §2.3, en
  * el campo al que se refieren o, si no son de un campo, en un aviso de papel encima del botón.
  */
-
-/** El logo del juego con el mismo lockup que el menú (§3.1 «La firma»: autenticación). */
-function TitlePiece() {
-  return (
-    <div className={styles.title} data-title-piece="">
-      <GameLogo className={styles.logo} />
-      <TitleLockup className={styles.lockup} />
-    </div>
-  )
-}
 
 function AuthScreen({
   title,
@@ -95,6 +84,7 @@ export function SignInPage() {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
+    const form = event.currentTarget as HTMLFormElement
     setBusy(true)
     setErrors({})
     const byEmail = identity.includes('@')
@@ -104,6 +94,7 @@ export function SignInPage() {
     setBusy(false)
     if (result.error) {
       setErrors({ form: authErrorCode(result.error) })
+      focusFirstInvalid(form)
       return
     }
     await useSession.getState().refresh()
@@ -192,6 +183,7 @@ export function SignUpPage() {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
+    const form = event.currentTarget as HTMLFormElement
     const local: Errors = {}
     const problem = usernameProblem(username)
     if (problem) local.username = problem
@@ -199,6 +191,7 @@ export function SignUpPage() {
     if (!email.includes('@')) local.email = 'INVALID_EMAIL'
     if (Object.keys(local).length > 0) {
       setErrors(local)
+      focusFirstInvalid(form)
       return
     }
     setBusy(true)
@@ -216,6 +209,7 @@ export function SignUpPage() {
     setBusy(false)
     if (result.error) {
       setErrors(placeError(result.error))
+      focusFirstInvalid(form)
       return
     }
     navigate(`${paths.verify()}?email=${encodeURIComponent(email.trim())}`)
@@ -259,13 +253,16 @@ export function SignUpPage() {
           below={<StrengthMeter password={password} userInputs={[email, username]} />}
           required
         />
-        <fieldset className={styles.choices}>
+        <fieldset className={styles.choices} aria-describedby="signup-notices-help">
           <legend className={styles.legend}>{t('account.signUp.noticesTitle')}</legend>
-          <p className={styles.legendHelp}>{t('account.signUp.noticesHelp')}</p>
+          <p id="signup-notices-help" className={styles.legendHelp}>
+            {t('account.signUp.noticesHelp')}
+          </p>
           <div className={styles.chips}>
             {SIGNUP_NOTICES.map((key) => (
               <FilterChip
                 key={key}
+                variant="plate"
                 label={t(`account.notices.${key}`)}
                 pressed={notices[key]}
                 onChange={(pressed) => setNotices((current) => ({ ...current, [key]: pressed }))}
@@ -276,12 +273,14 @@ export function SignUpPage() {
         <fieldset className={styles.choices}>
           <legend className={styles.legend}>{t('account.signUp.consentsTitle')}</legend>
           <FilterChip
+            variant="plate"
             label={t('account.consents.marketing')}
             pressed={marketing}
             onChange={setMarketing}
             data-consent-version={CONSENT_TEXT_VERSIONS.marketing}
           />
           <FilterChip
+            variant="plate"
             label={t('account.consents.otpNewsletter')}
             pressed={otpNewsletter}
             onChange={setOtpNewsletter}
@@ -406,14 +405,17 @@ export function RecoverPage() {
 
   const request = async (event: FormEvent) => {
     event.preventDefault()
+    const form = event.currentTarget as HTMLFormElement
     if (!email.includes('@')) {
       setErrors({ email: 'INVALID_EMAIL' })
+      focusFirstInvalid(form)
       return
     }
     setState('busy')
     const result = await authClient.requestPasswordReset({ email: email.trim(), redirectTo: paths.recover() })
     if (result.error) {
       setErrors({ form: authErrorCode(result.error) })
+      focusFirstInvalid(form)
       setState('idle')
       return
     }
@@ -422,14 +424,17 @@ export function RecoverPage() {
 
   const change = async (event: FormEvent) => {
     event.preventDefault()
+    const form = event.currentTarget as HTMLFormElement
     if (password.length < 12) {
       setErrors({ password: 'PASSWORD_TOO_SHORT' })
+      focusFirstInvalid(form)
       return
     }
     setState('busy')
     const result = await authClient.resetPassword({ newPassword: password, token: token ?? '' })
     if (result.error) {
       setErrors(placeError(result.error))
+      focusFirstInvalid(form)
       setState('idle')
       return
     }

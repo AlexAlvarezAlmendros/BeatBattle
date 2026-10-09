@@ -9,6 +9,7 @@ import { Frame } from '../../ui/Frame'
 import { useIdleMenuKeys } from '../../ui/hooks/useIdleMenuKeys'
 import { useRovingMenu } from '../../ui/hooks/useRovingMenu'
 import { MenuPlate } from '../../ui/MenuPlate'
+import { TitlePiece } from '../auth/TitlePiece'
 import styles from './UnsubscribePage.module.css'
 
 const InfoSchema = z.object({ kind: z.string(), family: z.enum(['battle', 'marketing']), email: z.string() })
@@ -41,6 +42,11 @@ export function UnsubscribePage() {
   const token = params.get('token') ?? ''
   const [state, setState] = useState<State>(token ? { status: 'loading' } : { status: 'invalid' })
   const listRef = useRef<HTMLUListElement>(null)
+  const doneRef = useRef<HTMLParagraphElement>(null)
+  // Hecha la baja, el menú desaparece: el foco va al mensaje (jurado de la 2.25, WCAG 2.4.3).
+  useEffect(() => {
+    if (state.status === 'done') doneRef.current?.focus()
+  }, [state.status])
 
   useEffect(() => {
     if (!token) return
@@ -88,6 +94,10 @@ export function UnsubscribePage() {
       kicker={t('frame.plates.emails')}
       summary={choosing ? t('pages.unsubscribe.summary') : undefined}
       backIsStart={state.status !== 'ready' && state.status !== 'error'}
+      // Se llega desde un email: la pieza es el logo con su firma, como en las pantallas de cuenta (jurado
+      // de la 2.25: sin pieza, la mitad izquierda eran rayos delante de nada).
+      piece={<TitlePiece />}
+      layout="title"
     >
       <div className={styles.body} aria-busy={state.status === 'loading' || state.status === 'saving'}>
         {state.status === 'loading' && <p className={styles.note}>{t('pages.unsubscribe.loading')}</p>}
@@ -130,7 +140,7 @@ export function UnsubscribePage() {
           </>
         )}
         {state.status === 'done' && (
-          <p className={styles.done} role="status">
+          <p ref={doneRef} className={styles.done} tabIndex={-1} data-focus-target="done">
             {state.scope === 'kind'
               ? t('pages.unsubscribe.doneThis', { kind })
               : t('pages.unsubscribe.doneAll')}

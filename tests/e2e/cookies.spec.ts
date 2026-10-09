@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { open } from './support'
+import { open, runSuffix, testIp } from './support'
 
 /**
  * Auditoría de cookies (guía §4.14, tarea 2.23; `RNF-PRIV-03`): tras registrarse, verificar el email (que
@@ -12,14 +12,16 @@ test('RNF-PRIV-03: tras registrarse y entrar, solo cookies técnicas de sesión 
   context,
   baseURL,
 }) => {
-  const email = 'cookies@example.com'
+  await page.context().setExtraHTTPHeaders({ 'x-forwarded-for': testIp(41) })
+  const username = `cookies${runSuffix()}`
+  const email = `${username}@example.com`
   const signUp = await page.request.post('/api/auth/sign-up/email', {
     headers: { origin: baseURL as string },
     data: {
       email,
       password: 'lluvia en gràcia 92',
-      name: 'cookies',
-      username: 'cookies',
+      name: username,
+      username,
       callbackURL: '/bienvenida',
     },
   })
@@ -38,7 +40,7 @@ test('RNF-PRIV-03: tras registrarse y entrar, solo cookies técnicas de sesión 
   // La app entera con sesión: menú, opciones y perfil.
   await open(page, '/', 'Beat Battle')
   await open(page, '/ajustes/cuenta', 'Cuenta')
-  await open(page, '/p/cookies', 'cookies')
+  await open(page, `/p/${username}`, username)
 
   const cookies = await context.cookies()
   expect(cookies.length).toBeGreaterThan(0)

@@ -113,6 +113,29 @@
 }
 
 /*
+ * Placa de opción (`variant="plate"`): a todo el ancho, el nombre a la izquierda y «SÍ | NO» al borde
+ * derecho. Encendida no se rellena de rojo: el estado lo dice la casilla «SÍ», roja con texto negro
+ * (5,32:1), y el borde de la placa.
+ */
+.plate {
+  justify-content: space-between;
+  width: 100%;
+  padding-block: var(--bb-space-2);
+  text-align: left;
+}
+
+.plate[aria-pressed="true"] {
+  --frame-border: var(--bb-red);
+  --frame-fill: var(--bb-panel-2);
+  color: var(--bb-white);
+}
+
+.plate[aria-pressed="true"] .yesNo span[data-on] {
+  background: var(--bb-red);
+  color: var(--bb-black);
+}
+
+/*
  * Contraste alto (`forced-colors: active`, RNF-A11Y-01): el estado del chip de filtro iba solo en fondos
  * (la casilla blanca de «SÍ | NO» y el relleno rojo del activo), y el modo los quita: encendido y apagado
  * se veían iguales. La casilla elegida se pinta en `Highlight` con su texto en `HighlightText`, y el
@@ -128,6 +151,11 @@
 
   .filterChip[aria-pressed="true"]::before {
     background: Highlight;
+  }
+
+  .plate[aria-pressed="true"] .yesNo span[data-on] {
+    background: Highlight;
+    color: HighlightText;
   }
 
   .filterChip:disabled .yesNo span[data-on] {

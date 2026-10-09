@@ -1,6 +1,8 @@
 /* Campo de texto (§3.8.14, tarea 2.15): etiqueta, campo de 44 px, ayuda y error en texto. */
 .field {
   display: grid;
+  /* Una columna que puede encogerse: el ancho intrínseco del campo (`size=20`) no estira el panel. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--bb-space-2);
 }
 
@@ -20,6 +22,7 @@
 
 .input {
   flex: 1;
+  width: 0;
   min-width: 0;
   min-height: var(--bb-target);
   padding: 0 var(--bb-space-3);
@@ -81,6 +84,7 @@
 
 /* Varias líneas (la bio): el mismo campo, con relleno arriba y abajo y alto según `rows`. */
 .textarea {
+  width: 100%;
   padding-block: var(--bb-space-2);
   line-height: var(--bb-leading-body);
   resize: vertical;

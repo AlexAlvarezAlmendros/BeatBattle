@@ -6,7 +6,7 @@ import { FilterChip } from '../../ui/Chip'
 import { TextField } from '../../ui/Field'
 import { authClient } from '../account/authClient'
 import { type Errors, placeError, textOf } from '../account/authErrors'
-import { Done, PaperNotice, StrengthMeter } from '../account/FormBits'
+import { Done, focusFirstInvalid, PaperNotice, StrengthMeter } from '../account/FormBits'
 import { RequireSession } from '../account/RequireSession'
 import { useSession } from '../account/session'
 import { SettingsGroup, SettingsSection } from './SettingsSection'
@@ -37,15 +37,21 @@ function ChangeEmailForm() {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
+    const form = event.currentTarget as HTMLFormElement
     setErrors({})
     setSame(false)
     const newEmail = email.trim()
-    if (!newEmail.includes('@')) return setErrors({ email: 'INVALID_EMAIL' })
-    if (newEmail.toLowerCase() === current.toLowerCase()) return setSame(true)
+    if (!newEmail.includes('@') || newEmail.toLowerCase() === current.toLowerCase()) {
+      if (newEmail.includes('@')) setSame(true)
+      else setErrors({ email: 'INVALID_EMAIL' })
+      focusFirstInvalid(form)
+      return
+    }
     setState('busy')
     const result = await authClient.changeEmail({ newEmail, callbackURL: paths.settings('cuenta') })
     if (result.error) {
       setErrors(placeError(result.error))
+      focusFirstInvalid(form)
       setState('idle')
       return
     }
@@ -89,15 +95,18 @@ function ChangePasswordForm() {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
+    const form = event.currentTarget as HTMLFormElement
     const local: Errors = {}
     if (!currentPassword) local.currentPassword = 'INVALID_PASSWORD'
     if (newPassword.length < 12) local.password = 'PASSWORD_TOO_SHORT'
     setErrors(local)
+    focusFirstInvalid(form)
     if (Object.keys(local).length > 0) return
     setState('busy')
     const result = await authClient.changePassword({ currentPassword, newPassword, revokeOtherSessions })
     if (result.error) {
       setErrors(placeError(result.error))
+      focusFirstInvalid(form)
       setState('idle')
       return
     }
@@ -132,6 +141,7 @@ function ChangePasswordForm() {
         />
         <div className="settings-option">
           <FilterChip
+            variant="plate"
             label={t('settings.account.password.closeOthers')}
             pressed={revokeOtherSessions}
             onChange={setRevokeOtherSessions}

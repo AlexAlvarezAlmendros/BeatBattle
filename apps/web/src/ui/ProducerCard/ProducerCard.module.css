@@ -4,6 +4,8 @@
  */
 .card {
   display: grid;
+  /* Una columna que no crece con su contenido: un nombre largo se ajusta, no ensancha la carta. */
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto 1fr auto auto auto auto auto;
   gap: var(--bb-space-2);
   width: min(100%, calc(var(--bb-space-16) * 4.2));
@@ -43,6 +45,8 @@
 .sealInner {
   display: grid;
   place-items: center;
+  align-content: center;
+  line-height: 1;
   width: calc(100% - 2 * var(--bb-stroke-cursor));
   height: calc(100% - 2 * var(--bb-stroke-cursor));
   border-radius: 50%;
@@ -52,37 +56,21 @@
   font-weight: var(--bb-weight-extrabold);
 }
 
+.sealLabel {
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+/* El retrato nunca cede su alto a un nombre largo: como poco, el de una placa del menú. */
 .portrait {
   display: grid;
   place-items: center;
-  min-height: 0;
+  min-height: var(--bb-plate-h);
   border: var(--bb-stroke) solid var(--bb-line-strong);
   background: var(--bb-wine-2);
-}
-
-/*
- * La foto en duotono rojo y negro (§3.4.1): en grises y multiplicada por rojo, así los blancos quedan rojos
- * y las sombras negras; ninguna foto trae otros colores a la paleta. Se recorta a cuadrado (`c_fill`).
- */
-.portrait[data-photo] {
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.portrait[data-photo]::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--bb-red);
-  mix-blend-mode: multiply;
-}
-
-.photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: grayscale(1) contrast(1.15);
 }
 
 .monogram {
@@ -93,10 +81,14 @@
   text-shadow: var(--bb-shadow-hard);
 }
 
+/* Una línea (`useFitText` baja la anchura y el cuerpo); puede desbordar en horizontal para medirse. */
 .name {
-  overflow-wrap: anywhere;
+  min-width: 0;
+  overflow-x: clip;
+  overflow-y: visible;
   font-size: var(--bb-fs-xl);
   line-height: 1;
+  white-space: nowrap;
 }
 
 .rank {
@@ -114,9 +106,19 @@
   margin: 0;
 }
 
+/* Como `05-perfil`: tres columnas iguales con filete, la cifra grande centrada y el rótulo debajo. */
 .stats div {
-  display: grid;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
   gap: var(--bb-space-1);
+  min-width: 0;
+  padding-block: var(--bb-space-1);
+  text-align: center;
+}
+
+.stats div + div {
+  border-left: var(--bb-stroke-hair) solid var(--bb-line);
 }
 
 .stats dt {
@@ -129,7 +131,8 @@
 .stats dd {
   margin: 0;
   font-family: var(--bb-font-num);
-  font-size: var(--bb-fs-lg);
+  font-size: var(--bb-fs-xl);
+  line-height: 1;
   font-weight: var(--bb-weight-extrabold);
 }
 
@@ -156,6 +159,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--bb-space-2);
+  white-space: nowrap;
+  font-stretch: var(--bb-stretch-min);
   color: var(--bb-text-3);
   font-size: var(--bb-fs-xs);
   font-weight: var(--bb-weight-bold);

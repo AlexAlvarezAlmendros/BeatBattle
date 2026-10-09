@@ -211,12 +211,15 @@
       },
       "chart": {
         "title": "Posiciones",
-        "empty": "La gráfica aparece con la primera semana sellada."
+        "empty": "Aquí saldrá su puesto en cada semana sellada.",
+        "place": "{place}.º"
       },
       "achievements": {
         "title": "Logros",
-        "empty": "Aún no hay logros: llegan con la capa de juego."
-      }
+        "empty": "Los logros llegan con la capa de juego: los no conseguidos se ven en silueta.",
+        "hidden": "???"
+      },
+      "newTab": "(se abre en otra pestaña)"
     },
     "hallOfFame": {
       "title": "Salón de la fama",
@@ -331,12 +334,13 @@
       "summary": "Tu nombre, tu bio, tu ciudad, tus enlaces y el color de tu carta. Lo ve todo el mundo en tu perfil.",
       "require": "Entra para editar tu perfil.",
       "username": {
-        "title": "Nombre de productor",
+        "title": "Nombre",
         "label": "Nombre de productor",
         "hint": "Letras sin tilde, números, punto y guion bajo. Se cambia una vez cada 30 días, y el anterior lleva a tu perfil 30 días más.",
         "submit": "Cambiar nombre",
         "changed": "Hecho: ahora eres {name}.",
-        "availableAt": "Podrás volver a cambiarlo el {date}."
+        "availableAt": "Podrás volver a cambiarlo el {date}.",
+        "unchanged": "Escribe un nombre distinto del que tienes para cambiarlo."
       },
       "card": {
         "title": "Tu carta",
@@ -445,11 +449,12 @@
         "gone": "Se borran tu perfil, tu avatar, tus sesiones, tus preferencias y permisos, y tus votos y entradas de semanas sin sellar con sus audios.",
         "kept": "Las entradas de semanas ya selladas siguen en su clasificación como «Productor eliminado», sin tu nombre. De tu email solo queda una huella cifrada si te diste de baja o rebotó.",
         "confirmLabel": "Escribe tu nombre de productor para confirmar",
-        "confirmHint": "Tu nombre es {name}. No se puede deshacer.",
+        "confirmHint": "Tu nombre es {name}.",
         "submit": "Borrar mi cuenta",
         "mismatch": "No coincide con tu nombre de productor.",
         "done": "Cuenta borrada. Te hemos enviado un último email.",
-        "error": "No se ha podido borrar la cuenta. Vuelve a probar en un momento."
+        "error": "No se ha podido borrar la cuenta. Vuelve a probar en un momento.",
+        "warning": "Borrar la cuenta no se puede deshacer."
       }
     },
     "accessibility": {
@@ -714,7 +719,8 @@
       },
       "showcase": "Vitrina de logros",
       "emptySlot": "Hueco vacío",
-      "since": "Beat Battle · desde {since}"
+      "since": "Beat Battle · desde {since}",
+      "levelShort": "Nv"
     }
   },
   "dev": {

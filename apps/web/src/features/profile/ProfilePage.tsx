@@ -1,5 +1,6 @@
 import { levelProgress, rankTitle } from '@beatbattle/rules'
 import { PROFILE_LINK_KINDS, type PublicProfile, PublicProfileSchema } from '@beatbattle/shared'
+import { useRef } from 'react'
 import { type LoaderFunctionArgs, redirect, useLoaderData } from 'react-router'
 import { paths } from '../../app/paths'
 import { notFound } from '../../app/routes'
@@ -8,6 +9,7 @@ import { formatDate, t } from '../../i18n'
 import { ApiClientError, apiFetch } from '../../net/api'
 import { Button } from '../../ui/Button'
 import { DataTile, DataTileList } from '../../ui/DataTile'
+import { useFitText } from '../../ui/hooks/useFitText'
 import { ProducerCard } from '../../ui/ProducerCard'
 import { initialsOf, useSession } from '../account/session'
 import styles from './ProfilePage.module.css'
@@ -38,6 +40,12 @@ export async function profileLoader({ params, request }: LoaderFunctionArgs): Pr
 
 const TILES = ['bestPlace', 'streak', 'finalAverage', 'goldenEar', 'votesGiven', 'season'] as const
 
+/** Las marcas del eje de posiciones (§3.8.10: 1.º arriba). */
+const CHART_AXIS = [1, 8, 15] as const
+
+/** Huecos de la vitrina vacía: dos filas de seis, como `05-perfil`. */
+const ACHIEVEMENT_SLOTS = 12
+
 export function ProfilePage() {
   const profile = useLoaderData() as PublicProfile
   const me = useSession((state) => state.me)
@@ -46,11 +54,16 @@ export function ProfilePage() {
   const name = profile.displayUsername
   const joined = new Date(profile.joinedAt)
   const own = me?.username === profile.username
+  const nameRef = useRef<HTMLParagraphElement>(null)
+  // El nombre en una línea: baja la anchura y el cuerpo antes que partir a mitad (un nombre de 20 caracteres).
+  useFitText(nameRef, name, { minFontPx: 24 })
   return (
     <ScreenPage
       title={name}
       kicker={t('frame.plates.profile')}
       documentTitle={t('pages.profile.documentTitle', { name })}
+      // El nombre es una palabra: en la cabeza de móvil, más pequeño antes que partido a mitad.
+      titleMinFontPx={18}
       piece={
         <div className={styles.piece}>
           <ProducerCard
@@ -75,7 +88,7 @@ export function ProfilePage() {
               since: formatDate(profile.joinedAt, { month: 'long', year: 'numeric' }),
             })}
           </p>
-          <p className={`bb-display ${styles.name}`} aria-hidden="true">
+          <p ref={nameRef} className={`bb-display ${styles.name}`} aria-hidden="true">
             {name}
           </p>
           <p className={styles.meta}>
@@ -99,6 +112,7 @@ export function ProfilePage() {
                 size="sm"
               >
                 {t(`pages.profile.links.${kind}`)}
+                <span className="sr-only"> {t('pages.profile.newTab')}</span>
               </Button>
             ))}
             {own && (
@@ -130,28 +144,45 @@ export function ProfilePage() {
         </section>
 
         <div className={styles.columns}>
-          <section className={styles.section} aria-labelledby="profile-history">
-            <div className={styles.sectionHead}>
-              <h2 id="profile-history" className={styles.sectionTitle}>
-                {t('pages.profile.history.title')}
-              </h2>
-              <span className="bb-label">{t('pages.profile.history.note')}</span>
-            </div>
-            <p className={styles.empty}>{t('pages.profile.history.empty')}</p>
-            <p className={styles.note}>{t('pages.profile.history.pending')}</p>
-          </section>
           <div className={styles.side}>
-            <section className={styles.section} aria-labelledby="profile-chart">
-              <h2 id="profile-chart" className={styles.sectionTitle}>
-                {t('pages.profile.chart.title')}
-              </h2>
-              <p className={styles.empty}>{t('pages.profile.chart.empty')}</p>
+            <section className={styles.section} aria-labelledby="profile-history">
+              <div className={styles.sectionHead}>
+                <h2 id="profile-history" className={styles.sectionTitle}>
+                  {t('pages.profile.history.title')}
+                </h2>
+                <span className="bb-label">{t('pages.profile.history.note')}</span>
+              </div>
+              <p className={styles.empty}>{t('pages.profile.history.empty')}</p>
+              <p className={styles.note}>{t('pages.profile.history.pending')}</p>
             </section>
             <section className={styles.section} aria-labelledby="profile-achievements">
               <h2 id="profile-achievements" className={styles.sectionTitle}>
                 {t('pages.profile.achievements.title')}
               </h2>
-              <p className={styles.empty}>{t('pages.profile.achievements.empty')}</p>
+              {/* La vitrina en silueta (§3.8.10: los no conseguidos, en silueta; los ocultos, «???»). */}
+              <ul className={styles.achievements} aria-hidden="true">
+                {Array.from({ length: ACHIEVEMENT_SLOTS }, (_, i) => (
+                  // biome-ignore lint/suspicious/noArrayIndexKey: huecos fijos
+                  <li key={i}>{t('pages.profile.achievements.hidden')}</li>
+                ))}
+              </ul>
+              <p className={styles.note}>{t('pages.profile.achievements.empty')}</p>
+            </section>
+          </div>
+          <div className={styles.side}>
+            <section className={styles.section} aria-labelledby="profile-chart">
+              <h2 id="profile-chart" className={styles.sectionTitle}>
+                {t('pages.profile.chart.title')}
+              </h2>
+              {/* La rejilla de la gráfica, vacía, con sus ejes (1.º arriba), y lo que saldrá en ella. */}
+              <div className={styles.chart}>
+                <ul className={styles.chartAxis} aria-hidden="true">
+                  {CHART_AXIS.map((place) => (
+                    <li key={place}>{t('pages.profile.chart.place', { place })}</li>
+                  ))}
+                </ul>
+                <p className={styles.chartEmpty}>{t('pages.profile.chart.empty')}</p>
+              </div>
             </section>
           </div>
         </div>

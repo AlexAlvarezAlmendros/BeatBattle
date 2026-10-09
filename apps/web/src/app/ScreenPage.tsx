@@ -59,6 +59,18 @@ export interface ScreenPageProps {
    */
   panelFirst?: boolean
   /**
+   * Dónde va la pieza en su columna, en escritorio: centrada en el alto del panel (por defecto) o arriba
+   * (`start`), alineada con el panel, para las pantallas cuyo panel puede ser mucho más alto que la
+   * ventana (las secciones de Opciones que funcionan: su emblema no debe quedar fuera de la vista).
+   */
+  pieceAlign?: 'center' | 'start'
+  /**
+   * Cuerpo mínimo al que puede bajar el título en display antes de partir (por defecto no baja: parte por
+   * palabras). Para un título que es una sola palabra larga, el nombre de un productor
+   * («PRODUCTORA.NOCTURNA»): mejor más pequeño que partido a mitad (jurado de la 2.25).
+   */
+  titleMinFontPx?: number
+  /**
    * Dónde va el `<h1>` (§3.8.14). `head` (por defecto): en la cabeza, con su rótulo; en escritorio, si
    * la ruta tiene placa en el HUD, solo para los lectores de pantalla. `panel`: el título del panel, a
    * la vista (los legales: sus pestañas son rótulos cortos y el nombre completo va aquí). `tabs`: solo
@@ -255,6 +267,8 @@ export function ScreenPage({
   layout = 'interior',
   fill = false,
   panelFirst = false,
+  pieceAlign = 'center',
+  titleMinFontPx,
   titleInHud,
   titlePlacement = 'head',
   actions,
@@ -279,8 +293,9 @@ export function ScreenPage({
   const headingRef = useRef<HTMLHeadingElement>(null)
   const plateTitleRef = useRef<HTMLParagraphElement>(null)
   const plateTitle = screen.plate ? t(screen.plate.title) : title
-  useFitText(headingRef, titlePlacement === 'tabs' ? '' : title, TITLE_FIT)
-  useFitText(plateTitleRef, titlePlacement === 'head' ? '' : plateTitle, TITLE_FIT)
+  const titleFit = titleMinFontPx ? { ...TITLE_FIT, minFontPx: titleMinFontPx } : TITLE_FIT
+  useFitText(headingRef, titlePlacement === 'tabs' ? '' : title, titleFit)
+  useFitText(plateTitleRef, titlePlacement === 'head' ? '' : plateTitle, titleFit)
   const heading = (
     <h1
       ref={headingRef}
@@ -318,6 +333,7 @@ export function ScreenPage({
       data-layout={layout}
       data-fill={fill || undefined}
       data-panel-first={panelFirst || undefined}
+      data-piece-align={pieceAlign === 'start' ? 'start' : undefined}
     >
       <DocumentTitle page={documentTitle ?? undefined} />
       {titlePlacement === 'head' ? (
