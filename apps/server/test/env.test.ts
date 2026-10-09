@@ -145,3 +145,29 @@ describe('loadEnv', () => {
     expect(extra.allowedOrigins).toEqual(['https://www.b.example', 'https://b.example'])
   })
 })
+
+describe('lista blanca en local con Gmail (§4.19.1, tarea 2.28)', () => {
+  const gmail = {
+    GMAIL_USER: 'contacto@otherpeople.es',
+    GMAIL_APP_PASSWORD: 'abcdabcdabcdabcd',
+    EMAIL_FROM_ADDRESS: 'contacto@otherpeople.es',
+  }
+
+  it('RF-NOTIF-18: en desarrollo con Gmail, sin lista no sale nada; con lista, solo a ella', () => {
+    expect(loadEnv({ NODE_ENV: 'development', ...gmail }).mail.previewAllowlist).toEqual([])
+    expect(
+      loadEnv({
+        NODE_ENV: 'development',
+        ...gmail,
+        MAIL_PREVIEW_ALLOWLIST: 'yo@example.com, @otherpeople.es',
+      }).mail.previewAllowlist,
+    ).toEqual(['yo@example.com', '@otherpeople.es'])
+  })
+
+  it('con Mailpit en local y en los tests no hay lista (nada sale fuera de la máquina)', () => {
+    expect(
+      loadEnv({ NODE_ENV: 'development', SMTP_URL: 'smtp://127.0.0.1:1025' }).mail.previewAllowlist,
+    ).toBeNull()
+    expect(loadEnv({ NODE_ENV: 'test', ...gmail }).mail.previewAllowlist).toBeNull()
+  })
+})

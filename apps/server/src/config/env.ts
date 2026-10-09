@@ -140,7 +140,10 @@ export interface MailConfig {
   dailyLimit: number
   /** Clave de los tokens de baja; fuera de producción, una fija de desarrollo si no hay. */
   unsubscribeSecret: string
-  /** Solo en la preview: destinatarios permitidos. `null` fuera de ella. */
+  /**
+   * Destinatarios permitidos en la preview y en local con Gmail (tarea 2.28; vacía: no sale nada). `null`
+   * en producción, en los tests y en local con Mailpit.
+   */
   previewAllowlist: readonly string[] | null
 }
 
@@ -365,12 +368,15 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
       },
       dailyLimit: e.MAIL_DAILY_LIMIT,
       unsubscribeSecret: e.UNSUBSCRIBE_SECRET ?? DEV_UNSUBSCRIBE_SECRET,
-      previewAllowlist: preview
-        ? (e.MAIL_PREVIEW_ALLOWLIST ?? '')
-            .split(',')
-            .map((item) => item.trim())
-            .filter(Boolean)
-        : null,
+      // La lista blanca (§4.19.1): en las previews y, en local, si hay credenciales de Gmail (tarea 2.28):
+      // así nunca sale un email de prueba a una dirección real. Sin lista, no sale ninguno.
+      previewAllowlist:
+        preview || (e.NODE_ENV === 'development' && e.GMAIL_USER && e.GMAIL_APP_PASSWORD)
+          ? (e.MAIL_PREVIEW_ALLOWLIST ?? '')
+              .split(',')
+              .map((item) => item.trim())
+              .filter(Boolean)
+          : null,
     },
   }
 }
