@@ -6,6 +6,7 @@ import { authRoutes } from './auth/routes'
 import type { AppConfig } from './config/env'
 import type { Db } from './db/client'
 import { createMailer, type Mailer } from './email'
+import type { DrainDeps } from './email/outbox'
 import { createRenderer } from './email/render'
 import { createServiceEmails } from './email/service'
 import { createUnsubscribeLinks } from './email/unsubscribe'
@@ -15,6 +16,9 @@ import { type LogStream, loggerOptions } from './lib/logger'
 import { createRateLimiter } from './lib/rateLimit'
 import { type AudioMeasurement, measureAudio } from './media/measure'
 import { accountRoutes } from './modules/account/routes'
+import { alertsRoutes } from './modules/alerts/routes'
+import { createAlertsService } from './modules/alerts/service'
+import { cronRoutes } from './modules/cron/routes'
 import { emailPrefsRoutes } from './modules/emailPrefs/routes'
 import { healthRoutes } from './modules/health/routes'
 import { createHealthService } from './modules/health/service'
@@ -35,6 +39,7 @@ import {
 import { testingRoutes } from './modules/testing/routes'
 import { unsubscribeRoutes } from './modules/unsubscribe/routes'
 import { uploadsRoutes } from './modules/uploads/routes'
+import { countdownRoutes } from './modules/weeks/countdownRoute'
 import { weeksRoutes } from './modules/weeks/routes'
 import { createWeeksService } from './modules/weeks/service'
 import { registerClock } from './plugins/clock'
@@ -114,16 +119,16 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   })
 
   const newId = () => uuidv7(clock)
-  const emails = createServiceEmails({
+  const drainDeps: DrainDeps = {
     db,
     mailer,
     now: () => clock.now(),
     render: createRenderer({ publicUrl: config.publicUrl }),
     unsubscribeUrl: unsubscribeLinks.oneClick,
     dailyLimit: config.mail.dailyLimit,
-    newId,
     onSendError: (info) => app.log.warn({ email: info }, 'envío de email fallido'),
-  })
+  }
+  const emails = createServiceEmails({ ...drainDeps, newId })
   authRoutes(app, createAuth({ config, db, emails, now: () => clock.now(), newId }))
   registerAdminGuard(app)
 
@@ -158,7 +163,21 @@ export function buildApp(deps: AppDeps): FastifyInstance {
       newId,
     }),
   )
-  weeksRoutes(app, createWeeksService({ db, storage: samples, newId }))
+  const weeks = createWeeksService({ db, storage: samples, newId })
+  weeksRoutes(app, weeks)
+  countdownRoutes(app, { db })
+  const alerts = createAlertsService({ db, emails, publicUrl: config.publicUrl, newId })
+  alertsRoutes(app, { service: alerts, rateLimiter, secret: config.auth.secret })
+  cronRoutes(app, {
+    db,
+    storage: samples,
+    publicUrl: config.publicUrl,
+    newId,
+    cronSecret: config.cronSecret,
+    drain: drainDeps,
+    weeks,
+    alerts,
+  })
   // El buzón de los E2E: solo en test, nunca en desarrollo ni en producción.
   if (config.env === 'test') testingRoutes(app, mailer)
   // Spike de Cloudinary (tarea 1.7): solo fuera de producción.
