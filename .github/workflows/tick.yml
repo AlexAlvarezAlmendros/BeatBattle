@@ -1,0 +1,29 @@
+# Disparador del cron cada 15 minutos (guía §4.12, tarea 3.12). Vercel Cron, en el plan Hobby, llama a
+# /api/cron/tick una vez al día; este flujo lo llama cada 15 minutos con el mismo secreto. La corrección no
+# depende de ninguno de los dos: el sellado es perezoso y el resto de tareas tolera retrasos.
+#
+# Necesita, en el repositorio, la variable BB_TICK_URL (https://battle.otherpeople.es/api/cron/tick) y el
+# secreto BB_CRON_SECRET (el mismo valor que CRON_SECRET en Vercel). Sin la variable, no hace nada.
+name: tick
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  tick:
+    if: ${{ vars.BB_TICK_URL != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Llamar a /api/cron/tick
+        env:
+          TICK_URL: ${{ vars.BB_TICK_URL }}
+          CRON_SECRET: ${{ secrets.BB_CRON_SECRET }}
+        run: |
+          curl --fail-with-body --silent --show-error --max-time 60 \
+            --header "Authorization: Bearer ${CRON_SECRET}" \
+            "${TICK_URL}"

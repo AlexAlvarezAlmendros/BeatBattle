@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.43 · 2026-10-09 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.44 · 2026-10-09 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -671,8 +671,9 @@ distintas:
 | `mod.action` | Servicio | Ocultar, descalificar, restaurar, bloquear, anular votos | El afectado | Inmediato |
 | `rules.changed` | Servicio | Nueva versión de las bases | Todas las cuentas | Una vez |
 | `account.deleted` | Servicio | Cuenta borrada | La dirección borrada | Inmediato |
+| `admin.calendar_gap` | Servicio | Un lunes sin semana programada a 72 h o menos (`RF-DROP-04`) | Los admins | Una vez por lunes |
 | `battle.monday` | Aviso | **Lunes de batalla**: resultados de la semana anterior + nuevo drop en un solo email | Cuentas y suscriptores con el aviso activo | Lunes 08:00 |
-| `battle.drop` | Aviso | Nuevo drop (si el usuario prefiere emails separados) | Ídem | Lunes 08:00 |
+| `battle.drop` | Aviso | Nuevo drop (si el usuario prefiere emails separados; hasta la Fase 6, en la que llega el combinado, a todos) | Ídem | Lunes 08:00 |
 | `battle.results` | Aviso | Resultados (si prefiere separados) | Participantes y jurados de la semana | Lunes 08:00 o al sellar |
 | `battle.reminder` | Aviso | Descargó el sample y no ha subido (si tiene racha ≥ 3, versión «racha en peligro») | Ese usuario | Sábado 18:00 |
 | `battle.jury_call` | Aviso | Ha votado esta semana y le quedan ≥ 3 entradas por escuchar | Ese usuario | Domingo 17:00 |
@@ -2559,8 +2560,8 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | GET | `/api/hall-of-fame` | Pública | Ganadores, campeones, récords |
 | GET | `/api/seasons/:id/standings` | Pública | Clasificación de temporada |
 | GET | `/api/public/otp/summary` | Pública + CORS sello | Resumen para el widget del sello |
-| POST | `/api/subscribe` | Pública | Alerta de drop sin cuenta (doble confirmación; 3/h por IP) |
-| GET | `/api/subscribe/confirm?token=` | Pública | Confirmar la alerta |
+| POST | `/api/subscribe` | Pública | Alerta de drop sin cuenta (doble confirmación; 3/h por IP); responde 202 igual para cualquier dirección |
+| POST | `/api/subscribe/confirm` | Pública | Confirmar la alerta con `{ token }` desde la página `/alerta?token=` de la web: un `POST` y no un `GET`, porque los escáneres de enlaces del correo abren los `GET` y confirmarían solos |
 | GET · POST | `/api/unsubscribe?token=` · `/api/unsubscribe/one-click?token=` | Pública | Página de baja y baja en un clic (RFC 8058) |
 | GET | `/api/email/countdown/:slug.gif` | Pública | Cuenta atrás animada para emails |
 | GET | `/r/:linkId` | Pública | Redirección de enlaces de campaña (clics en agregado) |
@@ -2755,8 +2756,11 @@ recibo cualificado; después hace un `INSERT … ON CONFLICT(user_id, entry_id) 
 | `adminAlerts` | Hueco en el calendario a 72 h, cuota de Cloudinary ≥ 80 % |
 
 - **Disparadores**: Vercel Cron (en el plan Hobby, como mucho una vez al día y sin precisión de
-  minuto) **y** un flujo programado de GitHub Actions cada 15 minutos que llama a la misma ruta con
-  el secreto. La corrección no depende de ninguno de los dos: el sellado es perezoso y el resto de
+  minuto; `vercel.json` lo pone a las 06:00 UTC, las 08:00 del drop en verano) **y** un flujo programado de
+  GitHub Actions cada 15 minutos (`.github/workflows/tick.yml`) que llama a la misma ruta con
+  `Authorization: Bearer <CRON_SECRET>`: necesita la variable `BB_TICK_URL` y el secreto `BB_CRON_SECRET` en
+  el repositorio, y sin la variable no hace nada. La ruta responde 503 si el servidor no tiene `CRON_SECRET`
+  y lleva una *lease* (`tick`): dos a la vez no se pisan. La corrección no depende de ninguno de los dos: el sellado es perezoso y el resto de
   tareas tolera retrasos.
 
 ### 4.13 Seguridad
@@ -3108,7 +3112,10 @@ CREATE TABLE entry_receipt_seq (week_id TEXT PRIMARY KEY, last INTEGER NOT NULL)
 #### 4.19.5 Imágenes dinámicas
 
 - **Cuenta atrás**: `GET /api/email/countdown/:slug.gif` dibuja 60 fotogramas (un minuto) desde el
-  instante de la petición, con la dirección de arte del juego (§3.8.12). Caché de 30 s por semana. `alt` con el tiempo
+  instante de la petición, con la dirección de arte del juego (§3.8.12): 512 × 96, «DD:HH:MM:SS» en letra de
+  píxeles con su rótulo, dígitos blancos y rojos en la «hora loca», sobre negro. Codificador GIF89a propio
+  (paleta fija de 4 colores, LZW), sin dependencias. Una semana que no existe o fuera de `open` y `voting`
+  da la imagen de ceros: un email viejo nunca muestra un error. Caché de 30 s por semana. `alt` con el tiempo
   restante.
 - **Tarjeta de resultado**: `GET /api/og/result/:slug/:userId?sig=` con firma HMAC (es personal);
   sin firma válida, 403.
@@ -3492,7 +3499,8 @@ fórmula de Pearson sobre rangos. Casos de prueba: sin empates, `[1,2,3,4,5]` fr
 | `auth.welcome` | «Bienvenido a la batalla, <nombre>» | Tu carta de productor (imagen), cómo funciona en 3 pasos, sample en curso con cuenta atrás, ajustes de email |
 | `auth.security` | «Han cambiado la contraseña de tu cuenta» (y variantes) | Qué ha cambiado, cuándo, desde qué navegador y «No he sido yo» |
 | `auth.change_email` | «Confirma el cambio de email de tu cuenta» | La dirección nueva enmascarada, botón «Aprobar el cambio», qué hacer si no ha sido él |
-| `alert.confirm` | «Confirma tu alerta de drop» | Botón de confirmar, caducidad 7 días |
+| `alert.confirm` | «Confirma tu alerta de drop» | Botón de confirmar (lleva a la página `/alerta`, que confirma con un `POST`), caducidad 7 días |
+| `admin.calendar_gap` | «Calendario vacío: falta el drop del <lunes>» | Qué lunes falta, cuántas horas quedan y el botón al calendario |
 | `entry.receipt` | «Recibo: tu beat está en la batalla #41» | Ticket con nº de recibo, alias, título, metadatos, informe técnico (LUFS, ajuste, pico real, onda), hora de recepción, huella, botones (§2.12.1) |
 | `entry.failed` | «No hemos podido aceptar tu beat» | Motivo, qué hacer, enlace a `/subir` con la ficha conservada |
 | `entry.changed` | «Recibo actualizado: semana #41» / «Has retirado tu beat» | Recibo nuevo o confirmación de retirada (y aviso de votos perdidos) |
@@ -3543,6 +3551,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-09 | 0.6.44 | **Cron, emails del drop, alerta sin cuenta y cuenta atrás** (tareas 3.12–3.14, §2.12, §4.10, §4.12, §4.19.5, Anexo H). La confirmación de la alerta pasa de `GET /api/subscribe/confirm?token=` a un `POST` desde la página `/alerta`, porque los escáneres de enlaces confirmarían solos. Nuevo email de servicio `admin.calendar_gap` (`RF-DROP-04`). `battle.drop` sale a todos hasta que llegue el Lunes combinado (Fase 6). Disparadores del `tick` concretados (Vercel Cron a las 06:00 UTC y `tick.yml` con `BB_TICK_URL` y `BB_CRON_SECRET`). Cuenta atrás con un codificador GIF propio. |
 | 2026-10-09 | 0.6.43 | **Servidor de semanas y samples** (tareas 3.3–3.11, §2.4, §4.8, §4.10, §4.11). Cambia: la descarga del sample es la API privada de Cloudinary (`private_download_url` con `attachment=true` y `expires_at`), porque una URL de entrega firmada no caduca (`RF-DROP-07`, §4.8.3). Los stems llevan `.zip` en el `public_id`. Se añaden el almacenamiento falso en disco (`BB_FAKE_STORAGE`, §4.8.6) y `FFMPEG_PATH`. En §4.10 se precisan las rutas de la semana, de la descarga, de lo visto y del admin. Los samples se miden en servidor desde esta fase. |
 | 2026-10-09 | 0.6.42 | **Calendario y fases** (tareas 3.1 y 3.2, §4.5, Anexo B): `calendar` y `phase` en `packages/rules`. Se añade al Anexo B la «hora loca» (`LAST_HOUR_MS`, 1 h, incluida la marca justa) y §2.4 precisa que el sample se descarga solo en `open`. El criterio de `RF-DROP-10` se precisa: con 59 min 59 s por delante, `00:00:59:59` en modo «última hora»; con 1 h y 1 s, `00:01:00:01` sin él. |
 | 2026-10-09 | 0.6.41 | **Lista blanca en local con Gmail** (tarea 2.28, §4.19.1): con las credenciales del Workspace en `.env`, el servidor de desarrollo solo envía a `MAIL_PREVIEW_ALLOWLIST` (vacía: nada). |
