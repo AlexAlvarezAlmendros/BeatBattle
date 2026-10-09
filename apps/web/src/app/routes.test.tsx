@@ -231,6 +231,8 @@ describe('router (0.10, guía §2.18)', () => {
       '/registro': 'public',
       '/verificar': 'public',
       '/recuperar': 'public',
+      '/bienvenida': 'session',
+      '/baja': 'public',
       '/admin': 'admin',
       '/legal/bases': 'public',
       '/no-existe': 'public',

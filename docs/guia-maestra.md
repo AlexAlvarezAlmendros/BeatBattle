@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.30 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.32 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1819,6 +1819,12 @@ estrella», estrellas de 62 px y Pausa · Saltar · Denunciar de 48 px.
 Tras verificar el email: «NUEVO JUGADOR» y la carta de luchador se **imprime** saliendo de una ranura
 de abajo arriba con su número, «Bienvenido a la batalla» y el primer logro.
 
+Versión de la Fase 2 (`/bienvenida`, tarea 2.17): la carta es el **anverso plano** (`ProducerCard`, la de
+§3.4.4 sin pase ni 3D, con el marco de chaflán de `Frame`), sube desde la ranura en `--bb-dur-reward` y,
+sin movimiento, ya está fuera (Anexo E). Como ningún logro del Anexo C se gana al registrarse, «el primer
+logro» es **el primero por ganar**, Primer sample («Descarga el sample de la semana en cuanto caiga el
+lunes»). Botones «Ir al menú» y «Completar mi perfil». Sin sesión, a `/entrar`.
+
 #### 3.8.10 Perfil (carta de luchador)
 
 Placa de título «CARTA DE PRODUCTOR · PERFIL». A la izquierda, sobre la cuña con trama, la **carta
@@ -1941,7 +1947,7 @@ las pantallas de texto sin pieza, como la galería, no los llevan.
 | **Temporada** | Clasificación de torneo con puntos tipo F1; el top 3 en peanas pequeñas |
 | **Cómo se juega** | «Lista de movimientos», un menú de juego en la cuña (cursor con 1P, ↑↓, Intro): 1 Pilla el sample · 2 Flipea el sample · 3 Sube y vota, cada uno con sus teclas o su gesto como ayuda («[INTRO] Jugar», «En tu estudio», «[1]–[5] Votar») y «HECHO» para quien lo ha completado (con las cuentas, Fase 2), más «Bases de la competición [B]» y «Volver al menú [Esc]»; a la derecha, las reglas de juego limpio en 5 filas con índice (voto ciego, escucha mínima, Ronda justa, media bayesiana, el XP no puntúa), cada una con su nombre en display y una línea de explicación |
 | **Ajustes = OPCIONES** | Pestañas Q/E (Sonido · Movimiento · Cuenta · Perfil · Emails · Sesiones · Privacidad · Accesibilidad; `/ajustes` lleva a Sonido); cada opción es una placa con «◀ SÍ ▶» o un medidor de 10 pasos que se cambia con ←/→: volumen por bus, reducir movimiento, sin sonido, **modo serio**, tamaño de texto, calidad visual, puerta de entrada y atajos de una tecla (Accesibilidad, `RNF-A11Y-08`). Mientras no funcionan (Fase 2), la cuña enseña las placas de la sección en vista previa, quietas («Todavía no hacen nada»), sobre un tablero opaco con su pie, con su nombre en display y su valor o medidor (en un tablero estrecho, por debajo de 20 rem, el medidor baja bajo el nombre; por debajo de 22 rem, el nombre baja de 125 a 105 %), y el granate queda en el rango de las maquetas (≤ 24,5 % a 1440 px, ≤ 18 % en móvil; por debajo de 360 px, donde las pestañas ocupan varias filas, la cuña, que es fija, empieza bajo ellas y al desplazar la vista previa pasa sobre negro); el sello «EN OBRAS» pasa al panel |
-| **Autenticación** | «CONTINUAR PARTIDA» (entrar) y «NUEVO JUGADOR» (registro) como pantalla de título (maqueta `00-titulo`): a la izquierda, sobre los rayos, el logo con el mismo lockup que el menú («TORNEO SEMANAL DE PRODUCTORES by [OTP.]», en una fila); el bloque del logo y el panel se centra en vertical entre el HUD y la barra, con el pie del panel alineado con el del lockup y un ancho de panel acotado; en móvil, el panel va anclado al pie y acaba sobre la barra (en el móvil bajo la cabeza se acerca al logo y el panel se aprieta; por debajo de 360 px el logo cede alto); campos normales y accesibles en paneles opacos; Google y Discord como botones neutros; abajo, la barra de controles con sus teclas y la firma |
+| **Autenticación** | Tarea 2.15: entrar con email **o** nombre de productor; el registro lleva el medidor `zxcvbn-ts` (cargado al escribir la contraseña, nunca con la página) con el medidor segmentado del juego, los avisos como chips «SÍ / NO» (marcados) y los dos consentimientos (desmarcados); los errores van en el campo al que pertenecen o, si no son de un campo, en un aviso de papel; `/verificar` (enviado, reenviar con espera de 60 s, enlace caducado o usado, verificado) y `/recuperar` (pedir el enlace; con `?token=`, la contraseña nueva avisando de que se cierran las sesiones). Lo que pide sesión lo dice dentro del panel («Entra para…», `RequireSession`), sin redirigir: la protección es la del servidor. **Con el formulario de verdad** (Fase 2) el panel es más alto que el logo: en escritorio el bloque sigue centrado entre el HUD y la barra, pero el pie del panel ya no va a la altura del lockup; en móvil el panel sigue al logo, el **primer campo se ve sin desplazar** (de 320 × 568 a 390 × 844) y la página se desplaza para el resto, con «Volver al menú» al pie (el formulario no cabe sobre la barra). El primer elemento de juego es el primer campo: en reposo, ↑↓ e Intro lo enfocan sin enviar nada (`useIdleFormKeys`). «CONTINUAR PARTIDA» (entrar) y «NUEVO JUGADOR» (registro) como pantalla de título (maqueta `00-titulo`): a la izquierda, sobre los rayos, el logo con el mismo lockup que el menú («TORNEO SEMANAL DE PRODUCTORES by [OTP.]», en una fila); el bloque del logo y el panel se centra en vertical entre el HUD y la barra, con el pie del panel alineado con el del lockup y un ancho de panel acotado; en móvil, el panel va anclado al pie y acaba sobre la barra (en el móvil bajo la cabeza se acerca al logo y el panel se aprieta; por debajo de 360 px el logo cede alto); campos normales y accesibles en paneles opacos; Google y Discord como botones neutros; abajo, la barra de controles con sus teclas y la firma |
 | **Admin y legales** | Marco simple: HUD sin capa de juego, paneles y tablas, y la barra de controles con sus teclas y la firma en el centro; sin anunciador ni puerta. Los legales usan la plantilla de las interiores (mientras no estén los textos, Fase 10, el sello «EN OBRAS» en la columna de la pieza) y sus pestañas van en una fila de rótulos cortos («BASES · TÉRMINOS · PRIVACIDAD · COOKIES»; el nombre completo, en el título del panel), también en móvil a partir de 360 px |
 
 ### 3.9 Tono del anunciador y copys
@@ -2846,9 +2852,10 @@ el original); el top 3 conserva el original. El panel de uso (`RF-ADM-04`) avisa
 Decisión del usuario: **el mismo sistema que la web del sello** (`ReactOtpWeb/backend/services/emailService.js`),
 nodemailer con Gmail y contraseña de aplicación, con estas mejoras:
 
-- **Una dirección del Google Workspace de `otherpeople.es`** (decisión del usuario del 2026-10-08; p. ej.
-  `batalla@otherpeople.es`), propia de Beat Battle y no la que usa la tienda del sello: el límite diario es
-  por cuenta y un lunes con mucha actividad dejaría sin cupo las entradas y licencias del sello. Requiere
+- **`contacto@otherpeople.es`**, del Google Workspace del sello (decisión del usuario del 2026-10-08).
+  Riesgo aceptado: el límite diario es por cuenta, así que si la web del sello envía desde la misma
+  dirección, un lunes con mucha actividad compartiría cupo con sus entradas y licencias. Si pasa, se
+  cambia a una dirección propia de Beat Battle sin tocar nada más (solo `GMAIL_USER` y su contraseña). Requiere
   verificación en dos pasos para generar la contraseña de aplicación. El Workspace da más cupo (~2.000 al
   día) y mejor entrega que un Gmail normal, con `From` del dominio.
 - **TLS verificado**: conexión a `smtp.gmail.com:465` con `secure: true` y **sin**
@@ -3096,7 +3103,7 @@ Valores por defecto que la guía ya asume; se confirman o se cambian (y se regis
 |---|---|---|
 | Dominio | **Cerrada (2026-10-08): `battle.otherpeople.es`** | Antes de la Fase 2 (afecta a OAuth y cookies) |
 | Cuenta de Cloudinary | **Propia de BeatBattle**, mismo sistema que el sello | Antes de la Fase 4 |
-| Cuenta de Gmail para enviar | **Cerrada (2026-10-08): una dirección del Google Workspace de `otherpeople.es`** (§4.19.1), propia de Beat Battle y no la de la tienda | Antes de la Fase 2 |
+| Cuenta de Gmail para enviar | **Cerrada (2026-10-08): `contacto@otherpeople.es`**, del Google Workspace del sello (§4.19.1) | Antes de la Fase 2 |
 | Newsletter del sello desde BeatBattle | Casilla opcional en el registro que da de alta en la newsletter del sello | Fase 9 |
 | Proveedores sociales | **Cerrada (2026-10-08): Google y Discord** | Fase 2 |
 | Premios | Sin premio material; visibilidad en el sello y Elección del sello. Si hay premios, revisar bases y fiscalidad (Anexo A) | Antes de la beta |
@@ -3443,6 +3450,8 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-08 | 0.6.32 | **Pantallas de cuenta y bienvenida** (tareas 2.15 y 2.17, §3.8.9, §3.8.14): entrar con email o nombre, registro con medidor diferido y casillas, verificar y recuperar, `GET /api/me` para el HUD (sin el cliente de Better Auth en la primera pintura), lo que pide sesión se pide dentro del panel, y la bienvenida con la carta plana y el primer logro por ganar (ninguno se gana al registrarse). |
+| 2026-10-08 | 0.6.31 | **Dirección de envío** (decisión del usuario): `contacto@otherpeople.es` (§4.19.1, §7), con el riesgo de cupo compartido con la web del sello anotado. |
 | 2026-10-08 | 0.6.30 | **Rebotes** (tarea 2.11, §4.19.2): qué cuenta como permanente, el lector puro, el buzón detrás de una interfaz e `imapflow` fijado en la 2.2.5. La conexión real con el Workspace está pendiente de sus credenciales. |
 | 2026-10-08 | 0.6.29 | **Preferencias y consentimientos** (tarea 2.12, §2.12.4): la API de Ajustes → Emails, las casillas del registro en el propio alta y el historial que solo añade cuando cambia el valor, con la versión del texto y el hash de la IP (sal semanal). |
 | 2026-10-08 | 0.6.28 | **Flujos de cuenta** (tarea 2.6, §2.3): el cambio de email se aprueba desde la dirección actual con un email nuevo del catálogo, `auth.change_email` (§2.12, Anexo H), y avisa a las dos direcciones; cambiar la contraseña y cerrar las demás sesiones avisan con `auth.security`. En Better Auth, una redirección (302) es un `APIError`: los *hooks* la tratan como éxito. |

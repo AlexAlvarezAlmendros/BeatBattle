@@ -1,0 +1,145 @@
+/*
+ * Carta de productor (§3.4.4), anverso plano: 63 × 88, inclinada −3°, negra (variante estándar) con marco
+ * blanco y chaflán, en la paleta.
+ */
+.card {
+  display: grid;
+  grid-template-rows: auto 1fr auto auto auto auto auto;
+  gap: var(--bb-space-2);
+  width: min(100%, calc(var(--bb-space-16) * 4.2));
+  aspect-ratio: 63 / 88;
+  /* Marco blanco que sigue el chaflán (`Frame`): con `border` + `clip-path` el trazo se cortaba en las esquinas. */
+  --frame-border: var(--bb-white);
+  --frame-fill: var(--bb-black);
+  --frame-stroke: var(--bb-stroke-cursor);
+  padding: var(--bb-space-4);
+  color: var(--bb-white);
+  rotate: var(--bb-tilt-card);
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.number {
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-extrabold);
+}
+
+/* Sello de nivel: círculo con el arco de progreso en rojo. */
+.seal {
+  display: grid;
+  place-items: center;
+  width: var(--bb-space-10);
+  height: var(--bb-space-10);
+  border-radius: 50%;
+  background: conic-gradient(var(--bb-red) var(--seal-arc), var(--bb-ink-4) 0);
+}
+
+.sealInner {
+  display: grid;
+  place-items: center;
+  width: calc(100% - 2 * var(--bb-stroke-cursor));
+  height: calc(100% - 2 * var(--bb-stroke-cursor));
+  border-radius: 50%;
+  background: var(--bb-black);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-extrabold);
+}
+
+.portrait {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  border: var(--bb-stroke) solid var(--bb-line-strong);
+  background: var(--bb-wine-2);
+}
+
+.monogram {
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-3xl);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  text-shadow: var(--bb-shadow-hard);
+}
+
+.name {
+  overflow-wrap: anywhere;
+  font-size: var(--bb-fs-xl);
+  line-height: 1;
+}
+
+.rank {
+  color: var(--bb-red);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--bb-space-2);
+  margin: 0;
+}
+
+.stats div {
+  display: grid;
+  gap: var(--bb-space-1);
+}
+
+.stats dt {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.stats dd {
+  margin: 0;
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-lg);
+  font-weight: var(--bb-weight-extrabold);
+}
+
+.showcase {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--bb-space-2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.slot {
+  min-height: var(--bb-space-8);
+  border: var(--bb-stroke) solid var(--bb-line-strong);
+}
+
+/* Hueco vacío: la silueta (borde discontinuo). */
+.slot[data-empty] {
+  border-style: dashed;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    rotate: none;
+  }
+}

@@ -1,5 +1,6 @@
 import { DocumentTitle } from '../../app/DocumentTitle'
 import { t } from '../../i18n'
+import { playerOf, useSession } from '../account/session'
 import { MainMenu } from './menu/MainMenu'
 import type { MenuModel } from './menu/model'
 
@@ -19,9 +20,10 @@ export const IDLE_CHRONICLE = [
  * «Avísame del próximo drop» (§2.12.3, Fase 3). Los demás estados se ven en `/dev/menu`.
  */
 export function HomePage() {
+  const me = useSession((state) => state.me)
   const model: MenuModel = {
     week: null,
-    player: null,
+    player: me ? playerOf(me) : null,
     season: null,
     champion: null,
     lastSealed: null,

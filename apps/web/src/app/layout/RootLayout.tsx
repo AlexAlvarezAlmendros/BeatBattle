@@ -1,5 +1,6 @@
 import { type MouseEvent, useEffect, useRef } from 'react'
 import { Outlet, ScrollRestoration, useLocation, useNavigation, useNavigationType } from 'react-router'
+import { useSession } from '../../features/account/session'
 import { t } from '../../i18n'
 import { keepsTabFocus } from '../../ui/Tabs'
 // Directo, sin el índice de `ui/Toast`: el marco solo necesita la zona (las regiones vivas); la pieza y
@@ -65,6 +66,10 @@ function GameFrame() {
   useFrameKeys()
   useGamepad()
   useAudioUnlock()
+  // La sesión (§4.9): una vez al cargar; las pantallas de cuenta la vuelven a pedir al entrar o salir.
+  useEffect(() => {
+    void useSession.getState().refresh()
+  }, [])
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: solo al cambiar de pantalla (con el estado de esa navegación)
   useEffect(() => {

@@ -241,6 +241,17 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               lazy: page(auth, (m) => m.RecoverPage),
             },
             {
+              path: 'bienvenida',
+              handle: handle(
+                'session',
+                simpleScreen({ kicker: PLATE_KICKERS.signUp, title: 'account.welcome.title' }),
+              ),
+              lazy: page(
+                () => import('../features/account/WelcomePage'),
+                (m) => m.WelcomePage,
+              ),
+            },
+            {
               path: 'baja',
               handle: handle(
                 'public',

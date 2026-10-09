@@ -1,0 +1,15 @@
+.box {
+  display: grid;
+  gap: var(--bb-space-3);
+}
+
+.lead {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-md);
+  line-height: var(--bb-leading-body);
+}
+
+.note {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-sm);
+}

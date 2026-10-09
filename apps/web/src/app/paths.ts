@@ -58,6 +58,8 @@ export const paths = {
   signUp: () => '/registro',
   verify: () => '/verificar',
   recover: () => '/recuperar',
+  /** La bienvenida tras verificar el email (§3.8.9): «NUEVO JUGADOR» y la carta impresa. */
+  welcome: () => '/bienvenida',
   /** La página de baja del pie de los avisos (§2.12.4); el token lo pone el email. */
   unsubscribe: (token: string) => `/baja?token=${encodeURIComponent(token)}`,
   admin: () => '/admin',
