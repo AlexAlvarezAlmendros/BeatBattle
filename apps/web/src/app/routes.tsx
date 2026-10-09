@@ -268,6 +268,17 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               ),
             },
             {
+              path: 'alerta',
+              handle: handle(
+                'public',
+                simpleScreen({ kicker: PLATE_KICKERS.emails, title: 'pages.alert.title' }),
+              ),
+              lazy: page(
+                () => import('../features/email/AlertConfirmPage'),
+                (m) => m.AlertConfirmPage,
+              ),
+            },
+            {
               path: 'admin',
               handle: handle(
                 'admin',
