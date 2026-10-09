@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.33 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.34 · 2026-10-08 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -273,6 +273,23 @@ token de cada sesión al navegador y exige una sesión de menos de un día.
 enlaces (Instagram, SoundCloud, YouTube, Spotify, BeatStars), color de acento (rojo, blanco o
 granate: solo la paleta, §3.2), la **carta de productor** en 3D, estadísticas, vitrina de logros y el
 historial de entradas con su posición.
+
+- **API.** `GET /api/profiles/:username` (público, sin distinguir mayúsculas) da nombre, número de carta,
+  alta, XP, bio, ciudad, enlaces, acento y avatar; nunca el email ni el id. Un nombre que no existe (o una
+  cuenta suspendida) es 404 y la web pinta su 404. Lo que aún no existe (estadísticas, historial,
+  posiciones y logros, Fases 5–7) se enseña con su estado vacío, y la semana en curso nunca aparece antes
+  del sellado (§1.3). Ajustes → Perfil edita con `GET`/`PUT /api/me/profile` (solo lo que cambia; un texto
+  vacío borra) y cambia el nombre con `PUT /api/me/username`; los dos cuentan para el límite de **30
+  cambios por hora** (§4.13). Errores: `USERNAME_TAKEN`, `USERNAME_RESERVED`, `USERNAME_INVALID`,
+  `USERNAME_CHANGE_TOO_SOON` (con `availableAt`) e `INVALID_LINK` (con el tipo).
+- **Enlaces.** Cada uno, `https://` de su sitio (`instagram.com`, `soundcloud.com`, `youtube.com` o
+  `youtu.be`, `open.spotify.com`, `beatstars.com`; sin esquema se le pone `https://`), y se abren en otra
+  pestaña con `rel="noopener noreferrer me"`.
+- **Cambio de nombre** (`RF-PRF-03`). Una vez cada 30 días; cambiar solo mayúsculas no cuenta. El anterior
+  queda retenido 30 días para su dueño: la API responde **301** desde `/api/profiles/<anterior>` al nuevo y
+  la web cambia la URL de `/p/<anterior>` a `/p/<nuevo>` (la página es la misma SPA; el 301 de la propia
+  `/p/` llegará con `api/share.ts`, la función de las páginas compartibles, en la Fase 6). El `update-user` de Better Auth
+  no puede cambiar el nombre (403): se saltaría el plazo y la redirección.
 
 | Id | Requisito | Aceptación |
 |---|---|---|
@@ -3460,6 +3477,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-08 | 0.6.34 | **Perfil** (tarea 2.18, §2.3, §3.8.10): `/p/:username` con lo que ya existe y el estado vacío de lo que llega después, Ajustes → Perfil, enlaces solo de su sitio, cambio de nombre con plazo de 30 días y 301 en la API (el de la página llega con `api/share.ts` en la Fase 6), `update-user` bloqueado para el nombre, y los códigos de error del perfil (§2.3). |
 | 2026-10-08 | 0.6.33 | **Ajustes → Cuenta, Emails y Sesiones** (tareas 2.16 y 2.20, §2.3, §2.12.4, §3.8.14): las tres secciones funcionan, con el emblema en la cuña; `GET`/`DELETE /api/me/sessions` en lugar de `list-sessions` de Better Auth (que expone los tokens); el email desechable se rechaza al pedir el cambio; el HUD lleva la ficha del jugador con sesión en todas las pantallas de juego (§3.4.1). |
 | 2026-10-08 | 0.6.32 | **Pantallas de cuenta y bienvenida** (tareas 2.15 y 2.17, §3.8.9, §3.8.14): entrar con email o nombre, registro con medidor diferido y casillas, verificar y recuperar, `GET /api/me` para el HUD (sin el cliente de Better Auth en la primera pintura), lo que pide sesión se pide dentro del panel, y la bienvenida con la carta plana y el primer logro por ganar (ninguno se gana al registrarse). |
 | 2026-10-08 | 0.6.31 | **Dirección de envío** (decisión del usuario): `contacto@otherpeople.es` (§4.19.1, §7), con el riesgo de cupo compartido con la web del sello anotado. |

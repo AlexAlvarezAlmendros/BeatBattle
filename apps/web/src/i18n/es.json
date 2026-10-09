@@ -179,7 +179,44 @@
     },
     "profile": {
       "title": "Perfil",
-      "summary": "Aquí irá el perfil público de @{username} y su carta de productor."
+      "documentTitle": "{name} · Perfil",
+      "loading": "Cargando el perfil…",
+      "header": "Productor #{number} · En la batalla desde {since}",
+      "level": "Nv {level}",
+      "linksLabel": "Enlaces de {name}",
+      "links": {
+        "instagram": "Instagram",
+        "soundcloud": "SoundCloud",
+        "youtube": "YouTube",
+        "spotify": "Spotify",
+        "beatstars": "BeatStars"
+      },
+      "edit": "Editar perfil",
+      "tilesLabel": "Estadísticas",
+      "tiles": {
+        "bestPlace": "Mejor puesto",
+        "streak": "Racha",
+        "finalAverage": "Media final",
+        "goldenEar": "Oído de oro",
+        "votesGiven": "Votos dados",
+        "season": "Temporada"
+      },
+      "noValue": "—",
+      "noValueLabel": "Sin datos todavía",
+      "history": {
+        "title": "Historial de combates",
+        "note": "Solo semanas selladas",
+        "empty": "Todavía no ha combatido en ninguna semana sellada.",
+        "pending": "La semana en curso no aparece aquí hasta el sellado: el voto es ciego."
+      },
+      "chart": {
+        "title": "Posiciones",
+        "empty": "La gráfica aparece con la primera semana sellada."
+      },
+      "achievements": {
+        "title": "Logros",
+        "empty": "Aún no hay logros: llegan con la capa de juego."
+      }
     },
     "hallOfFame": {
       "title": "Salón de la fama",
@@ -291,7 +328,46 @@
     },
     "profile": {
       "title": "Perfil",
-      "summary": "Aquí irá la edición de tu perfil público: nombre, avatar, enlaces y acento."
+      "summary": "Tu nombre, tu bio, tu ciudad, tus enlaces y el color de tu carta. Lo ve todo el mundo en tu perfil.",
+      "require": "Entra para editar tu perfil.",
+      "username": {
+        "title": "Nombre de productor",
+        "label": "Nombre de productor",
+        "hint": "Letras sin tilde, números, punto y guion bajo. Se cambia una vez cada 30 días, y el anterior lleva a tu perfil 30 días más.",
+        "submit": "Cambiar nombre",
+        "changed": "Hecho: ahora eres {name}.",
+        "availableAt": "Podrás volver a cambiarlo el {date}."
+      },
+      "card": {
+        "title": "Tu carta",
+        "bio": "Bio",
+        "bioHint": "Una línea sobre tu música.",
+        "city": "Ciudad",
+        "accent": "Color de acento",
+        "accents": {
+          "red": "Rojo",
+          "white": "Blanco",
+          "wine": "Granate"
+        }
+      },
+      "links": {
+        "title": "Enlaces",
+        "hint": "Pega la dirección de tu perfil en ese sitio, por ejemplo instagram.com/tu-nombre."
+      },
+      "save": "Guardar perfil",
+      "saved": "Perfil guardado.",
+      "see": "Ver mi perfil",
+      "loadError": "No se ha podido leer tu perfil.",
+      "retry": "Reintentar",
+      "errors": {
+        "usernameTaken": "Ese nombre ya lo tiene otro productor.",
+        "usernameReserved": "Ese nombre está reservado. Elige otro.",
+        "usernameInvalid": "Entre 3 y 20 caracteres: letras sin tilde, números, punto y guion bajo.",
+        "usernameChangeTooSoon": "Ya lo cambiaste hace menos de 30 días. Podrás el {date}.",
+        "invalidLink": "Ese enlace no es de {site}: tiene que ser una dirección https:// de su web.",
+        "rateLimited": "Demasiados cambios seguidos. Espera un poco y vuelve a probar.",
+        "unknown": "No se ha podido guardar. Vuelve a probar en un momento."
+      }
     },
     "emails": {
       "title": "Emails",
@@ -591,7 +667,8 @@
       "show": "Ver {label}",
       "hide": "Ocultar {label}",
       "showShort": "Ver",
-      "hideShort": "Ocultar"
+      "hideShort": "Ocultar",
+      "count": "{count} / {max}"
     },
     "producerCard": {
       "label": "Carta de luchador de {name}, número {number}",

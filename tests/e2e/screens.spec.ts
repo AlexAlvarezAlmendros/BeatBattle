@@ -770,7 +770,7 @@ for (const viewport of [
  * 1024 × 768, «TAMAÑO / DE / TEXTO» partía en tres).
  */
 /** Secciones de Opciones que ya funcionan (§3.8.14): su cuña lleva el emblema, no la vista previa. */
-const WORKING_SETTINGS = ['/ajustes/cuenta', '/ajustes/emails', '/ajustes/sesiones']
+const WORKING_SETTINGS = ['/ajustes/cuenta', '/ajustes/perfil', '/ajustes/emails', '/ajustes/sesiones']
 
 for (const viewport of [
   { width: 1440, height: 900 },
@@ -995,10 +995,11 @@ for (const colorScheme of ['dark', 'light'] as const) {
       page,
     }) => {
       await page.emulateMedia({ forcedColors: 'active', colorScheme })
-      // Movimiento: conmutadores «◀ NO ▶»; Perfil: acciones «Editar ▸» (Cuenta ya funciona).
+      // Movimiento: conmutadores «◀ NO ▶»; Privacidad: acciones «Pedir ▸» y «Borrar ▸» (Cuenta y Perfil
+      // ya funcionan).
       for (const { path, heading, arrows } of [
         { path: '/ajustes/movimiento', heading: 'Movimiento', arrows: 6 },
-        { path: '/ajustes/perfil', heading: 'Perfil', arrows: 4 },
+        { path: '/ajustes/privacidad', heading: 'Privacidad', arrows: 2 },
       ]) {
         await open(page, path, heading)
         await settle(page)

@@ -35,7 +35,6 @@ const PAGES: { path: string; heading: string; title: string }[] = [
   { path: '/e/0192f3a1', heading: 'pages.entry.title', title: documentTitle(tk('pages.entry.title')) },
   { path: '/jurado', heading: 'pages.jury.title', title: documentTitle(tk('pages.jury.title')) },
   { path: '/subir', heading: 'pages.upload.title', title: documentTitle(tk('pages.upload.title')) },
-  { path: '/p/aina', heading: 'pages.profile.title', title: documentTitle(tk('pages.profile.title')) },
   {
     path: '/salon-de-la-fama',
     heading: 'pages.hallOfFame.title',
@@ -82,6 +81,40 @@ describe('router (0.10, guía §2.18)', () => {
     expect(await h1(tk(heading))).toBeInTheDocument()
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1)
     await waitFor(() => expect(document.title).toBe(title))
+  })
+
+  it('/p/:username pinta el perfil: su <h1> es el nombre y la pestaña lo lleva', async () => {
+    const profile = {
+      username: 'aina',
+      displayUsername: 'Aina',
+      cardNumber: 7,
+      joinedAt: Date.UTC(2026, 9, 1),
+      xp: 0,
+      bio: null,
+      city: null,
+      links: {},
+      accent: 'red',
+      avatarUrl: null,
+    }
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) =>
+        String(input).endsWith('/api/profiles/aina')
+          ? new Response(JSON.stringify({ data: profile }), {
+              headers: { 'content-type': 'application/json' },
+            })
+          : new Response(JSON.stringify({ error: { code: 'NOT_FOUND', message: '' } }), {
+              status: String(input).includes('/api/profiles/') ? 404 : 200,
+              headers: { 'content-type': 'application/json' },
+            }),
+      ),
+    )
+    renderAt('/p/aina')
+    expect(await h1('Aina')).toBeInTheDocument()
+    await waitFor(() =>
+      expect(document.title).toBe(documentTitle(t('pages.profile.documentTitle', { name: 'Aina' }))),
+    )
+    vi.unstubAllGlobals()
   })
 
   it('las páginas con parámetros los reciben', async () => {

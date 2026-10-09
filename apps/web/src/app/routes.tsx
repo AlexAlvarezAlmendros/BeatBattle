@@ -76,6 +76,7 @@ const settings = () => import('../features/settings/SettingsPages')
 const accountSettings = () => import('../features/settings/AccountSettings')
 const emailSettings = () => import('../features/settings/EmailSettings')
 const sessionsSettings = () => import('../features/settings/SessionsSettings')
+const profileSettings = () => import('../features/settings/ProfileSettings')
 const auth = () => import('../features/auth/AuthPages')
 
 export interface CreateRoutesOptions {
@@ -155,10 +156,10 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             {
               path: 'p/:username',
               handle: handle('public', interior('profile', 'pages.profile.title')),
-              lazy: page(
-                () => import('../features/profile/ProfilePage'),
-                (m) => m.ProfilePage,
-              ),
+              lazy: async () => {
+                const m = await import('../features/profile/ProfilePage')
+                return { Component: m.ProfilePage, loader: m.profileLoader }
+              },
             },
             {
               path: 'salon-de-la-fama',
@@ -204,7 +205,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
                 { path: 'sonido', lazy: page(settings, (m) => m.SoundSettingsPage) },
                 { path: 'movimiento', lazy: page(settings, (m) => m.MotionSettingsPage) },
                 { path: 'cuenta', lazy: page(accountSettings, (m) => m.AccountSettingsPage) },
-                { path: 'perfil', lazy: page(settings, (m) => m.ProfileSettingsPage) },
+                { path: 'perfil', lazy: page(profileSettings, (m) => m.ProfileSettingsPage) },
                 { path: 'emails', lazy: page(emailSettings, (m) => m.EmailSettingsPage) },
                 { path: 'sesiones', lazy: page(sessionsSettings, (m) => m.SessionsSettingsPage) },
                 { path: 'privacidad', lazy: page(settings, (m) => m.PrivacySettingsPage) },

@@ -69,7 +69,7 @@ export const ROUTES = [
   { path: '/e/0192f3a1', heading: 'Entrada' },
   { path: '/jurado', heading: 'Modo Jurado' },
   { path: '/subir', heading: 'Subir mi beat' },
-  { path: '/p/aina', heading: 'Perfil' },
+  { path: '/p/aina', heading: 'aina' },
   { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
   { path: '/temporada/t4', heading: 'Temporada' },
   { path: '/como-funciona', heading: 'Cómo se juega' },

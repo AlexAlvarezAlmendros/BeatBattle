@@ -1,0 +1,138 @@
+/*
+ * Perfil público (§3.8.10; tarea 2.18): la carta en la cuña y el panel con la cabecera, los enlaces, las
+ * seis teselas y, en dos columnas desde 1100 px, el historial a la izquierda y las posiciones y los logros
+ * a la derecha. El acento de la carta tiñe el filete de los títulos (la sombra del nombre es siempre la roja).
+ */
+.piece {
+  display: grid;
+  place-items: center;
+  width: 100%;
+}
+
+.body {
+  --accent: var(--bb-red-cta);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-6);
+}
+
+.body[data-accent="white"] {
+  --accent: var(--bb-text-3);
+}
+
+.body[data-accent="wine"] {
+  --accent: var(--bb-wine);
+}
+
+.head {
+  display: grid;
+  gap: var(--bb-space-2);
+  min-width: 0;
+}
+
+.name {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-3xl);
+  text-shadow: var(--bb-shadow-hard);
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.meta strong {
+  color: var(--bb-white);
+  font-weight: var(--bb-weight-bold);
+}
+
+.bio {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-md);
+  line-height: var(--bb-leading-body);
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-2);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-6);
+}
+
+.side {
+  display: grid;
+  align-content: start;
+  gap: var(--bb-space-6);
+}
+
+.section {
+  display: grid;
+  align-content: start;
+  gap: var(--bb-space-3);
+}
+
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--bb-space-2);
+}
+
+.sectionTitle {
+  padding-left: var(--bb-space-3);
+  border-left: var(--bb-space-1) solid var(--accent);
+  color: var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-md);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: var(--bb-leading-label);
+  text-transform: uppercase;
+}
+
+/* El estado vacío: una placa opaca con su texto, del alto de una fila del historial. */
+.empty {
+  padding: var(--bb-space-4);
+  border: var(--bb-stroke-hair) dashed var(--bb-line-strong);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+.note {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  line-height: var(--bb-leading-body);
+}
+
+/* Tres teselas por fila desde 721 px (en móvil, la lista pasa a filas de clave y valor) y seis desde 1100. */
+@media (min-width: 721px) {
+  .tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .tiles {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .columns {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+}
+
+/* En móvil la cabeza de la pantalla ya enseña el nombre en display: el del panel sobra. */
+@media (max-width: 720px) {
+  .name {
+    display: none;
+  }
+}

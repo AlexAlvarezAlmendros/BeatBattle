@@ -113,6 +113,17 @@ export function createAuth(deps: AuthDeps) {
       // El dominio desechable se rechaza al pedir el cambio de email (`RF-AUTH-09`), no al final: el
       // formulario de Ajustes → Cuenta lo dice en el campo, antes de mandar ningún email.
       before: createAuthMiddleware(async (ctx) => {
+        // El nombre solo cambia por `PUT /api/me/username` (una vez cada 30 días y con redirección,
+        // `RF-PRF-03`): el `update-user` del plugin `username` se lo saltaría.
+        if (ctx.path === '/update-user') {
+          const body = (ctx.body ?? {}) as Record<string, unknown>
+          if ('username' in body || 'displayUsername' in body)
+            throw new APIError('FORBIDDEN', {
+              code: 'USERNAME_CHANGE_VIA_PROFILE',
+              message: 'El nombre se cambia en Ajustes → Perfil.',
+            })
+          return
+        }
         if (ctx.path !== '/change-email') return
         const newEmail = (ctx.body as { newEmail?: unknown } | undefined)?.newEmail
         if (typeof newEmail === 'string' && isDisposableEmail(newEmail))

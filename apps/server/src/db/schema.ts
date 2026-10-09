@@ -1,3 +1,4 @@
+import { ACCENTS, type Accent } from '@beatbattle/shared'
 import { index, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { user } from './auth-schema'
 
@@ -26,9 +27,8 @@ export const appRateLimit = sqliteTable('app_rate_limit', {
   resetAt: integer('reset_at').notNull(),
 })
 
-/** Colores de acento del perfil: solo la paleta (§2.3, §3.2). */
-export const ACCENTS = ['red', 'white', 'wine'] as const
-export type Accent = (typeof ACCENTS)[number]
+/** Colores de acento del perfil: solo la paleta (§2.3, §3.2); los define `@beatbattle/shared`. */
+export { ACCENTS, type Accent }
 
 /**
  * Perfil de productor (guía §4.11): lo público y lo de juego de cada cuenta, aparte de `user`. Se crea
