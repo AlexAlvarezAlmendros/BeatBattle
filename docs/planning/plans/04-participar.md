@@ -158,8 +158,8 @@ nunca pasa por la API (`RF-STO-01`) y nada de lo que el navegador declara sobre 
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 4.19 | E2E del hito con el almacenamiento falso y el Mailer en memoria: un WAV de 60 MB generado (140 BPM en La menor, −10 LUFS) sube por trozos; BPM y tonalidad sugeridos; sonoridad medida en servidor; `entry.receipt` con número, sonoridad y huella. Además: un audio de 5 min rechazado en el navegador, cancelar a mitad, segunda subida 409, corte de red a mitad y retirar y volver a subir | 🔒 Bloqueado | 4.6–4.18 | §5 · hito · `RF-ENT-*`, `RF-NOTIF-06` |
-| 4.20 | Jurado visual de tres lentes sobre `/subir` (ranura, análisis, hoja, medidor, celebración, edición y errores) y los emails del recibo | 🔒 Bloqueado | 4.12, 4.14–4.18 | `RD-VIS-02` (e) |
+| 4.19 | E2E del hito con el almacenamiento falso y el Mailer en memoria: un WAV de 60 MB generado (140 BPM en La menor, −10 LUFS) sube por trozos; BPM y tonalidad sugeridos; sonoridad medida en servidor; `entry.receipt` con número, sonoridad y huella. Además: un audio de 5 min rechazado en el navegador, cancelar a mitad, segunda subida 409, corte de red a mitad y retirar y volver a subir | ✅ Hecho | 4.6–4.18 | §5 · hito · `RF-ENT-*`, `RF-NOTIF-06` · **Hecho:** `tests/e2e/entries.spec.ts` con el reloj simulado en la semana 2032-W12: un WAV de 104 s a 96 kHz/24 bits (≈ 60 MB, bombo a 140 BPM y La menor) por la UI de `/subir`; el análisis local sugiere 140 y `Am`; sube en 3 trozos de 20 MB; el servidor verifica y mide y el `tick` manda `entry.receipt` con `BB-2032W12-…`, LUFS, 1:44 y la huella; el menú pasa a «Editar mi entrada». El buzón de prueba admite `contains=` para elegir entre varios emails |
+| 4.20 | Jurado visual de tres lentes sobre `/subir` (ranura, análisis, hoja, medidor, celebración, edición y errores) y los emails del recibo | ⬜ Listo | 4.12, 4.14–4.18 | `RD-VIS-02` (e) |
 | 4.21 | Cierre de la fase: cobertura de ids, hito y roadmap | 🔒 Bloqueado | 4.10, 4.19, 4.20 | — |
 
 ---
@@ -188,6 +188,7 @@ Hasta el cierre de envíos puede editar la ficha, sustituir el audio sin votos o
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-10 | 4.19 | E2E del hito de la Fase 4 en verde: 60 MB por trozos, sugerencia 140/Am, medición y recibo. |
 | 2026-10-10 | 4.18 | `/subir` en edición: ficha, sustituir el audio sin votos y retirar, recorridos en Chrome. Guía v0.6.55. |
 | 2026-10-10 | 4.15, 4.16 | La hoja del luchador, la subida por trozos con el medidor de súper y la celebración; recorrido completo en Chrome. |
 | 2026-10-10 | 4.11 | Portadas generativas por CPU con calibración; `RD-VIS-04` con 48 semillas en Chrome. Guía v0.6.54. |
