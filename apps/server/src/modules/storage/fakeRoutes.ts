@@ -1,9 +1,12 @@
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import type { FastifyInstance } from 'fastify'
 import { appError } from '../../lib/errors'
 import { type DiskSampleStorage, SAMPLE_MAX_BYTES } from './samples'
 
 const MIME: Record<string, string> = {
   wav: 'audio/wav',
+  flac: 'audio/flac',
   aiff: 'audio/aiff',
   aif: 'audio/aiff',
   mp3: 'audio/mpeg',
@@ -17,8 +20,9 @@ const MIME: Record<string, string> = {
 /**
  * Rutas del almacenamiento falso en disco (§4.8.6, tarea 3.4): hacen de Cloudinary en los E2E y en
  * desarrollo sin red. Solo se registran con `BB_FAKE_STORAGE` fuera de producción. Imitan lo que importa:
- * la subida firmada (multipart, con `public_id` y firma), la escucha firmada y la descarga como adjunto
- * que caduca (pasada la hora, 401, como la API de descarga de Cloudinary).
+ * la subida firmada (multipart, con `public_id` y firma; también **por trozos**, con `X-Unique-Upload-Id` y
+ * `Content-Range`, §4.7.4: el último trozo cierra el recurso y la respuesta lleva su `etag`), la escucha
+ * firmada y la descarga como adjunto que caduca (pasada la hora, 401, como la API de descarga de Cloudinary).
  */
 export function fakeStorageRoutes(app: FastifyInstance, storage: DiskSampleStorage): void {
   app.register(async (scope) => {
@@ -50,8 +54,29 @@ export function fakeStorageRoutes(app: FastifyInstance, storage: DiskSampleStora
         const format = (file.name.split('.').pop() ?? '').toLowerCase()
         if (!field('allowed_formats').split(',').includes(format))
           throw appError('UNSUPPORTED_FORMAT', `Formato ${format} no permitido.`)
-        await storage.put({ publicId, bytes: new Uint8Array(await file.arrayBuffer()), format })
-        return { public_id: publicId, format, bytes: file.size }
+        const bytes = new Uint8Array(await file.arrayBuffer())
+        const range = parseContentRange(req.headers['content-range'])
+        if (!range) {
+          const meta = await storage.put({ publicId, bytes, format, nowMs: req.now })
+          return { public_id: publicId, format, bytes: meta.bytes, etag: meta.etag, done: true }
+        }
+        // Por trozos: cada uno se guarda aparte y el último cierra el recurso (como Cloudinary).
+        const uploadId = String(req.headers['x-unique-upload-id'] ?? '')
+        if (!/^[\w-]{8,64}$/.test(uploadId)) throw appError('VALIDATION_FAILED', 'Falta X-Unique-Upload-Id.')
+        if (range.end - range.start + 1 !== bytes.byteLength)
+          throw appError('VALIDATION_FAILED', 'El trozo no mide lo que dice Content-Range.')
+        const dir = join(storage.root, '.chunks', uploadId)
+        await mkdir(dir, { recursive: true })
+        await writeFile(join(dir, String(range.start).padStart(12, '0')), bytes)
+        if (range.end + 1 < range.total) return { done: false }
+        const parts = (await readdir(dir)).sort()
+        const chunks = await Promise.all(parts.map((name) => readFile(join(dir, name))))
+        await rm(dir, { recursive: true, force: true })
+        const whole = Buffer.concat(chunks)
+        if (whole.byteLength !== range.total)
+          throw appError('VALIDATION_FAILED', 'Faltan trozos: el fichero no mide lo que dice Content-Range.')
+        const meta = await storage.put({ publicId, bytes: new Uint8Array(whole), format, nowMs: req.now })
+        return { public_id: publicId, format, bytes: meta.bytes, etag: meta.etag, done: true }
       },
     )
 
@@ -86,4 +111,16 @@ export function fakeStorageRoutes(app: FastifyInstance, storage: DiskSampleStora
       (req, reply) => serve(true)(req, reply),
     )
   })
+}
+
+/** `Content-Range: bytes 0-20971519/62914560` → `{ start, end, total }`, o `null` sin la cabecera. */
+function parseContentRange(
+  header: string | string[] | undefined,
+): { start: number; end: number; total: number } | null {
+  if (typeof header !== 'string') return null
+  const match = /^bytes (\d+)-(\d+)\/(\d+)$/.exec(header.trim())
+  if (!match) throw appError('VALIDATION_FAILED', 'Content-Range no válido.')
+  const [start, end, total] = [Number(match[1]), Number(match[2]), Number(match[3])]
+  if (start > end || end >= total) throw appError('VALIDATION_FAILED', 'Content-Range no válido.')
+  return { start, end, total }
 }
