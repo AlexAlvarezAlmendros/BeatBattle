@@ -1,4 +1,5 @@
 export * from './emailPrefs'
+export * from './entries'
 export * from './envelope'
 export * from './errorCodes'
 export * from './health'
