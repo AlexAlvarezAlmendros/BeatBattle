@@ -12,6 +12,7 @@ import { Skeleton, SkeletonGroup } from '../../ui/Skeleton'
 import { VinylSun } from '../../ui/VinylSun'
 import { Done, PaperNotice } from '../account/FormBits'
 import { RulesModal } from '../week/RulesModal'
+import { EditEntry } from './EditEntry'
 import { EntrySheet, type EntrySheetResult } from './EntrySheet'
 import { clearDraft, EMPTY_DRAFT, type EntryDraft, loadDraft, saveDraft } from './entrySheet'
 import styles from './UploadPage.module.css'
@@ -157,16 +158,7 @@ export function UploadPage() {
       />
     )
   } else if (week.viewer?.entry) {
-    body = (
-      <div className={styles.gate}>
-        <p className={styles.lead}>{t('pages.upload.inside.summary', { alias: week.viewer.entry.alias })}</p>
-        <div className={styles.actions}>
-          <Button to={paths.entry(week.viewer.entry.id)} variant="cta">
-            {t('pages.upload.inside.view')}
-          </Button>
-        </div>
-      </div>
-    )
+    body = <EditEntry week={week} />
   } else if (!week.viewer?.rulesAccepted) {
     body = (
       <div className={styles.gate}>

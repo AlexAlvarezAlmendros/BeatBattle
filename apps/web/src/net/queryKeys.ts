@@ -13,6 +13,10 @@ export const queryKeys = {
     current: () => ['weeks', 'current'] as const,
     detail: (slug: string) => ['weeks', 'detail', slug] as const,
   },
+  entries: {
+    all: ['entries'] as const,
+    mine: (slug: string) => ['entries', 'mine', slug] as const,
+  },
   admin: {
     all: ['admin'] as const,
     samples: () => ['admin', 'samples'] as const,

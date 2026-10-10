@@ -71,6 +71,7 @@ describe('la hoja del luchador (§2.5, 4.15)', () => {
         declaration: true,
       },
       cover: null,
+      removeCover: false,
     })
   })
 

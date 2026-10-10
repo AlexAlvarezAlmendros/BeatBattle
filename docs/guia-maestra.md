@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.54 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.55 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2570,6 +2570,7 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | POST | `/api/weeks/:slug/sample/download` | Verif. | URL firmada de descarga (`kind: original\|stems`), solo en `open` y con las bases aceptadas |
 | POST | `/api/uploads/sign` | Verif. | Parámetros firmados (`kind: entry\|entryCover\|avatar`); los del sample, en `/api/admin/samples/sign` |
 | POST | `/api/weeks/:slug/entries` | Verif. | Registrar la entrada tras la subida |
+| GET | `/api/weeks/:slug/entries/mine` | Sesión | La entrada propia de la semana, con su estado, recibo, medición y si se puede sustituir el audio (`/subir` en edición) |
 | GET | `/api/entries/:id` | Pública | Ficha (respeta el voto ciego) |
 | PATCH | `/api/entries/:id` | Dueño | Editar la ficha (hasta el cierre de envíos) |
 | PUT | `/api/entries/:id/audio` | Dueño | Sustituir el audio (sin votos) |
@@ -3594,6 +3595,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-10 | 0.6.55 | **Tarea 4.18.** §4.10: `GET /api/weeks/:slug/entries/mine` (la entrada propia para editarla en `/subir`). |
 | 2026-10-10 | 0.6.54 | **Tarea 4.11.** §3.4.5: cada entrada lleva su portada generativa (semilla, tónica y BPM) pintada por CPU con la calibración por medida en `packages/covers` (`painter.ts`) con la paleta de los tokens; `GenerativeCover` en la web y el banco `/dev/portadas`; `RD-VIS-04` medido con 48 y 200 semillas (peor desviación 0,5 % en rojo, 1,2 % y 2,1 % en luminancia). |
 | 2026-10-10 | 0.6.53 | **Tarea 4.17.** Anexo D: `upload.hover` no va en bucle sino una vez (240 ms, como dicen §3.8.5 y el Anexo E) con la tónica de la semana en la 1.ª octava; `upload.progress` sube del grado 1 al 11 de la pentatónica y como mucho suena 3 veces por segundo; `upload.drop` y `upload.done` van en la tónica. Anexo E: equivalentes visuales del medidor de súper y de la entrada en la batalla (`RNF-A11Y-05`). |
 | 2026-10-10 | 0.6.52 | **Tarea 4.12.** §4.19.5: la onda del recibo (`/api/email/waveform/:entryId.png`, PNG propio, firma con la versión del audio, línea plana sin onda, petición sin registrar). `RF-NOTIF-12`: la imagen que es el contenido del email (onda, tarjeta de resultado) es la única por destinatario, firmada y sin id de usuario. §2.12.1: «compartir mi tarjeta» llega con la Fase 5; la retirada no dice cuántos votos tenía. |
