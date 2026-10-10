@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.50 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.51 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2433,7 +2433,9 @@ envían su medición; el servidor usa la mediana cuando hay 3 y marca las discre
 - Barrido diario por prefijo (Admin API `resources`, paginado): recursos de más de 24 h sin fila en
   la BD → se borran.
 - Todo respeta el límite de la Admin API (500 peticiones por hora en el plan gratuito): el barrido
-  se trocea entre varios `tick`.
+  se trocea entre varios `tick` (dos páginas por `tick`, con el cursor en `job_state`; una vez por día UTC).
+- Entradas que se quedaron en `processing` (§4.8.4): el `tick` las mide (dos por `tick`) y pasan a `active`
+  con su recibo; si lo medido no vale o no se puede leer, se retiran, se borra el audio y sale `entry.failed`.
 
 #### 4.8.6 Interfaz `AudioStorage`
 
@@ -2755,6 +2757,7 @@ CREATE TABLE ip_signal (user_id TEXT, ip_hash TEXT, seen_at INTEGER NOT NULL,
   PRIMARY KEY (user_id, ip_hash));                    -- hash con sal rotatoria; se purga a los 7 días
 
 CREATE TABLE job_lease (name TEXT PRIMARY KEY, holder TEXT NOT NULL, expires_at INTEGER NOT NULL);
+CREATE TABLE job_state (name TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at INTEGER NOT NULL); -- por dónde va una tarea troceada (barrido de huérfanos, §4.8.5)
 
 CREATE TABLE audit_log (id TEXT PRIMARY KEY, actor_id TEXT NOT NULL, action TEXT NOT NULL,
   target TEXT NOT NULL, reason TEXT, payload TEXT, created_at INTEGER NOT NULL);
@@ -3578,6 +3581,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-10 | 0.6.51 | **Tarea 4.9.** §4.8.5 y §4.11: tabla `job_state` para las tareas troceadas; el barrido de huérfanos hace dos páginas por `tick` y una pasada por día; el `tick` completa (o retira) las entradas en `processing`. |
 | 2026-10-10 | 0.6.50 | **Tareas 4.5 y 4.6.** §4.8.2: la firma acepta `replacing` (sustituir el audio sin votos). §4.8.4: los motivos de rechazo (`ENTRY_ASSET_INVALID` con `details.reason`, `UPLOAD_INTENT_INVALID`) y el *intent* `failed` con `entry.failed`. La medición espera hasta 20 s (`MEASURE_BUDGET_MS`) antes de dejar la entrada en `processing`. |
 | 2026-10-10 | 0.6.49 | **Tarea 4.3.** §4.11: al borrar una cuenta (`RF-PRF-04`), sus entradas de semanas selladas guardan `user_id = 'deleted:<id de la entrada>'` (único por entrada, para no chocar con `entry_one_per_week`); las de semanas sin sellar y sus votos se borran, y sus audios los barre la limpieza de huérfanos (§4.8.5). |
 | 2026-10-10 | 0.6.48 | **Plan de la Fase 4** (Participar). §4.8.6: el almacenamiento falso imita también la subida por trozos (`X-Unique-Upload-Id`, `Content-Range`) y devuelve el `etag`. §2.12.1 y §4.11: el número de recibo se guarda en `entry.receipt_number` (único por semana, fijado al crear, no se reutiliza). §2.5, §3.8.5 y §4.8.4: el XP y los logros de la subida llegan con la Fase 7; hasta entonces el `batch` lleva la entrada y su email. |

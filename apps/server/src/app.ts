@@ -205,6 +205,8 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     drain: drainDeps,
     weeks,
     alerts,
+    entries,
+    entryStorage,
   })
   // El buzón de los E2E: solo en test, nunca en desarrollo ni en producción.
   if (config.env === 'test') testingRoutes(app, mailer, db)

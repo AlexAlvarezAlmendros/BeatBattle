@@ -21,8 +21,10 @@ const beat = (seconds = 31) => sineWav({ seconds, sampleRate: 8000, channels: 1 
 type Options = Parameters<typeof makeWeeksApp>[1]
 
 /** Semana 42 abierta y un productor verificado con las bases aceptadas. */
+const CRON_SECRET = 'cron-secret-de-prueba-0123456789abcdef'
+
 async function openWeek(options: Options = {}) {
-  t = await makeWeeksApp({}, options)
+  t = await makeWeeksApp({ cronSecret: CRON_SECRET }, options)
   const { id } = await createSample(t)
   await scheduleWeek(t, '2026-10-12', id)
   t.clock.set(W42.startsAt + HOUR)
@@ -479,5 +481,94 @@ describe('la semana con lo de quien mira (4.8, §3.8.3)', () => {
       headers: { cookie, origin: ORIGIN },
     })
     expect((await weekView(cookie)).json().data).toMatchObject({ entries: 0, viewer: { entry: null } })
+  })
+})
+
+describe('el tick de las entradas (4.9, §4.8.5)', () => {
+  const tick = async () => {
+    const res = await t.app.inject({
+      method: 'GET',
+      url: '/api/cron/tick',
+      headers: { authorization: `Bearer ${CRON_SECRET}` },
+    })
+    expect(res.statusCode, res.body).toBe(200)
+    return res.json().data
+  }
+
+  it('RF-STO-05 / RF-ENT-07: un intent caducado (subida cancelada) borra su recurso y queda expired', async () => {
+    const { cookie } = await openWeek()
+    const { intentId, publicId } = await upload(cookie)
+    t.clock.advance(INTENT_TTL_MS)
+    const out = await tick()
+    expect(out.entries.intentsExpired).toBe(1)
+    expect(await t.storage.read(publicId)).toBeNull()
+    const [intent] = await t.db.select().from(uploadIntent).where(eq(uploadIntent.id, intentId))
+    expect(intent?.status).toBe('expired')
+  })
+
+  it('§4.8.4: el tick completa una entrada en processing (se mide y sale el recibo)', async () => {
+    let mode: 'real' | 'hang' = 'real'
+    const { cookie } = await openWeek({
+      measure: (source) => (mode === 'hang' ? new Promise(() => {}) : measureAudio(source)),
+      measureBudgetMs: 30,
+    })
+    mode = 'hang'
+    const own = (await create(cookie, (await upload(cookie)).intentId)).json().data
+    expect(own.status).toBe('processing')
+    mode = 'real'
+    const out = await tick()
+    expect(out.entries).toMatchObject({ processingCompleted: 1, processingRejected: 0 })
+    const [row] = await t.db.select().from(entry).where(eq(entry.id, own.id))
+    expect(row?.status).toBe('active')
+    expect(row?.loudnessLufs).toBeCloseTo(-13, 0)
+    expect(await outbox('entry.receipt')).toHaveLength(1)
+  })
+
+  it('§4.8.4: si en el tick no se puede leer, la entrada se retira, se borra el audio y sale entry.failed', async () => {
+    let mode: 'real' | 'hang' | 'fail' = 'real'
+    const { cookie } = await openWeek({
+      measure: (source) =>
+        mode === 'hang'
+          ? new Promise(() => {})
+          : mode === 'fail'
+            ? Promise.reject(new Error('no es audio'))
+            : measureAudio(source),
+      measureBudgetMs: 30,
+    })
+    mode = 'hang'
+    const { publicId } = await (async () => {
+      const up = await upload(cookie)
+      await create(cookie, up.intentId)
+      return up
+    })()
+    mode = 'fail'
+    const out = await tick()
+    expect(out.entries).toMatchObject({ processingCompleted: 0, processingRejected: 1 })
+    expect((await t.db.select().from(entry))[0]?.status).toBe('withdrawn')
+    expect(await t.storage.read(publicId)).toBeNull()
+    expect(await outbox('entry.failed')).toHaveLength(1)
+  })
+
+  it('RF-STO-05: tras el tick, un recurso huérfano de más de 24 h ya no existe (los usados y los recientes, sí)', async () => {
+    const { cookie } = await openWeek()
+    const own = (await create(cookie, (await upload(cookie)).intentId)).json().data
+    const [row] = await t.db.select().from(entry).where(eq(entry.id, own.id))
+    const old = 'beatbattle-test/entries/2026-w42/huerfano-viejo'
+    const recent = 'beatbattle-test/entries/2026-w42/huerfano-nuevo'
+    const cover = 'beatbattle-test/entry-covers/2026-w42/portada-huerfana'
+    t.clock.advance(25 * HOUR)
+    const now = t.clock.now()
+    await t.storage.put({ publicId: old, bytes: beat(), format: 'wav', nowMs: now - 25 * HOUR })
+    await t.storage.put({ publicId: recent, bytes: beat(), format: 'wav', nowMs: now - HOUR })
+    await t.storage.put({ publicId: cover, bytes: pngHeader(10, 10), format: 'png', nowMs: now - 30 * HOUR })
+    const out = await tick()
+    expect(out.entries.orphansRemoved).toBe(2)
+    expect(await t.storage.read(old)).toBeNull()
+    expect(await t.storage.read(cover)).toBeNull()
+    expect(await t.storage.read(recent)).not.toBeNull()
+    // El audio de la entrada viva tiene más de 24 h, pero se usa: se queda.
+    expect(await t.storage.read(row!.audioPublicId)).not.toBeNull()
+    // El barrido del día ya está hecho: el siguiente tick no vuelve a listar.
+    expect((await tick()).entries.orphansRemoved).toBe(0)
   })
 })
