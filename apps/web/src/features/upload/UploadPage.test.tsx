@@ -1,4 +1,4 @@
-import type { CurrentWeek, PublicWeek } from '@beatbattle/shared'
+import type { CurrentWeek, OwnEntry, PublicWeek } from '@beatbattle/shared'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { renderInRouter } from '../../app/layout/testing'
@@ -77,18 +77,55 @@ describe('/subir: comprobaciones previas (§2.5, paso 1)', () => {
     expect(screen.queryByText(t('pages.upload.slot.title'))).toBeNull()
   })
 
-  it('RF-ENT-01: con su entrada en la semana, no hay ranura: está dentro, con su alias', () => {
-    render(
-      weekWith({
-        viewer: {
-          rulesAccepted: true,
-          dropSeen: true,
-          entry: { id: 'e1', status: 'active', alias: 'Tigre Púrpura' },
-        },
-      }),
-    )
-    expect(screen.getByText(/Tigre Púrpura/)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: t('pages.upload.inside.view') })).toHaveAttribute('href', '/e/e1')
+  it('RF-ENT-01: con su entrada en la semana, no hay ranura de nueva entrada: su ficha, sustituir y retirar', async () => {
+    const own: OwnEntry = {
+      id: 'e1',
+      weekSlug: '2026-w42',
+      alias: 'Tigre Púrpura',
+      title: 'Bruma',
+      description: null,
+      bpm: 140,
+      musicalKey: 'Am',
+      daw: 'Renoise',
+      genres: ['Trap'],
+      durationMs: 150_000,
+      peaks: null,
+      gainDb: -4,
+      streamUrl: '/stream',
+      cover: { kind: 'generative', seed: 7 },
+      producer: null,
+      status: 'active',
+      receiptCode: 'BB-2026W42-0001',
+      format: 'wav',
+      bytes: 1000,
+      loudnessLufs: -10,
+      truePeakDb: -1,
+      ownCoverUrl: null,
+      canReplaceAudio: false,
+      submittedAt: 1,
+      updatedAt: 1,
+    }
+    renderInRouter(<UploadPage />, '/subir', (client) => {
+      client.setQueryData<CurrentWeek>(queryKeys.weeks.current(), {
+        week: weekWith({
+          viewer: {
+            rulesAccepted: true,
+            dropSeen: true,
+            entry: { id: 'e1', status: 'active', alias: own.alias },
+          },
+        }),
+        next: null,
+      })
+      client.setQueryData(queryKeys.entries.mine('2026-w42'), own)
+    })
+    expect(await screen.findByRole('heading', { name: 'Tigre Púrpura' })).toBeInTheDocument()
+    expect(screen.getByText(/BB-2026W42-0001/)).toBeInTheDocument()
+    // El DAW que no está en la lista vuelve como «otro» con su nombre.
+    expect(screen.getByLabelText(t('pages.upload.sheet.fields.dawOther'))).toHaveValue('Renoise')
+    // RF-ENT-08: con votos, el audio no se cambia.
+    expect(screen.getByText(t('pages.upload.edit.hasVotes'))).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: t('pages.upload.slot.title') })).toBeNull()
+    expect(screen.getByRole('button', { name: t('pages.upload.edit.withdraw') })).toBeInTheDocument()
   })
 })
 

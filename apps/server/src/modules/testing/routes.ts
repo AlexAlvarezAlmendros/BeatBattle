@@ -8,7 +8,8 @@ import type { Mailer, MemoryMailer } from '../../email/mailer'
 
 /**
  * Solo con `NODE_ENV=test` y el `Mailer` en memoria (los E2E, guía §4.15): `GET /api/test/mailbox?to=` da
- * el último email a esa dirección (asunto y texto), para seguir enlaces de verificación sin un buzón real.
+ * el último email a esa dirección (asunto y texto), para seguir enlaces de verificación sin un buzón real;
+ * con `&contains=`, el último cuyo asunto lleve ese texto.
  * `GET /api/test/unsubscribe-link?to=&kind=` da el enlace de baja (la página) que llevaría un aviso de ese
  * tipo: los avisos de la batalla aún no salen (Fase 3), y el E2E del hito prueba la baja con él.
  * `POST /api/test/role { email, role }` da o quita el rol de admin (los E2E del panel, Fase 3: en producción
@@ -24,8 +25,15 @@ export function testingRoutes(app: FastifyInstance, mailer: Mailer | null, db: D
   })
   const memory = mailer as MemoryMailer | null
   if (!memory || typeof memory.lastTo !== 'function') return
-  app.get<{ Querystring: { to?: string } }>('/api/test/mailbox', async (req) => {
-    const last = memory.lastTo(String(req.query.to ?? ''))
+  app.get<{ Querystring: { to?: string; contains?: string } }>('/api/test/mailbox', async (req) => {
+    const to = String(req.query.to ?? '').toLowerCase()
+    const contains = req.query.contains
+    // `contains`: el último cuyo asunto lleve ese texto (cuando a la misma dirección salen varios).
+    const last = contains
+      ? [...memory.sent]
+          .reverse()
+          .find((mail) => mail.to.toLowerCase() === to && mail.subject.includes(contains))
+      : memory.lastTo(to)
     return { data: last ? { subject: last.subject, text: last.text } : null }
   })
   app.get<{ Querystring: { to?: string; kind?: string } }>('/api/test/unsubscribe-link', async (req) => {
