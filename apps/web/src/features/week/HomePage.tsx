@@ -68,7 +68,7 @@ export function HomePage() {
     audio.setKey({ tonic: tonic as PitchClass, mode })
   }, [key])
 
-  const week = data?.week ? menuWeekOf(data.week, now) : null
+  const week = data?.week ? menuWeekOf(data.week, now, data.week.entries) : null
 
   // La revelación del drop (§3.8.2, `RF-DROP-11`): la primera visita a cada semana, tras la pantalla de título.
   const live = data?.week ?? null
@@ -100,7 +100,8 @@ export function HomePage() {
   const model: MenuModel = {
     week,
     loading: isPending,
-    player: me ? playerOf(me) : null,
+    // Con su entrada en la semana, Jugar pasa a «Editar mi entrada» y el cursor, a Jurado (§3.8.3).
+    player: me ? { ...playerOf(me), uploaded: Boolean(data?.week?.viewer?.entry) } : null,
     season: data?.week ? (data.week.seasonId.split('-')[1] ?? null) : null,
     champion: null,
     lastSealed: null,

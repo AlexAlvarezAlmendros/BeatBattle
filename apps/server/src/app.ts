@@ -20,6 +20,8 @@ import { alertsRoutes } from './modules/alerts/routes'
 import { createAlertsService } from './modules/alerts/service'
 import { cronRoutes } from './modules/cron/routes'
 import { emailPrefsRoutes } from './modules/emailPrefs/routes'
+import { entriesRoutes } from './modules/entries/routes'
+import { createEntriesService } from './modules/entries/service'
 import { healthRoutes } from './modules/health/routes'
 import { createHealthService } from './modules/health/service'
 import { meRoutes } from './modules/me/routes'
@@ -28,6 +30,11 @@ import { profileRoutes } from './modules/profile/routes'
 import { samplesRoutes } from './modules/samples/routes'
 import { createSamplesService } from './modules/samples/service'
 import { createCloudinaryStorage, type ImageStorage } from './modules/storage/cloudinary'
+import {
+  createCloudinaryEntryStorage,
+  createDiskEntryStorage,
+  type EntryStorage,
+} from './modules/storage/entries'
 import { fakeStorageRoutes } from './modules/storage/fakeRoutes'
 import { storageSpikeRoutes } from './modules/storage/routes'
 import {
@@ -72,6 +79,10 @@ export interface AppDeps {
    * configurado. Los tests pasan uno en una carpeta temporal.
    */
   samples?: SampleStorage | null
+  /** Almacenamiento de las entradas; por defecto, sobre el de los samples (falso) o Cloudinary. */
+  entryStorage?: EntryStorage | null
+  /** Presupuesto de la medición de una entrada antes de dejarla en `processing` (tests). */
+  measureBudgetMs?: number
   /** Medición del audio (§4.8.4); por defecto, ffmpeg. */
   measure?: (source: ReadableStream<Uint8Array>) => Promise<AudioMeasurement>
 }
@@ -141,7 +152,6 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   const images = deps.images === undefined ? storage : deps.images
   meRoutes(app, { db, images })
   profileRoutes(app, { db, images, rateLimiter })
-  uploadsRoutes(app, { images, rateLimiter, newId })
   accountRoutes(app, { db, images, emails, rateLimiter })
 
   const samples =
@@ -163,6 +173,24 @@ export function buildApp(deps: AppDeps): FastifyInstance {
       newId,
     }),
   )
+  const entryStorage =
+    deps.entryStorage !== undefined
+      ? deps.entryStorage
+      : samples && 'put' in samples
+        ? createDiskEntryStorage(samples as DiskSampleStorage, deps.measure)
+        : config.storage
+          ? createCloudinaryEntryStorage(config.storage, deps.measure)
+          : null
+  const entries = createEntriesService({
+    db,
+    storage: entryStorage,
+    newId,
+    publicUrl: config.publicUrl,
+    measureBudgetMs: deps.measureBudgetMs,
+    images,
+  })
+  uploadsRoutes(app, { images, entries: entryStorage ? entries : null, rateLimiter, newId })
+  entriesRoutes(app, entries)
   const weeks = createWeeksService({ db, storage: samples, newId })
   weeksRoutes(app, weeks)
   countdownRoutes(app, { db })
@@ -177,6 +205,8 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     drain: drainDeps,
     weeks,
     alerts,
+    entries,
+    entryStorage,
   })
   // El buzón de los E2E: solo en test, nunca en desarrollo ni en producción.
   if (config.env === 'test') testingRoutes(app, mailer, db)

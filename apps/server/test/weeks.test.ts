@@ -407,7 +407,7 @@ describe('bases y descarga (3.10)', () => {
       url: '/api/weeks/2026-w42',
       headers: { cookie: producer.cookie },
     })
-    expect(week42.json().data.viewer).toEqual({ rulesAccepted: true, dropSeen: false })
+    expect(week42.json().data.viewer).toEqual({ rulesAccepted: true, dropSeen: false, entry: null })
   })
 
   it('RF-AUTH-01: sin email verificado no se descarga (403 EMAIL_NOT_VERIFIED); sin sesión, 401', async () => {
