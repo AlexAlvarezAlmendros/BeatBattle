@@ -135,7 +135,7 @@ nunca pasa por la API (`RF-STO-01`) y nada de lo que el navegador declara sobre 
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 4.11 | `packages/covers`: el pintor de la portada generativa sobre el emblema que ya existe (8 familias × pliegues por tonalidad × giro por BPM × fase por semilla, anillos de acento, fondo común). Pinta por CPU en un contexto 2D con `willReadFrequently`, con calibración por medida a 11,5 % de rojo y 1,6 % de blanco. Test `RD-VIS-04` con 48 semillas en el Chrome del sistema | 🔄 En curso | — | §3.4.5 · `RD-VIS-04` |
+| 4.11 | `packages/covers`: el pintor de la portada generativa sobre el emblema que ya existe (8 familias × pliegues por tonalidad × giro por BPM × fase por semilla, anillos de acento, fondo común). Pinta por CPU en un contexto 2D con `willReadFrequently`, con calibración por medida a 11,5 % de rojo y 1,6 % de blanco. Test `RD-VIS-04` con 48 semillas en el Chrome del sistema | ✅ Hecho | — | §3.4.5 · `RD-VIS-04` · **Hecho:** `packages/covers/src/painter.ts` (por CPU, 2D con `willReadFrequently`, 2–5 pasadas de calibración), `GenerativeCover` en la web y banco `/dev/portadas`; E2E `tests/e2e/covers.spec.ts` en el Chrome del sistema: 48 semillas a ±5 % (rojo medio 11,7 %, peor desviación 0,5 %), 3–5 ms por portada de 160 px. Guía v0.6.54. Hojas en `evidence/f4/portadas/` |
 
 ### Emails
 
@@ -188,6 +188,7 @@ Hasta el cierre de envíos puede editar la ficha, sustituir el audio sin votos o
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-10 | 4.11 | Portadas generativas por CPU con calibración; `RD-VIS-04` con 48 semillas en Chrome. Guía v0.6.54. |
 | 2026-10-10 | 4.12, 4.17 | Emails de la entrada con la onda en PNG firmado; efectos de la subida medidos *offline*. Guía v0.6.52–0.6.53. |
 | 2026-10-10 | 4.14 | `/subir`: comprobaciones previas, la ranura y el análisis local, mirado en Chrome. |
 | 2026-10-10 | 4.9 | Limpieza de las entradas en el `tick`: *intents* caducados, `processing` y huérfanos. Guía v0.6.51. |
