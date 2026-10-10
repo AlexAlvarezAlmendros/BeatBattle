@@ -1,0 +1,34 @@
+/* `/subir` (§3.8.5): el vinilo-sol de la semana en la cuña y, en el panel, las comprobaciones o la ranura. */
+.piece {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.vinyl {
+  width: min(100%, 26rem);
+}
+
+.body {
+  display: grid;
+  align-content: start;
+  gap: var(--bb-space-5);
+}
+
+.gate {
+  display: grid;
+  gap: var(--bb-space-4);
+}
+
+.lead {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-md);
+  line-height: var(--bb-leading-body);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-3);
+}
