@@ -8,6 +8,7 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { renderEmail, TEMPLATES, type TemplateKind } from '../src'
+import { ENTRY_WITHDRAWN_FIXTURE, entryChanged } from '../src/templates/entryChanged'
 
 const [out = 'galeria-emails', publicUrl = 'http://localhost:5173'] = process.argv.slice(2)
 await mkdir(out, { recursive: true })
@@ -24,9 +25,23 @@ for (const kind of kinds) {
   )
   console.log(`${kind}: «${email.subject}» (${email.subject.length} caracteres)`)
 }
+// Variantes que no son el ejemplo de su plantilla: la retirada de `entry.changed`.
+const variants = [
+  { name: 'entry.changed.withdrawn', template: entryChanged, payload: ENTRY_WITHDRAWN_FIXTURE },
+]
+for (const { name, template, payload } of variants) {
+  const email = await renderEmail(template, payload, { publicUrl, family: 'service' })
+  await writeFile(path.join(out, `${name}.html`), email.html)
+  await writeFile(
+    path.join(out, `${name}.txt`),
+    `Asunto: ${email.subject}\nPreheader: ${email.preheader}\n\n${email.text}`,
+  )
+  console.log(`${name}: «${email.subject}» (${email.subject.length} caracteres)`)
+}
+const names = [...kinds, ...variants.map((variant) => variant.name)]
 await writeFile(
   path.join(out, 'index.html'),
-  `<!doctype html><meta charset="utf-8"><title>Galería de emails</title><ul>${kinds
+  `<!doctype html><meta charset="utf-8"><title>Galería de emails</title><ul>${names
     .map((kind) => `<li><a href="${kind}.html">${kind}</a> · <a href="${kind}.txt">texto plano</a></li>`)
     .join('')}</ul>`,
 )

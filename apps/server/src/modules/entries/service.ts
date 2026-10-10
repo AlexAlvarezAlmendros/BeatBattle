@@ -35,6 +35,7 @@ import { appError } from '../../lib/errors'
 import type { AudioMeasurement } from '../../media/measure'
 import type { ImageStorage } from '../storage/cloudinary'
 import type { EntryAsset, EntryStorage } from '../storage/entries'
+import { waveformUrl } from './waveformRoute'
 
 /**
  * Participar (guía §2.5, §4.8.2, §4.8.4; tareas 4.5 y 4.6): firmar la subida con su *intent* y registrar la
@@ -76,6 +77,8 @@ export interface EntriesDeps {
   measureBudgetMs?: number
   /** Avatares, para el productor de una entrada ya revelada. */
   images?: ImageStorage | null
+  /** Secreto con el que se firman las imágenes de los emails (la onda del recibo, §4.19.5). */
+  emailSecret?: string
 }
 
 /** Lado del avatar del productor en la ficha de una entrada revelada. */
@@ -314,11 +317,14 @@ export function createEntriesService(deps: EntriesDeps) {
       loudnessLufs: row.loudnessLufs,
       truePeakDb: row.truePeakDb,
       gainDb: row.loudnessLufs === null ? null : playbackGainDb(row.loudnessLufs),
-      peaks: row.peaks ? Buffer.from(row.peaks).toString('base64') : null,
       etag: row.etag,
       receivedAt: row.submittedAt,
+      /** Hasta cuándo se edita la ficha (el cierre de envíos). */
+      editUntil: w.submitEndsAt,
       entryUrl: `${deps.publicUrl}/e/${row.id}`,
       editUrl: `${deps.publicUrl}/subir`,
+      /** PNG de la onda medida, firmado (§4.19.5). */
+      waveformUrl: deps.emailSecret ? waveformUrl(deps.publicUrl, deps.emailSecret, row.id, row.etag) : null,
     }
   }
 
