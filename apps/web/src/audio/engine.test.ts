@@ -1,4 +1,4 @@
-import { DEFAULT_KEY, sfxCatalog } from '@beatbattle/audio'
+import { DEFAULT_KEY, sfxCatalog, uploadProgressSfx } from '@beatbattle/audio'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const playSfx = vi.fn()
@@ -132,6 +132,32 @@ describe('motor de audio: topes y silencio (Anexo D, RD-SND-01)', () => {
     ctx.currentTime += 1 / 8
     engine.play('ui.hover')
     expect(playSfx).toHaveBeenCalledTimes(6)
+  })
+
+  it('4.17: `upload.progress` suena con la nota de su porcentaje y como mucho 3 veces por segundo', () => {
+    const engine = new AudioEngine()
+    engine.unlock()
+    const ctx = engine.context as unknown as FakeContext
+    engine.play('upload.progress', { progress: 0.5 })
+    engine.play('upload.progress', { progress: 0.55 })
+    expect(playSfx).toHaveBeenCalledTimes(1)
+    expect(playSfx.mock.calls[0]?.[3]).toEqual(uploadProgressSfx(DEFAULT_KEY, 0.5))
+    ctx.currentTime += 1 / 3 + 0.001
+    engine.play('upload.progress', { progress: 0.6 })
+    expect(playSfx).toHaveBeenCalledTimes(2)
+    expect(playSfx.mock.calls[1]?.[3]).toEqual(uploadProgressSfx(DEFAULT_KEY, 0.6))
+  })
+
+  it('4.17: el zumbido de la ranura no se repite con cada `dragenter` (medio segundo entre dos)', () => {
+    const engine = new AudioEngine()
+    engine.unlock()
+    const ctx = engine.context as unknown as FakeContext
+    engine.play('upload.hover')
+    engine.play('upload.hover')
+    expect(playSfx).toHaveBeenCalledTimes(1)
+    ctx.currentTime += 0.5
+    engine.play('upload.hover')
+    expect(playSfx).toHaveBeenCalledTimes(2)
   })
 
   it('con el silencio (M) no suena nada', () => {

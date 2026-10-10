@@ -906,11 +906,12 @@
       },
       "kicker": "Beat Battle · banco de pruebas de la arena",
       "sound": {
-        "intro": "Efectos de la tarea 1.4 (Anexo D), sintetizados por código en La menor. El primer clic desbloquea el audio; con el sonido apagado (M) no suena nada.",
+        "intro": "Efectos del Anexo D (tareas 1.4 y 4.17), sintetizados por código en La menor. El primer clic desbloquea el audio; con el sonido apagado (M) no suena nada.",
         "blocks": {
           "ui": "Interfaz",
           "stars": "Estrellas",
-          "game": "Voto y progreso"
+          "game": "Voto y progreso",
+          "upload": "Subida"
         }
       },
       "base": {

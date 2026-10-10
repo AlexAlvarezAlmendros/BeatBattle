@@ -61,14 +61,15 @@ test.describe('audio', () => {
       for (const id of offline.SFX_IDS as readonly string[]) result[id] = await offline.renderSfx(id)
       return result
     }, OFFLINE_MODULE)
-    // Los 16 de la tarea 1.4, `vote.unlocked` de la 1.5, los 7 de la interfaz de la 2.27 y `drop.needle` de la 3.17.
+    // Los 16 de la tarea 1.4, `vote.unlocked` de la 1.5, los 7 de la interfaz de la 2.27, `drop.needle` de la
+    // 3.17 y los 5 de la subida de la 4.17 (`upload.*`, `ann.newbeat`).
     test.info().annotations.push({
       type: 'medidas',
       description: Object.entries(metrics)
         .map(([id, m]) => `${id} ${m.peakDb.toFixed(1)}/${m.levelDb} dB ${m.activeSeconds.toFixed(3)} s`)
         .join(' · '),
     })
-    expect(Object.keys(metrics)).toHaveLength(25)
+    expect(Object.keys(metrics)).toHaveLength(30)
     for (const [id, m] of Object.entries(metrics)) {
       expect(
         Math.abs(m.peakDb - m.levelDb),

@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.52 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.53 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -3415,10 +3415,10 @@ efectos al 100 %; variación = desafinación aleatoria por disparo.
 | `star.vote.5` | Votar 5 | Acorde de la tónica arpegiado rápido + brillo de ruido agudo | 600 ms | −10 | 0 |
 | `vote.locked` | Voto confirmado por el servidor | Golpe sordo de sello (seno 90 Hz + ruido marrón) | 120 ms | −12 | ±0,5 st |
 | `vote.unlocked` | Umbral cumplido | Barrido ascendente con tres notas de la escala | 450 ms | −16 | 0 |
-| `upload.hover` | Fichero sobre la ranura | Zumbido de la ranura (seno 33 Hz modulado) en bucle | bucle | −24 | 0 |
-| `upload.drop` | Soltar el fichero | El beat entra en la ranura: golpe + resonancia | 300 ms | −14 | 0 |
-| `upload.progress` | Cada 5 % de progreso | Nota de la escala que sube con el porcentaje | 80 ms | −24 | 0 |
-| `upload.done` | Entrada creada | *Riser* de ruido 1,5 s + impacto (bombo + platillo de ruido) | 2 s | −8 | 0 |
+| `upload.hover` | Fichero sobre la ranura (como mucho uno cada 0,5 s) | Zumbido de la ranura, una vez: la tónica de la semana en la 1.ª octava (33–62 Hz) con vibrato lento y su 3.ª octava, que es la que se oye en altavoces pequeños | 240 ms | −24 | 0 |
+| `upload.drop` | Soltar el fichero | El beat entra en la ranura: golpe + resonancia en la tónica | 300 ms | −14 | 0 |
+| `upload.progress` | Cada 5 % de progreso (como mucho 3 por segundo: las que sobran se saltan) | Nota de la pentatónica que sube con el porcentaje, del grado 1 al 11 (dos octavas y un grado) | 80 ms | −24 | 0 |
+| `upload.done` | Entrada creada | *Riser* de ruido 1,5 s + impacto (bombo en la tónica + platillo de ruido) | 2 s | −8 | 0 |
 | `drop.needle` | Revelación del drop | Aguja que cae: clic + crujido de vinilo en bucle corto | 1 s | −12 | 0 |
 | `clock.tick` | Últimos 10 s de una cuenta atrás (si se está mirando) | *Tick* de reloj alternando dos tonos | 30 ms | −20 | 0 |
 | `clock.heartbeat` | Última hora antes de un cierre, cada 4 s | Latido doble grave | 400 ms | −22 | 0 |
@@ -3472,6 +3472,8 @@ efectos al 100 %; variación = desafinación aleatoria por disparo.
 | Foco del podio | El haz baja sobre la peana | 600 ms (línea de tiempo de la ceremonia) | — | Haz fijo |
 | Subida: ranura | Se ilumina y vibra una vez al arrastrar | 240 ms | `upload.hover` | Borde que se ilumina |
 | Subida: tragaperras | BPM y tonalidad giran hasta fijarse | 900 ms | `upload.drop` | Valor fijo |
+| Subida: medidor de súper | Se llena con los bytes reales, con el porcentaje en cifra | Continuo | `upload.progress` | Relleno sin brillo (el porcentaje en cifra es el equivalente del sonido) |
+| Subida: entrada en la batalla | El anunciador «¡NUEVO BEAT EN LA BATALLA!» en el impacto y la portada con el alias | 2 s (1,5 s de subida + impacto) | `upload.done`, `ann.newbeat` | Aparece sin golpe (y región viva con el texto) |
 | Crónica de la arena | Cambia de mensaje por fundido | 150 ms cada 5 s | — | Lista estática que rota cada 5 s |
 | Trama reactiva al audio | Tamaño de punto ±15 %, paso bajo ≤ 2 Hz | Continuo | — | Quieta |
 
@@ -3587,6 +3589,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-10 | 0.6.53 | **Tarea 4.17.** Anexo D: `upload.hover` no va en bucle sino una vez (240 ms, como dicen §3.8.5 y el Anexo E) con la tónica de la semana en la 1.ª octava; `upload.progress` sube del grado 1 al 11 de la pentatónica y como mucho suena 3 veces por segundo; `upload.drop` y `upload.done` van en la tónica. Anexo E: equivalentes visuales del medidor de súper y de la entrada en la batalla (`RNF-A11Y-05`). |
 | 2026-10-10 | 0.6.52 | **Tarea 4.12.** §4.19.5: la onda del recibo (`/api/email/waveform/:entryId.png`, PNG propio, firma con la versión del audio, línea plana sin onda, petición sin registrar). `RF-NOTIF-12`: la imagen que es el contenido del email (onda, tarjeta de resultado) es la única por destinatario, firmada y sin id de usuario. §2.12.1: «compartir mi tarjeta» llega con la Fase 5; la retirada no dice cuántos votos tenía. |
 | 2026-10-10 | 0.6.51 | **Tarea 4.9.** §4.8.5 y §4.11: tabla `job_state` para las tareas troceadas; el barrido de huérfanos hace dos páginas por `tick` y una pasada por día; el `tick` completa (o retira) las entradas en `processing`. |
 | 2026-10-10 | 0.6.50 | **Tareas 4.5 y 4.6.** §4.8.2: la firma acepta `replacing` (sustituir el audio sin votos). §4.8.4: los motivos de rechazo (`ENTRY_ASSET_INVALID` con `details.reason`, `UPLOAD_INTENT_INVALID`) y el *intent* `failed` con `entry.failed`. La medición espera hasta 20 s (`MEASURE_BUDGET_MS`) antes de dejar la entrada en `processing`. |
