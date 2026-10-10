@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.51 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.52 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -3587,7 +3587,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
-| 2026-10-10 | 0.6.5x | **Tarea 4.12.** §4.19.5: la onda del recibo (`/api/email/waveform/:entryId.png`, PNG propio, firma con la versión del audio, línea plana sin onda, petición sin registrar). `RF-NOTIF-12`: la imagen que es el contenido del email (onda, tarjeta de resultado) es la única por destinatario, firmada y sin id de usuario. §2.12.1: «compartir mi tarjeta» llega con la Fase 5; la retirada no dice cuántos votos tenía. |
+| 2026-10-10 | 0.6.52 | **Tarea 4.12.** §4.19.5: la onda del recibo (`/api/email/waveform/:entryId.png`, PNG propio, firma con la versión del audio, línea plana sin onda, petición sin registrar). `RF-NOTIF-12`: la imagen que es el contenido del email (onda, tarjeta de resultado) es la única por destinatario, firmada y sin id de usuario. §2.12.1: «compartir mi tarjeta» llega con la Fase 5; la retirada no dice cuántos votos tenía. |
 | 2026-10-10 | 0.6.51 | **Tarea 4.9.** §4.8.5 y §4.11: tabla `job_state` para las tareas troceadas; el barrido de huérfanos hace dos páginas por `tick` y una pasada por día; el `tick` completa (o retira) las entradas en `processing`. |
 | 2026-10-10 | 0.6.50 | **Tareas 4.5 y 4.6.** §4.8.2: la firma acepta `replacing` (sustituir el audio sin votos). §4.8.4: los motivos de rechazo (`ENTRY_ASSET_INVALID` con `details.reason`, `UPLOAD_INTENT_INVALID`) y el *intent* `failed` con `entry.failed`. La medición espera hasta 20 s (`MEASURE_BUDGET_MS`) antes de dejar la entrada en `processing`. |
 | 2026-10-10 | 0.6.49 | **Tarea 4.3.** §4.11: al borrar una cuenta (`RF-PRF-04`), sus entradas de semanas selladas guardan `user_id = 'deleted:<id de la entrada>'` (único por entrada, para no chocar con `entry_one_per_week`); las de semanas sin sellar y sus votos se borran, y sus audios los barre la limpieza de huérfanos (§4.8.5). |
