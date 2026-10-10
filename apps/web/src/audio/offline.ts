@@ -1,4 +1,11 @@
-import { DEFAULT_KEY, type Key, type SfxId, sfxCatalog } from '@beatbattle/audio'
+import {
+  DEFAULT_KEY,
+  type Key,
+  type SfxDef,
+  type SfxId,
+  sfxCatalog,
+  uploadProgressSfx,
+} from '@beatbattle/audio'
 import { createMix } from './mix'
 import { makeNoiseBank } from './noise'
 import { dbToGain, playSfx } from './synth'
@@ -23,13 +30,34 @@ export interface SfxMetrics {
   levelDb: number
 }
 
-/** Renderiza un efecto solo (sin variación de tono) y mide su pico y cuánto dura. */
-export async function renderSfx(id: SfxId, key: Key = DEFAULT_KEY): Promise<SfxMetrics> {
-  const def = sfxCatalog(key)[id]
+/** Las muestras (mono, 48 kHz) de un efecto solo, sin variación de tono, con 50 ms de silencio delante. */
+async function renderDef(def: SfxDef): Promise<Float32Array> {
   const seconds = def.duration + 0.5
   const ctx = new OfflineAudioContext(1, Math.ceil(seconds * SAMPLE_RATE), SAMPLE_RATE)
   playSfx(ctx, ctx.destination, makeNoiseBank(ctx), { ...def, jitter: 0 }, 0.05, { random: () => 0.5 })
-  const data = (await ctx.startRendering()).getChannelData(0)
+  return (await ctx.startRendering()).getChannelData(0)
+}
+
+/**
+ * Las muestras de un efecto, para escucharlo fuera del navegador (`tools/shot/sfx-wav.mjs` las guarda en
+ * WAV). `progress` da la nota de `upload.progress`.
+ */
+export async function renderSfxSamples(
+  id: SfxId,
+  key: Key = DEFAULT_KEY,
+  progress?: number,
+): Promise<number[]> {
+  const def =
+    id === 'upload.progress' && progress !== undefined
+      ? uploadProgressSfx(key, progress)
+      : sfxCatalog(key)[id]
+  return Array.from(await renderDef(def))
+}
+
+/** Renderiza un efecto solo (sin variación de tono) y mide su pico y cuánto dura. */
+export async function renderSfx(id: SfxId, key: Key = DEFAULT_KEY): Promise<SfxMetrics> {
+  const def = sfxCatalog(key)[id]
+  const data = await renderDef(def)
   let peak = 0
   let last = 0
   const floor = dbToGain(-60)

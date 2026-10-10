@@ -1,4 +1,11 @@
-import { DEFAULT_KEY, type Key, type SfxDef, type SfxId, sfxCatalog } from '@beatbattle/audio'
+import {
+  DEFAULT_KEY,
+  type Key,
+  type SfxDef,
+  type SfxId,
+  sfxCatalog,
+  uploadProgressSfx,
+} from '@beatbattle/audio'
 import { createMix, type Mix } from './mix'
 import { makeNoiseBank, type NoiseBank } from './noise'
 import { playSfx } from './synth'
@@ -18,8 +25,21 @@ export const HOVER_MIN_GAP = 1 / 8
 /** Y entre dos `ui.move`, el tic del cursor: 12 por segundo como mucho (Anexo D). */
 export const MOVE_MIN_GAP = 1 / 12
 
-/** Los efectos con tope de frecuencia: los que se disparan al pasar por encima o al recorrer un menú. */
-const MIN_GAP: Partial<Record<SfxId, number>> = { 'ui.hover': HOVER_MIN_GAP, 'ui.move': MOVE_MIN_GAP }
+/**
+ * Y entre dos notas del progreso de la subida: como mucho 3 por segundo (4.17). Con una conexión rápida los
+ * pasos del 5 % llegan seguidos; las notas que sobran se saltan y la siguiente ya sale más aguda.
+ */
+export const UPLOAD_PROGRESS_MIN_GAP = 1 / 3
+/** Y entre dos zumbidos de la ranura (`dragenter` se repite al pasar por sus hijos). */
+export const UPLOAD_HOVER_MIN_GAP = 0.5
+
+/** Los efectos con tope de frecuencia: los que se disparan al pasar por encima, al recorrer o al subir. */
+const MIN_GAP: Partial<Record<SfxId, number>> = {
+  'ui.hover': HOVER_MIN_GAP,
+  'ui.move': MOVE_MIN_GAP,
+  'upload.progress': UPLOAD_PROGRESS_MIN_GAP,
+  'upload.hover': UPLOAD_HOVER_MIN_GAP,
+}
 
 type ContextConstructor = new (options?: AudioContextOptions) => AudioContext
 
@@ -195,10 +215,11 @@ export class AudioEngine {
   }
 
   /**
-   * Dispara un efecto. Sin contexto (no ha habido ningún gesto), en silencio o con `ui.hover` o `ui.move`
-   * demasiado seguidos, no hace nada.
+   * Dispara un efecto. Sin contexto (no ha habido ningún gesto), en silencio o con un efecto con tope
+   * (`ui.hover`, `ui.move`, `upload.*`) demasiado seguido, no hace nada. `xpCombo` sube el blip de
+   * `xp.gain`; `progress` (de 0 a 1) da la nota de `upload.progress`, que sube con el porcentaje.
    */
-  play(id: SfxId, options: { xpCombo?: number } = {}): void {
+  play(id: SfxId, options: { xpCombo?: number; progress?: number } = {}): void {
     const { ctx, mix, bank } = this
     if (!ctx || !mix || !bank || this.muted || ctx.state !== 'running') return
     const gap = MIN_GAP[id]
@@ -207,7 +228,11 @@ export class AudioEngine {
       this.lastPlayed.set(id, ctx.currentTime)
     }
     const def =
-      id === 'xp.gain' && options.xpCombo ? sfxCatalog(this.key, options.xpCombo)[id] : this.catalog[id]
+      id === 'xp.gain' && options.xpCombo
+        ? sfxCatalog(this.key, options.xpCombo)[id]
+        : id === 'upload.progress' && options.progress !== undefined
+          ? uploadProgressSfx(this.key, options.progress)
+          : this.catalog[id]
     playSfx(ctx, mix.input.sfx, bank, def, ctx.currentTime)
   }
 }
