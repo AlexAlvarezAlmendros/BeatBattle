@@ -1,6 +1,6 @@
 import type { CurrentWeek } from '@beatbattle/shared'
 import { useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { paths } from '../../app/paths'
 import { ScreenPage } from '../../app/ScreenPage'
 import { t } from '../../i18n'
@@ -10,11 +10,15 @@ import { acceptRules, useCurrentWeek } from '../../net/weeks'
 import { Button } from '../../ui/Button'
 import { Skeleton, SkeletonGroup } from '../../ui/Skeleton'
 import { VinylSun } from '../../ui/VinylSun'
-import { PaperNotice } from '../account/FormBits'
+import { Done, PaperNotice } from '../account/FormBits'
 import { RulesModal } from '../week/RulesModal'
+import { EntrySheet, type EntrySheetResult } from './EntrySheet'
+import { clearDraft, EMPTY_DRAFT, type EntryDraft, loadDraft, saveDraft } from './entrySheet'
 import styles from './UploadPage.module.css'
+import { UploadCelebration, UploadMeter } from './UploadProgress'
 import { UploadSlot } from './UploadSlot'
 import { useEntryAnalysis } from './useEntryAnalysis'
+import { useEntryUpload } from './useEntryUpload'
 
 /**
  * `/subir` — «INSERTA TU BEAT» (§2.5, §3.8.5; tareas 4.14–4.18), solo cuentas verificadas (la ruta lo
@@ -30,6 +34,48 @@ export function UploadPage() {
   const [rulesBusy, setRulesBusy] = useState(false)
   const [rulesError, setRulesError] = useState<string | null>(null)
   const week = data?.week ?? null
+  const upload = useEntryUpload()
+  const [draft, setDraft] = useState<EntryDraft>(EMPTY_DRAFT)
+  const [lastSheet, setLastSheet] = useState<EntrySheetResult | null>(null)
+  const slug = week?.slug ?? null
+
+  // El borrador de la semana vuelve si se recarga o algo falla (`RF-ENT-12`).
+  useEffect(() => {
+    if (!slug) return
+    const saved = loadDraft(slug)
+    if (saved) setDraft(saved)
+  }, [slug])
+
+  // Al terminar el análisis, BPM y tonalidad sugeridos donde aún no hay nada escrito (`RF-ENT-06`).
+  const ready = analysis.state.stage === 'ready' ? analysis.state : null
+  useEffect(() => {
+    if (!ready) return
+    setDraft((prev) => ({
+      ...prev,
+      bpm: prev.bpm || (ready.bpm === null ? '' : String(ready.bpm)),
+      musicalKey: prev.musicalKey || (ready.musicalKey ?? ''),
+    }))
+  }, [ready])
+
+  const changeDraft = (next: EntryDraft) => {
+    setDraft(next)
+    if (slug) saveDraft(slug, next)
+  }
+
+  const send = async (sheet: EntrySheetResult) => {
+    if (!week || !ready) return
+    setLastSheet(sheet)
+    const entry = await upload.start({
+      weekSlug: week.slug,
+      file: ready.file,
+      durationMs: ready.durationMs,
+      sheet,
+    })
+    if (entry) {
+      clearDraft(week.slug)
+      void queryClient.invalidateQueries({ queryKey: queryKeys.weeks.all })
+    }
+  }
 
   const accept = async () => {
     if (!week) return
@@ -96,6 +142,20 @@ export function UploadPage() {
         </div>
       </div>
     )
+  } else if (upload.state.stage === 'done') {
+    body = <UploadCelebration entry={upload.state.entry} weekNumber={week.number} />
+  } else if (upload.state.stage === 'uploading' || upload.state.stage === 'registering') {
+    const current = upload.state
+    body = (
+      <UploadMeter
+        sent={current.stage === 'uploading' ? current.sent : current.total}
+        total={current.total}
+        speed={current.stage === 'uploading' ? current.speed : null}
+        remaining={current.stage === 'uploading' ? current.remaining : null}
+        registering={current.stage === 'registering'}
+        onCancel={upload.cancel}
+      />
+    )
   } else if (week.viewer?.entry) {
     body = (
       <div className={styles.gate}>
@@ -121,11 +181,44 @@ export function UploadPage() {
     )
   } else {
     body = (
-      <UploadSlot
-        analysis={analysis.state}
-        onFile={(file) => void analysis.start(file)}
-        onReset={analysis.reset}
-      />
+      <>
+        <UploadSlot
+          analysis={analysis.state}
+          onFile={(file) => {
+            upload.reset()
+            void analysis.start(file)
+          }}
+          onReset={() => {
+            upload.reset()
+            analysis.reset()
+          }}
+        />
+        {upload.state.stage === 'error' && (
+          <PaperNotice
+            live
+            action={
+              lastSheet && (
+                <Button size="sm" variant="outline" onClick={() => void send(lastSheet)}>
+                  {t('pages.upload.retry')}
+                </Button>
+              )
+            }
+          >
+            {upload.state.message}
+          </PaperNotice>
+        )}
+        {upload.state.stage === 'idle' && upload.state.cancelled && (
+          <Done>{t('pages.upload.progress.cancelled')}</Done>
+        )}
+        {ready && (
+          <EntrySheet
+            draft={draft}
+            onChange={changeDraft}
+            onSubmit={(sheet) => void send(sheet)}
+            blind={week.blind}
+          />
+        )}
+      </>
     )
   }
 

@@ -249,6 +249,90 @@
         "done": "BPM y tonalidad sugeridos: los puedes cambiar en la ficha.",
         "noSuggestion": "No hemos podido sugerir BPM o tonalidad: escríbelos en la ficha."
       },
+      "sheet": {
+        "title": "La hoja del luchador",
+        "fields": {
+          "title": "Título",
+          "bpm": "BPM",
+          "key": "Tonalidad",
+          "daw": "DAW",
+          "dawOther": "¿Cuál?",
+          "genres": "Géneros",
+          "description": "Descripción",
+          "cover": "Portada propia (opcional)",
+          "declaration": "He usado el sample de la semana y el resto del material es mío o libre de derechos"
+        },
+        "hints": {
+          "title": "De 2 a 60 caracteres. En voto ciego, que no diga quién eres.",
+          "suggested": "Sugerido por el análisis: cámbialo si no cuadra.",
+          "genres": "Hasta {max}: llevas {count}."
+        },
+        "keyNone": "Sin tonalidad",
+        "dawNone": "Sin decir",
+        "dawOther": "Otro",
+        "cover": {
+          "add": "Añadir portada",
+          "change": "Cambiar portada",
+          "remove": "Quitar",
+          "blind": "En voto ciego tu portada no se ve hasta el domingo: mientras, todos verán tu portada generativa.",
+          "open": "Esta semana no es de voto ciego: tu portada se verá desde ya.",
+          "format": "La portada tiene que ser PNG, JPEG o WebP.",
+          "size": "La portada pesa demasiado: el máximo son 10 MB."
+        },
+        "errors": {
+          "title": "Ponle un título de 2 a 60 caracteres.",
+          "bpm": "El BPM va de 40 a 250 (o déjalo en blanco).",
+          "daw": "Escribe qué DAW usas (hasta 40 caracteres).",
+          "genres": "Elige como mucho 3 géneros.",
+          "description": "La descripción no puede pasar de 280 caracteres.",
+          "declaration": "Marca la declaración para entrar en la batalla."
+        },
+        "submit": "Entrar en la batalla"
+      },
+      "genres": {
+        "trap": "Trap",
+        "jerk": "Jerk",
+        "hoodtrap": "Hoodtrap",
+        "drill": "Drill",
+        "boomBap": "Boom bap",
+        "crank": "Crank",
+        "reggaeton": "Reggaetón",
+        "electronic": "Electrónica",
+        "afrobeats": "Afrobeats",
+        "club": "Club",
+        "dancehall": "Dancehall",
+        "jersey": "Jersey",
+        "amapiano": "Amapiano"
+      },
+      "errors": {
+        "network": "Se ha cortado la conexión. Tu ficha sigue aquí: vuelve a intentarlo.",
+        "exists": "Ya estás en la batalla esta semana: edita tu entrada.",
+        "rules": "Antes, acepta las bases de la semana.",
+        "intent": "La subida ha caducado. Vuelve a intentarlo: tu ficha sigue aquí.",
+        "asset": "No hemos podido verificar tu archivo. Vuelve a subirlo.",
+        "rateLimited": "Has pedido muchas subidas seguidas. Espera un poco y vuelve a intentarlo.",
+        "unverified": "Confirma tu email antes de subir tu beat.",
+        "unknown": "Algo ha fallado al subir. Tu ficha sigue aquí: vuelve a intentarlo."
+      },
+      "progress": {
+        "title": "Subiendo tu beat",
+        "registering": "Verificando y midiendo tu beat…",
+        "valueText": "{pct} % subido",
+        "bytes": "{sent} de {total} MB",
+        "speed": "{speed} MB/s · faltan {remaining}",
+        "cancel": "Cancelar",
+        "cancelled": "Subida cancelada. Tu ficha sigue aquí."
+      },
+      "done": {
+        "announcer": "¡Nuevo beat en la batalla!",
+        "alias": "Así te verán hasta el domingo: {alias}. No lo difundas.",
+        "inside": "Ya estás en la batalla #{number}",
+        "receipt": "Te hemos mandado el recibo por email, con el informe de la medición.",
+        "processing": "Estamos midiendo tu beat: el recibo te llegará por email en cuanto termine.",
+        "view": "Ver mi entrada",
+        "menu": "Volver al menú"
+      },
+      "retry": "Volver a intentarlo",
       "problems": {
         "unsupportedFormat": "Eso no suena a audio. Prueba con WAV, AIFF, FLAC o MP3.",
         "fileTooLarge": "Tu archivo pesa {size} MB. El máximo son 100 MB.",

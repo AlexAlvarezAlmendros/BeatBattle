@@ -19,6 +19,7 @@ function weekWith(overrides: Partial<PublicWeek> = {}): PublicWeek {
     voteEndsAt: now + 90_000_000,
     challenge: null,
     golden: false,
+    blind: true,
     entries: 3,
     sample: {
       title: 'Lluvia en Gràcia',

@@ -23,6 +23,7 @@ const week: PublicWeek = {
   ...W41,
   challenge: 'Usa solo el primer compás',
   golden: false,
+  blind: true,
   sample: {
     title: 'Lluvia en Gràcia',
     credits: 'Other People Records',
