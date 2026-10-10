@@ -187,6 +187,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     newId,
     publicUrl: config.publicUrl,
     measureBudgetMs: deps.measureBudgetMs,
+    images,
   })
   uploadsRoutes(app, { images, entries: entryStorage ? entries : null, rateLimiter, newId })
   entriesRoutes(app, entries)

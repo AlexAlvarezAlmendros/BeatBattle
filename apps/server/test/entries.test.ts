@@ -1,12 +1,12 @@
 import { scheduleWeek as boundaries } from '@beatbattle/rules'
 import { and, eq } from 'drizzle-orm'
 import { afterEach, describe, expect, it } from 'vitest'
-import { auditLog, emailOutbox, entry, uploadIntent, vote } from '../src/db/schema'
+import { auditLog, emailOutbox, entry, uploadIntent, vote, week } from '../src/db/schema'
 import { measureAudio } from '../src/media/measure'
 import { INTENT_TTL_MS } from '../src/modules/entries/service'
 import { sineWav } from './fixtures/wav'
-import { createSample, json, makeWeeksApp, scheduleWeek, type WeeksApp } from './fixtures/weeks'
-import { createAccount } from './helpers'
+import { createSample, json, makeWeeksApp, pngHeader, scheduleWeek, type WeeksApp } from './fixtures/weeks'
+import { createAccount, ORIGIN } from './helpers'
 
 let t: WeeksApp
 afterEach(async () => {
@@ -319,5 +319,141 @@ describe('registrar la entrada (4.6, §4.8.4)', () => {
       payload: { intentId: 'x', ...ficha },
     })
     expect(res.statusCode).toBe(401)
+  })
+})
+
+describe('la entrada: ficha pública, editar, sustituir y retirar (4.7)', () => {
+  const get = (id: string, cookie?: string) =>
+    t.app.inject({ method: 'GET', url: `/api/entries/${id}`, headers: cookie ? { cookie } : {} })
+  const patch = (cookie: string, id: string, payload: object) =>
+    t.app.inject({ method: 'PATCH', url: `/api/entries/${id}`, headers: json(cookie), payload })
+
+  /** Sube la portada propia (PNG) y devuelve su intent. */
+  async function uploadCover(cookie: string) {
+    const signed = await t.app.inject({
+      method: 'POST',
+      url: '/api/uploads/sign',
+      headers: json(cookie),
+      payload: { kind: 'entryCover', weekSlug: '2026-w42', mime: 'image/png', bytes: 33 },
+    })
+    expect(signed.statusCode, signed.body).toBe(200)
+    const data = signed.json().data
+    expect(data.publicId).toMatch(/^beatbattle-test\/entry-covers\/2026-w42\//)
+    await t.storage.put({
+      publicId: data.publicId,
+      bytes: pngHeader(800, 800),
+      format: 'png',
+      nowMs: t.clock.now(),
+    })
+    return data as { intentId: string; publicId: string }
+  }
+
+  it('RF-ENT-10: en voto ciego, la ficha pública no lleva autoría ni la portada propia; tras el sellado, sí', async () => {
+    const { id: userId, cookie } = await openWeek()
+    const cover = await uploadCover(cookie)
+    const { intentId } = await upload(cookie)
+    const own = (await create(cookie, intentId, { coverIntentId: cover.intentId })).json().data
+    expect(own.ownCoverUrl).toContain(cover.publicId)
+    expect(own.cover).toMatchObject({ kind: 'generative' })
+    const blind = await get(own.id)
+    expect(blind.statusCode).toBe(200)
+    const body = blind.body
+    for (const leak of [userId, 'lilbru', cover.publicId, 'avatar', 'userId', 'username'])
+      expect(body, leak).not.toContain(leak)
+    expect(blind.json().data).toMatchObject({
+      producer: null,
+      cover: { kind: 'generative' },
+      alias: own.alias,
+    })
+    await t.db.update(week).set({ sealedAt: t.clock.now() })
+    const sealed = (await get(own.id)).json().data
+    expect(sealed.producer).toMatchObject({ username: 'lilbru', displayName: 'lilbru' })
+    expect(sealed.cover).toMatchObject({ kind: 'own' })
+  })
+
+  it('RNF-SEC-04 (parcial): una entrada en processing solo existe para su dueño', async () => {
+    let hang = false
+    const { cookie } = await openWeek({
+      measure: (source) => (hang ? new Promise(() => {}) : measureAudio(source)),
+      measureBudgetMs: 30,
+    })
+    hang = true
+    const { intentId } = await upload(cookie)
+    const own = (await create(cookie, intentId)).json().data
+    expect((await get(own.id)).statusCode).toBe(404)
+    expect((await get(own.id, cookie)).statusCode).toBe(200)
+  })
+
+  it('§2.5: la ficha se edita hasta el cierre de envíos, y solo su dueño', async () => {
+    const { cookie } = await openWeek()
+    const own = (await create(cookie, (await upload(cookie)).intentId)).json().data
+    const edited = await patch(cookie, own.id, { title: 'Otro título', genres: ['Drill', 'Jersey'] })
+    expect(edited.statusCode, edited.body).toBe(200)
+    expect(edited.json().data).toMatchObject({
+      title: 'Otro título',
+      genres: ['Drill', 'Jersey'],
+      alias: own.alias,
+    })
+    const other = await producer('aina')
+    expect((await patch(other.cookie, own.id, { title: 'Mío' })).statusCode).toBe(404)
+    t.clock.set(W42.submitEndsAt)
+    expect((await patch(cookie, own.id, { title: 'Tarde' })).json().error.code).toBe('SUBMISSIONS_CLOSED')
+  })
+
+  it('RF-ENT-08: sin votos se sustituye el audio (mismo alias y recibo, entry.changed y el anterior borrado)', async () => {
+    const { cookie } = await openWeek()
+    const first = await upload(cookie)
+    const own = (await create(cookie, first.intentId)).json().data
+    const replacement = await upload(cookie, beat(45), { replacing: own.id })
+    const res = await t.app.inject({
+      method: 'PUT',
+      url: `/api/entries/${own.id}/audio`,
+      headers: json(cookie),
+      payload: { intentId: replacement.intentId },
+    })
+    expect(res.statusCode, res.body).toBe(200)
+    expect(res.json().data).toMatchObject({
+      alias: own.alias,
+      receiptCode: own.receiptCode,
+      durationMs: 45_000,
+      status: 'active',
+    })
+    expect(await t.storage.read(first.publicId)).toBeNull()
+    const changed = await outbox('entry.changed')
+    expect(JSON.parse(changed[0]?.payload ?? '{}')).toMatchObject({
+      change: 'replaced',
+      receiptCode: own.receiptCode,
+    })
+  })
+
+  it('RF-ENT-09: retirar borra el audio y los votos, libera el hueco y el número de recibo no se reutiliza', async () => {
+    const { cookie } = await openWeek()
+    const first = await upload(cookie)
+    const own = (await create(cookie, first.intentId)).json().data
+    const [row] = await t.db.select().from(entry).where(eq(entry.id, own.id))
+    await t.db.insert(vote).values({
+      userId: 'votante',
+      entryId: own.id,
+      weekId: row!.weekId,
+      stars: 5,
+      createdAt: t.clock.now(),
+      updatedAt: t.clock.now(),
+    })
+    const res = await t.app.inject({
+      method: 'DELETE',
+      url: `/api/entries/${own.id}`,
+      headers: { cookie, origin: ORIGIN },
+    })
+    expect(res.statusCode).toBe(204)
+    expect(await t.db.select().from(vote)).toEqual([])
+    expect(await t.storage.read(first.publicId)).toBeNull()
+    expect((await t.db.select().from(entry).where(eq(entry.id, own.id)))[0]?.status).toBe('withdrawn')
+    expect((await get(own.id, cookie)).statusCode).toBe(404)
+    const changed = await outbox('entry.changed')
+    expect(JSON.parse(changed[0]?.payload ?? '{}')).toMatchObject({ change: 'withdrawn', votesLost: 1 })
+    // Tras retirarla puede subir otra, con el recibo siguiente.
+    const again = await create(cookie, (await upload(cookie)).intentId)
+    expect(again.statusCode).toBe(201)
+    expect(again.json().data.receiptCode).toBe('BB-2026W42-0002')
   })
 })

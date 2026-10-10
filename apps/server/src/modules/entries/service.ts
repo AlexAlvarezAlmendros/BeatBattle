@@ -14,10 +14,12 @@ import {
 } from '@beatbattle/rules'
 import {
   ENTRY_CHUNK_BYTES,
+  type EntryAudioReplace,
   type EntryCoverSignRequest,
   type EntryCreate,
   type EntrySignedUpload,
   type EntrySignRequest,
+  type EntryUpdate,
   type MusicalKey,
   type OwnEntry,
   type PublicEntry,
@@ -26,11 +28,12 @@ import { and, count, eq, inArray, max, ne } from 'drizzle-orm'
 import type { BatchStatement } from '../../db/batch'
 import { runBatch } from '../../db/batch'
 import type { Db } from '../../db/client'
-import { entry, rulesAcceptance, uploadIntent, vote, week } from '../../db/schema'
+import { entry, producerProfile, rulesAcceptance, uploadIntent, user, vote, week } from '../../db/schema'
 import { enqueueEmail } from '../../email/outbox'
 import { auditStatement } from '../../lib/audit'
 import { appError } from '../../lib/errors'
 import type { AudioMeasurement } from '../../media/measure'
+import type { ImageStorage } from '../storage/cloudinary'
 import type { EntryAsset, EntryStorage } from '../storage/entries'
 
 /**
@@ -71,7 +74,12 @@ export interface EntriesDeps {
   /** Origen público de la web, para los enlaces de los emails. */
   publicUrl: string
   measureBudgetMs?: number
+  /** Avatares, para el productor de una entrada ya revelada. */
+  images?: ImageStorage | null
 }
+
+/** Lado del avatar del productor en la ficha de una entrada revelada. */
+const PRODUCER_AVATAR_SIZE = 256
 
 type WeekRow = typeof week.$inferSelect
 type EntryRow = typeof entry.$inferSelect
@@ -197,6 +205,50 @@ export function createEntriesService(deps: EntriesDeps) {
         'No hemos podido leer el audio. Comprueba que el archivo no esté dañado.',
       )
     }
+  }
+
+  async function entryWithWeek(id: string): Promise<{ row: EntryRow; w: WeekRow }> {
+    const [found] = await db
+      .select()
+      .from(entry)
+      .innerJoin(week, eq(week.id, entry.weekId))
+      .where(eq(entry.id, id))
+    if (!found) throw appError('NOT_FOUND', 'No existe esa entrada.')
+    return { row: found.entry, w: found.week }
+  }
+
+  /**
+   * La entrada viva del usuario (`RNF-SEC-03`: de otro, 404, sin decir que existe) con los envíos abiertos
+   * (`SUBMISSIONS_CLOSED` si no).
+   */
+  async function ownedLive(userId: string, id: string, now: number): Promise<{ row: EntryRow; w: WeekRow }> {
+    const found = await entryWithWeek(id)
+    if (found.row.userId !== userId || !(LIVE as readonly string[]).includes(found.row.status))
+      throw appError('NOT_FOUND', 'No existe esa entrada.')
+    if (!canSubmit(found.w, now))
+      throw appError('SUBMISSIONS_CLOSED', 'Los envíos de esta semana están cerrados.')
+    return found
+  }
+
+  /**
+   * Verifica (Admin API), valida formato y tamaño, mide dentro del presupuesto y valida la duración medida
+   * (§4.8.4). Lanza `AssetFailure` si el recurso no vale.
+   */
+  async function ingestAudio(
+    intent: IntentRow,
+  ): Promise<{ asset: EntryAsset; measured: AudioMeasurement | null }> {
+    const asset = await verifiedAsset(intent)
+    const format = entryFormatOf(`audio.${asset.format}`)
+    // Formato y tamaño, con lo que dice Cloudinary, antes de gastar la medición (la duración aún no cuenta).
+    const early = validateEntryAudio({ format, sizeBytes: asset.bytes, durationMs: ENTRY_MIN_DURATION_MS })
+    if (early) throw new AssetFailure('audio', audioProblemError(early))
+    const measured = await measureWithin(asset)
+    const durationMs = asset.durationMs ?? measured?.durationMs ?? null
+    if (durationMs !== null) {
+      const problem = validateEntryAudio({ format, sizeBytes: asset.bytes, durationMs })
+      if (problem) throw new AssetFailure('audio', audioProblemError(problem))
+    }
+    return { asset, measured }
   }
 
   function receiptOf(row: Pick<WeekRow, 'startsAt'>, receiptNumber: number): string {
@@ -381,21 +433,7 @@ export function createEntriesService(deps: EntriesDeps) {
       let asset: EntryAsset
       let measured: AudioMeasurement | null
       try {
-        asset = await verifiedAsset(intent)
-        const format = entryFormatOf(`audio.${asset.format}`)
-        // Formato y tamaño, con lo que dice Cloudinary, antes de gastar la medición (la duración aún no cuenta).
-        const early = validateEntryAudio({
-          format,
-          sizeBytes: asset.bytes,
-          durationMs: ENTRY_MIN_DURATION_MS,
-        })
-        if (early) throw new AssetFailure('audio', audioProblemError(early))
-        measured = await measureWithin(asset)
-        const durationMs = asset.durationMs ?? measured?.durationMs ?? null
-        if (durationMs !== null) {
-          const problem = validateEntryAudio({ format, sizeBytes: asset.bytes, durationMs })
-          if (problem) throw new AssetFailure('audio', audioProblemError(problem))
-        }
+        ;({ asset, measured } = await ingestAudio(intent))
         if (cover && !(await storage().verify(cover.publicId, 'entryCover')))
           throw assetError('missing', 'No encontramos la portada subida. Vuelve a subirla.')
       } catch (error) {
@@ -487,6 +525,208 @@ export function createEntriesService(deps: EntriesDeps) {
         throw error
       }
       return toOwn(row, w, now)
+    },
+
+    // ── 4.7: la entrada pública, editar, sustituir el audio y retirar ──────────────────────────
+
+    /**
+     * `GET /api/entries/:id` (§4.10). Solo entradas activas; las demás (en `processing`, ocultas, retiradas,
+     * descalificadas) no existen para nadie más que su dueño. En voto ciego antes del sellado, sin autoría
+     * ni portada propia (`RF-ENT-10`); después, con el productor (o «Productor eliminado»: `producer` nulo).
+     */
+    async publicEntry(id: string, viewerId: string | null): Promise<PublicEntry> {
+      const { row, w } = await entryWithWeek(id)
+      const visible = row.status === 'active' || (viewerId !== null && row.userId === viewerId)
+      if (!visible || row.status === 'withdrawn') throw appError('NOT_FOUND', 'No existe esa entrada.')
+      const out = toPublic(row, w)
+      const revealed = !w.blind || w.sealedAt !== null
+      if (!revealed) return out
+      const [person] = await db
+        .select({
+          username: user.username,
+          displayUsername: user.displayUsername,
+          name: user.name,
+          avatarPublicId: producerProfile.avatarPublicId,
+        })
+        .from(user)
+        .leftJoin(producerProfile, eq(producerProfile.userId, user.id))
+        .where(eq(user.id, row.userId))
+      if (!person) return out
+      const username = person.username ?? ''
+      return {
+        ...out,
+        producer: {
+          username,
+          displayName: person.displayUsername || username || person.name,
+          avatarUrl:
+            person.avatarPublicId && deps.images
+              ? deps.images.imageUrl(person.avatarPublicId, { size: PRODUCER_AVATAR_SIZE })
+              : null,
+        },
+      }
+    },
+
+    /** La entrada propia de una semana (para `viewer.entry` y `/subir`), o `null`. */
+    async ownEntry(userId: string, weekId: string, now: number): Promise<OwnEntry | null> {
+      const row = await liveEntry(userId, weekId)
+      if (!row) return null
+      const [w] = await db.select().from(week).where(eq(week.id, weekId))
+      return w ? toOwn(row, w, now) : null
+    },
+
+    /**
+     * `PATCH /api/entries/:id`: la ficha, hasta el cierre de envíos (§2.5). `coverIntentId` pone otra portada
+     * propia ya subida; `null` la quita (vuelve la generativa). La anterior se borra del almacenamiento.
+     */
+    async update(userId: string, id: string, input: EntryUpdate, now: number): Promise<OwnEntry> {
+      const { row, w } = await ownedLive(userId, id, now)
+      let coverPublicId = row.coverPublicId
+      let coverIntent: IntentRow | null = null
+      if (input.coverIntentId !== undefined) {
+        if (input.coverIntentId === null) coverPublicId = null
+        else {
+          coverIntent = await usableIntent(userId, input.coverIntentId, 'entryCover', w.id, now)
+          if (!(await storage().verify(coverIntent.publicId, 'entryCover')))
+            throw appError('ENTRY_ASSET_INVALID', 'No encontramos la portada subida. Vuelve a subirla.', {
+              details: { reason: 'missing' },
+            })
+          coverPublicId = coverIntent.publicId
+        }
+      }
+      const changes: Partial<EntryRow> = {
+        ...(input.title !== undefined ? { title: input.title } : {}),
+        ...(input.bpm !== undefined ? { bpm: input.bpm } : {}),
+        ...(input.musicalKey !== undefined ? { musicalKey: input.musicalKey } : {}),
+        ...(input.daw !== undefined ? { daw: input.daw } : {}),
+        ...(input.genres !== undefined ? { tags: JSON.stringify(input.genres) } : {}),
+        ...(input.description !== undefined ? { description: input.description } : {}),
+        coverPublicId,
+        updatedAt: now,
+      }
+      await runBatch(db, [
+        db.update(entry).set(changes).where(eq(entry.id, row.id)),
+        ...(coverIntent
+          ? [db.update(uploadIntent).set({ status: 'done' }).where(eq(uploadIntent.id, coverIntent.id))]
+          : []),
+      ])
+      if (row.coverPublicId && row.coverPublicId !== coverPublicId)
+        await storage()
+          .remove(row.coverPublicId, 'entryCover')
+          .catch(() => {})
+      return toOwn({ ...row, ...changes }, w, now)
+    },
+
+    /**
+     * `PUT /api/entries/:id/audio` (`RF-ENT-08`): solo sin votos y con los envíos abiertos. El audio nuevo se
+     * verifica y mide como al registrar; la entrada conserva alias y número de recibo, y sale `entry.changed`
+     * con el recibo actualizado. El audio anterior se borra.
+     */
+    async replaceAudio(userId: string, id: string, input: EntryAudioReplace, now: number): Promise<OwnEntry> {
+      const { row, w } = await ownedLive(userId, id, now)
+      if ((await voteCount(row.id)) > 0)
+        throw appError('ENTRY_HAS_VOTES', 'Tu entrada ya tiene votos: el audio no se puede sustituir.')
+      const intent = await usableIntent(userId, input.intentId, 'entry', w.id, now)
+      if (intent.entryId !== row.id)
+        throw appError('UPLOAD_INTENT_INVALID', 'Esta subida no es para sustituir el audio de esta entrada.')
+      let asset: EntryAsset
+      let measured: AudioMeasurement | null
+      try {
+        ;({ asset, measured } = await ingestAudio(intent))
+      } catch (error) {
+        if (error instanceof AssetFailure) return reject(userId, intent, w, error, now)
+        throw error
+      }
+      const [twin] = await db
+        .select({ id: entry.id })
+        .from(entry)
+        .where(and(eq(entry.etag, asset.etag), ne(entry.userId, userId)))
+        .limit(1)
+      const changes: Partial<EntryRow> = {
+        audioPublicId: intent.publicId,
+        etag: asset.etag,
+        format: asset.format,
+        bytes: asset.bytes,
+        durationMs: asset.durationMs ?? measured?.durationMs ?? intent.declaredDurationMs ?? 0,
+        peaks: measured
+          ? Buffer.from(measured.peaks.buffer, measured.peaks.byteOffset, measured.peaks.byteLength)
+          : null,
+        loudnessLufs: measured?.integratedLufs ?? null,
+        truePeakDb: measured?.truePeakDb ?? null,
+        hotStartMs: null,
+        status: measured ? 'active' : 'processing',
+        duplicateOf: twin?.id ?? null,
+        updatedAt: now,
+      }
+      const next = { ...row, ...changes }
+      await runBatch(db, [
+        db.update(entry).set(changes).where(eq(entry.id, row.id)),
+        db.update(uploadIntent).set({ status: 'done' }).where(eq(uploadIntent.id, intent.id)),
+        ...(next.status === 'active'
+          ? [
+              enqueueEmail(db, {
+                id: deps.newId(),
+                kind: 'entry.changed',
+                target: { userId },
+                idempotencyKey: `entry.changed:${row.id}:${next.etag}`,
+                payload: { change: 'replaced', ...receiptPayload(next, w) },
+                now,
+              }),
+            ]
+          : []),
+        ...(twin
+          ? [
+              auditStatement(db, {
+                id: deps.newId(),
+                actorId: 'system',
+                action: 'entry.duplicate',
+                target: row.id,
+                payload: { duplicateOf: twin.id, etag: next.etag },
+                now,
+              }),
+            ]
+          : []),
+      ])
+      await storage()
+        .remove(row.audioPublicId, 'entry')
+        .catch(() => {})
+      return toOwn(next, w, now)
+    },
+
+    /**
+     * `DELETE /api/entries/:id` (`RF-ENT-09`): retirar hasta el cierre de envíos. Borra sus votos, libera el
+     * hueco de la semana (`withdrawn`) y borra audio y portada; sale `entry.changed` con los votos perdidos
+     * (un dato del propio productor, nunca público).
+     */
+    async withdraw(userId: string, id: string, now: number): Promise<void> {
+      const { row, w } = await ownedLive(userId, id, now)
+      const votesLost = await voteCount(row.id)
+      await runBatch(db, [
+        db.delete(vote).where(eq(vote.entryId, row.id)),
+        db
+          .update(entry)
+          .set({ status: 'withdrawn', statusReason: 'owner', updatedAt: now })
+          .where(eq(entry.id, row.id)),
+        enqueueEmail(db, {
+          id: deps.newId(),
+          kind: 'entry.changed',
+          target: { userId },
+          idempotencyKey: `entry.changed:${row.id}:withdrawn`,
+          payload: {
+            change: 'withdrawn',
+            receiptCode: receiptOf(w, row.receiptNumber),
+            weekNumber: w.number,
+            weekSlug: w.slug,
+            alias: row.alias,
+            title: row.title,
+            votesLost,
+            uploadUrl: `${deps.publicUrl}/subir`,
+          },
+          now,
+        }),
+      ])
+      const files = storage()
+      await files.remove(row.audioPublicId, 'entry').catch(() => {})
+      if (row.coverPublicId) await files.remove(row.coverPublicId, 'entryCover').catch(() => {})
     },
 
     /** Para las tareas 4.7–4.9: la entrada propia y la pública. */
