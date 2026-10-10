@@ -1,6 +1,16 @@
 import { ACCENTS, type Accent } from '@beatbattle/shared'
 import { sql } from 'drizzle-orm'
-import { blob, check, index, integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import {
+  blob,
+  check,
+  index,
+  integer,
+  primaryKey,
+  real,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from 'drizzle-orm/sqlite-core'
 import { user } from './auth-schema'
 
 /** Las tablas de Better Auth (`user`, `session`, `account`, `verification`, `rate_limit`), generadas. */
@@ -315,4 +325,119 @@ export const auditLog = sqliteTable(
     createdAt: integer('created_at').notNull(),
   },
   (table) => [index('audit_log_created').on(table.createdAt)],
+)
+
+// ── Entradas (guía §2.5, §4.8, §4.11, tarea 4.3) ───────────────────────────────────────────
+
+export const UPLOAD_INTENT_KINDS = ['entry', 'entryCover'] as const
+export type UploadIntentKind = (typeof UPLOAD_INTENT_KINDS)[number]
+export const UPLOAD_INTENT_STATUSES = ['pending', 'done', 'expired', 'failed'] as const
+export type UploadIntentStatus = (typeof UPLOAD_INTENT_STATUSES)[number]
+
+/**
+ * Lo firmado para una subida (§4.8.2): el `public_id` que fija el servidor y lo declarado. Caduca a la
+ * hora, como la firma de Cloudinary; al registrar la entrada pasa a `done` y no se puede volver a usar.
+ * `entryId`: la entrada cuyo audio se sustituye (`RF-ENT-08`) o cuya portada se cambia.
+ */
+export const uploadIntent = sqliteTable(
+  'upload_intent',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull(),
+    kind: text('kind', { enum: UPLOAD_INTENT_KINDS }).notNull(),
+    weekId: text('week_id').notNull(),
+    entryId: text('entry_id'),
+    publicId: text('public_id').notNull().unique(),
+    status: text('status', { enum: UPLOAD_INTENT_STATUSES }).notNull(),
+    declaredBytes: integer('declared_bytes'),
+    declaredDurationMs: integer('declared_duration_ms'),
+    expiresAt: integer('expires_at').notNull(),
+    createdAt: integer('created_at').notNull(),
+  },
+  (table) => [
+    index('upload_intent_user').on(table.userId),
+    index('upload_intent_expires').on(table.expiresAt),
+  ],
+)
+
+export const ENTRY_STATUSES = ['processing', 'active', 'hidden', 'withdrawn', 'disqualified'] as const
+export type EntryRowStatus = (typeof ENTRY_STATUSES)[number]
+
+/**
+ * Entrada de una semana (§2.5). Duración, bytes, formato, sonoridad, pico real y onda los mide el servidor
+ * (`RF-ENT-05`). El `public_id` del audio no lleva el id del usuario (`RF-ENT-04`). Una sola activa por
+ * cuenta y semana (`RF-ENT-01`, índice parcial); alias y número de recibo, únicos en la semana.
+ */
+export const entry = sqliteTable(
+  'entry',
+  {
+    id: text('id').primaryKey(),
+    weekId: text('week_id')
+      .notNull()
+      .references(() => week.id),
+    /** La cuenta; tras borrarla, en una semana sellada, `deleted:<id de la entrada>` (`RF-PRF-04`). */
+    userId: text('user_id').notNull(),
+    alias: text('alias').notNull(),
+    title: text('title').notNull(),
+    description: text('description'),
+    bpm: real('bpm'),
+    musicalKey: text('musical_key'),
+    daw: text('daw'),
+    /** JSON: hasta 3 géneros de la lista del sello. */
+    tags: text('tags').notNull().default('[]'),
+    audioPublicId: text('audio_public_id').notNull().unique(),
+    etag: text('etag').notNull(),
+    format: text('format').notNull(),
+    bytes: integer('bytes').notNull(),
+    durationMs: integer('duration_ms').notNull(),
+    /** 1000 bins mín/máx en `Int8` (2000 bytes); `null` mientras está en `processing`. */
+    peaks: blob('peaks', { mode: 'buffer' }),
+    loudnessLufs: real('loudness_lufs'),
+    truePeakDb: real('true_peak_db'),
+    hotStartMs: integer('hot_start_ms'),
+    coverPublicId: text('cover_public_id'),
+    coverSeed: integer('cover_seed').notNull(),
+    /** Correlativo de la semana (§2.12.1): se fija al crearla y no se reutiliza. */
+    receiptNumber: integer('receipt_number').notNull(),
+    status: text('status', { enum: ENTRY_STATUSES }).notNull(),
+    statusReason: text('status_reason'),
+    playCount: integer('play_count').notNull().default(0),
+    /** Marcada por `etag` igual al de otra entrada (`RF-ENT-11`). */
+    duplicateOf: text('duplicate_of'),
+    submittedAt: integer('submitted_at').notNull(),
+    updatedAt: integer('updated_at').notNull(),
+  },
+  (table) => [
+    uniqueIndex('entry_one_per_week')
+      .on(table.weekId, table.userId)
+      .where(sql`${table.status} IN ('processing', 'active', 'hidden')`),
+    uniqueIndex('entry_alias_week').on(table.weekId, table.alias),
+    uniqueIndex('entry_receipt_week').on(table.weekId, table.receiptNumber),
+    index('entry_user').on(table.userId),
+    index('entry_etag').on(table.etag),
+  ],
+)
+
+/**
+ * Voto de 1 a 5 estrellas (§2.7). En la Fase 4 solo el esquema: sustituir el audio pide que la entrada no
+ * tenga votos (`RF-ENT-08`) y retirarla los borra (`RF-ENT-09`). La lógica del voto llega con la Fase 5.
+ */
+export const vote = sqliteTable(
+  'vote',
+  {
+    userId: text('user_id').notNull(),
+    entryId: text('entry_id').notNull(),
+    weekId: text('week_id').notNull(),
+    stars: integer('stars').notNull(),
+    voided: integer('voided', { mode: 'boolean' }).notNull().default(false),
+    voidedReason: text('voided_reason'),
+    createdAt: integer('created_at').notNull(),
+    updatedAt: integer('updated_at').notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.entryId] }),
+    index('vote_week').on(table.weekId),
+    index('vote_entry').on(table.entryId),
+    check('vote_stars', sql`${table.stars} BETWEEN 1 AND 5`),
+  ],
 )
