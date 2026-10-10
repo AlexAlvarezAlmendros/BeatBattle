@@ -102,6 +102,7 @@ describe('HomePage con la semana en juego y la entrada subida (4.8, §3.8.3)', (
       voteEndsAt: now + 2 * 86_400_000 + 4 * 3_600_000,
       challenge: null,
       golden: false,
+      blind: true,
       entries: 7,
       sample: {
         title: 'Lluvia en Gràcia',

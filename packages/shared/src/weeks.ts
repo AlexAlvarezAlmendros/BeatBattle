@@ -201,6 +201,8 @@ export const PublicWeekSchema = z.object({
   voteEndsAt: z.number().int(),
   challenge: z.string().nullable(),
   golden: z.boolean(),
+  /** Voto ciego (por defecto): la autoría y la portada propia no se ven hasta el sellado (`RF-ENT-10`). */
+  blind: z.boolean(),
   sample: z.object({
     title: z.string(),
     credits: z.string(),

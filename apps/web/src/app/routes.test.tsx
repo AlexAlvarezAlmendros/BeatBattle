@@ -134,6 +134,7 @@ describe('router (0.10, guía §2.18)', () => {
       ...W41,
       challenge: null,
       golden: false,
+      blind: true,
       sample: {
         title: 'Lluvia en Gràcia',
         credits: 'Other People Records',
