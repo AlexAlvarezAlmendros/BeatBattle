@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.49 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.50 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2369,7 +2369,8 @@ original (que además gastaría 10 veces más ancho de banda).
 
 #### 4.8.2 Subida firmada
 
-1. `POST /api/uploads/sign` con `{ kind, weekSlug?, bytes, mime, durationMs }`. El servidor
+1. `POST /api/uploads/sign` con `{ kind, weekSlug?, bytes, mime, durationMs, replacing? }` (`replacing`: la
+   entrada cuyo audio se sustituye, `RF-ENT-08`). El servidor
    comprueba permisos y precondiciones (fase, entrada existente, bases aceptadas, tamaño y duración
    declarados), crea un `upload_intent` (caduca en 1 h) y devuelve los parámetros firmados:
    `public_id`, `timestamp`, `type=authenticated`, `allowed_formats` y `eager` (derivado de escucha,
@@ -2408,7 +2409,10 @@ Al registrar la entrada:
    comprueba que el binario existe.
 4. Entrada, XP y logros se escriben en un único `batch` (XP y logros, desde la Fase 7: hasta entonces, la
    entrada y su email en la cola).
-5. Si cualquier paso falla, se borra el recurso y se devuelve el motivo.
+5. Si cualquier paso falla, se borra el recurso, el *intent* queda `failed`, sale `entry.failed` y se devuelve
+   el motivo: el código de `validateEntryAudio` (`DURATION_OUT_OF_RANGE`…) o `ENTRY_ASSET_INVALID` con
+   `details.reason` (`missing`: no está; `mismatch`: no es el firmado o es anterior al *intent*;
+   `undecodable`: ffmpeg no lo lee). Un *intent* ajeno, usado o caducado da `UPLOAD_INTENT_INVALID`.
 
 Si la medición tarda más que el límite de la función, la entrada se crea en estado `processing`
 (visible solo para su dueño) y el siguiente `tick` la completa.
@@ -3574,6 +3578,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-10 | 0.6.50 | **Tareas 4.5 y 4.6.** §4.8.2: la firma acepta `replacing` (sustituir el audio sin votos). §4.8.4: los motivos de rechazo (`ENTRY_ASSET_INVALID` con `details.reason`, `UPLOAD_INTENT_INVALID`) y el *intent* `failed` con `entry.failed`. La medición espera hasta 20 s (`MEASURE_BUDGET_MS`) antes de dejar la entrada en `processing`. |
 | 2026-10-10 | 0.6.49 | **Tarea 4.3.** §4.11: al borrar una cuenta (`RF-PRF-04`), sus entradas de semanas selladas guardan `user_id = 'deleted:<id de la entrada>'` (único por entrada, para no chocar con `entry_one_per_week`); las de semanas sin sellar y sus votos se borran, y sus audios los barre la limpieza de huérfanos (§4.8.5). |
 | 2026-10-10 | 0.6.48 | **Plan de la Fase 4** (Participar). §4.8.6: el almacenamiento falso imita también la subida por trozos (`X-Unique-Upload-Id`, `Content-Range`) y devuelve el `etag`. §2.12.1 y §4.11: el número de recibo se guarda en `entry.receipt_number` (único por semana, fijado al crear, no se reutiliza). §2.5, §3.8.5 y §4.8.4: el XP y los logros de la subida llegan con la Fase 7; hasta entonces el `batch` lleva la entrada y su email. |
 | 2026-10-10 | 0.6.47 | **Quinto pase del jurado de la Fase 3** (tarea 3.21). §3.8.2: los datos de la revelación se fijan al empezar (una nueva petición de la semana con otra URL firmada la hacía volver a empezar a mitad). §3.8.3: estado **cargando** (tarjeta en esqueleto, Jugar «Cargando…»), distinto del calendario vacío; el título largo baja hasta 24 px en escritorio antes de partir y la tarjeta aprieta sus filas para no pasar bajo la barra. §2.12.3: en «Cómo se juega» el formulario del aviso solo sale por encima de 960 px. |

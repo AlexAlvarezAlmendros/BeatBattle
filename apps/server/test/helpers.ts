@@ -5,6 +5,7 @@ import type { Db } from '../src/db/client'
 import { createTestDb } from '../src/db/testDb'
 import type { MemoryMailer } from '../src/email/mailer'
 import { type FixedClock, fixedClock } from '../src/lib/clock'
+import type { AudioMeasurement } from '../src/media/measure'
 import type { ImageStorage } from '../src/modules/storage/cloudinary'
 import type { SampleStorage } from '../src/modules/storage/samples'
 
@@ -46,6 +47,10 @@ export interface MakeAppOptions {
   images?: ImageStorage | null
   /** Samples (almacenamiento falso en disco); por defecto, ninguno. */
   samples?: SampleStorage | null
+  /** Medición del audio (por defecto, ffmpeg de verdad). */
+  measure?: (source: ReadableStream<Uint8Array>) => Promise<AudioMeasurement>
+  /** Presupuesto de la medición de una entrada antes de dejarla en `processing`. */
+  measureBudgetMs?: number
 }
 
 export async function makeApp(options: MakeAppOptions = {}): Promise<TestApp> {
@@ -59,6 +64,8 @@ export async function makeApp(options: MakeAppOptions = {}): Promise<TestApp> {
     clock,
     images: options.images ?? null,
     samples: options.samples ?? null,
+    measure: options.measure,
+    measureBudgetMs: options.measureBudgetMs,
     logStream: { write: (line) => logs.push(line) },
   })
   options.routes?.(app)
