@@ -135,23 +135,23 @@ nunca pasa por la API (`RF-STO-01`) y nada de lo que el navegador declara sobre 
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 4.11 | `packages/covers`: el pintor de la portada generativa sobre el emblema que ya existe (8 familias × pliegues por tonalidad × giro por BPM × fase por semilla, anillos de acento, fondo común). Pinta por CPU en un contexto 2D con `willReadFrequently`, con calibración por medida a 11,5 % de rojo y 1,6 % de blanco. Test `RD-VIS-04` con 48 semillas en el Chrome del sistema | ⬜ Listo | — | §3.4.5 · `RD-VIS-04` |
+| 4.11 | `packages/covers`: el pintor de la portada generativa sobre el emblema que ya existe (8 familias × pliegues por tonalidad × giro por BPM × fase por semilla, anillos de acento, fondo común). Pinta por CPU en un contexto 2D con `willReadFrequently`, con calibración por medida a 11,5 % de rojo y 1,6 % de blanco. Test `RD-VIS-04` con 48 semillas en el Chrome del sistema | 🔄 En curso | — | §3.4.5 · `RD-VIS-04` |
 
 ### Emails
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 4.12 | Plantillas `entry.receipt` (ticket de §3.8.12 con número, alias, título, duración, formato, tamaño, BPM, tonalidad, informe técnico con el ajuste de −14 LUFS de `loudness.ts`, aviso de clip por encima de −0,1 dBTP, hora de Madrid, `etag` abreviado, botones y recordatorio de las bases), `entry.failed` (motivo con las palabras de la UI y enlace a `/subir`) y `entry.changed` (recibo nuevo o retirada). Más el PNG de la onda, `GET /api/email/waveform/:entryId.png` con firma HMAC y codificador propio | 🔒 Bloqueado | 4.6 | §2.12.1, §4.19.4, §4.19.5, Anexo I · `RF-NOTIF-06` |
+| 4.12 | Plantillas `entry.receipt` (ticket de §3.8.12 con número, alias, título, duración, formato, tamaño, BPM, tonalidad, informe técnico con el ajuste de −14 LUFS de `loudness.ts`, aviso de clip por encima de −0,1 dBTP, hora de Madrid, `etag` abreviado, botones y recordatorio de las bases), `entry.failed` (motivo con las palabras de la UI y enlace a `/subir`) y `entry.changed` (recibo nuevo o retirada). Más el PNG de la onda, `GET /api/email/waveform/:entryId.png` con firma HMAC y codificador propio | 🔄 En curso | 4.6 | §2.12.1, §4.19.4, §4.19.5, Anexo I · `RF-NOTIF-06` |
 | 4.13 | QR del recibo a la ficha de la entrada | 🔒 Bloqueado | 4.12 | §2.12.1 · **Decisión abierta:** ninguna biblioteca de QR está en §4.1. ¿Se añade una dependencia (`qrcode`) o se escribe un codificador propio (modo byte, Reed-Solomon, como el GIF de la F3)? Mientras, el enlace va en texto y en botón |
 
 ### Web
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 4.14 | `/subir`, la ranura «INSERTA TU BEAT»: arrastrar o elegir (con Intro), validación local con su frase (`entryFile.ts`), análisis en el worker (`analyze.ts`) con la onda dibujándose y BPM y tonalidad girando como una tragaperras hasta fijarse. Antes, comprobaciones previas: sesión, bases, fase y entrada existente | 🔒 Bloqueado | 4.2 | §2.5, §3.8.5 · `RF-ENT-03`, `RF-ENT-06` |
+| 4.14 | `/subir`, la ranura «INSERTA TU BEAT»: arrastrar o elegir (con Intro), validación local con su frase (`entryFile.ts`), análisis en el worker (`analyze.ts`) con la onda dibujándose y BPM y tonalidad girando como una tragaperras hasta fijarse. Antes, comprobaciones previas: sesión, bases, fase y entrada existente | 🔄 En curso | 4.2 | §2.5, §3.8.5 · `RF-ENT-03`, `RF-ENT-06` |
 | 4.15 | La hoja del luchador: título, BPM y tonalidad prerrellenados, DAW con «otro», hasta 3 géneros, descripción, portada propia opcional (oculta en voto ciego, se avisa) y declaración. La ficha se conserva en `sessionStorage` si algo falla | 🔒 Bloqueado | 4.14 | §2.5, §3.8.5 · `RF-ENT-12` |
 | 4.16 | El medidor de súper: subida por trozos (`chunkedUpload.ts`) con bytes reales, velocidad, tiempo restante y «Cancelar [Esc]» (aborta el XHR); reintentos por trozo; registro de la entrada. Después, la celebración: anunciador «¡NUEVO BEAT EN LA BATALLA!», portada generativa con el alias («Así te verán hasta el domingo…»), «Ya estás en la batalla #41», con su variante sin movimiento | 🔒 Bloqueado | 4.6, 4.11, 4.15, 4.17 | §3.8.5, §4.7.4 · `RF-ENT-07`, `RF-ENT-12` |
-| 4.17 | Efectos `upload.hover`, `upload.progress`, `upload.done` y `ann.newbeat` como `SfxDef`, afinados en la tonalidad de la semana, con su equivalente visual y medidos *offline* | ⬜ Listo | — | §3.7.3, Anexo D · `RNF-A11Y-05` |
+| 4.17 | Efectos `upload.hover`, `upload.progress`, `upload.done` y `ann.newbeat` como `SfxDef`, afinados en la tonalidad de la semana, con su equivalente visual y medidos *offline* | 🔄 En curso | — | §3.7.3, Anexo D · `RNF-A11Y-05` |
 | 4.18 | `/subir` en modo edición: «Editar mi entrada» (ficha), sustituir el audio (solo sin votos) y retirar con confirmación. En el menú, Jugar → «Editar mi entrada», con el cursor en Jurado | 🔒 Bloqueado | 4.7, 4.8, 4.16 | §2.5, §3.8.3 · `RF-ENT-02`, `RF-ENT-08/09` |
 
 ### Cierre
