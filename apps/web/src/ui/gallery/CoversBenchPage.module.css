@@ -1,0 +1,43 @@
+/* Banco de portadas (§3.4.5): rejilla de portadas con su familia, tonalidad y BPM debajo, texto sobre negro. */
+.bench {
+  display: grid;
+  gap: var(--bb-space-4);
+  padding-block: var(--bb-space-4);
+}
+
+.intro,
+.summary {
+  max-width: 70ch;
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.summary {
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--bb-space-16) * 2.5), 1fr));
+  gap: var(--bb-space-3);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.item {
+  display: grid;
+  gap: var(--bb-space-1);
+  background: var(--bb-black);
+}
+
+.cover {
+  width: 100%;
+}
+
+.label {
+  color: var(--bb-text-3);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+}

@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.53 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.54 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1399,11 +1399,16 @@ servidor (imágenes OG):
   10,9 % en luminancia: no pasa); con `willReadFrequently: true`, el mismo resultado que la referencia
   (0,3 % y 0,7 %: pasa). Ver `docs/planning/evidence/f0/arena/README.md`.
 - Tras el sellado se puede ver la portada propia del productor (§2.5).
-- **Hasta la Fase 4** todas las entradas llevan la misma portada: la **de referencia** de las maquetas
-  (`coverDots('referencia', { family: 0, key: 4, bpm: 92 })`, la que calibra a las demás), con su
-  presupuesto de tinta. La geometría del emblema (familias, bandas y `solveScale`) ya vive en
-  `packages/covers` (`emblem.ts`, portada de `final.js`); el pintor en canvas por CPU con la calibración por
-  medida llega con la Fase 4.
+- **Desde la Fase 4** (tarea 4.11) cada entrada lleva la suya: semilla `entry.cover_seed` (`coverSeed` de
+  `packages/rules`), pliegues por la tónica de su tonalidad y giro por su BPM. El pintor vive en
+  `packages/covers` (`painter.ts`: `coverContext`, `drawCover`, `measureCover`, `calibrationFor` y
+  `paintCover`), con la paleta de los tokens (`--bb-wine-2` → `--bb-wine-3` → negro, rayos blancos al 3 %,
+  puntos `--bb-red` y blanco al 94 %); la portada de referencia (`coverDots('referencia', { family: 0, key:
+  4, bpm: 92 })`) sigue siendo la que calibra a las demás y la de `CoverArt` donde aún no hay entrada. En la
+  web, `GenerativeCover` la pinta a su tamaño en píxeles de pantalla y `/dev/portadas` (solo en desarrollo)
+  es el banco del test y de la revisión manual. Medido el 2026-10-10 en el Chrome del sistema con la GPU real:
+  48 semillas, peor desviación 0,5 % en rojo y 1,2 % en luminancia; 200 semillas, 0,5 % y 2,1 %; de 3 a 6 ms
+  por portada de 160 px (E2E `covers.spec.ts`; evidencia en `docs/planning/evidence/f4/portadas/`).
 
 #### 3.4.6 Silueta del jurado
 
@@ -3589,6 +3594,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-10 | 0.6.54 | **Tarea 4.11.** §3.4.5: cada entrada lleva su portada generativa (semilla, tónica y BPM) pintada por CPU con la calibración por medida en `packages/covers` (`painter.ts`) con la paleta de los tokens; `GenerativeCover` en la web y el banco `/dev/portadas`; `RD-VIS-04` medido con 48 y 200 semillas (peor desviación 0,5 % en rojo, 1,2 % y 2,1 % en luminancia). |
 | 2026-10-10 | 0.6.53 | **Tarea 4.17.** Anexo D: `upload.hover` no va en bucle sino una vez (240 ms, como dicen §3.8.5 y el Anexo E) con la tónica de la semana en la 1.ª octava; `upload.progress` sube del grado 1 al 11 de la pentatónica y como mucho suena 3 veces por segundo; `upload.drop` y `upload.done` van en la tónica. Anexo E: equivalentes visuales del medidor de súper y de la entrada en la batalla (`RNF-A11Y-05`). |
 | 2026-10-10 | 0.6.52 | **Tarea 4.12.** §4.19.5: la onda del recibo (`/api/email/waveform/:entryId.png`, PNG propio, firma con la versión del audio, línea plana sin onda, petición sin registrar). `RF-NOTIF-12`: la imagen que es el contenido del email (onda, tarjeta de resultado) es la única por destinatario, firmada y sin id de usuario. §2.12.1: «compartir mi tarjeta» llega con la Fase 5; la retirada no dice cuántos votos tenía. |
 | 2026-10-10 | 0.6.51 | **Tarea 4.9.** §4.8.5 y §4.11: tabla `job_state` para las tareas troceadas; el barrido de huérfanos hace dos páginas por `tick` y una pasada por día; el `tick` completa (o retira) las entradas en `processing`. |

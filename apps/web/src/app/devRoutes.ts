@@ -54,6 +54,18 @@ export const devRoutes: RouteObject[] = import.meta.env.DEV
         lazy: async () => ({ Component: (await import('../ui/gallery/StageBenchPage')).StageBenchPage }),
       },
       {
+        // Banco de las portadas generativas (4.11, `RD-VIS-04`): 48 semillas medidas, hasta 200 con `?n=`.
+        path: 'dev/portadas',
+        handle: {
+          access: 'public',
+          screen: {
+            ...simpleScreen({ kicker: 'frame.plates.dev', title: 'dev.covers.title' }, ['back', 'sound']),
+            rays: false,
+          },
+        },
+        lazy: async () => ({ Component: (await import('../ui/gallery/CoversBenchPage')).CoversBenchPage }),
+      },
+      {
         // El menú principal con los datos de muestra de las maquetas (0.24), para compararlo con ellas.
         path: 'dev/menu',
         handle: { access: 'public', screen: MENU_SCREEN },

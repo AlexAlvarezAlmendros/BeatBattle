@@ -7,8 +7,7 @@
  * × fase y rotación según la semilla; un anillo de cada tres lleva puntos blancos con otra familia
  * (acento). **Mismo presupuesto de tinta para todas**: el área de los puntos rojos es el 11,5 % del disco
  * y la de los blancos el 1,6 %, repartidas en tres bandas radiales igualadas. La medida sobre los píxeles
- * (que corrige el *antialiasing*, §3.4.5) es del pintor en canvas, que llega con la Fase 4; aquí está la
- * geometría.
+ * (que corrige el *antialiasing*, §3.4.5) es del pintor en canvas (`painter.ts`); aquí está la geometría.
  *
  * Coordenadas en el disco unidad: centro en (0, 0), radio 1. El pintor las escala a su radio (en las
  * maquetas, el 46 % del lado de la portada).
@@ -278,8 +277,7 @@ export function inkShare(dots: readonly CoverDot[]): number {
 
 /**
  * La portada de referencia de las maquetas (`coverDots('referencia', { family: 0, key: 4, bpm: 92 })`):
- * la que calibra a todas las demás. Hasta que cada entrada tenga la suya (Fase 4), es la que llevan
- * **todas** durante el voto ciego, así que ninguna se distingue por su portada.
+ * la que calibra a todas las demás (`calibrationFor`) y la que lleva `CoverArt` donde aún no hay entrada.
  */
 export const REFERENCE_COVER = { seed: 'referencia', options: { family: 0, key: 4, bpm: 92 } } as const
 
