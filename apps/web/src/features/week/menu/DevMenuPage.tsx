@@ -11,16 +11,16 @@ const HOUR = 60 * MINUTE
 const DAY = 24 * HOUR
 
 /** La semana de las maquetas aprobadas (`01-menu.html`): semana 41, «Lluvia en Gràcia». */
-function sampleWeek(phase: MenuWeek['phase']): MenuWeek {
+function sampleWeek(phase: MenuWeek['phase'], long = false): MenuWeek {
   return {
     phase,
     number: 41,
-    title: t('dev.menu.week.title'),
+    title: long ? t('dev.menu.week.longTitle') : t('dev.menu.week.title'),
     credits: t('dev.menu.week.credits'),
     range: t('dev.menu.week.range'),
     code: '2026-W41',
     bpm: 92,
-    musicalKey: t('dev.menu.week.key'),
+    musicalKey: long ? t('dev.menu.week.longKey') : t('dev.menu.week.key'),
     durationSeconds: 72,
     genre: t('dev.menu.week.genre'),
     peaks: samplePeaks('sample-41'),
@@ -49,13 +49,15 @@ const SAMPLE_PLAYER: MenuPlayer = {
  * `/dev/menu` — el menú principal con los datos de muestra de las maquetas aprobadas, para compararlo
  * con ellas (`docs/planning/evidence/f0/arena/01-menu-*.png`). Solo en desarrollo. Parámetros:
  * `?estado=abierta` (por defecto), `votacion` o `vacio`; `?visitante` quita la sesión; `?subida`, el
- * jugador ya ha subido su entrada; `?titulo` enseña la pantalla de título aunque ya se haya visto (1.13).
+ * jugador ya ha subido su entrada; `?titulo` enseña la pantalla de título aunque ya se haya visto (1.13); `?largo`, un título de 49
+ * caracteres y la tonalidad más larga («Fa sostenido menor»), para las pruebas de encaje (jurado de la 3.21).
  */
 export function DevMenuPage() {
   const [params] = useSearchParams()
   const state = params.get('estado') ?? 'abierta'
   const visitor = params.has('visitante')
-  const week = state === 'vacio' ? null : sampleWeek(state === 'votacion' ? 'voting' : 'open')
+  const week =
+    state === 'vacio' ? null : sampleWeek(state === 'votacion' ? 'voting' : 'open', params.has('largo'))
   const model: MenuModel = {
     week,
     player: visitor

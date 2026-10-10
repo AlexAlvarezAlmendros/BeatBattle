@@ -3,6 +3,7 @@ import {
   type ReactNode,
   type RefObject,
   useCallback,
+  useEffect,
   useId,
   useLayoutEffect,
   useRef,
@@ -61,15 +62,17 @@ const TOUCH_QUERY = '(hover: none), (pointer: coarse)'
  * Qué hace cada modo según la semana y el jugador (§3.8.3): a dónde lleva, su dato, si está
  * deshabilitado (con el motivo como dato) y la ayuda del panel de debajo.
  */
-export function menuEntries({ week, player, lastSealed }: MenuModel): ModeEntry[] {
+export function menuEntries({ week, player, lastSealed, loading = false }: MenuModel): ModeEntry[] {
   const signIn = paths.signIn()
   const play: ModeEntry = !week
-    ? {
-        mode: 'play',
-        disabled: true,
-        detail: t('home.modes.play.empty'),
-        help: t('home.modes.play.helpEmpty'),
-      }
+    ? loading
+      ? { mode: 'play', disabled: true, detail: t('home.loading.detail'), help: t('home.loading.help') }
+      : {
+          mode: 'play',
+          disabled: true,
+          detail: t('home.modes.play.empty'),
+          help: t('home.modes.play.helpEmpty'),
+        }
     : week.phase === 'voting'
       ? {
           mode: 'play',
@@ -120,8 +123,8 @@ export function menuEntries({ week, player, lastSealed }: MenuModel): ModeEntry[
       ? {
           mode: 'jury',
           disabled: true,
-          detail: t('home.modes.jury.empty'),
-          help: t('home.modes.jury.helpEmpty'),
+          detail: loading ? t('home.loading.detail') : t('home.modes.jury.empty'),
+          help: loading ? t('home.loading.help') : t('home.modes.jury.helpEmpty'),
         }
       : {
           mode: 'jury',
@@ -212,13 +215,28 @@ export function MainMenu({
   const titleRef = useRef<HTMLElement>(null)
   const firstEnabled = Math.max(0, model.player?.uploaded ? 1 : entries.findIndex((entry) => !entry.disabled))
   const revealHelp = useRevealHelp(listRef, helpRef)
+  // Si la persona aún no ha movido el cursor, sigue a la primera opción disponible cuando llegan los datos
+  // (la semana carga después de la primera pintura: sin esto, el cursor se quedaba en Jurado aunque Jugar
+  // estuviera abierto, jurado de la 3.21).
+  const moved = useRef(false)
+  const following = useRef(false)
   const menu = useRovingMenu({
     count: entries.length,
     initialIndex: firstEnabled,
     isDisabled: (index) => Boolean(entries[index]?.disabled),
     getLabel: (index) => t(`home.modes.${MENU_MODES[index]!}.label`),
-    onMove: revealHelp,
+    onMove: () => {
+      if (!following.current) moved.current = true
+      revealHelp()
+    },
   })
+  const { moveTo, activeIndex } = menu
+  useEffect(() => {
+    if (moved.current || activeIndex === firstEnabled) return
+    following.current = true
+    moveTo(firstEnabled, { focus: false })
+    following.current = false
+  }, [firstEnabled, activeIndex, moveTo])
   const active = entries[menu.activeIndex] ?? entries[0]!
   // Un mismo cuerpo de rótulo y un mismo alto para todas las placas en reposo (§3.3).
   const fit = useMenuPlateFit(listRef)
@@ -235,16 +253,18 @@ export function MainMenu({
   const narrow = useMediaQuery(MOBILE_QUERY)
   const touch = useMediaQuery(TOUCH_QUERY)
   const modesFirst = narrow && !touch
-  const card = <StageCard week={model.week} nextDrop={model.nextDrop} />
+  const card = <StageCard week={model.week} nextDrop={model.nextDrop} loading={model.loading} />
   // En la tableta vertical, lo que sobra de alto se reparte alrededor de la tarjeta (CSS): necesita su alto. La
   // tarjeta cambia de sitio (`modesFirst`) y de pieza (sin semana, la del calendario vacío).
-  useCardHeight(titleRef, `${modesFirst}|${Boolean(model.week)}`)
+  useCardHeight(titleRef, `${modesFirst}|${Boolean(model.week)}|${Boolean(model.loading)}`)
 
   const { week, player } = model
   // La crónica empieza por el crédito solo con la semana abierta a envíos; en `voting` la barra no invita
   // a subir y empieza por el cierre (§3.8.3 v0.6.7).
   const chronicle: ReactNode[] = !week
-    ? [...model.chronicle]
+    ? model.loading
+      ? [t('home.loading.help')]
+      : [...model.chronicle]
     : week.phase === 'open'
       ? [<CreditLine key="credit" inside={Boolean(player?.uploaded)} />, ...model.chronicle]
       : [t('home.chronicle.closed'), ...model.chronicle]
@@ -252,7 +272,7 @@ export function MainMenu({
   return (
     <div
       className={styles.menu}
-      data-week={week ? week.phase : 'empty'}
+      data-week={week ? week.phase : model.loading ? 'loading' : 'empty'}
       data-modes-first={modesFirst || undefined}
     >
       {gate ? <TitleGate model={model} onDone={() => setGate(false)} /> : afterTitle}

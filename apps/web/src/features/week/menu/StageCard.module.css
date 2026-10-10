@@ -85,7 +85,31 @@
   overflow-y: visible;
   padding-top: var(--bb-space-1);
   font-size: calc(var(--bb-fs-title) * var(--card-s));
+  text-wrap: balance;
   white-space: nowrap;
+}
+
+/*
+ * En escritorio, si parte (un título largo), con aire para la sombra dura (§3.8.14); y la tarjeta aprieta
+ * sus separaciones lo que crece el título, para seguir llegando a la barra sin pasar bajo ella (§3.8.3;
+ * jurado de la 3.21, quinto pase: a 1440 × 900 pasaba 17 px).
+ */
+@media (min-width: 721px) {
+  .title {
+    line-height: calc(1em + var(--bb-space-1));
+  }
+
+  .card[data-long-title] {
+    gap: calc(var(--bb-space-2) * var(--card-s));
+  }
+
+  .card[data-long-title] .heading {
+    gap: var(--bb-space-1);
+  }
+
+  .card[data-long-title] .chips {
+    margin-top: 0;
+  }
 }
 
 /*
@@ -134,6 +158,13 @@
   min-width: 0;
 }
 
+/* El fallo del sample: en escritorio lo dice la onda; en móvil, sin onda, este texto (abajo). */
+.audioError {
+  display: none;
+  color: var(--bb-white);
+  font-size: var(--bb-fs-xs);
+}
+
 .time {
   color: var(--bb-text-3);
   font-family: var(--bb-font-num);
@@ -175,6 +206,41 @@
   font-family: var(--bb-font-num);
   font-size: var(--bb-fs-xl);
   font-weight: var(--bb-weight-extrabold);
+}
+
+/*
+ * ── Cargando: la misma tarjeta, en esqueleto (§3.3) ───────────────────────────────────────
+ * Cada esqueleto va dentro de la pieza de la tarjeta cargada (vinilo, título, chips, play, onda, reloj del
+ * móvil, pie) y toma su alto: la línea del título, un renglón del display; los chips, el alto de un chip;
+ * el play, el del botón; la onda y el reloj en línea, los suyos.
+ */
+.loadingDisc {
+  width: 100%;
+  aspect-ratio: 1;
+  height: auto;
+}
+
+.loadingLine {
+  height: 1lh;
+}
+
+.loadingChip {
+  width: calc(var(--bb-space-16) * 1.5);
+  height: var(--bb-space-8);
+}
+
+.loadingButton {
+  flex: none;
+  width: var(--bb-space-12);
+  height: var(--bb-space-12);
+}
+
+.loadingFill {
+  height: 100%;
+}
+
+.loadingWave {
+  height: var(--bb-space-10);
 }
 
 /* ── Calendario vacío: el hueco del aviso del próximo drop ───────────────────────────────── */
@@ -224,6 +290,11 @@
   }
 
   .heading {
+    gap: var(--bb-space-1);
+  }
+
+  /* Con un título largo en dos líneas, las filas más juntas todavía (1280 × 720 pasaba 11 px). */
+  .card[data-long-title] {
     gap: var(--bb-space-1);
   }
 
@@ -279,6 +350,10 @@
     display: none;
   }
 
+  .audioError {
+    display: inline;
+  }
+
   .title {
     font-size: var(--bb-fs-xl);
   }
@@ -324,7 +399,6 @@
 @media (max-width: 720px) and (hover: none), (max-width: 720px) and (pointer: coarse),
   (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) and (hover: none),
   (min-width: 721px) and (max-width: 1199px) and (max-aspect-ratio: 3 / 4) and (pointer: coarse) {
-  .emptyKickers,
   .credits,
   .foot,
   .genre,
@@ -336,8 +410,34 @@
     display: inline-flex;
   }
 
+  /*
+   * Con una tonalidad larga, la duración (que está en la ficha) cede antes que partir la fila de chips: la
+   * tarjeta crecía y la última placa del menú quedaba bajo la barra a 390 × 844 (jurado de la 3.21).
+   */
+  .chips[data-long-key] .duration {
+    display: none;
+  }
+
+  /* Un título largo va en dos líneas: la tarjeta aprieta sus filas para que el menú siga cabiendo. */
+  .card[data-long-title] {
+    gap: var(--bb-space-1);
+    padding-block: var(--bb-space-2);
+  }
+
   /* El aviso, en una línea: el título del escenario sigue siendo el texto principal (y el LCP). */
   .alertText {
+    display: none;
+  }
+
+  /*
+   * Sin semana, el rótulo con la fecha del próximo drop se queda (es el dato de la tarjeta; antes se plegaba
+   * y en el teléfono no estaba en ningún sitio, jurado de la 3.21); el título, «En el horno», va en una línea.
+   */
+  .emptyKickers .range[data-next-drop] {
+    display: inline;
+  }
+
+  .emptyKickers:has(.range[data-next-drop]) .kickerRed {
     display: none;
   }
 }
@@ -424,10 +524,35 @@
  * franja de «ELIGE MODO», que lleva aire (`MainMenu`). Por debajo de 360 px la pantalla ya se desplaza
  * (§3.8.3) y lleva los 8.
  */
+/*
+ * Teléfono bajo (≤ 780 px de alto) táctil y sin semana: el título de la alerta se pliega (la sección sigue
+ * nombrada por él para el lector) y queda la fila del campo con «Avísame».
+ */
+@media (max-width: 720px) and (max-height: 780px) and (hover: none),
+  (max-width: 720px) and (max-height: 780px) and (pointer: coarse) {
+  .alertTitle {
+    display: none;
+  }
+
+  .alert {
+    padding-top: var(--bb-space-1);
+  }
+}
+
 @media (min-width: 360px) and (max-width: 720px) and (max-height: 650px) and (hover: none),
   (min-width: 360px) and (max-width: 720px) and (max-height: 650px) and (pointer: coarse) {
   .card {
     padding-block: var(--bb-space-1);
+  }
+
+  /* Con un título largo en dos líneas, el rótulo de la semana se pliega (el número sigue en la ficha). */
+  .card[data-long-title] .kickers {
+    display: none;
+  }
+
+  /* Sin semana, en el teléfono más bajo (360 × 640), el rótulo rojo se pliega; la fecha, si la hay, se queda. */
+  .emptyKickers:not(:has(.range[data-next-drop])) {
+    display: none;
   }
 }
 

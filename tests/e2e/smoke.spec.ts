@@ -25,9 +25,7 @@ test('humo: la home pinta el HUD, el menú principal y la barra de controles, si
   // Menú principal (§3.8.3) en «calendario vacío» (§2.19).
   const main = page.getByRole('main')
   await expect(main.getByRole('heading', { level: 1, name: 'Beat Battle' })).toBeAttached()
-  await expect(
-    main.getByRole('heading', { level: 2, name: 'El próximo drop está en el horno' }),
-  ).toBeVisible()
+  await expect(main.getByRole('heading', { level: 2, name: 'En el horno' })).toBeVisible()
   const menu = main.getByRole('menu', { name: 'Elige modo' })
   await expect(menu.getByRole('menuitem')).toHaveCount(6)
   await expect(main.getByRole('region', { name: /Avísame del próximo drop/ })).toHaveAttribute('id', 'alerta')

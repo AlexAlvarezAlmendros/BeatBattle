@@ -5,6 +5,7 @@ import { Card } from '../components/Card'
 import { Layout } from '../components/Layout'
 import { Heading, Kicker, Paragraph } from '../components/Text'
 import { useEmail } from '../context'
+import { clip } from '../format'
 import type { EmailTemplate } from '../template'
 
 export interface AdminCalendarGapPayload {
@@ -33,7 +34,7 @@ function GapBody({ p }: { p: AdminCalendarGapPayload }) {
 
 /** `admin.calendar_gap` (§2.1, §4.12 `adminAlerts`, `RF-DROP-04`): hueco en el calendario a 72 h. */
 export const adminCalendarGap: EmailTemplate<AdminCalendarGapPayload> = {
-  subject: (p) => `Calendario vacío: falta el drop del ${p.mondayText}`.slice(0, 50),
+  subject: (p) => clip(`Falta el drop del ${p.mondayText}`, 50),
   preheader: (p) => `Quedan ${p.hoursLeft} h y no hay semana programada.`,
   fixture: { mondayText: 'lunes 12 de octubre', hoursLeft: 72 },
   body: (p) => <GapBody p={p} />,

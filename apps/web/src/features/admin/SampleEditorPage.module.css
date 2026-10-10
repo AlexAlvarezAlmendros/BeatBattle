@@ -106,22 +106,91 @@
 }
 
 .region[data-selected] {
+  border-inline-color: var(--bb-white);
+  border-inline-width: calc(var(--bb-stroke) * 1.5);
   background: color-mix(in srgb, var(--bb-red) 40%, transparent);
+}
+
+@media (forced-colors: active) {
+  .region[data-selected] {
+    border-inline-color: Highlight;
+  }
+}
+
+.waveLength {
+  position: absolute;
+  right: var(--bb-space-2);
+  bottom: var(--bb-space-1);
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+}
+
+/* La tabla de chops: la cabecera una vez y una fila por chop, densa (filas de 44 px). */
+.chopHead,
+.chopRow {
+  display: grid;
+  grid-template-columns: 7rem 5.5rem 5.5rem 6rem auto;
+  align-items: center;
+  gap: var(--bb-space-3);
+}
+
+.chopHead {
+  white-space: nowrap;
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
 }
 
 .chopList {
   display: grid;
-  gap: var(--bb-space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  gap: var(--bb-space-1);
 }
 
 .chopRow {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr) auto;
-  align-items: end;
-  gap: var(--bb-space-3);
+  min-width: 0;
+  white-space: nowrap;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.chopInput {
+  width: 100%;
+  min-height: var(--bb-target);
+  padding: 0 var(--bb-space-2);
+  border: var(--bb-stroke) solid var(--bb-line-strong);
+  background: var(--bb-panel);
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-sm);
+}
+
+.chopInput:focus-visible {
+  outline: var(--bb-stroke) solid var(--bb-white);
+}
+
+.chopRow[data-invalid] .chopInput {
+  border: calc(var(--bb-stroke) * 1.5) solid var(--bb-white);
+}
+
+/* El motivo, en texto bajo la fila (no solo el color del borde, WCAG 1.4.1 y 3.3.1). */
+.chopProblem {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--bb-white);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-bold);
+  white-space: normal;
+}
+
+.chopLength {
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-sm);
 }
 
 @media (max-width: 720px) {
@@ -133,7 +202,13 @@
     grid-column: 1 / -1;
   }
 
+  .chopHead,
   .chopRow {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: 7rem 4.5rem 4.5rem auto;
+  }
+
+  .chopHead span:nth-child(4),
+  .chopLength {
+    display: none;
   }
 }

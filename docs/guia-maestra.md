@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.44 · 2026-10-09 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.47 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -717,11 +717,13 @@ martes (§4.17).
 #### 2.12.3 Alerta de drop sin cuenta
 
 En el menú principal (en la tarjeta de la semana cuando el calendario está vacío, §3.8.3) y en
-«Cómo se juega», un formulario «Avísame del próximo drop» deja suscribirse solo con el email,
+«Cómo se juega» (en su columna, solo con la ventana de más de 960 px de ancho: por debajo, el menú es el
+sitio del formulario y la página no lo repite), un formulario «Avísame del próximo drop» deja suscribirse solo con el email,
 sin crear cuenta. Usa **doble confirmación** (`alert.confirm`); sin confirmar en 7 días, se borra.
 El suscriptor recibe `battle.drop` (o el resumen del lunes sin la parte personal) y cada email le
 invita a crear cuenta. Si después se registra con el mismo email, la suscripción se fusiona con su
-cuenta y conserva las preferencias.
+cuenta y conserva las preferencias. El enlace del email lleva a la página `/alerta`, que confirma con un
+botón (un `POST`): abrir el enlace no basta, para que un escáner de correo no la confirme solo.
 
 #### 2.12.4 Preferencias, frecuencia y horas de silencio
 
@@ -836,6 +838,10 @@ Panel en `/admin`, solo para el rol `admin`, con la misma estética pero en un m
   onda para marcar los 8 trozos).
 - **Calendario de semanas**: programar semanas futuras con su sample, reto, voto ciego sí/no, semana
   dorada sí/no. Vista de calendario con huecos marcados en rojo.
+- **Modo denso** (Fase 3): pantalla sin pieza con el panel a todo lo ancho (`ScreenPage wide`), tablas con
+  filete y sin efectos. `/admin` reúne el calendario y la lista de samples; `/admin/samples/:id` (`nuevo`)
+  es el editor: subida firmada con progreso, ficha, nueva medición y los 8 *chops* sobre la onda (clic para
+  el inicio, Mayús+clic para el final, y los campos de cada chop con el teclado).
 - **Semana en curso**: entradas, descargas, votos totales, participación por día (gráfica), botón de
   «sellar ahora» (solo tras el cierre) y de re-sellar.
 - **Moderación**: denuncias, votos anómalos, entradas duplicadas por `etag`, cuentas.
@@ -1654,12 +1660,16 @@ Implementación (tarea 1.13, `TitleGate`):
 
 #### 3.8.2 Revelación del drop («¡NUEVO ESCENARIO!»)
 
-Primera visita a una semana nueva (`RF-DROP-11`, 6 s, saltable): la arena se oscurece, el anunciador
-dice «SEMANA 41», el vinilo-sol del sample cae girando en su sitio del menú, la aguja se posa
-(`drop.needle`) y suenan los primeros compases mientras el título del escenario se estampa y **BPM y
-tonalidad giran como una tragaperras** hasta fijarse. Termina en el menú con la tarjeta del escenario
-iluminada. En semana dorada, el vinilo lleva canto dorado (si se aprueba, §7) y ascuas. Sin movimiento:
-fundido del menú con los datos ya fijos.
+Primera visita a una semana nueva (`RF-DROP-11`, 6 s, saltable con Esc, Intro, «Saltar» o un clic): un
+velo opaco tapa la arena, el anunciador dice «SEMANA 41», el vinilo-sol cae girando al centro, el brazo se
+posa (`drop.needle`) y suenan los primeros compases mientras el título del escenario se estampa y **BPM y
+tonalidad giran como una tragaperras** hasta fijarse. Al pie, la pegatina *OTP.* propia (el velo tapa la
+barra, como en la ceremonia, §3.1) y «Saltar». Es un diálogo modal: la página de detrás queda `inert`, las
+flechas no llegan al menú y el foco vuelve a donde estaba. Al terminar, el menú. En semana dorada, el vinilo
+lleva canto dorado (si se aprueba, §7) y ascuas. Sin movimiento, la capa entera funde con los datos ya
+fijos (sin caída, giro ni estampado). Los datos de la revelación se fijan al empezar: si la semana se vuelve
+a pedir mientras dura (al cambiar la sesión, por ejemplo, con otra URL firmada del sample), la revelación
+sigue donde iba y no vuelve a empezar.
 
 #### 3.8.3 Menú principal (home)
 
@@ -1753,7 +1763,13 @@ crónica en una fila de la barra): la pantalla se desplaza (WCAG 1.4.4 y 1.4.10)
 siga siendo un menú, en esa composición estrecha con teclado y ratón **«ELIGE MODO» y sus placas van antes
 que la tarjeta de la semana**, que queda entera debajo.
 
-Otros estados: **calendario vacío** («El próximo drop está en el horno», reloj oculto, Jugar
+**Título largo.** El título del escenario baja primero la anchura y después el cuerpo, hasta 24 px en
+escritorio (16 en móvil), antes de partir en dos líneas equilibradas; con dos líneas, la tarjeta aprieta
+sus separaciones para seguir acabando donde la de un título corto (nunca bajo la barra).
+
+Otros estados: **cargando** (la semana aún no ha llegado: la tarjeta en esqueleto con `aria-busy` y
+«Cargando la semana…», Jugar deshabilitado con «Cargando…» y esa misma frase en la crónica; nunca el
+calendario vacío, que solo sale cuando la respuesta dice que no hay semana); **calendario vacío** («El próximo drop está en el horno», reloj oculto, Jugar
 deshabilitado con su motivo y, en la tarjeta de la semana, el formulario «Avísame del próximo drop»,
 §2.12.3); **visitante** (el HUD dice «1P · PULSA PARA UNIRTE»; Jugar y Jurado
 llevan a entrar); **semana en `voting`** (Jugar deshabilitado: «Envíos cerrados · votos hasta las 23:59»; la barra no
@@ -3500,7 +3516,7 @@ fórmula de Pearson sobre rangos. Casos de prueba: sin empates, `[1,2,3,4,5]` fr
 | `auth.security` | «Han cambiado la contraseña de tu cuenta» (y variantes) | Qué ha cambiado, cuándo, desde qué navegador y «No he sido yo» |
 | `auth.change_email` | «Confirma el cambio de email de tu cuenta» | La dirección nueva enmascarada, botón «Aprobar el cambio», qué hacer si no ha sido él |
 | `alert.confirm` | «Confirma tu alerta de drop» | Botón de confirmar (lleva a la página `/alerta`, que confirma con un `POST`), caducidad 7 días |
-| `admin.calendar_gap` | «Calendario vacío: falta el drop del <lunes>» | Qué lunes falta, cuántas horas quedan y el botón al calendario |
+| `admin.calendar_gap` | «Falta el drop del <lunes>» | Qué lunes falta, cuántas horas quedan y el botón al calendario |
 | `entry.receipt` | «Recibo: tu beat está en la batalla #41» | Ticket con nº de recibo, alias, título, metadatos, informe técnico (LUFS, ajuste, pico real, onda), hora de recepción, huella, botones (§2.12.1) |
 | `entry.failed` | «No hemos podido aceptar tu beat» | Motivo, qué hacer, enlace a `/subir` con la ficha conservada |
 | `entry.changed` | «Recibo actualizado: semana #41» / «Has retirado tu beat» | Recibo nuevo o confirmación de retirada (y aviso de votos perdidos) |
@@ -3551,6 +3567,9 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-10 | 0.6.47 | **Quinto pase del jurado de la Fase 3** (tarea 3.21). §3.8.2: los datos de la revelación se fijan al empezar (una nueva petición de la semana con otra URL firmada la hacía volver a empezar a mitad). §3.8.3: estado **cargando** (tarjeta en esqueleto, Jugar «Cargando…»), distinto del calendario vacío; el título largo baja hasta 24 px en escritorio antes de partir y la tarjeta aprieta sus filas para no pasar bajo la barra. §2.12.3: en «Cómo se juega» el formulario del aviso solo sale por encima de 960 px. |
+| 2026-10-10 | 0.6.46 | **Jurado visual de la Fase 3** (tarea 3.21). §3.8.2: la revelación lleva velo opaco, su propia pegatina *OTP.* y es modal (`inert`, foco de vuelta); el vinilo cae al centro (no a la tarjeta) y, sin movimiento, la capa entera funde con los datos fijos. §3.8.3: con el calendario vacío, el título de la tarjeta es «En el horno» (el display no pasa de 4 palabras, §3.2) y el rótulo dice cuándo cae el próximo drop o «Pronto»; el formulario de la alerta va en una fila en la tarjeta y en «Cómo se juega». |
+| 2026-10-09 | 0.6.45 | **Web de la Fase 3** (tareas 3.15–3.20): la home con la semana real, la ficha del drop con las bases, la revelación del drop (línea de tiempo `REVEAL_TIMELINE`, una vez por semana con `seen_flag` o `localStorage` sin sesión), la página `/alerta` (§2.12.3) y el modo denso del admin (§2.14, `ScreenPage wide`). El asunto de `admin.calendar_gap` pasa a «Falta el drop del <lunes>» (Anexo H) para caber entero en 50 caracteres. |
 | 2026-10-09 | 0.6.44 | **Cron, emails del drop, alerta sin cuenta y cuenta atrás** (tareas 3.12–3.14, §2.12, §4.10, §4.12, §4.19.5, Anexo H). La confirmación de la alerta pasa de `GET /api/subscribe/confirm?token=` a un `POST` desde la página `/alerta`, porque los escáneres de enlaces confirmarían solos. Nuevo email de servicio `admin.calendar_gap` (`RF-DROP-04`). `battle.drop` sale a todos hasta que llegue el Lunes combinado (Fase 6). Disparadores del `tick` concretados (Vercel Cron a las 06:00 UTC y `tick.yml` con `BB_TICK_URL` y `BB_CRON_SECRET`). Cuenta atrás con un codificador GIF propio. |
 | 2026-10-09 | 0.6.43 | **Servidor de semanas y samples** (tareas 3.3–3.11, §2.4, §4.8, §4.10, §4.11). Cambia: la descarga del sample es la API privada de Cloudinary (`private_download_url` con `attachment=true` y `expires_at`), porque una URL de entrega firmada no caduca (`RF-DROP-07`, §4.8.3). Los stems llevan `.zip` en el `public_id`. Se añaden el almacenamiento falso en disco (`BB_FAKE_STORAGE`, §4.8.6) y `FFMPEG_PATH`. En §4.10 se precisan las rutas de la semana, de la descarga, de lo visto y del admin. Los samples se miden en servidor desde esta fase. |
 | 2026-10-09 | 0.6.42 | **Calendario y fases** (tareas 3.1 y 3.2, §4.5, Anexo B): `calendar` y `phase` en `packages/rules`. Se añade al Anexo B la «hora loca» (`LAST_HOUR_MS`, 1 h, incluida la marca justa) y §2.4 precisa que el sample se descarga solo en `open`. El criterio de `RF-DROP-10` se precisa: con 59 min 59 s por delante, `00:00:59:59` en modo «última hora»; con 1 h y 1 s, `00:01:00:01` sin él. |

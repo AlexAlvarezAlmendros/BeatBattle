@@ -18,6 +18,10 @@
   width: min(100%, 34rem);
 }
 
+.frame.wide {
+  width: min(100%, 40rem);
+}
+
 .surface {
   --frame-fill: var(--bb-panel-veil);
   display: grid;

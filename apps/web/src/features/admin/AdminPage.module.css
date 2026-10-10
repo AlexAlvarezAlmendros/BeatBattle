@@ -45,6 +45,10 @@
   border: var(--bb-stroke-hair) solid var(--bb-line-strong);
 }
 
+.tableWrap:focus-visible {
+  outline: var(--bb-stroke) solid var(--bb-white);
+}
+
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -60,22 +64,37 @@
   white-space: nowrap;
 }
 
-.table th {
+/* El título del sample parte en dos líneas antes que empujar las acciones fuera de la tabla (1024 px). */
+.table .wrap {
+  min-width: 12rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.table thead th {
   color: var(--bb-text-2);
-  font-family: var(--bb-font-display);
+  font-family: var(--bb-font-ui);
   font-size: var(--bb-fs-xs);
   font-weight: var(--bb-weight-bold);
   letter-spacing: var(--bb-tracking-label);
   text-transform: uppercase;
 }
 
-.table tr[data-gap] td {
-  background: var(--bb-wine);
+.table tbody th {
+  font-weight: var(--bb-weight-medium);
 }
 
+/* Las cifras (número de semana, descargas, duración, sonoridad), en Oxanium (§3.9). */
+.num {
+  font-family: var(--bb-font-num);
+}
+
+/* El hueco: marca roja y rótulo rojo sobre el panel (un relleno granate pasaba del presupuesto, §3.2). */
 .gap {
-  color: var(--bb-white);
+  color: var(--bb-red);
   font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
   border-left: var(--bb-space-1) solid var(--bb-red);
   padding-left: var(--bb-space-2);
 }

@@ -135,6 +135,8 @@ export interface ModalProps {
   dismissible?: boolean
   /** Elemento que recibe el foco al abrir; por defecto, el propio diálogo (se lee el título). */
   initialFocus?: RefObject<HTMLElement | null>
+  /** Más ancho (40 rem): para un pie con dos acciones largas en una fila (las bases de la semana). */
+  wide?: boolean
 }
 
 /**
@@ -157,6 +159,7 @@ export function Modal({
   children,
   dismissible = true,
   initialFocus,
+  wide = false,
 }: ModalProps) {
   // Dónde estaba el foco antes de abrir (lo anota la capa justo antes de mover el foco al diálogo).
   const returnFocus = useRef<HTMLElement | null>(null)
@@ -201,6 +204,7 @@ export function Modal({
           footer={footer}
           dismissible={dismissible}
           initialFocus={initialFocus}
+          wide={wide}
         >
           {children}
         </ModalLayer>
@@ -221,6 +225,7 @@ function ModalLayer({
   children,
   dismissible,
   initialFocus,
+  wide,
 }: ModalLayerProps) {
   const reduced = useReducedMotion()
   const dialogRef = useRef<HTMLDivElement>(null)
@@ -304,7 +309,7 @@ function ModalLayer({
       data-modal-exiting={isPresent ? undefined : ''}
     >
       <motion.div
-        className={styles.frame}
+        className={wide ? `${styles.frame} ${styles.wide}` : styles.frame}
         initial={{ opacity: 0, x: offset }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: offset }}

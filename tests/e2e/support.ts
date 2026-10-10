@@ -63,7 +63,6 @@ export async function openGallery(page: Page, timeout = 30_000): Promise<void> {
 export const ROUTES = [
   { path: '/', heading: 'Beat Battle' },
   { path: '/dev/menu', heading: 'Beat Battle' },
-  { path: '/semana/2026-41', heading: 'Semana' },
   { path: '/semana/2026-41/resultados', heading: 'Resultados' },
   { path: '/semanas', heading: 'Semanas' },
   { path: '/e/0192f3a1', heading: 'Entrada' },

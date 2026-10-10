@@ -34,7 +34,7 @@ const BOUNDARY_SLACK_MS = 1000
  */
 export function HomePage() {
   const me = useSession((state) => state.me)
-  const { data } = useCurrentWeek()
+  const { data, isPending } = useCurrentWeek()
   const queryClient = useQueryClient()
   const [now, setNow] = useState(() => Date.now())
 
@@ -83,6 +83,7 @@ export function HomePage() {
     !seenLocally(live.slug)
   const reveal = unseen ? (
     <DropReveal
+      key={live.slug}
       week={{
         number: live.number,
         title: live.sample.title,
@@ -98,6 +99,7 @@ export function HomePage() {
   ) : null
   const model: MenuModel = {
     week,
+    loading: isPending,
     player: me ? playerOf(me) : null,
     season: data?.week ? (data.week.seasonId.split('-')[1] ?? null) : null,
     champion: null,
