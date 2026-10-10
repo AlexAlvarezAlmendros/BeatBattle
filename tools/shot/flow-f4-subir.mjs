@@ -53,8 +53,10 @@ const browser = await chromium.launch({
   channel: 'chrome',
   args: ['--ignore-gpu-blocklist', '--use-angle=vulkan', '--enable-features=Vulkan', '--disable-lcd-text'],
 })
+/** El alto de cada ancho de los que juzga el jurado (los reales: portátil bajo, tableta, móviles). */
+const HEIGHTS = { 1440: 900, 1366: 657, 1024: 768, 390: 844, 320: 568 }
 const ctx = await browser.newContext({
-  viewport: touch ? { width: Number(width), height: 844 } : { width: Number(width), height: 900 },
+  viewport: { width: Number(width), height: HEIGHTS[width] ?? (touch ? 844 : 900) },
   isMobile: touch,
   hasTouch: touch,
 })
