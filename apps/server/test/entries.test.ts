@@ -457,3 +457,27 @@ describe('la entrada: ficha pública, editar, sustituir y retirar (4.7)', () => 
     expect(again.json().data.receiptCode).toBe('BB-2026W42-0002')
   })
 })
+
+describe('la semana con lo de quien mira (4.8, §3.8.3)', () => {
+  const weekView = (cookie?: string) =>
+    t.app.inject({ method: 'GET', url: '/api/weeks/2026-w42', headers: cookie ? { cookie } : {} })
+
+  it('RNF-SEC-04: la semana dice cuántas entradas hay (dato de la semana) y a cada uno, la suya', async () => {
+    const { cookie } = await openWeek()
+    const own = (await create(cookie, (await upload(cookie)).intentId)).json().data
+    const mine = (await weekView(cookie)).json().data
+    expect(mine.entries).toBe(1)
+    expect(mine.viewer.entry).toEqual({ id: own.id, status: 'active', alias: own.alias })
+    const other = await producer('aina')
+    expect((await weekView(other.cookie)).json().data.viewer.entry).toBeNull()
+    const anonymous = (await weekView()).json().data
+    expect(anonymous).toMatchObject({ entries: 1, viewer: null })
+    // Una retirada no cuenta ni es «la suya».
+    await t.app.inject({
+      method: 'DELETE',
+      url: `/api/entries/${own.id}`,
+      headers: { cookie, origin: ORIGIN },
+    })
+    expect((await weekView(cookie)).json().data).toMatchObject({ entries: 0, viewer: { entry: null } })
+  })
+})

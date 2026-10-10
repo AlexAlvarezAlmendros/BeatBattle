@@ -38,6 +38,7 @@ const week: PublicWeek = {
     coverUrl: '/cover',
     streamUrl: '/stream',
   },
+  entries: 0,
   viewer: null,
 }
 
