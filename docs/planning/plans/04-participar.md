@@ -148,8 +148,8 @@ nunca pasa por la API (`RF-STO-01`) y nada de lo que el navegador declara sobre 
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 4.14 | `/subir`, la ranura «INSERTA TU BEAT»: arrastrar o elegir (con Intro), validación local con su frase (`entryFile.ts`), análisis en el worker (`analyze.ts`) con la onda dibujándose y BPM y tonalidad girando como una tragaperras hasta fijarse. Antes, comprobaciones previas: sesión, bases, fase y entrada existente | 🔄 En curso | 4.2 | §2.5, §3.8.5 · `RF-ENT-03`, `RF-ENT-06` |
-| 4.15 | La hoja del luchador: título, BPM y tonalidad prerrellenados, DAW con «otro», hasta 3 géneros, descripción, portada propia opcional (oculta en voto ciego, se avisa) y declaración. La ficha se conserva en `sessionStorage` si algo falla | 🔒 Bloqueado | 4.14 | §2.5, §3.8.5 · `RF-ENT-12` |
+| 4.14 | `/subir`, la ranura «INSERTA TU BEAT»: arrastrar o elegir (con Intro), validación local con su frase (`entryFile.ts`), análisis en el worker (`analyze.ts`) con la onda dibujándose y BPM y tonalidad girando como una tragaperras hasta fijarse. Antes, comprobaciones previas: sesión, bases, fase y entrada existente | ✅ Hecho | 4.2 | §2.5, §3.8.5 · `RF-ENT-03`, `RF-ENT-06` · **Hecho:** `UploadPage` con las comprobaciones previas (envíos cerrados, bases que se aceptan allí mismo, entrada ya subida) y `UploadSlot` (Intro con el foco en «Elegir archivo», arrastrar con brillo y una vibración, motivo en aviso de papel); `useEntryAnalysis` decodifica una vez (`analyzeDecoded`), dibuja la onda con el progreso y gira BPM y tonalidad. Recorrido en Chrome (`tools/shot/flow-f4-subir.mjs`): un WAV de 140 BPM en La menor da 140 y «La menor» (`RF-ENT-06`); capturas a 1440 y 390 en `evidence/f4/subir/`. Los sonidos de la ranura, con la 4.16 |
+| 4.15 | La hoja del luchador: título, BPM y tonalidad prerrellenados, DAW con «otro», hasta 3 géneros, descripción, portada propia opcional (oculta en voto ciego, se avisa) y declaración. La ficha se conserva en `sessionStorage` si algo falla | ⬜ Listo | 4.14 | §2.5, §3.8.5 · `RF-ENT-12` |
 | 4.16 | El medidor de súper: subida por trozos (`chunkedUpload.ts`) con bytes reales, velocidad, tiempo restante y «Cancelar [Esc]» (aborta el XHR); reintentos por trozo; registro de la entrada. Después, la celebración: anunciador «¡NUEVO BEAT EN LA BATALLA!», portada generativa con el alias («Así te verán hasta el domingo…»), «Ya estás en la batalla #41», con su variante sin movimiento | 🔒 Bloqueado | 4.6, 4.11, 4.15, 4.17 | §3.8.5, §4.7.4 · `RF-ENT-07`, `RF-ENT-12` |
 | 4.17 | Efectos `upload.hover`, `upload.progress`, `upload.done` y `ann.newbeat` como `SfxDef`, afinados en la tonalidad de la semana, con su equivalente visual y medidos *offline* | 🔄 En curso | — | §3.7.3, Anexo D · `RNF-A11Y-05` |
 | 4.18 | `/subir` en modo edición: «Editar mi entrada» (ficha), sustituir el audio (solo sin votos) y retirar con confirmación. En el menú, Jugar → «Editar mi entrada», con el cursor en Jurado | 🔒 Bloqueado | 4.7, 4.8, 4.16 | §2.5, §3.8.3 · `RF-ENT-02`, `RF-ENT-08/09` |
@@ -188,6 +188,7 @@ Hasta el cierre de envíos puede editar la ficha, sustituir el audio sin votos o
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-10 | 4.14 | `/subir`: comprobaciones previas, la ranura y el análisis local, mirado en Chrome. |
 | 2026-10-10 | 4.9 | Limpieza de las entradas en el `tick`: *intents* caducados, `processing` y huérfanos. Guía v0.6.51. |
 | 2026-10-10 | 4.8 | La semana pública cuenta sus entradas y dice a quien mira cuál es la suya; el menú pasa a «Editar mi entrada». |
 | 2026-10-10 | 4.7 | Ficha pública de la entrada con voto ciego, editar, sustituir el audio y retirar. |

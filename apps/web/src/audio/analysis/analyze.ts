@@ -111,10 +111,9 @@ function analyzeInWorker(audio: DecodedAudio, report: Report): Promise<AnalysisR
 
     w.addEventListener('message', onMessage)
     w.addEventListener('error', onError)
-    // El PCM se transfiere: sin copia.
-    w.postMessage({ id, pcm: audio.pcm, sampleRate: audio.sampleRate, duration: audio.duration }, [
-      audio.pcm.buffer,
-    ])
+    // Se transfiere una copia: el original queda para el plan B del hilo principal (y para quien lo pidió).
+    const pcm = audio.pcm.slice()
+    w.postMessage({ id, pcm, sampleRate: audio.sampleRate, duration: audio.duration }, [pcm.buffer])
   })
 }
 
@@ -134,18 +133,30 @@ async function onMainThread(audio: DecodedAudio, report: Report): Promise<Analys
   })
 }
 
-/** Analiza un fichero de audio. `onProgress` recibe `{ stage: 'decode' | 'bpm' | 'key' | 'done', pct }`. */
-export async function analyzeAudioFile(file: Blob, options: AnalyzeOptions = {}): Promise<AnalysisResult> {
+/**
+ * Analiza un audio ya decodificado (`decodeToMono`): en el worker o, si no lo hay o se cae, en el hilo
+ * principal. El progreso empieza en el 10 % (lo de antes es la decodificación). Para quien también necesita
+ * el PCM (la onda de `/subir`), sin decodificar dos veces.
+ */
+export async function analyzeDecoded(
+  audio: DecodedAudio,
+  options: AnalyzeOptions = {},
+): Promise<AnalysisResult> {
   const report: Report = (stage, pct) => options.onProgress?.({ stage, pct: Math.min(100, Math.round(pct)) })
-  report('decode', 2)
-  const audio = await decodeToMono(await file.arrayBuffer())
-  report('decode', 10)
   if (options.withoutWorker || typeof Worker === 'undefined') return onMainThread(audio, report)
   try {
     return await analyzeInWorker(audio, report)
   } catch (error) {
     if (error instanceof AudioAnalysisError && error.audioError) throw error
-    // Sin worker o se ha caído: el mismo motor en el hilo principal. El PCM se transfirió: se decodifica otra vez.
-    return onMainThread(await decodeToMono(await file.arrayBuffer()), report)
+    // Sin worker o se ha caído: el mismo motor en el hilo principal.
+    return onMainThread(audio, report)
   }
+}
+
+/** Analiza un fichero de audio. `onProgress` recibe `{ stage: 'decode' | 'bpm' | 'key' | 'done', pct }`. */
+export async function analyzeAudioFile(file: Blob, options: AnalyzeOptions = {}): Promise<AnalysisResult> {
+  options.onProgress?.({ stage: 'decode', pct: 2 })
+  const audio = await decodeToMono(await file.arrayBuffer())
+  options.onProgress?.({ stage: 'decode', pct: 10 })
+  return analyzeDecoded(audio, options)
 }

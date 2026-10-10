@@ -220,12 +220,41 @@
     },
     "upload": {
       "title": "Subir mi beat",
-      "summary": "Aquí irá la subida o la edición de tu entrada de la semana.",
+      "kicker": "Semana {number} · inscripción",
+      "summary": "Sube tu flip del sample de la semana y entra en la batalla.",
+      "closed": {
+        "summary": "Los envíos de esta semana están cerrados. El próximo drop cae el lunes.",
+        "week": "Ver la semana"
+      },
+      "inside": {
+        "summary": "Ya estás en la batalla esta semana como {alias}. Puedes editar tu entrada hasta el cierre de envíos.",
+        "view": "Ver mi entrada"
+      },
+      "rules": {
+        "summary": "Antes de subir, lee y acepta las bases de la semana {number}: son cinco puntos.",
+        "open": "Leer las bases",
+        "submit": "Aceptar las bases",
+        "error": "No hemos podido guardar que aceptas las bases. Vuelve a intentarlo."
+      },
+      "slot": {
+        "title": "Inserta tu beat",
+        "hint": "WAV, AIFF, FLAC o MP3 · de 30 s a 4 min · hasta 100 MB",
+        "pick": "Elegir archivo",
+        "key": "Intro",
+        "drop": "o arrástralo aquí",
+        "change": "Cambiar archivo"
+      },
+      "analysis": {
+        "busy": "Analizando el beat… {pct} %",
+        "done": "BPM y tonalidad sugeridos: los puedes cambiar en la ficha.",
+        "noSuggestion": "No hemos podido sugerir BPM o tonalidad: escríbelos en la ficha."
+      },
       "problems": {
         "unsupportedFormat": "Eso no suena a audio. Prueba con WAV, AIFF, FLAC o MP3.",
         "fileTooLarge": "Tu archivo pesa {size} MB. El máximo son 100 MB.",
         "durationTooLong": "Tu beat dura {duration}. El máximo son 4 minutos.",
-        "durationTooShort": "Tu beat dura {duration}. El mínimo son 30 segundos."
+        "durationTooShort": "Tu beat dura {duration}. El mínimo son 30 segundos.",
+        "unreadable": "No hemos podido leer ese audio. Comprueba que el archivo no esté dañado."
       }
     },
     "profile": {
