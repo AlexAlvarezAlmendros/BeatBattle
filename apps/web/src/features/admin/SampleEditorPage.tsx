@@ -86,16 +86,27 @@ function UploadSlot({
 }) {
   const input = useRef<HTMLInputElement>(null)
   const id = useId()
+  // El progreso se anuncia por cuartos (0, 25, 50, 75 y 100 %), no en cada evento de la subida.
+  const announced =
+    state.status === 'uploading'
+      ? t('admin.sample.uploading', { percent: Math.floor(state.fraction * 4) * 25 })
+      : state.status === 'done'
+        ? t('admin.sample.uploaded')
+        : state.status === 'error'
+          ? t('admin.sample.uploadError')
+          : ''
   return (
     <div className={styles.slot}>
-      <label htmlFor={id} className={styles.slotLabel}>
+      <span id={`${id}-label`} className={styles.slotLabel}>
         {label}
-      </label>
+      </span>
+      {/* El input real queda fuera del orden de tabulación: lo abre el botón (una sola parada de foco). */}
       <input
         ref={input}
-        id={id}
         className="sr-only"
         type="file"
+        tabIndex={-1}
+        aria-hidden="true"
         accept={ACCEPT[part]}
         data-part={part}
         onChange={(event) => {
@@ -107,16 +118,20 @@ function UploadSlot({
       <Button
         size="sm"
         variant="outline"
+        id={`${id}-button`}
         onClick={() => input.current?.click()}
-        aria-describedby={`${id}-state`}
+        aria-labelledby={`${id}-button ${id}-label`}
       >
         {state.status === 'done' ? t('admin.sample.replace') : t('admin.sample.choose')}
       </Button>
-      <span id={`${id}-state`} className={styles.slotState} aria-live="polite">
+      <span className={styles.slotState} aria-hidden="true">
         {state.status === 'uploading' &&
           t('admin.sample.uploading', { percent: Math.round(state.fraction * 100) })}
         {state.status === 'done' && t('admin.sample.uploaded')}
         {state.status === 'error' && t('admin.sample.uploadError')}
+      </span>
+      <span className="sr-only" role="status">
+        {announced}
       </span>
     </div>
   )
@@ -361,44 +376,110 @@ function spread(durationMs: number): Chop[] {
   }))
 }
 
-const toSeconds = (ms: number) => (ms / 1000).toFixed(2)
-const fromSeconds = (text: string) => Math.round(Number(text.replace(',', '.')) * 1000)
+/** Segundos con coma, como se escriben en castellano («2,48»). */
+const toSeconds = (ms: number) => (ms / 1000).toFixed(2).replace('.', ',')
+/** Segundos escritos («2,5», «2.50») a ms, o `null` si no es un número. */
+const fromSeconds = (text: string): number | null => {
+  const value = Number(text.trim().replace(',', '.'))
+  return text.trim() !== '' && Number.isFinite(value) && value >= 0 ? Math.round(value * 1000) : null
+}
+
+type Draft = { start: string; end: string }
+const draftsOf = (chops: readonly Chop[]): Draft[] =>
+  chops.map((chop) => ({ start: toSeconds(chop.startMs), end: toSeconds(chop.endMs) }))
 
 /**
  * Editor de los 8 *chops* (`RF-ADM-01`, §3.7.6): la onda medida con las 8 regiones encima; clic en la onda
- * fija el inicio del chop elegido y Mayús+clic, su final. Con el teclado, los campos de cada chop (en
- * segundos). «Escuchar» reproduce el trozo con el MP3 de escucha.
+ * fija el inicio del chop elegido y Mayús+clic, su final. Con el teclado, los dos campos de cada chop (en
+ * segundos): guardan lo que se escribe tal cual y lo convierten al salir del campo (antes, el campo
+ * reescribía «3» como «3.00» en cada tecla y no se podía editar). «Escuchar» reproduce el trozo.
  */
 function ChopsEditor({ sample, onSaved }: { sample: AdminSample; onSaved: () => void }) {
-  const [chops, setChops] = useState<Chop[]>(
-    sample.chops.length === CHOPS_COUNT ? sample.chops : spread(sample.durationMs),
-  )
+  const initial = sample.chops.length === CHOPS_COUNT ? sample.chops : spread(sample.durationMs)
+  const [chops, setChops] = useState<Chop[]>(initial)
+  const [drafts, setDrafts] = useState<Draft[]>(() => draftsOf(initial))
   const [selected, setSelected] = useState(0)
+  const [playing, setPlaying] = useState<number | null>(null)
   const [message, setMessage] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null)
   const [busy, setBusy] = useState(false)
   const player = useRef<HTMLAudioElement | null>(null)
   const peaks = decodePeaks(sample.peaks)
   const seconds = sample.durationMs / 1000
-  const valid = chops.every(
-    (chop) => chop.startMs >= 0 && chop.endMs > chop.startMs && chop.endMs <= sample.durationMs,
-  )
+  /** Campos con algo que no es un número (`2-start`, `5-end`): se dice en su fila, por campo. */
+  const [typos, setTypos] = useState<Record<string, boolean>>({})
+  const listRef = useRef<HTMLDivElement>(null)
+  const ids = useId()
+  /** El motivo por el que un chop no vale, o `null`. */
+  const problemOf = (chop: Chop, index: number): string | null =>
+    typos[`${index}-start`] || typos[`${index}-end`]
+      ? t('admin.chops.problemNumber')
+      : chop.endMs <= chop.startMs
+        ? t('admin.chops.problemOrder')
+        : chop.endMs > sample.durationMs
+          ? t('admin.chops.problemEnd')
+          : null
+  const invalid = (chop: Chop, index: number) => problemOf(chop, index) !== null
 
-  const setChop = (index: number, patch: Partial<Chop>) =>
+  const replace = (next: Chop[]) => {
+    setChops(next)
+    setDrafts(draftsOf(next))
+  }
+  /** Cambia un chop y solo los borradores de los campos que cambian (lo que se escribe en otra fila se queda). */
+  const setChop = (index: number, patch: Partial<Chop>) => {
     setChops((current) => current.map((chop, i) => (i === index ? { ...chop, ...patch } : chop)))
+    setDrafts((current) =>
+      current.map((draft, i) =>
+        i === index
+          ? {
+              start: patch.startMs === undefined ? draft.start : toSeconds(patch.startMs),
+              end: patch.endMs === undefined ? draft.end : toSeconds(patch.endMs),
+            }
+          : draft,
+      ),
+    )
+    setTypos((current) => ({
+      ...current,
+      ...(patch.startMs === undefined ? {} : { [`${index}-start`]: false }),
+      ...(patch.endMs === undefined ? {} : { [`${index}-end`]: false }),
+    }))
+  }
+  const commit = (index: number, field: 'start' | 'end') => {
+    const ms = fromSeconds(drafts[index]?.[field] ?? '')
+    // Lo que no es un número no se aplica, pero se dice en la fila (antes se deshacía en silencio).
+    setTypos((current) => ({ ...current, [`${index}-${field}`]: ms === null }))
+    if (ms === null) return
+    setChop(index, field === 'start' ? { startMs: ms } : { endMs: ms })
+  }
 
-  const play = (chop: Chop) => {
+  const play = (index: number) => {
+    const chop = chops[index]
+    if (!chop) return
     player.current?.pause()
     const audio = new Audio(sample.streamUrl)
     player.current = audio
     audio.currentTime = chop.startMs / 1000
-    void audio.play().catch(() => {})
-    window.setTimeout(() => audio.pause(), chop.endMs - chop.startMs)
+    setPlaying(index)
+    void audio.play().catch(() => setPlaying(null))
+    window.setTimeout(() => {
+      audio.pause()
+      setPlaying((current) => (current === index ? null : current))
+    }, chop.endMs - chop.startMs)
   }
 
   const save = async () => {
     setMessage(null)
-    if (!valid) {
-      setMessage({ kind: 'error', text: t('admin.chops.invalid') })
+    const failing = chops
+      .map((chop, index) => (invalid(chop, index) ? index : -1))
+      .filter((index) => index >= 0)
+    if (failing.length > 0) {
+      setMessage({
+        kind: 'error',
+        text: t('admin.chops.invalidList', {
+          count: failing.length,
+          list: failing.map((index) => index + 1).join(', '),
+        }),
+      })
+      listRef.current?.querySelector<HTMLInputElement>(`[data-chop="${failing[0]}"] input`)?.focus()
       return
     }
     setBusy(true)
@@ -441,11 +522,27 @@ function ChopsEditor({ sample, onSaved }: { sample: AdminSample; onSaved: () => 
             {index + 1}
           </span>
         ))}
+        <span className={styles.waveLength}>{formatDuration(seconds)}</span>
       </div>
-      <ol className={styles.chopList}>
+      <div className={styles.chopHead} aria-hidden="true">
+        <span>{t('admin.chops.column.chop')}</span>
+        <span>{t('admin.chops.start')}</span>
+        <span>{t('admin.chops.end')}</span>
+        <span>{t('admin.chops.column.length')}</span>
+        <span />
+      </div>
+      <div ref={listRef} className={styles.chopList}>
         {chops.map((chop, index) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: los 8 chops son posiciones fijas
-          <li key={index} className={styles.chopRow} data-selected={index === selected || undefined}>
+          <fieldset
+            // biome-ignore lint/suspicious/noArrayIndexKey: los 8 chops son posiciones fijas
+            key={index}
+            className={styles.chopRow}
+            data-chop={index}
+            data-selected={index === selected || undefined}
+            data-invalid={invalid(chop, index) || undefined}
+            aria-describedby={invalid(chop, index) ? `${ids}-problem-${index}` : undefined}
+          >
+            <legend className="sr-only">{t('admin.chops.chop', { index: index + 1 })}</legend>
             <Button
               size="sm"
               variant={index === selected ? 'white' : 'outline'}
@@ -454,39 +551,59 @@ function ChopsEditor({ sample, onSaved }: { sample: AdminSample; onSaved: () => 
             >
               {t('admin.chops.chop', { index: index + 1 })}
             </Button>
-            <TextField
-              label={t('admin.chops.start')}
-              inputMode="decimal"
-              value={toSeconds(chop.startMs)}
-              onFocus={() => setSelected(index)}
-              onChange={(e) => setChop(index, { startMs: fromSeconds(e.target.value) })}
-            />
-            <TextField
-              label={t('admin.chops.end')}
-              inputMode="decimal"
-              value={toSeconds(chop.endMs)}
-              onFocus={() => setSelected(index)}
-              onChange={(e) => setChop(index, { endMs: fromSeconds(e.target.value) })}
-            />
+            {(['start', 'end'] as const).map((field) => (
+              <label key={field} className={styles.chopField}>
+                <span className="sr-only">
+                  {t(field === 'start' ? 'admin.chops.start' : 'admin.chops.end')}
+                </span>
+                <input
+                  className={styles.chopInput}
+                  type="text"
+                  inputMode="decimal"
+                  value={drafts[index]?.[field] ?? ''}
+                  aria-invalid={invalid(chop, index) || undefined}
+                  aria-describedby={invalid(chop, index) ? `${ids}-problem-${index}` : undefined}
+                  onFocus={() => setSelected(index)}
+                  onChange={(event) =>
+                    setDrafts((current) =>
+                      current.map((draft, i) =>
+                        i === index ? { ...draft, [field]: event.target.value } : draft,
+                      ),
+                    )
+                  }
+                  onBlur={() => commit(index, field)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') commit(index, field)
+                  }}
+                />
+              </label>
+            ))}
+            <span className={styles.chopLength}>{toSeconds(Math.max(0, chop.endMs - chop.startMs))}</span>
             <Button
               size="sm"
               variant="outline"
               iconOnly
-              icon="triangleRight"
+              icon={playing === index ? 'pause' : 'triangleRight'}
               aria-label={t('admin.chops.play', { index: index + 1 })}
-              onClick={() => play(chop)}
+              aria-pressed={playing === index}
+              onClick={() => play(index)}
             />
-          </li>
+            {invalid(chop, index) && (
+              <p id={`${ids}-problem-${index}`} className={styles.chopProblem}>
+                <span aria-hidden="true">! </span>
+                {problemOf(chop, index)}
+              </p>
+            )}
+          </fieldset>
         ))}
-      </ol>
-      <p className={styles.note}>{formatDuration(seconds)}</p>
+      </div>
       {message?.kind === 'error' && <PaperNotice live>{message.text}</PaperNotice>}
       {message?.kind === 'ok' && <Done>{message.text}</Done>}
       <div className={styles.actions}>
         <Button variant="cta" loading={busy} onClick={() => void save()}>
           {t('admin.chops.save')}
         </Button>
-        <Button variant="outline" onClick={() => setChops(spread(sample.durationMs))}>
+        <Button variant="outline" onClick={() => replace(spread(sample.durationMs))}>
           {t('admin.chops.spread')}
         </Button>
       </div>

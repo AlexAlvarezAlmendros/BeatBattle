@@ -106,6 +106,10 @@ describe('i18n: es.json', () => {
     }
   })
 
+  it('§3.2: las tonalidades van en palabras, sin ♯ ni ♭ (ninguna de las tres familias los trae)', () => {
+    for (const [key, value] of leaves) expect(String(value), key).not.toMatch(/[♯♭]/)
+  })
+
   it('las claves van en camelCase y el guion bajo solo marca plurales con su _other', () => {
     for (const [key] of leaves) {
       for (const segment of key.split('.')) {

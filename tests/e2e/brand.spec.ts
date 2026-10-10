@@ -113,7 +113,6 @@ const STAGE_SCREENS = [
   { path: '/', heading: 'Beat Battle', viewport: { width: 1440, height: 900 } },
   { path: '/dev/menu', heading: 'Beat Battle', viewport: { width: 1440, height: 900 } },
   { path: '/dev/menu', heading: 'Beat Battle', viewport: { width: 390, height: 844 } },
-  { path: '/semana/2026-41', heading: 'Semana', viewport: { width: 1440, height: 900 } },
   { path: '/jurado', heading: 'Modo Jurado', viewport: { width: 1440, height: 900 } },
   { path: '/como-funciona', heading: 'Cómo se juega', viewport: { width: 1440, height: 900 } },
 ]

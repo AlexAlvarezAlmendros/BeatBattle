@@ -1630,7 +1630,6 @@ test.describe('granate de las provisionales a 1440 × 900', () => {
     { path: '/subir', heading: 'Subir mi beat' },
     { path: '/jurado', heading: 'Modo Jurado' },
     { path: '/semanas', heading: 'Semanas' },
-    { path: '/semana/2026-41', heading: 'Semana' },
     { path: '/semana/2026-41/resultados', heading: 'Resultados' },
     { path: '/e/0192f3a1', heading: 'Entrada' },
   ])

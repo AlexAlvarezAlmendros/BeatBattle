@@ -105,8 +105,7 @@ export const battleDrop: EmailTemplate<BattleDropPayload> = {
     musicalKey: 'Dm',
     genre: 'Boom Bap',
     challenge: 'Usa solo el primer compás',
-    coverUrl:
-      'https://res.cloudinary.com/demo/image/upload/c_fill,g_auto,h_512,w_512/f_auto,q_auto/beatbattle-dev/samples/ejemplo/cover',
+    coverUrl: 'https://res.cloudinary.com/demo/image/upload/c_fill,g_auto,h_512,w_512/f_auto,q_auto/sample',
     closesText: 'domingo 11 de octubre a las 20:00',
     subscriber: true,
   },

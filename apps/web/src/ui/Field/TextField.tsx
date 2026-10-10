@@ -14,6 +14,8 @@ export interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElemen
   revealable?: boolean
   /** Algo debajo de la ayuda (el medidor de fortaleza de la contraseña). */
   below?: ReactNode
+  /** El rótulo solo para el lector (un formulario compacto cuyo título ya dice qué es). */
+  labelHidden?: boolean
   ref?: Ref<HTMLInputElement>
 }
 
@@ -29,6 +31,7 @@ export function TextField({
   error,
   revealable = false,
   below,
+  labelHidden = false,
   className,
   type = 'text',
   ref,
@@ -41,7 +44,7 @@ export function TextField({
   const describedBy = [errorId, hintId, rest['aria-describedby']].filter(Boolean).join(' ') || undefined
   return (
     <div className={cx(styles.field, className)} data-invalid={error ? '' : undefined}>
-      <label className={styles.label} htmlFor={id}>
+      <label className={cx(styles.label, labelHidden && 'sr-only')} htmlFor={id}>
         {label}
       </label>
       <div className={styles.control}>

@@ -124,8 +124,8 @@ todo lo demás.
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
 | 3.19 | Datos de prueba: `tools/seed` con 3 samples y 3 semanas sobre el almacenamiento falso | ✅ Hecho | 3.7 | — · **Hecho:** `pnpm --filter @beatbattle/server seed:weeks` (con `BB_FAKE_STORAGE`): tres samples sintéticos (bucle de acordes con bombo, portada PNG de 1024 px generada) medidos con ffmpeg y tres semanas seguidas desde la de hoy (o `--from=`). |
-| 3.20 | E2E del hito con el reloj simulado: el admin programa 3 semanas; la home cambia de semana en la frontera; la descarga exige las bases; sale `battle.drop` (también al suscriptor sin cuenta, tras confirmar) | ⬜ Listo | 3.12–3.19 | §5 · hito |
-| 3.21 | Jurado visual de tres lentes sobre la home viva, la ficha, la revelación, el modal de las bases y el panel de admin | ⬜ Listo | 3.15–3.18 | `RD-VIS-02` (e) |
+| 3.20 | E2E del hito con el reloj simulado: el admin programa 3 semanas; la home cambia de semana en la frontera; la descarga exige las bases; sale `battle.drop` (también al suscriptor sin cuenta, tras confirmar) | ✅ Hecho | 3.12–3.19 | §5 · hito · **Hecho:** `tests/e2e/weeks.spec.ts` con el reloj simulado (`page.clock` en el navegador y `x-bb-test-now` en cada `/api` por una ruta de Playwright), semanas de marzo de 2031: el admin sube un sample por el panel y guarda sus 8 chops (`RF-ADM-01`), sube dos más por la API con la firma y programa las 3 semanas por el formulario (la del cambio de hora, 167 h, `RF-ADM-02`/`RF-DROP-05`); un visitante pide la alerta en la home y la confirma en `/alerta`; la home cambia sola de semana en la frontera y la revelación sale una vez (se salta con Esc y no vuelve al recargar, `RF-DROP-11`); un productor verificado descarga tras aceptar las bases (`RF-DROP-06`); el `tick` del lunes a las 08:00 manda `battle.drop` al productor y al suscriptor (`RF-NOTIF-09`). Otro test: con 59 min 59 s, `00:00:59:59` y «hora loca»; con 1 h y 1 s, sin ella (`RF-DROP-10`). La API de los E2E arranca con `BB_FAKE_STORAGE` y `CRON_SECRET`; `POST /api/test/role` da el rol de admin (solo en test). |
+| 3.21 | Jurado visual de tres lentes sobre la home viva, la ficha, la revelación, el modal de las bases y el panel de admin | 🔄 En curso | 3.15–3.18 | `RD-VIS-02` (e) · Acta en `docs/planning/evidence/f3/jurado/README.md`. Marca ✅ y accesibilidad ✅ al tercer pase; juego ✅ al sexto, **con la excepción de la n.º 1** (el menú no cabe a 1024 × 768, viene de la F0): queda 🔄 hasta que el usuario dé su conformidad en el acta o pida arreglarla aquí. Todas las altas y medias propias de la fase, corregidas y verificadas (guía v0.6.43 → v0.6.47); las bajas abiertas, con su motivo en el acta. |
 | 3.22 | Cierre de la fase: cobertura de ids, hito y roadmap | ⬜ Listo | 3.20, 3.21 | — |
 
 ---
@@ -152,6 +152,7 @@ El lunes sale el email del drop, también a quien solo dejó su email.
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-10 | 3.20, 3.21 | E2E del hito en verde. Jurado de tres lentes en seis pases: marca y accesibilidad ✅, juego ✅ con la excepción n.º 1 pendiente de la conformidad del usuario. Guía v0.6.47. |
 | 2026-10-09 | 3.18 | Panel de admin con calendario, samples y chops, recorrido en el navegador. |
 | 2026-10-09 | 3.16, 3.17 | Ficha del drop con bases y descarga, y revelación del drop; recorridos en el navegador. |
 | 2026-10-09 | 3.15, 3.19 | Home viva, alerta sin cuenta en la web y *seed* de semanas; mirado en el navegador. |

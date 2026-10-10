@@ -1,5 +1,7 @@
 /*
- * Revelación del drop (§3.8.2): capa a toda la pantalla sobre el menú. Los tiempos de cada paso viven en
+ * Revelación del drop (§3.8.2): capa a toda la pantalla sobre el menú, con velo opaco (la arena de detrás no
+ * compite con el anunciador ni con el título, jurado de la 3.21). Todo va en una columna centrada lejos del
+ * HUD; al pie, la firma propia y «Saltar», dentro del medianil. Los tiempos de cada paso viven en
  * `REVEAL_TIMELINE` (la línea de tiempo de la ceremonia, §3.6); aquí, solo cómo entra cada pieza.
  */
 .reveal {
@@ -7,10 +9,8 @@
   inset: 0;
   z-index: var(--bb-z-ceremony);
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto auto;
-  justify-items: center;
-  gap: var(--bb-space-4);
-  padding: var(--bb-space-10) var(--bb-space-6) var(--bb-space-8);
+  grid-template-rows: minmax(0, 1fr) auto;
+  padding: var(--bb-space-6) var(--bb-gutter) var(--bb-space-5);
   cursor: pointer;
 }
 
@@ -18,17 +18,25 @@
   position: absolute;
   inset: 0;
   background: var(--bb-black);
-  opacity: 0.88;
   animation: bb-reveal-fade var(--bb-dur-slow) var(--bb-ease-out) both;
 }
 
-.announcer {
+.stack {
   position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  justify-items: center;
+  align-content: center;
+  gap: var(--bb-space-5);
+  min-height: 0;
+}
+
+.announcerSlot {
   width: min(100%, 40rem);
+  min-height: var(--bb-space-16);
 }
 
 .stageArea {
-  position: relative;
   display: grid;
   place-items: center;
   width: 100%;
@@ -37,7 +45,7 @@
 
 .vinylDrop {
   position: relative;
-  width: min(60vmin, 26rem);
+  width: min(56vmin, 28rem);
   aspect-ratio: 1;
   animation: bb-reveal-drop var(--bb-dur-reward) var(--bb-ease-out) both;
 }
@@ -46,13 +54,36 @@
   width: 100%;
 }
 
-/* La aguja: un brazo blanco que se posa sobre el borde del vinilo. */
+/*
+ * El brazo del tocadiscos: un pivote redondo fuera del disco y la aguja que se posa sobre el borde (antes
+ * era una barra suelta que se leía como un fallo de pintado).
+ */
+.arm {
+  position: absolute;
+  top: -4%;
+  right: -10%;
+  width: 52%;
+  height: 52%;
+  pointer-events: none;
+}
+
+.pivot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: var(--bb-space-8);
+  aspect-ratio: 1;
+  border: var(--bb-stroke) solid var(--bb-white);
+  border-radius: 50%;
+  background: var(--bb-black);
+}
+
 .needle {
   position: absolute;
-  top: 6%;
-  right: -4%;
-  width: 40%;
-  height: var(--bb-space-2);
+  top: calc(var(--bb-space-8) / 2 - var(--bb-stroke));
+  right: calc(var(--bb-space-8) / 2);
+  width: 90%;
+  height: calc(var(--bb-stroke) * 2);
   background: var(--bb-white);
   transform-origin: 100% 50%;
   /* Apoyada: el ángulo de la diagonal más el giro de un sello. */
@@ -61,19 +92,22 @@
 }
 
 .titleBlock {
-  position: relative;
   display: grid;
   justify-items: center;
   gap: var(--bb-space-3);
-  width: min(100%, 48rem);
+  width: min(100%, 64rem);
+  min-height: calc(var(--bb-space-16) + var(--bb-space-12));
   text-align: center;
 }
 
 .title {
+  max-width: 100%;
   color: var(--bb-white);
   font-size: var(--bb-fs-3xl);
-  line-height: var(--bb-leading-display);
+  /* Partido, cada línea deja sitio a la sombra dura de la de arriba (§3.8.14, como la cabeza de móvil). */
+  line-height: calc(1em + var(--bb-space-1));
   text-shadow: var(--bb-shadow-hard);
+  text-wrap: balance;
   animation: bb-reveal-stamp var(--bb-dur-slam) var(--bb-ease-snap) both;
 }
 
@@ -84,31 +118,45 @@
   gap: var(--bb-space-3);
 }
 
+/* La tragaperras, a tamaño de momento de juego (no el chip pequeño de la tarjeta). */
 .chip {
-  min-width: 9ch;
-  padding: var(--bb-space-2) var(--bb-space-4);
-  border: var(--bb-stroke) solid var(--bb-white);
-  background: var(--bb-black);
-  color: var(--bb-text-2);
-  font-family: var(--bb-font-num);
-  font-size: var(--bb-fs-lg);
-  text-align: center;
+  font-size: var(--bb-fs-xl);
 }
 
-.chip b {
-  color: var(--bb-white);
+.chip[data-spinning] {
+  --frame-border: var(--bb-red);
 }
 
-.chip[data-spinning] b {
-  color: var(--bb-red);
-}
-
-.skip {
+.foot {
   position: relative;
-  justify-self: end;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bb-space-4);
 }
 
-/* Sin movimiento (Anexo E): solo un fundido, con los datos ya fijos. */
+.signature {
+  display: inline-flex;
+}
+
+/* Contraste alto: el brazo, con el color del texto del sistema (blanco sobre blanco desaparecía). */
+@media (forced-colors: active) {
+  .needle {
+    background: CanvasText;
+  }
+
+  .pivot {
+    border-color: CanvasText;
+    background: Canvas;
+  }
+}
+
+/* Sin movimiento (Anexo E): la capa entera funde a la vez, con los datos ya fijos. */
+.reveal[data-reduced] {
+  animation: bb-reveal-fade var(--bb-dur-base) var(--bb-ease-out) both;
+}
+
+.reveal[data-reduced] .shade,
 .reveal[data-reduced] .vinylDrop,
 .reveal[data-reduced] .needle,
 .reveal[data-reduced] .title {
@@ -143,6 +191,15 @@
 }
 
 @media (max-width: 720px) {
+  .vinylDrop {
+    width: min(44vw, 12rem);
+  }
+
+  /* Al pie, la fila de «Saltar»: el título y los chips le dejan su alto (no se montan con la tonalidad larga). */
+  .titleBlock {
+    margin-bottom: var(--bb-space-4);
+  }
+
   .title {
     font-size: var(--bb-fs-2xl);
   }

@@ -149,13 +149,6 @@
   color: var(--bb-red);
 }
 
-.alertText {
-  max-width: 60ch;
-  color: var(--bb-text-2);
-  font-size: var(--bb-fs-sm);
-  line-height: var(--bb-leading-body);
-}
-
 .ruleList {
   display: grid;
   border-top: var(--bb-stroke-hair) solid var(--bb-line);
@@ -290,6 +283,16 @@
 @media (hover: none), (pointer: coarse) {
   .keys,
   .option :global([data-key]) {
+    display: none;
+  }
+}
+
+/*
+ * «Avísame del próximo drop» (§2.12.3): en dos columnas. En una (≤ 960 px) la pantalla dejaba de caber
+ * entre el HUD y la barra; ahí el formulario está en la tarjeta de la home.
+ */
+@media (max-width: 960px) {
+  .alert {
     display: none;
   }
 }

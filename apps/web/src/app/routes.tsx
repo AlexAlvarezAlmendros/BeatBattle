@@ -108,7 +108,8 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'semana/:slug',
-              handle: handle('public', interior('week', 'pages.week.title')),
+              // El vinilo-sol gira sin fin y el reloj late en la última hora: la barra lleva la pausa (WCAG 2.2.2).
+              handle: handle('public', { ...interior('week', 'pages.week.title'), loops: true }),
               lazy: async () => {
                 const m = await import('../features/week/WeekPage')
                 return { Component: m.WeekPage, loader: m.weekLoader }
@@ -282,7 +283,8 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               path: 'admin',
               handle: handle(
                 'admin',
-                simpleScreen({ kicker: PLATE_KICKERS.admin, title: 'pages.admin.title' }),
+                // Modo denso sin pieza: sin rayos detrás de las tablas (§3.8.14, `RD-VIS-05`).
+                { ...simpleScreen({ kicker: PLATE_KICKERS.admin, title: 'pages.admin.title' }), rays: false },
               ),
               // Las secciones del panel (samples, semanas, moderación, campañas, uso) se añaden aquí.
               children: [

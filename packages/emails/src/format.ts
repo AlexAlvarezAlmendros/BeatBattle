@@ -15,20 +15,20 @@ export const cardNumber = (n: number) => `#${String(n).padStart(4, '0')}`
 
 const TONIC_NAMES: Record<string, string> = {
   C: 'Do',
-  'C#': 'Do♯',
+  'C#': 'Do sostenido',
   D: 'Re',
-  'D#': 'Re♯',
+  'D#': 'Re sostenido',
   E: 'Mi',
   F: 'Fa',
-  'F#': 'Fa♯',
+  'F#': 'Fa sostenido',
   G: 'Sol',
-  'G#': 'Sol♯',
+  'G#': 'Sol sostenido',
   A: 'La',
-  'A#': 'La♯',
+  'A#': 'La sostenido',
   B: 'Si',
 }
 
-/** Tonalidad en palabras («Dm» → «Re menor», «F#» → «Fa♯ mayor»), como la dice la interfaz (§3.2). */
+/** Tonalidad en palabras («Dm» → «Re menor», «F#» → «Fa sostenido mayor»), como la dice la interfaz (§3.2). */
 export function musicalKeyName(key: string): string {
   const minor = key.endsWith('m')
   const tonic = TONIC_NAMES[minor ? key.slice(0, -1) : key] ?? key

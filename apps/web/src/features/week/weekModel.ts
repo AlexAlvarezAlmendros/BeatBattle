@@ -66,7 +66,8 @@ export function rangeText(week: Pick<PublicWeek, 'startsAt' | 'submitEndsAt' | '
   return t('weekTime.range', {
     from: sameMonth ? from : `${from} ${month(week.startsAt)}`,
     to,
-    code: week.label,
+    // Sin corte tras el guion («2026-» / «W41» a 320 px): unión de palabras invisible (U+2060).
+    code: week.label.replace('-', '-\u2060'),
   })
 }
 
@@ -95,7 +96,8 @@ export function menuWeekOf(week: PublicWeek, now: number, entries = 0): MenuWeek
     title: week.sample.title,
     credits: week.sample.credits,
     range: rangeText(week),
-    code: week.label,
+    // Sin corte tras el guion («2026-» / «W41» a 320 px): unión de palabras invisible (U+2060).
+    code: week.label.replace('-', '-\u2060'),
     bpm: week.sample.bpm ?? 0,
     musicalKey: week.sample.musicalKey ? musicalKeyName(week.sample.musicalKey) : '',
     durationSeconds: week.sample.durationMs / 1000,
