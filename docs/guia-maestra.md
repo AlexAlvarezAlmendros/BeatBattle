@@ -698,11 +698,12 @@ y la medición (§4.8.4) y tiene forma de **ticket** (§3.8.12):
   con aviso si supera −0,1 dBTP («tu master clipa») y forma de onda en imagen.
 - Hora exacta de recepción (Madrid) y huella abreviada del fichero (`etag`): sirve como prueba de
   entrega en caso de duda.
-- Botones: escuchar mi entrada, editar la ficha (hasta el domingo a las 20:00), compartir mi tarjeta.
+- Botones: escuchar mi entrada, editar la ficha (hasta el domingo a las 20:00), compartir mi tarjeta (este,
+  con la tarjeta para compartir de §4.7.7, en la Fase 5).
 - Recordatorio corto de las bases (voto ciego: «tu título no debe delatarte»).
 
 Si se sustituye el audio o se retira la entrada, `entry.changed` envía el recibo actualizado o la
-confirmación de retirada. Si la subida falla en la verificación, `entry.failed` explica el motivo
+confirmación de retirada (que dice si tenía votos, nunca cuántos). Si la subida falla en la verificación, `entry.failed` explica el motivo
 con las mismas palabras que la interfaz (§2.19) y enlaza a `/subir` con la ficha conservada.
 
 #### 2.12.2 Lunes de batalla
@@ -793,7 +794,7 @@ Panel de admin (§2.14) para crear campañas sin salir de la estética de Beat B
 | `RF-NOTIF-09` | Alerta de drop sin cuenta con doble confirmación, caducidad de 7 días y fusión al registrarse | E2E completo con el email capturado |
 | `RF-NOTIF-10` | Supresión por rebote duro, detectado en el buzón de envío por IMAP | Un aviso de rebote permanente en el buzón suprime la dirección; el siguiente envío a ella queda `suppressed` |
 | `RF-NOTIF-11` | Campañas con editor por bloques, segmentos con recuento, prueba, programación, cancelación, estimación de días y estadísticas agregadas | E2E de admin con el `Mailer` en memoria; con un segmento de 900 y un cupo libre de 300 al día, estima 3 días |
-| `RF-NOTIF-12` | Sin píxeles de seguimiento; clics contados solo en agregado | Ninguna plantilla incluye imágenes de 1×1 ni parámetros por usuario en las URL de imágenes |
+| `RF-NOTIF-12` | Sin píxeles de seguimiento; clics contados solo en agregado | Ninguna plantilla incluye imágenes de 1×1 ni parámetros por usuario en las URL de imágenes. Única excepción, la imagen que **es** el contenido del email y solo tiene sentido para su destinatario (la onda del recibo, la tarjeta de resultado, §4.19.5): firmada, sin id de usuario en la URL, con caché larga y sin registrar la petición |
 | `RF-NOTIF-13` | Ningún email filtra datos sellados antes de tiempo ni rompe el voto ciego | Test de contrato sobre el contenido renderizado de cada plantilla con una semana sin sellar |
 | `RF-NOTIF-14` | Cuenta atrás animada en vivo y tarjeta de resultado personal (URL firmada) | La imagen de la cuenta atrás cambia entre dos peticiones separadas un minuto; la tarjeta sin firma → 403 |
 | `RF-NOTIF-15` | «Tu temporada en cifras» al cerrar cada temporada | Test con una temporada simulada |
@@ -3149,7 +3150,12 @@ CREATE TABLE entry_receipt_seq (week_id TEXT PRIMARY KEY, last INTEGER NOT NULL)
   restante.
 - **Tarjeta de resultado**: `GET /api/og/result/:slug/:userId?sig=` con firma HMAC (es personal);
   sin firma válida, 403.
-- **Forma de onda del recibo**: PNG generado con la onda medida de la entrada.
+- **Forma de onda del recibo**: `GET /api/email/waveform/:entryId.png?v=&sig=`, PNG de 512 × 96 con la onda
+  medida de la entrada en 128 barras sobre el fondo de la tarjeta (las que tocan el máximo digital, en rojo:
+  se ve dónde clipa). Codificador PNG propio (color indexado, `node:zlib`). Firma HMAC sobre el id y la versión
+  del audio (`v`: los 12 primeros caracteres del `etag`, así un audio sustituido tiene otra URL); sin firma
+  válida, 403. Sin onda (en `processing` o ya borrada), la línea plana. La petición no se registra
+  (`RF-NOTIF-12`) y se cachea una semana.
 
 #### 4.19.6 Bajas
 
@@ -3581,6 +3587,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-10 | 0.6.5x | **Tarea 4.12.** §4.19.5: la onda del recibo (`/api/email/waveform/:entryId.png`, PNG propio, firma con la versión del audio, línea plana sin onda, petición sin registrar). `RF-NOTIF-12`: la imagen que es el contenido del email (onda, tarjeta de resultado) es la única por destinatario, firmada y sin id de usuario. §2.12.1: «compartir mi tarjeta» llega con la Fase 5; la retirada no dice cuántos votos tenía. |
 | 2026-10-10 | 0.6.51 | **Tarea 4.9.** §4.8.5 y §4.11: tabla `job_state` para las tareas troceadas; el barrido de huérfanos hace dos páginas por `tick` y una pasada por día; el `tick` completa (o retira) las entradas en `processing`. |
 | 2026-10-10 | 0.6.50 | **Tareas 4.5 y 4.6.** §4.8.2: la firma acepta `replacing` (sustituir el audio sin votos). §4.8.4: los motivos de rechazo (`ENTRY_ASSET_INVALID` con `details.reason`, `UPLOAD_INTENT_INVALID`) y el *intent* `failed` con `entry.failed`. La medición espera hasta 20 s (`MEASURE_BUDGET_MS`) antes de dejar la entrada en `processing`. |
 | 2026-10-10 | 0.6.49 | **Tarea 4.3.** §4.11: al borrar una cuenta (`RF-PRF-04`), sus entradas de semanas selladas guardan `user_id = 'deleted:<id de la entrada>'` (único por entrada, para no chocar con `entry_one_per_week`); las de semanas sin sellar y sus votos se borran, y sus audios los barre la limpieza de huérfanos (§4.8.5). |

@@ -44,6 +44,12 @@ describe('plantillas de email (§3.8.12, §4.19.4)', () => {
       for (const img of html.match(/<img[^>]*>/g) ?? []) {
         expect(img).not.toMatch(/width="1"|height="1"/)
         const src = img.match(/src="([^"]+)"/)?.[1] ?? ''
+        // La onda del recibo es la imagen de la propia entrada (§4.19.5): firmada (`v` y `sig`), sin id de
+        // usuario ni nada más en la URL, y el servidor no registra quién la pide.
+        if (src.includes('/api/email/waveform/')) {
+          expect(src).toMatch(/\/api\/email\/waveform\/[\w-]+\.png\?v=[0-9a-f]*&(amp;)?sig=[\w-]+$/)
+          continue
+        }
         // Las imágenes del juego, la cuenta atrás en vivo (§4.19.5) o la portada del sample (Cloudinary).
         const allowed = [
           `${PUBLIC_URL}/img/email/`,

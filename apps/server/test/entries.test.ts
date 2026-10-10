@@ -2,6 +2,7 @@ import { scheduleWeek as boundaries } from '@beatbattle/rules'
 import { and, eq } from 'drizzle-orm'
 import { afterEach, describe, expect, it } from 'vitest'
 import { auditLog, emailOutbox, entry, uploadIntent, vote, week } from '../src/db/schema'
+import type { MemoryMailer } from '../src/email/mailer'
 import { measureAudio } from '../src/media/measure'
 import { INTENT_TTL_MS } from '../src/modules/entries/service'
 import { sineWav } from './fixtures/wav'
@@ -570,5 +571,50 @@ describe('el tick de las entradas (4.9, §4.8.5)', () => {
     expect(await t.storage.read(row!.audioPublicId)).not.toBeNull()
     // El barrido del día ya está hecho: el siguiente tick no vuelve a listar.
     expect((await tick()).entries.orphansRemoved).toBe(0)
+  })
+})
+
+describe('los emails de la entrada salen con su plantilla (4.12)', () => {
+  const mailer = () => t.app.email.mailer as MemoryMailer
+  const tick = () =>
+    t.app.inject({
+      method: 'GET',
+      url: '/api/cron/tick',
+      headers: { authorization: `Bearer ${CRON_SECRET}` },
+    })
+
+  it('RF-NOTIF-06: tras registrar la entrada sale el recibo con número, alias, informe técnico y la onda firmada', async () => {
+    const { cookie } = await openWeek()
+    const own = (await create(cookie, (await upload(cookie)).intentId)).json().data
+    const [queued] = await outbox('entry.receipt')
+    const payload = JSON.parse(queued?.payload ?? '{}')
+    expect(payload.editUntil).toBe(W42.submitEndsAt)
+    expect(payload.waveformUrl).toMatch(
+      new RegExp(`/api/email/waveform/${own.id}\\.png\\?v=[0-9a-f]{12}&sig=`),
+    )
+    expect(payload).not.toHaveProperty('peaks')
+    await tick()
+    const mail = mailer().lastTo('lilbru@example.com')
+    expect(mail?.subject).toBe('Ya estás en la batalla #1 · BB-2026W42-0001')
+    const text = mail?.text.replaceAll(' ', ' ') ?? ''
+    expect(text).toContain(`Alias ${own.alias.toLocaleUpperCase('es-ES')}`)
+    expect(text).toContain('Archivo WAV')
+    expect(text).toMatch(/−13,\d LUFS/)
+    // La onda del recibo se sirve con su firma.
+    const png = await t.app.inject({
+      method: 'GET',
+      url: payload.waveformUrl.replace(/^https?:\/\/[^/]+/, ''),
+    })
+    expect(png.statusCode).toBe(200)
+    expect(png.headers['content-type']).toBe('image/png')
+  })
+
+  it('RF-NOTIF-06: si la subida falla, entry.failed dice el motivo con las palabras de la interfaz', async () => {
+    const { cookie } = await openWeek()
+    await create(cookie, (await upload(cookie, beat(20), { durationMs: 31_000 })).intentId)
+    await tick()
+    const mail = mailer().lastTo('lilbru@example.com')
+    expect(mail?.subject).toBe('Tu beat no ha entrado en la semana #1')
+    expect(mail?.text).toContain('Tu beat dura 0:20. El mínimo son 30 segundos.')
   })
 })
