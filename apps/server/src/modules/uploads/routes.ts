@@ -26,6 +26,9 @@ export function uploadsRoutes(app: FastifyInstance, deps: UploadsDeps): void {
     { preHandler: requireVerified },
     async (req): Promise<DataEnvelope<SignedUpload>> => {
       const request = UploadSignRequestSchema.parse(req.body)
+      // El audio de una entrada y su portada se firman con su *intent* (tarea 4.5); hasta entonces, nunca
+      // como un avatar.
+      if (request.kind !== 'avatar') throw appError('BAD_REQUEST', 'Esta subida todavía no está disponible.')
       const userId = req.user?.id as string
       if (!deps.images) throw appError('SERVICE_UNAVAILABLE', 'Las subidas no están disponibles.')
       await deps.rateLimiter.enforce({
