@@ -1,6 +1,6 @@
 # Plan 05 — Escuchar y votar
 
-> Fase: 5 de 10 | Estado: 🔄 En curso | Iniciado: 2026-10-13 | Cerrado: —
+> Fase: 5 de 10 | Estado: ✅ Cerrada | Iniciado: 2026-10-13 | Cerrado: 2026-10-13
 > Hito del roadmap: dos usuarios se votan; todas las reglas `RF-VOTE-*` en verde; Modo Jurado completo con
 > teclado; recordatorio, llamada al jurado y primeros votos.
 
@@ -150,8 +150,8 @@ construye aquí lo ve alguien que vota.
 | 5.20 | Datos de prueba: semana en juego con 24 entradas de varios productores y audios del almacenamiento falso (`tools/seed` y fixtures de E2E) | ✅ Hecho | 5.5 | para la 5.21 y las capturas de la 5.22 · **Hecho:** `apps/server/src/scripts/seedBattle.ts` (por la API con la app en el mismo proceso: 24 entradas medidas y votos en 14 s) y `tests/e2e/battle.ts` (semana con entradas para los E2E de la fase) |
 | 5.21 | E2E del hito: dos usuarios se votan con teclado (rejilla → ficha → Modo Jurado), todas las reglas `RF-VOTE-*` y los tres emails capturados en el `Mailer` en memoria con el reloj simulado | ✅ Hecho | 5.12, 5.16, 5.17, 5.18, 5.19, 5.20 | §5 · hito de la fase · **Hecho:** `tests/e2e/vote.spec.ts` (32 s): Ana elige la entrada de Bea en la rejilla con el teclado, la escucha (audio a 4×, reloj de la API +31 s al empezar) y vota 4 en la ficha con el teclado; su propia ficha no lleva estrellas; Bea entra al Modo Jurado desde el menú, salta con S hasta la de Ana, pausa con Espacio y vota 5 (combo ×1, siguiente entrada); la lista sigue sin medias; al quinto voto sale `battle.first_votes` y con el reloj del sábado 18:00 y el domingo 17:00, `battle.reminder` y `battle.jury_call`, leídos del `Mailer` en memoria |
 | 5.22 | Jurado visual de tres lentes (juego, marca y accesibilidad) sobre la rejilla, la ficha, el Modo Jurado, el reproductor y los emails, en los tamaños de referencia | ✅ Hecho | 5.21 | §3 · `RD-VIS-02` · acta en `evidence/f5/jurado/` · **Hecho:** 30 capturas con `tools/shot/jury-f5.mjs` en cinco tamaños, sin movimiento y en contraste alto; dos altas (J1 HUD del jurado en móvil, C1 estrellas en contraste alto) y cuatro medias (S1, S2, P1, J3) corregidas; bajas abiertas J3 (en parte), B1 y M1. Juego, marca y accesibilidad ✅. E2E afectados: 361 en verde. Guía v0.6.70 |
-| 5.23 | ⚠️ Prueba real: el reproductor global sobre un MP3 firmado de Cloudinary (prefijo de desarrollo), con la ganancia, el analizador y Media Session en Chrome | 🔄 En curso | 5.13 | `RF-PLAY-02`, §4.8 · crea y borra recursos en Cloudinary: con confirmación · **Preparada, sin ejecutar:** `apps/server/src/scripts/realPlayerCheck.ts` (sube al prefijo de desarrollo, espera el MP3 firmado, lo reproduce en Chrome con `tools/shot/real-player.mjs` y borra el recurso). La parte de navegador, validada contra el almacenamiento falso: suena, el analizador lee (1206) y como entrada ciega queda en `null`, Media Session con título y artista. Espera la confirmación del usuario para crear y borrar el recurso en Cloudinary |
-| 5.24 | Cierre de la fase: criterio de aceptación, cobertura de ids y CI en verde | ⬜ Listo | 5.22, 5.23 | — |
+| 5.23 | ⚠️ Prueba real: el reproductor global sobre un MP3 firmado de Cloudinary (prefijo de desarrollo), con la ganancia, el analizador y Media Session en Chrome | ✅ Hecho | 5.13 | `RF-PLAY-02`, §4.8 · crea y borra recursos en Cloudinary: con confirmación · **Hecho** con la confirmación del usuario: «Low Life» (MP3 del catálogo del sello) en `beatbattle-dev`; el MP3 firmado `f_mp3,br_192k` suena en el reproductor global, el analizador lo lee (3529) y como entrada ciega queda en `null`, la Media Session lleva título y artista, y se borró (la Admin API ya no lo encuentra). 16,7 s. Evidencia en `evidence/f5/cloudinary/` |
+| 5.24 | Cierre de la fase: criterio de aceptación, cobertura de ids y CI en verde | ✅ Hecho | 5.22, 5.23 | — · **Hecho:** los seis criterios se cumplen (abajo, «Cierre») |
 
 ---
 
@@ -172,13 +172,24 @@ recordatorio, llamada al jurado y primeros votos salen respetando silencio y top
 5. Prueba real del reproductor sobre Cloudinary hecha (o aplazada con motivo y conformidad del usuario).
 6. `pnpm check`, `typecheck`, `test`, `build` y `e2e` en verde en la CI.
 
+### Cierre (2026-10-13, tarea 5.24)
+
+| # | Criterio | Cómo se verificó |
+|---|---|---|
+| 1 | Ids de la tabla de cobertura | Los 26 que tocan a esta fase tienen un test con su id en el nombre (búsqueda en los nombres de los tests); `RF-PLAY-08` va a la Fase 6, `RF-VOTE-14` queda fuera del MVP y `RF-VOTE-08` se hizo en la 4.1. `RD-VIS-02`, además, con el acta del jurado |
+| 2 | E2E del hito | `tests/e2e/vote.spec.ts` (5.21): dos usuarios se votan con el teclado (rejilla → ficha y Modo Jurado) y salen `battle.first_votes`, `battle.reminder` y `battle.jury_call` |
+| 3 | Contrato de voto ciego | `test/blindContract.test.ts` (rutas públicas con votos reales), `test/votes.test.ts` y `test/battleNotices.test.ts` (`RF-NOTIF-13` sobre lo enviado) |
+| 4 | Jurado sin altas ni medias abiertas | Acta de la 5.22: las tres lentes ✅; abiertas solo tres bajas |
+| 5 | Prueba real del reproductor | 5.23, `evidence/f5/cloudinary/` |
+| 6 | CI en verde | Cada PR de la fase (#62–#72) se mezcló con `quality` en verde; la de este cierre, también. En local: 1412 tests de Vitest (en solitario, todos; con todas las suites en paralelo y los servidores de desarrollo abiertos, dos o tres tests de la F2 agotan sus 5 s) y la batería E2E completa |
+
 ---
 
 ## Registro de avance
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
-| 2026-10-13 | 5.23 | Prueba real del reproductor preparada (scripts); a la espera de confirmación para tocar Cloudinary. |
+| 2026-10-13 | 5.23, 5.24 | Prueba real del reproductor contra Cloudinary (con la confirmación del usuario) y **cierre de la Fase 5**. |
 | 2026-10-13 | 5.22 | Jurado visual de tres lentes: altas y medias corregidas (guía v0.6.70). |
 | 2026-10-13 | 5.9, 5.21 | Crónica del menú con `/ticker` y E2E del hito con teclado y los tres avisos (guía v0.6.69). |
 | 2026-10-13 | 5.18 | Modo Jurado como pantalla VS (guía v0.6.68). |
