@@ -5,8 +5,8 @@ import { expect, type Page, test } from '@playwright/test'
  * `playwright.config.ts`), en el móvil y la red de §4.17: 4G lento (150 ms de RTT, 1,6 Mbit/s) y CPU ×4,
  * 412 × 823 a DPR 1,75. Es la comprobación de `RNF-PERF-02` hasta que llegue Lighthouse CI (Fase 10):
  *
- * - el LCP es un texto —el título del escenario de la semana, que con el calendario vacío es «El
- *   próximo drop está en el horno»— y no el logo (SVG) ni un lienzo, y se pinta con la primera pintura
+ * - el LCP es un texto —el título del escenario de la semana, que con el calendario vacío es «En el
+ *   horno» (jurado de la F3, J18)— y no el logo (SVG) ni un lienzo, y se pinta con la primera pintura
  *   (§3.5), y
  * - el LCP queda por debajo de 2,5 s (mediana de tres cargas en frío).
  *
@@ -64,10 +64,7 @@ async function coldLoad(page: Page, title = false): Promise<PaintTimes> {
   await page.goto('/', { waitUntil: 'load' })
   if (title)
     await expect(page.getByRole('dialog', { name: 'Beat Battle, un juego de Other People' })).toBeVisible()
-  else
-    await expect(
-      page.getByRole('heading', { level: 2, name: 'El próximo drop está en el horno' }),
-    ).toBeVisible()
+  else await expect(page.getByRole('heading', { level: 2, name: 'En el horno' })).toBeVisible()
   // El LCP se da por cerrado con la primera interacción; hasta entonces, se espera a que asiente.
   await page.waitForTimeout(1_500)
   const times = await page.evaluate(() => ({
