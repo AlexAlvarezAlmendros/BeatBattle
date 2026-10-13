@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.74 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.75 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -883,6 +883,13 @@ Panel en `/admin`, solo para el rol `admin`, con la misma estética pero en un m
 - **Imágenes OG** generadas en servidor con la dirección de arte del juego (paleta, trama y la
   pegatina *OTP.*): semana (vinilo-sol + título +
   cuenta atrás congelada), entrada (portada + alias o productor), resultados (podio), perfil (carta).
+  `GET /api/og/:kind/:id.png?v=` (`week`, `entry`, `results`, `profile`) en la app de Fastify, con satori y
+  resvg. El vinilo-sol es la portada generativa con la semilla de la semana, y la de una entrada es la suya.
+  Las dos se pintan por CPU con un contexto 2D que dibuja en SVG y mide con resvg, con la calibración de
+  §3.4.5. La cuenta atrás congelada es la fecha de fin de la fase («Envíos hasta el dom 18 oct · 20:00»).
+  `v` es el hash de lo que se ve: con la vigente, caché inmutable de un año; sin ella o con una vieja, cinco
+  minutos. Antes del drop, una semana da 404; unos resultados sin sellar o una entrada no activa, también. El
+  perfil solo cuenta semanas selladas: si contara las abiertas, diría quién está en una batalla ciega.
 - **Tarjetas para stories** (1080×1920), generadas en el navegador: «Estoy en la batalla #41»,
   «He quedado 2.º», «Mi carta de productor». Se comparten con la Web Share API (con ficheros) o se
   descargan.
@@ -2234,7 +2241,7 @@ beatbattle/
 │        ├─ share/            inyección de metadatos y OG
 │        └─ lib/              reloj, errores (AppError con estado por código), createRateLimiter,
 │                             ids, auditoría; lo transversal sin rutas con la misma fábrica
-├─ api/                       funciones de Vercel: index.ts (Fastify), og.tsx, share.ts
+├─ api/                       funciones de Vercel: index.ts (Fastify, con las imágenes OG), share.ts
 ├─ packages/
 │  ├─ rules/                  núcleo puro y determinista (§4.5)
 │  ├─ audio/                  análisis portado del sello + teoría musical + definiciones de efectos
@@ -2642,7 +2649,7 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | * | `/api/admin/samples` (`/sign`, CRUD), `/weeks` (`GET` con los huecos, `POST`, y `GET`/`PATCH`/`DELETE` de `/:slug` solo antes del drop), `/reports`, `/votes/anomalies`, `/entries/:id/{hide,disqualify,restore}`, `/weeks/:slug/{seal,reseal}`, `/label-pick`, `/usage`, `/audit`, `/campaigns` (CRUD, `/test`, `/schedule`, `/cancel`, `/segment-count`), `/email/{queue,suppressions,stats}` | Admin | Administración (§2.14) |
 | GET | `/api/cron/tick` | `CRON_SECRET` | Tareas programadas (§4.12) |
 | GET | `/api/health` | Pública | Salud: `{ data: { status: 'ok', db: 'up', time } }`; si la BD no responde, 503 `SERVICE_UNAVAILABLE` con `details.db = 'down'` (Cloudinary se añade en la Fase 4) |
-| GET | `/api/og/:kind/:id` | Pública | Imagen OG |
+| GET | `/api/og/:kind/:id.png?v=` | Pública | Imagen OG (`week`, `entry`, `results`, `profile`; §2.15) |
 
 Reglas comunes: Zod en la frontera, cuerpo máximo de 64 kB (el audio nunca pasa por la API),
 `Content-Type: application/json` obligatorio en las escrituras **con cuerpo** (sin cuerpo, como
@@ -2916,8 +2923,8 @@ Referencias: OWASP ASVS nivel 2 y las chuletas de autenticación, sesiones y sub
 
 ### 4.15 Despliegue e infraestructura
 
-- **Vercel**: `apps/web/dist` estático + funciones `api/index.ts` (Fastify), `api/share.ts` y
-  `api/og.tsx`, región `fra1`. `api/index.ts` importa `apps/server/dist/vercel.mjs`, un ESM con los
+- **Vercel**: `apps/web/dist` estático + funciones `api/index.ts` (Fastify, que también pinta las imágenes OG
+  y la tarjeta de resultado: no hay un `api/og.tsx` aparte) y `api/share.ts`, región `fra1`. `api/index.ts` importa `apps/server/dist/vercel.mjs`, un ESM con los
   paquetes `@beatbattle/*` dentro que `pnpm build` genera con Vite SSR (`apps/server/build.config.mjs`)
   y comprueba cargándolo con `node` puro y pidiendo `/api/health` (`scripts/smoke-bundle.mjs`). Se
   valida en la primera preview (tarea 1.8). *Preview* por PR con su base de datos (rama de Turso) y su prefijo de
@@ -3646,6 +3653,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.75 | **Tarea 6.11.** §2.15, §4.10, §4.15: las imágenes OG las pinta la app de Fastify (`/api/og/:kind/:id.png?v=`) y no una función `api/og.tsx` aparte. Se añaden la versión por hash con caché inmutable, los 404 antes de tiempo, el perfil con solo semanas selladas y las portadas por CPU en servidor (SVG medido con resvg, con la calibración de §3.4.5). |
 | 2026-10-13 | 0.6.74 | **Tareas 6.9 y 6.10.** §2.12.2: el reparto del Lunes de batalla por destinatario (separado, sin semana nueva o sin semana cerrada, la ventana de una semana) y que el combinado se decide con el instante del sellado. §4.19.5: la tarjeta de resultado (404 con firma y sin resultado, contenido, fuentes estáticas, caché de una hora). Dependencias de §4.1 fijadas: satori 0.33.5 (la última con más de dos semanas) y `@resvg/resvg-js` 2.6.2; las fuentes, de `@fontsource` (Anybody, Chakra Petch y Oxanium estáticas) en el servidor. |
 | 2026-10-13 | 0.6.73 | **Tareas 6.2–6.8.** §4.10: `GET /api/weeks/:slug/results` devuelve la revisión, `correctedAt` y «tu resultado»; el archivo pagina de 20 en 20 con el podio; `GET /api/weeks/current` añade la última semana sellada (`sealed`) y `POST /api/me/seen` acepta `ceremony`; el re-sellado va por `slug`. §4.11: índice `result_entry`. `RF-RES-09` se guarda en `seen_flag` (`kind = ceremony`), no en una tabla `results_seen`. El sellado escribe el snapshot en el mismo `batch` que marca la semana; los votos válidos excluyen cuentas bloqueadas o borradas, votos anulados y entradas no activas. |
 | 2026-10-13 | 0.6.72 | **Tarea 6.1.** §4.5, `ranking`: la fila de cada entrada (la de la tabla `result`) y la comparación exacta de puntuaciones con enteros. Sin votos en la semana, la puntuación es 0. Los votos a entradas que no están en la lista no cuentan, tampoco para la media `m`. |

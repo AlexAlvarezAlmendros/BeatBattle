@@ -14,6 +14,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@beatbattle/covers": "workspace:^",
     "@beatbattle/emails": "workspace:^",
     "@beatbattle/rules": "workspace:^",
     "@beatbattle/shared": "workspace:^",

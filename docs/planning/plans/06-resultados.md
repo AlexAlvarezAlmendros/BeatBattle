@@ -115,7 +115,7 @@ completa el MVP (F0–F6) para la beta cerrada.
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 6.11 | Imágenes OG (`api/og`): semana, entrada, resultados y perfil, con la dirección de arte del juego, caché inmutable por versión y voto ciego | ⬜ Listo | 6.6 | §2.15, §4.15 · `RF-SHARE-02`, `RF-SHARE-04` |
+| 6.11 | Imágenes OG (`api/og`): semana, entrada, resultados y perfil, con la dirección de arte del juego, caché inmutable por versión y voto ciego | ✅ Hecho | 6.6 | §2.15, §4.15 · `RF-SHARE-02`, `RF-SHARE-04` · Hecho: en Fastify (`share/og.ts`, `media/ogImages.ts`, `media/svgCanvas.ts`); 4 tests; capturas en `evidence/f6/og`. |
 | 6.12 | `api/share`: inyecta título, descripción, Open Graph, Twitter, canonical y JSON-LD en `index.html` para las rutas compartibles (y el 301 del nombre cambiado del perfil) | ⬜ Listo | 6.11 | §4.7.7 · `RF-SHARE-01`, `RF-SHARE-04` |
 | 6.13 | `sitemap.xml` (semanas selladas y perfiles), `robots.txt` y datos estructurados (`MusicRecording`, `Event`) | ⬜ Listo | 6.12 | §2.15 · `RF-SHARE-05` |
 | 6.14 | Tarjetas de stories (1080 × 1920) en el navegador: «Estoy en la batalla #N» y «He quedado N.º», con Web Share (ficheros) o descarga | ⬜ Listo | 6.15 | §2.15 · `RF-SHARE-03` |
@@ -165,6 +165,7 @@ resultado y el sample nuevo; y lo que se comparte enseña la cara del juego sin 
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-13 | 6.11 | Imágenes OG en la app de Fastify, sin `api/og.tsx` (guía v0.6.75). Portadas por CPU con un contexto 2D que dibuja en SVG y mide con resvg: la calibración converge al 0,1 % de la referencia. |
 | 2026-10-13 | 6.9, 6.10 | Lunes de batalla y tarjeta de resultado (guía v0.6.74). satori fijado en 0.33.5: la 0.34–0.56 salieron todas el mismo día. |
 | 2026-10-13 | 6.2–6.8 | Servidor de resultados: snapshot al sellar, descalificar y re-sellar, `/results`, archivo y ceremonia vista; 9 tests en `results.test.ts` (guía v0.6.73). |
 | 2026-10-13 | 6.1 | `rank` en `packages/rules` con propiedades (guía v0.6.72). |

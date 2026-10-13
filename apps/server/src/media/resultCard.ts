@@ -1,8 +1,5 @@
-import { readFileSync } from 'node:fs'
-import { createRequire } from 'node:module'
-import { color, medal } from '@beatbattle/shared/tokens'
-import { Resvg } from '@resvg/resvg-js'
-import satori from 'satori'
+import { color } from '@beatbattle/shared/tokens'
+import { dataUri, h, medalSvg, type Node, renderPng, renderSvg, scoreText } from './ogKit'
 
 /**
  * Tarjeta de resultado personal (§3.8.12, §4.19.5; tarea 6.10): la imagen que lleva el Lunes de batalla de
@@ -10,8 +7,7 @@ import satori from 'satori'
  * invierten colores no la rompan, la medalla de vinilo de su puesto (§3.4.3) y las cifras de la semana sellada.
  * En el email va a 560 px de ancho: ningún texto baja de 30 px aquí (14 px allí, §3.8.12).
  *
- * satori pinta el árbol a SVG con las fuentes del juego (Anybody, Chakra Petch y Oxanium, en `woff` estático:
- * satori no lee `woff2` ni fuentes variables) y resvg lo rasteriza a PNG.
+ * Se pinta con `ogKit` (satori y resvg, con las fuentes del juego).
  */
 
 export const RESULT_CARD_WIDTH = 1200
@@ -32,67 +28,6 @@ export interface ResultCardData {
   /** Revisión del snapshot: con un re-sellado, la tarjeta lo dice. */
   corrected: boolean
 }
-
-type Child = Node | string | null | false
-interface Node {
-  type: string
-  props: Record<string, unknown> & { children?: Child | Child[] }
-}
-
-const h = (type: string, style: Record<string, unknown>, ...children: Child[]): Node => ({
-  type,
-  props: { style: { display: 'flex', ...style }, children },
-})
-
-const require = createRequire(import.meta.url)
-const fontFile = (pkg: string, file: string) => readFileSync(require.resolve(`${pkg}/files/${file}`))
-
-type Fonts = Parameters<typeof satori>[1]['fonts']
-let fonts: Fonts | null = null
-function loadFonts(): Fonts {
-  fonts ??= [
-    { name: 'Anybody', data: fontFile('@fontsource/anybody', 'anybody-latin-900-normal.woff'), weight: 900 },
-    {
-      name: 'Chakra Petch',
-      data: fontFile('@fontsource/chakra-petch', 'chakra-petch-latin-600-normal.woff'),
-      weight: 600,
-    },
-    {
-      name: 'Chakra Petch',
-      data: fontFile('@fontsource/chakra-petch', 'chakra-petch-latin-700-normal.woff'),
-      weight: 700,
-    },
-    { name: 'Oxanium', data: fontFile('@fontsource/oxanium', 'oxanium-latin-700-normal.woff'), weight: 700 },
-  ]
-  return fonts
-}
-
-/** Surcos del vinilo (unidades del dibujo de 100 × 100), los de `ui/Medal`. */
-const GROOVES = Array.from({ length: 9 }, (_, index) => 20 + index * 3.2)
-
-/** La medalla de vinilo de §3.4.3 como SVG (el `Medal` de la web, con los colores por token). */
-export function medalSvg(place: 1 | 2 | 3): string {
-  const ink = color[medal[place]]
-  const rim = place === 3 ? color.white : ink
-  const grooves = GROOVES.map(
-    (r) => `<circle cx="50" cy="50" r="${r}" fill="none" stroke="${color.line}" stroke-width="1"/>`,
-  ).join('')
-  const crown =
-    place === 1 ? `<path d="M37 56 L35 42 L43 49 L50 38 L57 49 L65 42 L63 56 Z" fill="${color.black}"/>` : ''
-  const label =
-    place === 3
-      ? `<circle cx="50" cy="50" r="19" fill="${ink}" stroke="${color.white}" stroke-width="2"/>`
-      : `<circle cx="50" cy="50" r="19" fill="${ink}"/>`
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">` +
-    `<circle cx="50" cy="50" r="48" fill="${color.panel}" stroke="${rim}" stroke-width="3"/>${grooves}` +
-    `<path d="M18 30 A38 38 0 0 1 40 13" fill="none" stroke="${color.lineStrong}" stroke-width="3"/>` +
-    `${label}${crown}<circle cx="50" cy="50" r="2.4" fill="${color.black}"/></svg>`
-  )
-}
-
-/** «4,21» (la puntuación con dos decimales, como en la web). */
-export const scoreText = (scoreMilli: number) => (scoreMilli / 1000).toFixed(2).replace('.', ',')
 
 function tree(data: ResultCardData): Node {
   const place = data.position !== null && data.position <= 3 ? (data.position as 1 | 2 | 3) : null
@@ -117,7 +52,7 @@ function tree(data: ResultCardData): Node {
       ? {
           type: 'img',
           props: {
-            src: `data:image/svg+xml;base64,${Buffer.from(medalSvg(place)).toString('base64')}`,
+            src: dataUri(medalSvg(place), 'image/svg+xml'),
             width: 260,
             height: 260,
           },
@@ -253,16 +188,9 @@ function tree(data: ResultCardData): Node {
 }
 
 /** La tarjeta como SVG (para los tests, que no rasterizan). */
-export async function resultCardSvg(data: ResultCardData): Promise<string> {
-  return satori(tree(data) as unknown as Parameters<typeof satori>[0], {
-    width: RESULT_CARD_WIDTH,
-    height: RESULT_CARD_HEIGHT,
-    fonts: loadFonts(),
-  })
-}
+export const resultCardSvg = (data: ResultCardData) =>
+  renderSvg(tree(data), RESULT_CARD_WIDTH, RESULT_CARD_HEIGHT)
 
 /** La tarjeta como PNG. */
-export async function resultCardPng(data: ResultCardData): Promise<Uint8Array> {
-  const svg = await resultCardSvg(data)
-  return new Resvg(svg, { fitTo: { mode: 'width', value: RESULT_CARD_WIDTH } }).render().asPng()
-}
+export const resultCardPng = (data: ResultCardData) =>
+  renderPng(tree(data), RESULT_CARD_WIDTH, RESULT_CARD_HEIGHT)
