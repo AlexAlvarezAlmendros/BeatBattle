@@ -25,6 +25,8 @@ import { useSession } from '../account/session'
 import { usePlayer } from '../player/store'
 import { entryTrack } from '../player/tracks'
 import { MiniHistogram, scoreOf } from '../results/score'
+import { StoryButton } from '../share/StoryButton'
+import { storyCover } from '../share/storyCover'
 import { ReportDialog } from '../vote/ReportDialog'
 import { useStarsListen, useVote } from '../vote/useVote'
 import { decodePeaks, musicalKeyName } from '../week/weekModel'
@@ -205,6 +207,20 @@ export function EntryPage() {
           <Button variant="outline" onClick={share}>
             {t('entryPage.share')}
           </Button>
+          {own && !entry.result && week && (
+            <StoryButton
+              fileName={`beatbattle-semana-${week.number}.png`}
+              card={{
+                kind: 'battle',
+                weekNumber: week.number,
+                sampleTitle: week.sample.title,
+                title: entry.title,
+                alias: entry.alias,
+                cover: storyCover(entry),
+                url: window.location.href,
+              }}
+            />
+          )}
           {me && !own && (
             <Button variant="outline" onClick={() => setReporting(true)}>
               {t('entryPage.report')}

@@ -1976,6 +1976,10 @@
     "note": "Ronda justa: primero, las que menos votos llevan (nadie ve cuántos). Notas y autoría, el domingo.",
     "link": "Elegir entrada"
   },
+  "stories": {
+    "button": "Tarjeta para stories",
+    "shareTitle": "Beat Battle"
+  },
   "ceremony": {
     "label": "Ceremonia de resultados de la semana {number}",
     "sealed": "¡Sellado!",

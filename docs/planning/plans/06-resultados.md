@@ -118,7 +118,7 @@ completa el MVP (F0–F6) para la beta cerrada.
 | 6.11 | Imágenes OG (`api/og`): semana, entrada, resultados y perfil, con la dirección de arte del juego, caché inmutable por versión y voto ciego | ✅ Hecho | 6.6 | §2.15, §4.15 · `RF-SHARE-02`, `RF-SHARE-04` · Hecho: en Fastify (`share/og.ts`, `media/ogImages.ts`, `media/svgCanvas.ts`); 4 tests; capturas en `evidence/f6/og`. |
 | 6.12 | `api/share`: inyecta título, descripción, Open Graph, Twitter, canonical y JSON-LD en `index.html` para las rutas compartibles (y el 301 del nombre cambiado del perfil) | ✅ Hecho | 6.11 | §4.7.7 · `RF-SHARE-01`, `RF-SHARE-04` · Hecho: en Fastify (`share/routes.ts`, `share/meta.ts`) con reescrituras en `vercel.json`; 6 tests. El paso por Vercel (URL original, `includeFiles`), escrito, sin verificar hasta la F10. |
 | 6.13 | `sitemap.xml` (semanas selladas y perfiles), `robots.txt` y datos estructurados (`MusicRecording`, `Event`) | ✅ Hecho | 6.12 | §2.15 · `RF-SHARE-05` · Hecho: `share/seo.ts`; 2 tests + configuración. El paso por el validador de datos estructurados (necesita una URL pública), pendiente del despliegue: se registra en la 6.23. |
-| 6.14 | Tarjetas de stories (1080 × 1920) en el navegador: «Estoy en la batalla #N» y «He quedado N.º», con Web Share (ficheros) o descarga | ⬜ Listo | 6.15 | §2.15 · `RF-SHARE-03` |
+| 6.14 | Tarjetas de stories (1080 × 1920) en el navegador: «Estoy en la batalla #N» y «He quedado N.º», con Web Share (ficheros) o descarga | ✅ Hecho | 6.15 | §2.15 · `RF-SHARE-03` · Hecho: `storyCard.ts` y `StoryButton` (Web Share con el fichero o descarga). Mirada: «He quedado 7.º» descargada desde los resultados a 1080 × 1920 y «Estoy en la batalla» pintada en el navegador. El E2E de la descarga, con la 6.21. |
 
 ### Cliente
 
@@ -165,6 +165,7 @@ resultado y el sample nuevo; y lo que se comparte enseña la cara del juego sin 
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-13 | 6.14 | Tarjetas para stories (guía v0.6.80). |
 | 2026-10-13 | 6.19 | La home ofrece la ceremonia. |
 | 2026-10-13 | 6.17 | Ceremonia de resultados (guía v0.6.79). |
 | 2026-10-13 | 6.18 | Archivo de semanas. |
