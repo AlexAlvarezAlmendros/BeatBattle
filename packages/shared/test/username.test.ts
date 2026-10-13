@@ -1,6 +1,6 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
-import { RESERVED_USERNAMES, usernameProblem } from '../src/username'
+import { RESERVED_USERNAMES, usernameCandidate, usernameProblem } from '../src/username'
 
 describe('nombre de productor (§2.3)', () => {
   it('RF-AUTH-06: los reservados se rechazan con USERNAME_RESERVED, también con mayúsculas, puntos o guiones bajos', () => {
@@ -28,5 +28,16 @@ describe('nombre de productor (§2.3)', () => {
         expect(usernameProblem(name.toUpperCase())).toBe(usernameProblem(name))
       }),
     )
+  })
+})
+
+describe('usernameCandidate (altas con Google o Discord)', () => {
+  it('saca un nombre válido de un texto libre o null si no queda nada usable', () => {
+    expect(usernameCandidate('Aina Puig')).toBe('aina_puig')
+    expect(usernameCandidate('Ñandú Beats!!')).toBe('nandu_beats')
+    expect(usernameCandidate('..kairo.wav..')).toBe('kairo.wav')
+    expect(usernameCandidate('Productora Nocturna de Gràcia')).toBe('productora_nocturna')
+    expect(usernameCandidate('李')).toBeNull()
+    expect(usernameCandidate('ab')).toBeNull()
   })
 })

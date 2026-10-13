@@ -2,6 +2,7 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderInRouter } from '../../app/layout/testing'
+import { t } from '../../i18n'
 
 const client = vi.hoisted(() => ({
   signIn: { email: vi.fn(), username: vi.fn(), social: vi.fn() },
@@ -20,6 +21,11 @@ const { SignInPage, SignUpPage, RecoverPage } = await import('./AuthPages')
 beforeEach(() => vi.clearAllMocks())
 
 describe('CONTINUAR PARTIDA (/entrar)', () => {
+  it('RF-AUTH-05: al volver de Google o Discord sin poder unir la cuenta, lo explica y ofrece entrar con email', () => {
+    renderInRouter(<SignInPage />, '/entrar?error=account_not_linked')
+    expect(screen.getByRole('alert')).toHaveTextContent(t('account.social.notLinked'))
+  })
+
   it('con email entra por email y con nombre por nombre; un fallo sale en el aviso con las palabras de la guía', async () => {
     client.signIn.username.mockResolvedValue({ error: { code: 'INVALID_USERNAME_OR_PASSWORD', status: 401 } })
     renderInRouter(<SignInPage />, '/entrar')

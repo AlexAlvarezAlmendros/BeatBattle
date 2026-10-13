@@ -78,3 +78,23 @@ export function usernameProblem(raw: string): UsernameProblem | null {
 }
 
 export const isAllowedUsername = (username: string): boolean => usernameProblem(username) === null
+
+/**
+ * Un nombre de productor válido a partir de un texto libre (el nombre que da Google o Discord, o la parte
+ * local del email): sin tildes, en minúsculas, solo `[a-z0-9_.]`, sin puntos ni guiones bajos en los
+ * extremos y como mucho de 20 caracteres. Si no queda nada usable, `null` (quien llama elige otro origen).
+ * No mira si está libre ni si es reservado: eso lo decide el servidor.
+ */
+export function usernameCandidate(raw: string): string | null {
+  const base = raw
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+    .replace(/[^a-z0-9_.]/g, '')
+    .replace(/[._]{2,}/g, '_')
+    .replace(/^[._]+|[._]+$/g, '')
+    .slice(0, USERNAME_MAX)
+    .replace(/[._]+$/g, '')
+  return base.length >= USERNAME_MIN ? base : null
+}

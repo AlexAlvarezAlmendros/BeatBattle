@@ -61,8 +61,14 @@ test.describe('audio', () => {
       for (const id of offline.SFX_IDS as readonly string[]) result[id] = await offline.renderSfx(id)
       return result
     }, OFFLINE_MODULE)
-    // Los 16 de la tarea 1.4 y `vote.unlocked` de la 1.5.
-    expect(Object.keys(metrics)).toHaveLength(17)
+    // Los 16 de la tarea 1.4, `vote.unlocked` de la 1.5 y los 7 de la interfaz de la 2.27.
+    test.info().annotations.push({
+      type: 'medidas',
+      description: Object.entries(metrics)
+        .map(([id, m]) => `${id} ${m.peakDb.toFixed(1)}/${m.levelDb} dB ${m.activeSeconds.toFixed(3)} s`)
+        .join(' · '),
+    })
+    expect(Object.keys(metrics)).toHaveLength(24)
     for (const [id, m] of Object.entries(metrics)) {
       expect(
         Math.abs(m.peakDb - m.levelDb),

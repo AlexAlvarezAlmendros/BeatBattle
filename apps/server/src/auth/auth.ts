@@ -13,6 +13,7 @@ import { ipHash } from '../lib/ipHash'
 import { recordSignupConsents } from '../modules/emailPrefs/service'
 import { isDisposableEmail } from './disposable'
 import { schemaOptions } from './options'
+import { pickSocialUsername } from './socialUsername'
 
 /** Cabecera interna con la IP que ha resuelto Fastify (respeta `trustProxy`); la de fuera se borra. */
 export const CLIENT_IP_HEADER = 'x-bb-client-ip'
@@ -196,7 +197,11 @@ export function createAuth(deps: AuthDeps) {
       ...(config.auth.google ? { google: config.auth.google } : {}),
       ...(config.auth.discord ? { discord: config.auth.discord } : {}),
     },
-    account: { accountLinking: { enabled: true, trustedProviders: ['google', 'discord'] } },
+    // `RF-AUTH-05`: una cuenta de Google o Discord se vincula con la existente del mismo email solo si el
+    // proveedor dice que el email está verificado y la cuenta local también lo está
+    // (`requireLocalEmailVerified`, por defecto). Ningún proveedor va en `trustedProviders`: con Discord
+    // allí, un email puesto sin verificar en Discord entraría en la cuenta de otro.
+    account: { accountLinking: { enabled: true, trustedProviders: [] } },
     session: { expiresIn: 60 * 60 * 24 * 30, updateAge: 60 * 60 * 24 },
     rateLimit: {
       ...options.rateLimit,
@@ -223,6 +228,11 @@ export function createAuth(deps: AuthDeps) {
             const name = (user as { username?: string | null }).username
             if (name && usernameProblem(name) === 'USERNAME_RESERVED')
               throw reject('USERNAME_RESERVED', 'Ese nombre está reservado.')
+            // Alta con Google o Discord: el proveedor no da nombre de productor, así que se elige uno.
+            if (!name) {
+              const username = await pickSocialUsername(db, user.name, user.email, deps.now())
+              return { data: { ...user, username, displayUsername: username } }
+            }
             return { data: user }
           },
           after: async (user) => {

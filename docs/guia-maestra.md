@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.38 · 2026-10-09 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.40 · 2026-10-09 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1561,6 +1561,25 @@ anunciador (`ann.*`: una estampa por rótulo de la tabla de §3.9; los rótulos 
 drop (`drop.*`), cuenta atrás (`clock.*`), juego (`xp.*`, `level.*`, `ach.*`, `combo.*`, `jury.*`),
 ceremonia (`cer.*`, con el sello que se rasga, `cer.tear`) y secretos (`egg.*`).
 
+**Dónde suenan los de la interfaz** (tarea 2.27). Los dispara la pieza, no cada pantalla:
+
+- **Cursor:** el de juego (`useRoving`, que comparten el menú, la rejilla y las pestañas de enlaces)
+  suena `ui.move` al cambiar de opción con flechas, letra inicial o ratón, también con el foco en
+  reposo (`useIdleMenuKeys`).
+- **Activar:** elegir una opción suena `ui.press`.
+- **Botones:** `ui.press` al pulsar y `ui.hover` al pasar el ratón; deshabilitados o cargando, nada.
+- **Chips y placas de opción:** `ui.toggle`.
+- **Pestañas:** `ui.toggle` al cambiar, con flechas, clic o Q/E, sin el tic del cursor.
+- **Ventana de juego:** `ui.open` y `ui.close` al cambiar, nunca al montarse cerrada.
+- **Avisos:** toasts de error y de éxito con `ui.error` y `ui.success`, el aviso de papel que sale con
+  `ui.error` y el mensaje de hecho con `ui.success`. La validación local que deja un campo con error
+  también suena `ui.error`.
+- **Cambio de pantalla:** `nav.page`, salvo entre secciones de la misma pantalla (las pestañas de
+  Opciones o de los legales), donde ya suena el conmutador.
+
+Topes del motor: `ui.hover` como mucho 8 por segundo y `ui.move` 12. Con el silencio (M) o sin el primer
+gesto, el motor no sintetiza nada. Todos tienen su equivalente visual en el estado de la pieza.
+
 #### 3.7.4 Música de sala
 
 Opcional (apagada por defecto; se enciende en Opciones → Sonido): un bucle *lo-fi* generado con
@@ -2462,6 +2481,16 @@ export const auth = betterAuth({
   `EMAIL_DISPOSABLE` (registro y cambio de email, `RF-AUTH-09`) y `USERNAME_RESERVED` (el plugin
   `username` solo mira el formato, `RF-AUTH-06`). Los demás son los de Better Auth
   (`USERNAME_IS_ALREADY_TAKEN`, `PASSWORD_TOO_SHORT`, `PASSWORD_COMPROMISED`, `EMAIL_NOT_VERIFIED`…).
+- **Google y Discord** (`RF-AUTH-05`, tarea 2.22). Ningún proveedor va en `trustedProviders`: una cuenta
+  social se une a la existente del mismo email solo si el proveedor dice que ese email está verificado
+  (`email_verified` de Google, `verified` de Discord) **y** la cuenta local también lo está. Con Discord en
+  `trustedProviders`, alguien que pusiera en Discord el email de otro sin verificarlo entraría en su cuenta.
+  Si no se puede unir, la vuelta es `/entrar?error=account_not_linked` y la pantalla lo explica. Una cuenta
+  nueva por un proveedor sale verificada si el proveedor lo dice, va a la bienvenida y recibe un nombre de
+  productor válido y libre sacado de su nombre o, si no vale o es reservado, de la parte local del email
+  (`usernameCandidate`, con un número si está cogido o retenido por una redirección); se puede cambiar en
+  Ajustes → Perfil. URL de vuelta: `<BB_PUBLIC_URL>/api/auth/callback/<proveedor>`, dadas de alta para
+  `http://localhost:5173` y `https://battle.otherpeople.es`.
 - Al crear la cuenta, su `producer_profile` con el siguiente número de carta. Los emails de verificación y
   recuperación salen por la cola en la misma petición (`ServiceEmails.sendNow`). Un envío fallido queda en
   el registro con su tipo e intento, sin la dirección.
@@ -3504,6 +3533,8 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-09 | 0.6.40 | **Efectos de la interfaz** (tarea 2.27, §3.7.3, Anexo D): las definiciones de `ui.move`, `ui.toggle`, `ui.open`/`ui.close`, `ui.error`, `ui.success` y `nav.page` (las tonales, en la tonalidad de la semana), calibradas al nivel del Anexo D en el render offline, y dónde suenan; tope de 12 por segundo para `ui.move`. |
+| 2026-10-09 | 0.6.39 | **Google y Discord** (tarea 2.22, §4.9): unión de cuentas solo con el email verificado por el proveedor y la cuenta local verificada (sin `trustedProviders`), nombre de productor para las altas sociales y el aviso en `/entrar` cuando no se puede unir. |
 | 2026-10-09 | 0.6.38 | **Jurado visual de la Fase 2** (tarea 2.25, acta en `docs/planning/evidence/f2/jurado/`): placa de opción del chip de filtro (§3.3), botón deshabilitado neutro y etiquetas largas que parten (§3.3), emblema de Opciones arriba y en `sticky` y la carta como pieza de Perfil (§3.8.14), el panel del diseño de título nunca por debajo de 26 rem y la baja con el logo como pieza (§3.8.14), cabecera de los emails con la cuña (§3.8.12), duotono con trama y nombres ajustados a una línea (§3.4.1, §3.4.4). |
 | 2026-10-09 | 0.6.37 | **E2E del hito de la Fase 2** (tarea 2.24, §4.16): la cuenta de principio a fin por la interfaz y «A contra B», con el enlace de baja de test y una IP por prueba en los E2E. Entrar con Google llega con la 2.22. |
 | 2026-10-09 | 0.6.36 | **Exportar y borrar la cuenta** (tarea 2.21, §4.14): registro de datos por módulo, exportación en JSON, borrado en un único `batch` con `account.deleted` y la limpieza de Cloudinary después, y la cola sin direcciones sueltas tras enviar. **Cookies** (tarea 2.23): auditoría en E2E y en el servidor. Buzón de los E2E (`/api/test/mailbox`, solo en test, §4.16). **Emblema de Opciones** (§3.8.14) con el tamaño del tablero de la vista previa: con cinco secciones ya reales, el granate de Privacidad llegaba al 24,8 %. |

@@ -1,4 +1,5 @@
 import { type FocusEvent, type KeyboardEvent, useCallback, useEffect, useId, useRef, useState } from 'react'
+import { audio } from '../../audio/engine'
 import { singleKeyAllowed } from '../shortcuts'
 import { isCharacterKey, isEditableTarget, listNavigation, wrapIndex } from './roving'
 import { type GroupLabel, type ItemHandlers, type RovingItemBaseProps, useRovingCore } from './useRoving'
@@ -86,6 +87,8 @@ export function useRovingTabs(options: RovingTabsOptions): RovingTabs {
       if (index === selectedRef.current || latest.current.isDisabled?.(index)) return
       selectedRef.current = index
       if (!controlled) setOwnIndex(index)
+      // Cambiar de pestaña suena a conmutador (`ui.toggle`, Anexo E), con flechas, clic o Q/E.
+      audio.play('ui.toggle')
       latest.current.onChange?.(index)
     },
     [controlled],
@@ -99,6 +102,9 @@ export function useRovingTabs(options: RovingTabsOptions): RovingTabs {
     isDisabled: options.isDisabled,
     navigate: (key, index) => listNavigation(key, index, count, { loop, orientation: 'horizontal' }),
     onMove: commit,
+    // El sonido lo pone `commit` (`ui.toggle`): mover el cursor de las pestañas ya elige.
+    moveSfx: null,
+    activateSfx: null,
   })
   const { moveTo, elements } = core
 

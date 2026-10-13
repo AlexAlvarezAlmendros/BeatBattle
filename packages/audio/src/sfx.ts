@@ -43,11 +43,22 @@ export interface SfxDef {
   duration: number
 }
 
-/** Los efectos de la tarea 1.4 y `vote.unlocked` de la 1.5 (el resto del Anexo D llega con sus pantallas). */
+/**
+ * Los efectos de la tarea 1.4, `vote.unlocked` de la 1.5 y los de la interfaz de la 2.27 (`ui.move`,
+ * `ui.toggle`, `ui.open`/`ui.close`, `ui.error`, `ui.success`, `nav.page`). El resto del Anexo D llega con
+ * sus pantallas.
+ */
 export const SFX_IDS = [
   'ui.enter',
   'ui.hover',
   'ui.press',
+  'ui.move',
+  'ui.toggle',
+  'ui.open',
+  'ui.close',
+  'ui.error',
+  'ui.success',
+  'nav.page',
   'star.hover.1',
   'star.hover.2',
   'star.hover.3',
@@ -90,6 +101,28 @@ export function sfxCatalog(key: Key = DEFAULT_KEY, xpCombo = 0): Record<SfxId, S
   const [root = 440, third = 554, fifth = 659] = triad
   const xpDegree = 3 + Math.max(0, Math.min(xpCombo, 7))
   const fanfare = [1, 2, 3, 4, 5, 6].map((degree) => pentatonicHz(key, degree, 5))
+  // Los de la interfaz que tienen nota van en la tonalidad (§3.7.1): la tónica en la 6.ª octava para los
+  // clics, en la 3.ª para el error.
+  const [clickRoot = 1047] = tonicTriadHz(key, 6)
+  const [lowRoot = 131] = tonicTriadHz(key, 3)
+  const semitone = 2 ** (1 / 12)
+  const fifthUp = 2 ** (7 / 12)
+  const majorThird = 2 ** (4 / 12)
+  // `gain` compensa lo que el paso banda se come (medido en el render offline, Anexo D).
+  const blow = (from: number, to: number, gain: number): SfxDef => ({
+    jitter: 0,
+    levelDb: -20,
+    duration: 0.22,
+    layers: [
+      noise({
+        filter: { type: 'bandpass', freq: [from, to], q: 1.4 },
+        attack: 0.06,
+        decay: 0.12,
+        dur: 0.22,
+        gain,
+      }),
+    ],
+  })
   const starHover = (degree: number): SfxDef => ({
     jitter: 0,
     levelDb: -26,
@@ -158,6 +191,94 @@ export function sfxCatalog(key: Key = DEFAULT_KEY, xpCombo = 0): Record<SfxId, S
           gain: 0.6,
         }),
         tone({ freq: at(1200), attack: 0.001, decay: 0.03, dur: 0.04, gain: 0.7 }),
+      ],
+    },
+    // Tic del cursor de juego (máx. 12 por segundo, en el motor).
+    'ui.move': {
+      jitter: 0,
+      levelDb: -28,
+      duration: 0.02,
+      layers: [
+        noise({
+          noise: 'white',
+          filter: { type: 'bandpass', freq: at(4500), q: 6 },
+          attack: 0.001,
+          decay: 0.012,
+          dur: 0.02,
+          gain: 7.2,
+        }),
+      ],
+    },
+    // Dos clics a una quinta (pestañas, chips, conmutadores).
+    'ui.toggle': {
+      jitter: 0,
+      levelDb: -20,
+      duration: 0.06,
+      layers: [
+        tone({ wave: 'triangle', freq: at(clickRoot), attack: 0.001, decay: 0.012, dur: 0.025, gain: 1 }),
+        tone({
+          wave: 'triangle',
+          freq: at(clickRoot * fifthUp),
+          attack: 0.001,
+          decay: 0.012,
+          dur: 0.025,
+          gain: 1,
+          delay: 0.035,
+        }),
+      ],
+    },
+    // Soplo de ruido filtrado: ascendente al abrir una ventana, descendente al cerrarla.
+    'ui.open': blow(400, 3200, 6.6),
+    'ui.close': blow(3200, 400, 7.9),
+    // Dos notas graves en segunda menor, triangular con filtro.
+    'ui.error': {
+      jitter: 0,
+      levelDb: -14,
+      duration: 0.28,
+      layers: [lowRoot, lowRoot * semitone].map((hz, index) =>
+        tone({
+          wave: 'triangle',
+          freq: at(hz),
+          filter: { type: 'lowpass', freq: at(1400), q: 0.7 },
+          attack: 0.004,
+          decay: 0.1,
+          dur: 0.14,
+          gain: 1,
+          delay: index * 0.14,
+        }),
+      ),
+    },
+    // Tercera mayor ascendente, campanita FM.
+    'ui.success': {
+      jitter: 0,
+      levelDb: -16,
+      duration: 0.3,
+      layers: [root, root * majorThird].map((hz, index) =>
+        fm({
+          freq: at(hz),
+          harmonicity: 3.5,
+          modIndex: 0.8,
+          attack: 0.003,
+          decay: 0.14,
+          dur: 0.18,
+          gain: 1,
+          delay: index * 0.12,
+        }),
+      ),
+    },
+    // El barrido de la diagonal al cambiar de página: ruido paso banda que sube.
+    'nav.page': {
+      jitter: 0,
+      levelDb: -24,
+      duration: 0.24,
+      layers: [
+        noise({
+          filter: { type: 'bandpass', freq: [300, 5000], q: 2 },
+          attack: 0.04,
+          decay: 0.12,
+          dur: 0.24,
+          gain: 11.7,
+        }),
       ],
     },
     'star.hover.1': starHover(1),
