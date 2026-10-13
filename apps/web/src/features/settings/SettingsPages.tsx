@@ -18,29 +18,32 @@ import { SettingsOptionsHelp, SettingsPreview } from './SettingsPreview'
 /** `/ajustes/sonido`. Ya funciona «Escuchar el master tal cual» (§2.6, `RF-PLAY-03`; tarea 5.13). */
 export function SoundSettingsPage() {
   return (
-    <SettingsSectionPlaceholder section="sound">
-      <RawMasterOption />
-    </SettingsSectionPlaceholder>
+    // La opción que ya funciona va en el sitio del resumen: el sello «EN OBRAS» y «Qué hará cada opción» ya
+    // dicen que el resto llega después, y así la sección sigue cabiendo a 1366 × 657 (§3.8.14).
+    <SettingsSectionPlaceholder section="sound" summary={<RawMasterOption />} />
   )
 }
 
-/** «Escuchar el master tal cual [SÍ/NO]»: quita la igualación fuera del Modo Jurado. */
+/**
+ * «Escuchar el master tal cual [SÍ/NO]»: quita la igualación fuera del Modo Jurado. Va en el resumen (un
+ * `<p>`): solo piezas en línea.
+ */
 function RawMasterOption() {
   const raw = usePlayer((state) => state.rawMaster)
   const set = usePlayer((state) => state.setRawMaster)
   const helpId = useId()
   return (
-    <div className="settings-option">
+    <span className="settings-option settings-option-inline">
       <FilterChip
         label={t('settings.sound.rawMaster.label')}
         pressed={raw}
         onChange={set}
         aria-describedby={helpId}
       />
-      <p id={helpId} className="settings-option-help">
+      <span id={helpId} className="settings-option-help">
         {t('settings.sound.rawMaster.help')}
-      </p>
-    </div>
+      </span>
+    </span>
   )
 }
 
@@ -51,9 +54,12 @@ export function MotionSettingsPage() {
 
 function SettingsSectionPlaceholder({
   section,
+  summary,
   children,
 }: {
   section: SettingsSectionKey
+  /** Lo que va al lado del sello «EN OBRAS»; por defecto, el resumen de la sección. */
+  summary?: ReactNode
   children?: ReactNode
 }) {
   const title = t(`settings.${section}.title`)
@@ -64,7 +70,7 @@ function SettingsSectionPlaceholder({
       // El <h1> (la sección) solo para lectores: la pestaña elegida ya la nombra. En móvil, donde el HUD
       // no lleva placa, la cabeza enseña la de escritorio, «OPCIONES · AJUSTES», antes de las pestañas.
       titlePlacement="tabs"
-      summary={t(`settings.${section}.summary`)}
+      summary={summary ?? t(`settings.${section}.summary`)}
       // La pieza de la cuña: las placas de la sección en vista previa (el sello «EN OBRAS» pasa al panel).
       piece={<SettingsPreview section={section} />}
       // Las secciones, después del rótulo y del título (en móvil, la pantalla abre con su título).
