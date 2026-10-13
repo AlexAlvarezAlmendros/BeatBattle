@@ -207,7 +207,7 @@ describe('render de la cola (§4.19.3, tarea 2.9)', () => {
   })
 
   it('un tipo sin plantilla todavía falla (y la cola lo reintenta)', async () => {
-    await expect(render(row('battle.monday', 'battle', {}), { to: 'a@b.es' })).rejects.toBeInstanceOf(
+    await expect(render(row('season.wrap', 'battle', {}), { to: 'a@b.es' })).rejects.toBeInstanceOf(
       MissingTemplateError,
     )
   })

@@ -11,9 +11,10 @@ import { withLease } from '../../lib/lease'
 import type { AlertsService } from '../alerts/service'
 import { type EntriesTickResult, entriesTick } from '../entries/cleanup'
 import type { EntriesService } from '../entries/service'
+import { type MondayResult, scheduleMondayEmails } from '../results/monday'
 import type { EntryStorage } from '../storage/entries'
 import { type NoticeResult, scheduleBattleNotices } from '../votes/notices'
-import { type ScheduleDeps, scheduleDropEmails, scheduleGapAlerts } from '../weeks/schedule'
+import { type ScheduleDeps, scheduleGapAlerts } from '../weeks/schedule'
 import { sealDueWeeks } from '../weeks/seal'
 import type { WeeksService } from '../weeks/service'
 
@@ -22,7 +23,8 @@ const TICK_LEASE_MS = 5 * 60 * 1000
 
 export interface TickResult {
   sealed: string[]
-  dropEmails: number
+  /** Lunes de batalla: combinados, drops y resultados encolados (tarea 6.9). */
+  mondayEmails: MondayResult
   /** Recordatorios y llamadas al jurado encolados (tarea 5.12). */
   battleNotices: NoticeResult
   calendarGaps: string[]
@@ -37,6 +39,8 @@ export interface TickResult {
 export interface CronDeps extends ScheduleDeps {
   db: Db
   cronSecret: string | null
+  /** Firma de la tarjeta de resultado del Lunes de batalla. */
+  cardSecret: string
   drain: DrainDeps
   weeks: WeeksService
   alerts: AlertsService
@@ -66,7 +70,7 @@ export function cronRoutes(app: FastifyInstance, deps: CronDeps): void {
     const result = await withLease(deps.db, { name: 'tick', holder, ttlMs: TICK_LEASE_MS, now }, async () => {
       const out: TickResult = {
         sealed: [],
-        dropEmails: 0,
+        mondayEmails: { monday: 0, drop: 0, results: 0 },
         battleNotices: { reminders: 0, juryCalls: 0 },
         calendarGaps: [],
         cleaned: { unconfirmedAlerts: 0, usernameRedirects: 0, ipSignals: 0 },
@@ -86,7 +90,7 @@ export function cronRoutes(app: FastifyInstance, deps: CronDeps): void {
         out.sealed = await sealDueWeeks(deps.db, { now, holder })
       })
       await step('emailSchedule', async () => {
-        out.dropEmails = await scheduleDropEmails(deps, now)
+        out.mondayEmails = await scheduleMondayEmails(deps, now)
         out.battleNotices = await scheduleBattleNotices(deps, now)
       })
       await step('adminAlerts', async () => {

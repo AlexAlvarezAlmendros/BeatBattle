@@ -55,6 +55,11 @@ describe('plantillas de email (§3.8.12, §4.19.4)', () => {
           expect(src).toMatch(/\/api\/email\/qr\/[\w-]+\.png\?sig=[\w-]+$/)
           continue
         }
+        // La tarjeta de resultado (6.10): personal por definición, firmada (`sig`) y sin registro en el servidor.
+        if (src.includes('/api/og/result/')) {
+          expect(src).toMatch(/\/api\/og\/result\/\d{4}-w\d{2}\/[\w-]+\?sig=[\w-]+$/)
+          continue
+        }
         // Las imágenes del juego, la cuenta atrás en vivo (§4.19.5) o la portada del sample (Cloudinary).
         const allowed = [
           `${PUBLIC_URL}/img/email/`,

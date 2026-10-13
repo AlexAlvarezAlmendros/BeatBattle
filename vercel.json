@@ -6,7 +6,7 @@
   "regions": ["fra1"],
   "functions": {
     "api/index.ts": {
-      "includeFiles": "apps/server/drizzle/**",
+      "includeFiles": "{apps/server/drizzle/**,apps/server/node_modules/@fontsource/*/files/*-latin-*-normal.woff}",
       "maxDuration": 10
     }
   },

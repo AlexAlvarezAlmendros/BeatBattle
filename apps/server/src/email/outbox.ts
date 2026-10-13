@@ -51,6 +51,11 @@ export interface EnqueueInput {
   now: number
   /** Primer instante en que puede salir (por defecto, ya). */
   notBefore?: number
+  /**
+   * Prioridad dentro de su tipo (por defecto, la del catálogo): el Lunes de batalla sale primero a quien
+   * participó, luego al jurado, al resto de cuentas y a los suscriptores (§2.12.2).
+   */
+  priority?: number
 }
 
 /**
@@ -70,7 +75,7 @@ export function enqueueEmail(db: Db, input: EnqueueInput): BatchStatement {
       toAddress: 'address' in target ? target.address : null,
       kind: input.kind,
       family: info.family,
-      priority: info.priority,
+      priority: input.priority ?? info.priority,
       payload: JSON.stringify(input.payload),
       status: 'queued',
       notBefore: input.notBefore ?? input.now,

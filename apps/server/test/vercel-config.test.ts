@@ -107,9 +107,11 @@ describe('vercel.json: construcción y función', () => {
     expect(config.regions).toEqual(['fra1'])
   })
 
-  it('la función api/index.ts lleva las migraciones y tiene un máximo de 10 s', () => {
+  it('la función api/index.ts lleva las migraciones y las fuentes de las imágenes, con un máximo de 10 s', () => {
+    // Las fuentes las lee `media/resultCard` con una ruta que el trazador de Vercel no ve (tarea 6.10).
     expect(config.functions['api/index.ts']).toEqual({
-      includeFiles: 'apps/server/drizzle/**',
+      includeFiles:
+        '{apps/server/drizzle/**,apps/server/node_modules/@fontsource/*/files/*-latin-*-normal.woff}',
       maxDuration: 10,
     })
   })
