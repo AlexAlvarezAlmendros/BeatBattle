@@ -6,6 +6,7 @@ import {
   type Clock,
   createBattleWeek,
   lastMail,
+  PASSWORD,
   signUp,
 } from './battle'
 import { expectNoAxeViolations, runSuffix, testIp } from './support'
