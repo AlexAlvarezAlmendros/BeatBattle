@@ -90,7 +90,7 @@ completa el MVP (F0–F6) para la beta cerrada.
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 6.1 | `packages/rules`: `rank(entradas, votos)` con la bayesiana de la semana, desempates (votos → mediana → cincos), ex aequo, podio con ≥ 3 votos, «sin clasificar» al final por orden de subida y los puntos de temporada de cada posición | ⬜ Listo | — | §2.8, §4.5, Anexo G · `RF-RES-01..04` · propiedades con fast-check |
+| 6.1 | `packages/rules`: `rank(entradas, votos)` con la bayesiana de la semana, desempates (votos → mediana → cincos), ex aequo, podio con ≥ 3 votos, «sin clasificar» al final por orden de subida y los puntos de temporada de cada posición | ✅ Hecho | — | §2.8, §4.5, Anexo G · `RF-RES-01..04` · propiedades con fast-check · **Hecho:** `ranking.ts` con 6 tests en `test/ranking.test.ts` (el caso del Anexo G exacto, podio con ≥ 3 votos, desempates y ex aequo 1, 1, 3, sin clasificar por orden de subida, propiedades de pureza, totalidad y estabilidad, semana sin votos). Guía v0.6.72 |
 
 ### Servidor
 
@@ -165,4 +165,5 @@ resultado y el sample nuevo; y lo que se comparte enseña la cara del juego sin 
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-13 | 6.1 | `rank` en `packages/rules` con propiedades (guía v0.6.72). |
 | 2026-10-13 | — | Plan creado (23 tareas). Sin dorado (decisión del usuario). XP, oído de oro y temporadas, en la F7; Elección del sello, en la F9; moderación completa y despliegue, en la F10. |
