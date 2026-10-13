@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from 'node:crypto'
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto'
 import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve, sep } from 'node:path'
 import { v2 as cloudinary } from 'cloudinary'
@@ -207,17 +207,44 @@ export function createCloudinarySampleStorage(config: StorageConfig): SampleStor
 // ─── Falso en disco (E2E y desarrollo sin Cloudinary) ───────────────────────────────────────────
 
 /** Metadatos que el almacenamiento falso guarda junto a cada fichero. */
-interface DiskMeta {
+export interface DiskMeta {
   format: string
   bytes: number
   width?: number
   height?: number
+  /** MD5 del contenido, como el `etag` de Cloudinary (`RF-ENT-11`). */
+  etag?: string
+  /** Cuándo se subió (ms UTC), como `created_at` de la Admin API. */
+  createdAtMs?: number
+  /** Duración de un WAV leída de su cabecera (Cloudinary la da de cualquier audio). */
+  durationMs?: number
+}
+
+/** Duración de un WAV PCM por su cabecera (`fmt ` y `data`), o `undefined` si no es un WAV legible. */
+export function wavDurationMs(bytes: Uint8Array): number | undefined {
+  const view = Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength)
+  if (view.length < 12 || view.toString('ascii', 0, 4) !== 'RIFF' || view.toString('ascii', 8, 12) !== 'WAVE')
+    return undefined
+  let offset = 12
+  let byteRate = 0
+  while (offset + 8 <= view.length) {
+    const id = view.toString('ascii', offset, offset + 4)
+    const size = view.readUInt32LE(offset + 4)
+    if (id === 'fmt ' && offset + 16 <= view.length) byteRate = view.readUInt32LE(offset + 16)
+    if (id === 'data') return byteRate > 0 ? Math.round((size / byteRate) * 1000) : undefined
+    offset += 8 + size + (size % 2)
+  }
+  return undefined
 }
 
 export interface DiskSampleStorage extends SampleStorage {
   readonly root: string
+  /** Origen de las URLs de las rutas de prueba (`''`: el mismo de la API). */
+  readonly baseUrl: string
+  /** Firma de una subida (`public_id`, `timestamp` y formatos permitidos), como la de Cloudinary. */
+  signUpload(publicId: string, timestamp: string, allowedFormats: string): string
   /** Guarda una parte como si la hubiera subido el navegador (lo usan la ruta de subida y los tests). */
-  put(input: { publicId: string; bytes: Uint8Array; format: string }): Promise<void>
+  put(input: { publicId: string; bytes: Uint8Array; format: string; nowMs?: number }): Promise<DiskMeta>
   /** Lee una parte guardada, o `null`. */
   read(publicId: string): Promise<{ bytes: Uint8Array; meta: DiskMeta } | null>
   /** Comprueba la firma de una subida o de una URL del almacenamiento falso. */
@@ -269,7 +296,9 @@ export function createDiskSampleStorage(input: {
   }
   const storage: DiskSampleStorage = {
     root,
+    baseUrl: input.baseUrl,
     prefix,
+    signUpload: (publicId, timestamp, allowedFormats) => hmac(`${publicId}|${timestamp}|${allowedFormats}`),
     publicIdFor: (sampleId, part) => publicIdFor(prefix, sampleId, part),
     checkSignature(payload, signature) {
       const expected = Buffer.from(hmac(payload))
@@ -292,16 +321,24 @@ export function createDiskSampleStorage(input: {
         publicId,
         fields: {
           ...fields,
-          signature: hmac(`${fields.public_id}|${fields.timestamp}|${fields.allowed_formats}`),
+          signature: storage.signUpload(fields.public_id, fields.timestamp, fields.allowed_formats),
         },
       }
     },
-    async put({ publicId, bytes, format }) {
+    async put({ publicId, bytes, format, nowMs }) {
       const path = pathOf(publicId)
       await mkdir(dirname(path), { recursive: true })
       await writeFile(path, bytes)
-      const meta: DiskMeta = { format, bytes: bytes.byteLength, ...imageSize(bytes) }
+      const meta: DiskMeta = {
+        format,
+        bytes: bytes.byteLength,
+        ...imageSize(bytes),
+        etag: createHash('md5').update(bytes).digest('hex'),
+        ...(nowMs === undefined ? {} : { createdAtMs: nowMs }),
+        ...(format === 'wav' ? { durationMs: wavDurationMs(bytes) } : {}),
+      }
       await writeFile(`${path}.meta.json`, JSON.stringify(meta))
+      return meta
     },
     async read(publicId) {
       const path = pathOf(publicId)
@@ -317,7 +354,7 @@ export function createDiskSampleStorage(input: {
       try {
         await stat(path)
         const meta = JSON.parse(await readFile(`${path}.meta.json`, 'utf8')) as DiskMeta
-        return { publicId, ...meta }
+        return { publicId, format: meta.format, bytes: meta.bytes, width: meta.width, height: meta.height }
       } catch {
         return null
       }

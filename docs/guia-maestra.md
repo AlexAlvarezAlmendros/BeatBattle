@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.48 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.49 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2670,7 +2670,7 @@ CREATE TABLE upload_intent (
 CREATE TABLE entry (
   id TEXT PRIMARY KEY,
   week_id TEXT NOT NULL REFERENCES week(id),
-  user_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,                               -- borrada la cuenta, en semana sellada: 'deleted:<id>' (RF-PRF-04)
   alias TEXT NOT NULL,                                 -- alias de batalla
   title TEXT NOT NULL, description TEXT,
   bpm REAL, musical_key TEXT, daw TEXT, tags TEXT NOT NULL DEFAULT '[]',
@@ -3574,6 +3574,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-10 | 0.6.49 | **Tarea 4.3.** §4.11: al borrar una cuenta (`RF-PRF-04`), sus entradas de semanas selladas guardan `user_id = 'deleted:<id de la entrada>'` (único por entrada, para no chocar con `entry_one_per_week`); las de semanas sin sellar y sus votos se borran, y sus audios los barre la limpieza de huérfanos (§4.8.5). |
 | 2026-10-10 | 0.6.48 | **Plan de la Fase 4** (Participar). §4.8.6: el almacenamiento falso imita también la subida por trozos (`X-Unique-Upload-Id`, `Content-Range`) y devuelve el `etag`. §2.12.1 y §4.11: el número de recibo se guarda en `entry.receipt_number` (único por semana, fijado al crear, no se reutiliza). §2.5, §3.8.5 y §4.8.4: el XP y los logros de la subida llegan con la Fase 7; hasta entonces el `batch` lleva la entrada y su email. |
 | 2026-10-10 | 0.6.47 | **Quinto pase del jurado de la Fase 3** (tarea 3.21). §3.8.2: los datos de la revelación se fijan al empezar (una nueva petición de la semana con otra URL firmada la hacía volver a empezar a mitad). §3.8.3: estado **cargando** (tarjeta en esqueleto, Jugar «Cargando…»), distinto del calendario vacío; el título largo baja hasta 24 px en escritorio antes de partir y la tarjeta aprieta sus filas para no pasar bajo la barra. §2.12.3: en «Cómo se juega» el formulario del aviso solo sale por encima de 960 px. |
 | 2026-10-10 | 0.6.46 | **Jurado visual de la Fase 3** (tarea 3.21). §3.8.2: la revelación lleva velo opaco, su propia pegatina *OTP.* y es modal (`inert`, foco de vuelta); el vinilo cae al centro (no a la tarjeta) y, sin movimiento, la capa entera funde con los datos fijos. §3.8.3: con el calendario vacío, el título de la tarjeta es «En el horno» (el display no pasa de 4 palabras, §3.2) y el rótulo dice cuándo cae el próximo drop o «Pronto»; el formulario de la alerta va en una fila en la tarjeta y en «Cómo se juega». |
