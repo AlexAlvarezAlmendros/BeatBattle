@@ -26,6 +26,9 @@ importers:
 
   apps/server:
     dependencies:
+      '@beatbattle/covers':
+        specifier: workspace:^
+        version: link:../../packages/covers
       '@beatbattle/emails':
         specifier: workspace:^
         version: link:../../packages/emails

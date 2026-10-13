@@ -18,3 +18,11 @@ porque la semana del ejemplo no existe en la BD local.
 
 El reparto (combinado, separado, espera de 2 h al sellado, prioridad y el contrato de voto ciego) se prueba con
 el `tick` y el `Mailer` en memoria en `apps/server/test/monday.test.ts`.
+
+## Imágenes OG (tarea 6.11)
+
+`og/`: semana abierta y en votación (portada generativa con la semilla de la semana y la cuenta atrás
+congelada), entrada en voto ciego («Escúchala y vota», sin autoría ni cifras) y sellada (alias tachado,
+productor, medalla y puntuación), resultados (podio) y perfil (solo semanas selladas). Pintadas con
+`apps/server/src/media/ogImages.ts`; la portada, por CPU con `svgCanvas.ts` y su calibración (2–4 pasadas,
+dentro del 0,1 % de la referencia). Entre 70 ms (sin portada) y 520 ms (la primera, con fuentes y calibración).
