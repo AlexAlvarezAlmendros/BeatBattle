@@ -7,7 +7,11 @@
  * registro, escucha y voto), con la app en este mismo proceso y su reloj movido a mano. La BD y la carpeta del
  * almacenamiento falso quedan listas para arrancar después la API con ellas:
  *
- *   pnpm --filter @beatbattle/server exec tsx src/scripts/seedBattle.ts <bd.db> <carpeta> [entradas] [votantes]
+ *   pnpm --filter @beatbattle/server exec tsx src/scripts/seedBattle.ts <bd.db> <carpeta> [entradas] [votantes] [sealed]
+ *
+ * Con `sealed` (tarea 6.20), la semana jugada es la **anterior** y queda sellada con su clasificación (para
+ * mirar los resultados, la ceremonia, el archivo y la ficha sellada), y la de este lunes queda abierta con
+ * otro sample y sin entradas (la home ofrece la ceremonia de la sellada).
  *   NODE_ENV=test DATABASE_URL=file:<bd.db> BB_FAKE_STORAGE=<carpeta> BB_TEST_CLOCK=1 PORT=3102 \
  *     pnpm --filter @beatbattle/server start
  *
@@ -24,8 +28,10 @@ import { createMemoryMailer } from '../email/mailer'
 import { fixedClock } from '../lib/clock'
 import { createDiskSampleStorage } from '../modules/storage/samples'
 
-const [dbFile, storageDir, producersArg = '24', votersArg = '2'] = process.argv.slice(2)
-if (!dbFile || !storageDir) throw new Error('Uso: seedBattle.ts <bd.db> <carpeta> [entradas] [votantes]')
+const [dbFile, storageDir, producersArg = '24', votersArg = '2', mode = 'open'] = process.argv.slice(2)
+if (!dbFile || !storageDir)
+  throw new Error('Uso: seedBattle.ts <bd.db> <carpeta> [entradas] [votantes] [sealed]')
+const SEALED = mode === 'sealed'
 
 const ORIGIN = 'http://localhost:5176'
 const PASSWORD = 'lluvia en gràcia 92'
@@ -43,7 +49,10 @@ const config = loadEnv({
 const db = await createDb(config.databaseUrl, config.databaseAuthToken)
 await runMigrations(db, config.migrationsDir)
 const mailer = createMemoryMailer({ name: 'Beat Battle', address: 'batalla@example.com' })
-const week = scheduleWeek(mondayOf(Date.now()))
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000
+// Con `sealed`, se juega la semana anterior.
+const monday = mondayOf(SEALED ? Date.now() - WEEK_MS : Date.now())
+const week = scheduleWeek(monday)
 const clock = fixedClock(week.startsAt - 24 * HOUR)
 const app = buildApp({ config, db, clock, mailer })
 await app.ready()
@@ -152,32 +161,43 @@ const admin = await account('jefa')
 await db.update(user).set({ role: 'admin' }).where(eq(user.id, admin.id))
 const signPart = (part: string, sampleId?: string) =>
   call('POST', '/api/admin/samples/sign', admin.cookie, { part, ...(sampleId ? { sampleId } : {}) })
-const original = await signPart('original')
-await files.put({ publicId: original.upload.publicId, bytes: beat(20, 92, 147, 1), format: 'wav' })
-const cover = await signPart('cover', original.sampleId)
 const png = Buffer.alloc(33)
 Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(png, 0)
 png.writeUInt32BE(13, 8)
 png.write('IHDR', 12)
 png.writeUInt32BE(1200, 16)
 png.writeUInt32BE(1200, 20)
-await files.put({ publicId: cover.upload.publicId, bytes: new Uint8Array(png), format: 'png' })
-const sample = await call('POST', '/api/admin/samples', admin.cookie, {
-  sampleId: original.sampleId,
-  title: 'Lluvia en Gràcia',
-  credits: 'Other People Records',
-  licenseText: 'Uso libre para la batalla.',
-  bpm: 92,
-  musicalKey: 'Dm',
-  hasStems: false,
-})
-const monday = mondayOf(Date.now())
+/** Un sample con su audio sintético y una portada mínima. */
+async function newSample(title: string, bpm: number, musicalKey: string, root: number) {
+  const original = await signPart('original')
+  await files.put({ publicId: original.upload.publicId, bytes: beat(20, bpm, root, 1), format: 'wav' })
+  const cover = await signPart('cover', original.sampleId)
+  await files.put({ publicId: cover.upload.publicId, bytes: new Uint8Array(png), format: 'png' })
+  return call('POST', '/api/admin/samples', admin.cookie, {
+    sampleId: original.sampleId,
+    title,
+    credits: 'Other People Records',
+    licenseText: 'Uso libre para la batalla.',
+    bpm,
+    musicalKey,
+    hasStems: false,
+  })
+}
+const sample = await newSample('Lluvia en Gràcia', 92, 'Dm', 147)
 const weekSlug = slugOf(monday)
 await call('POST', '/api/admin/weeks', admin.cookie, {
   monday: formatLocalDate(monday),
   sampleId: sample.id,
   challenge: 'Usa solo el primer compás',
 })
+const nextMonday = mondayOf(Date.now())
+if (SEALED) {
+  const next = await newSample('Niebla en Montjuïc', 100, 'Am', 110)
+  await call('POST', '/api/admin/weeks', admin.cookie, {
+    monday: formatLocalDate(nextMonday),
+    sampleId: next.id,
+  })
+}
 clock.set(week.startsAt + HOUR)
 
 // Los productores, cada uno con su entrada.
@@ -216,7 +236,13 @@ const voters: { id: string; cookie: string }[] = []
 for (let v = 0; v < Number(votersArg); v++) voters.push(await account(`jurado${v + 1}`))
 const everyone = [...voters, ...producers]
 for (const [v, voter] of everyone.entries()) {
-  const targets = producers.filter((p, i) => p.id !== voter.id && (i + v) % 3 === 0).slice(0, 6)
+  // Sellada: votos para casi todas (las que se queden con menos de 3, sin clasificar).
+  const targets = SEALED
+    ? producers
+        // La última, con solo 2 votos: sin clasificar.
+        .filter((p, i) => p.id !== voter.id && (i + v) % 4 !== 0 && (i < producers.length - 1 || v < 2))
+        .slice(0, 12)
+    : producers.filter((p, i) => p.id !== voter.id && (i + v) % 3 === 0).slice(0, 6)
   for (const [k, target] of targets.entries()) {
     const { listenId } = await call('POST', `/api/entries/${target.entryId}/listen`, voter.cookie)
     clock.advance(31_000)
@@ -225,7 +251,16 @@ for (const [v, voter] of everyone.entries()) {
   }
 }
 
+if (SEALED) {
+  // Cierra y sella (la primera lectura de los resultados tras el cierre sella, `RF-DROP-03`).
+  clock.set(week.voteEndsAt + MINUTE)
+  const results = await call('GET', `/api/weeks/${weekSlug}/results`, admin.cookie)
+  const podium = results.rows.filter((row: { result: { position: number | null } }) => row.result.position)
+  console.log(`\nSellada: ${podium.length} clasificadas de ${results.rows.length}.`)
+}
+
 await app.close()
 db.$client.close()
 console.log(`\nSemana ${weekSlug}: ${producers.length} entradas, ${voters.length} votantes.`)
+if (SEALED) console.log(`Abierta: ${slugOf(nextMonday)} (sin entradas).`)
 console.log(`Cuentas (contraseña «${PASSWORD}»): jefa (admin), jurado1…, prod01…`)

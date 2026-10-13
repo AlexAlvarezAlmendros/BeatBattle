@@ -134,7 +134,7 @@ completa el MVP (F0–F6) para la beta cerrada.
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 6.20 | Datos de prueba: una semana sellada con su clasificación (en `seedBattle` y en los fixtures de E2E) | ⬜ Listo | 6.4 | para la 6.21 y las capturas de la 6.22 |
+| 6.20 | Datos de prueba: una semana sellada con su clasificación (en `seedBattle` y en los fixtures de E2E) | ✅ Hecho | 6.4 | para la 6.21 y las capturas de la 6.22 · Hecho: `seedBattle.ts … sealed` (la anterior sellada con 11 de 12 clasificadas y la de este lunes abierta); el fixture de E2E va con la 6.21. |
 | 6.21 | E2E del hito: una semana simulada se vota, se cierra y se sella; los resultados y la ceremonia (y saltarla); re-sellar sin cambios da el mismo snapshot y, tras descalificar, la revisión 2 con su aviso; sale el Lunes de batalla | ⬜ Listo | 6.9, 6.15, 6.17, 6.18, 6.19, 6.20 | §5 · hito |
 | 6.22 | Jurado visual de tres lentes: resultados, ceremonia (fotogramas), archivo, ficha sellada, emails del lunes, imágenes OG y tarjetas de stories | ⬜ Listo | 6.21 | `RD-VIS-02` |
 | 6.23 | Cierre de la fase: criterio de aceptación, cobertura de ids y CI en verde | ⬜ Listo | 6.22 | — |
@@ -165,6 +165,7 @@ resultado y el sample nuevo; y lo que se comparte enseña la cara del juego sin 
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-13 | 6.20 | `seedBattle` con semana sellada. |
 | 2026-10-13 | 6.13 | Sitemap y robots.txt en la app de Fastify (guía v0.6.77). |
 | 2026-10-13 | 6.12 | Metadatos de las páginas compartibles en la app de Fastify, sin `api/share.ts` (guía v0.6.76). |
 | 2026-10-13 | 6.11 | Imágenes OG en la app de Fastify, sin `api/og.tsx` (guía v0.6.75). Portadas por CPU con un contexto 2D que dibuja en SVG y mide con resvg: la calibración converge al 0,1 % de la referencia. |
