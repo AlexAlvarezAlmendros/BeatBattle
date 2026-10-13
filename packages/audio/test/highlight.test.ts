@@ -5,9 +5,8 @@ import { loudestWindowMs } from '../src/highlight'
 describe('el momento más enérgico (6.17, §3.8.6)', () => {
   it('encuentra la ventana más fuerte: un beat callado con 4 s fuertes a partir del segundo 30', () => {
     // 60 s en 600 barras (10 por segundo): fuerte de 30 a 34 s.
-    const peaks = Array.from(
-      { length: 600 },
-      (_, i) => (i >= 300 && i < 340 ? [-0.9, 0.9] : [-0.1, 0.1]) as const,
+    const peaks = Array.from({ length: 600 }, (_, i): [number, number] =>
+      i >= 300 && i < 340 ? [-0.9, 0.9] : [-0.1, 0.1],
     )
     expect(loudestWindowMs(peaks, 60_000, 4000)).toBe(30_000)
   })
