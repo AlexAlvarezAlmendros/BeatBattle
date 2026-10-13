@@ -114,7 +114,7 @@ construye aquí lo ve alguien que vota.
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 5.2 | Esquema y migración: `listen`, `report`, `ip_signal`; esquemas Zod en `@beatbattle/shared` (lista, voto, escucha, denuncia, cola, crónica, estadísticas) y códigos de error (`OWN_ENTRY`, `LISTEN_REQUIRED`, `VOTING_CLOSED`, `REPORT_EXISTS`) | ⬜ Listo | — | §4.10, §4.11 · `RF-VOTE-01` (Zod: enteros 1–5) |
+| 5.2 | Esquema y migración: `listen`, `report`, `ip_signal`; esquemas Zod en `@beatbattle/shared` (lista, voto, escucha, denuncia, cola, crónica, estadísticas) y códigos de error (`OWN_ENTRY`, `LISTEN_REQUIRED`, `VOTING_CLOSED`, `REPORT_EXISTS`) | ✅ Hecho | — | §4.10, §4.11 · `RF-VOTE-01` (Zod: enteros 1–5) · **Hecho:** migración `0006_escuchar_votar`; `packages/shared/src/votes.ts` con sus tests (`RF-VOTE-01`, sin orden «mejor valoradas», nada de medias en la lista ni autoría en la crónica); borrado y exportación de la cuenta con las tablas nuevas, retirada y sustitución del audio que borran los recibos, y purga de `ip_signal` a los 7 días en el `tick`. Guía v0.6.61 |
 | 5.3 | `GET /api/weeks/:slug/entries?order=fair\|new\|random&genre=&bpm=&key=&unvoted=`: activas, sin autoría ni notas sin sellar; con sesión, `myVote` | ⬜ Listo | 5.1, 5.2 | §2.6, §4.10 · `RF-PLAY-04`, `RF-PLAY-05`, `RF-VOTE-07` |
 | 5.4 | Recibo de escucha: `POST /api/entries/:id/listen` → `{ listenId, thresholdMs }` y `POST …/listen/qualify` (comprueba el tiempo de reloj desde el inicio con el reloj inyectable) | ⬜ Listo | 5.2 | §2.7, §4.7.3 · `RF-VOTE-04` |
 | 5.5 | Voto: `PUT`/`DELETE /api/entries/:id/vote` en un `batch` condicionado (fase `open`/`voting`, entrada activa y ajena, recibo cualificado; `ON CONFLICT DO UPDATE`); 120/h por usuario; `ip_signal`; al llegar a 5 votos, `battle.first_votes` en el mismo `batch` | ⬜ Listo | 5.4 | §2.7, §4.11 · `RF-VOTE-01..06`, `RF-VOTE-11`, `RF-VOTE-13` |
@@ -178,5 +178,6 @@ recordatorio, llamada al jurado y primeros votos salen respetando silencio y top
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
-| 2026-10-13 | — | Plan creado (24 tareas). |
+| 2026-10-13 | 5.2 | Esquema (`listen`, `report`, `ip_signal`), esquemas Zod del voto y códigos de error (guía v0.6.61). |
 | 2026-10-13 | 5.1 | Ronda justa, órdenes y cola del jurado en `packages/rules` con propiedades (guía v0.6.60). |
+| 2026-10-13 | — | Plan creado (24 tareas). |

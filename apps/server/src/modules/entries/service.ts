@@ -28,7 +28,16 @@ import { and, count, eq, inArray, max, ne } from 'drizzle-orm'
 import type { BatchStatement } from '../../db/batch'
 import { runBatch } from '../../db/batch'
 import type { Db } from '../../db/client'
-import { entry, producerProfile, rulesAcceptance, uploadIntent, user, vote, week } from '../../db/schema'
+import {
+  entry,
+  listen,
+  producerProfile,
+  rulesAcceptance,
+  uploadIntent,
+  user,
+  vote,
+  week,
+} from '../../db/schema'
 import { enqueueEmail } from '../../email/outbox'
 import { auditStatement } from '../../lib/audit'
 import { appError } from '../../lib/errors'
@@ -693,6 +702,8 @@ export function createEntriesService(deps: EntriesDeps) {
       await runBatch(db, [
         db.update(entry).set(changes).where(eq(entry.id, row.id)),
         db.update(uploadIntent).set({ status: 'done' }).where(eq(uploadIntent.id, intent.id)),
+        // Lo escuchado del audio anterior no cuenta para el nuevo (`RF-VOTE-04`).
+        db.delete(listen).where(eq(listen.entryId, row.id)),
         ...(next.status === 'active'
           ? [
               enqueueEmail(db, {
@@ -725,7 +736,8 @@ export function createEntriesService(deps: EntriesDeps) {
     },
 
     /**
-     * `DELETE /api/entries/:id` (`RF-ENT-09`): retirar hasta el cierre de envíos. Borra sus votos, libera el
+     * `DELETE /api/entries/:id` (`RF-ENT-09`): retirar hasta el cierre de envíos. Borra sus votos y sus
+     * recibos de escucha, libera el
      * hueco de la semana (`withdrawn`) y borra audio y portada; sale `entry.changed` con los votos perdidos
      * (un dato del propio productor, nunca público).
      */
@@ -734,6 +746,7 @@ export function createEntriesService(deps: EntriesDeps) {
       const votesLost = await voteCount(row.id)
       await runBatch(db, [
         db.delete(vote).where(eq(vote.entryId, row.id)),
+        db.delete(listen).where(eq(listen.entryId, row.id)),
         db
           .update(entry)
           .set({ status: 'withdrawn', statusReason: 'owner', updatedAt: now })

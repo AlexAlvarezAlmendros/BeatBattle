@@ -67,6 +67,14 @@ export const ERROR_STATUS = {
   ENTRY_ASSET_INVALID: 422,
   /** No hay almacenamiento de audio configurado (ni Cloudinary ni el falso). */
   STORAGE_UNAVAILABLE: 503,
+  /** Votar la propia entrada (`RF-VOTE-03`). */
+  OWN_ENTRY: 403,
+  /** Votar sin el recibo de escucha cumplido (`RF-VOTE-04`); `details.remainingMs` dice cuánto falta. */
+  LISTEN_REQUIRED: 409,
+  /** Votar o quitar el voto fuera de `open` y `voting` (`RF-VOTE-05`), aunque la semana no esté sellada. */
+  VOTING_CLOSED: 409,
+  /** Segunda denuncia del mismo usuario a la misma entrada (`RF-VOTE-12`). */
+  REPORT_EXISTS: 409,
   /** Límite de frecuencia superado; la respuesta lleva `Retry-After`. */
   RATE_LIMITED: 429,
   /** Error inesperado; nunca lleva la pila ni mensajes internos. */

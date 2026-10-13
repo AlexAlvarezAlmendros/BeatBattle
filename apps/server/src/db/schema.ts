@@ -419,8 +419,8 @@ export const entry = sqliteTable(
 )
 
 /**
- * Voto de 1 a 5 estrellas (§2.7). En la Fase 4 solo el esquema: sustituir el audio pide que la entrada no
- * tenga votos (`RF-ENT-08`) y retirarla los borra (`RF-ENT-09`). La lógica del voto llega con la Fase 5.
+ * Voto de 1 a 5 estrellas (§2.7): uno por usuario y entrada, repetirlo lo actualiza (`RF-VOTE-02`). Sustituir
+ * el audio pide que la entrada no tenga votos (`RF-ENT-08`) y retirarla los borra (`RF-ENT-09`).
  */
 export const vote = sqliteTable(
   'vote',
@@ -439,6 +439,64 @@ export const vote = sqliteTable(
     index('vote_week').on(table.weekId),
     index('vote_entry').on(table.entryId),
     check('vote_stars', sql`${table.stars} BETWEEN 1 AND 5`),
+  ],
+)
+
+/**
+ * Recibo de escucha (§2.7, §4.7.3, `RF-VOTE-04`): el servidor apunta cuándo empezó a sonar una entrada y,
+ * cuando el cliente dice que ha cumplido el umbral, comprueba que ha pasado ese tiempo de reloj.
+ */
+export const listen = sqliteTable(
+  'listen',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull(),
+    entryId: text('entry_id').notNull(),
+    startedAt: integer('started_at').notNull(),
+    qualifiedAt: integer('qualified_at'),
+  },
+  (table) => [
+    index('listen_user_entry').on(table.userId, table.entryId),
+    index('listen_entry').on(table.entryId),
+  ],
+)
+
+export const REPORT_STATUSES = ['open', 'actioned', 'dismissed'] as const
+
+/** Denuncia de una entrada (§2.7, §2.13, `RF-VOTE-12`): una por usuario y entrada; la cola es de la F10. */
+export const report = sqliteTable(
+  'report',
+  {
+    id: text('id').primaryKey(),
+    reporterId: text('reporter_id').notNull(),
+    entryId: text('entry_id').notNull(),
+    reason: text('reason').notNull(),
+    details: text('details'),
+    status: text('status', { enum: REPORT_STATUSES }).notNull().default('open'),
+    resolvedBy: text('resolved_by'),
+    resolvedAt: integer('resolved_at'),
+    createdAt: integer('created_at').notNull(),
+  },
+  (table) => [
+    uniqueIndex('report_reporter_entry').on(table.reporterId, table.entryId),
+    index('report_entry').on(table.entryId),
+  ],
+)
+
+/**
+ * Señal de IP de quien vota (§2.13, §4.14): hash con sal rotatoria, para el informe de votos anómalos
+ * (`RF-MOD-03`, Fase 10). Se purga a los 7 días (`cleanup`).
+ */
+export const ipSignal = sqliteTable(
+  'ip_signal',
+  {
+    userId: text('user_id').notNull(),
+    ipHash: text('ip_hash').notNull(),
+    seenAt: integer('seen_at').notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.ipHash] }),
+    index('ip_signal_seen').on(table.seenAt),
   ],
 )
 

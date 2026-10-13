@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.60 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.61 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2581,7 +2581,7 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | GET | `/api/weeks/current` | Pública | Semana en juego (`open` o `voting`: sample con su MP3 de escucha firmado, fase, fronteras, reto, dorada; con sesión, `viewer` con bases aceptadas y drop visto) y, si no hay, solo **cuándo** es el próximo drop (`next`). Sella de forma perezosa lo que haya cerrado |
 | GET | `/api/weeks/:slug` | Pública | Una semana ya empezada (antes del drop, 404) |
 | GET | `/api/weeks?cursor=` | Pública | Archivo de semanas selladas |
-| GET | `/api/weeks/:slug/entries?order=fair\|new\|random&genre=&bpm=&key=&unvoted=` | Pública | Entradas (sin autoría ni notas si no está sellada); con sesión incluye `myVote` |
+| GET | `/api/weeks/:slug/entries?order=fair\|new\|random&genre=&bpm=&key=&unvoted=&seed=` | Pública | Entradas (sin autoría ni notas si no está sellada); con sesión incluye `myVote` y `mine`. `bpm` es un rango `90-110`; `seed` vuelve a barajar «Aleatorio» |
 | GET | `/api/weeks/:slug/ticker?since=` | Pública | Eventos de la crónica de la arena (§3.8.3) |
 | GET | `/api/weeks/:slug/results` | Pública | Snapshot de resultados (404 si no está sellada) |
 | POST | `/api/weeks/:slug/rules` | Verif. | Aceptar las bases de la semana |
@@ -2596,7 +2596,7 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | GET | `/api/entries/:id/stats` | Dueño | Votos y escuchas propios (sin media) |
 | POST | `/api/entries/:id/listen` | Verif. | Inicio de escucha → `{ listenId, thresholdMs }` |
 | POST | `/api/entries/:id/listen/qualify` | Verif. | Cumplir el umbral |
-| POST | `/api/entries/:id/play` | Pública | Contar una escucha (≥ 10 s), con límite por IP y entrada |
+| POST | `/api/entries/:id/play` | Pública | Contar una escucha (≥ 10 s) `{ playId }`, una por sesión de escucha, con límite por IP y entrada |
 | PUT · DELETE | `/api/entries/:id/vote` | Verif. | Votar `{ stars }` o quitar el voto |
 | POST | `/api/entries/:id/report` | Verif. | Denunciar |
 | POST | `/api/entries/:id/guess` | Verif. | «Adivina el productor» (Fase 8) |
@@ -3618,6 +3618,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.61 | **Tarea 5.2.** §4.10: la lista admite `seed` (volver a barajar «Aleatorio») y su `bpm` es un rango `min-max`; cada entrada lleva `mine` además de `myVote`; `POST /play` lleva un `playId` por sesión de escucha. Códigos nuevos: `OWN_ENTRY` (403), `LISTEN_REQUIRED`, `VOTING_CLOSED` y `REPORT_EXISTS` (409). Motivos de denuncia de §2.7 como ids: `not_sample`, `rights`, `offensive`, `spam`, `other` (detalle de hasta 500 caracteres). §4.14: la exportación y el borrado de la cuenta incluyen los recibos de escucha, las denuncias y las señales de IP (y, de sus entradas sin sellar, los de otros); sustituir el audio o retirar la entrada borra sus recibos de escucha. |
 | 2026-10-13 | 0.6.60 | **Tarea 5.1.** §4.5, módulo `fair`: además de `fairOrder`, `fairSeed` (con sesión, usuario y semana; sin ella, el día en `Europe/Madrid`), `newestOrder`, `randomOrder` (baraja la lista ordenada por id, así no depende del orden de llegada) y `juryQueue` (la cola del Modo Jurado de §2.7: sin las votadas ni la propia, en Ronda justa, y las saltadas al final en el orden del último salto). Las ya votadas, en Ronda justa, van al final con el mismo criterio (la rejilla de §3.8.13 las pone ahí). |
 | 2026-10-13 | 0.6.59 | §3.5 y §4.17 (`RNF-PERF-02`): el LCP de la home es un texto del menú, el título del escenario o, si es más pequeño (el calendario vacío, «En el horno», desde el jurado de la F3), la etiqueta de la placa elegida. Lo que se exige no cambia: un texto, nunca el lienzo ni el logo, pintado con la primera pintura. |
 | 2026-10-13 | 0.6.58 | **Tarea 4.13 (decisión del usuario).** §4.1: `qrcode` como dependencia del servidor para la matriz de los códigos QR. §4.19.5: el QR del recibo (`/api/email/qr/:entryId.png?sig=`), firmado, a la ficha pública de la entrada. El recibo de §2.12.1 ya lo llevaba en la especificación. |
