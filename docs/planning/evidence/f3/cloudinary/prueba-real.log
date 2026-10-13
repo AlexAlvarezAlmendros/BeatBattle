@@ -1,0 +1,9 @@
+[3.4 s] subidas: [["beatbattle-dev/samples/prueba-real-3-4-a4bb235b/original","original"],["beatbattle-dev/samples/prueba-real-3-4-a4bb235b/stems.zip","stems"],["beatbattle-dev/samples/prueba-real-3-4-a4bb235b/cover","cover"]]
+[3.8 s] verificación: {"original":{"publicId":"beatbattle-dev/samples/prueba-real-3-4-a4bb235b/original","format":"wav","bytes":3528124,"width":0,"height":0},"stems":{"publicId":"beatbattle-dev/samples/prueba-real-3-4-a4bb235b/stems.zip","format":"zip","bytes":6402094},"cover":{"publicId":"beatbattle-dev/samples/prueba-real-3-4-a4bb235b/cover","format":"png","bytes":10458,"width":1200,"height":1200}}
+[4.6 s] medición: {"duraciónMs":20000,"lufs":-7.7,"picoRealDb":0.1,"bytesLeídos":3528124}
+[6.2 s] escucha: {"firmada":200,"tipo":"audio/mpeg","bytes":481532,"sinFirma":404}
+[7.4 s] descarga antes de caducar: {"original":{"status":200,"disposición":"attachment; filename=\"sample.wav\"","bytes":3528124},"stems":{"status":200,"disposición":"attachment; filename=\"stems.zip\"","bytes":6402094},"caducaEnS":45}
+[66.8 s] descarga caducada: {"original":401,"stems":401}
+[67.5 s] portada: {"status":200,"tipo":"image/png"}
+[69.9 s] borrado: {"original":true,"stems":true,"cover":true}
+[69.9 s] fin
