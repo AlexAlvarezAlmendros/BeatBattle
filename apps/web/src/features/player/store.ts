@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { audio } from '../../audio/engine'
 import type { WaveformPeak } from '../../ui/Waveform'
+import { listenInterrupted, listenProgress, listenStarted } from './listen'
 
 /**
  * El reproductor global (guía §2.6, §4.7.3; tarea 5.13): **un único** `HTMLAudioElement` para toda la web
@@ -41,6 +42,8 @@ export interface PlayerTrack {
   peaks: readonly WaveformPeak[] | null
   /** Entrada de una semana ciega sin sellar (`RD-MOT-06`). */
   blind: boolean
+  /** Ajena y con las votaciones abiertas: se pide el recibo de escucha (`features/player/listen`). */
+  votable?: boolean
   weekSlug: string
 }
 
@@ -98,9 +101,23 @@ export function playerElement(): HTMLAudioElement {
   const el = new Audio()
   el.crossOrigin = 'anonymous'
   el.preload = 'none'
-  el.addEventListener('timeupdate', () => usePlayer.setState({ positionMs: el.currentTime * 1000 }))
-  el.addEventListener('playing', () => usePlayer.setState({ status: 'playing' }))
+  el.addEventListener('timeupdate', () => {
+    usePlayer.setState({ positionMs: el.currentTime * 1000 })
+    const { track } = usePlayer.getState()
+    if (track) listenProgress(track, el.played, el.currentTime)
+  })
+  el.addEventListener('playing', () => {
+    usePlayer.setState({ status: 'playing' })
+    const { track } = usePlayer.getState()
+    if (track) listenStarted(track, el.currentTime)
+  })
+  // Pausa o salto: la escucha seguida (`RF-PLAY-07`) vuelve a empezar.
+  el.addEventListener('seeking', () => listenInterrupted(null))
+  el.addEventListener('seeked', () => {
+    if (!el.paused) listenInterrupted(el.currentTime)
+  })
   el.addEventListener('pause', () => {
+    listenInterrupted(null)
     if (usePlayer.getState().status === 'playing') usePlayer.setState({ status: 'paused' })
   })
   el.addEventListener('waiting', () => usePlayer.setState({ status: 'loading' }))

@@ -1,0 +1,1 @@
+export { JurySilhouette } from './JurySilhouette'

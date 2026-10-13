@@ -1521,6 +1521,10 @@
       "back": "Volver",
       "cancel": "Cancelar",
       "sound": "Sonido",
+      "listen": "Escuchar",
+      "jury": "Jurado",
+      "order": "Orden",
+      "filters": "Filtros",
       "glyph": {
         "up": "↑",
         "upLabel": "Flecha arriba",
@@ -1534,7 +1538,9 @@
         "e": "E",
         "enter": "Intro",
         "escape": "Esc",
-        "m": "M"
+        "m": "M",
+        "j": "J",
+        "f": "F"
       }
     },
     "controls": {
@@ -1547,6 +1553,7 @@
     },
     "plates": {
       "week": "Escenario",
+      "weekEntries": "Selección",
       "weekResults": "Ceremonia",
       "weeks": "Selección de escenario",
       "entry": "Ficha de luchador",
@@ -1920,5 +1927,26 @@
     "expand": "Abrir el reproductor",
     "collapse": "Plegar el reproductor",
     "close": "Cerrar el reproductor"
+  },
+  "selection": {
+    "title": "Elige entrada",
+    "kicker": "Semana {number} · selección",
+    "summary": "{count} entradas · voto ciego: nadie sabe de quién es cada beat hasta el sellado.",
+    "documentTitle": "Elige entrada · semana {number}",
+    "orderLabel": "Orden de la lista",
+    "order": {
+      "fair": "Ronda justa",
+      "new": "Recién subidas",
+      "random": "Aleatorio"
+    },
+    "unvoted": "Solo sin votar",
+    "filters": "Filtros",
+    "genre": "Género",
+    "key": "Tonalidad",
+    "any": "Cualquiera",
+    "info": "{count} en la lista · tus votadas van al final · orden de escucha, no clasificación",
+    "gridLabel": "Entradas de la semana",
+    "note": "Ronda justa: primero, las que menos votos llevan (nadie ve cuántos). Notas y autoría, el domingo.",
+    "link": "Elegir entrada"
   }
 }

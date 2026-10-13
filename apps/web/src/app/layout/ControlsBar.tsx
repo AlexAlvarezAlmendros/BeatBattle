@@ -36,6 +36,13 @@ export const CONTROL_KEYS: Readonly<
   back: { keys: [{ glyph: 'frame.keys.glyph.escape' }], verb: 'frame.keys.back' },
   cancel: { keys: [{ glyph: 'frame.keys.glyph.escape' }], verb: 'frame.keys.cancel' },
   sound: { keys: [{ glyph: 'frame.keys.glyph.m' }], verb: 'frame.keys.sound' },
+  listen: { keys: [{ glyph: 'frame.keys.glyph.enter' }], verb: 'frame.keys.listen' },
+  jury: { keys: [{ glyph: 'frame.keys.glyph.j' }], verb: 'frame.keys.jury' },
+  order: {
+    keys: [{ glyph: 'frame.keys.glyph.q' }, { glyph: 'frame.keys.glyph.e' }],
+    verb: 'frame.keys.order',
+  },
+  filters: { keys: [{ glyph: 'frame.keys.glyph.f' }], verb: 'frame.keys.filters' },
 }
 
 /**

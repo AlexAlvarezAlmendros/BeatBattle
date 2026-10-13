@@ -233,6 +233,11 @@ export function WeekPage() {
 
         <div className={styles.actions}>
           {actions}
+          {week.entries > 0 && (
+            <Button variant="outline" to={paths.weekEntries(week.slug)}>
+              {t('selection.link')}
+            </Button>
+          )}
           {live && (
             <Button variant="outline" onClick={() => setReplay(true)}>
               {t('pages.week.replay')}

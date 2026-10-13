@@ -1,4 +1,4 @@
-import type { HTMLAttributes, Ref } from 'react'
+import type { HTMLAttributes, ReactNode, Ref } from 'react'
 import { t } from '../../i18n'
 import { CoverArt } from '../CoverArt'
 import { Cursor } from '../Cursor'
@@ -26,6 +26,8 @@ export interface EntryCellProps {
   /** La entrada no ha cargado. */
   error?: boolean
   itemProps: EntryCellItemProps
+  /** La portada de la entrada (la generativa de su semilla, §3.4.5); sin ella, la de referencia. */
+  cover?: ReactNode
   state?: InteractionState
   className?: string
 }
@@ -48,6 +50,7 @@ export function EntryCell({
   loading = false,
   error = false,
   itemProps,
+  cover,
   state,
   className,
 }: EntryCellProps) {
@@ -92,6 +95,8 @@ export function EntryCell({
           <span className={styles.failed}>
             <Icon name="alert" />
           </span>
+        ) : cover ? (
+          <span className={styles.cover}>{cover}</span>
         ) : (
           <CoverArt className={styles.cover} />
         )}
