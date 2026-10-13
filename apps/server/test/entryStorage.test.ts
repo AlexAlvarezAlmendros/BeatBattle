@@ -19,7 +19,14 @@ const config = { cloudName: 'demo', apiKey: '123', apiSecret: 'secreto', prefix:
 const fakeMeasure = async (source: ReadableStream<Uint8Array>): Promise<AudioMeasurement> => {
   let bytes = 0
   for await (const chunk of source as unknown as AsyncIterable<Uint8Array>) bytes += chunk.byteLength
-  return { durationMs: bytes, integratedLufs: -10, truePeakDb: -0.5, peaks: new Int8Array(2000) }
+  return {
+    durationMs: bytes,
+    integratedLufs: -10,
+    truePeakDb: -0.5,
+    peaks: new Int8Array(2000),
+    md5: '',
+    bytesRead: bytes,
+  }
 }
 
 async function diskApp(): Promise<{ t: TestApp; storage: EntryStorage; root: string }> {
@@ -90,7 +97,7 @@ describe('almacenamiento de las entradas en Cloudinary (4.4)', () => {
 })
 
 describe('almacenamiento falso de las entradas, con la subida por trozos (4.4, §4.8.6)', () => {
-  it('RF-STO-01: un WAV sube en 3 trozos firmados; el último cierra el recurso con su etag, duración y fecha', async () => {
+  it('RF-STO-01: un WAV sube en 3 trozos firmados; el último cierra el recurso con su etag, y la verificación (como la Admin API) no lo da', async () => {
     const { t, storage } = await diskApp()
     const wav = sineWav({ seconds: 3 })
     const publicId = storage.publicIdFor('entry', '2026-w41', 'abc')
@@ -113,11 +120,11 @@ describe('almacenamiento falso de las entradas, con la subida por trozos (4.4, �
       publicId,
       format: 'wav',
       bytes: wav.byteLength,
-      durationMs: 3000,
       createdAtMs: T0,
     })
-    expect(asset?.etag).toBe(responses.at(-1).etag)
-    expect(asset?.etag).toMatch(/^[0-9a-f]{32}$/)
+    expect(responses.at(-1).etag).toMatch(/^[0-9a-f]{32}$/)
+    // La Admin API de Cloudinary no da ni el etag ni la duración (prueba real de la 4.10): el falso, tampoco.
+    expect(asset).toMatchObject({ etag: '', durationMs: null })
     // La medición recibe el fichero entero.
     expect((await storage.measure(publicId, 'wav')).durationMs).toBe(wav.byteLength)
   })

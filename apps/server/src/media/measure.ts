@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process'
-import { Readable } from 'node:stream'
+import { createHash } from 'node:crypto'
+import { Readable, Transform } from 'node:stream'
 import ffmpegStatic from 'ffmpeg-static'
 
 /**
@@ -25,6 +26,13 @@ export interface AudioMeasurement {
   truePeakDb: number | null
   /** `WAVEFORM_BINS × [mín, máx]` en `Int8` (−127…127). */
   peaks: Int8Array
+  /**
+   * Huella del fichero (MD5 en hexadecimal) de los bytes que se han leído para medirlo, y cuántos son: la
+   * huella de la entrada (`RF-ENT-11`) solo vale si son todos. La Admin API de Cloudinary no da el `etag`
+   * (solo la respuesta de la subida, que ve el navegador): lo calcula el servidor (prueba real de la 4.10).
+   */
+  md5: string
+  bytesRead: number
 }
 
 /** Ruta del ffmpeg: `FFMPEG_PATH` si se da, si no el de `ffmpeg-static`. */
@@ -36,7 +44,14 @@ export function defaultFfmpegPath(): string {
 
 type AudioSource = ReadableStream<Uint8Array> | Readable | Uint8Array
 
-function run(source: AudioSource, ffmpegPath: string): Promise<{ pcm: Buffer; stderr: string }> {
+interface RunResult {
+  pcm: Buffer
+  stderr: string
+  md5: string
+  bytesRead: number
+}
+
+function run(source: AudioSource, ffmpegPath: string): Promise<RunResult> {
   return new Promise((resolve, reject) => {
     const child = spawn(ffmpegPath, [
       '-hide_banner',
@@ -62,8 +77,21 @@ function run(source: AudioSource, ffmpegPath: string): Promise<{ pcm: Buffer; st
         : source instanceof Readable
           ? source
           : Readable.fromWeb(source as import('node:stream/web').ReadableStream<Uint8Array>)
+    // La huella, de lo que pasa camino de ffmpeg.
+    const hash = createHash('md5')
+    let bytesRead = 0
+    const fingerprint = new Transform({
+      transform(chunk: Buffer, _encoding, done) {
+        hash.update(chunk)
+        bytesRead += chunk.length
+        done(null, chunk)
+      },
+    })
     // Si ffmpeg corta la entrada (fichero que no es audio), el `EPIPE` no debe tumbar el proceso.
-    input.pipe(child.stdin).on('error', () => {})
+    input
+      .pipe(fingerprint)
+      .pipe(child.stdin)
+      .on('error', () => {})
     child.stdin.on('error', () => {})
     const pcm: Buffer[] = []
     let stderr = ''
@@ -76,7 +104,7 @@ function run(source: AudioSource, ffmpegPath: string): Promise<{ pcm: Buffer; st
     child.on('error', reject)
     child.on('close', (code) => {
       if (code !== 0) reject(new Error(`ffmpeg salió con ${code}: ${stderr.slice(-400)}`))
-      else resolve({ pcm: Buffer.concat(pcm), stderr })
+      else resolve({ pcm: Buffer.concat(pcm), stderr, md5: hash.digest('hex'), bytesRead })
     })
   })
 }
@@ -116,12 +144,14 @@ export async function measureAudio(
   source: AudioSource,
   ffmpegPath: string = defaultFfmpegPath(),
 ): Promise<AudioMeasurement> {
-  const { pcm, stderr } = await run(source, ffmpegPath)
+  const { pcm, stderr, md5, bytesRead } = await run(source, ffmpegPath)
   const samples = new Int16Array(pcm.buffer, pcm.byteOffset, Math.floor(pcm.byteLength / 2))
   if (samples.length === 0) throw new Error('ffmpeg no sacó ninguna muestra: no es un audio')
   return {
     durationMs: Math.round((samples.length / WAVE_RATE) * 1000),
     ...parseLoudness(stderr),
     peaks: waveformPeaks(samples),
+    md5,
+    bytesRead,
   }
 }

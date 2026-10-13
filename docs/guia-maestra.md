@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.56 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.59 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -390,7 +390,7 @@ las bases) y la portada propia queda oculta hasta el sellado: se muestra la gene
 | `RF-ENT-08` | El audio solo se sustituye si la entrada no tiene votos | Con un voto → 409 `ENTRY_HAS_VOTES` |
 | `RF-ENT-09` | Retirar la entrada borra su audio y sus votos y libera el hueco | Tras retirarla puede subir otra |
 | `RF-ENT-10` | En voto ciego, la portada propia y la identidad no se exponen antes del sellado, ni en la UI ni en la API pública | La respuesta pública de una entrada en una semana sin sellar no contiene `userId`, `username`, `avatar` ni `coverUrl` propio |
-| `RF-ENT-11` | Detección de audio duplicado por `etag` de Cloudinary | Dos cuentas que suben el mismo fichero → la segunda se crea, pero queda marcada para revisión del admin |
+| `RF-ENT-11` | Detección de audio duplicado por su huella (MD5 que calcula el servidor al medir, §4.8.4) | Dos cuentas que suben el mismo fichero → la segunda se crea, pero queda marcada para revisión del admin |
 | `RF-ENT-12` | La subida reintenta automáticamente ante cortes de red (3 intentos con espera exponencial) y conserva la ficha rellenada | Cortar la red al 50 % y recuperarla → la subida continúa o se reintenta sin perder el formulario |
 
 ### 2.6 Escuchar: reproductor, lista y ficha de entrada
@@ -1474,7 +1474,7 @@ beat a 160 BPM (`tools/shot/flashes.mjs`), 0 destellos por segundo y una oscilac
 
 La identidad no depende del Escenario: con calidad Apagada la pantalla se ve igual, quieta. El render
 se pausa con la pestaña oculta. El LCP nunca es el canvas ni el logo (que se pinta en un canvas 2D, sin
-`<text>` que pueda contar como candidato): es un texto (el título del escenario de la semana en la home) y sale con la primera pintura (`RNF-PERF-02`).
+`<text>` que pueda contar como candidato): es un texto del menú de la home (el título del escenario de la semana o, si es más pequeño, como «En el horno» con el calendario vacío, la etiqueta de la placa elegida) y sale con la primera pintura (`RNF-PERF-02`).
 
 ### 3.6 Movimiento
 
@@ -2131,6 +2131,7 @@ con el DOM. Las versiones se fijan en la tarea 0.1, alineadas con las de Orchard
 | Medición de audio en servidor | **ffmpeg** (`ffmpeg-static`) con `ebur128` | Sonoridad y forma de onda autoritativas; validado en Vercel en la Fase 1 (*spike* 1.8: ~80 MB de función, 3,7 s en frío para 52 MB) |
 | Email | **nodemailer** + **Gmail** (SMTP con contraseña de aplicación) + **React Email**; **Mailpit** en local | Decisión del usuario: el mismo sistema que el sello y sin coste. Sus límites se gestionan con presupuesto diario y cola (§4.19) |
 | Imágenes OG | **satori + resvg** (`@vercel/og`) | Imágenes con la dirección de arte del juego en servidor |
+| Códigos QR | **qrcode** (solo en el servidor) | Decisión del usuario (2026-10-13, tarea 4.13): la matriz (modo byte, Reed-Solomon, máscaras) la calcula `qrcode`; el PNG lo pinta el codificador propio de la onda (§4.19.5) |
 | Tests | **Vitest**, **fast-check**, **Testing Library**, **Playwright** | Unitarios, propiedades, componentes y E2E |
 | Lint y formato | **Biome** | Estándar del usuario |
 | CI | GitHub Actions | Lint, tipos, tests, build, E2E y preview |
@@ -2416,8 +2417,12 @@ Al registrar la entrada:
 
 1. Se carga el `upload_intent` (del usuario, pendiente, no caducado).
 2. **Admin API** `resource(public_id)` → existe, está en la carpeta esperada, `bytes ≤ 100 MB`,
-   formato permitido, `30 s ≤ duration ≤ 240 s` (`validateEntryAudio`), creado después del *intent*. Se guarda el `etag`
-   para detectar duplicados (`RF-ENT-11`).
+   formato permitido y creado después del *intent*. La Admin API **no da ni el `etag` ni la duración**
+   (solo la respuesta de la subida, que ve el navegador y no vale como prueba; comprobado en la prueba real
+   de la 4.10): la duración se valida con la **medida** (`30 s ≤ duración ≤ 240 s`, `validateEntryAudio`) y
+   la **huella** para los duplicados (`RF-ENT-11`) es el MD5 que calcula el servidor de los bytes que lee al
+   medir, solo si los lee todos. Sin medir (`processing`), la huella queda vacía, no se compara con nada y
+   la pone el `tick` al completar la entrada, que marca entonces el duplicado.
 3. **Medición**: Node descarga el original con una URL firmada temporal y lo pasa a ffmpeg por la
    entrada estándar según llega (`pipe:0`, sin disco); ffmpeg, en una sola pasada (`asplit`), calcula
    sonoridad integrada y pico real (`ebur128=peak=true`) y saca la señal a 8 kHz mono para la forma de
@@ -2950,7 +2955,7 @@ negocio en el panel de admin (participantes, votos, escuchas por semana) y Verce
 | Id | Requisito | Aceptación |
 |---|---|---|
 | `RNF-PERF-01` | Presupuestos de la tabla en la home y en la ficha de entrada | Lighthouse CI en móvil simulado |
-| `RNF-PERF-02` | LCP < 2,5 s | Lighthouse CI (Fase 10); hasta entonces, proyecto `perf` de Playwright sobre la build (4G lento, CPU ×4, 412×823): en local exige LCP < 2,5 s y en la CI que el LCP sea un texto (el título del escenario de la semana, §3.5) y salga con la primera pintura |
+| `RNF-PERF-02` | LCP < 2,5 s | Lighthouse CI (Fase 10); hasta entonces, proyecto `perf` de Playwright sobre la build (4G lento, CPU ×4, 412×823): en local exige LCP < 2,5 s y en la CI que el LCP sea un texto del menú (el título del escenario o la etiqueta de la placa elegida, §3.5) y salga con la primera pintura |
 | `RNF-PERF-03` | FPS del Escenario según la tabla | `tools/shot/bench.mjs` en escritorio y en Android: en la Fase 1, **emulado** (CPU ×4, pantalla y densidad de gama media; decisión del usuario del 2026-10-08, sin dispositivo); con un Android real cuando lo haya |
 | `RNF-PERF-04` | El Escenario no se descarga antes de la primera pintura | Traza de red: el trozo del Escenario empieza después de FCP |
 | `RNF-PERF-05` | Render pausado con la pestaña oculta | Test: `visibilitychange` detiene el bucle |
@@ -3175,6 +3180,11 @@ CREATE TABLE entry_receipt_seq (week_id TEXT PRIMARY KEY, last INTEGER NOT NULL)
   del audio (`v`: los 12 primeros caracteres del `etag`, así un audio sustituido tiene otra URL); sin firma
   válida, 403. Sin onda (en `processing` o ya borrada), la línea plana. La petición no se registra
   (`RF-NOTIF-12`) y se cachea una semana.
+- **QR del recibo**: `GET /api/email/qr/:entryId.png?sig=`, la matriz de `qrcode` (nivel de corrección M)
+  pintada con el mismo codificador PNG: módulos negros sobre blanco con el margen de silencio de 4 módulos y
+  6 px por módulo (en el email, a 132 px). Codifica la ficha pública de la entrada (`/e/:id`), que en voto
+  ciego no dice nada de la autoría (`RF-ENT-10`). Firma HMAC sobre el id; sin firma válida, 403. No consulta
+  la BD, no se registra (`RF-NOTIF-12`) y se cachea un mes.
 
 #### 4.19.6 Bajas
 
@@ -3608,6 +3618,9 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.59 | §3.5 y §4.17 (`RNF-PERF-02`): el LCP de la home es un texto del menú, el título del escenario o, si es más pequeño (el calendario vacío, «En el horno», desde el jurado de la F3), la etiqueta de la placa elegida. Lo que se exige no cambia: un texto, nunca el lienzo ni el logo, pintado con la primera pintura. |
+| 2026-10-13 | 0.6.58 | **Tarea 4.13 (decisión del usuario).** §4.1: `qrcode` como dependencia del servidor para la matriz de los códigos QR. §4.19.5: el QR del recibo (`/api/email/qr/:entryId.png?sig=`), firmado, a la ficha pública de la entrada. El recibo de §2.12.1 ya lo llevaba en la especificación. |
+| 2026-10-13 | 0.6.57 | **Tarea 4.10 (prueba real contra Cloudinary).** §4.8.4 y `RF-ENT-11`: la Admin API no da el `etag` ni la duración; la huella de los duplicados es el MD5 que calcula el servidor al medir (si lee el fichero entero) y la duración se valida con la medida. Sin medir, la huella queda vacía y la pone el `tick`. El almacenamiento falso imita a la Admin API (sin `etag` ni duración en la verificación). Las claves de idempotencia de los emails de la entrada van por el `public_id` del audio, no por la huella. |
 | 2026-10-13 | 0.6.56 | **Tarea 4.20 (jurado de la F4).** §3.8.5: la boca de la ranura, el rodillo de la tragaperras con el porcentaje a la vista, el medidor de súper de 28 px con marcas a tercios, la franja del anunciador en dos líneas con su alto reservado, una sola acción en la celebración, la vista y el foco al panel nuevo en cada cambio, qué estados llenan el alto, la ranura compacta de la edición y el aviso al retirar; lo que oye el lector en el análisis y la subida; Esc no hace nada mientras se verifica. §3.4.1: `[ESC] CANCELAR` en la barra mientras dura algo que Esc detiene. |
 | 2026-10-10 | 0.6.55 | **Tarea 4.18.** §4.10: `GET /api/weeks/:slug/entries/mine` (la entrada propia para editarla en `/subir`). |
 | 2026-10-10 | 0.6.54 | **Tarea 4.11.** §3.4.5: cada entrada lleva su portada generativa (semilla, tónica y BPM) pintada por CPU con la calibración por medida en `packages/covers` (`painter.ts`) con la paleta de los tokens; `GenerativeCover` en la web y el banco `/dev/portadas`; `RD-VIS-04` medido con 48 y 200 semillas (peor desviación 0,5 % en rojo, 1,2 % y 2,1 % en luminancia). |

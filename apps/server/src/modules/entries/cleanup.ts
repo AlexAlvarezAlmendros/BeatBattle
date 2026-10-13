@@ -4,6 +4,7 @@ import { runBatch } from '../../db/batch'
 import type { Db } from '../../db/client'
 import { entry, jobState, uploadIntent, week } from '../../db/schema'
 import { enqueueEmail } from '../../email/outbox'
+import { auditStatement } from '../../lib/audit'
 import type { EntryAssetKind, EntryStorage } from '../storage/entries'
 import type { EntriesService } from './service'
 
@@ -114,7 +115,7 @@ async function completeProcessing(
           id: deps.newId(),
           kind: 'entry.failed',
           target: { userId: row.userId },
-          idempotencyKey: `entry.failed:${row.id}:${row.etag}`,
+          idempotencyKey: `entry.failed:${row.id}:${row.audioPublicId}`,
           payload: {
             reason: measured ? 'audio' : 'undecodable',
             code: problem?.code ?? 'ENTRY_ASSET_INVALID',
@@ -129,16 +130,41 @@ async function completeProcessing(
       await deps.storage.remove(row.audioPublicId, 'entry').catch(() => {})
       continue
     }
+    // La huella, si al registrarla no se pudo medir (Cloudinary no la da): la de lo medido, y el duplicado
+    // con ella (`RF-ENT-11`).
+    const etag = row.etag || (measured.bytesRead === row.bytes ? measured.md5 : '')
+    const [twin] =
+      etag && !row.etag
+        ? await db
+            .select({ id: entry.id })
+            .from(entry)
+            .where(and(eq(entry.etag, etag), ne(entry.userId, row.userId)))
+            .limit(1)
+        : []
     const changes = {
       durationMs: measured.durationMs,
       peaks: Buffer.from(measured.peaks.buffer, measured.peaks.byteOffset, measured.peaks.byteLength),
       loudnessLufs: measured.integratedLufs,
       truePeakDb: measured.truePeakDb,
+      etag,
+      ...(twin ? { duplicateOf: twin.id } : {}),
       status: 'active' as const,
       updatedAt: now,
     }
     const next = { ...row, ...changes }
     await runBatch(db, [
+      ...(twin
+        ? [
+            auditStatement(db, {
+              id: deps.newId(),
+              actorId: 'system',
+              action: 'entry.duplicate',
+              target: row.id,
+              payload: { duplicateOf: twin.id, etag },
+              now,
+            }),
+          ]
+        : []),
       db
         .update(entry)
         .set(changes)
@@ -147,7 +173,7 @@ async function completeProcessing(
         id: deps.newId(),
         kind: 'entry.receipt',
         target: { userId: row.userId },
-        idempotencyKey: `entry.receipt:${row.id}:${row.etag}`,
+        idempotencyKey: `entry.receipt:${row.id}:${row.audioPublicId}`,
         payload: deps.entries.receiptPayload(next, w),
         now,
       }),

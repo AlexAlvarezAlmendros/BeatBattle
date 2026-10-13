@@ -20,6 +20,7 @@ import { alertsRoutes } from './modules/alerts/routes'
 import { createAlertsService } from './modules/alerts/service'
 import { cronRoutes } from './modules/cron/routes'
 import { emailPrefsRoutes } from './modules/emailPrefs/routes'
+import { qrRoutes } from './modules/entries/qrRoute'
 import { entriesRoutes } from './modules/entries/routes'
 import { createEntriesService } from './modules/entries/service'
 import { waveformRoutes } from './modules/entries/waveformRoute'
@@ -197,6 +198,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   weeksRoutes(app, weeks)
   countdownRoutes(app, { db })
   waveformRoutes(app, { db, secret: config.auth.secret })
+  qrRoutes(app, { publicUrl: config.publicUrl, secret: config.auth.secret })
   const alerts = createAlertsService({ db, emails, publicUrl: config.publicUrl, newId })
   alertsRoutes(app, { service: alerts, rateLimiter, secret: config.auth.secret })
   cronRoutes(app, {

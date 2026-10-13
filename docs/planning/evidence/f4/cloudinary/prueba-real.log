@@ -1,0 +1,9 @@
+[0.1 s] fichero: {"nombre":"low-life-60mb.wav","bytes":59904148,"formato":"wav"}
+[0.1 s] firma: {"publicId":"beatbattle-dev/entries/prueba-real-4-10/a8b8f092-11cb-41bc-bf0f-61aaa79c1eae","uploadUrl":"https://api.cloudinary.com/v1_1/testsecpho/video/upload","eager":"f_mp3,br_192k","type":"authenticated"}
+[8.7 s] subida: {"trozos":["bytes 0-20971519/59904148 → 200","bytes 20971520-41943039/59904148 → 200","bytes 41943040-59904147/59904148 → 200"],"eager":1,"estado":true}
+[9.1 s] verificación: {"publicId":"beatbattle-dev/entries/prueba-real-4-10/a8b8f092-11cb-41bc-bf0f-61aaa79c1eae","format":"wav","bytes":59904148,"etag":"","createdAtMs":1791885889000,"durationMs":null,"width":0,"height":0,"enLaCarpeta":true,"mismosBytes":true,"despuésDelIntent":true}
+[10.7 s] medición: {"duraciónMs":104000,"lufs":-8,"picoRealDb":0.1,"bins":1000,"huella":"b4691cee593f4ac1cb173edecd3fd901","bytesLeídos":59904148,"huellaCompleta":true,"validación":"válido","tardóMs":1534}
+[17.1 s] escucha firmada: {"status":200,"tipo":"audio/mpeg","bytes":2497004,"transformación":true,"firmada":true}
+[17.5 s] sin firma: {"original":404,"mp3SinFirma":404,"comoPúblico":404}
+[18.8 s] borrado: {"borrado":true}
+[18.8 s] fin

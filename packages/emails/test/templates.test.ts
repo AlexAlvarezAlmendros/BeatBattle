@@ -50,6 +50,11 @@ describe('plantillas de email (§3.8.12, §4.19.4)', () => {
           expect(src).toMatch(/\/api\/email\/waveform\/[\w-]+\.png\?v=[0-9a-f]*&(amp;)?sig=[\w-]+$/)
           continue
         }
+        // El QR del recibo (4.13): el de la propia entrada, firmado (`sig`) y sin nada más en la URL.
+        if (src.includes('/api/email/qr/')) {
+          expect(src).toMatch(/\/api\/email\/qr\/[\w-]+\.png\?sig=[\w-]+$/)
+          continue
+        }
         // Las imágenes del juego, la cuenta atrás en vivo (§4.19.5) o la portada del sample (Cloudinary).
         const allowed = [
           `${PUBLIC_URL}/img/email/`,

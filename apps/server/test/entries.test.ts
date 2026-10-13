@@ -174,6 +174,9 @@ describe('registrar la entrada (4.6, §4.8.4)', () => {
       alias: own.alias,
       title: 'Bruma en Gràcia',
       durationMs: 31_000,
+      // La huella la calcula el servidor al medir (la Admin API no la da), y el QR firmado va a la ficha.
+      etag: expect.stringMatching(/^[0-9a-f]{32}$/),
+      qrUrl: expect.stringMatching(new RegExp(`/api/email/qr/${own.id}\\.png\\?sig=`)),
     })
   })
 
@@ -523,6 +526,45 @@ describe('el tick de las entradas (4.9, §4.8.5)', () => {
     expect(row?.status).toBe('active')
     expect(row?.loudnessLufs).toBeCloseTo(-13, 0)
     expect(await outbox('entry.receipt')).toHaveLength(1)
+  })
+
+  it('RF-ENT-11: sin medir, la huella queda vacía y no es duplicado; el tick la pone y marca el duplicado', async () => {
+    let mode: 'real' | 'hang' = 'real'
+    const first = await openWeek({
+      measure: (source) => (mode === 'hang' ? new Promise(() => {}) : measureAudio(source)),
+      measureBudgetMs: 30,
+    })
+    mode = 'hang'
+    const second = await producer('aina')
+    const third = await producer('kira')
+    const same = beat()
+    const a = (await create(first.cookie, (await upload(first.cookie, same)).intentId)).json().data
+    const b = (await create(second.cookie, (await upload(second.cookie, beat(33))).intentId)).json().data
+    const [w] = await t.db.select().from(week).where(eq(week.slug, '2026-w42'))
+    const rows = async () =>
+      t.db
+        .select()
+        .from(entry)
+        .where(eq(entry.weekId, w?.id ?? ''))
+    // Las dos sin medir: la Admin API no da el etag, así que no se sabe y no se comparan.
+    expect((await rows()).map((row) => [row.etag, row.duplicateOf])).toEqual([
+      ['', null],
+      ['', null],
+    ])
+    mode = 'real'
+    await tick()
+    const measured = await rows()
+    expect(measured.every((row) => /^[0-9a-f]{32}$/.test(row.etag))).toBe(true)
+    expect(new Set(measured.map((row) => row.etag)).size).toBe(2)
+    // La tercera sube el mismo fichero que la primera: al medirla el tick, duplicado con su auditoría.
+    const c = (await create(third.cookie, (await upload(third.cookie, same)).intentId)).json().data
+    await tick()
+    const [dup] = await t.db.select().from(entry).where(eq(entry.id, c.id))
+    expect(dup?.duplicateOf).toBe(a.id)
+    expect(dup?.etag).toBe(measured.find((row) => row.id === a.id)?.etag)
+    const audits = await t.db.select().from(auditLog).where(eq(auditLog.action, 'entry.duplicate'))
+    expect(audits.map((item) => item.target)).toEqual([c.id])
+    expect(b.id).not.toBe(a.id)
   })
 
   it('§4.8.4: si en el tick no se puede leer, la entrada se retira, se borra el audio y sale entry.failed', async () => {
