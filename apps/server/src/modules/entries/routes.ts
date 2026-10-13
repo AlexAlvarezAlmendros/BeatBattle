@@ -2,6 +2,8 @@ import {
   type DataEnvelope,
   EntryAudioReplaceSchema,
   EntryCreateSchema,
+  type EntryList,
+  EntryListQuerySchema,
   EntryUpdateSchema,
   type OwnEntry,
   type PublicEntry,
@@ -23,7 +25,8 @@ const userOf = (req: FastifyRequest) => req.user?.id as string
 
 /**
  * Entradas (§4.10, tareas 4.6–4.7): registrar la entrada tras la subida (`POST /api/weeks/:slug/entries`,
- * cuenta verificada, `RF-AUTH-01`), la ficha pública (`GET /api/entries/:id`, que respeta el voto ciego) y,
+ * cuenta verificada, `RF-AUTH-01`), la lista de la semana (`GET /api/weeks/:slug/entries`, 5.3) y la ficha
+ * pública (`GET /api/entries/:id`), que respetan el voto ciego, y,
  * para su dueño, editar, sustituir el audio y retirar. La firma de la subida va por `/api/uploads/sign`.
  */
 export function entriesRoutes(app: FastifyInstance, service: EntriesService): void {
@@ -41,6 +44,16 @@ export function entriesRoutes(app: FastifyInstance, service: EntriesService): vo
       )
       reply.code(201)
       return { data: created }
+    },
+  )
+
+  app.get<{ Params: { slug: string } }>(
+    '/api/weeks/:slug/entries',
+    async (req): Promise<DataEnvelope<EntryList>> => {
+      const slug = WeekSlugSchema.safeParse(req.params.slug)
+      if (!slug.success) throw appError('NOT_FOUND', 'No existe esa semana.')
+      const query = EntryListQuerySchema.parse(req.query)
+      return { data: await service.list(slug.data, query, req.user?.id ?? null, req.now) }
     },
   )
 

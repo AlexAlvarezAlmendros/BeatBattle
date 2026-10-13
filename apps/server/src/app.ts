@@ -48,6 +48,8 @@ import {
 import { testingRoutes } from './modules/testing/routes'
 import { unsubscribeRoutes } from './modules/unsubscribe/routes'
 import { uploadsRoutes } from './modules/uploads/routes'
+import { votesRoutes } from './modules/votes/routes'
+import { createVotesService } from './modules/votes/service'
 import { countdownRoutes } from './modules/weeks/countdownRoute'
 import { weeksRoutes } from './modules/weeks/routes'
 import { createWeeksService } from './modules/weeks/service'
@@ -194,6 +196,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   })
   uploadsRoutes(app, { images, entries: entryStorage ? entries : null, rateLimiter, newId })
   entriesRoutes(app, entries)
+  votesRoutes(app, createVotesService({ db, entries, rateLimiter, newId, ipSecret: config.auth.secret }))
   const weeks = createWeeksService({ db, storage: samples, newId })
   weeksRoutes(app, weeks)
   countdownRoutes(app, { db })
