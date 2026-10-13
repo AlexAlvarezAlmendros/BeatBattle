@@ -98,8 +98,8 @@ export function weeksRoutes(app: FastifyInstance, service: WeeksService): void {
 
   // ── Lo ya visto (3.11) ─────────────────────────────────────────────────────────────────────────
   app.post('/api/me/seen', { preHandler: requireSession }, async (req, reply) => {
-    const { ref } = SeenRequestSchema.parse(req.body)
-    await service.markDropSeen(actorOf(req), ref, req.now)
+    const { kind, ref } = SeenRequestSchema.parse(req.body)
+    await service.markSeen(actorOf(req), kind, ref, req.now)
     reply.code(204)
   })
 }

@@ -2,6 +2,7 @@ import { and, eq, isNull, lte } from 'drizzle-orm'
 import type { Db } from '../../db/client'
 import { week } from '../../db/schema'
 import { withLease } from '../../lib/lease'
+import { snapshotStatements } from '../results/snapshot'
 
 /**
  * Sellado perezoso e idempotente (§2.1, §4.12, `RF-DROP-03`; tarea 3.9). Lo dispara la primera lectura o
@@ -10,8 +11,9 @@ import { withLease } from '../../lib/lease'
  * - la *lease* `seal:<semana>` evita calcular dos veces el snapshot a la vez;
  * - el `UPDATE … WHERE sealed_at IS NULL` deja un único sellado aunque la *lease* caduque a medias.
  *
- * En la Fase 3 el snapshot está vacío (aún no hay entradas): el sellado solo fija `sealed_at` y la
- * revisión 1. La clasificación (`rank`, tabla `result`) llega en la Fase 6 dentro de este mismo paso.
+ * Desde la Fase 6 el sellado guarda también la clasificación (`rank` sobre los votos válidos, tabla `result`)
+ * como la revisión 1, en el mismo `batch` que `sealed_at` (tarea 6.4). Una semana sin entradas se sella con el
+ * snapshot vacío: «Semana desierta» (`RF-RES-10`).
  */
 
 /** Lo que puede tardar un sellado antes de que otro lo dé por perdido. */
@@ -26,11 +28,17 @@ export async function sealWeek(
     db,
     { name: `seal:${input.weekId}`, holder: input.holder, ttlMs: SEAL_LEASE_MS, now: input.now },
     async () => {
-      const updated = await db
-        .update(week)
-        .set({ sealedAt: input.now, resultRevision: 1 })
-        .where(and(eq(week.id, input.weekId), isNull(week.sealedAt), lte(week.voteEndsAt, input.now)))
-        .returning({ id: week.id })
+      // La clasificación y el sello en un `batch`: o las dos cosas o ninguna. Si otro ya selló, el `UPDATE` no
+      // toca nada y las filas de la revisión 1 ya existen (`ON CONFLICT DO NOTHING`).
+      const rows = await snapshotStatements(db, input.weekId, 1)
+      const [updated] = await db.batch([
+        db
+          .update(week)
+          .set({ sealedAt: input.now, resultRevision: 1 })
+          .where(and(eq(week.id, input.weekId), isNull(week.sealedAt), lte(week.voteEndsAt, input.now)))
+          .returning({ id: week.id }),
+        ...rows,
+      ])
       return updated.length > 0
     },
   )

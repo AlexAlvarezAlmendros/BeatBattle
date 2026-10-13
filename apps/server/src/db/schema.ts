@@ -443,6 +443,33 @@ export const vote = sqliteTable(
 )
 
 /**
+ * Snapshot de la clasificación de una semana (§2.8, §4.11; tarea 6.4): una fila por entrada y revisión. El
+ * sellado escribe la revisión 1 y cada re-sellado, una nueva (`RF-RES-06`); la semana dice cuál vale
+ * (`week.result_revision`). Inmutable: nunca se actualiza una fila.
+ */
+export const result = sqliteTable(
+  'result',
+  {
+    weekId: text('week_id').notNull(),
+    revision: integer('revision').notNull(),
+    entryId: text('entry_id').notNull(),
+    /** `null` = sin clasificar (menos de 3 votos válidos). */
+    position: integer('position'),
+    scoreMilli: integer('score_milli').notNull(),
+    votes: integer('votes').notNull(),
+    meanMilli: integer('mean_milli').notNull(),
+    medianHalf: integer('median_half').notNull(),
+    /** JSON `[n1..n5]`. */
+    histogram: text('histogram').notNull(),
+    seasonPoints: integer('season_points').notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.weekId, table.revision, table.entryId] }),
+    index('result_entry').on(table.entryId),
+  ],
+)
+
+/**
  * Recibo de escucha (§2.7, §4.7.3, `RF-VOTE-04`): el servidor apunta cuándo empezó a sonar una entrada y,
  * cuando el cliente dice que ha cumplido el umbral, comprueba que ha pasado ese tiempo de reloj.
  */

@@ -28,6 +28,7 @@ function list(myVote: number | null): EntryList {
     streamUrl: 'https://x/e-1.mp3',
     cover: { kind: 'generative' as const, seed: 1 },
     producer: null,
+    result: null,
     mine: false,
     myVote,
   }

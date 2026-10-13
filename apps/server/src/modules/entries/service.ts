@@ -49,6 +49,7 @@ import { enqueueEmail } from '../../email/outbox'
 import { auditStatement } from '../../lib/audit'
 import { appError } from '../../lib/errors'
 import type { AudioMeasurement } from '../../media/measure'
+import { snapshotOf } from '../results/snapshot'
 import type { ImageStorage } from '../storage/cloudinary'
 import type { EntryAsset, EntryStorage } from '../storage/entries'
 import { entryPageUrl, qrUrl } from './qrRoute'
@@ -319,6 +320,8 @@ export function createEntriesService(deps: EntriesDeps) {
           : { kind: 'generative', seed: row.coverSeed },
       // La autoría la añade la ficha pública cuando la semana deja verla (tarea 4.7).
       producer: null,
+      // El resultado, solo con la semana sellada: lo añade `presentAll` (tarea 6.6).
+      result: null,
     }
   }
 
@@ -327,7 +330,24 @@ export function createEntriesService(deps: EntriesDeps) {
    * ya está sellada (`RF-ENT-10`, `RF-VOTE-07`); si no, `null`.
    */
   async function presentAll(rows: readonly EntryRow[], w: WeekRow): Promise<PublicEntry[]> {
-    const out = rows.map((row) => toPublic(row, w))
+    const snapshot =
+      w.sealedAt !== null && rows.length > 0 ? await snapshotOf(db, w.id, w.resultRevision) : null
+    const out = rows.map((row) => {
+      const base = toPublic(row, w)
+      const found = snapshot?.get(row.id)
+      // Sellada: posición, puntuación, votos e histograma (`RF-PLAY-08`); sin sellar, nada (`RF-PLAY-05`).
+      return found
+        ? {
+            ...base,
+            result: {
+              position: found.position,
+              scoreMilli: found.scoreMilli,
+              votes: found.votes,
+              histogram: JSON.parse(found.histogram) as [number, number, number, number, number],
+            },
+          }
+        : base
+    })
     const revealed = !w.blind || w.sealedAt !== null
     if (!revealed || rows.length === 0) return out
     const people = await db

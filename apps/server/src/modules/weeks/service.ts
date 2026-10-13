@@ -25,7 +25,7 @@ import {
   type WeekCreate,
   type WeekUpdate,
 } from '@beatbattle/shared'
-import { and, asc, count, eq, gt, gte, inArray, lt, lte, sql, sum } from 'drizzle-orm'
+import { and, asc, count, desc, eq, gt, gte, inArray, isNotNull, lt, lte, sql, sum } from 'drizzle-orm'
 import { type BatchStatement, runBatch } from '../../db/batch'
 import type { Db } from '../../db/client'
 import { entry, rulesAcceptance, sample, sampleDownload, seenFlag, week } from '../../db/schema'
@@ -363,9 +363,38 @@ export function createWeeksService(deps: WeeksDeps) {
         .where(gt(week.startsAt, now))
         .orderBy(asc(week.startsAt))
         .limit(1)
+      // La última sellada: su ceremonia se ofrece una vez a cada cuenta (`RF-RES-09`).
+      const [last] = await db
+        .select({ id: week.id, slug: week.slug, number: week.number, sealedAt: week.sealedAt })
+        .from(week)
+        .where(isNotNull(week.sealedAt))
+        .orderBy(desc(week.startsAt))
+        .limit(1)
+      let sealed: CurrentWeek['sealed'] = null
+      if (last?.sealedAt != null) {
+        const [seen] = viewerId
+          ? await db
+              .select({ at: seenFlag.seenAt })
+              .from(seenFlag)
+              .where(
+                and(
+                  eq(seenFlag.userId, viewerId),
+                  eq(seenFlag.kind, 'ceremony'),
+                  eq(seenFlag.ref, last.slug),
+                ),
+              )
+          : []
+        sealed = {
+          slug: last.slug,
+          number: last.number,
+          sealedAt: last.sealedAt,
+          ceremonySeen: viewerId ? seen !== undefined : null,
+        }
+      }
       return {
         week: live ? await toPublic(live, now, viewerId) : null,
         next: next ?? null,
+        sealed,
       }
     },
 
@@ -421,12 +450,15 @@ export function createWeeksService(deps: WeeksDeps) {
 
     // ── Lo ya visto (3.11) ──────────────────────────────────────────────────────────────────────
 
-    async markDropSeen(userId: string, slug: string, now: number): Promise<void> {
+    /**
+     * Marca como visto el drop de una semana (`RF-DROP-11`) o la ceremonia de una sellada (`RF-RES-09`; antes
+     * del sellado no hay ceremonia que ver: 404).
+     */
+    async markSeen(userId: string, kind: 'drop' | 'ceremony', slug: string, now: number): Promise<void> {
       const row = await publicRow(slug, now)
-      await db
-        .insert(seenFlag)
-        .values({ userId, kind: 'drop', ref: row.slug, seenAt: now })
-        .onConflictDoNothing()
+      if (kind === 'ceremony' && row.sealedAt === null)
+        throw appError('NOT_FOUND', 'Esa semana aún no está sellada.')
+      await db.insert(seenFlag).values({ userId, kind, ref: row.slug, seenAt: now }).onConflictDoNothing()
     },
 
     /** Los lunes de las próximas `weeks` semanas sin semana programada (para `adminAlerts`, 3.12). */
