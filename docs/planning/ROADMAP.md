@@ -32,8 +32,8 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 | 1 | Spike de sensación y audio | ✅ Cerrada con **GO** (2026-10-08) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio (emulado); efectos con la parte de la app < 10 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
 | 2 | Cuentas y base de email | 🔄 En curso (todo hecho salvo las comprobaciones manuales: Discord real 2.22, IMAP real 2.11 y el cierre 2.26) | [02-cuentas-email.md](plans/02-cuentas-email.md) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, presupuesto diario, preferencias, consentimientos y bajas |
 | 3 | Semanas y samples | 🔄 En curso (hito cumplido: E2E del hito, jurado ✅ y prueba real en Cloudinary ✅; solo falta la conformidad del usuario con la excepción n.º 1 del acta, 3.21) | [03-semanas-samples.md](plans/03-semanas-samples.md) | 3 semanas programadas; cambio de semana en la frontera con reloj simulado; email del drop (también sin cuenta) |
-| 4 | Participar | 🔄 En curso (hito cumplido; prueba real contra Cloudinary ✅; solo falta el cierre, 4.21) | [04-participar.md](plans/04-participar.md) | WAV de 60 MB por trozos con BPM, tonalidad y sonoridad medida; recibo por email |
-| 5 | Escuchar y votar | 🔒 Bloqueada (F4) | — | Todas las reglas `RF-VOTE-*` en verde; Modo Jurado con teclado; recordatorio y llamada al jurado |
+| 4 | Participar | ✅ Cerrada (2026-10-13) | [04-participar.md](plans/04-participar.md) | WAV de 60 MB por trozos con BPM, tonalidad y sonoridad medida; recibo por email |
+| 5 | Escuchar y votar | ⬜ Lista (plan por crear) | — | Todas las reglas `RF-VOTE-*` en verde; Modo Jurado con teclado; recordatorio y llamada al jurado |
 | 6 | Cierre, resultados y ceremonia | 🔒 Bloqueada (F5) | — | Sellado determinista, ceremonia, re-sellado idéntico; Lunes de batalla por email |
 | — | **Beta cerrada** | 🔒 | — | 15–25 productores, 3 semanas reales |
 | 7 | Capa de juego | 🔒 Bloqueada (beta) | — | XP, niveles, rachas, logros, temporadas y carta con su pase de torneo |
@@ -43,12 +43,11 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 
 ## Foco actual
 
-**En curso: la Fase 4** (participar, [plan 04](plans/04-participar.md)). La **Fase 2** y la **Fase 3** tienen
-su hito cumplido y solo esperan comprobaciones del usuario:
+**Siguiente: la Fase 5** (escuchar y votar; plan por crear). La **Fase 4** se cerró el 2026-10-13. La
+**Fase 2** y la **Fase 3** tienen su hito cumplido y solo esperan al usuario:
 
 - **F2:** Discord real (2.22), IMAP real (2.11) y el cierre (2.26).
 - **F3:** la conformidad con la excepción n.º 1 del acta del jurado (3.21). La prueba real (3.4) ya está hecha.
-- **F4:** hito, jurado y prueba real contra Cloudinary cumplidos; solo falta el cierre (4.21) para empezar la Fase 5.
 
 ## Grafo de dependencias
 
@@ -192,6 +191,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-13 | F4 | **Fase 4 cerrada** (4.21): los siete criterios, con la CI en verde sobre `main` (1050 E2E). Antes se arregló la CI, en rojo en `main` desde la 2.4 (PR #59), y se mezcló la pila de PR #38–#58 (el usuario delega desde hoy los merges). La Fase 5 pasa a lista. |
 | 2026-10-13 | F3 | 3.4 hecha: prueba real de los samples contra Cloudinary (subida, escucha, descarga como adjunto y 401 pasada la caducidad). Solo falta la 3.21. |
 | 2026-10-13 | F4 | 4.10 y 4.13 hechas: prueba real contra Cloudinary con un beat del sello (destapó que la Admin API no da el `etag`; arreglado) y QR del recibo con `qrcode`. La 4.21 (cierre) pasa a lista. |
 | 2026-10-13 | F4 | 4.20 hecha: jurado de tres lentes en cuatro pases, todas las altas y medias corregidas (guía v0.6.56). Solo queda la prueba real contra Cloudinary (4.10) para cerrar la fase (4.21). |

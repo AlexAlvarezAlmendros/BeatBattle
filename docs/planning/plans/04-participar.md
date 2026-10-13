@@ -1,6 +1,6 @@
 # Plan 04 — Participar
 
-> Fase: 4 de 10 | Estado: 🔄 En curso | Iniciado: 2026-10-10 | Cerrado: —
+> Fase: 4 de 10 | Estado: ✅ Cerrada | Iniciado: 2026-10-10 | Cerrado: 2026-10-13
 > Hito del roadmap: subir un WAV de 60 MB por trozos, con BPM y tonalidad sugeridos, sonoridad medida en
 > servidor y recibo por email.
 
@@ -160,7 +160,7 @@ nunca pasa por la API (`RF-STO-01`) y nada de lo que el navegador declara sobre 
 |---|-------|--------|------------|-------|
 | 4.19 | E2E del hito con el almacenamiento falso y el Mailer en memoria: un WAV de 60 MB generado (140 BPM en La menor, −10 LUFS) sube por trozos; BPM y tonalidad sugeridos; sonoridad medida en servidor; `entry.receipt` con número, sonoridad y huella. Además: un audio de 5 min rechazado en el navegador, cancelar a mitad, segunda subida 409, corte de red a mitad y retirar y volver a subir | ✅ Hecho | 4.6–4.18 | §5 · hito · `RF-ENT-*`, `RF-NOTIF-06` · **Hecho:** `tests/e2e/entries.spec.ts` con el reloj simulado en la semana 2032-W12: un WAV de 104 s a 96 kHz/24 bits (≈ 60 MB, bombo a 140 BPM y La menor) por la UI de `/subir`; el análisis local sugiere 140 y `Am`; sube en 3 trozos de 20 MB; el servidor verifica y mide y el `tick` manda `entry.receipt` con `BB-2032W12-…`, LUFS, 1:44 y la huella; el menú pasa a «Editar mi entrada». El buzón de prueba admite `contains=` para elegir entre varios emails |
 | 4.20 | Jurado visual de tres lentes sobre `/subir` (ranura, análisis, hoja, medidor, celebración, edición y errores) y los emails del recibo | ✅ Hecho | 4.12, 4.14–4.18 | `RD-VIS-02` (e) · **Hecho:** acta en `docs/planning/evidence/f4/jurado/README.md`. Marca ✅ al 2.º pase; juego y accesibilidad ✅ al 4.º. Las 5 altas y 16 medias, corregidas y verificadas (guía v0.6.56): la vista y el foco en cada cambio de panel, el vinilo `sticky`, el medidor de súper (`Meter size="super"`), la tragaperras con rodillo, la boca de la ranura, la franja del anunciador, ESC CANCELAR en la barra (`useControlKeys`), la ranura compacta de la edición, la ranura que no se ensancha tras cancelar (paso nuevo en el E2E del hito) y Esc sin salir mientras se verifica. Bajas abiertas con su motivo en el acta |
-| 4.21 | Cierre de la fase: cobertura de ids, hito y roadmap | ⬜ Listo | 4.10, 4.19, 4.20 | — |
+| 4.21 | Cierre de la fase: cobertura de ids, hito y roadmap | ✅ Hecho | 4.10, 4.19, 4.20 | **Hecho:** los siete criterios de aceptación se cumplen (abajo, «Cierre»); los 27 ids de la tabla de cobertura tienen un test con su id en el nombre, y `RD-VIS-02` además el acta del jurado |
 
 ---
 
@@ -182,12 +182,29 @@ Hasta el cierre de envíos puede editar la ficha, sustituir el audio sin votos o
 6. Jurado visual de tres lentes sin hallazgos altos ni medios abiertos.
 7. Todos los ids de la tabla de cobertura, verificados.
 
+### Cierre (2026-10-13, tarea 4.21)
+
+| # | Criterio | Cómo se verificó |
+|---|---|---|
+| 1 | `check`, `typecheck`, `test` y `e2e` en verde | CI `quality` (ejecución 38392404781) sobre el árbol que hoy es `main`: auditoría, Biome y lints propios, tipos, 1404 tests de Vitest, build y **1050 E2E** (proyectos `e2e` y `perf`). Para llegar a verde hubo que arreglar la CI, que estaba en rojo en `main` desde la 2.4 (PR #59: la lista de dominios desechables no estaba en git y el job necesitaba 45 min), y un test de `perf` que buscaba el título viejo del calendario vacío (guía v0.6.59) |
+| 2 | E2E del hito con el WAV de 60 MB y el recibo | `entries.spec.ts`, con el paso nuevo de cancelar a mitad (4.20) |
+| 3 | Contrato de voto ciego | Tests `RF-ENT-10`, `RF-ENT-04` y `RNF-SEC-04` (rutas públicas, `public_id` sin usuario, emails) |
+| 4 | Prueba real contra Cloudinary | 4.10, `evidence/f4/cloudinary/` |
+| 5 | `RD-VIS-04` en el Chrome del sistema | `covers.spec.ts` (48 semillas a ±5 %) |
+| 6 | Jurado sin altas ni medias abiertas | Acta de la 4.20: las tres lentes ✅ |
+| 7 | Todos los ids de la tabla, verificados | Los 27, con su test (búsqueda del id en los nombres de los tests); `RF-STO-02` y `RF-STO-04`, también en la prueba real |
+
+**Queda fuera, a propósito** (lista de arriba): `RF-STO-07` (Fase 6), el XP y los logros de la subida (Fase 7), la
+tarjeta para compartir la entrada (Fase 5), la cola de duplicados del admin y `RF-ADM-04` (Fase 10). Las bajas
+abiertas del jurado van en su acta con la fase en que se revisan.
+
 ---
 
 ## Registro de avance
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-13 | 4.21 | **Fase 4 cerrada.** Siete criterios cumplidos con la CI en verde (1050 E2E) sobre `main`. |
 | 2026-10-13 | 4.10, 4.13 | Prueba real contra Cloudinary con un beat del sello: todo bien salvo el `etag`, que la Admin API no da (arreglado: huella MD5 del servidor, guía v0.6.57). QR del recibo con `qrcode` (decisión del usuario, guía v0.6.58). La 4.21 pasa a lista. |
 | 2026-10-13 | 4.20 | Jurado de tres lentes en cuatro pases: marca ✅ al 2.º, juego y accesibilidad ✅ al 4.º; altas y medias corregidas. Guía v0.6.56. La 4.21 sigue esperando la prueba real de Cloudinary (4.10). |
 | 2026-10-10 | 4.19 | E2E del hito de la Fase 4 en verde: 60 MB por trozos, sugerencia 140/Am, medición y recibo. |
