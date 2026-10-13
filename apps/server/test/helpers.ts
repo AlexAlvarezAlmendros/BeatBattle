@@ -53,6 +53,23 @@ export interface MakeAppOptions {
   measureBudgetMs?: number
 }
 
+/** El `index.html` de la web en los tests de las páginas compartibles (el de `apps/web`, abreviado). */
+export const TEST_INDEX_HTML = `<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Beat Battle · Other People</title>
+    <meta
+      name="description"
+      content="Cada lunes, un sample nuevo."
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+`
+
 export async function makeApp(options: MakeAppOptions = {}): Promise<TestApp> {
   const logs: string[] = []
   const config = testConfig({ ...options.config, logLevel: options.logLevel ?? 'silent' })
@@ -67,6 +84,7 @@ export async function makeApp(options: MakeAppOptions = {}): Promise<TestApp> {
     measure: options.measure,
     measureBudgetMs: options.measureBudgetMs,
     logStream: { write: (line) => logs.push(line) },
+    indexHtml: async () => TEST_INDEX_HTML,
   })
   options.routes?.(app)
   await app.ready()

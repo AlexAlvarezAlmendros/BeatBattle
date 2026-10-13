@@ -35,6 +35,7 @@ import { createResultsService } from './modules/results/service'
 import { samplesRoutes } from './modules/samples/routes'
 import { createSamplesService } from './modules/samples/service'
 import { ogRoutes } from './modules/share/ogRoutes'
+import { indexHtmlLoader, shareRoutes } from './modules/share/routes'
 import { createCloudinaryStorage, type ImageStorage } from './modules/storage/cloudinary'
 import {
   createCloudinaryEntryStorage,
@@ -93,6 +94,8 @@ export interface AppDeps {
   measureBudgetMs?: number
   /** Medición del audio (§4.8.4); por defecto, ffmpeg. */
   measure?: (source: ReadableStream<Uint8Array>) => Promise<AudioMeasurement>
+  /** El `index.html` de la web para las páginas compartibles (§4.7.7); por defecto, el construido. */
+  indexHtml?: () => Promise<string>
 }
 
 /**
@@ -214,6 +217,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   resultsRoutes(app, createResultsService({ db, entries, samples, newId }))
   resultCardRoutes(app, { db, secret: config.auth.secret })
   ogRoutes(app, { db })
+  shareRoutes(app, { db, publicUrl: config.publicUrl, indexHtml: deps.indexHtml ?? indexHtmlLoader() })
   const weeks = createWeeksService({ db, storage: samples, newId })
   weeksRoutes(app, weeks)
   countdownRoutes(app, { db })

@@ -6,13 +6,15 @@
   "regions": ["fra1"],
   "functions": {
     "api/index.ts": {
-      "includeFiles": "{apps/server/drizzle/**,apps/server/node_modules/@fontsource/*/files/*-latin-*-normal.woff}",
+      "includeFiles": "{apps/server/drizzle/**,apps/server/node_modules/@fontsource/*/files/*-latin-*-normal.woff,apps/web/dist/index.html}",
       "maxDuration": 10
     }
   },
   "crons": [{ "path": "/api/cron/tick", "schedule": "0 6 * * *" }],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/(e|p)/([^/]+)", "destination": "/api" },
+    { "source": "/semana/([^/]+)(/resultados)?", "destination": "/api" },
     { "source": "/((?!api(?:/|$)|assets/).*)", "destination": "/index.html" }
   ],
   "headers": [

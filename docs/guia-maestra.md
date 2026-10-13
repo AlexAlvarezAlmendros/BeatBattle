@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.75 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.76 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -288,7 +288,7 @@ historial de entradas con su posición.
 - **Cambio de nombre** (`RF-PRF-03`). Una vez cada 30 días; cambiar solo mayúsculas no cuenta. El anterior
   queda retenido 30 días para su dueño: la API responde **301** desde `/api/profiles/<anterior>` al nuevo y
   la web cambia la URL de `/p/<anterior>` a `/p/<nuevo>` (la página es la misma SPA; el 301 de la propia
-  `/p/` llegará con `api/share.ts`, la función de las páginas compartibles, en la Fase 6). El `update-user` de Better Auth
+  `/p/` lo da la función de la API al servir las páginas compartibles, §4.7.7). El `update-user` de Better Auth
   no puede cambiar el nombre (403): se saltaría el plazo y la redirección.
 - **Avatar** (`RF-PRF-02`). `POST /api/uploads/sign` con `{ kind: 'avatar', mime, bytes }` (cuenta
   verificada; PNG, JPG o WebP de hasta 10 MB; 10 firmas por hora) devuelve los parámetros firmados para
@@ -2241,7 +2241,7 @@ beatbattle/
 │        ├─ share/            inyección de metadatos y OG
 │        └─ lib/              reloj, errores (AppError con estado por código), createRateLimiter,
 │                             ids, auditoría; lo transversal sin rutas con la misma fábrica
-├─ api/                       funciones de Vercel: index.ts (Fastify, con las imágenes OG), share.ts
+├─ api/                       función de Vercel: index.ts (Fastify, con las imágenes OG y las páginas compartibles)
 ├─ packages/
 │  ├─ rules/                  núcleo puro y determinista (§4.5)
 │  ├─ audio/                  análisis portado del sello + teoría musical + definiciones de efectos
@@ -2376,10 +2376,15 @@ latencia de salida la pone el sistema (en Linux con PipeWire, 24–48 ms) y la a
 #### 4.7.7 Metadatos para compartir
 
 `vercel.json` reescribe `/e/:id`, `/semana/:slug`, `/semana/:slug/resultados` y `/p/:username` a la
-función `api/share`, que lee el `index.html` construido (incluido en la función), consulta lo mínimo
-en la BD, inyecta `<title>`, descripción, Open Graph, Twitter, canonical y JSON-LD, y responde con
-`Cache-Control: s-maxage=60, stale-while-revalidate=600`. El resto de rutas son estáticas con
-*fallback* a `index.html`.
+función de la API (`api/index.ts`, la app de Fastify, que recibe la URL original; no hay un `api/share.ts`
+aparte). Esta lee el `index.html` construido (incluido en la función), consulta lo mínimo en la BD (los mismos
+datos que la imagen OG de esa página, §2.15), inyecta `<title>`, descripción, Open Graph, Twitter, canonical y
+JSON-LD (`Event` en la semana, `MusicRecording` en una entrada sellada), y responde con
+`Cache-Control: s-maxage=60, stale-while-revalidate=600`. Todo va escapado; el JSON-LD, con `<` como
+`\u003c`. Si no hay página que enseñar (no existe, la semana es anterior al drop, los resultados no están
+sellados o la cuenta está bloqueada), devuelve el `index.html` tal cual con 404 y la SPA pinta su pantalla. El
+nombre viejo de un perfil responde 301 al nuevo durante 30 días (`RF-PRF-03`). Sin la web construida, 503. El
+resto de rutas son estáticas con *fallback* a `index.html`.
 
 #### 4.7.8 i18n y PWA
 
@@ -2923,8 +2928,9 @@ Referencias: OWASP ASVS nivel 2 y las chuletas de autenticación, sesiones y sub
 
 ### 4.15 Despliegue e infraestructura
 
-- **Vercel**: `apps/web/dist` estático + funciones `api/index.ts` (Fastify, que también pinta las imágenes OG
-  y la tarjeta de resultado: no hay un `api/og.tsx` aparte) y `api/share.ts`, región `fra1`. `api/index.ts` importa `apps/server/dist/vercel.mjs`, un ESM con los
+- **Vercel**: `apps/web/dist` estático + la función `api/index.ts` (Fastify, que también pinta las imágenes
+  OG y la tarjeta de resultado y sirve las páginas compartibles: no hay `api/og.tsx` ni `api/share.ts`
+  aparte), región `fra1`. `api/index.ts` importa `apps/server/dist/vercel.mjs`, un ESM con los
   paquetes `@beatbattle/*` dentro que `pnpm build` genera con Vite SSR (`apps/server/build.config.mjs`)
   y comprueba cargándolo con `node` puro y pidiendo `/api/health` (`scripts/smoke-bundle.mjs`). Se
   valida en la primera preview (tarea 1.8). *Preview* por PR con su base de datos (rama de Turso) y su prefijo de
@@ -3653,6 +3659,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.76 | **Tarea 6.12.** §4.7.7, §4.15: las páginas compartibles las sirve la app de Fastify (reescrituras de `vercel.json` a `/api`) y no hay un `api/share.ts` aparte. Se concretan los 404 con el `index.html` tal cual, el 301 del perfil, el escape de los metadatos y el 503 sin la web construida. |
 | 2026-10-13 | 0.6.75 | **Tarea 6.11.** §2.15, §4.10, §4.15: las imágenes OG las pinta la app de Fastify (`/api/og/:kind/:id.png?v=`) y no una función `api/og.tsx` aparte. Se añaden la versión por hash con caché inmutable, los 404 antes de tiempo, el perfil con solo semanas selladas y las portadas por CPU en servidor (SVG medido con resvg, con la calibración de §3.4.5). |
 | 2026-10-13 | 0.6.74 | **Tareas 6.9 y 6.10.** §2.12.2: el reparto del Lunes de batalla por destinatario (separado, sin semana nueva o sin semana cerrada, la ventana de una semana) y que el combinado se decide con el instante del sellado. §4.19.5: la tarjeta de resultado (404 con firma y sin resultado, contenido, fuentes estáticas, caché de una hora). Dependencias de §4.1 fijadas: satori 0.33.5 (la última con más de dos semanas) y `@resvg/resvg-js` 2.6.2; las fuentes, de `@fontsource` (Anybody, Chakra Petch y Oxanium estáticas) en el servidor. |
 | 2026-10-13 | 0.6.73 | **Tareas 6.2–6.8.** §4.10: `GET /api/weeks/:slug/results` devuelve la revisión, `correctedAt` y «tu resultado»; el archivo pagina de 20 en 20 con el podio; `GET /api/weeks/current` añade la última semana sellada (`sealed`) y `POST /api/me/seen` acepta `ceremony`; el re-sellado va por `slug`. §4.11: índice `result_entry`. `RF-RES-09` se guarda en `seen_flag` (`kind = ceremony`), no en una tabla `results_seen`. El sellado escribe el snapshot en el mismo `batch` que marca la semana; los votos válidos excluyen cuentas bloqueadas o borradas, votos anulados y entradas no activas. |

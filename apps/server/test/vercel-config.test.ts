@@ -64,7 +64,9 @@ const EXPECTED_CSP: [directive: string, sources: string[]][] = [
 const ONE_YEAR_S = 31_536_000
 
 /** Rutas representativas: raíz, rutas del cliente, API y un recurso con hash de Vite. */
-const CLIENT_ROUTES = ['/', '/semana/41', '/semana/41/resultados', '/e/abc', '/p/productor', '/dev/galeria']
+const CLIENT_ROUTES = ['/', '/semana/41/entradas', '/dev/galeria', '/e/abc/otra', '/jurado']
+/** Las compartibles (§4.7.7): las sirve la app de Fastify con sus metadatos (tarea 6.12). */
+const SHARE_ROUTES = ['/semana/41', '/semana/2026-w42/resultados', '/e/abc', '/p/productor']
 const API_ROUTES = ['/api/health', '/api/auth/sign-in/email', '/api/']
 const ASSET = '/assets/index-abc123.js'
 
@@ -107,11 +109,12 @@ describe('vercel.json: construcción y función', () => {
     expect(config.regions).toEqual(['fra1'])
   })
 
-  it('la función api/index.ts lleva las migraciones y las fuentes de las imágenes, con un máximo de 10 s', () => {
-    // Las fuentes las lee `media/resultCard` con una ruta que el trazador de Vercel no ve (tarea 6.10).
+  it('la función api/index.ts lleva las migraciones, las fuentes de las imágenes y el index.html, con un máximo de 10 s', () => {
+    // Las fuentes (tarea 6.10) y el index.html de las páginas compartibles (6.12) se leen con rutas que el
+    // trazador de Vercel no ve.
     expect(config.functions['api/index.ts']).toEqual({
       includeFiles:
-        '{apps/server/drizzle/**,apps/server/node_modules/@fontsource/*/files/*-latin-*-normal.woff}',
+        '{apps/server/drizzle/**,apps/server/node_modules/@fontsource/*/files/*-latin-*-normal.woff,apps/web/dist/index.html}',
       maxDuration: 10,
     })
   })
@@ -153,6 +156,10 @@ describe('vercel.json: reescrituras', () => {
   })
 
   it.each(API_ROUTES)('%s → función /api', (path) => {
+    expect(rewriteFor(path)).toBe('/api')
+  })
+
+  it.each(SHARE_ROUTES)('RF-SHARE-01: %s → función /api (metadatos de la página)', (path) => {
     expect(rewriteFor(path)).toBe('/api')
   })
 
