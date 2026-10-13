@@ -135,7 +135,7 @@ construye aquí lo ve alguien que vota.
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 5.13 | Reproductor global: almacén `player` (Zustand), un único `HTMLAudioElement` (`preload` según intención), ganancia con rampa de 50 ms, «Escuchar el master tal cual» en Ajustes, Media Session, error con reintentar, barra fina en escritorio y mini reproductor en móvil; el sample de la home pasa por él; analizador al Escenario solo con el sample o semanas selladas | ⬜ Listo | — | §2.6, §4.7.3, §3.5 · `RF-PLAY-01..03`, `RF-PLAY-09`, `RD-MOT-06` |
+| 5.13 | Reproductor global: almacén `player` (Zustand), un único `HTMLAudioElement` (`preload` según intención), ganancia con rampa de 50 ms, «Escuchar el master tal cual» en Ajustes, Media Session, error con reintentar, barra fina en escritorio y mini reproductor en móvil; el sample de la home pasa por él; analizador al Escenario solo con el sample o semanas selladas | ✅ Hecho | — | §2.6, §4.7.3, §3.5 · `RF-PLAY-01..03`, `RF-PLAY-09`, `RD-MOT-06` · **Hecho:** `features/player` (almacén con el `<audio>` único, Media Session, ganancia con rampa en el motor, `PlayerBar` en diferido sobre la barra de controles) y «Escuchar el master tal cual» en Ajustes → Sonido. Tests: `store.test.ts` (7: `RF-PLAY-02`, `-03`, `-09`, `RD-MOT-06`, cola), `engine.test.ts` (rampa de 50 ms) y E2E `player.spec.ts` (`RF-PLAY-01`: el sample sigue al navegar, pausa y cierre). Mirado en el navegador a 1440 × 900 y 390 × 844 táctil, plegado y desplegado. Guía v0.6.65 |
 | 5.14 | Escucha acumulada desde `audio.played` con `listen`/`qualify`, la escucha (`play`) a los 10 s seguidos y las estrellas conectadas al medidor | ⬜ Listo | 5.4, 5.7, 5.13 | §4.7.3 · `RF-VOTE-04`, `RF-VOTE-10`, `RF-PLAY-07` |
 | 5.15 | Voto optimista: mutación de TanStack Query con reversión y sonido de error; estados «Guardando» y «No se ha guardado» de las estrellas; quitar el voto | ⬜ Listo | 5.5, 5.14 | §3.8.4, §4.7.2 · `RF-VOTE-02`, `RF-VOTE-13` |
 | 5.16 | «ELIGE ENTRADA» en `/semana/:slug`: ficha de luchador de la enfocada, pestañas Q/E, «Solo sin votar», filtros (F), rejilla `listbox` 2D con casilla «?», votadas al final y atenuadas, paginado por filas, J al Modo Jurado; móvil con hoja inferior. El menú pasa a usar la crónica de `/ticker` (de la 5.9) | ⬜ Listo | 5.3, 5.13 | §3.8.13 · `RF-PLAY-04` |
@@ -147,7 +147,7 @@ construye aquí lo ve alguien que vota.
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 5.20 | Datos de prueba: semana en `voting` con 24 entradas de varios productores y audios del almacenamiento falso (`tools/seed` y fixtures de E2E) | ⬜ Listo | 5.5 | para la 5.21 y las capturas de la 5.22 |
+| 5.20 | Datos de prueba: semana en juego con 24 entradas de varios productores y audios del almacenamiento falso (`tools/seed` y fixtures de E2E) | ✅ Hecho | 5.5 | para la 5.21 y las capturas de la 5.22 · **Hecho:** `apps/server/src/scripts/seedBattle.ts` (por la API con la app en el mismo proceso: 24 entradas medidas y votos en 14 s) y `tests/e2e/battle.ts` (semana con entradas para los E2E de la fase) |
 | 5.21 | E2E del hito: dos usuarios se votan con teclado (rejilla → ficha → Modo Jurado), todas las reglas `RF-VOTE-*` y los tres emails capturados en el `Mailer` en memoria con el reloj simulado | ⬜ Listo | 5.12, 5.16, 5.17, 5.18, 5.19, 5.20 | §5 · hito de la fase |
 | 5.22 | Jurado visual de tres lentes (juego, marca y accesibilidad) sobre la rejilla, la ficha, el Modo Jurado, el reproductor y los emails, en los tamaños de referencia | ⬜ Listo | 5.21 | §3 · `RD-VIS-02` · acta en `evidence/f5/jurado/` |
 | 5.23 | ⚠️ Prueba real: el reproductor global sobre un MP3 firmado de Cloudinary (prefijo de desarrollo), con la ganancia, el analizador y Media Session en Chrome | ⬜ Listo | 5.13 | `RF-PLAY-02`, §4.8 · crea y borra recursos en Cloudinary: con confirmación |
@@ -178,6 +178,7 @@ recordatorio, llamada al jurado y primeros votos salen respetando silencio y top
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-13 | 5.13, 5.20 | Reproductor global con su barra y el sample dentro (guía v0.6.65); generador de una semana en juego para desarrollo y E2E. |
 | 2026-10-13 | 5.12 | Recordatorio, llamada al jurado y primeros votos, con su programación y el contrato de voto ciego sobre lo enviado (guía v0.6.64). |
 | 2026-10-13 | 5.11 | Horas de silencio y tope semanal de avisos al enviar (guía v0.6.63). |
 | 2026-10-13 | 5.3–5.10 | Servidor del voto: lista, recibo de escucha, voto, denuncia, escuchas, cola, crónica y contrato de voto ciego (guía v0.6.62). `battle.first_votes` pasa a la 5.12. |

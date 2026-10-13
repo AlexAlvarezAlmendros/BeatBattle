@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.64 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.65 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -400,7 +400,8 @@ reproductor en móvil que se expande). Sigue sonando al navegar entre páginas. 
 (generativa en voto ciego), el alias o título, la forma de onda con el progreso en rojo, el tiempo,
 anterior/siguiente, volumen y un botón «Votar» que se ilumina cuando el umbral de escucha se cumple.
 Integra la **Media Session API** (controles del sistema y de la pantalla de bloqueo), como Other
-People.
+People. El sample de la semana pasa por el mismo reproductor: lo que empieza en la tarjeta del menú sigue
+sonando al navegar, con la barra fuera de la home (§3.3 «Reproductor»).
 
 **Igualación de sonoridad.** Cada entrada se reproduce con una ganancia que la lleva a **−14 LUFS
 integrados**, medidos en servidor (§4.8.4). La ganancia solo puede **atenuar** (nunca sube más de
@@ -1260,6 +1261,7 @@ una ventana estrecha o ampliada al 200 %.
 | **Modal** (ventana de juego) | Panel `--bb-panel-veil` con marco blanco y chaflán `--bb-cut-lg`, título en display, teclas de acción en el pie, sobre `--bb-scrim`. Entra con la diagonal (`--bb-dur-base`) y `ui.open`. El foco va al diálogo; Esc cierra. |
 | **Anunciador** | Rótulo de una a tres palabras en display, blanco con extrusión de trama y contorno, o etiqueta grande girada −6°: «RONDA 07», «¡A ESCUCHAR!», «¡VOTO LISTO!», «¡VOTO GUARDADO!», «¡TIEMPO!», «¡SELLADO!», «¡JURADO COMPLETO!», «¡CAMPEÓN!». **Uno por evento**, nunca encadenados, y repetido en `aria-live="polite"`. El rótulo en display ocupa el ancho de su caja, centrado y con `--bb-space-2` de aire a los lados para la sombra dura, y se ajusta con `useFitText` como el alias (anchura de 150 a 105 %, después el cuerpo hasta 30 px y, como último recurso, parte entre palabras). La etiqueta girada es roja con texto blanco (`cta`, como «¡VOTO GUARDADO!» en `03-jurado`); la blanca con texto negro queda para lo que invita («¡A ESCUCHAR!», `03-jurado-escuchando`). Las dos parten entre palabras y en contraste alto conservan su caja. Modo serio: no aparece (queda la región viva); la galería lo explica en la tesela. |
 | **Aviso** (*toast*) | Panel opaco con marco, icono y texto; abajo a la derecha (arriba en móvil), 4 s, pausa con ratón o foco, como mucho 4. El de error es de papel (§3.2). Logros: §3.8.8. |
+| **Reproductor** (barra global, §2.6) | Encima de la barra de controles y pegado a ella (`bottom` = lo que va pegado al pie), en la capa del reproductor, sobre `--bb-panel` con filete `--bb-line-strong`; solo mientras hay pista. Escritorio: portada de 40 px (generativa en voto ciego), título y alias o productor, anterior · play · siguiente, la onda con el progreso y la cabeza (control: `RF-PLAY-06`), el tiempo, «Votar» (a la ficha de la entrada) y cerrar. Móvil: la fila mínima (portada, título, play, desplegar y cerrar) y, desplegada (`aria-expanded`), la onda con anterior, siguiente, el tiempo y «Votar». Su alto real (`--player-h`) se suma al margen del foco. No sale en la home mientras suena el sample (su mando es la tarjeta del escenario) ni en el Modo Jurado (su panel). Si el audio no carga, «No hemos podido cargar este beat» y «Reintentar» (`RF-PLAY-09`). |
 | **Medidor** (XP, escucha, combo, semana) | Paralelogramo segmentado (segmentos de 9–12 px con hueco negro de 2 px), pista `--bb-ink-4`, relleno `--bb-red`. Siempre con su valor en texto y `role="meter"`/`progressbar` con `aria-valuetext`. Al subir, un brillo lo recorre una vez. |
 | **Esqueleto** | Placa con la forma final y trama de relleno al 20 % que barre en diagonal con `transform` (nunca `background-position`). Sin movimiento: trama fija. Nunca *spinners*, salvo el sellado (vinilo girando). |
 | **Reloj de ronda** (cuenta atrás) | Caja de marco rojo con rótulo («TIEMPO · CIERRE DE ENVÍOS»), `DD:HH:MM:SS` en Oxanium 34 px con unidades debajo y separadores rojos, y la **barra de la semana**: 7 segmentos L–D (días gastados rayados, hoy parcial, el tramo de solo votos del domingo con rayado rojo). ≤ 24 h: dígitos rojos. ≤ 1 h: el marco late a 1 Hz (la variante en línea de la tarjeta móvil, sin marco, no late: quedan los dígitos rojos). Agotado: «¡TIEMPO!». `role="timer"`, avisos solo en hitos (`RNF-A11Y-07`). |
@@ -2224,7 +2226,8 @@ beatbattle/
 │  └─ emails/                 plantillas React Email
 ├─ tools/
 │  ├─ shot/                   capturas, bancos de FPS y de audio (de Orchard)
-│  └─ seed/                   semanas, entradas sintéticas y votos para desarrollo y E2E
+│  └─ seed/                   (vacío) el generador de una semana en juego con entradas y votos es
+│                             `apps/server/src/scripts/seedBattle.ts` (usa la app); en E2E, `tests/e2e/battle.ts`
 └─ docs/                      guia-maestra.md, planning/, legal/, security/
 ```
 
@@ -3620,6 +3623,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.65 | **Tareas 5.13 y 5.20.** §3.3: el componente «Reproductor» (la barra global: dónde va, qué lleva en escritorio y en móvil, cuándo no sale y su alto en el margen del foco). §2.6: el sample pasa por el mismo reproductor. §4.4: el generador de datos de una semana en juego vive en `apps/server/src/scripts/seedBattle.ts` (necesita la app) y el de los E2E en `tests/e2e/battle.ts`. |
 | 2026-10-13 | 0.6.64 | **Tarea 5.12.** §2.12: `battle.first_votes` se encola en el `batch` del voto que hace el quinto, una vez por entrada; `battle.jury_call` cuenta las entradas activas, ajenas y sin su voto. La versión «racha en peligro» de `battle.reminder` llega con las rachas (Fase 7). §4.10 y §4.19.5: la cuenta atrás `:slug.votes.gif` va siempre al cierre de votos (la llamada al jurado sale el domingo a las 17:00, con los envíos aún abiertos). |
 | 2026-10-13 | 0.6.63 | **Tarea 5.11.** §2.12.4 (`RF-NOTIF-08`): la semana del tope va del lunes a las 00:00 al domingo en Madrid y cuenta por destinatario; se aplica al enviar (lo ya enviado ocupa su hueco; entre lo que toca a la vez, por prioridad) y lo descartado queda `skipped` con el motivo `weekly_cap`. Lo retenido por las horas de silencio sale a las 08:00 (`not_before`). |
 | 2026-10-13 | 0.6.62 | **Tareas 5.3–5.10.** §4.10: un recibo de escucha por usuario y entrada (volver a empezar no reinicia el reloj de servidor, que cuenta desde la primera vez); `listen` y `qualify` solo en `open` y `voting` y nunca de la propia entrada; `qualify` antes de tiempo da `LISTEN_REQUIRED` con lo que falta. La escucha (`/play`) cuenta una vez por sesión y 3 por hora por IP y entrada, y responde 202 siempre. La crónica da las 5 últimas entradas por alias, los días que quedan y los votos de la semana. La cola del jurado lleva la ronda `{ done, total }`. Denunciar tiene, además, un límite de 20 por hora y usuario. |

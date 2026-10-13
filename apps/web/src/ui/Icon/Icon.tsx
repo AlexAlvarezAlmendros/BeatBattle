@@ -67,6 +67,10 @@ const PATHS = {
   ),
   /* Flecha maciza del cursor de las placas del menú y del botón «Escuchar». */
   triangleRight: <path d="M7 4.5v15L19 12z" className={styles.solid} />,
+  prev: <path d="M6 5v14M18 5.5v13L8.5 12z" />,
+  next: <path d="M18 5v14M6 5.5v13L15.5 12z" />,
+  chevronUp: <path d="M6 15l6-6 6 6" />,
+  chevronDown: <path d="M6 9l6 6 6-6" />,
 } satisfies Record<string, ReactNode>
 
 export type IconName = keyof typeof PATHS

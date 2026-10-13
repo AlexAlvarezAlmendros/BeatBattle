@@ -503,7 +503,11 @@
     "navLabel": "Secciones de ajustes",
     "sound": {
       "title": "Sonido y efectos",
-      "summary": "Aquí irán los volúmenes por bus (efectos, música de sala y entradas) y el silencio."
+      "summary": "Aquí irán los volúmenes por bus (efectos, música de sala y entradas) y el silencio.",
+      "rawMaster": {
+        "label": "Escuchar el master tal cual",
+        "help": "Cada beat suena igualado a −14 LUFS: el reproductor solo baja los que vienen más fuertes, para que ninguno destaque por volumen. Actívalo para oír el master tal y como se subió. El Modo Jurado iguala siempre."
+      }
     },
     "motion": {
       "title": "Movimiento",
@@ -1902,5 +1906,19 @@
       "invalidList_one": "Revisa el chop {list}: el motivo está bajo su fila.",
       "invalidList_other": "Revisa los chops {list}: el motivo está bajo cada fila."
     }
+  },
+  "player": {
+    "label": "Reproductor",
+    "play": "Escuchar {title}",
+    "pause": "Pausar {title}",
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "time": "{current} / {total}",
+    "vote": "Votar",
+    "retry": "Reintentar",
+    "error": "No hemos podido cargar este beat",
+    "expand": "Abrir el reproductor",
+    "collapse": "Plegar el reproductor",
+    "close": "Cerrar el reproductor"
   }
 }

@@ -4,6 +4,7 @@ import type { SettingsSectionKey } from '../../app/paths'
 import { t } from '../../i18n'
 import { FilterChip } from '../../ui/Chip'
 import { useShortcuts } from '../../ui/shortcuts'
+import { usePlayer } from '../player/store'
 import { SettingsTabs } from './SettingsLayout'
 import { SettingsOptionsHelp, SettingsPreview } from './SettingsPreview'
 
@@ -14,9 +15,33 @@ import { SettingsOptionsHelp, SettingsPreview } from './SettingsPreview'
  * Cuenta, Perfil, Emails, Sesiones y Privacidad (Fase 2) viven en su propio fichero y su propio trozo diferido.
  */
 
-/** `/ajustes/sonido` */
+/** `/ajustes/sonido`. Ya funciona «Escuchar el master tal cual» (§2.6, `RF-PLAY-03`; tarea 5.13). */
 export function SoundSettingsPage() {
-  return <SettingsSectionPlaceholder section="sound" />
+  return (
+    <SettingsSectionPlaceholder section="sound">
+      <RawMasterOption />
+    </SettingsSectionPlaceholder>
+  )
+}
+
+/** «Escuchar el master tal cual [SÍ/NO]»: quita la igualación fuera del Modo Jurado. */
+function RawMasterOption() {
+  const raw = usePlayer((state) => state.rawMaster)
+  const set = usePlayer((state) => state.setRawMaster)
+  const helpId = useId()
+  return (
+    <div className="settings-option">
+      <FilterChip
+        label={t('settings.sound.rawMaster.label')}
+        pressed={raw}
+        onChange={set}
+        aria-describedby={helpId}
+      />
+      <p id={helpId} className="settings-option-help">
+        {t('settings.sound.rawMaster.help')}
+      </p>
+    </div>
+  )
 }
 
 /** `/ajustes/movimiento` */

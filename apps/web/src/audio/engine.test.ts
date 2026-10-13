@@ -29,11 +29,31 @@ class FakeContext {
   createMediaElementSource() {
     return { connect: () => {}, disconnect: () => {} }
   }
+  /** Ganancia que apunta lo que se le programa. */
+  createGain() {
+    const calls: [string, ...number[]][] = []
+    return {
+      calls,
+      gain: {
+        value: 1,
+        cancelScheduledValues: (at: number) => calls.push(['cancel', at]),
+        setValueAtTime: (value: number, at: number) => calls.push(['set', value, at]),
+        linearRampToValueAtTime: (value: number, at: number) => calls.push(['ramp', value, at]),
+      },
+      connect: () => {},
+      disconnect: () => {},
+    }
+  }
 }
 
 /** Un `<audio>` falso que suena o no. */
 function element(paused: boolean) {
-  return { paused, addEventListener: () => {}, removeEventListener: () => {} } as unknown as HTMLMediaElement
+  return {
+    paused,
+    volume: 1,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  } as unknown as HTMLMediaElement
 }
 
 function pointer(fine: boolean) {
@@ -102,6 +122,42 @@ describe('motor de audio: voto ciego (RD-MOT-06)', () => {
     engine.attachElement(element(false), { blind: false })
     expect(engine.musicReactive).toBe(true)
     expect(engine.musicAnalyser).not.toBeNull()
+  })
+})
+
+describe('motor de audio: igualación de sonoridad (RF-PLAY-03)', () => {
+  beforeEach(() => {
+    vi.stubGlobal('AudioContext', FakeContext)
+    pointer(true)
+  })
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('RF-PLAY-03: la ganancia cambia con una rampa de 50 ms y nunca pasa de 0 dB', () => {
+    const engine = new AudioEngine()
+    engine.unlock()
+    const audioElement = element(false)
+    let made: { calls: [string, ...number[]][] } | undefined
+    const ctx = engine.context as unknown as FakeContext
+    const original = ctx.createGain.bind(ctx)
+    ctx.createGain = () => {
+      const node = original()
+      made = node
+      return node
+    }
+    engine.attachElement(audioElement, { blind: true })
+    engine.setElementGainDb(audioElement, -6)
+    const ramp = made?.calls.find((call) => call[0] === 'ramp')
+    expect(ramp?.[1]).toBeCloseTo(10 ** (-6 / 20), 6)
+    expect(ramp?.[2]).toBeCloseTo(12.5 + 0.05, 6)
+    engine.setElementGainDb(audioElement, 4)
+    expect(made?.calls.filter((call) => call[0] === 'ramp').at(-1)?.[1]).toBe(1)
+  })
+
+  it('RF-PLAY-03: sin contexto, con el volumen del elemento', () => {
+    const engine = new AudioEngine()
+    const audioElement = element(false)
+    engine.setElementGainDb(audioElement, -6)
+    expect(audioElement.volume).toBeCloseTo(10 ** (-6 / 20), 6)
   })
 })
 

@@ -1,0 +1,161 @@
+/*
+ * Barra del reproductor global (guía §2.6, §3.3 «Reproductor»; tarea 5.13): encima de la barra de controles
+ * y pegada a ella (`bottom` = lo que va pegado al pie, `--controls-pinned-h`), en la capa del reproductor.
+ * Su alto real (`--player-h`, que publica `PlayerBar`) se suma al margen del foco: ningún control enfocado
+ * queda debajo (WCAG 2.4.11). En escritorio, una fila fina; en móvil, la fila mínima y el panel que se
+ * despliega con la onda.
+ */
+.bar {
+  position: sticky;
+  bottom: var(--controls-pinned-h, var(--bb-controls-h));
+  z-index: var(--bb-z-player);
+  display: grid;
+  grid-template-columns: auto minmax(0, 16rem) auto minmax(0, 1fr) auto;
+  grid-template-areas: "cover info transport panel close";
+  align-items: center;
+  gap: var(--bb-space-2) var(--bb-space-4);
+  padding: var(--bb-space-2) var(--bb-gutter);
+  border-top: var(--bb-stroke-hair) solid var(--bb-line-strong);
+  background: var(--bb-panel);
+}
+
+.cover {
+  grid-area: cover;
+  display: block;
+  width: var(--bb-space-10);
+  height: var(--bb-space-10);
+  overflow: hidden;
+  background: var(--bb-wine-2);
+}
+
+.cover :is(img, canvas, svg) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.info {
+  grid-area: info;
+  display: grid;
+  min-width: 0;
+  line-height: var(--bb-leading-label);
+}
+
+.title,
+.artist {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title {
+  color: var(--bb-text);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-bold);
+}
+
+.artist {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-semibold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.transport {
+  grid-area: transport;
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+}
+
+.panel {
+  grid-area: panel;
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-4);
+  min-width: 0;
+}
+
+.wave {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.time {
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.error {
+  grid-column: 1 / -1;
+  color: var(--bb-text);
+  font-size: var(--bb-fs-sm);
+}
+
+.secondary {
+  display: contents;
+}
+
+.expand,
+.panelNav {
+  display: none;
+}
+
+.close {
+  grid-area: close;
+}
+
+/*
+ * Móvil: la fila mínima (portada, título, play, desplegar y cerrar). Desplegada, el panel con anterior,
+ * siguiente, la onda, el tiempo y «Votar» en una segunda fila.
+ */
+@media (max-width: 720px) {
+  .bar {
+    grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+    grid-template-areas:
+      "cover info transport expand close"
+      "panel panel panel panel panel";
+    gap: var(--bb-space-2) var(--bb-space-3);
+    padding-inline: var(--bb-gutter);
+  }
+
+  .expand {
+    display: inline-flex;
+    grid-area: expand;
+  }
+
+  .secondary {
+    display: none;
+  }
+
+  .panel {
+    display: none;
+    flex-wrap: wrap;
+  }
+
+  .bar[data-open] .panel {
+    display: flex;
+  }
+
+  .panelNav {
+    display: flex;
+    gap: var(--bb-space-2);
+  }
+
+  .wave {
+    flex-basis: 100%;
+  }
+}
+
+/*
+ * Sus controles no llevan el margen del foco de `global.css` (el alto de lo pegado: ya están en ello), como
+ * los de la barra de controles: si no, al llegar a ellos con Tab la pantalla saltaría cada vez.
+ */
+.bar :is(a[href], button, [tabindex]) {
+  scroll-margin-block-end: 0;
+}
