@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
-import { entry, sample, vote, week } from '../src/db/schema'
+import { entry, ipSignal, listen, report, sample, vote, week } from '../src/db/schema'
 import { createAccount, makeApp, ORIGIN, T0, type TestApp } from './helpers'
 
 /** Una semana mínima (con su sample) directamente en la BD; `sealed` la deja sellada. */
@@ -156,5 +156,52 @@ describe('exportar y borrar la cuenta con entradas (RNF-PRIV-01)', () => {
       ]),
     )
     expect(votes).toHaveLength(2)
+  })
+
+  it('RF-PRF-04: borra sus escuchas, denuncias y señales de IP, y las de otros a sus entradas sin sellar', async () => {
+    const t = await makeApp()
+    const { id, cookie } = await createAccount(t, { email: 'aina@example.com', username: 'aina' })
+    const open = await insertWeek(t, 1)
+    const sealed = await insertWeek(t, 2, { sealed: true })
+    const mine = entryRow(open, id)
+    const mineSealed = entryRow(sealed, id)
+    const theirs = entryRow(open, 'otro')
+    await t.db.insert(entry).values([mine, mineSealed, theirs])
+    await t.db.insert(listen).values([
+      { id: 'l-mia', userId: id, entryId: theirs.id, startedAt: T0, qualifiedAt: T0 + 30_000 },
+      { id: 'l-a-mi-entrada', userId: 'otro', entryId: mine.id, startedAt: T0 },
+      { id: 'l-a-la-sellada', userId: 'otro', entryId: mineSealed.id, startedAt: T0 },
+    ])
+    await t.db.insert(report).values([
+      { id: 'r-mia', reporterId: id, entryId: theirs.id, reason: 'spam', createdAt: T0 },
+      { id: 'r-a-mi-entrada', reporterId: 'otro', entryId: mine.id, reason: 'rights', createdAt: T0 },
+      { id: 'r-a-la-sellada', reporterId: 'otro', entryId: mineSealed.id, reason: 'other', createdAt: T0 },
+    ])
+    await t.db.insert(ipSignal).values([
+      { userId: id, ipHash: 'hash-de-aina', seenAt: T0 },
+      { userId: 'otro', ipHash: 'hash-de-otro', seenAt: T0 },
+    ])
+
+    const exported = (
+      await t.app.inject({ method: 'GET', url: '/api/me/export', headers: { cookie } })
+    ).json().data.game
+    expect(exported.listens).toEqual([{ entryId: theirs.id, startedAt: T0, qualifiedAt: T0 + 30_000 }])
+    expect(exported.reports).toEqual([{ entryId: theirs.id, reason: 'spam', details: null, createdAt: T0 }])
+    expect(exported.ipSignals).toEqual([{ ipHash: 'hash-de-aina', seenAt: T0 }])
+
+    const res = await t.app.inject({
+      method: 'DELETE',
+      url: '/api/me',
+      headers: { cookie, origin: ORIGIN },
+      payload: { confirm: 'aina' },
+    })
+    expect(res.statusCode).toBe(200)
+    expect((await t.db.select({ id: listen.id }).from(listen)).map((row) => row.id)).toEqual([
+      'l-a-la-sellada',
+    ])
+    expect((await t.db.select({ id: report.id }).from(report)).map((row) => row.id)).toEqual([
+      'r-a-la-sellada',
+    ])
+    expect(await t.db.select({ userId: ipSignal.userId }).from(ipSignal)).toEqual([{ userId: 'otro' }])
   })
 })

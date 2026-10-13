@@ -1,6 +1,6 @@
 import { scheduleWeek as boundaries } from '@beatbattle/rules'
 import { afterEach, describe, expect, it } from 'vitest'
-import { emailSubscriber } from '../src/db/schema'
+import { emailSubscriber, ipSignal } from '../src/db/schema'
 import type { MemoryMailer } from '../src/email/mailer'
 import { encodeGif } from '../src/media/gif'
 import { createSample, makeWeeksApp, scheduleWeek, type WeeksApp } from './fixtures/weeks'
@@ -125,6 +125,17 @@ describe('alerta de drop sin cuenta y email del drop (3.13)', () => {
     expect((await confirm(token)).statusCode).toBe(404)
     expect((await tick()).json().data.cleaned.unconfirmedAlerts).toBe(1)
     expect(await t.db.select().from(emailSubscriber)).toEqual([])
+  })
+
+  it('§4.14: las señales de IP de los votos se purgan a los 7 días', async () => {
+    t = await makeWeeksApp({ cronSecret: SECRET })
+    const now = t.clock.now()
+    await t.db.insert(ipSignal).values([
+      { userId: 'vieja', ipHash: 'a', seenAt: now - 7 * 24 * HOUR },
+      { userId: 'reciente', ipHash: 'b', seenAt: now - 6 * 24 * HOUR },
+    ])
+    expect((await tick()).json().data.cleaned.ipSignals).toBe(1)
+    expect(await t.db.select({ userId: ipSignal.userId }).from(ipSignal)).toEqual([{ userId: 'reciente' }])
   })
 
   it('RF-NOTIF-09: al registrarse con el mismo email, la alerta se fusiona y el drop llega una vez, como cuenta', async () => {

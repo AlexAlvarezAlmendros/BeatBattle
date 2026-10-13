@@ -8,7 +8,10 @@ import {
   emailPref,
   emailSubscriber,
   entry,
+  ipSignal,
+  listen,
   producerProfile,
+  report,
   rulesAcceptance,
   sampleDownload,
   seenFlag,
@@ -229,8 +232,9 @@ const weeks: AccountDataModule = {
 }
 
 /**
- * Entradas y votos (§2.5, tarea 4.3). Al borrar la cuenta (`RF-PRF-04`): las entradas y los votos de
- * semanas sin sellar se borran (también los votos que otros dieron a esas entradas); las entradas de
+ * Entradas, votos, escuchas y denuncias (§2.5, tareas 4.3 y 5.2). Al borrar la cuenta (`RF-PRF-04`): las
+ * entradas y los votos de semanas sin sellar se borran (también los votos, escuchas y denuncias que otros
+ * dieron a esas entradas); sus recibos de escucha, sus denuncias y sus señales de IP, siempre; las entradas de
  * semanas selladas se quedan con su clasificación y pasan a «Productor eliminado» (`user_id` =
  * `deleted:<id de la entrada>`, sin nada que lleve a la persona). Sus audios, ya sin fila, los barre la
  * limpieza de huérfanos del `tick` (tarea 4.9).
@@ -266,9 +270,29 @@ const entries: AccountDataModule = {
       .from(vote)
       .innerJoin(week, eq(week.id, vote.weekId))
       .where(eq(vote.userId, userId))
+    const listens = await db
+      .select({ entryId: listen.entryId, startedAt: listen.startedAt, qualifiedAt: listen.qualifiedAt })
+      .from(listen)
+      .where(eq(listen.userId, userId))
+    const reports = await db
+      .select({
+        entryId: report.entryId,
+        reason: report.reason,
+        details: report.details,
+        createdAt: report.createdAt,
+      })
+      .from(report)
+      .where(eq(report.reporterId, userId))
+    const ipSignals = await db
+      .select({ ipHash: ipSignal.ipHash, seenAt: ipSignal.seenAt })
+      .from(ipSignal)
+      .where(eq(ipSignal.userId, userId))
     return {
       entries: own.map(({ tags, ...item }) => ({ ...item, genres: JSON.parse(tags) as string[] })),
       votes,
+      listens,
+      reports,
+      ipSignals,
       // La capa de juego (logros y XP) llega con la Fase 7.
       achievements: [],
       xpEvents: [],
@@ -283,6 +307,10 @@ const entries: AccountDataModule = {
       .where(and(eq(entry.userId, userId), inArray(entry.weekId, unsealedWeeks)))
     return {
       statements: [
+        // Antes que las entradas: las subconsultas las leen.
+        db.delete(listen).where(or(eq(listen.userId, userId), inArray(listen.entryId, ownUnsealed))),
+        db.delete(report).where(or(eq(report.reporterId, userId), inArray(report.entryId, ownUnsealed))),
+        db.delete(ipSignal).where(eq(ipSignal.userId, userId)),
         db.delete(vote).where(inArray(vote.entryId, ownUnsealed)),
         db.delete(vote).where(and(eq(vote.userId, userId), inArray(vote.weekId, unsealedWeeks))),
         db.delete(entry).where(and(eq(entry.userId, userId), inArray(entry.weekId, unsealedWeeks))),

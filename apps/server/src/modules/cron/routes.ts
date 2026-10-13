@@ -3,9 +3,10 @@ import type { DataEnvelope } from '@beatbattle/shared'
 import { lte } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import type { Db } from '../../db/client'
-import { usernameRedirect } from '../../db/schema'
+import { ipSignal, usernameRedirect } from '../../db/schema'
 import { type DrainDeps, type DrainResult, emailDrain } from '../../email/outbox'
 import { appError } from '../../lib/errors'
+import { IP_SIGNAL_RETENTION_MS } from '../../lib/ipHash'
 import { withLease } from '../../lib/lease'
 import type { AlertsService } from '../alerts/service'
 import { type EntriesTickResult, entriesTick } from '../entries/cleanup'
@@ -22,7 +23,7 @@ export interface TickResult {
   sealed: string[]
   dropEmails: number
   calendarGaps: string[]
-  cleaned: { unconfirmedAlerts: number; usernameRedirects: number }
+  cleaned: { unconfirmedAlerts: number; usernameRedirects: number; ipSignals: number }
   /** Intents caducados, entradas en `processing` y huérfanos (tarea 4.9); `null` sin almacenamiento. */
   entries: EntriesTickResult | null
   drain: DrainResult | null
@@ -64,7 +65,7 @@ export function cronRoutes(app: FastifyInstance, deps: CronDeps): void {
         sealed: [],
         dropEmails: 0,
         calendarGaps: [],
-        cleaned: { unconfirmedAlerts: 0, usernameRedirects: 0 },
+        cleaned: { unconfirmedAlerts: 0, usernameRedirects: 0, ipSignals: 0 },
         entries: null,
         drain: null,
         errors: [],
@@ -93,6 +94,11 @@ export function cronRoutes(app: FastifyInstance, deps: CronDeps): void {
           .where(lte(usernameRedirect.expiresAt, now))
           .returning({ old: usernameRedirect.old })
         out.cleaned.usernameRedirects = redirects.length
+        const signals = await deps.db
+          .delete(ipSignal)
+          .where(lte(ipSignal.seenAt, now - IP_SIGNAL_RETENTION_MS))
+          .returning({ userId: ipSignal.userId })
+        out.cleaned.ipSignals = signals.length
       })
       await step('entries', async () => {
         if (!deps.entryStorage) return

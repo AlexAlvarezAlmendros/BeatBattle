@@ -93,7 +93,15 @@ describe('exportar los datos (RF-PRF-05)', () => {
       expect.objectContaining({ purpose: 'marketing', granted: true, source: 'ajustes' }),
     ])
     expect(data.email.emails.map((item: { kind: string }) => item.kind)).toContain('auth.security')
-    expect(data.game).toEqual({ entries: [], votes: [], achievements: [], xpEvents: [] })
+    expect(data.game).toEqual({
+      entries: [],
+      votes: [],
+      listens: [],
+      reports: [],
+      ipSignals: [],
+      achievements: [],
+      xpEvents: [],
+    })
     // Nada que sirva para entrar: ni el hash de la contraseña ni los tokens de sesión.
     const accounts = await t.db.$client.execute('select password from account')
     const sessions = await t.db.$client.execute('select token from session')
