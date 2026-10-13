@@ -21,16 +21,14 @@ describe('SEO (6.13)', () => {
     b = await battle({ producers: 2, voters: 0 })
     const [first, second] = b.producers as [Battle['producers'][0], Battle['producers'][0]]
     for (const [i, stars] of [4, 4, 4].entries())
-      await b.t.db
-        .insert(vote)
-        .values({
-          userId: `v-${i}`,
-          entryId: first.entryId,
-          weekId: b.weekId,
-          stars,
-          createdAt: 1,
-          updatedAt: 1,
-        })
+      await b.t.db.insert(vote).values({
+        userId: `v-${i}`,
+        entryId: first.entryId,
+        weekId: b.weekId,
+        stars,
+        createdAt: 1,
+        updatedAt: 1,
+      })
     const url = b.t.config.publicUrl
 
     const open = await get('/sitemap.xml')
