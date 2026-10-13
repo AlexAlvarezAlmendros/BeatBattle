@@ -7,6 +7,7 @@ import { DocumentTitle } from '../../app/DocumentTitle'
 import { type ControlKey, useControlKeys } from '../../app/layout/screen'
 import { FrameSlot } from '../../app/layout/slots'
 import { paths } from '../../app/paths'
+import { ScreenPage } from '../../app/ScreenPage'
 import { audio } from '../../audio/engine'
 import { formatDuration, t } from '../../i18n'
 import { queryKeys } from '../../net/queryKeys'
@@ -59,6 +60,34 @@ function typing(target: EventTarget | null): boolean {
  * por su alias y la trama no reacciona a ella (`RD-MOT-06`, el reproductor va como fuente ciega).
  */
 export function JuryPage() {
+  const status = useSession((state) => state.status)
+  const me = useSession((state) => state.me)
+  if (status === 'loading') return <p className={styles.loading}>{t('jury.loading')}</p>
+  if (!me?.emailVerified) return <JuryGate signedIn={me !== null} />
+  return <JuryArena />
+}
+
+/**
+ * Sin cuenta o sin el email verificado, el Modo Jurado no se juega (votar pide la cuenta verificada,
+ * `RF-VOTE-06`): la pantalla lo dice con la silueta del jurado y lleva a entrar o a verificar.
+ */
+function JuryGate({ signedIn }: { signedIn: boolean }) {
+  return (
+    <ScreenPage
+      title={t('pages.jury.title')}
+      summary={signedIn ? t('jury.gate.verify') : t('jury.gate.signIn')}
+      piece={<JurySilhouette className={styles.gateSilhouette} />}
+      actions={
+        <Button to={signedIn ? paths.verify() : paths.signIn()} keyHint={t('frame.keys.glyph.enter')}>
+          {signedIn ? t('jury.gate.verifyAction') : t('jury.gate.signInAction')}
+        </Button>
+      }
+    />
+  )
+}
+
+/** El Modo Jurado de una cuenta verificada. */
+function JuryArena() {
   const [params] = useSearchParams()
   const from = params.get('desde')
   const me = useSession((state) => state.me)

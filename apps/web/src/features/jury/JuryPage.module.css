@@ -384,3 +384,8 @@
     margin-top: var(--bb-space-1);
   }
 }
+
+/* La puerta (sin cuenta o sin verificar): la silueta como pieza de la pantalla. */
+.gateSilhouette {
+  width: min(100%, 20rem);
+}
