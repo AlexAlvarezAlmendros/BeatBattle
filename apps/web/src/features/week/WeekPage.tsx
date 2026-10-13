@@ -1,6 +1,6 @@
 import { type PublicWeek, PublicWeekSchema } from '@beatbattle/shared'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { type LoaderFunctionArgs, useLoaderData, useLocation } from 'react-router'
 import { paths } from '../../app/paths'
 import { notFound } from '../../app/routes'
@@ -16,7 +16,7 @@ import { RoundClock } from '../../ui/RoundClock'
 import { Tag } from '../../ui/Tag'
 import { VinylSun } from '../../ui/VinylSun'
 import { Waveform } from '../../ui/Waveform'
-import { PaperNotice } from '../account/FormBits'
+import { Done, PaperNotice } from '../account/FormBits'
 import { useSession } from '../account/session'
 import { DropReveal } from './DropReveal'
 import { RulesModal } from './RulesModal'
@@ -60,6 +60,7 @@ export function WeekPage() {
   const peaks = decodePeaks(week.sample.peaks)
   const seconds = week.sample.durationMs / 1000
   const titleRef = useRef<HTMLParagraphElement>(null)
+  const licenseId = useId()
   useFitText(titleRef, week.sample.title, { minFontPx: 24 })
 
   const start = async (kind: 'original' | 'stems') => {
@@ -178,9 +179,7 @@ export function WeekPage() {
             variant="white"
             iconOnly
             icon={player.playing ? 'pause' : 'triangleRight'}
-            aria-label={t(player.playing ? 'pages.week.pause' : 'pages.week.listen', {
-              title: week.sample.title,
-            })}
+            aria-label={t('pages.week.listen', { title: week.sample.title })}
             aria-pressed={player.playing}
             onClick={player.toggle}
           />
@@ -192,6 +191,7 @@ export function WeekPage() {
             duration={seconds}
             onSeek={player.seek}
             animateIn={false}
+            error={player.failed ? t('pages.week.audioError') : undefined}
           />
           <span className={styles.time}>
             {t('home.stage.time', {
@@ -223,8 +223,15 @@ export function WeekPage() {
           </p>
         )}
 
-        <div className={styles.actions}>{actions}</div>
-        {download === 'started' && <PaperNotice live>{t('pages.week.downloading')}</PaperNotice>}
+        <div className={styles.actions}>
+          {actions}
+          {live && (
+            <Button variant="outline" onClick={() => setReplay(true)}>
+              {t('pages.week.replay')}
+            </Button>
+          )}
+        </div>
+        {download === 'started' && <Done>{t('pages.week.downloading')}</Done>}
         {download === 'error' && <PaperNotice live>{t('pages.week.downloadError')}</PaperNotice>}
         {download === 'unverified' && (
           <PaperNotice
@@ -239,16 +246,12 @@ export function WeekPage() {
           </PaperNotice>
         )}
 
-        {live && (
-          <Button className={styles.replay} variant="outline" size="sm" onClick={() => setReplay(true)}>
-            {t('pages.week.replay')}
-          </Button>
-        )}
-
-        <details className={styles.license}>
-          <summary className="bb-label">{t('pages.week.license')}</summary>
+        <section className={styles.license} aria-labelledby={licenseId}>
+          <h2 id={licenseId} className="bb-label">
+            {t('pages.week.license')}
+          </h2>
           <p>{week.sample.licenseText}</p>
-        </details>
+        </section>
       </div>
 
       {replay && (

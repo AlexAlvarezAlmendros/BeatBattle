@@ -2,7 +2,7 @@
 // movimiento. Uso: node tools/shot/flow-f3-revelacion.mjs <origen> <carpeta> [--mobile]
 import { chromium } from '@playwright/test'
 
-const [origin = 'http://localhost:5174', out = '.'] = process.argv.slice(2).filter((a) => !a.startsWith('--'))
+const [origin = 'http://localhost:5176', out = '.'] = process.argv.slice(2).filter((a) => !a.startsWith('--'))
 const mobile = process.argv.includes('--mobile')
 const size = mobile ? { width: 390, height: 844 } : { width: 1440, height: 900 }
 const tag = mobile ? '390' : '1440'

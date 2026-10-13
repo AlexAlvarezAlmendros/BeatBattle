@@ -14,7 +14,7 @@ type State = 'idle' | 'busy' | 'sent' | 'error' | 'rateLimited'
  * mismo («revisa tu email»), como el servidor, que tampoco dice si la dirección ya estaba. Va en la tarjeta
  * de la semana con el calendario vacío y en «Cómo se juega».
  */
-export function DropAlertForm({ className }: { className?: string }) {
+export function DropAlertForm({ className, compact = false }: { className?: string; compact?: boolean }) {
   const [email, setEmail] = useState('')
   const [state, setState] = useState<State>('idle')
   const [invalid, setInvalid] = useState(false)
@@ -42,7 +42,7 @@ export function DropAlertForm({ className }: { className?: string }) {
 
   return (
     <form
-      className={[styles.form, className].filter(Boolean).join(' ')}
+      className={[styles.form, compact && styles.compact, className].filter(Boolean).join(' ')}
       onSubmit={submit}
       noValidate
       aria-describedby={`${id}-status`}
@@ -52,6 +52,8 @@ export function DropAlertForm({ className }: { className?: string }) {
         type="email"
         autoComplete="email"
         inputMode="email"
+        placeholder={compact ? t('home.dropAlert.placeholder') : undefined}
+        labelHidden={compact}
         value={email}
         onChange={(event) => setEmail(event.target.value)}
         error={invalid ? t('home.dropAlert.invalid') : null}

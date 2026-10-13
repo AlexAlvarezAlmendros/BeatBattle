@@ -87,6 +87,12 @@ export interface MenuModel {
   lastSealed: { number: number; unseen: boolean } | null
   /** Crónica de la arena (§3.8.3): nunca dice quién ha subido. */
   chronicle: readonly string[]
+  /**
+   * La semana todavía no ha llegado (la primera petición de `GET /api/weeks/current`): ni «en el horno» ni
+   * Jugar bloqueado, sino la tarjeta en esqueleto (jurado de la 3.21, quinto pase: al cargar se veía un
+   * instante el calendario vacío aunque hubiera semana).
+   */
+  loading?: boolean
   /** Sin semana en juego: cuándo cae el próximo drop («Cae el lunes 12 de octubre»), si está programado. */
   nextDrop?: string | null
 }

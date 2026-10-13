@@ -170,12 +170,11 @@ export function HowItWorksPage() {
           ))}
         </ol>
       </section>
-      <section className={styles.rules} aria-labelledby={alertId}>
+      <section className={cx(styles.rules, styles.alert)} aria-labelledby={alertId}>
         <h2 id={alertId} className={cx('bb-label', styles.rulesTitle)}>
           {t('home.dropAlert.title')}
         </h2>
-        <p className={styles.alertText}>{t('home.dropAlert.summary')}</p>
-        <DropAlertForm />
+        <DropAlertForm compact />
       </section>
     </ScreenPage>
   )

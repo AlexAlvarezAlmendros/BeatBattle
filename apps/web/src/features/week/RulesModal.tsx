@@ -43,13 +43,14 @@ export function RulesModal({
 
   return (
     <Modal
+      wide
       open={open}
       onClose={onClose}
       title={t('pages.week.rules.title', { number: weekNumber })}
       description={t('pages.week.rules.summary')}
       footer={
         <>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} keyHint={t('frame.keys.glyph.escape')}>
             {t('pages.week.rules.cancel')}
           </Button>
           <Button variant="cta" loading={busy} onClick={submit} keyHint={t('frame.keys.glyph.enter')}>
@@ -58,9 +59,15 @@ export function RulesModal({
         </>
       }
     >
-      <ol className={styles.rulesList}>
-        {POINTS.map((point) => (
-          <li key={point}>{t(`pages.week.rules.points.${point}`)}</li>
+      {/* biome-ignore lint/a11y/noRedundantRoles: Safari y VoiceOver quitan la semántica de lista con list-style: none */}
+      <ol role="list" className={styles.rulesList}>
+        {POINTS.map((point, index) => (
+          <li key={point} className={styles.rulesItem}>
+            <span className={styles.rulesIndex} aria-hidden="true">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <span>{t(`pages.week.rules.points.${point}`)}</span>
+          </li>
         ))}
       </ol>
       <a className={styles.rulesLink} href={paths.legal('bases')} target="_blank" rel="noopener">

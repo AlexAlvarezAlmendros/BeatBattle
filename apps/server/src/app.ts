@@ -179,7 +179,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     alerts,
   })
   // El buzón de los E2E: solo en test, nunca en desarrollo ni en producción.
-  if (config.env === 'test') testingRoutes(app, mailer)
+  if (config.env === 'test') testingRoutes(app, mailer, db)
   // Spike de Cloudinary (tarea 1.7): solo fuera de producción.
   if (config.env !== 'production')
     storageSpikeRoutes(app, storage, {

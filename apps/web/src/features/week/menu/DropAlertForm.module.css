@@ -1,4 +1,4 @@
-/* «Avísame del próximo drop» (§2.12.3): el campo y el botón en una fila; en móvil, uno bajo otro. */
+/* «Avísame del próximo drop» (§2.12.3): el campo y el botón en una fila (en móvil, uno bajo otro, salvo el compacto). */
 .form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -18,8 +18,19 @@
   display: none;
 }
 
+/*
+ * Compacto (la tarjeta del menú, que tiene que caber sin desplazar, §3.8.3): campo y botón en una fila
+ * también en móvil; el rótulo del campo, solo para el lector (`labelHidden`).
+ */
+
 @media (max-width: 720px) {
-  .form {
+  .form:not(.compact) {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* El ejemplo del campo compacto es la pista visible del campo: en `--bb-text-3` (≥ 4,5:1, WCAG 1.4.3). */
+.compact input::placeholder {
+  color: var(--bb-text-3);
+  opacity: 1;
 }

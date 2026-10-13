@@ -27,11 +27,16 @@ const previewPort = Number(process.env.PW_PREVIEW_PORT ?? 5175)
 const previewOrigin = `http://localhost:${previewPort}`
 /** BD temporal nueva en cada ejecución: ningún E2E depende de datos de una ejecución anterior. */
 const db = join(tmpdir(), `beatbattle-e2e-${Date.now()}.db`)
+/** Almacenamiento falso de los samples (§4.8.6, Fase 3): carpeta nueva en cada ejecución. */
+const storage = join(tmpdir(), `beatbattle-e2e-storage-${Date.now()}`)
+/** Secreto del cron de los E2E (`/api/cron/tick`, §4.12). */
+const E2E_CRON_SECRET = 'e2e-cron-secret-0123456789abcdefghij'
 /** Build de producción para el proyecto `perf`, fuera de `apps/web/dist` para no pisar la de `pnpm build`. */
 const previewDist = join(tmpdir(), `beatbattle-e2e-dist-${Date.now()}`)
 // Se borran al salir. Los workers también evalúan este fichero, pero sus rutas no existen: no borran nada.
 process.once('exit', () => {
   rmSync(db, { force: true })
+  rmSync(storage, { recursive: true, force: true })
   rmSync(previewDist, { recursive: true, force: true })
 })
 
@@ -125,6 +130,8 @@ export default defineConfig({
         // por hora y por IP (§4.13) y todos los workers salen de 127.0.0.1.
         TRUST_PROXY: '1',
         LOG_LEVEL: 'warn',
+        BB_FAKE_STORAGE: storage,
+        CRON_SECRET: E2E_CRON_SECRET,
       },
     },
   ],

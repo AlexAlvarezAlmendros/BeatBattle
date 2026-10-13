@@ -117,7 +117,8 @@ for (const viewport of [
       hasTouch: viewport.touch,
     })
 
-    for (const path of ['/dev/menu', '/']) {
+    // `?largo`: título de 49 caracteres y «Fa sostenido menor» (jurado de la 3.21).
+    for (const path of ['/dev/menu', '/dev/menu?largo', '/']) {
       test(`§3.3 / RD-VIS-02: ninguna placa elegida de ${path} corta su etiqueta, su dato ni su tecla`, async ({
         page,
       }) => {
@@ -414,6 +415,8 @@ for (const viewport of [
       '/dev/menu',
       '/dev/menu?estado=votacion',
       '/dev/menu?estado=vacio',
+      // Título de 49 caracteres y «Fa sostenido menor» (jurado de la 3.21: la fila de chips partía).
+      '/dev/menu?largo',
       '/dev/menu?visitante',
       '/dev/menu?subida',
       '/',
@@ -1457,7 +1460,7 @@ for (const viewport of [
   test.describe(`pie del menú con la ventana baja a ${viewport.width} × ${viewport.height}`, () => {
     test.use({ viewport })
 
-    for (const path of ['/dev/menu', '/']) {
+    for (const path of ['/dev/menu', '/dev/menu?largo', '/']) {
       test(`RD-VIS-02 e / §3.8.3: en ${path} la tarjeta y la ayuda acaban por encima de la línea discontinua de la barra`, async ({
         page,
       }) => {
@@ -1481,6 +1484,39 @@ for (const viewport of [
         expect(box.scroll).toBeLessThanOrEqual(0)
       })
     }
+  })
+}
+
+/**
+ * Con la ventana de la maqueta y mayores, la tarjeta llega a la barra (§3.8.3): con un título largo en dos
+ * líneas acaba donde la de un título corto, nunca bajo la barra (jurado de la 3.21, quinto pase: a 1440 × 900
+ * pasaba 17 px y el chaflán de abajo quedaba tapado).
+ */
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 1920, height: 1080 },
+]) {
+  test.describe(`título largo a ${viewport.width} × ${viewport.height}`, () => {
+    test.use({ viewport })
+
+    test('RD-VIS-02 e / §3.8.3: la tarjeta con un título largo acaba donde la corta, sobre la barra', async ({
+      page,
+    }) => {
+      const cardBottom = async (path: string) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        return page.evaluate(() => ({
+          card: document.querySelector('main article')!.getBoundingClientRect().bottom,
+          bar: document.querySelector('footer')!.getBoundingClientRect().top,
+          scroll: document.scrollingElement!.scrollHeight - window.innerHeight,
+        }))
+      }
+      const short = await cardBottom('/dev/menu')
+      const long = await cardBottom('/dev/menu?largo')
+      expect(long.card, 'pie de la tarjeta larga').toBeLessThanOrEqual(short.card + 0.5)
+      expect(long.card, 'sobre la barra').toBeLessThanOrEqual(long.bar + 0.5)
+      expect(long.scroll).toBeLessThanOrEqual(0)
+    })
   })
 }
 

@@ -41,7 +41,8 @@
       "sent": "Hecho. Revisa tu email y confirma la alerta (caduca en 7 días).",
       "invalid": "Escribe un email válido.",
       "error": "No hemos podido apuntarte. Prueba otra vez en un momento.",
-      "rateLimited": "Demasiados intentos desde aquí. Prueba dentro de una hora."
+      "rateLimited": "Demasiados intentos desde aquí. Prueba dentro de una hora.",
+      "placeholder": "Tu email"
     },
     "title": {
       "label": "Beat Battle, torneo semanal de productores",
@@ -103,11 +104,15 @@
         "help": "Sonido, movimiento, modo serio y tamaño de texto; también cuenta, emails y sesiones."
       }
     },
+    "loading": {
+      "detail": "Cargando…",
+      "help": "Cargando la semana…"
+    },
     "empty": {
       "kicker": "Próximo drop",
-      "title": "El próximo drop está en el horno",
+      "title": "En el horno",
       "summary": "Cada lunes cae un sample nuevo: flipéalo, sube tu beat antes del domingo y deja que la comunidad vote a ciegas. El domingo se sella la semana.",
-      "whenSoon": "Próximo drop pronto"
+      "whenSoon": "Pronto"
     },
     "stage": {
       "kickerBefore": "Semana",
@@ -124,7 +129,7 @@
       "challenge": "Reto",
       "closesShort": "Cierre de envíos",
       "votesShort": "Cierre de votos",
-      "pause": "Pausar el sample «{title}»"
+      "audioError": "El sample no se ha podido cargar."
     },
     "clock": {
       "closes": "Tiempo · cierre de envíos",
@@ -164,7 +169,6 @@
       "kicker": "Semana {number} · escenario",
       "origin": "Origen: {origin}",
       "listen": "Escuchar el sample «{title}»",
-      "pause": "Pausar el sample «{title}»",
       "wave": "Forma de onda del sample",
       "closes": "Cierre de envíos",
       "votes": "Cierre de votos",
@@ -195,7 +199,8 @@
         "required": "Marca que aceptas las bases para seguir.",
         "submit": "Aceptar y descargar",
         "cancel": "Ahora no"
-      }
+      },
+      "audioError": "No se ha podido cargar el sample. Prueba otra vez en un momento."
     },
     "weekResults": {
       "title": "Resultados",
@@ -1320,7 +1325,9 @@
         "when": "domingo 11 a las 20:00",
         "whenVoting": "hoy a las 23:59",
         "clockWhen": "Domingo 11 a las 20:00 · votos hasta las 23:59",
-        "clockWhenVoting": "Envíos cerrados · votos hasta las 23:59"
+        "clockWhenVoting": "Envíos cerrados · votos hasta las 23:59",
+        "longTitle": "Una tarde de lluvia en la plaza del Sol de Gràcia",
+        "longKey": "Fa sostenido menor"
       },
       "player": {
         "season": "Temporada T4",
@@ -1611,16 +1618,16 @@
   "music": {
     "tonics": {
       "c": "Do",
-      "cs": "Do♯",
+      "cs": "Do sostenido",
       "d": "Re",
-      "ds": "Re♯",
+      "ds": "Re sostenido",
       "e": "Mi",
       "f": "Fa",
-      "fs": "Fa♯",
+      "fs": "Fa sostenido",
       "g": "Sol",
-      "gs": "Sol♯",
+      "gs": "Sol sostenido",
       "a": "La",
-      "as": "La♯",
+      "as": "La sostenido",
       "b": "Si"
     },
     "major": "{tonic} mayor",
@@ -1638,7 +1645,8 @@
   "reveal": {
     "label": "Nuevo escenario: semana {number}",
     "week": "SEMANA {number}",
-    "skip": "Saltar"
+    "skip": "Saltar",
+    "details": "{title} · {bpm} BPM · {key}"
   },
   "admin": {
     "require": "Entra con una cuenta de administración para ver el panel.",
@@ -1674,7 +1682,10 @@
         "voting": "Votación",
         "sealing": "Sellando",
         "sealed": "Sellada"
-      }
+      },
+      "weekNumber": "de la semana #{number}",
+      "upcoming": "Próximas semanas",
+      "scheduled": "Semana #{number} programada para el {monday}."
     },
     "samples": {
       "title": "Samples",
@@ -1731,7 +1742,15 @@
       "spread": "Repartir en 8 iguales",
       "save": "Guardar los chops",
       "saved": "Chops guardados.",
-      "invalid": "Cada chop acaba después de empezar y dentro del sample."
+      "column": {
+        "chop": "Chop",
+        "length": "Duración (s)"
+      },
+      "problemOrder": "El final va antes del inicio.",
+      "problemEnd": "Acaba después del final del sample.",
+      "problemNumber": "Escribe los segundos con cifras (por ejemplo, 2,5).",
+      "invalidList_one": "Revisa el chop {list}: el motivo está bajo su fila.",
+      "invalidList_other": "Revisa los chops {list}: el motivo está bajo cada fila."
     }
   }
 }

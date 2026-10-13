@@ -61,10 +61,10 @@ describe('/api/cron/tick (3.12)', () => {
     expect((await tick()).json().data.calendarGaps).toEqual(['2026-10-12'])
     await tick()
     const toAdmin = mailer().sent.filter(
-      (email) => email.to === 'jefa@example.com' && /Calendario vacío/.test(email.subject),
+      (email) => email.to === 'jefa@example.com' && /Falta el drop/.test(email.subject),
     )
     expect(toAdmin).toHaveLength(1)
-    expect(toAdmin[0]?.subject).toBe('Calendario vacío: falta el drop del lunes 12 de oc')
+    expect(toAdmin[0]?.subject).toBe('Falta el drop del lunes 12 de octubre')
   })
 
   it('RF-DROP-04: con la semana programada no hay aviso', async () => {

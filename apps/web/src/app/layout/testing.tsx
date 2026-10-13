@@ -10,11 +10,13 @@ export function testQueryClient(): QueryClient {
 
 /**
  * Solo para tests: pinta una pieza del marco dentro de un router en memoria, en la ruta `path`. Cualquier
- * otra ruta pinta lo mismo, así que navegar no desmonta la pieza.
+ * otra ruta pinta lo mismo, así que navegar no desmonta la pieza. `prepare` recibe el cliente de TanStack
+ * Query antes de pintar (para dejar datos en la caché).
  */
-export function renderInRouter(element: ReactElement, path = '/') {
+export function renderInRouter(element: ReactElement, path = '/', prepare?: (client: QueryClient) => void) {
   const router = createMemoryRouter([{ path: '*', element }], { initialEntries: [path] })
   const client = testQueryClient()
+  prepare?.(client)
   return {
     router,
     client,

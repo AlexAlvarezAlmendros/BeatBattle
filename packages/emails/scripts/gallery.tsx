@@ -15,7 +15,8 @@ const kinds = Object.keys(TEMPLATES) as TemplateKind[]
 for (const kind of kinds) {
   const template = TEMPLATES[kind]
   // biome-ignore lint/suspicious/noExplicitAny: cada plantilla con su propio fixture
-  const email = await renderEmail(template as any, template.fixture, { publicUrl, family: 'service' })
+  const family = kind.startsWith('battle.') ? 'battle' : 'service'
+  const email = await renderEmail(template as any, template.fixture, { publicUrl, family })
   await writeFile(path.join(out, `${kind}.html`), email.html)
   await writeFile(
     path.join(out, `${kind}.txt`),

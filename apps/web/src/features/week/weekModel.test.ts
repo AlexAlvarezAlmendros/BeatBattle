@@ -44,8 +44,8 @@ const week: PublicWeek = {
 describe('weekModel', () => {
   it('tonalidad en palabras', () => {
     expect(musicalKeyName('Dm')).toBe('Re menor')
-    expect(musicalKeyName('F#')).toBe('Fa♯ mayor')
-    expect(musicalKeyName('A#m')).toBe('La♯ menor')
+    expect(musicalKeyName('F#')).toBe('Fa sostenido mayor')
+    expect(musicalKeyName('A#m')).toBe('La sostenido menor')
   })
 
   it('la onda de la API (Int8 en base64) en pares de −1 a 1', () => {
@@ -56,9 +56,9 @@ describe('weekModel', () => {
   })
 
   it('rango y cierre en hora de Madrid', () => {
-    expect(rangeText(week)).toBe('5–11 oct · 2026-W41')
+    expect(rangeText(week)).toBe('5–11 oct · 2026-\u2060W41')
     expect(rangeText({ ...scheduleWeek({ year: 2026, month: 9, day: 28 }), label: '2026-W40' })).toBe(
-      '28 sept–4 oct · 2026-W40',
+      '28 sept–4 oct · 2026-\u2060W40',
     )
     expect(whenText(W41.submitEndsAt, W41.startsAt)).toBe('domingo 11 a las 20:00')
     expect(whenText(W41.voteEndsAt - 1000, W41.submitEndsAt)).toBe('hoy a las 23:59')

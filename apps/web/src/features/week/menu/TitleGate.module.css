@@ -358,6 +358,10 @@
 }
 
 .billTitle {
+  min-width: 0;
+  overflow-x: clip;
+  overflow-y: visible;
+  white-space: nowrap;
   margin-top: var(--bb-space-2);
   /* 36 px en escritorio (maqueta): el 2xl (32) × 1,125. */
   font-size: calc(var(--bb-fs-2xl) * 1.125);

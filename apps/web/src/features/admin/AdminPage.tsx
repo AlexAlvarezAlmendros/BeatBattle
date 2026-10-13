@@ -16,7 +16,7 @@ import { queryKeys } from '../../net/queryKeys'
 import { Button } from '../../ui/Button'
 import { FilterChip } from '../../ui/Chip'
 import { TextField } from '../../ui/Field'
-import { PaperNotice } from '../account/FormBits'
+import { Done, PaperNotice } from '../account/FormBits'
 import { RequireSession } from '../account/RequireSession'
 import { useSession } from '../account/session'
 import styles from './AdminPage.module.css'
@@ -97,6 +97,8 @@ function Calendar() {
     try {
       await unscheduleWeek(slug)
       refresh()
+      // La fila (y su botón) desaparece: el foco va al título del calendario.
+      document.getElementById(headingId)?.focus()
     } catch (cause) {
       setError(cause instanceof ApiClientError ? cause.message : t('admin.error'))
     }
@@ -104,17 +106,20 @@ function Calendar() {
 
   return (
     <section className={styles.section} aria-labelledby={headingId}>
-      <h2 id={headingId} className={`bb-label ${styles.heading}`}>
+      <h2 id={headingId} className={`bb-label ${styles.heading}`} tabIndex={-1}>
         {t('admin.calendar.title')}
       </h2>
       <p className={styles.summary}>{t('admin.calendar.summary')}</p>
-      <WeeksTable rows={rows} onRemove={(slug) => void remove(slug)} />
+      <WeeksTable rows={rows} caption={t('admin.calendar.upcoming')} onRemove={(slug) => void remove(slug)} />
       {error && <PaperNotice live>{error}</PaperNotice>}
       <ScheduleForm gaps={calendar.data.gaps} samples={samples.data ?? []} onDone={refresh} />
       {past.length > 0 && (
         <>
           <h3 className={`bb-label ${styles.subheading}`}>{t('admin.calendar.past')}</h3>
-          <WeeksTable rows={past.map((week) => ({ kind: 'week' as const, week }))} />
+          <WeeksTable
+            rows={past.map((week) => ({ kind: 'week' as const, week }))}
+            caption={t('admin.calendar.past')}
+          />
         </>
       )}
     </section>
@@ -123,14 +128,18 @@ function Calendar() {
 
 function WeeksTable({
   rows,
+  caption,
   onRemove,
 }: {
   rows: ({ kind: 'week'; week: AdminWeek } | { kind: 'gap'; monday: string })[]
+  caption: string
   onRemove?: (slug: string) => void
 }) {
   return (
-    <div className={styles.tableWrap}>
+    // biome-ignore lint/a11y/noNoninteractiveTabindex: la tabla se desplaza en horizontal en móvil; con el foco, también con el teclado
+    <section className={styles.tableWrap} tabIndex={0} aria-label={caption}>
       <table className={styles.table}>
+        <caption className="sr-only">{caption}</caption>
         <thead>
           <tr>
             <th scope="col">{t('admin.calendar.monday')}</th>
@@ -145,20 +154,20 @@ function WeeksTable({
           {rows.map((row) =>
             row.kind === 'gap' ? (
               <tr key={row.monday} data-gap="">
-                <td>{mondayLabel(row.monday)}</td>
+                <th scope="row">{mondayLabel(row.monday)}</th>
                 <td colSpan={onRemove ? 5 : 4}>
                   <span className={styles.gap}>{t('admin.calendar.gap')}</span>
                 </td>
               </tr>
             ) : (
               <tr key={row.week.slug}>
-                <td>{mondayLabel(row.week.monday)}</td>
-                <td>
+                <th scope="row">{mondayLabel(row.week.monday)}</th>
+                <td className={styles.num}>
                   #{row.week.number} · {row.week.label}
                 </td>
-                <td>{row.week.sample.title}</td>
+                <td className={styles.wrap}>{row.week.sample.title}</td>
                 <td>{t(`admin.calendar.phases.${row.week.phase}`)}</td>
-                <td>
+                <td className={styles.num}>
                   {t('admin.calendar.downloadsValue', {
                     count: row.week.downloads.accounts,
                     total: row.week.downloads.total,
@@ -169,6 +178,10 @@ function WeeksTable({
                     {row.week.phase === 'scheduled' && (
                       <Button size="sm" variant="outline" onClick={() => onRemove(row.week.slug)}>
                         {t('admin.calendar.unschedule')}
+                        <span className="sr-only">
+                          {' '}
+                          {t('admin.calendar.weekNumber', { number: row.week.number })}
+                        </span>
                       </Button>
                     )}
                   </td>
@@ -178,7 +191,7 @@ function WeeksTable({
           )}
         </tbody>
       </table>
-    </div>
+    </section>
   )
 }
 
@@ -201,6 +214,7 @@ function ScheduleForm({
   const [golden, setGolden] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [done, setDone] = useState<string | null>(null)
   const ids = { monday: useId(), sample: useId(), title: useId() }
   const chosenMonday = monday || future[0] || ''
   const chosenSample = sampleId || samples[0]?.id || ''
@@ -208,9 +222,10 @@ function ScheduleForm({
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     setError(null)
+    setDone(null)
     setBusy(true)
     try {
-      await schedule({
+      const created = await schedule({
         monday: chosenMonday,
         sampleId: chosenSample,
         challenge: challenge || null,
@@ -219,6 +234,7 @@ function ScheduleForm({
       })
       setChallenge('')
       setMonday('')
+      setDone(t('admin.calendar.scheduled', { number: created.number, monday: mondayLabel(created.monday) }))
       onDone()
     } catch (cause) {
       setError(cause instanceof ApiClientError ? cause.message : t('admin.error'))
@@ -271,6 +287,7 @@ function ScheduleForm({
         />
       </div>
       {error && <PaperNotice live>{error}</PaperNotice>}
+      {done && <Done>{done}</Done>}
       <Button type="submit" variant="cta" loading={busy} className={styles.submit}>
         {t('admin.calendar.submit')}
       </Button>
@@ -296,8 +313,10 @@ function Samples() {
       ) : samples.data.length === 0 ? (
         <p className={styles.summary}>{t('admin.samples.empty')}</p>
       ) : (
-        <div className={styles.tableWrap}>
+        // biome-ignore lint/a11y/noNoninteractiveTabindex: la tabla se desplaza en horizontal en móvil; con el foco, también con el teclado
+        <section className={styles.tableWrap} tabIndex={0} aria-label={t('admin.samples.title')}>
           <table className={styles.table}>
+            <caption className="sr-only">{t('admin.samples.title')}</caption>
             <thead>
               <tr>
                 <th scope="col">{t('admin.calendar.sample')}</th>
@@ -311,12 +330,12 @@ function Samples() {
             <tbody>
               {samples.data.map((sample) => (
                 <tr key={sample.id}>
-                  <td>
+                  <th scope="row" className={styles.wrap}>
                     <b>{sample.title}</b>
                     <span className={styles.muted}> · {sample.credits}</span>
-                  </td>
-                  <td>{formatDuration(sample.durationMs / 1000)}</td>
-                  <td>
+                  </th>
+                  <td className={styles.num}>{formatDuration(sample.durationMs / 1000)}</td>
+                  <td className={styles.num}>
                     {sample.loudnessLufs === null
                       ? '—'
                       : t('admin.samples.loudnessValue', { value: sample.loudnessLufs.toFixed(1) })}
@@ -335,7 +354,7 @@ function Samples() {
               ))}
             </tbody>
           </table>
-        </div>
+        </section>
       )}
     </section>
   )
@@ -343,7 +362,7 @@ function Samples() {
 
 function Status({ loading }: { loading: boolean }) {
   return (
-    <p className={styles.summary} aria-busy={loading}>
+    <p className={styles.summary} role="status">
       {loading ? t('admin.loading') : t('admin.error')}
     </p>
   )

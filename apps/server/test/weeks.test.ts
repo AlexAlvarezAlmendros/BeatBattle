@@ -76,7 +76,15 @@ describe('samples del admin (3.6)', () => {
         method: 'POST',
         url: '/api/admin/samples',
         headers: json(t.admin.cookie),
-        payload: { sampleId, title: 'X', credits: 'Y', licenseText: 'Z', ...payload },
+        payload: {
+          sampleId,
+          title: 'X',
+          credits: 'Y',
+          licenseText: 'Z',
+          bpm: 92,
+          musicalKey: 'Dm',
+          ...payload,
+        },
       })
     const noCover = await create({})
     expect(noCover.statusCode).toBe(422)

@@ -87,14 +87,13 @@
 .actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--bb-space-3);
 }
 
-.replay {
-  justify-self: start;
-}
-
 .license {
+  display: grid;
+  gap: var(--bb-space-1);
   border-top: var(--bb-stroke-hair) solid var(--bb-line);
   padding-top: var(--bb-space-3);
   color: var(--bb-text-2);
@@ -102,23 +101,35 @@
   line-height: var(--bb-leading-body);
 }
 
-.license summary {
-  min-height: var(--bb-target);
-  display: flex;
-  align-items: center;
+.license h2 {
   color: var(--bb-white);
-  cursor: pointer;
 }
 
 /* Modal de las bases. */
 .rulesList {
   display: grid;
-  gap: var(--bb-space-2);
   margin: 0 0 var(--bb-space-4);
-  padding-left: var(--bb-space-5);
+  padding: 0;
+  border-top: var(--bb-stroke-hair) solid var(--bb-line);
+  list-style: none;
   color: var(--bb-white);
   font-size: var(--bb-fs-md);
   line-height: var(--bb-leading-body);
+}
+
+/* Cada punto, una fila con su índice en cifras rojas, como «Juego limpio» de «Cómo se juega». */
+.rulesItem {
+  display: grid;
+  grid-template-columns: var(--bb-space-8) minmax(0, 1fr);
+  gap: var(--bb-space-3);
+  padding: var(--bb-space-2) 0;
+  border-bottom: var(--bb-stroke-hair) solid var(--bb-line);
+}
+
+.rulesIndex {
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-weight: var(--bb-weight-bold);
 }
 
 .rulesLink {
@@ -140,9 +151,31 @@
   font-size: var(--bb-fs-sm);
 }
 
+/* Ventana baja (§3.8.14): menos aire entre las filas para que todo quepa sin esconder nada. */
+@media (min-width: 721px) and (max-height: 899px) {
+  .body {
+    gap: var(--bb-space-3);
+  }
+}
+
+@media (min-width: 721px) and (max-height: 699px) {
+  .body {
+    gap: var(--bb-space-2);
+  }
+
+  .license {
+    padding-top: var(--bb-space-2);
+  }
+}
+
 @media (max-width: 720px) {
   .title {
     display: none;
+  }
+
+  /* En móvil, el vinilo a media anchura: el reloj y «Pillar el sample» salen en la primera vista. */
+  .vinyl {
+    width: min(55%, 14rem);
   }
 
   .player {

@@ -11,6 +11,7 @@ import { Cursor } from '../../../ui/Cursor'
 import { Frame } from '../../../ui/Frame'
 import { cx } from '../../../ui/forceState'
 import { GameLogo } from '../../../ui/GameLogo'
+import { useFitText } from '../../../ui/hooks/useFitText'
 import { useReducedMotion } from '../../../ui/hooks/useReducedMotion'
 import { Key } from '../../../ui/Key'
 import { Medal } from '../../../ui/Medal'
@@ -62,6 +63,9 @@ export function TitleGate({ model, onDone }: { model: MenuModel; onDone: () => v
   const setSound = useSound((state) => state.set)
   const toggleSound = useSound((state) => state.toggle)
   const titleId = useId()
+  const billTitleRef = useRef<HTMLHeadingElement>(null)
+  // El título del cartel, en una línea mientras quepa (antes un título largo se iba a 5 líneas y tapaba el disco).
+  useFitText(billTitleRef, model.week?.title ?? '', { minFontPx: 22 })
   const hintId = useId()
   const week = model.week
 
@@ -129,8 +133,13 @@ export function TitleGate({ model, onDone }: { model: MenuModel; onDone: () => v
     enter(shortcuts && (event.key === 's' || event.key === 'S'))
   }
 
+  // La galleta solo cabe una tonalidad corta («Re menor»): con una larga («Fa sostenido menor»), solo el BPM
+  // (la tonalidad sigue en los chips del cartel).
   const discSub = week
-    ? t('home.gate.discSub', { bpm: week.bpm, key: week.musicalKey }).toLocaleUpperCase('es')
+    ? (week.musicalKey.length <= 9
+        ? t('home.gate.discSub', { bpm: week.bpm, key: week.musicalKey })
+        : t('home.stage.bpm', { bpm: week.bpm })
+      ).toLocaleUpperCase('es')
     : ''
 
   return createPortal(
@@ -265,7 +274,7 @@ export function TitleGate({ model, onDone }: { model: MenuModel; onDone: () => v
               {t('home.gate.billKickerBefore')} <b className={styles.billNumber}>{week.number}</b>{' '}
               {t('home.gate.billKickerAfter')}
             </span>
-            <h2 id={`${titleId}-bill`} className={cx('bb-display', styles.billTitle)}>
+            <h2 ref={billTitleRef} id={`${titleId}-bill`} className={cx('bb-display', styles.billTitle)}>
               {week.title}
             </h2>
             <div className={styles.billChips}>
