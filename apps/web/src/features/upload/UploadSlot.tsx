@@ -1,5 +1,6 @@
 import { MUSICAL_KEYS, type MusicalKey } from '@beatbattle/shared'
 import { type DragEvent, useEffect, useId, useRef, useState } from 'react'
+import { audio } from '../../audio/engine'
 import { formatDuration, t } from '../../i18n'
 import { Button } from '../../ui/Button'
 import { DataChip } from '../../ui/Chip'
@@ -62,13 +63,18 @@ export function UploadSlot({
     if (!over) {
       setOver(true)
       setJolt((value) => value + 1)
+      // Una vez por entrada en la ranura (el motor no deja más de uno cada 0,5 s).
+      audio.play('upload.hover')
     }
   }
   const onDrop = (event: DragEvent) => {
     event.preventDefault()
     setOver(false)
     const file = event.dataTransfer.files[0]
-    if (file) onFile(file)
+    if (file) {
+      audio.play('upload.drop')
+      onFile(file)
+    }
   }
 
   const input = (
@@ -82,7 +88,10 @@ export function UploadSlot({
       onChange={(event) => {
         const file = event.target.files?.[0]
         event.target.value = ''
-        if (file) onFile(file)
+        if (file) {
+          audio.play('upload.drop')
+          onFile(file)
+        }
       }}
     />
   )

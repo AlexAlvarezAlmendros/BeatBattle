@@ -1,0 +1,99 @@
+/* La hoja del luchador (§3.8.5; tarea 4.15): un panel opaco con los campos de la ficha. */
+.sheet {
+  display: grid;
+  gap: var(--bb-space-4);
+  padding: var(--bb-space-5);
+}
+
+.heading {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-xl);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--bb-space-3);
+  align-items: start;
+}
+
+.select {
+  display: grid;
+  gap: var(--bb-space-1);
+}
+
+.selectLabel {
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.select select {
+  min-height: var(--bb-target);
+  padding: 0 var(--bb-space-3);
+  border: var(--bb-stroke) solid var(--bb-line-strong);
+  background: var(--bb-panel);
+  color: var(--bb-white);
+  font: inherit;
+}
+
+.genres {
+  display: grid;
+  gap: var(--bb-space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-2);
+}
+
+.hint {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.cover {
+  display: grid;
+  gap: var(--bb-space-2);
+}
+
+.coverRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bb-space-2) var(--bb-space-3);
+}
+
+.coverName {
+  overflow: hidden;
+  min-width: 0;
+  color: var(--bb-white);
+  font-size: var(--bb-fs-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.input {
+  display: none;
+}
+
+.error {
+  margin-top: var(--bb-space-2);
+  color: var(--bb-white);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-semibold);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-3);
+}

@@ -201,6 +201,7 @@ export function createWeeksService(deps: WeeksDeps) {
       voteEndsAt: row.voteEndsAt,
       challenge: row.challenge,
       golden: row.golden,
+      blind: row.blind,
       entries: inBattle?.n ?? 0,
       sample: {
         title: s.title,

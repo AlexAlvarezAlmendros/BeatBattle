@@ -1,0 +1,91 @@
+/* El medidor de súper y la celebración (§3.8.5; tarea 4.16). */
+.meter,
+.done {
+  --frame-fill: var(--bb-wine-3);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-4);
+  padding: var(--bb-space-6);
+}
+
+.label {
+  color: var(--bb-text-2);
+}
+
+.pct {
+  color: var(--bb-white);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-3xl);
+  font-weight: var(--bb-weight-extrabold);
+  line-height: 1;
+}
+
+.pctUnit {
+  margin-left: var(--bb-space-1);
+  color: var(--bb-red);
+  font-size: var(--bb-fs-xl);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-3);
+}
+
+.announcerSlot {
+  min-width: 0;
+  min-height: var(--bb-space-16);
+}
+
+.fighter {
+  display: grid;
+  grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--bb-space-5);
+}
+
+.cover {
+  aspect-ratio: 1;
+}
+
+.who {
+  display: grid;
+  gap: var(--bb-space-2);
+  min-width: 0;
+}
+
+.alias {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-2xl);
+  text-shadow: var(--bb-shadow-hard);
+  overflow-wrap: anywhere;
+}
+
+.inside {
+  color: var(--bb-red);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-lg);
+  font-weight: var(--bb-weight-bold);
+  text-transform: uppercase;
+}
+
+.text {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+@media (max-width: 720px) {
+  .meter,
+  .done {
+    padding: var(--bb-space-4);
+  }
+
+  .fighter {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cover {
+    width: min(100%, 14rem);
+  }
+}

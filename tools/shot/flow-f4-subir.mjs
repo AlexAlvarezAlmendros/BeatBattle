@@ -5,7 +5,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { chromium } from '@playwright/test'
 
-const [origin = 'http://localhost:5176', out = '.', width = '1440'] = process.argv.slice(2)
+const [origin = 'http://localhost:5176', out = '.', width = '1440', minutes = '0.6'] = process.argv.slice(2)
 mkdirSync(out, { recursive: true })
 const touch = Number(width) < 700
 
@@ -44,7 +44,10 @@ function beatWav({ seconds = 36, bpm = 140, rate = 22_050 } = {}) {
 }
 
 const wavPath = join(out, 'beat-140-am.wav')
-writeFileSync(wavPath, beatWav())
+writeFileSync(
+  wavPath,
+  beatWav({ seconds: Math.round(Number(minutes) * 60), rate: Number(minutes) > 1 ? 44_100 : 22_050 }),
+)
 
 const browser = await chromium.launch({
   channel: 'chrome',
@@ -60,6 +63,14 @@ await ctx.addInitScript(() => {
   for (const slug of ['2026-w41', '2026-w42', '2026-w43']) localStorage.setItem(`bb:drop-seen:${slug}`, 'yes')
 })
 const page = await ctx.newPage()
+if (process.env.FLOW_DEBUG) {
+  page.on('console', (message) => console.log('[consola]', message.type(), message.text().slice(0, 200)))
+  page.on('requestfailed', (request) => console.log('[fallo]', request.url(), request.failure()?.errorText))
+  page.on('response', (response) => {
+    if (response.url().includes('/api/') && !response.url().includes('/assets/'))
+      console.log('[api]', response.status(), response.request().method(), response.url().slice(0, 120))
+  })
+}
 const suffix = Math.random().toString(36).slice(2, 7)
 const email = `subir.${suffix}@example.com`
 const username = `subir${suffix}`
@@ -92,5 +103,21 @@ await page
   .waitFor({ timeout: 60_000 })
 await page.waitForTimeout(400)
 await shot('subir-analizado')
-console.log('chips:', await page.locator('[class*="chips"]').last().innerText())
+console.log('chips:', await page.locator('[class*="chips"]').first().innerText())
+// La hoja del luchador (4.15): título, géneros y la declaración; BPM y tonalidad vienen del análisis.
+await page.getByLabel('Título').fill('Bruma en Gràcia')
+await page.getByRole('button', { name: /Trap/ }).first().click()
+await page.getByRole('button', { name: /Drill/ }).first().click()
+await page.getByLabel('Título').scrollIntoViewIfNeeded()
+await shot('subir-hoja')
+await page.getByRole('button', { name: /He usado el sample/ }).click()
+await page.getByRole('button', { name: /Entrar en la batalla/ }).click()
+await page.waitForTimeout(250)
+await shot('subir-medidor')
+await page.getByText('Ya estás en la batalla').waitFor({ timeout: 120_000 })
+await page.waitForTimeout(2200)
+await shot('subir-dentro')
+await page.goto(`${origin}/`)
+await page.waitForTimeout(2000)
+await shot('menu-con-entrada')
 await browser.close()
