@@ -4,8 +4,8 @@ import { ScreenPage, type ScreenPageProps, UnderConstruction } from './ScreenPag
 interface PlaceholderPageProps {
   /** Encabezado `<h1>` de la pantalla (ya traducido). */
   title: string
-  /** Una línea que cuenta qué irá aquí (ya traducida). */
-  summary: string
+  /** Una línea que cuenta qué irá aquí (ya traducida), o lo que ya funciona en su lugar (Sonido). */
+  summary: ReactNode
   /** Título de la pestaña; por defecto, el propio `title`. `null` deja el de la marca (home). */
   documentTitle?: string | null
   /** Rótulo encima del título. */
