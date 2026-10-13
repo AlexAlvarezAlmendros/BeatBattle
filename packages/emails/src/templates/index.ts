@@ -7,6 +7,9 @@ import { authSecurity } from './authSecurity'
 import { authVerify } from './authVerify'
 import { authWelcome } from './authWelcome'
 import { battleDrop } from './battleDrop'
+import { entryChanged } from './entryChanged'
+import { entryFailed } from './entryFailed'
+import { entryReceipt } from './entryReceipt'
 
 export type { AccountDeletedPayload } from './accountDeleted'
 export type { AdminCalendarGapPayload } from './adminCalendarGap'
@@ -17,6 +20,9 @@ export type { AuthSecurityPayload, SecurityChange } from './authSecurity'
 export type { AuthVerifyPayload } from './authVerify'
 export type { AuthWelcomePayload } from './authWelcome'
 export type { BattleDropPayload } from './battleDrop'
+export type { EntryChangedPayload, EntryReplacedPayload, EntryWithdrawnPayload } from './entryChanged'
+export type { EntryFailedPayload } from './entryFailed'
+export type { EntryReceiptPayload } from './entryReceipt'
 
 /** Plantillas por id del catálogo (§2.12). Cada fase añade las suyas. */
 export const TEMPLATES = {
@@ -29,6 +35,9 @@ export const TEMPLATES = {
   'admin.calendar_gap': adminCalendarGap,
   'alert.confirm': alertConfirm,
   'battle.drop': battleDrop,
+  'entry.receipt': entryReceipt,
+  'entry.failed': entryFailed,
+  'entry.changed': entryChanged,
 } as const
 
 export type TemplateKind = keyof typeof TEMPLATES

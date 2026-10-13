@@ -22,6 +22,7 @@ import { cronRoutes } from './modules/cron/routes'
 import { emailPrefsRoutes } from './modules/emailPrefs/routes'
 import { entriesRoutes } from './modules/entries/routes'
 import { createEntriesService } from './modules/entries/service'
+import { waveformRoutes } from './modules/entries/waveformRoute'
 import { healthRoutes } from './modules/health/routes'
 import { createHealthService } from './modules/health/service'
 import { meRoutes } from './modules/me/routes'
@@ -188,12 +189,14 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     publicUrl: config.publicUrl,
     measureBudgetMs: deps.measureBudgetMs,
     images,
+    emailSecret: config.auth.secret,
   })
   uploadsRoutes(app, { images, entries: entryStorage ? entries : null, rateLimiter, newId })
   entriesRoutes(app, entries)
   const weeks = createWeeksService({ db, storage: samples, newId })
   weeksRoutes(app, weeks)
   countdownRoutes(app, { db })
+  waveformRoutes(app, { db, secret: config.auth.secret })
   const alerts = createAlertsService({ db, emails, publicUrl: config.publicUrl, newId })
   alertsRoutes(app, { service: alerts, rateLimiter, secret: config.auth.secret })
   cronRoutes(app, {
