@@ -1,8 +1,11 @@
 import { eq } from 'drizzle-orm'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { emailOutbox, entry, sampleDownload, vote } from '../src/db/schema'
 import type { MemoryMailer } from '../src/email/mailer'
 import { type Battle, battle, HOUR, listener, W42 } from './fixtures/battle'
+
+// Cada prueba crea varias cuentas (alta, verificación) y vota por la API: en la CI pasa de los 5 s.
+vi.setConfig({ testTimeout: 30_000 })
 
 /** Avisos de la batalla (tarea 5.12): primeros votos, recordatorio y llamada al jurado. */
 
