@@ -1,4 +1,12 @@
-import { DEFAULT_KEY, type Key, midiToHz, pentatonicHz, pentatonicMidi, tonicTriadHz } from './theory'
+import {
+  DEFAULT_KEY,
+  type Key,
+  midiToHz,
+  pentatonicHz,
+  pentatonicMidi,
+  tonicMidi,
+  tonicTriadHz,
+} from './theory'
 
 /**
  * Efectos de sonido como datos (guía §3.7, Anexo D; `RD-SND-02`): capas de ruido, tono o FM con filtro y
@@ -44,9 +52,9 @@ export interface SfxDef {
 }
 
 /**
- * Los efectos de la tarea 1.4, `vote.unlocked` de la 1.5 y los de la interfaz de la 2.27 (`ui.move`,
- * `ui.toggle`, `ui.open`/`ui.close`, `ui.error`, `ui.success`, `nav.page`). El resto del Anexo D llega con
- * sus pantallas.
+ * Los efectos de la tarea 1.4, `vote.unlocked` de la 1.5, los de la interfaz de la 2.27 (`ui.move`,
+ * `ui.toggle`, `ui.open`/`ui.close`, `ui.error`, `ui.success`, `nav.page`), `drop.needle` de la 3.17 y los
+ * de la subida de la 4.17 (`upload.*`, `ann.newbeat`). El resto del Anexo D llega con sus pantallas.
  */
 export const SFX_IDS = [
   'ui.enter',
@@ -74,6 +82,11 @@ export const SFX_IDS = [
   'xp.gain',
   'level.up',
   'drop.needle',
+  'upload.hover',
+  'upload.drop',
+  'upload.progress',
+  'upload.done',
+  'ann.newbeat',
 ] as const
 
 export type SfxId = (typeof SFX_IDS)[number]
@@ -92,6 +105,37 @@ function starVote(hz: number): SfxLayer[] {
   ]
 }
 
+/** Pasos del progreso de la subida que suenan: uno cada 5 % (Anexo D, `upload.progress`). */
+export const UPLOAD_PROGRESS_STEP = 0.05
+/** Grados de la pentatónica que recorre el progreso, del 5 % al 100 % (dos octavas y un grado). */
+const UPLOAD_PROGRESS_DEGREES = 11
+
+/**
+ * El grado de la pentatónica de `upload.progress` para un progreso en [0, 1]: sube con el porcentaje, del
+ * grado 1 (al empezar) al 11 (al 100 %), en pasos del 5 %.
+ */
+export function uploadProgressDegree(progress: number): number {
+  const clamped = Number.isFinite(progress) ? Math.min(1, Math.max(0, progress)) : 0
+  const step = Math.floor(clamped / UPLOAD_PROGRESS_STEP + 1e-9)
+  return 1 + Math.round((step * (UPLOAD_PROGRESS_DEGREES - 1)) / Math.round(1 / UPLOAD_PROGRESS_STEP))
+}
+
+/**
+ * `upload.progress` para un progreso en [0, 1] (Anexo D): una nota corta de la escala de la semana que
+ * sube con el porcentaje. El catálogo lleva la del 0 %; el motor pide la del progreso de cada disparo.
+ */
+export function uploadProgressSfx(key: Key = DEFAULT_KEY, progress = 0): SfxDef {
+  const hz = pentatonicHz(key, uploadProgressDegree(progress), 5)
+  return {
+    jitter: 0,
+    levelDb: -24,
+    duration: 0.08,
+    layers: [
+      fm({ freq: at(hz), harmonicity: 2, modIndex: 0.3, attack: 0.003, decay: 0.06, dur: 0.08, gain: 1 }),
+    ],
+  }
+}
+
 /**
  * Catálogo de la tarea 1.4 en la tonalidad `key`. Diseño, duración, nivel y variación del Anexo D;
  * `xpCombo` sube el blip de `xp.gain` un grado de la pentatónica por combo.
@@ -106,6 +150,8 @@ export function sfxCatalog(key: Key = DEFAULT_KEY, xpCombo = 0): Record<SfxId, S
   // clics, en la 3.ª para el error.
   const [clickRoot = 1047] = tonicTriadHz(key, 6)
   const [lowRoot = 131] = tonicTriadHz(key, 3)
+  // El zumbido de la ranura: la tónica en la 1.ª octava (de 33 a 62 Hz, Anexo D).
+  const hum = midiToHz(tonicMidi(key, 1))
   const semitone = 2 ** (1 / 12)
   const fifthUp = 2 ** (7 / 12)
   const majorThird = 2 ** (4 / 12)
@@ -432,6 +478,118 @@ export function sfxCatalog(key: Key = DEFAULT_KEY, xpCombo = 0): Record<SfxId, S
             dur: 1.05,
             gain: 0.27,
             delay: 0.55,
+          }),
+        ),
+      ],
+    },
+    // La ranura zumba una vez cuando un fichero pasa por encima (§3.8.5, Anexo E: se ilumina y vibra una
+    // vez, 240 ms): la tónica de la semana en la 1.ª octava (33–62 Hz) con un vibrato lento, y su 3.ª
+    // octava, que es la que se oye en altavoces pequeños.
+    'upload.hover': {
+      jitter: 0,
+      levelDb: -24,
+      duration: 0.24,
+      layers: [
+        fm({
+          freq: at(hum),
+          harmonicity: 0.15,
+          modIndex: 0.12,
+          attack: 0.03,
+          decay: 0.16,
+          dur: 0.24,
+          gain: 0.79,
+        }),
+        tone({
+          wave: 'triangle',
+          freq: at(hum * 4),
+          filter: { type: 'lowpass', freq: at(900), q: 0.7 },
+          attack: 0.03,
+          decay: 0.14,
+          dur: 0.22,
+          gain: 0.35,
+        }),
+      ],
+    },
+    // El beat entra en la ranura (§3.8.5): un golpe sordo y la resonancia de la ranura en la tónica.
+    'upload.drop': {
+      jitter: 0,
+      levelDb: -14,
+      duration: 0.3,
+      layers: [
+        tone({ freq: [hum * 4, hum * 2], attack: 0.002, decay: 0.12, dur: 0.16, gain: 0.91 }),
+        noise({
+          noise: 'brown',
+          filter: { type: 'lowpass', freq: at(1200), q: 0.7 },
+          attack: 0.002,
+          decay: 0.06,
+          dur: 0.08,
+          gain: 0.82,
+        }),
+        fm({
+          freq: at(lowRoot * 2),
+          harmonicity: 2,
+          modIndex: 0.4,
+          attack: 0.01,
+          decay: 0.2,
+          dur: 0.28,
+          gain: 0.32,
+          delay: 0.02,
+        }),
+      ],
+    },
+    'upload.progress': uploadProgressSfx(key, 0),
+    // La entrada ya está en la batalla (§3.8.5): un *riser* de ruido de 1,5 s que sube de filtro y, en el
+    // impacto, bombo en la tónica y platillo de ruido. `ann.newbeat` suena en ese impacto.
+    'upload.done': {
+      jitter: 0,
+      levelDb: -8,
+      duration: 2,
+      layers: [
+        noise({
+          filter: { type: 'bandpass', freq: [300, 7000], q: 1.2 },
+          attack: 1.45,
+          decay: 0.06,
+          dur: 1.5,
+          gain: 1.32,
+        }),
+        tone({ freq: [lowRoot, lowRoot / 2], attack: 0.002, decay: 0.32, dur: 0.48, gain: 0.82, delay: 1.5 }),
+        noise({
+          noise: 'white',
+          filter: { type: 'highpass', freq: [5000, 7000], q: 0.7 },
+          attack: 0.002,
+          decay: 0.36,
+          dur: 0.5,
+          gain: 0.33,
+          delay: 1.5,
+        }),
+      ],
+    },
+    // Estampa del anunciador (§3.9): un golpe con cuerpo y el acorde de quinta de la tónica, seco y corto,
+    // a la vez que el rótulo se estampa (escala 1,4 → 1 en 280 ms, Anexo E).
+    'ann.newbeat': {
+      jitter: 0,
+      levelDb: -14,
+      duration: 0.35,
+      layers: [
+        tone({ freq: [lowRoot * 2, lowRoot], attack: 0.002, decay: 0.12, dur: 0.18, gain: 0.88 }),
+        noise({
+          noise: 'white',
+          filter: { type: 'bandpass', freq: at(1800), q: 1 },
+          attack: 0.001,
+          decay: 0.05,
+          dur: 0.08,
+          gain: 0.79,
+        }),
+        ...[root / 2, (root / 2) * fifthUp].map((hz) =>
+          tone({
+            wave: 'sawtooth',
+            freq: at(hz),
+            filter: { type: 'lowpass', freq: [2400, 700], q: 0.9 },
+            attack: 0.004,
+            decay: 0.22,
+            dur: 0.33,
+            gain: 0.31,
+            delay: 0.015,
           }),
         ),
       ],

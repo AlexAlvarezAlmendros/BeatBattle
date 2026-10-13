@@ -1,6 +1,12 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
-import { SFX_IDS, sfxCatalog } from '../src/sfx'
+import {
+  SFX_IDS,
+  sfxCatalog,
+  UPLOAD_PROGRESS_STEP,
+  uploadProgressDegree,
+  uploadProgressSfx,
+} from '../src/sfx'
 import { type Key, pentatonicHz } from '../src/theory'
 
 /** Duración nominal del Anexo D de cada efecto de la tarea 1.4 (s). */
@@ -20,6 +26,11 @@ const ANNEX_D: Record<string, { duration: number; levelDb: number; jitter: numbe
   'ui.error': { duration: 0.28, levelDb: -14, jitter: 0 },
   'ui.success': { duration: 0.3, levelDb: -16, jitter: 0 },
   'nav.page': { duration: 0.24, levelDb: -24, jitter: 0 },
+  'upload.hover': { duration: 0.24, levelDb: -24, jitter: 0 },
+  'upload.drop': { duration: 0.3, levelDb: -14, jitter: 0 },
+  'upload.progress': { duration: 0.08, levelDb: -24, jitter: 0 },
+  'upload.done': { duration: 2, levelDb: -8, jitter: 0 },
+  'ann.newbeat': { duration: 0.35, levelDb: -14, jitter: 0 },
 }
 
 describe('catálogo de efectos (Anexo D, 1.4)', () => {
@@ -84,5 +95,55 @@ describe('catálogo de efectos (Anexo D, 1.4)', () => {
     expect((b as number) / (a as number)).toBeCloseTo(2 ** (1 / 12))
     const [c, d] = minor['ui.toggle'].layers.map((layer) => layer.freq?.[0] ?? 0)
     expect((d as number) / (c as number)).toBeCloseTo(2 ** (7 / 12))
+  })
+
+  it('RD-SND-04 / 4.17: la nota de `upload.progress` sube con el porcentaje (nunca baja), en la escala de la semana', () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 11 }),
+        fc.constantFrom('minor', 'major'),
+        fc.double({ min: 0, max: 1, noNaN: true }),
+        fc.double({ min: 0, max: 1, noNaN: true }),
+        (tonic, mode, a, b) => {
+          const key = { tonic, mode } as Key
+          const [low, high] = a <= b ? [a, b] : [b, a]
+          const hz = (p: number) => uploadProgressSfx(key, p).layers[0]?.freq?.[0] ?? 0
+          expect(hz(high)).toBeGreaterThanOrEqual(hz(low))
+          expect(hz(low)).toBeCloseTo(pentatonicHz(key, uploadProgressDegree(low), 5))
+        },
+      ),
+    )
+    // Del grado 1 al empezar al 11 al 100 %: dos octavas y un grado.
+    expect(uploadProgressDegree(0)).toBe(1)
+    expect(uploadProgressDegree(1)).toBe(11)
+    expect(uploadProgressDegree(1.7)).toBe(11)
+    expect(uploadProgressDegree(Number.NaN)).toBe(1)
+    // Cada 5 % cambia de paso: entre dos pasos seguidos la nota no baja y en 10 % siempre sube.
+    for (let step = 0; step < 18; step++)
+      expect(uploadProgressDegree((step + 2) * UPLOAD_PROGRESS_STEP)).toBeGreaterThan(
+        uploadProgressDegree(step * UPLOAD_PROGRESS_STEP),
+      )
+  })
+
+  it('§3.7.1 / 4.17: los de la subida van en la tonalidad de la semana', () => {
+    const a = sfxCatalog({ tonic: 0, mode: 'minor' })
+    const d = sfxCatalog({ tonic: 2, mode: 'minor' })
+    for (const id of ['upload.hover', 'upload.drop', 'upload.done', 'ann.newbeat'] as const) {
+      const first = (catalog: typeof a) => catalog[id].layers.find((layer) => layer.freq)?.freq?.[0]
+      expect(first(a), id).not.toBe(first(d))
+    }
+    // El zumbido de la ranura: la tónica en la 1.ª octava, entre 32 y 62 Hz.
+    for (let tonic = 0; tonic < 12; tonic++) {
+      const hum = sfxCatalog({ tonic, mode: 'minor' } as Key)['upload.hover'].layers[0]?.freq?.[0] ?? 0
+      expect(hum).toBeGreaterThanOrEqual(32)
+      expect(hum).toBeLessThan(62)
+    }
+  })
+
+  it('Anexo D: el impacto de `upload.done` llega tras el riser de 1,5 s', () => {
+    const { layers } = sfxCatalog()['upload.done']
+    const riser = layers[0]
+    expect(riser?.attack).toBeCloseTo(1.45)
+    expect(layers.slice(1).every((layer) => layer.delay === 1.5)).toBe(true)
   })
 })
