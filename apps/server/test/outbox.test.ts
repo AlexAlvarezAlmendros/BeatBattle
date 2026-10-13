@@ -11,7 +11,9 @@ import { type DrainDeps, type EmailTarget, emailDrain, emailHash, enqueueEmail }
 import {
   type DueEmail,
   planBudget,
+  planWeeklyCap,
   QUOTA_WINDOW_MS,
+  quietUntil,
   RETRY_DELAYS_MS,
   SERVICE_RESERVE,
 } from '../src/email/policy'
@@ -292,5 +294,87 @@ describe('cola de salida (§4.19.3)', () => {
     await emailDrain(h.deps)
     const stats = await h.db.select().from(emailStat)
     expect(stats).toEqual([{ scope: 'kind:auth.welcome', day: '2026-10-12', metric: 'sent', count: 2 }])
+  })
+})
+
+describe('horas de silencio y tope semanal (§2.12.4)', () => {
+  // Lunes 12 de octubre de 2026, en Madrid (UTC+2).
+  const madrid = (day: number, hour: number, minute = 0) => Date.UTC(2026, 9, day, hour - 2, minute)
+
+  it('RF-NOTIF-08: horas de silencio de 22:00 a 08:00 en Madrid, también al cambiar la hora', () => {
+    expect(quietUntil(madrid(12, 7, 59))).toBe(madrid(12, 8))
+    expect(quietUntil(madrid(12, 8))).toBeNull()
+    expect(quietUntil(madrid(12, 21, 59))).toBeNull()
+    expect(quietUntil(madrid(12, 22))).toBe(madrid(13, 8))
+    // Sábado 24 de octubre a las 23:00 (UTC+2) → domingo 25 a las 08:00, ya en UTC+1.
+    expect(quietUntil(Date.UTC(2026, 9, 24, 21, 0))).toBe(Date.UTC(2026, 9, 25, 7, 0))
+  })
+
+  it('RF-NOTIF-08: de 22:00 a 08:00 los avisos se retienen hasta las 08:00; el servicio sale', async () => {
+    const h = await harness()
+    await addUser(h.db, 'aina')
+    h.clock.t = madrid(12, 23, 30)
+    const notice = await h.enqueue('battle.first_votes', { userId: 'aina' })
+    const receipt = await h.enqueue('entry.receipt', { userId: 'aina' })
+    const result = await emailDrain(h.deps)
+    expect(result).toMatchObject({ sent: 1, held: 1 })
+    expect(await status(h.db, receipt)).toMatchObject({ status: 'sent' })
+    expect(await status(h.db, notice)).toMatchObject({ status: 'queued', notBefore: madrid(13, 8) })
+    h.clock.t = madrid(13, 8)
+    expect(await emailDrain(h.deps)).toMatchObject({ sent: 1 })
+    expect(await status(h.db, notice)).toMatchObject({ status: 'sent' })
+  })
+
+  it('RF-NOTIF-08: 5 avisos en una semana → salen 3 por prioridad y 2 quedan `skipped`', async () => {
+    const h = await harness()
+    await addUser(h.db, 'aina')
+    h.clock.t = madrid(17, 18)
+    const ids = {
+      progress: await h.enqueue('game.progress', { userId: 'aina' }),
+      firstVotes: await h.enqueue('battle.first_votes', { userId: 'aina' }),
+      reminder: await h.enqueue('battle.reminder', { userId: 'aina' }),
+      monday: await h.enqueue('battle.monday', { userId: 'aina' }),
+      campaign: await h.enqueue('mkt.campaign', { userId: 'aina' }),
+    }
+    await h.db.insert(emailPref).values({ userId: 'aina', marketingOn: true, updatedAt: 0 })
+    const result = await emailDrain(h.deps)
+    expect(result).toMatchObject({ sent: 3, skipped: 2 })
+    for (const kind of ['monday', 'reminder', 'firstVotes'] as const)
+      expect((await status(h.db, ids[kind]))?.status, kind).toBe('sent')
+    for (const kind of ['progress', 'campaign'] as const)
+      expect(await status(h.db, ids[kind]), kind).toMatchObject({
+        status: 'skipped',
+        skipReason: 'weekly_cap',
+      })
+  })
+
+  it('RF-NOTIF-08: lo enviado antes en la semana cuenta; el lunes siguiente se vuelve a empezar; el servicio no cuenta', async () => {
+    const h = await harness()
+    await addUser(h.db, 'aina')
+    h.clock.t = madrid(12, 9)
+    await h.enqueue('battle.monday', { userId: 'aina' })
+    await h.enqueue('battle.first_votes', { userId: 'aina' })
+    await h.enqueue('entry.receipt', { userId: 'aina' })
+    expect(await emailDrain(h.deps)).toMatchObject({ sent: 3 })
+    h.clock.t = madrid(17, 18)
+    await h.enqueue('battle.reminder', { userId: 'aina' })
+    const late = await h.enqueue('battle.jury_call', { userId: 'aina' })
+    expect(await emailDrain(h.deps)).toMatchObject({ sent: 1, skipped: 1 })
+    expect(await status(h.db, late)).toMatchObject({ status: 'skipped', skipReason: 'weekly_cap' })
+    h.clock.t = madrid(19, 9)
+    const next = await h.enqueue('battle.monday', { userId: 'aina' }, 'battle.monday:aina:2026-w43')
+    expect(await emailDrain(h.deps)).toMatchObject({ sent: 1 })
+    expect((await status(h.db, next))?.status).toBe('sent')
+  })
+
+  it('RF-NOTIF-08: el tope es por destinatario (cuentas y suscriptores aparte)', () => {
+    const due = (ids: string[]) =>
+      ids.map((id, i) => ({ id, family: 'battle' as const, priority: 10 * (i + 1), createdAt: 0 }))
+    expect(planWeeklyCap({ sentThisWeek: 0, due: due(['a', 'b', 'c', 'd']) })).toEqual({
+      allow: ['a', 'b', 'c'],
+      skip: ['d'],
+    })
+    expect(planWeeklyCap({ sentThisWeek: 2, due: due(['a', 'b']) })).toEqual({ allow: ['a'], skip: ['b'] })
+    expect(planWeeklyCap({ sentThisWeek: 5, due: due(['a']) })).toEqual({ allow: [], skip: ['a'] })
   })
 })

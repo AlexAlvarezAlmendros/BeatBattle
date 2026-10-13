@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { and, asc, count, desc, eq, gt, inArray, lte, min, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, gt, gte, inArray, lte, min, ne, or, sql } from 'drizzle-orm'
 import type { BatchStatement } from '../db/batch'
 import type { Db } from '../db/client'
 import {
@@ -14,12 +14,16 @@ import {
 import { type EmailKind, kindInfo } from './catalog'
 import { type Mailer, RecipientNotAllowedError } from './mailer'
 import {
+  capWeekStart,
   type Decision,
   DRAIN_MAX_PER_RUN,
+  type DueEmail,
   decide,
   nextSlotAt,
   planBudget,
+  planWeeklyCap,
   QUOTA_WINDOW_MS,
+  quietUntil,
   type Recipient,
   retryAt,
 } from './policy'
@@ -112,6 +116,8 @@ export interface DrainDeps {
 export interface DrainResult {
   sent: number
   deferred: number
+  /** Retenidos por las horas de silencio hasta las 08:00 (`RF-NOTIF-08`). */
+  held: number
   skipped: number
   suppressed: number
   failed: number
@@ -172,6 +178,92 @@ async function resolveRecipient(db: Db, row: OutboxRow): Promise<Recipient | nul
   return { email: address, prefs, marketingConsent, suppressed: suppression !== undefined, subscriberActive }
 }
 
+type Candidate = DueEmail & { userId: string | null; subscriberId: string | null }
+
+/**
+ * Horas de silencio y tope semanal (§2.12.4, `RF-NOTIF-08`), antes del cupo: entre las 22:00 y las 08:00 lo
+ * que no es de servicio se retiene hasta las 08:00; y a cada destinatario (cuenta o suscriptor) le sale como
+ * mucho `WEEKLY_CAP` a la semana, por prioridad: lo que no cabe queda `skipped` (`weekly_cap`). Devuelve lo
+ * que sigue adelante.
+ */
+async function applyQuietAndCap(
+  db: Db,
+  candidates: readonly Candidate[],
+  now: number,
+  result: DrainResult,
+): Promise<DueEmail[]> {
+  const service = candidates.filter((email) => email.family === 'service')
+  let rest = candidates.filter((email) => email.family !== 'service')
+  const until = quietUntil(now)
+  if (until !== null && rest.length > 0) {
+    await db
+      .update(emailOutbox)
+      .set({ notBefore: until })
+      .where(
+        and(
+          inArray(
+            emailOutbox.id,
+            rest.map((email) => email.id),
+          ),
+          eq(emailOutbox.status, 'queued'),
+        ),
+      )
+    result.held = rest.length
+    rest = []
+  }
+  const keyOf = (email: Pick<Candidate, 'userId' | 'subscriberId'>) =>
+    email.userId ? `u:${email.userId}` : email.subscriberId ? `s:${email.subscriberId}` : null
+  const groups = new Map<string, Candidate[]>()
+  const loose: Candidate[] = []
+  for (const email of rest) {
+    const key = keyOf(email)
+    if (key === null) loose.push(email)
+    else groups.set(key, [...(groups.get(key) ?? []), email])
+  }
+  const allowed: DueEmail[] = [...service, ...loose]
+  if (groups.size > 0) {
+    const userIds = rest.flatMap((email) => (email.userId ? [email.userId] : []))
+    const subscriberIds = rest.flatMap((email) =>
+      !email.userId && email.subscriberId ? [email.subscriberId] : [],
+    )
+    const sent = await db
+      .select({ userId: emailOutbox.userId, subscriberId: emailOutbox.subscriberId, n: count() })
+      .from(emailOutbox)
+      .where(
+        and(
+          eq(emailOutbox.status, 'sent'),
+          ne(emailOutbox.family, 'service'),
+          gte(emailOutbox.sentAt, capWeekStart(now)),
+          or(
+            userIds.length > 0 ? inArray(emailOutbox.userId, userIds) : undefined,
+            subscriberIds.length > 0 ? inArray(emailOutbox.subscriberId, subscriberIds) : undefined,
+          ),
+        ),
+      )
+      .groupBy(emailOutbox.userId, emailOutbox.subscriberId)
+    const sentBy = new Map<string, number>()
+    for (const row of sent) {
+      const key = keyOf(row)
+      if (key) sentBy.set(key, (sentBy.get(key) ?? 0) + row.n)
+    }
+    const skip: string[] = []
+    for (const [key, emails] of groups) {
+      const plan = planWeeklyCap({ sentThisWeek: sentBy.get(key) ?? 0, due: emails })
+      const byId = new Map(emails.map((email) => [email.id, email]))
+      for (const id of plan.allow) allowed.push(byId.get(id) as Candidate)
+      skip.push(...plan.skip)
+    }
+    if (skip.length > 0) {
+      await db
+        .update(emailOutbox)
+        .set({ status: 'skipped', skipReason: 'weekly_cap' })
+        .where(and(inArray(emailOutbox.id, skip), eq(emailOutbox.status, 'queued')))
+      result.skipped += skip.length
+    }
+  }
+  return allowed
+}
+
 /**
  * Envía lo que toca (`status = queued` y `not_before ≤ ahora`), por prioridad y dentro del cupo diario en
  * ventana móvil de 24 h con la reserva de servicio (`RF-NOTIF-17`). Lo llaman el `tick` (Fase 3) y, justo
@@ -182,7 +274,15 @@ export async function emailDrain(
   deps: DrainDeps,
   options: { only?: readonly string[] } = {},
 ): Promise<DrainResult> {
-  const result: DrainResult = { sent: 0, deferred: 0, skipped: 0, suppressed: 0, failed: 0, retrying: 0 }
+  const result: DrainResult = {
+    sent: 0,
+    deferred: 0,
+    held: 0,
+    skipped: 0,
+    suppressed: 0,
+    failed: 0,
+    retrying: 0,
+  }
   const { db, mailer } = deps
   if (!mailer) return result
   const now = deps.now()
@@ -192,17 +292,21 @@ export async function emailDrain(
     lte(emailOutbox.notBefore, now),
     options.only ? inArray(emailOutbox.id, [...options.only]) : undefined,
   )
-  const due = await db
+  const candidates = await db
     .select({
       id: emailOutbox.id,
       family: emailOutbox.family,
       priority: emailOutbox.priority,
       createdAt: emailOutbox.createdAt,
+      userId: emailOutbox.userId,
+      subscriberId: emailOutbox.subscriberId,
     })
     .from(emailOutbox)
     .where(dueWhere)
     .orderBy(asc(emailOutbox.priority), asc(emailOutbox.createdAt))
     .limit(500)
+  if (candidates.length === 0) return result
+  const due = await applyQuietAndCap(db, candidates, now, result)
   if (due.length === 0) return result
 
   const windowStart = now - QUOTA_WINDOW_MS
