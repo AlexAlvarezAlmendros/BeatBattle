@@ -3,6 +3,7 @@
  * de BPM y tonalidad, la onda y la sonoridad llegan con las tareas 1.9 y 1.10.
  */
 
+export * from './highlight'
 export * from './measure'
 export * from './reactive'
 export * from './sfx'

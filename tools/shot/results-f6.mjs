@@ -2,13 +2,13 @@
 // `apps/server/src/scripts/seedBattle.ts … sealed`: la página de resultados (sin sesión y con la de alguien
 // que participó), en los tamaños de referencia; sin movimiento y en contraste alto, la de escritorio. Uso:
 //   node tools/shot/results-f6.mjs <origen> <carpeta> <semana sellada> [páginas]
-// `páginas`: lista separada por comas de `resultados` (por defecto, todas).
+// `páginas`: lista separada por comas de `resultados` y `ceremonia` (por defecto, todas).
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { chromium } from '@playwright/test'
 
 const [origin = 'http://localhost:5176', out = '.', slug = '2026-w41', only = ''] = process.argv.slice(2)
-const pages = new Set((only || 'resultados').split(','))
+const pages = new Set((only || 'resultados,ceremonia').split(','))
 mkdirSync(out, { recursive: true })
 
 const SIZES = [
@@ -86,6 +86,30 @@ if (pages.has('resultados'))
         await ctx.close()
       }
   }
+
+// La ceremonia (6.17): fotogramas en los momentos clave de su línea de tiempo, sin movimiento también.
+if (pages.has('ceremonia'))
+  for (const size of [SIZES[0], SIZES[3]])
+    for (const reduced of [false, true]) {
+      const { ctx, page } = await context(size, { account: middle, reduced })
+      await page.goto(`${origin}/semana/${slug}/resultados?ceremonia`)
+      await page.getByRole('dialog').waitFor()
+      const started = Date.now()
+      for (const [name, ms] of [
+        ['luces', 1000],
+        ['rafaga', 4200],
+        ['foco-3', 7300],
+        ['sello-3', 7900],
+        ['nombre-3', 9000],
+        ['nombre-2', 13_500],
+        ['campeon', 20_300],
+        ['tu-resultado', 24_000],
+      ]) {
+        await page.waitForTimeout(Math.max(0, ms - (Date.now() - started)))
+        await shot(page, `ceremonia-${name}${reduced ? '-sin-movimiento' : ''}`, size)
+      }
+      await ctx.close()
+    }
 
 await browser.close()
 console.log(`Capturas en ${out}`)

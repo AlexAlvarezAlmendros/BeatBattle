@@ -62,14 +62,15 @@ test.describe('audio', () => {
       return result
     }, OFFLINE_MODULE)
     // Los 16 de la tarea 1.4, `vote.unlocked` de la 1.5, los 7 de la interfaz de la 2.27, `drop.needle` de la
-    // 3.17, los 5 de la subida de la 4.17 (`upload.*`, `ann.newbeat`) y los 2 del Modo Jurado de la 5.18.
+    // 3.17, los 5 de la subida de la 4.17 (`upload.*`, `ann.newbeat`), los 2 del Modo Jurado de la 5.18 y los 6 de la
+    // ceremonia de la 6.17 (`cer.*`).
     test.info().annotations.push({
       type: 'medidas',
       description: Object.entries(metrics)
         .map(([id, m]) => `${id} ${m.peakDb.toFixed(1)}/${m.levelDb} dB ${m.activeSeconds.toFixed(3)} s`)
         .join(' · '),
     })
-    expect(Object.keys(metrics)).toHaveLength(32)
+    expect(Object.keys(metrics)).toHaveLength(38)
     for (const [id, m] of Object.entries(metrics)) {
       expect(
         Math.abs(m.peakDb - m.levelDb),

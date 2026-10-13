@@ -33,6 +33,13 @@ const ANNEX_D: Record<string, { duration: number; levelDb: number; jitter: numbe
   'ann.newbeat': { duration: 0.35, levelDb: -14, jitter: 0 },
   'combo.up': { duration: 0.12, levelDb: -18, jitter: 0 },
   'jury.swap': { duration: 0.3, levelDb: -16, jitter: 1 },
+  // Ceremonia de resultados (6.17); el redoble, 4 s dentro de los 3–5 del anexo.
+  'cer.drumroll': { duration: 4, levelDb: -8, jitter: 0 },
+  'cer.tear': { duration: 0.3, levelDb: -16, jitter: 0 },
+  'cer.reveal': { duration: 0.8, levelDb: -8, jitter: 0 },
+  'cer.heartbeat': { duration: 2, levelDb: -14, jitter: 0 },
+  'cer.airhorn': { duration: 1.4, levelDb: -8, jitter: 0 },
+  'cer.confetti': { duration: 1, levelDb: -20, jitter: 0 },
 }
 
 describe('catálogo de efectos (Anexo D, 1.4)', () => {
