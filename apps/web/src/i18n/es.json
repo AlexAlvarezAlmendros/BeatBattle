@@ -1948,5 +1948,41 @@
     "gridLabel": "Entradas de la semana",
     "note": "Ronda justa: primero, las que menos votos llevan (nadie ve cuántos). Notas y autoría, el domingo.",
     "link": "Elegir entrada"
+  },
+  "entryPage": {
+    "kicker": "Semana {number} · ficha",
+    "documentTitle": "{alias} · ficha",
+    "hidden": "Autoría oculta",
+    "titleLabel": "Título",
+    "equalized": "Sonoridad igualada a −14 LUFS · saltar con la onda no cuenta para la escucha mínima",
+    "starsLabel": "Tu nota para {alias}, de 1 a 5",
+    "own": "Es tu entrada: no se vota la propia.",
+    "ownStats": "Es tu entrada: {votes} votos · {plays} escuchas. Las notas, el domingo.",
+    "signInToVote": "Entra para votar este beat.",
+    "verifyToVote": "Verifica tu email para votar.",
+    "share": "Compartir",
+    "shareTitle": "{alias} en Beat Battle",
+    "shared": "Enlace listo para compartir.",
+    "report": "Denunciar"
+  },
+  "report": {
+    "title": "Denunciar «{alias}»",
+    "description": "La revisa el equipo de Other People. Nadie más sabe quién ha denunciado.",
+    "reason": "Motivo",
+    "reasons": {
+      "notSample": "No usa el sample",
+      "rights": "Plagio o derechos",
+      "offensive": "Contenido ofensivo",
+      "spam": "Spam",
+      "other": "Otro"
+    },
+    "details": "Detalle (opcional)",
+    "pick": "Elige un motivo",
+    "send": "Enviar denuncia",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "done": "Denuncia enviada. Gracias.",
+    "exists": "Ya habías denunciado esta entrada.",
+    "error": "No se ha podido enviar. Vuelve a intentarlo."
   }
 }

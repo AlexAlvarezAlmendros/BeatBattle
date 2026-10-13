@@ -38,7 +38,6 @@ const PAGES: { path: string; heading: string; title: string }[] = [
     title: documentTitle(tk('pages.weekResults.title')),
   },
   { path: '/semanas', heading: 'pages.weeks.title', title: documentTitle(tk('pages.weeks.title')) },
-  { path: '/e/0192f3a1', heading: 'pages.entry.title', title: documentTitle(tk('pages.entry.title')) },
   { path: '/jurado', heading: 'pages.jury.title', title: documentTitle(tk('pages.jury.title')) },
   { path: '/subir', heading: 'pages.upload.title', title: documentTitle(tk('pages.upload.title')) },
   {
@@ -119,6 +118,43 @@ describe('router (0.10, guía §2.18)', () => {
     expect(await h1('Aina')).toBeInTheDocument()
     await waitFor(() =>
       expect(document.title).toBe(documentTitle(t('pages.profile.documentTitle', { name: 'Aina' }))),
+    )
+    vi.unstubAllGlobals()
+  })
+
+  it('/e/:id pinta la ficha de la entrada: su <h1> es el alias y la pestaña lo lleva (y 404 si no existe)', async () => {
+    const entry = {
+      id: '0192f3a1',
+      weekSlug: '2026-w41',
+      alias: 'Tigre Púrpura',
+      title: 'Bruma en Gràcia',
+      description: null,
+      bpm: 140,
+      musicalKey: 'Am',
+      daw: null,
+      genres: ['Trap'],
+      durationMs: 180_000,
+      peaks: null,
+      gainDb: -6,
+      streamUrl: 'https://res.cloudinary.com/demo/e.mp3',
+      cover: { kind: 'generative', seed: 7 },
+      producer: null,
+    }
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) =>
+        String(input).endsWith('/api/entries/0192f3a1')
+          ? new Response(JSON.stringify({ data: entry }), { headers: { 'content-type': 'application/json' } })
+          : new Response(JSON.stringify({ error: { code: 'NOT_FOUND', message: '' } }), {
+              status: 404,
+              headers: { 'content-type': 'application/json' },
+            }),
+      ),
+    )
+    renderAt('/e/0192f3a1')
+    expect(await h1('Tigre Púrpura')).toBeInTheDocument()
+    await waitFor(() =>
+      expect(document.title).toBe(documentTitle(t('entryPage.documentTitle', { alias: 'Tigre Púrpura' }))),
     )
     vi.unstubAllGlobals()
   })

@@ -1,0 +1,102 @@
+/*
+ * Ficha de entrada (guía §2.6, §3.8.14): la portada grande en la cuña, con inclinación al pasar el ratón
+ * (sin movimiento, quieta), y en el panel el título, los chips, la onda que suena, las estrellas y las
+ * acciones.
+ */
+.cover {
+  position: relative;
+  display: block;
+  width: min(100%, 28rem);
+  aspect-ratio: 1;
+  transition: transform var(--bb-dur-base) var(--bb-ease-out);
+}
+
+/* Al pasar el ratón se inclina como la carta (`--bb-tilt-card`); sin movimiento, quieta (`--bb-motion`). */
+.cover:hover {
+  transform: perspective(60rem) rotateY(calc(var(--bb-tilt-card) * var(--bb-motion)))
+    rotateX(calc(-1 * var(--bb-tilt-card) * var(--bb-motion)));
+}
+
+.cover > :is(canvas, img) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stamp {
+  position: absolute;
+  bottom: var(--bb-space-6);
+  left: calc(-1 * var(--bb-space-3));
+}
+
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--bb-space-4);
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--bb-fs-lg);
+  font-weight: var(--bb-weight-semibold);
+}
+
+.chips,
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-2) var(--bb-space-3);
+}
+
+.description {
+  color: var(--bb-text-2);
+}
+
+.player {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-4);
+}
+
+.wave {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.alias {
+  font-size: var(--bb-fs-alias);
+  line-height: var(--bb-leading-label);
+  overflow-wrap: anywhere;
+}
+
+/* En móvil el `<h1>` de la cabeza ya lo dice. */
+@media (max-width: 720px) {
+  .alias {
+    display: none;
+  }
+}
+
+.time {
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.note,
+.own {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-sm);
+}
+
+.own {
+  color: var(--bb-text);
+  font-size: var(--bb-fs-md);
+}
+
+.stars {
+  justify-self: start;
+}
