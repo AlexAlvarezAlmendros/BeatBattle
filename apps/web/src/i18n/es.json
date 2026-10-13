@@ -1525,6 +1525,13 @@
       "jury": "Jurado",
       "order": "Orden",
       "filters": "Filtros",
+      "rate": "Puntuar",
+      "pause": "Pausa",
+      "seek": "Buscar",
+      "note": "Nota",
+      "skip": "Saltar",
+      "report": "Denunciar",
+      "exit": "Salir",
       "glyph": {
         "up": "↑",
         "upLabel": "Flecha arriba",
@@ -1540,7 +1547,12 @@
         "escape": "Esc",
         "m": "M",
         "j": "J",
-        "f": "F"
+        "f": "F",
+        "s": "S",
+        "r": "R",
+        "one": "1",
+        "five": "5",
+        "space": "Espacio"
       }
     },
     "controls": {
@@ -1984,5 +1996,52 @@
     "done": "Denuncia enviada. Gracias.",
     "exists": "Ya habías denunciado esta entrada.",
     "error": "No se ha podido enviar. Vuelve a intentarlo."
+  },
+  "jury": {
+    "loading": "Preparando la cola…",
+    "gate": {
+      "signIn": "El jurado puntúa cada beat de la semana, de 1 a 5, tras escuchar 30\u00a0s. Entra con tu cuenta para jugar.",
+      "signInAction": "Entrar",
+      "verify": "Verifica tu email para puntuar: te enviamos el enlace al registrarte.",
+      "verifyAction": "Verificar el email"
+    },
+    "queueError": "No hemos podido traer la cola del jurado.",
+    "srTitle": "Modo Jurado · ronda {round} de {total} · escuchando {alias}",
+    "you": "Tú",
+    "juror": "Jurado",
+    "listenMeter": "Escucha mínima",
+    "listenText": "{heard} / {total}\u00a0s",
+    "listenDone": "✓ {total} / {total}\u00a0s",
+    "round": "Ronda {round} / {total}",
+    "counterText": "s para puntuar",
+    "counterReady": "YA",
+    "counterReadyText": "puedes puntuar",
+    "blind": "Voto ciego",
+    "hidden": "Autoría oculta · se revela al sellar",
+    "hiddenShort": "Autoría oculta",
+    "arenaLabel": "Tú frente a esta entrada",
+    "panelLabel": "Puntuar",
+    "youPlate": "{name} · {votes} votos esta semana",
+    "vs": "VS",
+    "alone": "Puntúas este beat por sí solo, de 1 a 5. No compite contra otro.",
+    "thresholdMark": "{s}\u00a0s",
+    "combo": "Combo",
+    "comboText": "Combo ×{count}",
+    "play": "Escuchar",
+    "pause": "Pausa",
+    "skip": "Saltar",
+    "report": "Denunciar",
+    "loadError": "No hemos podido cargar {alias}: pasa al final de la cola.",
+    "ann": {
+      "listen": "¡A escuchar!",
+      "ready": "¡Voto listo!",
+      "complete": "¡Jurado completo!"
+    },
+    "completeTitle": "Jurado completo",
+    "completeText": "Has puntuado {count} beats en esta ronda · tu media dada: {mean}.",
+    "allVotedText": "Ya has puntuado todas las entradas de la semana. Puedes cambiar tus votos en sus fichas hasta el cierre.",
+    "emptyTitle": "Aún no hay entradas",
+    "emptyText": "En cuanto alguien suba su flip, aquí estará para que lo puntúes.",
+    "backToMenu": "Volver al menú"
   }
 }

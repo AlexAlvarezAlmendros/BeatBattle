@@ -31,6 +31,8 @@ const ANNEX_D: Record<string, { duration: number; levelDb: number; jitter: numbe
   'upload.progress': { duration: 0.08, levelDb: -24, jitter: 0 },
   'upload.done': { duration: 2, levelDb: -8, jitter: 0 },
   'ann.newbeat': { duration: 0.35, levelDb: -14, jitter: 0 },
+  'combo.up': { duration: 0.12, levelDb: -18, jitter: 0 },
+  'jury.swap': { duration: 0.3, levelDb: -16, jitter: 1 },
 }
 
 describe('catálogo de efectos (Anexo D, 1.4)', () => {

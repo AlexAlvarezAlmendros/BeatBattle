@@ -249,7 +249,7 @@ export class AudioEngine {
   /**
    * Dispara un efecto. Sin contexto (no ha habido ningún gesto), en silencio o con un efecto con tope
    * (`ui.hover`, `ui.move`, `upload.*`) demasiado seguido, no hace nada. `xpCombo` sube el blip de
-   * `xp.gain`; `progress` (de 0 a 1) da la nota de `upload.progress`, que sube con el porcentaje.
+   * `xp.gain` y el de `combo.up` (un semitono por voto seguido); `progress` (de 0 a 1) da la nota de `upload.progress`, que sube con el porcentaje.
    */
   play(id: SfxId, options: { xpCombo?: number; progress?: number } = {}): void {
     const { ctx, mix, bank } = this
@@ -260,7 +260,7 @@ export class AudioEngine {
       this.lastPlayed.set(id, ctx.currentTime)
     }
     const def =
-      id === 'xp.gain' && options.xpCombo
+      (id === 'xp.gain' || id === 'combo.up') && options.xpCombo
         ? sfxCatalog(this.key, options.xpCombo)[id]
         : id === 'upload.progress' && options.progress !== undefined
           ? uploadProgressSfx(this.key, options.progress)

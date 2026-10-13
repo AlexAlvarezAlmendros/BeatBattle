@@ -43,6 +43,16 @@ export const CONTROL_KEYS: Readonly<
     verb: 'frame.keys.order',
   },
   filters: { keys: [{ glyph: 'frame.keys.glyph.f' }], verb: 'frame.keys.filters' },
+  rate: {
+    keys: [{ glyph: 'frame.keys.glyph.one' }, { glyph: 'frame.keys.glyph.five' }],
+    verb: 'frame.keys.rate',
+  },
+  pause: { keys: [{ glyph: 'frame.keys.glyph.space' }], verb: 'frame.keys.pause' },
+  seek: { keys: [ARROW_LEFT, ARROW_RIGHT], verb: 'frame.keys.seek' },
+  note: { keys: [ARROW_LEFT, ARROW_RIGHT], verb: 'frame.keys.note' },
+  skip: { keys: [{ glyph: 'frame.keys.glyph.s' }], verb: 'frame.keys.skip' },
+  report: { keys: [{ glyph: 'frame.keys.glyph.r' }], verb: 'frame.keys.report' },
+  exit: { keys: [{ glyph: 'frame.keys.glyph.escape' }], verb: 'frame.keys.exit' },
 }
 
 /**
