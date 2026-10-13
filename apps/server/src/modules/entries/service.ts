@@ -6,9 +6,14 @@ import {
   type EntryAudioProblem,
   type EntryFormat,
   entryFormatOf,
+  fairOrder,
+  fairSeed,
+  formatLocalDate,
   isoWeekLabel,
   localDateOf,
+  newestOrder,
   playbackGainDb,
+  randomOrder,
   receiptCode,
   validateEntryAudio,
 } from '@beatbattle/rules'
@@ -17,6 +22,8 @@ import {
   type EntryAudioReplace,
   type EntryCoverSignRequest,
   type EntryCreate,
+  type EntryList,
+  type EntryListQuery,
   type EntrySignedUpload,
   type EntrySignRequest,
   type EntryUpdate,
@@ -315,6 +322,44 @@ export function createEntriesService(deps: EntriesDeps) {
     }
   }
 
+  /**
+   * Fichas públicas de entradas de la misma semana. La autoría (`producer`) solo si la semana no es ciega o
+   * ya está sellada (`RF-ENT-10`, `RF-VOTE-07`); si no, `null`.
+   */
+  async function presentAll(rows: readonly EntryRow[], w: WeekRow): Promise<PublicEntry[]> {
+    const out = rows.map((row) => toPublic(row, w))
+    const revealed = !w.blind || w.sealedAt !== null
+    if (!revealed || rows.length === 0) return out
+    const people = await db
+      .select({
+        id: user.id,
+        username: user.username,
+        displayUsername: user.displayUsername,
+        name: user.name,
+        avatarPublicId: producerProfile.avatarPublicId,
+      })
+      .from(user)
+      .leftJoin(producerProfile, eq(producerProfile.userId, user.id))
+      .where(inArray(user.id, [...new Set(rows.map((row) => row.userId))]))
+    const byId = new Map(people.map((person) => [person.id, person]))
+    return out.map((item, i) => {
+      const person = byId.get((rows[i] as EntryRow).userId)
+      if (!person) return item
+      const username = person.username ?? ''
+      return {
+        ...item,
+        producer: {
+          username,
+          displayName: person.displayUsername || username || person.name,
+          avatarUrl:
+            person.avatarPublicId && deps.images
+              ? deps.images.imageUrl(person.avatarPublicId, { size: PRODUCER_AVATAR_SIZE })
+              : null,
+        },
+      }
+    })
+  }
+
   async function toOwn(row: EntryRow, w: WeekRow, now: number): Promise<OwnEntry> {
     const votes = await voteCount(row.id)
     return {
@@ -574,33 +619,80 @@ export function createEntriesService(deps: EntriesDeps) {
       const { row, w } = await entryWithWeek(id)
       const visible = row.status === 'active' || (viewerId !== null && row.userId === viewerId)
       if (!visible || row.status === 'withdrawn') throw appError('NOT_FOUND', 'No existe esa entrada.')
-      const out = toPublic(row, w)
-      const revealed = !w.blind || w.sealedAt !== null
-      if (!revealed) return out
-      const [person] = await db
-        .select({
-          username: user.username,
-          displayUsername: user.displayUsername,
-          name: user.name,
-          avatarPublicId: producerProfile.avatarPublicId,
-        })
-        .from(user)
-        .leftJoin(producerProfile, eq(producerProfile.userId, user.id))
-        .where(eq(user.id, row.userId))
-      if (!person) return out
-      const username = person.username ?? ''
+      const [out] = await presentAll([row], w)
+      return out as PublicEntry
+    },
+
+    // ── 5.3: la lista de la semana ──────────────────────────────────────────────────────────────
+
+    /**
+     * `GET /api/weeks/:slug/entries` (§2.6): las activas de una semana ya empezada, en Ronda justa (por
+     * defecto), Recién subidas o Aleatorio, con los filtros. Sin autoría si es ciega y no está sellada
+     * (`RF-VOTE-07`), y nunca medias, recuentos por entrada ni posiciones (`RF-PLAY-05`): los votos solo
+     * sirven para ordenar. Con sesión, si es la suya y su voto.
+     */
+    async list(
+      slug: string,
+      query: EntryListQuery,
+      viewerId: string | null,
+      now: number,
+    ): Promise<EntryList> {
+      const [w] = await db.select().from(week).where(eq(week.slug, slug))
+      if (!w || w.startsAt > now) throw appError('NOT_FOUND', 'No existe esa semana.')
+      const rows = await db
+        .select()
+        .from(entry)
+        .where(and(eq(entry.weekId, w.id), eq(entry.status, 'active')))
+      const counts = await db
+        .select({ entryId: vote.entryId, n: count() })
+        .from(vote)
+        .where(and(eq(vote.weekId, w.id), eq(vote.voided, false)))
+        .groupBy(vote.entryId)
+      const votes = new Map(counts.map((c) => [c.entryId, c.n]))
+      const mine = viewerId
+        ? await db
+            .select({ entryId: vote.entryId, stars: vote.stars })
+            .from(vote)
+            .where(and(eq(vote.weekId, w.id), eq(vote.userId, viewerId)))
+        : []
+      const myVotes = new Map(mine.map((v) => [v.entryId, v.stars]))
+      const filtered = rows.filter((row) => {
+        if (query.genre && !(JSON.parse(row.tags) as string[]).includes(query.genre)) return false
+        if (query.bpm && (row.bpm === null || row.bpm < query.bpm[0] || row.bpm > query.bpm[1])) return false
+        if (query.key && row.musicalKey !== query.key) return false
+        if (query.unvoted && viewerId && (myVotes.has(row.id) || row.userId === viewerId)) return false
+        return true
+      })
+      const day = formatLocalDate(localDateOf(now))
+      const ordered =
+        query.order === 'new'
+          ? newestOrder(filtered)
+          : query.order === 'random'
+            ? randomOrder(filtered, [query.seed ?? day, w.id])
+            : fairOrder(
+                filtered,
+                votes,
+                myVotes.keys(),
+                fairSeed(w.id, viewerId ? { userId: viewerId } : { nowMs: now }),
+              )
+      const presented = await presentAll(ordered, w)
       return {
-        ...out,
-        producer: {
-          username,
-          displayName: person.displayUsername || username || person.name,
-          avatarUrl:
-            person.avatarPublicId && deps.images
-              ? deps.images.imageUrl(person.avatarPublicId, { size: PRODUCER_AVATAR_SIZE })
-              : null,
-        },
+        weekSlug: w.slug,
+        order: query.order,
+        total: rows.length,
+        entries: presented.map((item, i) => ({
+          ...item,
+          mine: viewerId !== null && ordered[i]?.userId === viewerId,
+          myVote: myVotes.get(item.id) ?? null,
+        })),
       }
     },
+
+    /** La entrada con su semana (para el voto, la escucha y la cola, 5.4–5.8); 404 si no existe. */
+    withWeek: entryWithWeek,
+
+    /** Fichas públicas de entradas de una misma semana, con la autoría solo si la semana deja verla. */
+    presentAll,
 
     /** `GET /api/weeks/:slug/entries/mine`: la entrada propia de la semana (`/subir` en edición), o `null`. */
     async mineBySlug(userId: string, slug: string, now: number): Promise<OwnEntry | null> {

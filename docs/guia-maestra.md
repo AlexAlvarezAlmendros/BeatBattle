@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.61 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.62 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2582,7 +2582,7 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | GET | `/api/weeks/:slug` | Pública | Una semana ya empezada (antes del drop, 404) |
 | GET | `/api/weeks?cursor=` | Pública | Archivo de semanas selladas |
 | GET | `/api/weeks/:slug/entries?order=fair\|new\|random&genre=&bpm=&key=&unvoted=&seed=` | Pública | Entradas (sin autoría ni notas si no está sellada); con sesión incluye `myVote` y `mine`. `bpm` es un rango `90-110`; `seed` vuelve a barajar «Aleatorio» |
-| GET | `/api/weeks/:slug/ticker?since=` | Pública | Eventos de la crónica de la arena (§3.8.3) |
+| GET | `/api/weeks/:slug/ticker?since=` | Pública | Eventos de la crónica de la arena (§3.8.3): las 5 últimas entradas por su alias, los días que quedan hasta el cierre de la fase (enteros, hacia abajo) y los votos de toda la semana |
 | GET | `/api/weeks/:slug/results` | Pública | Snapshot de resultados (404 si no está sellada) |
 | POST | `/api/weeks/:slug/rules` | Verif. | Aceptar las bases de la semana |
 | POST | `/api/weeks/:slug/sample/download` | Verif. | URL firmada de descarga (`kind: original\|stems`), solo en `open` y con las bases aceptadas |
@@ -2594,13 +2594,13 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | PUT | `/api/entries/:id/audio` | Dueño | Sustituir el audio (sin votos) |
 | DELETE | `/api/entries/:id` | Dueño | Retirar |
 | GET | `/api/entries/:id/stats` | Dueño | Votos y escuchas propios (sin media) |
-| POST | `/api/entries/:id/listen` | Verif. | Inicio de escucha → `{ listenId, thresholdMs }` |
-| POST | `/api/entries/:id/listen/qualify` | Verif. | Cumplir el umbral |
-| POST | `/api/entries/:id/play` | Pública | Contar una escucha (≥ 10 s) `{ playId }`, una por sesión de escucha, con límite por IP y entrada |
+| POST | `/api/entries/:id/listen` | Verif. | Inicio de escucha → `{ listenId, thresholdMs, startedAt }`; un recibo por usuario y entrada (volver a empezar no reinicia el reloj); solo en `open` y `voting` y nunca de la propia |
+| POST | `/api/entries/:id/listen/qualify` | Verif. | Cumplir el umbral `{ listenId }`; antes de tiempo, 409 `LISTEN_REQUIRED` con `details.remainingMs` |
+| POST | `/api/entries/:id/play` | Pública | Contar una escucha (≥ 10 s) `{ playId }`, una por sesión de escucha y como mucho 3 por hora por IP y entrada; responde 202 cuente o no |
 | PUT · DELETE | `/api/entries/:id/vote` | Verif. | Votar `{ stars }` o quitar el voto |
 | POST | `/api/entries/:id/report` | Verif. | Denunciar |
 | POST | `/api/entries/:id/guess` | Verif. | «Adivina el productor» (Fase 8) |
-| GET | `/api/jury/queue?week=` | Verif. | Siguientes entradas del Modo Jurado |
+| GET | `/api/jury/queue?week=` | Verif. | Siguientes entradas del Modo Jurado (`juryQueue`) y la ronda `{ done, total }`; fuera de `open` y `voting`, vacía |
 | GET | `/api/me` | Sesión | Perfil, XP, nivel, racha, logros nuevos, flags de ceremonias vistas |
 | PATCH | `/api/me/profile` | Sesión | Editar perfil |
 | POST | `/api/me/seen` | Sesión | Marcar vistos `{ kind, ref }` (drop desde la Fase 3; logros, nivel y ceremonia en sus fases) |
@@ -3618,6 +3618,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.62 | **Tareas 5.3–5.10.** §4.10: un recibo de escucha por usuario y entrada (volver a empezar no reinicia el reloj de servidor, que cuenta desde la primera vez); `listen` y `qualify` solo en `open` y `voting` y nunca de la propia entrada; `qualify` antes de tiempo da `LISTEN_REQUIRED` con lo que falta. La escucha (`/play`) cuenta una vez por sesión y 3 por hora por IP y entrada, y responde 202 siempre. La crónica da las 5 últimas entradas por alias, los días que quedan y los votos de la semana. La cola del jurado lleva la ronda `{ done, total }`. Denunciar tiene, además, un límite de 20 por hora y usuario. |
 | 2026-10-13 | 0.6.61 | **Tarea 5.2.** §4.10: la lista admite `seed` (volver a barajar «Aleatorio») y su `bpm` es un rango `min-max`; cada entrada lleva `mine` además de `myVote`; `POST /play` lleva un `playId` por sesión de escucha. Códigos nuevos: `OWN_ENTRY` (403), `LISTEN_REQUIRED`, `VOTING_CLOSED` y `REPORT_EXISTS` (409). Motivos de denuncia de §2.7 como ids: `not_sample`, `rights`, `offensive`, `spam`, `other` (detalle de hasta 500 caracteres). §4.14: la exportación y el borrado de la cuenta incluyen los recibos de escucha, las denuncias y las señales de IP (y, de sus entradas sin sellar, los de otros); sustituir el audio o retirar la entrada borra sus recibos de escucha. |
 | 2026-10-13 | 0.6.60 | **Tarea 5.1.** §4.5, módulo `fair`: además de `fairOrder`, `fairSeed` (con sesión, usuario y semana; sin ella, el día en `Europe/Madrid`), `newestOrder`, `randomOrder` (baraja la lista ordenada por id, así no depende del orden de llegada) y `juryQueue` (la cola del Modo Jurado de §2.7: sin las votadas ni la propia, en Ronda justa, y las saltadas al final en el orden del último salto). Las ya votadas, en Ronda justa, van al final con el mismo criterio (la rejilla de §3.8.13 las pone ahí). |
 | 2026-10-13 | 0.6.59 | §3.5 y §4.17 (`RNF-PERF-02`): el LCP de la home es un texto del menú, el título del escenario o, si es más pequeño (el calendario vacío, «En el horno», desde el jurado de la F3), la etiqueta de la placa elegida. Lo que se exige no cambia: un texto, nunca el lienzo ni el logo, pintado con la primera pintura. |
