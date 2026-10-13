@@ -1,0 +1,17 @@
+/* Histograma de 5 barras de un resultado sellado (la tabla de resultados y la ficha). */
+.histogram {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: var(--bb-space-1);
+  height: var(--bb-space-8);
+}
+
+.bar {
+  width: var(--bb-space-2);
+  height: max(var(--bb-stroke), calc(var(--bar) * 100%));
+  background: var(--bb-text-2);
+}
+
+.bar[data-five] {
+  background: var(--bb-red);
+}

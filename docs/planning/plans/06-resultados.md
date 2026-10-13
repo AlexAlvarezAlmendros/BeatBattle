@@ -125,7 +125,7 @@ completa el MVP (F0–F6) para la beta cerrada.
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
 | 6.15 | Página de resultados: placa «RESULTADOS OFICIALES», podio con escena (peanas, focos, medallas en la paleta, sello arrancado, alias tachado y productor), «TU RESULTADO», tabla con histogramas, aviso de re-sellado y semana desierta | ✅ Hecho | 6.6 | §3.8.6, §3.4.3 · `RF-RES-06`, `RF-RES-08`, `RF-RES-10` · Hecho: `WeekResultsPage` con podio, «TU RESULTADO» y la tabla con histogramas; test de ruta (`RF-RES-08`, aviso de `RF-RES-06`); mirada en 1440, 1366, 1024, 390 y 320, sin movimiento y en contraste alto (`tools/shot/results-f6.mjs`). Pendiente del jurado visual (6.22): a 1366 × 657, «TU RESULTADO» queda bajo el pliegue. |
-| 6.16 | La ficha de una semana sellada: posición, puntuación, votos e histograma de 5 barras, y el productor | ⬜ Listo | 6.6 | §2.6 · `RF-PLAY-08` |
+| 6.16 | La ficha de una semana sellada: posición, puntuación, votos e histograma de 5 barras, y el productor | ✅ Hecho | 6.6 | §2.6 · `RF-PLAY-08` · Hecho: el bloque del resultado en `EntryPage` (medalla, posición, puntuación, votos, histograma y enlace a los resultados); test `RF-PLAY-08`; mirada en 1440 y 390. |
 | 6.17 | Ceremonia (~25 s): luces fuera, del 10.º al 4.º, 3.º–2.º–1.º con foco, medalla, sello arrancado y el momento más enérgico de cada beat sincronizado con el reloj de audio, «¡CAMPEÓN!», tu resultado; saltable con Esc, repetible, sin movimiento por fundidos y efectos `cer.*` | ⬜ Listo | 6.15 | §3.8.6, §3.6, Anexos D y E · `RF-RES-09` · destellos por `flash.request()` |
 | 6.18 | Archivo `/semanas`: semanas selladas paginadas con su sample, entradas y podio, escuchables | ⬜ Listo | 6.7 | §2.9 · `RF-ARC-01` |
 | 6.19 | La home ofrece la ceremonia la primera vez tras el sellado y el menú enlaza la última semana sellada | ⬜ Listo | 6.8, 6.17 | §2.8, §3.8.3 · `RF-RES-09` |
@@ -165,6 +165,7 @@ resultado y el sample nuevo; y lo que se comparte enseña la cara del juego sin 
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-13 | 6.16 | Ficha sellada. |
 | 2026-10-13 | 6.15 | Página de resultados (guía v0.6.78). |
 | 2026-10-13 | 6.20 | `seedBattle` con semana sellada. |
 | 2026-10-13 | 6.13 | Sitemap y robots.txt en la app de Fastify (guía v0.6.77). |

@@ -3,6 +3,7 @@ import { type PublicEntry, PublicEntrySchema } from '@beatbattle/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { type LoaderFunctionArgs, useLoaderData } from 'react-router'
+import { paths } from '../../app/paths'
 import { notFound } from '../../app/routes'
 import { ScreenPage } from '../../app/ScreenPage'
 import { formatDuration, t } from '../../i18n'
@@ -15,6 +16,7 @@ import { Button } from '../../ui/Button'
 import { DataChip } from '../../ui/Chip'
 import { GenerativeCover } from '../../ui/CoverArt'
 import { Frame } from '../../ui/Frame'
+import { Medal } from '../../ui/Medal'
 import { Stamp } from '../../ui/Stamp'
 import { Stars } from '../../ui/Stars'
 import { Waveform } from '../../ui/Waveform'
@@ -22,6 +24,7 @@ import { Done } from '../account/FormBits'
 import { useSession } from '../account/session'
 import { usePlayer } from '../player/store'
 import { entryTrack } from '../player/tracks'
+import { MiniHistogram, scoreOf } from '../results/score'
 import { ReportDialog } from '../vote/ReportDialog'
 import { useStarsListen, useVote } from '../vote/useVote'
 import { decodePeaks, musicalKeyName } from '../week/weekModel'
@@ -45,7 +48,8 @@ export async function entryLoader({ params, request }: LoaderFunctionArgs): Prom
  * ciego) con inclinación al pasar el ratón, el alias (o el productor, revelada), los chips, la descripción,
  * la onda que suena en el reproductor global y salta con clic, arrastre y teclado (`RF-PLAY-06`), las
  * estrellas con su escucha mínima (nunca en la propia, `RF-VOTE-03`), compartir y denunciar. El dueño ve sus
- * votos y escuchas, sin la media (§2.7). Tras el sellado, la posición y la puntuación llegan con la Fase 6.
+ * votos y escuchas, sin la media (§2.7). Tras el sellado (`RF-PLAY-08`, tarea 6.16), el productor, la posición
+ * con su medalla, la puntuación, los votos y el histograma de 5 barras, y el enlace a los resultados.
  */
 export function EntryPage() {
   const initial = useLoaderData() as PublicEntry
@@ -151,6 +155,7 @@ export function EntryPage() {
           {entry.daw && <DataChip value={entry.daw} word />}
         </div>
         {entry.description && <p className={styles.description}>{entry.description}</p>}
+        {entry.result && <SealedResult entry={entry} result={entry.result} />}
         <div className={styles.player}>
           <Button
             variant="white"
@@ -215,5 +220,32 @@ export function EntryPage() {
         onClose={() => setReporting(false)}
       />
     </ScreenPage>
+  )
+}
+
+/** El resultado de una entrada sellada (`RF-PLAY-08`): nunca antes del sellado (`RF-PLAY-05`). */
+function SealedResult({ entry, result }: { entry: PublicEntry; result: NonNullable<PublicEntry['result']> }) {
+  const place =
+    result.position === 1 || result.position === 2 || result.position === 3 ? result.position : null
+  return (
+    <section className={styles.result} aria-label={t('entryPage.result.label')}>
+      {place && <Medal place={place} className={styles.resultMedal} />}
+      <div className={styles.resultTile}>
+        <small>{t('entryPage.result.position')}</small>
+        <b>{result.position ? `${result.position}.º` : t('results.mine.unranked')}</b>
+      </div>
+      <div className={styles.resultTile}>
+        <small>{t('entryPage.result.score')}</small>
+        <b>{scoreOf(result.scoreMilli)}</b>
+      </div>
+      <div className={styles.resultTile}>
+        <small>{t('entryPage.result.votes')}</small>
+        <b>{result.votes}</b>
+      </div>
+      <MiniHistogram histogram={result.histogram} />
+      <Button variant="outline" to={paths.weekResults(entry.weekSlug)}>
+        {t('entryPage.result.link')}
+      </Button>
+    </section>
   )
 }
