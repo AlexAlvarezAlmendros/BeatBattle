@@ -36,6 +36,7 @@ import { samplesRoutes } from './modules/samples/routes'
 import { createSamplesService } from './modules/samples/service'
 import { ogRoutes } from './modules/share/ogRoutes'
 import { indexHtmlLoader, shareRoutes } from './modules/share/routes'
+import { seoRoutes } from './modules/share/seo'
 import { createCloudinaryStorage, type ImageStorage } from './modules/storage/cloudinary'
 import {
   createCloudinaryEntryStorage,
@@ -218,6 +219,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   resultCardRoutes(app, { db, secret: config.auth.secret })
   ogRoutes(app, { db })
   shareRoutes(app, { db, publicUrl: config.publicUrl, indexHtml: deps.indexHtml ?? indexHtmlLoader() })
+  seoRoutes(app, { db, publicUrl: config.publicUrl, indexable: config.indexable })
   const weeks = createWeeksService({ db, storage: samples, newId })
   weeksRoutes(app, weeks)
   countdownRoutes(app, { db })

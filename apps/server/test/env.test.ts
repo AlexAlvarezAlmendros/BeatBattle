@@ -144,6 +144,18 @@ describe('loadEnv', () => {
     })
     expect(extra.allowedOrigins).toEqual(['https://www.b.example', 'https://b.example'])
   })
+
+  it('§2.15: solo producción de verdad se deja indexar (ni las previews de Vercel ni local)', () => {
+    const prod = {
+      NODE_ENV: 'production',
+      BB_PUBLIC_URL: 'https://b.example',
+      BETTER_AUTH_SECRET: 'x'.repeat(40),
+    }
+    expect(loadEnv(prod).indexable).toBe(true)
+    expect(loadEnv({ ...prod, VERCEL_ENV: 'production' }).indexable).toBe(true)
+    expect(loadEnv({ ...prod, VERCEL_ENV: 'preview' }).indexable).toBe(false)
+    expect(loadEnv({ NODE_ENV: 'development' }).indexable).toBe(false)
+  })
 })
 
 describe('lista blanca en local con Gmail (§4.19.1, tarea 2.28)', () => {

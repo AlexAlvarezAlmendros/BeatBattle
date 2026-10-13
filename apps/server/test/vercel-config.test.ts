@@ -66,7 +66,14 @@ const ONE_YEAR_S = 31_536_000
 /** Rutas representativas: raíz, rutas del cliente, API y un recurso con hash de Vite. */
 const CLIENT_ROUTES = ['/', '/semana/41/entradas', '/dev/galeria', '/e/abc/otra', '/jurado']
 /** Las compartibles (§4.7.7): las sirve la app de Fastify con sus metadatos (tarea 6.12). */
-const SHARE_ROUTES = ['/semana/41', '/semana/2026-w42/resultados', '/e/abc', '/p/productor']
+const SHARE_ROUTES = [
+  '/semana/41',
+  '/semana/2026-w42/resultados',
+  '/e/abc',
+  '/p/productor',
+  '/robots.txt',
+  '/sitemap.xml',
+]
 const API_ROUTES = ['/api/health', '/api/auth/sign-in/email', '/api/']
 const ASSET = '/assets/index-abc123.js'
 

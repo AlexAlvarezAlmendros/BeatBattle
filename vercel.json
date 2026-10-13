@@ -15,6 +15,7 @@
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/(e|p)/([^/]+)", "destination": "/api" },
     { "source": "/semana/([^/]+)(/resultados)?", "destination": "/api" },
+    { "source": "/(robots\\.txt|sitemap\\.xml)", "destination": "/api" },
     { "source": "/((?!api(?:/|$)|assets/).*)", "destination": "/index.html" }
   ],
   "headers": [
