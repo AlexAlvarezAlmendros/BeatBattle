@@ -15,9 +15,13 @@
 //   calendar   fronteras de la semana en Europe/Madrid, semana ISO, slug y temporada
 //   phase      fase derivada de los instantes, permisos por fase y cuenta atrás
 //
-// El resto de §4.5 llega con la fase que lo usa (ver docs/planning/ROADMAP.md): `ranking`, `fair`, `alias`, `xp` (`xpFor`, `streakOf`), `achievements`,
+// De la Fase 4 (tarea 4.1):
+//   alias      alias de batalla sin repetirse en la semana, número de recibo y semilla de la portada
+//
+// El resto de §4.5 llega con la fase que lo usa (ver docs/planning/ROADMAP.md): `ranking`, `fair`, `xp` (`xpFor`, `streakOf`), `achievements`,
 // `seasonStandings` y `goldenEar()`.
 
+export * from './alias'
 export * from './balance'
 export * from './calendar'
 export * from './entryAudio'

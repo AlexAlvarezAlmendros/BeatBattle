@@ -55,6 +55,16 @@ export const ERROR_STATUS = {
   RULES_NOT_ACCEPTED: 409,
   /** La fase de la semana no permite la operación (p. ej. descargar en `voting`). */
   WEEK_PHASE_CLOSED: 409,
+  /** Ya tiene una entrada activa esta semana (`RF-ENT-01`); se edita, no se sube otra. */
+  ENTRY_EXISTS: 409,
+  /** La semana no está en `open`: no se sube, no se edita la ficha ni se sustituye el audio (`RF-ENT-02`). */
+  SUBMISSIONS_CLOSED: 409,
+  /** Sustituir el audio de una entrada que ya tiene votos (`RF-ENT-08`). */
+  ENTRY_HAS_VOTES: 409,
+  /** El *intent* de la subida no existe, es de otro, ha caducado o ya se usó (§4.8.2). */
+  UPLOAD_INTENT_INVALID: 409,
+  /** El recurso subido no está, no es de su carpeta o no cuadra con lo firmado; `details.reason` dice qué (§4.8.4). */
+  ENTRY_ASSET_INVALID: 422,
   /** No hay almacenamiento de audio configurado (ni Cloudinary ni el falso). */
   STORAGE_UNAVAILABLE: 503,
   /** Límite de frecuencia superado; la respuesta lleva `Retry-After`. */

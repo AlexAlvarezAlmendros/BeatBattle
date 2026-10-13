@@ -44,6 +44,22 @@ const confirm = (t: TestApp, cookie: string, publicId: string) =>
   })
 
 describe('avatar (RF-PRF-02)', () => {
+  it('RF-ENT-04: el audio de una entrada no se firma como un avatar (su firma llega con la tarea 4.5)', async () => {
+    const fake = fakeImages()
+    const t = await makeApp({ images: fake.images })
+    const { cookie } = await createAccount(t, { email: 'pau@example.com', username: 'pau' })
+    const entry = {
+      kind: 'entry',
+      weekSlug: '2026-w41',
+      mime: 'audio/wav',
+      bytes: 60_000_000,
+      durationMs: 150_000,
+    }
+    const res = await sign(t, cookie, entry)
+    expect(res.statusCode).toBe(400)
+    expect(JSON.stringify(res.json())).not.toContain('avatars/')
+  })
+
   it('RF-PRF-02: la firma fija el public_id en la carpeta de la cuenta; al confirmar, el perfil entrega 256 px cuadrado', async () => {
     const fake = fakeImages()
     const t = await makeApp({ images: fake.images })

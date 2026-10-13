@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import * as alias from '../src/alias'
 import * as balance from '../src/balance'
 import * as calendar from '../src/calendar'
 import * as entryAudio from '../src/entryAudio'
@@ -13,6 +14,7 @@ import * as scoring from '../src/scoring'
 import * as season from '../src/season'
 
 const modules = {
+  alias,
   balance,
   calendar,
   entryAudio,
