@@ -45,6 +45,7 @@ export const EMAIL_CATALOG = {
   'mod.action': service(),
   'rules.changed': service(2),
   'account.deleted': service(),
+  'admin.calendar_gap': service(3),
   'battle.monday': battle(10, 'dropOn', 'resultsOn'),
   'battle.drop': battle(10, 'dropOn'),
   'battle.results': battle(10, 'resultsOn'),

@@ -12,3 +12,30 @@ export function madridDateTime(ms: number): string {
 
 /** Número de carta con cuatro cifras («#0042»). */
 export const cardNumber = (n: number) => `#${String(n).padStart(4, '0')}`
+
+const TONIC_NAMES: Record<string, string> = {
+  C: 'Do',
+  'C#': 'Do♯',
+  D: 'Re',
+  'D#': 'Re♯',
+  E: 'Mi',
+  F: 'Fa',
+  'F#': 'Fa♯',
+  G: 'Sol',
+  'G#': 'Sol♯',
+  A: 'La',
+  'A#': 'La♯',
+  B: 'Si',
+}
+
+/** Tonalidad en palabras («Dm» → «Re menor», «F#» → «Fa♯ mayor»), como la dice la interfaz (§3.2). */
+export function musicalKeyName(key: string): string {
+  const minor = key.endsWith('m')
+  const tonic = TONIC_NAMES[minor ? key.slice(0, -1) : key] ?? key
+  return `${tonic} ${minor ? 'menor' : 'mayor'}`
+}
+
+/** Corta un texto a `max` caracteres con «…» (los asuntos caben en 50, §3.8.12). */
+export function clip(text: string, max: number): string {
+  return text.length <= max ? text : `${text.slice(0, Math.max(1, max - 1)).trimEnd()}…`
+}

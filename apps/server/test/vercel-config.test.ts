@@ -33,6 +33,7 @@ interface VercelConfig {
   outputDirectory: string
   regions: string[]
   functions: Record<string, { includeFiles?: string; maxDuration?: number }>
+  crons?: { path: string; schedule: string }[]
   rewrites: { source: string; destination: string }[]
   headers: { source: string; headers: VercelHeader[] }[]
 }
@@ -242,5 +243,19 @@ describe('vercel.json: caché', () => {
 
   it.each(['/', '/index.html', '/semana/41', '/api/health'])('%s no se cachea como inmutable', (path) => {
     expect(headersFor(path).get('cache-control')).toBeUndefined()
+  })
+})
+
+describe('vercel.json: tareas programadas (§4.12, tarea 3.12)', () => {
+  it('Vercel Cron llama a /api/cron/tick una vez al día (Hobby), a las 06:00 UTC (las 08:00 del drop en verano)', () => {
+    expect(config.crons).toEqual([{ path: '/api/cron/tick', schedule: '0 6 * * *' }])
+  })
+
+  it('el flujo de GitHub Actions lo llama cada 15 minutos con el secreto, y sin la URL no hace nada', () => {
+    const workflow = readFileSync(new URL('../../../.github/workflows/tick.yml', import.meta.url), 'utf8')
+    expect(workflow).toContain('cron: "*/15 * * * *"')
+    expect(workflow).toContain("if: ${{ vars.BB_TICK_URL != '' }}")
+    expect(workflow).toContain('Authorization: Bearer ${CRON_SECRET}')
+    expect(workflow).toContain('permissions: {}')
   })
 })

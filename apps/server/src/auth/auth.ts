@@ -10,6 +10,7 @@ import { producerProfile } from '../db/schema'
 import type { ServiceEmails } from '../email/service'
 import { maskEmail } from '../email/unsubscribe'
 import { ipHash } from '../lib/ipHash'
+import { mergeAlertSubscription } from '../modules/alerts/service'
 import { recordSignupConsents } from '../modules/emailPrefs/service'
 import { isDisposableEmail } from './disposable'
 import { schemaOptions } from './options'
@@ -236,6 +237,8 @@ export function createAuth(deps: AuthDeps) {
             return { data: user }
           },
           after: async (user) => {
+            // Alta con Google o Discord, ya verificada: la alerta de drop con ese email pasa a ser suya.
+            if (user.emailVerified) await mergeAlertSubscription(db, user.id, user.email)
             // Su carta de productor: el número es el orden de alta (el índice único evita repetirlo).
             for (let attempt = 0; attempt < 5; attempt++) {
               try {
@@ -259,6 +262,10 @@ export function createAuth(deps: AuthDeps) {
             if (name && usernameProblem(name) === 'USERNAME_RESERVED')
               throw reject('USERNAME_RESERVED', 'Ese nombre está reservado.')
             return { data: user }
+          },
+          after: async (user) => {
+            // Al verificar el email (o cambiarlo por otro verificado), se fusiona la alerta sin cuenta (§2.12.3).
+            if (user.emailVerified) await mergeAlertSubscription(db, user.id, user.email)
           },
         },
       },

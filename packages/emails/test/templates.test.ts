@@ -3,7 +3,7 @@ import { type EmailFamily, renderEmail, TEMPLATES, type TemplateKind } from '../
 
 const PUBLIC_URL = 'https://battle.otherpeople.es'
 const KINDS = Object.keys(TEMPLATES) as TemplateKind[]
-const family = (_kind: TemplateKind): EmailFamily => 'service'
+const family = (kind: TemplateKind): EmailFamily => (kind.startsWith('battle.') ? 'battle' : 'service')
 
 async function renderFixture(
   kind: TemplateKind,
@@ -44,7 +44,16 @@ describe('plantillas de email (§3.8.12, §4.19.4)', () => {
       for (const img of html.match(/<img[^>]*>/g) ?? []) {
         expect(img).not.toMatch(/width="1"|height="1"/)
         const src = img.match(/src="([^"]+)"/)?.[1] ?? ''
-        expect(src.startsWith(`${PUBLIC_URL}/img/email/`)).toBe(true)
+        // Las imágenes del juego, la cuenta atrás en vivo (§4.19.5) o la portada del sample (Cloudinary).
+        const allowed = [
+          `${PUBLIC_URL}/img/email/`,
+          `${PUBLIC_URL}/api/email/countdown/`,
+          'https://res.cloudinary.com/',
+        ]
+        expect(
+          allowed.some((prefix) => src.startsWith(prefix)),
+          src,
+        ).toBe(true)
         expect(src).not.toContain('?')
       }
     })
@@ -74,5 +83,29 @@ describe('plantillas de email (§3.8.12, §4.19.4)', () => {
     const { html, text } = await renderFixture('auth.verify')
     expect(html).toMatch(/<td[^>]*bgcolor="#e6003a"/)
     expect(text).toContain('/api/auth/verify-email?token=ejemplo')
+  })
+
+  it('battle.drop: el asunto es «Nuevo drop: <sample> · <BPM> BPM · <tonalidad>» y un título largo se corta', () => {
+    const drop = TEMPLATES['battle.drop']
+    expect(drop.subject(drop.fixture)).toBe('Nuevo drop: Lluvia en Gràcia · 92 BPM · Re menor')
+    const long = drop.subject({
+      ...drop.fixture,
+      title: 'Un título larguísimo que no cabe de ninguna manera',
+    })
+    expect(long.length).toBeLessThanOrEqual(50)
+    expect(long).toMatch(/…· 92 BPM · Re menor$|… · 92 BPM · Re menor$/)
+  })
+
+  it('battle.drop: a quien solo dejó su email se le invita a crear cuenta; a una cuenta, no', async () => {
+    const drop = TEMPLATES['battle.drop']
+    const subscriber = await renderEmail(drop, drop.fixture, { publicUrl: PUBLIC_URL, family: 'battle' })
+    const account = await renderEmail(
+      drop,
+      { ...drop.fixture, subscriber: false },
+      { publicUrl: PUBLIC_URL, family: 'battle' },
+    )
+    expect(subscriber.text).toContain('crea la tuya')
+    expect(account.text).not.toContain('crea la tuya')
+    expect(subscriber.html).toContain(`${PUBLIC_URL}/api/email/countdown/2026-w41.gif`)
   })
 })

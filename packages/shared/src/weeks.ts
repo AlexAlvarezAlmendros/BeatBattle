@@ -241,3 +241,8 @@ export const RulesAcceptSchema = z.object({ rulesVersion: z.literal(RULES_VERSIO
  */
 export const SeenRequestSchema = z.object({ kind: z.literal('drop'), ref: WeekSlugSchema }).strict()
 export type SeenRequest = z.infer<typeof SeenRequestSchema>
+
+/** `POST /api/subscribe`: alerta de drop sin cuenta (§2.12.3). */
+export const AlertSubscribeSchema = z.object({ email: z.email().max(254) }).strict()
+/** `POST /api/subscribe/confirm`: el token del email `alert.confirm`. */
+export const AlertConfirmSchema = z.object({ token: z.string().min(16).max(128) }).strict()

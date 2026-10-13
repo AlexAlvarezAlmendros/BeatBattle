@@ -24,10 +24,12 @@ export interface WeeksApp extends TestApp {
 }
 
 /** App con almacenamiento falso en una carpeta temporal y una cuenta admin. */
-export async function makeWeeksApp(): Promise<WeeksApp> {
+export async function makeWeeksApp(
+  config: Partial<import('../../src/config/env').AppConfig> = {},
+): Promise<WeeksApp> {
   const root = await mkdtemp(join(tmpdir(), 'bb-samples-'))
   const storage = createDiskSampleStorage({ root, baseUrl: '', secret: 'x'.repeat(32) })
-  const t = await makeApp({ samples: storage })
+  const t = await makeApp({ samples: storage, config })
   const admin = await createAccount(t, { email: 'jefa@example.com', username: 'jefa' })
   await t.db.update(user).set({ role: 'admin' }).where(eq(user.id, admin.id))
   return { ...t, storage, admin }

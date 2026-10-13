@@ -10,6 +10,7 @@
       "maxDuration": 10
     }
   },
+  "crons": [{ "path": "/api/cron/tick", "schedule": "0 6 * * *" }],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api" },
     { "source": "/((?!api(?:/|$)|assets/).*)", "destination": "/index.html" }
