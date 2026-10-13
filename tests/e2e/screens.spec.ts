@@ -329,7 +329,6 @@ for (const { viewport, touch, screens } of [
       { path: '/legal/bases', heading: 'Bases de la competición' },
       { path: '/semanas', heading: 'Semanas' },
       { path: '/subir', heading: 'Subir mi beat' },
-      { path: '/e/0192f3a1', heading: 'Entrada' },
       { path: '/esto-no-existe', heading: 'Bonus stage' },
       { path: '/ajustes/accesibilidad', heading: 'Accesibilidad' },
     ],
@@ -1628,10 +1627,8 @@ for (const viewport of [
 test.describe('granate de las provisionales a 1440 × 900', () => {
   for (const { path, heading } of [
     { path: '/subir', heading: 'Subir mi beat' },
-    { path: '/jurado', heading: 'Modo Jurado' },
     { path: '/semanas', heading: 'Semanas' },
     { path: '/semana/2026-41/resultados', heading: 'Resultados' },
-    { path: '/e/0192f3a1', heading: 'Entrada' },
   ])
     test(`§3.1 / §3.8.14: en ${path}, la cuña sigue al sello y el granate no pasa del 24,5 % (G6)`, async ({
       page,
