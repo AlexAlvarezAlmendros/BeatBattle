@@ -149,7 +149,7 @@ export async function createBattleWeek(
   expect(role.ok(), await role.text()).toBe(true)
   let sampleId: string | undefined
   for (const [part, name, buffer, mimeType] of [
-    ['original', 'sample.wav', wav(6, 220), 'audio/wav'],
+    ['original', 'sample.wav', wav(20, 220), 'audio/wav'],
     ['cover', 'cover.png', pngHeader(), 'image/png'],
   ] as const) {
     const signed = await admin.page.request.post('/api/admin/samples/sign', {
@@ -177,10 +177,19 @@ export async function createBattleWeek(
     },
   })
   expect(sample.ok(), await sample.text()).toBe(true)
-  const created = await admin.page.request.post('/api/admin/weeks', {
+  // Un reintento del mismo E2E ya tiene su semana: la siguiente libre (el reloj sigue antes de su lunes).
+  const sampleId_ = (await sample.json()).data.id
+  let created = await admin.page.request.post('/api/admin/weeks', {
     headers: headers(),
-    data: { monday, sampleId: (await sample.json()).data.id },
+    data: { monday, sampleId: sampleId_ },
   })
+  for (let weeks = 1; weeks <= 4 && created.status() === 409; weeks++) {
+    const next = new Date(Date.UTC(year, month - 1, day + 7 * weeks)).toISOString().slice(0, 10)
+    created = await admin.page.request.post('/api/admin/weeks', {
+      headers: headers(),
+      data: { monday: next, sampleId: sampleId_ },
+    })
+  }
   expect(created.ok(), await created.text()).toBe(true)
   const week = (await created.json()).data as {
     slug: string

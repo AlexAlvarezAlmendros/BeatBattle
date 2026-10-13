@@ -22,7 +22,18 @@ export type ArenaWedge = 'right' | 'left' | 'none'
  * (INTRO ENTRAR), `back` (ESC VOLVER), `cancel` (ESC CANCELAR: mientras algo está en marcha y Esc lo
  * para, como la subida) y `sound` (M SONIDO).
  */
-export type ControlKey = 'choose' | 'move' | 'section' | 'enter' | 'back' | 'cancel' | 'sound'
+export type ControlKey =
+  | 'choose'
+  | 'move'
+  | 'section'
+  | 'enter'
+  | 'back'
+  | 'cancel'
+  | 'sound'
+  | 'listen'
+  | 'jury'
+  | 'order'
+  | 'filters'
 
 /** Placa de título del HUD en las pantallas interiores (§3.3 «Placa de título»). */
 export interface TitlePlateConfig {

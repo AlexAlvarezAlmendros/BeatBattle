@@ -45,6 +45,7 @@ export const paths = {
   dropAlert: () => `/#${DROP_ALERT_ID}`,
   week: (slug: string) => `/semana/${segment(slug)}`,
   weekResults: (slug: string) => `/semana/${segment(slug)}/resultados`,
+  weekEntries: (slug: string) => `/semana/${segment(slug)}/entradas`,
   weeks: () => '/semanas',
   entry: (id: string) => `/e/${segment(id)}`,
   jury: () => '/jurado',

@@ -34,6 +34,7 @@ const interior = (
 const PLATE_KICKERS = {
   week: 'frame.plates.week',
   weekResults: 'frame.plates.weekResults',
+  weekEntries: 'frame.plates.weekEntries',
   weeks: 'frame.plates.weeks',
   entry: 'frame.plates.entry',
   jury: 'frame.plates.jury',
@@ -113,6 +114,25 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
               lazy: async () => {
                 const m = await import('../features/week/WeekPage')
                 return { Component: m.WeekPage, loader: m.weekLoader }
+              },
+            },
+            {
+              path: 'semana/:slug/entradas',
+              handle: handle(
+                'public',
+                interior('weekEntries', 'selection.title', [
+                  'move',
+                  'listen',
+                  'jury',
+                  'order',
+                  'filters',
+                  'back',
+                  'sound',
+                ]),
+              ),
+              lazy: async () => {
+                const m = await import('../features/entries/SelectEntryPage')
+                return { Component: m.SelectEntryPage, loader: m.selectEntryLoader }
               },
             },
             {

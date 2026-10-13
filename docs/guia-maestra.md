@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.65 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.66 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -408,7 +408,7 @@ integrados**, medidos en servidor (§4.8.4). La ganancia solo puede **atenuar** 
 0 dB) para no amplificar ruido ni saturar. Se puede desactivar en ajustes («Escuchar el master tal
 cual»), pero viene activada y el Modo Jurado siempre la usa.
 
-**Lista de entradas** (`/semana/:slug`): rejilla de selección de luchador (§3.8.13) y filas de
+**Lista de entradas** (`/semana/:slug/entradas`, enlazada desde la página de la semana): rejilla de selección de luchador (§3.8.13) y filas de
 marcador en listas largas (§3.3). Durante la semana el orden por defecto es **«Ronda justa»**:
 
 1. Primero las entradas que el usuario aún no ha votado.
@@ -945,7 +945,8 @@ Objetivo **WCAG 2.2 AA** con extras propios de un juego:
 | Ruta | Pantalla | Acceso |
 |---|---|---|
 | `/` | Menú principal (home): puerta de entrada, «ELIGE MODO» y tarjeta del escenario de la semana con el reloj de ronda (§3.8.1, §3.8.3) | Público |
-| `/semana/:slug` | Semana (en curso o pasada): escenario y selección de entradas, «ELIGE ENTRADA» (§3.8.13) | Público |
+| `/semana/:slug` | Semana (en curso o pasada): el escenario con el sample, las bases y la descarga, y el enlace a sus entradas | Público |
+| `/semana/:slug/entradas` | Selección de entradas, «ELIGE ENTRADA» (§3.8.13) | Público |
 | `/semana/:slug/resultados` | Resultados y ceremonia | Público (sellada) |
 | `/semanas` | Archivo | Público |
 | `/e/:id` | Ficha de entrada | Público |
@@ -3623,6 +3624,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.66 | **Tarea 5.16.** §2.6 y §2.18: «ELIGE ENTRADA» va en su propia ruta, `/semana/:slug/entradas`; `/semana/:slug` sigue siendo el escenario del sample (bases y descarga, Fase 3) y enlaza a ella. Una pantalla para cada trabajo: la del sample ya es alta y la selección llena el alto entre el HUD y la barra (maqueta `02-seleccion`). J lleva al Modo Jurado empezando por la enfocada (`/jurado?desde=<id>`). Su barra de controles: `←↑↓→ MOVER · INTRO ESCUCHAR · J JURADO · Q E ORDEN · F FILTROS · ESC VOLVER · M SONIDO`. **Tareas 5.14 y 5.15** (§4.7.3, §4.7.2): la escucha seguida de 10 s se reinicia con una pausa o un salto; con la cuenta verificada, `listen` se pide al empezar a sonar una entrada ajena y `qualify` al sumar el umbral en `audio.played`, y si el reloj del servidor aún no llega se repite pasado `remainingMs`; las estrellas no despiertan hasta que el servidor da el recibo. El voto optimista cambia `myVote` en la lista y lo revierte con `ui.error` si no se guarda. |
 | 2026-10-13 | 0.6.65 | **Tareas 5.13 y 5.20.** §3.3: el componente «Reproductor» (la barra global: dónde va, qué lleva en escritorio y en móvil, cuándo no sale y su alto en el margen del foco). §2.6: el sample pasa por el mismo reproductor. §4.4: el generador de datos de una semana en juego vive en `apps/server/src/scripts/seedBattle.ts` (necesita la app) y el de los E2E en `tests/e2e/battle.ts`. |
 | 2026-10-13 | 0.6.64 | **Tarea 5.12.** §2.12: `battle.first_votes` se encola en el `batch` del voto que hace el quinto, una vez por entrada; `battle.jury_call` cuenta las entradas activas, ajenas y sin su voto. La versión «racha en peligro» de `battle.reminder` llega con las rachas (Fase 7). §4.10 y §4.19.5: la cuenta atrás `:slug.votes.gif` va siempre al cierre de votos (la llamada al jurado sale el domingo a las 17:00, con los envíos aún abiertos). |
 | 2026-10-13 | 0.6.63 | **Tarea 5.11.** §2.12.4 (`RF-NOTIF-08`): la semana del tope va del lunes a las 00:00 al domingo en Madrid y cuenta por destinatario; se aplica al enviar (lo ya enviado ocupa su hueco; entre lo que toca a la vez, por prioridad) y lo descartado queda `skipped` con el motivo `weekly_cap`. Lo retenido por las horas de silencio sale a las 08:00 (`not_before`). |

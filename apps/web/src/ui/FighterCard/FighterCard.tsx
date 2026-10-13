@@ -1,5 +1,5 @@
 import { listenThresholdMs } from '@beatbattle/rules'
-import { useId, useRef } from 'react'
+import { type ReactNode, useId, useRef } from 'react'
 import { formatDuration, t } from '../../i18n'
 import { Button } from '../Button'
 import { CoverArt } from '../CoverArt'
@@ -30,6 +30,8 @@ export interface FighterEntry {
 
 export interface FighterCardProps {
   entry?: FighterEntry
+  /** La portada de la entrada (la generativa de su semilla, §3.4.5); sin ella, la de referencia. */
+  cover?: ReactNode
   /**
    * Segundos de escucha que desbloquean las estrellas, si los manda el servidor. Por defecto, la regla de
    * `RF-VOTE-04` (`listenThresholdMs` de `@beatbattle/rules`: 30 s, o la entrada entera si dura menos).
@@ -56,6 +58,7 @@ export interface FighterCardProps {
  */
 export function FighterCard({
   entry,
+  cover,
   listenSeconds,
   loading = false,
   error = false,
@@ -110,7 +113,7 @@ export function FighterCard({
       <div className={styles.top}>
         <div className={styles.portrait}>
           <Frame variant="title" cut="lg" className={styles.cover}>
-            <CoverArt />
+            {cover ?? <CoverArt />}
           </Frame>
           <Stamp className={styles.hidden} turn={-0.7}>
             {t('ui.fighterCard.authorHidden')}

@@ -1,0 +1,73 @@
+/* Silueta del jurado (§3.4.6): colores de la maqueta `03-jurado`, solo con tokens. */
+.juror {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.dotsBase {
+  fill: var(--bb-red-cta);
+}
+
+.dotsDot {
+  fill: var(--bb-red-shade);
+}
+
+.red {
+  fill: var(--bb-red);
+}
+
+.rimOff {
+  stop-color: var(--bb-white);
+  stop-opacity: 0;
+}
+
+.rimOn {
+  stop-color: var(--bb-white);
+  stop-opacity: 1;
+}
+
+.shape {
+  fill: var(--bb-panel);
+  stroke: var(--bb-black);
+}
+
+.collar {
+  fill: var(--bb-ink-3);
+  stroke: var(--bb-black);
+}
+
+.strings,
+.rimWhite {
+  stroke: var(--bb-white);
+}
+
+.rimRed,
+.bandFront {
+  stroke: var(--bb-red);
+}
+
+.bandBack {
+  stroke: var(--bb-black);
+}
+
+.shine {
+  stroke: var(--bb-white);
+  opacity: 0.9;
+}
+
+.cups {
+  fill: var(--bb-red);
+  stroke: var(--bb-black);
+}
+
+.glint {
+  fill: var(--bb-white);
+  opacity: 0.9;
+}
+
+.glintDim {
+  fill: var(--bb-white);
+  opacity: 0.5;
+}

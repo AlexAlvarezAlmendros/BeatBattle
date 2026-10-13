@@ -16,7 +16,15 @@ export const queryKeys = {
   entries: {
     all: ['entries'] as const,
     mine: (slug: string) => ['entries', 'mine', slug] as const,
+    list: (slug: string, search: string) => ['entries', 'list', slug, search] as const,
+    detail: (id: string) => ['entries', 'detail', id] as const,
+    stats: (id: string) => ['entries', 'stats', id] as const,
   },
+  jury: {
+    all: ['jury'] as const,
+    queue: (week?: string) => ['jury', 'queue', week ?? 'current'] as const,
+  },
+  ticker: (slug: string) => ['ticker', slug] as const,
   admin: {
     all: ['admin'] as const,
     samples: () => ['admin', 'samples'] as const,
