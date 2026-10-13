@@ -31,7 +31,11 @@ export function Ticket({ code, rows }: { code: string; rows: readonly [string, R
       >
         {code}
       </p>
-      {/* Párrafos y no una tabla: en el texto plano cada dato sale en su línea («Alias TIGRE PÚRPURA»). */}
+      {/*
+       * Párrafos y no una tabla: en el texto plano cada dato sale en su línea («Alias TIGRE PÚRPURA»). El
+       * valor es un bloque en línea: si no cabe al lado del rótulo (la fecha a 390 px), baja entero a la
+       * línea siguiente en vez de partirse y meter su segunda línea bajo el rótulo (acta F4, M12 y J15).
+       */}
       {rows.map(([label, value]) => (
         <p
           key={label}
@@ -51,11 +55,12 @@ export function Ticket({ code, rows }: { code: string; rows: readonly [string, R
               letterSpacing: '0.12em',
               minWidth: '112px',
               textTransform: 'uppercase',
+              verticalAlign: 'top',
             }}
           >
             {label}
           </span>{' '}
-          <strong>{value}</strong>
+          <strong style={{ display: 'inline-block', maxWidth: '100%', verticalAlign: 'top' }}>{value}</strong>
         </p>
       ))}
     </Section>

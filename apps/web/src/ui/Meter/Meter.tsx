@@ -21,6 +21,13 @@ export interface MeterProps {
   /** Ancho CSS de la pista (por defecto, todo el de su sitio). */
   width?: CSSProperties['width']
   state?: MeterState
+  /**
+   * `hud` (por defecto): el de 10 px del HUD. `super`: el **medidor de súper** de la subida (§3.8.5), grueso,
+   * con marcas a un tercio y a dos tercios y el brillo al llenarse (jurado de la 4.20, J3).
+   */
+  size?: 'hud' | 'super'
+  /** Sin la transición de anchura: el relleno salta al valor (al pasar de subir a verificar, al 100 %). */
+  instant?: boolean
   className?: string
 }
 
@@ -41,6 +48,8 @@ export function Meter({
   role = 'meter',
   width,
   state,
+  size = 'hud',
+  instant = false,
   className,
 }: MeterProps) {
   const reduced = useReducedMotion()
@@ -71,11 +80,14 @@ export function Meter({
       style={{ '--meter-width': width, '--meter-ratio': ratio } as CSSProperties}
       data-full={ratio >= 1 || undefined}
       data-force-state={state === 'gain' ? 'gain' : undefined}
+      data-size={size === 'super' ? 'super' : undefined}
+      data-instant={instant || undefined}
     >
       <div className={styles.track} {...a11y}>
         <div className={styles.fill} data-meter-fill="">
           {(shine > 0 || state === 'gain') && <span key={shine} className={styles.shine} />}
         </div>
+        {size === 'super' && <span className={styles.thirds} aria-hidden="true" />}
       </div>
       {caption && (
         <div className={styles.caption} aria-hidden="true">

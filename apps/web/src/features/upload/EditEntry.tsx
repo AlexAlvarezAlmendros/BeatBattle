@@ -46,7 +46,7 @@ export function draftOf(entry: OwnEntry): EntryDraft {
  * recibo); y se retira con confirmación (`RF-ENT-09`: se borran el audio y sus votos y queda el hueco
  * libre).
  */
-export function EditEntry({ week }: { week: PublicWeek }) {
+export function EditEntry({ week, onWithdrawn }: { week: PublicWeek; onWithdrawn?: () => void }) {
   const queryClient = useQueryClient()
   const key = queryKeys.entries.mine(week.slug)
   const {
@@ -134,6 +134,7 @@ export function EditEntry({ week }: { week: PublicWeek }) {
     try {
       await withdrawEntry(entry.id)
       setConfirm(false)
+      onWithdrawn?.()
       queryClient.removeQueries({ queryKey: key })
       await queryClient.invalidateQueries({ queryKey: queryKeys.weeks.all })
     } catch (error) {
@@ -218,6 +219,8 @@ export function EditEntry({ week }: { week: PublicWeek }) {
               analysis={analysis.state}
               onFile={(file) => void analysis.start(file)}
               onReset={analysis.reset}
+              autoFocus={false}
+              compact
             />
             {analysis.state.stage === 'ready' && (
               <div className={styles.actions}>

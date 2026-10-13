@@ -34,6 +34,7 @@ export const CONTROL_KEYS: Readonly<
   },
   enter: { keys: [{ glyph: 'frame.keys.glyph.enter' }], verb: 'frame.keys.enter' },
   back: { keys: [{ glyph: 'frame.keys.glyph.escape' }], verb: 'frame.keys.back' },
+  cancel: { keys: [{ glyph: 'frame.keys.glyph.escape' }], verb: 'frame.keys.cancel' },
   sound: { keys: [{ glyph: 'frame.keys.glyph.m' }], verb: 'frame.keys.sound' },
 }
 

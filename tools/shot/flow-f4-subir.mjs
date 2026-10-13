@@ -78,7 +78,10 @@ const email = `subir.${suffix}@example.com`
 const username = `subir${suffix}`
 await page.request.post(`${origin}/api/auth/sign-up/email`, {
   data: { email, password: 'lluvia en gràcia 92', name: username, username, callbackURL: '/' },
-  headers: { origin, 'x-forwarded-for': `203.0.113.${Math.floor(Math.random() * 200) + 1}` },
+  headers: {
+    origin,
+    'x-forwarded-for': `10.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250) + 1}`,
+  },
 })
 const mail = await (
   await page.request.get(`${origin}/api/test/mailbox?to=${encodeURIComponent(email)}`)
@@ -113,11 +116,32 @@ await page.getByRole('button', { name: /Drill/ }).first().click()
 await page.getByLabel('Título').scrollIntoViewIfNeeded()
 await shot('subir-hoja')
 await page.getByRole('button', { name: /He usado el sample/ }).click()
+// El medidor a mitad (jurado de la 4.20, J3): la subida, frenada a ~1 MB/s con la red emulada de Chrome.
+const cdp = await ctx.newCDPSession(page)
+await cdp.send('Network.enable')
+await cdp.send('Network.emulateNetworkConditions', {
+  offline: false,
+  latency: 20,
+  downloadThroughput: -1,
+  uploadThroughput: 1024 * 1024,
+})
 await page.getByRole('button', { name: /Entrar en la batalla/ }).click()
-await page.waitForTimeout(250)
+await page.getByText(/MB\/s/).waitFor({ timeout: 15_000 })
+await page.waitForTimeout(1500)
 await shot('subir-medidor')
+await cdp.send('Network.emulateNetworkConditions', {
+  offline: false,
+  latency: 0,
+  downloadThroughput: -1,
+  uploadThroughput: -1,
+})
+// La celebración a varios instantes desde que aparece (M6: ¿un fotograma negro al cambiar?).
 await page.getByText('Ya estás en la batalla').waitFor({ timeout: 120_000 })
-await page.waitForTimeout(2200)
+for (const ms of [100, 500]) {
+  await page.waitForTimeout(ms === 100 ? 100 : 400)
+  await shot(`subir-dentro-${ms}ms`)
+}
+await page.waitForTimeout(1700)
 await shot('subir-dentro')
 await page.goto(`${origin}/`)
 await page.waitForTimeout(2000)

@@ -149,7 +149,10 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'subir',
-              handle: handle('verified', interior('upload', 'pages.upload.title')),
+              handle: handle(
+                'verified',
+                interior('upload', 'pages.upload.title', ['enter', 'back', 'sound']),
+              ),
               lazy: page(
                 () => import('../features/upload/UploadPage'),
                 (m) => m.UploadPage,

@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.55 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.56 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1310,7 +1310,9 @@ con su propia firma, §3.1) y las de autenticación, admin y legales, que usan u
 - **Barra de controles inferior** (58 px, negra, filete rojo de 2 px y línea discontinua encima):
   las teclas de la pantalla a la izquierda (`[↑][↓] ELEGIR · [INTRO] ENTRAR · [ESC] VOLVER ·
   [M] SONIDO`), la firma en el centro y un dato a la derecha («Crédito 01», «Nv 13 · 6.480 XP», la
-  crónica de la arena). En táctil, las teclas desaparecen y queda la firma. La firma va centrada;
+  crónica de la arena). Las teclas son las de la ruta, salvo mientras dura algo que Esc detiene: entonces
+  la barra dice `[ESC] CANCELAR` (la subida de una entrada, §3.8.5) y el pie del panel no ofrece «Volver
+  al menú [Esc]». En táctil, las teclas desaparecen y queda la firma. La firma va centrada;
   «Legal» va a su lado, separado por un filete (`--bb-stroke-hair`, `--bb-line`), si cabe, y si no,
   debajo y centrado. **Las teclas nunca se cortan ni se esconden con teclado**: entre la última tecla y
   la firma queda siempre `--bar-gap`; si no caben, primero se aprietan sus huecos y después van en su
@@ -1815,14 +1817,25 @@ serio no salen. El temblor de la tarjeta lo hace quien la contiene (`onImpact`),
 #### 3.8.5 Subida («INSERTA TU BEAT»)
 
 Inscripción del luchador. La zona de soltar es una **ranura** («INSERTA TU BEAT · WAV, AIFF, FLAC o
-MP3 · 30 s – 4 min») que se ilumina y vibra una vez al arrastrar encima (`upload.hover`). Al soltar,
-el análisis local hace girar **BPM y tonalidad como una tragaperras** hasta fijarse y dibuja la onda.
-La ficha es la **hoja del luchador** (título, BPM, tonalidad, DAW, hasta 3 géneros, descripción y
+MP3 · 30 s – 4 min», con su **boca**: tres flechas rojas sobre una hendidura negra, que se enciende al
+arrastrar) que se ilumina y vibra una vez al arrastrar encima (`upload.hover`). Al soltar, el análisis
+local hace girar **BPM y tonalidad como una tragaperras** (un rodillo por chip, con el valor anterior y
+el siguiente asomando, y «ANALIZANDO… 42 %» a la vista) hasta fijarse, y dibuja la onda en rojo con la
+cabeza blanca en el borde. El lector de pantalla no oye el giro: oye «Analizando» y el resultado. La
+ficha es la **hoja del luchador** (título, BPM, tonalidad, DAW, hasta 3 géneros, descripción y
 declaración), en paneles opacos con campos de marco y foco de juego. La subida es un **medidor de
-súper** con los bytes reales, velocidad, tiempo restante y «Cancelar [Esc]»; suena `upload.progress`.
-Al terminar: el anunciador dice «¡NUEVO BEAT EN LA BATALLA!», aparece tu **portada generativa con su
+súper** (el medidor de §3.3 a 28 px, con marcas a un tercio y a dos tercios y, lleno, en blanco con el
+filo rojo) con los bytes reales, velocidad, tiempo restante y «Cancelar [Esc]»; suena `upload.progress`
+y el lector oye el comienzo, los cuartos y la verificación. Mientras el servidor verifica y mide ya no se cancela: Esc no hace nada (ni sale al menú, donde se perdería la celebración) y repite que se está verificando. Al terminar: el anunciador dice «¡NUEVO BEAT
+EN LA BATALLA!» en una **franja** negra con filetes rojos que cruza el panel (dos líneas, el cuerpo
+ajustado al ancho y su alto reservado desde el principio), aparece tu **portada generativa con su
 alias** («Así te verán hasta el domingo: TIGRE PÚRPURA. No lo difundas.»), «Ya estás en la
-batalla #41», +XP (desde la Fase 7) y el recibo por email. Errores en tono de juego pero claros (§2.19), en aviso de papel.
+batalla #41», +XP (desde la Fase 7) y el recibo por email. La única acción es «Ver mi entrada»: el pie
+ya lleva «Volver al menú». Cada cambio de panel (análisis, medidor, celebración, retirada) lleva la
+vista y el foco al panel nuevo. La ranura, las bases, el medidor y la celebración centran su bloque; la
+hoja y la edición llenan el alto (§3.8.14), con el vinilo de la semana arriba y a la vista. En la
+edición, la ranura de sustituir el audio es compacta («Nuevo audio», sin display ni [INTRO]); al
+retirar, un aviso lo dice antes de la ranura vacía. Errores en tono de juego pero claros (§2.19), en aviso de papel.
 
 #### 3.8.6 Ceremonia de resultados (≈ 25 s, saltable con Esc o «Saltar»)
 
@@ -3595,6 +3608,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.56 | **Tarea 4.20 (jurado de la F4).** §3.8.5: la boca de la ranura, el rodillo de la tragaperras con el porcentaje a la vista, el medidor de súper de 28 px con marcas a tercios, la franja del anunciador en dos líneas con su alto reservado, una sola acción en la celebración, la vista y el foco al panel nuevo en cada cambio, qué estados llenan el alto, la ranura compacta de la edición y el aviso al retirar; lo que oye el lector en el análisis y la subida; Esc no hace nada mientras se verifica. §3.4.1: `[ESC] CANCELAR` en la barra mientras dura algo que Esc detiene. |
 | 2026-10-10 | 0.6.55 | **Tarea 4.18.** §4.10: `GET /api/weeks/:slug/entries/mine` (la entrada propia para editarla en `/subir`). |
 | 2026-10-10 | 0.6.54 | **Tarea 4.11.** §3.4.5: cada entrada lleva su portada generativa (semilla, tónica y BPM) pintada por CPU con la calibración por medida en `packages/covers` (`painter.ts`) con la paleta de los tokens; `GenerativeCover` en la web y el banco `/dev/portadas`; `RD-VIS-04` medido con 48 y 200 semillas (peor desviación 0,5 % en rojo, 1,2 % y 2,1 % en luminancia). |
 | 2026-10-10 | 0.6.53 | **Tarea 4.17.** Anexo D: `upload.hover` no va en bucle sino una vez (240 ms, como dicen §3.8.5 y el Anexo E) con la tónica de la semana en la 1.ª octava; `upload.progress` sube del grado 1 al 11 de la pentatónica y como mucho suena 3 veces por segundo; `upload.drop` y `upload.done` van en la tónica. Anexo E: equivalentes visuales del medidor de súper y de la entrada en la batalla (`RNF-A11Y-05`). |

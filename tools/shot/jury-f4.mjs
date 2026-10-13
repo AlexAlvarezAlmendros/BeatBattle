@@ -28,7 +28,10 @@ async function account(page) {
   const username = `jurado4${suffix}`
   await page.request.post(`${origin}/api/auth/sign-up/email`, {
     data: { email, password: 'lluvia en gràcia 92', name: username, username, callbackURL: '/' },
-    headers: { origin, 'x-forwarded-for': `203.0.113.${Math.floor(Math.random() * 200) + 1}` },
+    headers: {
+      origin,
+      'x-forwarded-for': `10.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250) + 1}`,
+    },
   })
   const mail = await (
     await page.request.get(`${origin}/api/test/mailbox?to=${encodeURIComponent(email)}`)

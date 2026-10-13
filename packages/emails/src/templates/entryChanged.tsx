@@ -63,7 +63,18 @@ export const entryChanged: EmailTemplate<EntryChangedPayload> = {
     p.change === 'replaced'
       ? 'Mismo recibo y mismo alias, con la medición del audio nuevo.'
       : 'El audio está borrado y tu hueco de la semana, libre.',
-  fixture: { change: 'replaced', ...ENTRY_RECEIPT_FIXTURE, loudnessLufs: -13.1, truePeakDb: -1.2, gainDb: 0 },
+  // El audio nuevo: su propia medición, su huella, su hora y su onda (sin clip, como dice su pico real).
+  fixture: {
+    change: 'replaced',
+    ...ENTRY_RECEIPT_FIXTURE,
+    bytes: 58_901_234,
+    loudnessLufs: -13.1,
+    truePeakDb: -1.2,
+    gainDb: 0,
+    etag: '0f9e8d7c6b5a49382716f5e4d3c2b1a0',
+    receivedAt: Date.UTC(2026, 9, 9, 17, 42, 3),
+    waveformUrl: 'https://battle.otherpeople.es/api/email/waveform/7b0c6a0e.png?v=f6e5d4c3b2a1&sig=ejemplo',
+  },
   body: (p) =>
     p.change === 'replaced' ? (
       <ReceiptBody

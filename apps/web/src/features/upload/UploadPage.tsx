@@ -1,6 +1,6 @@
 import type { CurrentWeek } from '@beatbattle/shared'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { paths } from '../../app/paths'
 import { ScreenPage } from '../../app/ScreenPage'
 import { t } from '../../i18n'
@@ -38,7 +38,18 @@ export function UploadPage() {
   const upload = useEntryUpload()
   const [draft, setDraft] = useState<EntryDraft>(EMPTY_DRAFT)
   const [lastSheet, setLastSheet] = useState<EntrySheetResult | null>(null)
+  const [withdrawn, setWithdrawn] = useState(false)
+  const rulesRef = useRef<HTMLButtonElement>(null)
+  const retryRef = useRef<HTMLButtonElement>(null)
   const slug = week?.slug ?? null
+  const needsRules = Boolean(
+    week && week.phase === 'open' && !week.viewer?.entry && !week.viewer?.rulesAccepted,
+  )
+
+  // Las bases: al llegar, el cursor en «Leer las bases», la acción de la pantalla (§3.3; jurado de la 4.20, A9).
+  useEffect(() => {
+    if (needsRules) rulesRef.current?.focus({ preventScroll: true })
+  }, [needsRules])
 
   // El borrador de la semana vuelve si se recarga o algo falla (`RF-ENT-12`).
   useEffect(() => {
@@ -57,6 +68,13 @@ export function UploadPage() {
       musicalKey: prev.musicalKey || (ready.musicalKey ?? ''),
     }))
   }, [ready])
+
+  // Tras un error de subida, el medidor desaparece: el foco va a «Volver a intentarlo», junto al motivo,
+  // en vez de caer en `<body>` (jurado de la 4.20, A4).
+  const failed = upload.state.stage === 'error'
+  useEffect(() => {
+    if (failed) retryRef.current?.focus()
+  }, [failed])
 
   const changeDraft = (next: EntryDraft) => {
     setDraft(next)
@@ -158,13 +176,13 @@ export function UploadPage() {
       />
     )
   } else if (week.viewer?.entry) {
-    body = <EditEntry week={week} />
+    body = <EditEntry week={week} onWithdrawn={() => setWithdrawn(true)} />
   } else if (!week.viewer?.rulesAccepted) {
     body = (
       <div className={styles.gate}>
         <p className={styles.lead}>{t('pages.upload.rules.summary', { number: week.number })}</p>
         <div className={styles.actions}>
-          <Button variant="cta" size="lg" onClick={() => setRulesOpen(true)}>
+          <Button ref={rulesRef} variant="cta" size="lg" onClick={() => setRulesOpen(true)}>
             {t('pages.upload.rules.open')}
           </Button>
         </div>
@@ -174,10 +192,14 @@ export function UploadPage() {
   } else {
     body = (
       <>
+        {/* Tras retirar la entrada, lo dice antes de la ranura vacía (jurado de la 4.20, J10). */}
+        {withdrawn && analysis.state.stage === 'idle' && <Done>{t('pages.upload.edit.withdrawn')}</Done>}
         <UploadSlot
           analysis={analysis.state}
+          autoFocus={!withdrawn}
           onFile={(file) => {
             upload.reset()
+            setWithdrawn(false)
             void analysis.start(file)
           }}
           onReset={() => {
@@ -190,7 +212,7 @@ export function UploadPage() {
             live
             action={
               lastSheet && (
-                <Button size="sm" variant="outline" onClick={() => void send(lastSheet)}>
+                <Button ref={retryRef} size="sm" variant="outline" onClick={() => void send(lastSheet)}>
                   {t('pages.upload.retry')}
                 </Button>
               )
@@ -214,14 +236,23 @@ export function UploadPage() {
     )
   }
 
+  // Llenan el alto (pantalla de contenido) la hoja y la edición; la ranura, las bases, el medidor y la
+  // celebración son de poco contenido y centran su bloque, sin un panel estirado y medio vacío (§3.8.14;
+  // jurado de la 4.20, J5). Mientras sube, el pie no ofrece «Volver al menú [Esc]»: Esc cancela (A7).
+  const moving = upload.state.stage === 'uploading' || upload.state.stage === 'registering'
+  const long = Boolean(week?.viewer?.entry) || (ready !== null && !moving && upload.state.stage !== 'done')
   return (
     <ScreenPage
       title={t('pages.upload.title')}
       kicker={week ? t('pages.upload.kicker', { number: week.number }) : undefined}
-      fill
+      fill={long}
       // En la columna única (móvil, tableta), la ranura antes que el vinilo: es la acción de la pantalla.
       panelFirst
+      // El vinilo arriba y a la vista mientras se desplaza la hoja: centrado en un panel largo bajaba fuera
+      // de la vista y dejaba la cuña desnuda (jurado de la 4.20, J2 y M1).
+      pieceAlign="start"
       piece={piece}
+      actions={moving ? null : undefined}
     >
       <div className={styles.body}>{body}</div>
       {week && (
