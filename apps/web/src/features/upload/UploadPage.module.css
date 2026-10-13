@@ -1,9 +1,13 @@
-/* `/subir` (§3.8.5): el vinilo-sol de la semana en la cuña y, en el panel, las comprobaciones o la ranura. */
+/*
+ * `/subir` (§3.8.5): el vinilo-sol de la semana en la cuña y, en el panel, las comprobaciones o la ranura. El
+ * vinilo va arriba y se queda a la vista al desplazar la hoja (`sticky`), como el emblema de Opciones.
+ */
 .piece {
+  position: sticky;
+  top: var(--bb-space-6);
   display: grid;
   place-items: center;
   width: 100%;
-  height: 100%;
 }
 
 .vinyl {

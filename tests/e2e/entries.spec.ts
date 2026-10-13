@@ -199,10 +199,36 @@ test('hito de la Fase 4: un WAV de 60 MB por trozos, BPM y tonalidad sugeridos, 
     await expect(page.getByLabel('Tonalidad')).toHaveValue('Am')
   })
 
-  await test.step('RF-STO-01 / RF-ENT-12: la ficha y la subida por trozos de 20 MB', async () => {
+  await test.step('RF-ENT-07: cancelar a mitad con Esc conserva la ficha y la ranura cabe en la ventana', async () => {
     await page.getByLabel('Título').fill('Bruma de marzo')
     await page.getByRole('button', { name: /Trap/ }).first().click()
     await page.getByRole('button', { name: /He usado el sample/ }).click()
+    // El primer trozo se queda colgado hasta que se cancela.
+    let release: () => void = () => {}
+    const held = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    await page.route('**/api/test/storage/upload', async (route) => {
+      await held
+      await route.abort().catch(() => {})
+    })
+    await page.getByRole('button', { name: /Entrar en la batalla/ }).click()
+    // §3.4.1: mientras sube, la barra dice ESC CANCELAR y el foco está en «Cancelar».
+    await expect(page.getByRole('button', { name: /Cancelar/ })).toBeFocused()
+    await page.keyboard.press('Escape')
+    release()
+    await expect(page.getByText('Subida cancelada. Tu ficha sigue aquí.')).toBeVisible()
+    await expect(page).toHaveURL(/\/subir$/)
+    await expect(page.getByLabel('Título')).toHaveValue('Bruma de marzo')
+    // Jurado de la 4.20, A11 (WCAG 1.4.10): la ranura, ya analizada, no se ensancha con su onda.
+    const viewport = page.viewportSize()?.width ?? 0
+    const box = await page.getByRole('region', { name: /bb-e2e-flip/i }).boundingBox()
+    expect(box && box.x + box.width).toBeLessThanOrEqual(viewport)
+    await page.unroute('**/api/test/storage/upload')
+    chunks.length = 0
+  })
+
+  await test.step('RF-STO-01 / RF-ENT-12: la ficha y la subida por trozos de 20 MB', async () => {
     await page.getByRole('button', { name: /Entrar en la batalla/ }).click()
     await expect(page.getByText(/Ya estás en la batalla #/)).toBeVisible({ timeout: 120_000 })
     expect(chunks).toHaveLength(3)

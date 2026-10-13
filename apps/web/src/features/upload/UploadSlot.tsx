@@ -1,7 +1,8 @@
 import { MUSICAL_KEYS, type MusicalKey } from '@beatbattle/shared'
-import { type DragEvent, useEffect, useId, useRef, useState } from 'react'
+import { type DragEvent, type ReactNode, useEffect, useId, useRef, useState } from 'react'
 import { audio } from '../../audio/engine'
 import { formatDuration, t } from '../../i18n'
+import { announce, ensureAnnouncer } from '../../ui/announce'
 import { Button } from '../../ui/Button'
 import { DataChip } from '../../ui/Chip'
 import { Frame } from '../../ui/Frame'
@@ -20,6 +21,23 @@ const ACCEPT =
 const SLOT_STEP_MS = 70
 
 /**
+ * Un rodillo de la tragaperras: una ventana que deja ver el valor y asoma el anterior y el siguiente; en
+ * cada paso, la tira baja una posición (jurado de la 4.20, J4). Solo con movimiento: sin él no gira.
+ */
+function Reel({ step, values }: { step: number; values: readonly [ReactNode, ReactNode, ReactNode] }) {
+  const [next, current, previous] = values
+  return (
+    <span className={styles.reel}>
+      <span key={step} className={styles.strip}>
+        <span>{next}</span>
+        <span>{current}</span>
+        <span>{previous}</span>
+      </span>
+    </span>
+  )
+}
+
+/**
  * La ranura «INSERTA TU BEAT» (§3.8.5; tarea 4.14): se arrastra o se elige el fichero (Intro con el foco en
  * «Elegir archivo», que lo tiene al llegar). Al arrastrar encima se ilumina y vibra una vez. Al soltar, la
  * onda se dibuja de izquierda a derecha con el progreso del análisis y BPM y tonalidad giran como una
@@ -31,12 +49,18 @@ export function UploadSlot({
   onFile,
   onReset,
   autoFocus = true,
+  compact = false,
 }: {
   analysis: EntryAnalysis
   onFile: (file: File) => void
   onReset: () => void
   /** Llevarse el foco al llegar (la página de subir); en la edición, el foco empieza en la ficha. */
   autoFocus?: boolean
+  /**
+   * La ranura de sustituir el audio en la edición: acción secundaria, con su rótulo pequeño («Nuevo audio»)
+   * en vez del display y sin la tecla [INTRO], que es de «Guardar la ficha» (jurado de la 4.20, J9 y M8).
+   */
+  compact?: boolean
 }) {
   const reduced = useReducedMotion()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -46,12 +70,44 @@ export function UploadSlot({
   const [over, setOver] = useState(false)
   const [jolt, setJolt] = useState(0)
   const [slot, setSlot] = useState(0)
+  const fileRef = useRef<HTMLHeadingElement>(null)
 
   const idle = analysis.stage === 'idle' || analysis.stage === 'problem'
-  // Al llegar, «Elegir archivo» tiene el foco: Intro abre el selector (foco = cursor, §3.3).
+  // Al llegar, «Elegir archivo» tiene el foco: Intro abre el selector (foco = cursor, §3.3). Si queda fuera
+  // de la vista (tras retirar, a 320), la vista va a él (jurado de la 4.20, A3).
   useEffect(() => {
-    if (idle && autoFocus) pickRef.current?.focus({ preventScroll: true })
+    if (idle && autoFocus) {
+      pickRef.current?.focus({ preventScroll: true })
+      pickRef.current?.scrollIntoView?.({ block: 'nearest' })
+    }
   }, [idle, autoFocus])
+
+  // Al elegir el fichero, el botón desaparece: el foco va al nombre del fichero, el título del análisis, en
+  // vez de caer en `<body>` (A4). El lector oye «Analizando…» una vez y el resultado al final, no los
+  // valores falsos de la tragaperras (A6).
+  const stage = analysis.stage
+  useEffect(() => {
+    if (stage === 'reading') {
+      ensureAnnouncer()
+      fileRef.current?.focus({ preventScroll: true })
+      announce(t('pages.upload.analysis.label'))
+    }
+  }, [stage])
+  const readyBpm = analysis.stage === 'ready' ? analysis.bpm : null
+  const readyKey = analysis.stage === 'ready' ? analysis.musicalKey : null
+  // Solo al pasar de analizar a listo: si la ranura vuelve a montarse ya lista (tras cancelar o tras un
+  // error de subida), no se repite el resultado (jurado de la 4.20, A10).
+  const previousStage = useRef(stage)
+  useEffect(() => {
+    const from = previousStage.current
+    previousStage.current = stage
+    if (stage !== 'ready' || from === 'ready') return
+    announce(
+      readyBpm === null || readyKey === null
+        ? t('pages.upload.analysis.readyAnnounceNone')
+        : t('pages.upload.analysis.readyAnnounce', { bpm: readyBpm, key: musicalKeyName(readyKey) }),
+    )
+  }, [stage, readyBpm, readyKey])
 
   const spinning = analysis.stage === 'reading' || analysis.stage === 'analyzing'
   useEffect(() => {
@@ -119,14 +175,35 @@ export function UploadSlot({
           }}
           onDrop={onDrop}
         >
-          <h2 id={titleId} className={cx('bb-display', styles.title)}>
-            {t('pages.upload.slot.title')}
-          </h2>
+          {compact ? (
+            <h3 id={titleId} className={cx('bb-label', styles.compactTitle)}>
+              {t('pages.upload.slot.replaceTitle')}
+            </h3>
+          ) : (
+            <h2 id={titleId} className={cx('bb-display', styles.title)}>
+              {t('pages.upload.slot.title')}
+            </h2>
+          )}
           <p id={hintId} className={styles.hint}>
             {t('pages.upload.slot.hint')}
           </p>
+          {/* La boca de la ranura: la hendidura con sus flechas, donde se suelta el beat (J5). */}
+          <div className={styles.mouth} aria-hidden="true">
+            <span className={styles.chevrons}>
+              <span />
+              <span />
+              <span />
+            </span>
+            <span className={styles.slit} />
+          </div>
           <div className={styles.actions}>
-            <Button ref={pickRef} variant="cta" size="lg" keyHint={t('pages.upload.slot.key')} onClick={pick}>
+            <Button
+              ref={pickRef}
+              variant="cta"
+              size={compact ? 'md' : 'lg'}
+              keyHint={compact ? undefined : t('pages.upload.slot.key')}
+              onClick={pick}
+            >
               {t('pages.upload.slot.pick')}
             </Button>
             <span className={styles.drop}>{t('pages.upload.slot.drop')}</span>
@@ -143,8 +220,14 @@ export function UploadSlot({
   const durationMs = analysis.stage === 'analyzing' || ready ? analysis.durationMs : null
   const bpm = ready ? analysis.bpm : null
   const key: MusicalKey | null = ready ? analysis.musicalKey : null
-  const spinBpm = 60 + ((slot * 37) % 120)
-  const spinKey = MUSICAL_KEYS[(slot * 7) % MUSICAL_KEYS.length] as MusicalKey
+  // Lo que enseña el rodillo en el paso `n` (el anterior y el siguiente asoman por arriba y por abajo).
+  const bpmAt = (n: number) => 60 + ((((n * 37) % 120) + 120) % 120)
+  const keyAt = (n: number) =>
+    musicalKeyName(
+      MUSICAL_KEYS[
+        (((n * 7) % MUSICAL_KEYS.length) + MUSICAL_KEYS.length) % MUSICAL_KEYS.length
+      ] as MusicalKey,
+    )
 
   return (
     <Frame
@@ -155,27 +238,59 @@ export function UploadSlot({
       className={styles.slot}
       aria-labelledby={titleId}
     >
-      <h2 id={titleId} className={cx('bb-label', styles.file)}>
-        {analysis.file.name}
-      </h2>
+      {(() => {
+        const Heading = compact ? 'h3' : 'h2'
+        return (
+          <Heading
+            ref={fileRef}
+            id={titleId}
+            tabIndex={-1}
+            data-focus-target="heading"
+            className={cx('bb-label', styles.file)}
+          >
+            {analysis.file.name}
+          </Heading>
+        )
+      })()}
       <div
         className={styles.wave}
         aria-busy={!ready || undefined}
-        // La onda se dibuja de izquierda a derecha con el progreso; mientras se lee, el esqueleto entero.
-        style={peaks.length > 0 ? { clipPath: `inset(0 ${100 - pct}% 0 0)` } : undefined}
+        // La onda se dibuja de izquierda a derecha con el progreso, en rojo y con la cabeza blanca en el
+        // borde; mientras se lee, el esqueleto entero.
+        style={peaks.length > 0 && !ready ? { clipPath: `inset(0 ${100 - pct}% 0 0)` } : undefined}
       >
-        <Waveform peaks={peaks} height={64} decorative animateIn={false} loading={peaks.length === 0} />
+        <Waveform
+          peaks={peaks}
+          height={64}
+          decorative
+          animateIn={false}
+          loading={peaks.length === 0}
+          progress={ready ? 1 : pct / 100}
+          playhead={!ready && peaks.length > 0}
+        />
       </div>
-      <p className={styles.chips} aria-live="polite">
+      {spinning && (
+        <p className={styles.busy} aria-hidden="true">
+          {t('pages.upload.analysis.label')}…<span className={styles.busyPct}>{`${pct}\u00a0%`}</span>
+        </p>
+      )}
+      <p className={styles.chips} aria-hidden={spinning || undefined}>
         {spinning && !reduced ? (
           <>
-            <DataChip className={styles.chip} data-spinning="" value={spinBpm} unit="BPM" />
-            <DataChip className={styles.chip} data-spinning="" value={musicalKeyName(spinKey)} word />
-            <span className="sr-only">{t('pages.upload.analysis.busy', { pct })}</span>
+            <DataChip
+              className={styles.chip}
+              data-spinning=""
+              value={<Reel step={slot} values={[bpmAt(slot + 1), bpmAt(slot), bpmAt(slot - 1)]} />}
+              unit="BPM"
+            />
+            <DataChip
+              className={cx(styles.chip, styles.keyChip)}
+              data-spinning=""
+              value={<Reel step={slot} values={[keyAt(slot + 1), keyAt(slot), keyAt(slot - 1)]} />}
+              word
+            />
           </>
-        ) : spinning ? (
-          <span className={styles.busy}>{t('pages.upload.analysis.busy', { pct })}</span>
-        ) : (
+        ) : spinning ? null : (
           <>
             <DataChip className={styles.chip} value={bpm ?? '—'} unit="BPM" />
             <DataChip className={styles.chip} value={key ? musicalKeyName(key) : '—'} word />
@@ -193,7 +308,7 @@ export function UploadSlot({
         </p>
       )}
       <div className={styles.actions}>
-        <Button variant="outline" onClick={onReset}>
+        <Button variant="outline" size={compact ? 'md' : undefined} onClick={onReset}>
           {t('pages.upload.slot.change')}
         </Button>
       </div>

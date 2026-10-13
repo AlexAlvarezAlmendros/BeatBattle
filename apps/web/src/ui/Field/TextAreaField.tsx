@@ -1,4 +1,4 @@
-import { type Ref, type TextareaHTMLAttributes, useId } from 'react'
+import { type FocusEvent, type Ref, type TextareaHTMLAttributes, useId } from 'react'
 import { t } from '../../i18n'
 import { cx } from '../forceState'
 import { Icon } from '../Icon'
@@ -11,6 +11,19 @@ export interface TextAreaFieldProps extends Omit<TextareaHTMLAttributes<HTMLText
   /** Con `maxLength`, el contador «48 / 160» debajo (se anuncia al acercarse al tope). */
   value: string
   ref?: Ref<HTMLTextAreaElement>
+}
+
+/**
+ * Al enfocar un `textarea`, Chrome desplaza hasta el cursor de texto y no hasta la caja: si la primera línea
+ * ya cae dentro de la ventana, detrás de la barra de controles fijada, no desplaza y el campo queda tapado.
+ * Se lleva la caja entera a la vista, que sí respeta el `scroll-margin` de la barra (jurado de la 4.20, A2;
+ * WCAG 2.4.11).
+ */
+function revealBox(event: FocusEvent<HTMLTextAreaElement>) {
+  const box = event.currentTarget
+  const pinned = Number.parseFloat(getComputedStyle(box).scrollMarginBlockEnd) || 0
+  if (box.getBoundingClientRect().bottom > window.innerHeight - pinned)
+    box.scrollIntoView?.({ block: 'nearest' })
 }
 
 /**
@@ -50,6 +63,10 @@ export function TextAreaField({
         className={cx(styles.input, styles.textarea)}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
+        onFocus={(event) => {
+          revealBox(event)
+          rest.onFocus?.(event)
+        }}
       />
       {error && (
         <p id={errorId} className={styles.error}>

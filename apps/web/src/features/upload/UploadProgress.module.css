@@ -32,9 +32,47 @@
   gap: var(--bb-space-3);
 }
 
+/*
+ * La franja del anunciador: cruza el panel de lado a lado (sale por el relleno), negra con los filetes
+ * rojos, como el rótulo de un evento que corta la pantalla (jurado de la 4.20, J7). El rótulo va siempre
+ * en dos líneas equilibradas («¡NUEVO BEAT / EN LA BATALLA!») con el cuerpo ajustado al ancho del panel
+ * (unidades del contenedor, hasta el del contador), y la franja reserva el alto de esas dos líneas desde
+ * el principio: al estampar no baja nada (2.º pase, N1). Antes del impacto la franja no se pinta (N2).
+ */
 .announcerSlot {
+  container-type: inline-size;
   min-width: 0;
-  min-height: var(--bb-space-16);
+  margin-inline: calc(-1 * var(--bb-space-6));
+  padding: var(--bb-space-2) var(--bb-space-4);
+  border-block: var(--bb-stroke) solid transparent;
+}
+
+/* La caja del rótulo, con el alto de dos líneas reservado (el cuerpo sale del ancho de la franja). */
+.announcerBox {
+  --ann-size: clamp(var(--bb-fs-lg), 7cqi, var(--bb-fs-timer));
+  --ann-lines: 2;
+  display: grid;
+  align-items: center;
+  min-height: calc(var(--ann-lines) * (var(--ann-size) + var(--bb-space-1)));
+}
+
+/* En los móviles más estrechos (320 px) el rótulo va en tres líneas: se reservan tres. */
+@media (max-width: 359px) {
+  .announcerBox {
+    --ann-lines: 3;
+  }
+}
+
+.announcerSlot[data-impact] {
+  background: var(--bb-black);
+  border-color: var(--bb-red);
+}
+
+.announcer p {
+  font-size: var(--ann-size);
+  line-height: calc(1em + var(--bb-space-1));
+  white-space: normal;
+  text-wrap: balance;
 }
 
 .fighter {
@@ -61,12 +99,19 @@
   overflow-wrap: anywhere;
 }
 
+/* «Ya estás en la batalla #41»: rótulo en Chakra Petch y el número en Oxanium (§3.2, §3.9; jurado M3). */
 .inside {
   color: var(--bb-red);
-  font-family: var(--bb-font-display);
+  font-family: var(--bb-font-ui);
   font-size: var(--bb-fs-lg);
   font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-button);
   text-transform: uppercase;
+}
+
+.insideNumber {
+  font-family: var(--bb-font-num);
+  font-weight: var(--bb-weight-extrabold);
 }
 
 .text {
@@ -81,11 +126,68 @@
     padding: var(--bb-space-4);
   }
 
+  .announcerSlot {
+    margin-inline: calc(-1 * var(--bb-space-4));
+    padding: var(--bb-space-2);
+  }
+
+  /*
+   * En el móvil, el alias a todo el ancho arriba (sin partir palabras), la portada pequeña con su frase al
+   * lado y debajo «Ya estás en la batalla» y el recibo: «Ver mi entrada» queda sobre la barra a 390 × 844
+   * (3.er pase, N6).
+   */
   .fighter {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: calc(var(--bb-space-16) + var(--bb-space-8)) minmax(0, 1fr);
+    grid-template-areas:
+      "alias alias"
+      "cover note"
+      "inside inside"
+      "receipt receipt";
+    align-items: center;
+    gap: var(--bb-space-3);
+  }
+
+  .who {
+    display: contents;
+  }
+
+  .alias {
+    grid-area: alias;
+    overflow-wrap: normal;
   }
 
   .cover {
-    width: min(100%, 14rem);
+    grid-area: cover;
+  }
+
+  .aliasNote {
+    grid-area: note;
+  }
+
+  .inside {
+    grid-area: inside;
+  }
+
+  .receiptNote {
+    grid-area: receipt;
+  }
+}
+
+/*
+ * Ventana baja de escritorio (1366 × 657): el rótulo con el tope del alto de la ventana y la portada más
+ * pequeña, para que «Volver al menú» quede sobre la barra (2.º pase, N1).
+ */
+@media (min-width: 961px) and (max-height: 760px) {
+  .announcerBox {
+    --ann-size: clamp(var(--bb-fs-lg), min(7cqi, 6.5svh), var(--bb-fs-timer));
+  }
+
+  .done {
+    gap: var(--bb-space-3);
+    padding-block: var(--bb-space-4);
+  }
+
+  .fighter {
+    grid-template-columns: minmax(6rem, 8rem) minmax(0, 1fr);
   }
 }

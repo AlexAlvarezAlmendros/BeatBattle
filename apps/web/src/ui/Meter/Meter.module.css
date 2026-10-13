@@ -69,16 +69,7 @@
 }
 
 .caption {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--bb-space-3);
-  color: var(--bb-text-3);
-  font-family: var(--bb-font-num);
-  font-size: var(--bb-fs-xs);
-  font-weight: var(--bb-weight-semibold);
-  letter-spacing: var(--bb-tracking-button);
-  line-height: 1;
-  white-space: nowrap;
+  font-size: var(--bb-fs-sm);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -97,6 +88,47 @@
 
 :global(:root[data-motion="reduced"]) .shine {
   display: none;
+}
+
+/*
+ * Medidor de súper (§3.8.5, la subida): 28 px de alto, chaflán ancho y marcas blancas a un tercio y a dos
+ * tercios, como la barra de súper de un juego de lucha. Lleno, el relleno pasa a blanco por dentro con el
+ * rojo en el filo (el estado de éxito).
+ */
+.meter[data-size="super"] .track {
+  height: calc(var(--bb-space-6) + var(--bb-space-1));
+  clip-path: polygon(var(--bb-slant) 0, 100% 0, calc(100% - var(--bb-slant)) 100%, 0 100%);
+}
+
+.thirds {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(var(--bb-white), var(--bb-white)) calc(100% / 3) 0 / var(--bb-stroke) 100% no-repeat,
+    linear-gradient(var(--bb-white), var(--bb-white)) calc(200% / 3) 0 / var(--bb-stroke) 100% no-repeat;
+  pointer-events: none;
+}
+
+.meter[data-size="super"][data-full] .fill {
+  border-bottom: var(--bb-space-1) solid var(--bb-red);
+  background: var(--bb-white);
+}
+
+.meter[data-size="super"] .meter[data-instant] .fill {
+  transition: none;
+}
+
+.caption {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--bb-space-3);
+  color: var(--bb-text-3);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-semibold);
+  letter-spacing: var(--bb-tracking-button);
+  line-height: 1;
+  white-space: nowrap;
 }
 
 /*
@@ -128,5 +160,12 @@
   .fill {
     forced-color-adjust: none;
     background: Highlight;
+  }
+
+  .thirds {
+    forced-color-adjust: none;
+    background:
+      linear-gradient(CanvasText, CanvasText) calc(100% / 3) 0 / var(--bb-stroke) 100% no-repeat,
+      linear-gradient(CanvasText, CanvasText) calc(200% / 3) 0 / var(--bb-stroke) 100% no-repeat;
   }
 }

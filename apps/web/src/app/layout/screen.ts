@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { useMatches } from 'react-router'
+import { create } from 'zustand'
 import type { SimpleMessageKey } from '../../i18n'
 
 /**
@@ -17,9 +19,10 @@ export type ArenaWedge = 'right' | 'left' | 'none'
 /**
  * Teclas de la barra de controles (§3.4.1), en el orden en que se enseñan. Cada una es un grupo de
  * teclas con su verbo: `choose` (↑↓ ELEGIR), `move` (←↑↓→ MOVER), `section` (Q E SECCIÓN), `enter`
- * (INTRO ENTRAR), `back` (ESC VOLVER) y `sound` (M SONIDO).
+ * (INTRO ENTRAR), `back` (ESC VOLVER), `cancel` (ESC CANCELAR: mientras algo está en marcha y Esc lo
+ * para, como la subida) y `sound` (M SONIDO).
  */
-export type ControlKey = 'choose' | 'move' | 'section' | 'enter' | 'back' | 'sound'
+export type ControlKey = 'choose' | 'move' | 'section' | 'enter' | 'back' | 'cancel' | 'sound'
 
 /** Placa de título del HUD en las pantallas interiores (§3.3 «Placa de título»). */
 export interface TitlePlateConfig {
@@ -77,12 +80,35 @@ function screenOf(handle: unknown): ScreenConfig | undefined {
   return (handle as { screen?: ScreenConfig }).screen
 }
 
+/** Teclas que una pantalla pone en la barra mientras dura un estado suyo (`useControlKeys`). */
+const useKeysOverride = create<{ keys: readonly ControlKey[] | null }>(() => ({ keys: null }))
+
+/**
+ * Mientras el componente está montado y `keys` no es `null`, la barra enseña esas teclas en vez de las de
+ * la ruta: la subida en marcha cambia «ESC VOLVER» por «ESC CANCELAR», porque Esc la cancela (jurado de
+ * la 4.20, J8 y A7).
+ */
+export function useControlKeys(keys: readonly ControlKey[] | null): void {
+  const id = keys?.join(' ') ?? null
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `id` resume `keys`
+  useEffect(() => {
+    if (id === null) return
+    useKeysOverride.setState({ keys })
+    return () => useKeysOverride.setState({ keys: null })
+  }, [id])
+}
+
 /** Configuración de la pantalla actual: la de la ruta más profunda que la declara. */
 export function useScreen(): ScreenConfig {
   const matches = useMatches()
+  const override = useKeysOverride((state) => state.keys)
+  let screen = DEFAULT_SCREEN
   for (let index = matches.length - 1; index >= 0; index -= 1) {
-    const screen = screenOf(matches[index]?.handle)
-    if (screen) return screen
+    const found = screenOf(matches[index]?.handle)
+    if (found) {
+      screen = found
+      break
+    }
   }
-  return DEFAULT_SCREEN
+  return override ? { ...screen, keys: override } : screen
 }

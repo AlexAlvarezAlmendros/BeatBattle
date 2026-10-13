@@ -242,12 +242,16 @@
         "pick": "Elegir archivo",
         "key": "Intro",
         "drop": "o arrástralo aquí",
-        "change": "Cambiar archivo"
+        "change": "Cambiar archivo",
+        "replaceTitle": "Nuevo audio"
       },
       "analysis": {
         "busy": "Analizando el beat… {pct} %",
         "done": "BPM y tonalidad sugeridos: los puedes cambiar en la ficha.",
-        "noSuggestion": "No hemos podido sugerir BPM o tonalidad: escríbelos en la ficha."
+        "noSuggestion": "No hemos podido sugerir BPM o tonalidad: escríbelos en la ficha.",
+        "label": "Analizando",
+        "readyAnnounce": "Análisis terminado: {bpm} BPM, {key}. Rellena la hoja del luchador.",
+        "readyAnnounceNone": "Análisis terminado. Rellena la hoja del luchador."
       },
       "sheet": {
         "title": "La hoja del luchador",
@@ -325,7 +329,8 @@
         "bytes": "{sent} de {total} MB",
         "speed": "{speed} MB/s · faltan {remaining}",
         "cancel": "Cancelar",
-        "cancelled": "Subida cancelada. Tu ficha sigue aquí."
+        "cancelled": "Subida cancelada. Tu ficha sigue aquí.",
+        "started": "Subiendo tu beat. Esc para cancelar."
       },
       "done": {
         "announcer": "¡Nuevo beat en la batalla!",
@@ -333,8 +338,7 @@
         "inside": "Ya estás en la batalla #{number}",
         "receipt": "Te hemos mandado el recibo por email, con el informe de la medición.",
         "processing": "Estamos midiendo tu beat: el recibo te llegará por email en cuanto termine.",
-        "view": "Ver mi entrada",
-        "menu": "Volver al menú"
+        "view": "Ver mi entrada"
       },
       "retry": "Volver a intentarlo",
       "edit": {
@@ -353,7 +357,8 @@
         "confirmTitle": "¿Retirar tu entrada?",
         "confirmSummary": "{alias} sale de la batalla: se borran el audio y sus votos. No se puede deshacer.",
         "keep": "No, seguir dentro",
-        "confirm": "Sí, retirarla"
+        "confirm": "Sí, retirarla",
+        "withdrawn": "Has retirado tu entrada: tu hueco vuelve a estar libre."
       },
       "problems": {
         "unsupportedFormat": "Eso no suena a audio. Prueba con WAV, AIFF, FLAC o MP3.",
@@ -1510,6 +1515,7 @@
       "section": "Sección",
       "enter": "Entrar",
       "back": "Volver",
+      "cancel": "Cancelar",
       "sound": "Sonido",
       "glyph": {
         "up": "↑",

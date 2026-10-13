@@ -1,6 +1,6 @@
 # BeatBattle — Roadmap del proyecto
 
-> Última actualización: 2026-10-06
+> Última actualización: 2026-10-13
 
 Competición semanal de beats a partir de un sample, con la estética de **Other People Records** y
 alma de videojuego: cada lunes cae un sample, los productores suben su *flip* y la comunidad vota
@@ -32,7 +32,7 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 | 1 | Spike de sensación y audio | ✅ Cerrada con **GO** (2026-10-08) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio (emulado); efectos con la parte de la app < 10 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
 | 2 | Cuentas y base de email | 🔄 En curso (todo hecho salvo las comprobaciones manuales: Discord real 2.22, IMAP real 2.11 y el cierre 2.26) | [02-cuentas-email.md](plans/02-cuentas-email.md) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, presupuesto diario, preferencias, consentimientos y bajas |
 | 3 | Semanas y samples | 🔄 En curso (hito cumplido: E2E del hito en verde y jurado ✅; faltan del usuario la prueba real de descarga en Cloudinary, 3.4, y la conformidad con la excepción n.º 1 del acta, 3.21) | [03-semanas-samples.md](plans/03-semanas-samples.md) | 3 semanas programadas; cambio de semana en la frontera con reloj simulado; email del drop (también sin cuenta) |
-| 4 | Participar | 🔄 En planificación (arranca con lo pendiente de la F3 en manos del usuario, como la F3 con la F2) | [04-participar.md](plans/04-participar.md) | WAV de 60 MB por trozos con BPM, tonalidad y sonoridad medida; recibo por email |
+| 4 | Participar | 🔄 En curso (hito cumplido: E2E del hito y jurado ✅; falta la prueba real contra Cloudinary, 4.10, con confirmación del usuario) | [04-participar.md](plans/04-participar.md) | WAV de 60 MB por trozos con BPM, tonalidad y sonoridad medida; recibo por email |
 | 5 | Escuchar y votar | 🔒 Bloqueada (F4) | — | Todas las reglas `RF-VOTE-*` en verde; Modo Jurado con teclado; recordatorio y llamada al jurado |
 | 6 | Cierre, resultados y ceremonia | 🔒 Bloqueada (F5) | — | Sellado determinista, ceremonia, re-sellado idéntico; Lunes de batalla por email |
 | — | **Beta cerrada** | 🔒 | — | 15–25 productores, 3 semanas reales |
@@ -49,6 +49,8 @@ su hito cumplido y solo esperan comprobaciones del usuario:
 - **F2:** Discord real (2.22), IMAP real (2.11) y el cierre (2.26).
 - **F3:** la prueba real de la descarga en Cloudinary (3.4) y la conformidad con la excepción n.º 1 del
   acta del jurado (3.21).
+- **F4:** con el hito y el jurado cumplidos, solo falta la prueba real contra Cloudinary (4.10), que se puede
+  hacer junto a la 3.4. Con ella se cierra la fase (4.21) y empieza la Fase 5.
 
 ## Grafo de dependencias
 
@@ -186,6 +188,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-13 | F4 | 4.20 hecha: jurado de tres lentes en cuatro pases, todas las altas y medias corregidas (guía v0.6.56). Solo queda la prueba real contra Cloudinary (4.10) para cerrar la fase (4.21). |
 | 2026-10-10 | F4 | Plan 04 creado (21 tareas). Empieza con lo pendiente de la F3 en manos del usuario: prueba real de la descarga en Cloudinary (3.4) y conformidad con la excepción n.º 1 del acta (3.21). |
 | 2026-10-09 | F3 | Plan 03 creado (22 tareas). Empieza mientras la F2 espera solo comprobaciones manuales del usuario: Discord real (2.22), IMAP real (2.11) y el cierre (2.26). |
 | 2026-10-08 | F2 | Plan 02 creado (26 tareas) con las decisiones de dominio, cuenta de envío y proveedores (guía v0.6.20). |
