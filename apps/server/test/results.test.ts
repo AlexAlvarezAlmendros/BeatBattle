@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { auditLog, entry, result, sample, user, vote, week } from '../src/db/schema'
 import { sealWeek } from '../src/modules/weeks/seal'
-import { type Battle, battle, W42 } from './fixtures/battle'
+import { type Battle, battle, HOUR, W42 } from './fixtures/battle'
 import { json } from './fixtures/weeks'
 
 // Cada prueba crea varias cuentas: en la CI pasa de los 5 s.
