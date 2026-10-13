@@ -1983,6 +1983,11 @@
     "skip": "Saltar",
     "replay": "Repetir la ceremonia",
     "watch": "Ver la ceremonia",
+    "offer": {
+      "title": "¡Semana {number} sellada!",
+      "body": "Ya hay campeón. La ceremonia dura unos 25 s y la puedes saltar cuando quieras.",
+      "later": "Ahora no"
+    },
     "hidden": "Autoría oculta",
     "place": "{position}.º puesto: {producer}, con {score}.",
     "mine": "Tu resultado: {position}",
