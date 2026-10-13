@@ -569,3 +569,8 @@
     padding-top: var(--bb-space-3);
   }
 }
+
+/* Panel a todo lo ancho (`wide`): el admin, en modo denso (§2.14). */
+.screen[data-wide] .panel {
+  grid-column: 1 / -1;
+}
