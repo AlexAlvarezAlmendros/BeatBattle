@@ -99,10 +99,10 @@ describe('alerta de drop sin cuenta y email del drop (3.13)', () => {
     expect((await confirm(tokenFor('fan@example.com'))).statusCode).toBe(200)
 
     t.clock.set(DROP_MAIL_AT - 1)
-    expect((await tick()).json().data.dropEmails).toBe(0)
+    expect((await tick()).json().data.mondayEmails.drop).toBe(0)
     t.clock.set(DROP_MAIL_AT)
     const first = (await tick()).json().data
-    expect(first.dropEmails).toBe(3)
+    expect(first.mondayEmails).toEqual({ monday: 0, drop: 3, results: 0 })
     const drop = mailer().lastTo('fan@example.com')
     expect(drop?.subject).toBe('Nuevo drop: Lluvia en Gràcia · 92 BPM · Re menor')
     expect(drop?.text).toContain('crea la tuya')

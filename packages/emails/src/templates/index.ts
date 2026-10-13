@@ -9,7 +9,9 @@ import { authWelcome } from './authWelcome'
 import { battleDrop } from './battleDrop'
 import { battleFirstVotes } from './battleFirstVotes'
 import { battleJuryCall } from './battleJuryCall'
+import { battleMonday } from './battleMonday'
 import { battleReminder } from './battleReminder'
+import { battleResults } from './battleResults'
 import { entryChanged } from './entryChanged'
 import { entryFailed } from './entryFailed'
 import { entryReceipt } from './entryReceipt'
@@ -25,10 +27,13 @@ export type { AuthWelcomePayload } from './authWelcome'
 export type { BattleDropPayload } from './battleDrop'
 export type { BattleFirstVotesPayload } from './battleFirstVotes'
 export type { BattleJuryCallPayload } from './battleJuryCall'
+export type { BattleMondayPayload } from './battleMonday'
 export type { BattleReminderPayload } from './battleReminder'
+export type { BattleResultsPayload } from './battleResults'
 export type { EntryChangedPayload, EntryReplacedPayload, EntryWithdrawnPayload } from './entryChanged'
 export type { EntryFailedPayload } from './entryFailed'
 export type { EntryReceiptPayload } from './entryReceipt'
+export type { ResultsBlock } from './results'
 
 /** Plantillas por id del catálogo (§2.12). Cada fase añade las suyas. */
 export const TEMPLATES = {
@@ -40,7 +45,9 @@ export const TEMPLATES = {
   'account.deleted': accountDeleted,
   'admin.calendar_gap': adminCalendarGap,
   'alert.confirm': alertConfirm,
+  'battle.monday': battleMonday,
   'battle.drop': battleDrop,
+  'battle.results': battleResults,
   'battle.reminder': battleReminder,
   'battle.jury_call': battleJuryCall,
   'battle.first_votes': battleFirstVotes,

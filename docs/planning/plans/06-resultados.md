@@ -108,8 +108,8 @@ completa el MVP (F0–F6) para la beta cerrada.
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 6.9 | **Lunes de batalla**: `battle.monday` (resultado personal o podio + el drop con su cuenta atrás) por defecto y `battle.results` y `battle.drop` por separado si se elige; espera de hasta 2 h al sellado; prioridad de envío; contrato de voto ciego y capturas | ⬜ Listo | 6.4, 6.10 | §2.12.2, §3.8.12, Anexo H · `RF-NOTIF-07`, `RF-NOTIF-13` |
-| 6.10 | Tarjeta de resultado personal: `GET /api/og/result/:slug/:userId?sig=` (satori y resvg), firmada; sin firma, 403 | ⬜ Listo | 6.4 | §4.19.5 · `RF-NOTIF-14` |
+| 6.9 | **Lunes de batalla**: `battle.monday` (resultado personal o podio + el drop con su cuenta atrás) por defecto y `battle.results` y `battle.drop` por separado si se elige; espera de hasta 2 h al sellado; prioridad de envío; contrato de voto ciego y capturas | ✅ Hecho | 6.4, 6.10 | §2.12.2, §3.8.12, Anexo H · `RF-NOTIF-07`, `RF-NOTIF-13` · Hecho: `results/monday.ts` en el `tick`; plantillas `battle.monday` y `battle.results`; 4 tests con el reloj (combinado, separado, espera de 2 h, sellado tardío dentro de plazo), prioridad 10–13 y contrato de voto ciego; capturas en `evidence/f6/emails`. |
+| 6.10 | Tarjeta de resultado personal: `GET /api/og/result/:slug/:userId?sig=` (satori y resvg), firmada; sin firma, 403 | ✅ Hecho | 6.4 | §4.19.5 · `RF-NOTIF-14` · Hecho: `media/resultCard.ts` y `results/cardRoute.ts`; test 403/404/200; capturas en `evidence/f6/tarjeta`. El despliegue con las fuentes (`includeFiles`), escrito, sin verificar hasta la F10. |
 
 ### Compartir y SEO
 
@@ -165,6 +165,7 @@ resultado y el sample nuevo; y lo que se comparte enseña la cara del juego sin 
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-13 | 6.9, 6.10 | Lunes de batalla y tarjeta de resultado (guía v0.6.74). satori fijado en 0.33.5: la 0.34–0.56 salieron todas el mismo día. |
 | 2026-10-13 | 6.2–6.8 | Servidor de resultados: snapshot al sellar, descalificar y re-sellar, `/results`, archivo y ceremonia vista; 9 tests en `results.test.ts` (guía v0.6.73). |
 | 2026-10-13 | 6.1 | `rank` en `packages/rules` con propiedades (guía v0.6.72). |
 | 2026-10-13 | — | Plan creado (23 tareas). Sin dorado (decisión del usuario). XP, oído de oro y temporadas, en la F7; Elección del sello, en la F9; moderación completa y despliegue, en la F10. |

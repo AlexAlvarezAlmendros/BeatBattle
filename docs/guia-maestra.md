@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.73 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.74 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -714,9 +714,16 @@ saturar: arriba, el resultado personal (posición, puntuación, XP, tarjeta de r
 para quien solo votó; abajo, el nuevo sample con su portada, chips, reto y una **cuenta atrás
 animada**. Quien lo prefiera puede recibirlos por separado (Ajustes → Emails). Si el sellado se
 retrasa más allá de las 08:00, el email espera hasta 2 h; si sigue sin sellar, sale solo el drop y
-los resultados llegan después. Si el cupo diario de Gmail no alcanza para todos, sale por orden de
-prioridad (participantes, jurados, resto de cuentas, suscriptores sin cuenta) y lo que falte, el
-martes (§4.17).
+los resultados llegan después (en `battle.results`, al sellar). Si el cupo diario de Gmail no alcanza para
+todos, sale por orden de prioridad (participantes, jurados, resto de cuentas, suscriptores sin cuenta) y lo
+que falte, el martes (§4.17).
+
+Reparto por destinatario: quien elige el lunes separado recibe `battle.drop` a las 08:00 y `battle.results`
+a las 08:00 o al sellar, este solo si participó o votó esa semana. Quien participó con menos de 3 votos ve
+«sin clasificar» con su tarjeta. Que salga el combinado se decide con el instante del sellado, que no cambia:
+nadie recibe el combinado y además el par drop + resultados. Si no hay semana nueva ese lunes (un hueco en el
+calendario), solo salen los resultados; si no hay semana cerrada, solo el drop. Pasada una semana del cierre,
+sus resultados ya no se reparten por email.
 
 #### 2.12.3 Alerta de drop sin cuenta
 
@@ -3188,8 +3195,13 @@ CREATE TABLE entry_receipt_seq (week_id TEXT PRIMARY KEY, last INTEGER NOT NULL)
   (paleta fija de 4 colores, LZW), sin dependencias. Una semana que no existe o fuera de `open` y `voting`
   da la imagen de ceros: un email viejo nunca muestra un error. Caché de 30 s por semana. `alt` con el tiempo
   restante.
-- **Tarjeta de resultado**: `GET /api/og/result/:slug/:userId?sig=` con firma HMAC (es personal);
-  sin firma válida, 403.
+- **Tarjeta de resultado**: `GET /api/og/result/:slug/:userId?sig=` con firma HMAC sobre la semana y la
+  cuenta (es personal); sin firma válida, 403; con firma pero sin resultado (semana sin sellar o sin entrada
+  clasificada de esa cuenta), 404. PNG de 1200 × 630 con satori y resvg: medalla de vinilo del puesto (o
+  «SIN CLASIFICAR»), título, alias tachado y productor, puntuación, votos e histograma, «RESULTADO
+  CORREGIDO» tras un re-sellado; fuentes del juego en `woff` estático (satori no lee `woff2` ni variables) y
+  ningún texto por debajo de 30 px (14 px a 512 px en el email). No se registra (`RF-NOTIF-12`) y se cachea
+  una hora (un re-sellado la cambia).
 - **Forma de onda del recibo**: `GET /api/email/waveform/:entryId.png?v=&sig=`, PNG de 512 × 96 con la onda
   medida de la entrada en 128 barras sobre el fondo de la tarjeta (las que tocan el máximo digital, en rojo:
   se ve dónde clipa). Codificador PNG propio (color indexado, `node:zlib`). Firma HMAC sobre el id y la versión
@@ -3634,6 +3646,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.74 | **Tareas 6.9 y 6.10.** §2.12.2: el reparto del Lunes de batalla por destinatario (separado, sin semana nueva o sin semana cerrada, la ventana de una semana) y que el combinado se decide con el instante del sellado. §4.19.5: la tarjeta de resultado (404 con firma y sin resultado, contenido, fuentes estáticas, caché de una hora). Dependencias de §4.1 fijadas: satori 0.33.5 (la última con más de dos semanas) y `@resvg/resvg-js` 2.6.2; las fuentes, de `@fontsource` (Anybody, Chakra Petch y Oxanium estáticas) en el servidor. |
 | 2026-10-13 | 0.6.73 | **Tareas 6.2–6.8.** §4.10: `GET /api/weeks/:slug/results` devuelve la revisión, `correctedAt` y «tu resultado»; el archivo pagina de 20 en 20 con el podio; `GET /api/weeks/current` añade la última semana sellada (`sealed`) y `POST /api/me/seen` acepta `ceremony`; el re-sellado va por `slug`. §4.11: índice `result_entry`. `RF-RES-09` se guarda en `seen_flag` (`kind = ceremony`), no en una tabla `results_seen`. El sellado escribe el snapshot en el mismo `batch` que marca la semana; los votos válidos excluyen cuentas bloqueadas o borradas, votos anulados y entradas no activas. |
 | 2026-10-13 | 0.6.72 | **Tarea 6.1.** §4.5, `ranking`: la fila de cada entrada (la de la tabla `result`) y la comparación exacta de puntuaciones con enteros. Sin votos en la semana, la puntuación es 0. Los votos a entradas que no están en la lista no cuentan, tampoco para la media `m`. |
 | 2026-10-13 | 0.6.71 | §7: cerrada la decisión del dorado (decisión del usuario): **sin dorado**; las medallas, la carta de campeón y la semana dorada van en la paleta del sello. |

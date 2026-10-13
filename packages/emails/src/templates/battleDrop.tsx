@@ -33,52 +33,59 @@ const chipsOf = (p: BattleDropPayload) =>
     .filter(Boolean)
     .join(' · ')
 
-function DropBody({ p }: { p: BattleDropPayload }) {
+/** La tarjeta del drop: sola en `battle.drop` y debajo de los resultados en `battle.monday` (§2.12.2). */
+export function DropCard({ p }: { p: BattleDropPayload }) {
   const { publicUrl } = useEmail()
   const weekUrl = `${publicUrl}/semana/${p.slug}`
   const chips = chipsOf(p)
   return (
+    <Card>
+      <Kicker>Semana #{p.weekNumber} · nuevo drop</Kicker>
+      <Img
+        src={p.coverUrl}
+        width="512"
+        height="512"
+        alt={`Portada de «${p.title}»`}
+        style={{ display: 'block', width: '100%', maxWidth: '512px', height: 'auto', margin: '0 0 16px' }}
+      />
+      <Heading>{p.title}</Heading>
+      <Paragraph muted>{p.credits}</Paragraph>
+      {chips ? (
+        <Paragraph>
+          <strong>{chips}</strong>
+        </Paragraph>
+      ) : null}
+      {p.challenge ? (
+        <Paragraph>
+          <strong>Reto extra:</strong> {p.challenge} (no puntúa, da un logro).
+        </Paragraph>
+      ) : null}
+      <Img
+        src={`${publicUrl}/api/email/countdown/${p.slug}.gif`}
+        width="512"
+        height="96"
+        alt={`Los envíos cierran el ${p.closesText}`}
+        style={{ display: 'block', width: '100%', maxWidth: '512px', height: 'auto', margin: '8px 0 16px' }}
+      />
+      <Paragraph>Tienes hasta el {p.closesText} para subir tu flip.</Paragraph>
+      <Button href={weekUrl}>Pillar el sample</Button>
+      {p.subscriber ? (
+        <Paragraph muted>
+          Para descargarlo y subir tu beat necesitas una cuenta:{' '}
+          <Link href={`${publicUrl}/registro`} style={{ color: mail.text }}>
+            crea la tuya
+          </Link>{' '}
+          con este mismo email y mantendrás la alerta.
+        </Paragraph>
+      ) : null}
+    </Card>
+  )
+}
+
+function DropBody({ p }: { p: BattleDropPayload }) {
+  return (
     <Layout preheader={battleDrop.preheader(p)}>
-      <Card>
-        <Kicker>Semana #{p.weekNumber} · nuevo drop</Kicker>
-        <Img
-          src={p.coverUrl}
-          width="512"
-          height="512"
-          alt={`Portada de «${p.title}»`}
-          style={{ display: 'block', width: '100%', maxWidth: '512px', height: 'auto', margin: '0 0 16px' }}
-        />
-        <Heading>{p.title}</Heading>
-        <Paragraph muted>{p.credits}</Paragraph>
-        {chips ? (
-          <Paragraph>
-            <strong>{chips}</strong>
-          </Paragraph>
-        ) : null}
-        {p.challenge ? (
-          <Paragraph>
-            <strong>Reto extra:</strong> {p.challenge} (no puntúa, da un logro).
-          </Paragraph>
-        ) : null}
-        <Img
-          src={`${publicUrl}/api/email/countdown/${p.slug}.gif`}
-          width="512"
-          height="96"
-          alt={`Los envíos cierran el ${p.closesText}`}
-          style={{ display: 'block', width: '100%', maxWidth: '512px', height: 'auto', margin: '8px 0 16px' }}
-        />
-        <Paragraph>Tienes hasta el {p.closesText} para subir tu flip.</Paragraph>
-        <Button href={weekUrl}>Pillar el sample</Button>
-        {p.subscriber ? (
-          <Paragraph muted>
-            Para descargarlo y subir tu beat necesitas una cuenta:{' '}
-            <Link href={`${publicUrl}/registro`} style={{ color: mail.text }}>
-              crea la tuya
-            </Link>{' '}
-            con este mismo email y mantendrás la alerta.
-          </Paragraph>
-        ) : null}
-      </Card>
+      <DropCard p={p} />
     </Layout>
   )
 }

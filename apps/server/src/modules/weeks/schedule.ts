@@ -1,18 +1,16 @@
 import { localDateOf, scheduleWeek, zonedInstant } from '@beatbattle/rules'
-import { and, eq, gt, isNull, lte } from 'drizzle-orm'
+import { and, eq, gt, lte } from 'drizzle-orm'
 import { type BatchStatement, runBatch } from '../../db/batch'
 import type { Db } from '../../db/client'
-import { emailSubscriber, sample, user, week } from '../../db/schema'
+import { sample, user, week } from '../../db/schema'
 import { enqueueEmail } from '../../email/outbox'
 import type { SampleStorage } from '../storage/samples'
 
 /**
  * Avisos programados de la semana (§4.12 `emailSchedule` y `adminAlerts`; tareas 3.12 y 3.13).
  *
- * - **Drop** (`battle.drop`): el lunes a las 08:00 de Madrid, a cada cuenta verificada (sus preferencias se
- *   aplican al enviar, `RF-NOTIF-01`) y a cada suscriptor confirmado sin cuenta (`RF-NOTIF-09`). Hasta la
- *   Fase 6 no hay «Lunes de batalla» combinado: el lunes sale este. La clave de idempotencia es por
- *   destinatario y semana, así que el `tick` lo puede intentar cada 15 minutos sin duplicar.
+ * - **Drop**: lo que dice del sample nuevo el email del lunes; el reparto (combinado o separado, la espera al
+ *   sellado) lo hace `results/monday.ts` (tarea 6.9).
  * - **Hueco en el calendario** (`admin.calendar_gap`, `RF-DROP-04`): un lunes sin semana a 72 h o menos
  *   avisa a cada admin, una vez por lunes.
  */
@@ -21,7 +19,6 @@ import type { SampleStorage } from '../storage/samples'
 export const DROP_EMAIL_AT = { hour: 8, minute: 0, second: 0 } as const
 /** Antelación del aviso de hueco en el calendario (`RF-DROP-04`). */
 export const CALENDAR_GAP_NOTICE_MS = 72 * 60 * 60 * 1000
-const ENQUEUE_CHUNK = 200
 
 /** «domingo 11 de octubre a las 20:00» en Madrid. */
 export function madridLongDateTime(ms: number): string {
@@ -60,22 +57,27 @@ export interface ScheduleDeps {
   newId: () => string
 }
 
-/** Encola `battle.drop` de la semana abierta si ya son las 08:00 de su lunes. Devuelve los encolados. */
-export async function scheduleDropEmails(deps: ScheduleDeps, now: number): Promise<number> {
-  const { db } = deps
-  if (!deps.storage) return 0
+/** La semana abierta ahora con su sample, o nada. */
+export async function liveWeek(db: Db, now: number) {
   const [live] = await db
     .select({ week, sample })
     .from(week)
     .innerJoin(sample, eq(sample.id, week.sampleId))
     .where(and(lte(week.startsAt, now), gt(week.submitEndsAt, now)))
     .limit(1)
-  if (!live) return 0
-  const mailAt = zonedInstant(localDateOf(live.week.startsAt), DROP_EMAIL_AT)
-  if (now < mailAt) return 0
+  return live ?? null
+}
 
+/** El instante del email del drop de una semana: las 08:00 de su lunes en Madrid. */
+export const dropMailAt = (startsAt: number) => zonedInstant(localDateOf(startsAt), DROP_EMAIL_AT)
+
+/** Lo que dice `battle.drop` (y la mitad de abajo de `battle.monday`) de la semana abierta. */
+export function dropPayload(
+  deps: Pick<ScheduleDeps, 'publicUrl'> & { storage: SampleStorage },
+  live: NonNullable<Awaited<ReturnType<typeof liveWeek>>>,
+) {
   const cover = deps.storage.coverUrl(live.sample.coverPublicId, 512)
-  const payload = {
+  return {
     weekNumber: live.week.number,
     slug: live.week.slug,
     title: live.sample.title,
@@ -87,36 +89,6 @@ export async function scheduleDropEmails(deps: ScheduleDeps, now: number): Promi
     coverUrl: cover.startsWith('http') ? cover : `${deps.publicUrl}${cover}`,
     closesText: madridLongDateTime(live.week.submitEndsAt),
   }
-  const accounts = await db.select({ id: user.id }).from(user).where(eq(user.emailVerified, true))
-  const subscribers = await db
-    .select({ id: emailSubscriber.id })
-    .from(emailSubscriber)
-    .where(and(eq(emailSubscriber.status, 'confirmed'), isNull(emailSubscriber.mergedUserId)))
-  const statements: BatchStatement[] = [
-    ...accounts.map((row) =>
-      enqueueEmail(db, {
-        id: deps.newId(),
-        kind: 'battle.drop',
-        target: { userId: row.id },
-        idempotencyKey: `battle.drop:user:${row.id}:${live.week.slug}`,
-        payload: { ...payload, subscriber: false },
-        now,
-      }),
-    ),
-    ...subscribers.map((row) =>
-      enqueueEmail(db, {
-        id: deps.newId(),
-        kind: 'battle.drop',
-        target: { subscriberId: row.id },
-        idempotencyKey: `battle.drop:subscriber:${row.id}:${live.week.slug}`,
-        payload: { ...payload, subscriber: true },
-        now,
-      }),
-    ),
-  ]
-  for (let i = 0; i < statements.length; i += ENQUEUE_CHUNK)
-    await runBatch(db, statements.slice(i, i + ENQUEUE_CHUNK))
-  return statements.length
 }
 
 /** Avisa a los admins de cada lunes sin semana en las próximas 72 h (`RF-DROP-04`). */

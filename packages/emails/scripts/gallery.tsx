@@ -8,6 +8,8 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { renderEmail, TEMPLATES, type TemplateKind } from '../src'
+import { battleMonday } from '../src/templates/battleMonday'
+import { battleResults } from '../src/templates/battleResults'
 import { ENTRY_WITHDRAWN_FIXTURE, entryChanged } from '../src/templates/entryChanged'
 
 const [out = 'galeria-emails', publicUrl = 'http://localhost:5173'] = process.argv.slice(2)
@@ -25,12 +27,34 @@ for (const kind of kinds) {
   )
   console.log(`${kind}: «${email.subject}» (${email.subject.length} caracteres)`)
 }
-// Variantes que no son el ejemplo de su plantilla: la retirada de `entry.changed`.
+// Variantes que no son el ejemplo de su plantilla: la retirada de `entry.changed`; el Lunes de batalla de una
+// alerta sin cuenta (el podio, sin parte personal) y los resultados de una semana desierta.
 const variants = [
-  { name: 'entry.changed.withdrawn', template: entryChanged, payload: ENTRY_WITHDRAWN_FIXTURE },
-]
-for (const { name, template, payload } of variants) {
-  const email = await renderEmail(template, payload, { publicUrl, family: 'service' })
+  {
+    name: 'entry.changed.withdrawn',
+    template: entryChanged,
+    payload: ENTRY_WITHDRAWN_FIXTURE,
+    family: 'service',
+  },
+  {
+    name: 'battle.monday.subscriber',
+    template: battleMonday,
+    payload: {
+      results: { ...battleMonday.fixture.results, mine: null },
+      drop: { ...battleMonday.fixture.drop, subscriber: true },
+    },
+    family: 'battle',
+  },
+  {
+    name: 'battle.results.empty',
+    template: battleResults,
+    payload: { ...battleResults.fixture, podium: [], mine: null, empty: true },
+    family: 'battle',
+  },
+] as const
+for (const { name, template, payload, family } of variants) {
+  // biome-ignore lint/suspicious/noExplicitAny: cada variante con su propia plantilla
+  const email = await renderEmail(template as any, payload, { publicUrl, family })
   await writeFile(path.join(out, `${name}.html`), email.html)
   await writeFile(
     path.join(out, `${name}.txt`),

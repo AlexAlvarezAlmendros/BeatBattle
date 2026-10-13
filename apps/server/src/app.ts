@@ -29,6 +29,7 @@ import { createHealthService } from './modules/health/service'
 import { meRoutes } from './modules/me/routes'
 import { sessionsRoutes } from './modules/me/sessions'
 import { profileRoutes } from './modules/profile/routes'
+import { resultCardRoutes } from './modules/results/cardRoute'
 import { resultsRoutes } from './modules/results/routes'
 import { createResultsService } from './modules/results/service'
 import { samplesRoutes } from './modules/samples/routes'
@@ -210,6 +211,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     }),
   )
   resultsRoutes(app, createResultsService({ db, entries, samples, newId }))
+  resultCardRoutes(app, { db, secret: config.auth.secret })
   const weeks = createWeeksService({ db, storage: samples, newId })
   weeksRoutes(app, weeks)
   countdownRoutes(app, { db })
@@ -223,6 +225,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     publicUrl: config.publicUrl,
     newId,
     cronSecret: config.cronSecret,
+    cardSecret: config.auth.secret,
     drain: drainDeps,
     weeks,
     alerts,
