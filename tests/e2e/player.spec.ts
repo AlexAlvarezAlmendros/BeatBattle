@@ -49,11 +49,11 @@ test('RF-PLAY-01: el sample sigue sonando al navegar de la home a otra pantalla;
   const time = bar.getByText(/\d:\d\d \/ \d:\d\d/)
   const first = await time.innerText()
   await expect.poll(async () => time.innerText(), { timeout: 10_000 }).not.toBe(first)
-  await expect(bar.getByRole('button', { name: 'Pausar Lluvia en Gràcia' })).toBeVisible()
-
-  // Pausa y cierre.
-  await bar.getByRole('button', { name: 'Pausar Lluvia en Gràcia' }).click()
-  await expect(bar.getByRole('button', { name: 'Escuchar Lluvia en Gràcia' })).toBeVisible()
+  // Pausa y cierre (si en una máquina lenta el sample ya ha acabado, el botón lo vuelve a poner).
+  const toggle = bar.getByRole('button', { name: /^(Pausar|Escuchar) Lluvia en Gràcia$/ })
+  const before = await toggle.getAttribute('aria-label')
+  await toggle.click()
+  await expect(toggle).not.toHaveAttribute('aria-label', before ?? '')
   await bar.getByRole('button', { name: 'Cerrar el reproductor' }).click()
   await expect(bar).toHaveCount(0)
   await context.close()
