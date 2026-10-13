@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.71 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.72 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2255,7 +2255,7 @@ tests de propiedades.
 | `phase` | `phaseOf(semana, now)`; `canSubmit`, `canVote`, `canDownload` (solo en `open`); `countdownOf(semana, now)` → cierre, lo que falta y «hora loca» |
 | `listen` | `listenThresholdMs(duracionMs)` |
 | `scoring` | `bayes(votos, m, C)`; `mean`; `median`; `histogram` |
-| `ranking` | `rank(entradas, votos) → Result[]` con desempates, ex aequo y elegibilidad de podio |
+| `ranking` | `rank(entradas, votos) → Result[]` con desempates, ex aequo y elegibilidad de podio: una fila por entrada con posición (o `null` sin clasificar), puntuación × 1000, votos, media × 1000, mediana × 2, histograma y puntos de temporada; compara las puntuaciones con productos cruzados enteros (sin redondeo) |
 | `fair` | `fairOrder(entradas, votosPorEntrada, votadasPorUsuario, semilla)` con `fairSeed(semana, usuario \| instante)` (visitantes: el día en Madrid); `newestOrder`; `randomOrder(entradas, semilla)`; `juryQueue(entradas, votos, votadas, semilla, { excluded, skipped })` (sin votadas ni la propia; las saltadas, al final) |
 | `alias` | `battleAlias(entryId, ocupados)` con listas de adjetivos y sustantivos (Anexo I) |
 | `season` | `seasonPoints(posicion, clasificada)`; `seasonStandings(resultados)` |
@@ -3633,6 +3633,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.72 | **Tarea 6.1.** §4.5, `ranking`: la fila de cada entrada (la de la tabla `result`) y la comparación exacta de puntuaciones con enteros. Sin votos en la semana, la puntuación es 0. Los votos a entradas que no están en la lista no cuentan, tampoco para la media `m`. |
 | 2026-10-13 | 0.6.71 | §7: cerrada la decisión del dorado (decisión del usuario): **sin dorado**; las medallas, la carta de campeón y la semana dorada van en la paleta del sello. |
 | 2026-10-13 | 0.6.70 | **Tarea 5.22 (jurado visual).** §3.8.13: a 360 px o menos, la rejilla va en dos columnas; en casillas de menos de 9 rem el sello es «✓ n/5»; en móvil, la entrada elegida va en una hoja pegada sobre la barra con su alias, sus datos, «Escuchar» y «Jurado». §3.8.7: en móvil, la ronda, el contador y el alias van en la fila «[silueta] VS ALIAS» de la arena y no en el HUD; el panel en una fila, solo desde 1200 px; sin cuenta o sin verificar, la puerta (silueta, por qué y «Entrar» o «Verificar el email», con sus teclas). §3.8.4: en contraste alto, las estrellas con contorno `CanvasText` y las llenas en `Highlight`. Acta en `docs/planning/evidence/f5/jurado/`. |
 | 2026-10-13 | 0.6.69 | **Tareas 5.9 (cliente) y 5.21.** §3.8.3: la crónica del menú añade a sus líneas las de `/ticker` (cada 30 s): «Nueva entrada: <alias>», «Quedan N días» (o «Último día para subir / votar») y «N votos esta semana» (no sale con 0). §3.8.7: Espacio pausa esté donde esté el cursor, también sobre un botón o una estrella. |

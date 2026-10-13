@@ -21,7 +21,10 @@
 // De la Fase 5 (tarea 5.1):
 //   fair       Ronda justa, Recién subidas, Aleatorio y la cola del Modo Jurado
 //
-// El resto de §4.5 llega con la fase que lo usa (ver docs/planning/ROADMAP.md): `ranking`, `xp` (`xpFor`, `streakOf`), `achievements`,
+// De la Fase 6 (tarea 6.1):
+//   ranking    la clasificación de la semana: bayesiana, desempates, ex aequo y podio
+//
+// El resto de §4.5 llega con la fase que lo usa (ver docs/planning/ROADMAP.md): `xp` (`xpFor`, `streakOf`), `achievements`,
 // `seasonStandings` y `goldenEar()`.
 
 export * from './alias'
@@ -35,5 +38,6 @@ export * from './listen'
 export * from './loudness'
 export * from './phase'
 export * from './prng'
+export * from './ranking'
 export * from './scoring'
 export * from './season'

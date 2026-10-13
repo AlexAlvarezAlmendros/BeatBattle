@@ -11,6 +11,7 @@ import * as listen from '../src/listen'
 import * as loudness from '../src/loudness'
 import * as phase from '../src/phase'
 import * as prng from '../src/prng'
+import * as ranking from '../src/ranking'
 import * as scoring from '../src/scoring'
 import * as season from '../src/season'
 
@@ -26,6 +27,7 @@ const modules = {
   loudness,
   phase,
   prng,
+  ranking,
   scoring,
   season,
 }
