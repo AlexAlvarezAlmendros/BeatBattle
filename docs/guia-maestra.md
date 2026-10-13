@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.58 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.59 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1474,7 +1474,7 @@ beat a 160 BPM (`tools/shot/flashes.mjs`), 0 destellos por segundo y una oscilac
 
 La identidad no depende del Escenario: con calidad Apagada la pantalla se ve igual, quieta. El render
 se pausa con la pestaña oculta. El LCP nunca es el canvas ni el logo (que se pinta en un canvas 2D, sin
-`<text>` que pueda contar como candidato): es un texto (el título del escenario de la semana en la home) y sale con la primera pintura (`RNF-PERF-02`).
+`<text>` que pueda contar como candidato): es un texto del menú de la home (el título del escenario de la semana o, si es más pequeño, como «En el horno» con el calendario vacío, la etiqueta de la placa elegida) y sale con la primera pintura (`RNF-PERF-02`).
 
 ### 3.6 Movimiento
 
@@ -2955,7 +2955,7 @@ negocio en el panel de admin (participantes, votos, escuchas por semana) y Verce
 | Id | Requisito | Aceptación |
 |---|---|---|
 | `RNF-PERF-01` | Presupuestos de la tabla en la home y en la ficha de entrada | Lighthouse CI en móvil simulado |
-| `RNF-PERF-02` | LCP < 2,5 s | Lighthouse CI (Fase 10); hasta entonces, proyecto `perf` de Playwright sobre la build (4G lento, CPU ×4, 412×823): en local exige LCP < 2,5 s y en la CI que el LCP sea un texto (el título del escenario de la semana, §3.5) y salga con la primera pintura |
+| `RNF-PERF-02` | LCP < 2,5 s | Lighthouse CI (Fase 10); hasta entonces, proyecto `perf` de Playwright sobre la build (4G lento, CPU ×4, 412×823): en local exige LCP < 2,5 s y en la CI que el LCP sea un texto del menú (el título del escenario o la etiqueta de la placa elegida, §3.5) y salga con la primera pintura |
 | `RNF-PERF-03` | FPS del Escenario según la tabla | `tools/shot/bench.mjs` en escritorio y en Android: en la Fase 1, **emulado** (CPU ×4, pantalla y densidad de gama media; decisión del usuario del 2026-10-08, sin dispositivo); con un Android real cuando lo haya |
 | `RNF-PERF-04` | El Escenario no se descarga antes de la primera pintura | Traza de red: el trozo del Escenario empieza después de FCP |
 | `RNF-PERF-05` | Render pausado con la pestaña oculta | Test: `visibilitychange` detiene el bucle |
@@ -3618,6 +3618,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.59 | §3.5 y §4.17 (`RNF-PERF-02`): el LCP de la home es un texto del menú, el título del escenario o, si es más pequeño (el calendario vacío, «En el horno», desde el jurado de la F3), la etiqueta de la placa elegida. Lo que se exige no cambia: un texto, nunca el lienzo ni el logo, pintado con la primera pintura. |
 | 2026-10-13 | 0.6.58 | **Tarea 4.13 (decisión del usuario).** §4.1: `qrcode` como dependencia del servidor para la matriz de los códigos QR. §4.19.5: el QR del recibo (`/api/email/qr/:entryId.png?sig=`), firmado, a la ficha pública de la entrada. El recibo de §2.12.1 ya lo llevaba en la especificación. |
 | 2026-10-13 | 0.6.57 | **Tarea 4.10 (prueba real contra Cloudinary).** §4.8.4 y `RF-ENT-11`: la Admin API no da el `etag` ni la duración; la huella de los duplicados es el MD5 que calcula el servidor al medir (si lee el fichero entero) y la duración se valida con la medida. Sin medir, la huella queda vacía y la pone el `tick`. El almacenamiento falso imita a la Admin API (sin `etag` ni duración en la verificación). Las claves de idempotencia de los emails de la entrada van por el `public_id` del audio, no por la huella. |
 | 2026-10-13 | 0.6.56 | **Tarea 4.20 (jurado de la F4).** §3.8.5: la boca de la ranura, el rodillo de la tragaperras con el porcentaje a la vista, el medidor de súper de 28 px con marcas a tercios, la franja del anunciador en dos líneas con su alto reservado, una sola acción en la celebración, la vista y el foco al panel nuevo en cada cambio, qué estados llenan el alto, la ranura compacta de la edición y el aviso al retirar; lo que oye el lector en el análisis y la subida; Esc no hace nada mientras se verifica. §3.4.1: `[ESC] CANCELAR` en la barra mientras dura algo que Esc detiene. |

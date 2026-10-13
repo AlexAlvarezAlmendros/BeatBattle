@@ -5,8 +5,9 @@ import { expect, type Page, test } from '@playwright/test'
  * `playwright.config.ts`), en el móvil y la red de §4.17: 4G lento (150 ms de RTT, 1,6 Mbit/s) y CPU ×4,
  * 412 × 823 a DPR 1,75. Es la comprobación de `RNF-PERF-02` hasta que llegue Lighthouse CI (Fase 10):
  *
- * - el LCP es un texto —el título del escenario de la semana, que con el calendario vacío es «En el
- *   horno» (jurado de la F3, J18)— y no el logo (SVG) ni un lienzo, y se pinta con la primera pintura
+ * - el LCP es un texto del menú —el título del escenario de la semana o, si es más pequeño (con el
+ *   calendario vacío es «En el horno», jurado de la F3, J18), la etiqueta de la placa elegida— y no el logo
+ *   (SVG) ni un lienzo, y se pinta con la primera pintura
  *   (§3.5), y
  * - el LCP queda por debajo de 2,5 s (mediana de tres cargas en frío).
  *
@@ -99,8 +100,9 @@ test('RNF-PERF-02: LCP de la home < 2,5 s en 4G lento con CPU ×4; es un texto (
   test.info().annotations.push({ type: 'LCP', description: summary })
 
   for (const sample of samples) {
-    // Un texto: el título del escenario de la tarjeta de la semana (ni el logo, que se pinta en un canvas, ni otro lienzo).
-    expect(sample.element, summary).toMatch(/^H2 .*title/i)
+    // Un texto del menú: el título del escenario o la etiqueta de la placa elegida (ni el logo, que se pinta en
+    // un canvas, ni otro lienzo; guía v0.6.59).
+    expect(sample.element, summary).toMatch(/^(H2 .*title|SPAN .*label)/i)
     expect(sample.lcp - sample.fcp, summary).toBeLessThanOrEqual(LCP_AFTER_FCP_MAX_MS)
   }
   const median = samples.map((s) => s.lcp).sort((a, b) => a - b)[Math.floor(RUNS / 2)] ?? Number.NaN
