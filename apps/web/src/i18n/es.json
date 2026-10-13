@@ -155,7 +155,14 @@
       "live": {
         "drop": "Nuevo drop: {title}",
         "sample": "{bpm} BPM · {key}",
-        "closes": "Envíos hasta el {when}"
+        "closes": "Envíos hasta el {when}",
+        "entry": "Nueva entrada: {alias}",
+        "daysLeft_one": "Queda 1\u00a0día",
+        "daysLeft_other": "Quedan {count}\u00a0días",
+        "lastDaySubmit": "Último día para subir",
+        "lastDayVote": "Último día para votar",
+        "votes_one": "{count} voto esta semana",
+        "votes_other": "{count} votos esta semana"
       }
     }
   },

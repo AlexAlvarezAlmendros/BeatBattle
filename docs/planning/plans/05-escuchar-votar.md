@@ -121,7 +121,7 @@ construye aquí lo ve alguien que vota.
 | 5.6 | Denuncia: `POST /api/entries/:id/report` con motivo y detalle opcional, una por usuario y entrada | ✅ Hecho | 5.2 | §2.7, §2.13 · `RF-VOTE-12` · la cola del admin es de la F10 (`RF-MOD-01`) · **Hecho:** 201, `REPORT_EXISTS` a la segunda, la propia no; 20 por hora |
 | 5.7 | Escuchas: `POST /api/entries/:id/play` (pública, límite por IP y entrada, una por sesión de escucha) y `GET /api/entries/:id/stats` (dueño: votos y escuchas, sin media) | ✅ Hecho | 5.2 | §2.6, §2.7 · `RF-PLAY-07`, `RF-PLAY-05` · **Hecho:** `play` (sesión, 3/h por IP y entrada, 202) y `stats` del dueño; tests |
 | 5.8 | `GET /api/jury/queue?week=` (la cola de `juryQueue`) y `GET /api/me/votes?week=` | ✅ Hecho | 5.1, 5.5 | §2.7, §4.10 · `RF-VOTE-09`, `RF-VOTE-13` · **Hecho:** cola con la ronda y `me/votes`; tests (propia y votadas fuera, Ronda justa, vacía al cerrar, 401 sin sesión) |
-| 5.9 | Crónica: `GET /api/weeks/:slug/ticker?since=` (nueva entrada por alias, días que quedan, votos de la semana) y el menú la usa | ✅ Hecho | 5.5 | §3.8.3 · `RF-PLAY-05` (nunca autoría ni recuentos por entrada) · **Hecho (servidor):** `GET /ticker` con tests; el menú la usa con el reproductor y la rejilla (5.16) |
+| 5.9 | Crónica: `GET /api/weeks/:slug/ticker?since=` (nueva entrada por alias, días que quedan, votos de la semana) y el menú la usa | ✅ Hecho | 5.5 | §3.8.3 · `RF-PLAY-05` (nunca autoría ni recuentos por entrada) · **Hecho:** `GET /ticker` con tests; el menú la pide cada 30 s y la añade a la crónica (mirado en el navegador: rotan las entradas nuevas por alias). Guía v0.6.69 |
 | 5.10 | Contrato de voto ciego y de «nada de medias antes del sellado» ampliado a todas las rutas nuevas | ✅ Hecho | 5.3, 5.7, 5.8, 5.9 | §1.3 · `RNF-SEC-04`, `RF-PLAY-05`, `RF-VOTE-07` · **Hecho:** `test/blindContract.test.ts` recorre lista (los tres órdenes y el filtro), ficha, semana, crónica y cola, sin sesión y con la de quien vota, con votos reales: ni ids, nombres, emails ni avatares de los productores, ni claves de medias, recuentos por entrada o posiciones; sellada, la autoría aparece |
 
 ### Emails
@@ -148,7 +148,7 @@ construye aquí lo ve alguien que vota.
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
 | 5.20 | Datos de prueba: semana en juego con 24 entradas de varios productores y audios del almacenamiento falso (`tools/seed` y fixtures de E2E) | ✅ Hecho | 5.5 | para la 5.21 y las capturas de la 5.22 · **Hecho:** `apps/server/src/scripts/seedBattle.ts` (por la API con la app en el mismo proceso: 24 entradas medidas y votos en 14 s) y `tests/e2e/battle.ts` (semana con entradas para los E2E de la fase) |
-| 5.21 | E2E del hito: dos usuarios se votan con teclado (rejilla → ficha → Modo Jurado), todas las reglas `RF-VOTE-*` y los tres emails capturados en el `Mailer` en memoria con el reloj simulado | ⬜ Listo | 5.12, 5.16, 5.17, 5.18, 5.19, 5.20 | §5 · hito de la fase |
+| 5.21 | E2E del hito: dos usuarios se votan con teclado (rejilla → ficha → Modo Jurado), todas las reglas `RF-VOTE-*` y los tres emails capturados en el `Mailer` en memoria con el reloj simulado | ✅ Hecho | 5.12, 5.16, 5.17, 5.18, 5.19, 5.20 | §5 · hito de la fase · **Hecho:** `tests/e2e/vote.spec.ts` (32 s): Ana elige la entrada de Bea en la rejilla con el teclado, la escucha (audio a 4×, reloj de la API +31 s al empezar) y vota 4 en la ficha con el teclado; su propia ficha no lleva estrellas; Bea entra al Modo Jurado desde el menú, salta con S hasta la de Ana, pausa con Espacio y vota 5 (combo ×1, siguiente entrada); la lista sigue sin medias; al quinto voto sale `battle.first_votes` y con el reloj del sábado 18:00 y el domingo 17:00, `battle.reminder` y `battle.jury_call`, leídos del `Mailer` en memoria |
 | 5.22 | Jurado visual de tres lentes (juego, marca y accesibilidad) sobre la rejilla, la ficha, el Modo Jurado, el reproductor y los emails, en los tamaños de referencia | ⬜ Listo | 5.21 | §3 · `RD-VIS-02` · acta en `evidence/f5/jurado/` |
 | 5.23 | ⚠️ Prueba real: el reproductor global sobre un MP3 firmado de Cloudinary (prefijo de desarrollo), con la ganancia, el analizador y Media Session en Chrome | ⬜ Listo | 5.13 | `RF-PLAY-02`, §4.8 · crea y borra recursos en Cloudinary: con confirmación |
 | 5.24 | Cierre de la fase: criterio de aceptación, cobertura de ids y CI en verde | ⬜ Listo | 5.22, 5.23 | — |
@@ -178,6 +178,7 @@ recordatorio, llamada al jurado y primeros votos salen respetando silencio y top
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-13 | 5.9, 5.21 | Crónica del menú con `/ticker` y E2E del hito con teclado y los tres avisos (guía v0.6.69). |
 | 2026-10-13 | 5.18 | Modo Jurado como pantalla VS (guía v0.6.68). |
 | 2026-10-13 | 5.17, 5.19 | Ficha de entrada y denuncia (guía v0.6.67). |
 | 2026-10-13 | 5.14–5.16 | Recibo de escucha y escuchas, voto optimista y «ELIGE ENTRADA» en su ruta (guía v0.6.66). |

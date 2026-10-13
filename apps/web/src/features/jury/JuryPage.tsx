@@ -179,7 +179,8 @@ function JuryArena() {
       if (/^[1-5]$/.test(key) && !inStars) {
         event.preventDefault()
         starsRef.current?.querySelectorAll<HTMLButtonElement>('[role="radio"]')[Number(key) - 1]?.click()
-      } else if (key === ' ' && !(event.target instanceof HTMLButtonElement)) {
+      } else if (key === ' ') {
+        // Espacio pausa esté donde esté el cursor (§3.8.7), también sobre un botón o una estrella.
         event.preventDefault()
         usePlayer.getState().toggle()
       } else if ((key === 'ArrowLeft' || key === 'ArrowRight') && !inStars) {

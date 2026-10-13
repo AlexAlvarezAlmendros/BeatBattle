@@ -1,11 +1,12 @@
 import type { PitchClass } from '@beatbattle/audio'
 import { parseMusicalKey } from '@beatbattle/shared'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { DocumentTitle } from '../../app/DocumentTitle'
 import { audio } from '../../audio/engine'
 import { t } from '../../i18n'
 import { queryKeys } from '../../net/queryKeys'
+import { ticker } from '../../net/votes'
 import { useCurrentWeek } from '../../net/weeks'
 import { playerOf, useSession } from '../account/session'
 import { DropReveal } from './DropReveal'
@@ -22,6 +23,11 @@ export const IDLE_CHRONICLE = [
   'home.chronicle.idle.vote',
   'home.chronicle.idle.seal',
 ] as const
+
+/** Cada cuánto se vuelve a pedir la crónica (§4.2). */
+const TICKER_POLL_MS = 30_000
+/** Líneas de la crónica que salen del servidor como mucho (la rotación es de 5 s, §3.8.3). */
+const TICKER_MAX_LINES = 5
 
 /** Margen tras una frontera antes de volver a pedir la semana (el servidor ya ha cambiado de fase). */
 const BOUNDARY_SLACK_MS = 1000
@@ -69,6 +75,32 @@ export function HomePage() {
   }, [key])
 
   const week = data?.week ? menuWeekOf(data.week, now, data.week.entries) : null
+  // La crónica de la arena (§3.8.3, tarea 5.9): las últimas entradas por su alias, los días que quedan y los
+  // votos de la semana, cada 30 s (§4.2: sondeo, sin tiempo real). Nunca autoría ni cifras de una entrada.
+  const slug = data?.week?.slug
+  const news = useQuery({
+    queryKey: queryKeys.ticker(slug ?? ''),
+    queryFn: ({ signal }) => ticker(slug ?? '', undefined, signal),
+    enabled: Boolean(slug),
+    refetchInterval: TICKER_POLL_MS,
+  }).data
+  const tickerLines = (news?.events ?? []).flatMap((event) =>
+    event.kind === 'entry'
+      ? [t('home.chronicle.live.entry', { alias: event.alias })]
+      : event.kind === 'closing'
+        ? [
+            event.days === 0
+              ? t(
+                  event.phase === 'submit'
+                    ? 'home.chronicle.live.lastDaySubmit'
+                    : 'home.chronicle.live.lastDayVote',
+                )
+              : t('home.chronicle.live.daysLeft', { count: event.days }),
+          ]
+        : event.count > 0
+          ? [t('home.chronicle.live.votes', { count: event.count })]
+          : [],
+  )
 
   // La revelación del drop (§3.8.2, `RF-DROP-11`): la primera visita a cada semana, tras la pantalla de título.
   const live = data?.week ?? null
@@ -113,6 +145,7 @@ export function HomePage() {
               ? [t('home.chronicle.live.sample', { bpm: week.bpm, key: week.musicalKey })]
               : []),
             t('home.chronicle.live.closes', { when: whenText(data.week.submitEndsAt, now) }),
+            ...tickerLines.slice(0, TICKER_MAX_LINES),
           ]
         : IDLE_CHRONICLE.map((message) => t(message)),
     nextDrop: data?.next ? nextDropText(data.next.startsAt) : null,
