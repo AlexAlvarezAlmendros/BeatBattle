@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.47 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.48 · 2026-10-10 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -367,8 +367,8 @@ extra y 8 *chops* (marcas de inicio y fin) para el kit sonoro de la semana (§3.
 6. **Verificación en servidor.** El servidor consulta el recurso en Cloudinary, comprueba carpeta,
    tamaño, formato y duración, mide la sonoridad y la forma de onda autoritativas (§4.8.4) y crea la
    entrada. Si algo no cuadra, borra el recurso y devuelve el motivo.
-7. **Celebración.** Animación de «entrada en la batalla» (§3.8.5), +XP, el posible logro y el
-   **recibo por email** con el informe técnico de la medición (§2.12.1).
+7. **Celebración.** Animación de «entrada en la batalla» (§3.8.5), +XP y el posible logro (desde la
+   Fase 7, con la capa de juego) y el **recibo por email** con el informe técnico de la medición (§2.12.1).
 
 **Después de subir** el productor puede editar título, descripción, etiquetas, BPM, tonalidad y
 portada hasta el cierre de envíos. Puede **sustituir el audio** solo mientras la entrada no tenga
@@ -689,7 +689,9 @@ distintas:
 Es la prueba de que la entrada ha llegado bien. Se envía cuando el servidor termina la verificación
 y la medición (§4.8.4) y tiene forma de **ticket** (§3.8.12):
 
-- Número de recibo correlativo por semana (`BB-2026W41-0007`) y QR a la ficha.
+- Número de recibo correlativo por semana (`BB-2026W41-0007`) y QR a la ficha. El número se fija al
+  crear la entrada (`entry.receipt_number`, el siguiente de la semana en el mismo `batch`), no cambia al
+  sustituir el audio y no se reutiliza al retirarla.
 - Alias de batalla, título, duración, formato y tamaño del original, BPM y tonalidad.
 - **Informe técnico** de la medición: sonoridad integrada y ajuste que se le aplicará al
   reproducirla («−9,2 LUFS: en la batalla sonará 4,8 dB más baja para igualarse al resto»), pico real
@@ -1814,7 +1816,7 @@ declaración), en paneles opacos con campos de marco y foco de juego. La subida 
 súper** con los bytes reales, velocidad, tiempo restante y «Cancelar [Esc]»; suena `upload.progress`.
 Al terminar: el anunciador dice «¡NUEVO BEAT EN LA BATALLA!», aparece tu **portada generativa con su
 alias** («Así te verán hasta el domingo: TIGRE PÚRPURA. No lo difundas.»), «Ya estás en la
-batalla #41», +XP y el recibo por email. Errores en tono de juego pero claros (§2.19), en aviso de papel.
+batalla #41», +XP (desde la Fase 7) y el recibo por email. Errores en tono de juego pero claros (§2.19), en aviso de papel.
 
 #### 3.8.6 Ceremonia de resultados (≈ 25 s, saltable con Esc o «Saltar»)
 
@@ -2404,7 +2406,8 @@ Al registrar la entrada:
    (`node_modules/ffmpeg-static/ffmpeg`), y el script de instalación de `ffmpeg-static`, que lo descarga,
    tiene que estar permitido en el gestor de paquetes (`onlyBuiltDependencies` desde pnpm 10); la CI
    comprueba que el binario existe.
-4. Entrada, XP y logros se escriben en un único `batch`.
+4. Entrada, XP y logros se escriben en un único `batch` (XP y logros, desde la Fase 7: hasta entonces, la
+   entrada y su email en la cola).
 5. Si cualquier paso falla, se borra el recurso y se devuelve el motivo.
 
 Si la medición tarda más que el límite de la función, la entrada se crea en estado `processing`
@@ -2435,7 +2438,9 @@ envían su medición; el servidor usa la mediana cuando hay 3 y marca las discre
 de Cloudinary es la única del lanzamiento. Los E2E usan una implementación falsa en disco que expone
 la misma API, para no depender de la red: con `BB_FAKE_STORAGE=<carpeta>` (prohibida en producción), las
 URLs firmadas con HMAC apuntan a `/api/test/storage/{upload,stream,download}/…`, que imitan la subida
-multipart, la escucha y la descarga como adjunto que caduca (401 pasada la hora). La medición es la misma
+multipart (también **por trozos**, con `X-Unique-Upload-Id` y `Content-Range`, como §4.7.4: el último
+trozo cierra el recurso y la respuesta lleva su `etag`), la escucha y la descarga como adjunto que caduca
+(401 pasada la hora). La medición es la misma
 (ffmpeg, `FFMPEG_PATH` o `ffmpeg-static`). Los samples la usan desde la Fase 3 (tarea 3.4): duración,
 sonoridad y forma de onda del sample las mide el servidor al crearlo.
 
@@ -2673,6 +2678,7 @@ CREATE TABLE entry (
   format TEXT NOT NULL, bytes INTEGER NOT NULL, duration_ms INTEGER NOT NULL,
   peaks BLOB, loudness_lufs REAL, true_peak_db REAL, hot_start_ms INTEGER,
   cover_public_id TEXT, cover_seed INTEGER NOT NULL,
+  receipt_number INTEGER NOT NULL,                     -- recibo correlativo por semana (§2.12.1)
   status TEXT NOT NULL,                                -- processing | active | hidden | withdrawn | disqualified
   status_reason TEXT,
   play_count INTEGER NOT NULL DEFAULT 0,
@@ -2682,6 +2688,7 @@ CREATE TABLE entry (
 CREATE UNIQUE INDEX entry_one_per_week ON entry(week_id, user_id)
   WHERE status IN ('processing','active','hidden');
 CREATE UNIQUE INDEX entry_alias_week ON entry(week_id, alias);
+CREATE UNIQUE INDEX entry_receipt_week ON entry(week_id, receipt_number);
 
 CREATE TABLE listen (
   id TEXT PRIMARY KEY, user_id TEXT NOT NULL, entry_id TEXT NOT NULL,
@@ -3567,6 +3574,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-10 | 0.6.48 | **Plan de la Fase 4** (Participar). §4.8.6: el almacenamiento falso imita también la subida por trozos (`X-Unique-Upload-Id`, `Content-Range`) y devuelve el `etag`. §2.12.1 y §4.11: el número de recibo se guarda en `entry.receipt_number` (único por semana, fijado al crear, no se reutiliza). §2.5, §3.8.5 y §4.8.4: el XP y los logros de la subida llegan con la Fase 7; hasta entonces el `batch` lleva la entrada y su email. |
 | 2026-10-10 | 0.6.47 | **Quinto pase del jurado de la Fase 3** (tarea 3.21). §3.8.2: los datos de la revelación se fijan al empezar (una nueva petición de la semana con otra URL firmada la hacía volver a empezar a mitad). §3.8.3: estado **cargando** (tarjeta en esqueleto, Jugar «Cargando…»), distinto del calendario vacío; el título largo baja hasta 24 px en escritorio antes de partir y la tarjeta aprieta sus filas para no pasar bajo la barra. §2.12.3: en «Cómo se juega» el formulario del aviso solo sale por encima de 960 px. |
 | 2026-10-10 | 0.6.46 | **Jurado visual de la Fase 3** (tarea 3.21). §3.8.2: la revelación lleva velo opaco, su propia pegatina *OTP.* y es modal (`inert`, foco de vuelta); el vinilo cae al centro (no a la tarjeta) y, sin movimiento, la capa entera funde con los datos fijos. §3.8.3: con el calendario vacío, el título de la tarjeta es «En el horno» (el display no pasa de 4 palabras, §3.2) y el rótulo dice cuándo cae el próximo drop o «Pronto»; el formulario de la alerta va en una fila en la tarjeta y en «Cómo se juega». |
 | 2026-10-09 | 0.6.45 | **Web de la Fase 3** (tareas 3.15–3.20): la home con la semana real, la ficha del drop con las bases, la revelación del drop (línea de tiempo `REVEAL_TIMELINE`, una vez por semana con `seen_flag` o `localStorage` sin sesión), la página `/alerta` (§2.12.3) y el modo denso del admin (§2.14, `ScreenPage wide`). El asunto de `admin.calendar_gap` pasa a «Falta el drop del <lunes>» (Anexo H) para caber entero en 50 caracteres. |
