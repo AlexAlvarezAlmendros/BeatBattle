@@ -196,7 +196,11 @@
   margin: calc(var(--bb-space-5) * var(--menu-s)) 0 0 var(--bb-space-7);
   padding: calc(var(--bb-space-3) * var(--menu-s)) var(--bb-space-5);
   /* Al mover el cursor, la ayuda se trae a la vista por encima de la barra pegada (`revealHelp`). */
-  scroll-margin-block-end: calc(var(--controls-pinned-h, var(--bb-controls-h)) + var(--bb-space-4));
+  scroll-margin-block-end: calc(
+    var(--controls-pinned-h, var(--bb-controls-h)) +
+    var(--player-h, 0px) +
+    var(--bb-space-4)
+  );
 }
 
 .helpKicker {

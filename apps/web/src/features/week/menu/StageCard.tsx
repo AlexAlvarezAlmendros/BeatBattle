@@ -51,7 +51,7 @@ export function StageCard({
   // (jurado de la 3.21, quinto pase).
   const compact = useMediaQuery(MOBILE_QUERY)
   useFitText(titleRef, week?.title ?? '', { minFontPx: compact ? 16 : STAGE_TITLE_MIN_FONT_PX })
-  const player = useSamplePlayer(week?.streamUrl, week?.durationSeconds ?? 0)
+  const player = useSamplePlayer(week)
   if (!week && loading) return <LoadingStage />
   if (!week) return <EmptyStage titleId={titleId} nextDrop={nextDrop ?? null} />
   return (

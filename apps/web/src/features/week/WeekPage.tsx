@@ -1,6 +1,6 @@
 import { type PublicWeek, PublicWeekSchema } from '@beatbattle/shared'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useId, useRef, useState } from 'react'
+import { useId, useMemo, useRef, useState } from 'react'
 import { type LoaderFunctionArgs, useLoaderData, useLocation } from 'react-router'
 import { paths } from '../../app/paths'
 import { notFound } from '../../app/routes'
@@ -55,9 +55,17 @@ export function WeekPage() {
   const [rulesOpen, setRulesOpen] = useState<null | 'original' | 'stems'>(null)
   const [download, setDownload] = useState<DownloadState>('idle')
   const [replay, setReplay] = useState(false)
-  const player = useSamplePlayer(week.sample.streamUrl, week.sample.durationMs / 1000)
+  const peaks = useMemo(() => decodePeaks(week.sample.peaks), [week.sample.peaks])
+  const player = useSamplePlayer({
+    number: week.number,
+    title: week.sample.title,
+    credits: week.sample.credits,
+    streamUrl: week.sample.streamUrl,
+    durationSeconds: week.sample.durationMs / 1000,
+    coverUrl: week.sample.coverUrl,
+    peaks,
+  })
   const live = menuWeekOf(week, Date.now())
-  const peaks = decodePeaks(week.sample.peaks)
   const seconds = week.sample.durationMs / 1000
   const titleRef = useRef<HTMLParagraphElement>(null)
   const licenseId = useId()

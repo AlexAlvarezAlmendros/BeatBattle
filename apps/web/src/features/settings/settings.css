@@ -7,6 +7,14 @@
   gap: var(--bb-space-2);
 }
 
+/* En una fila con su ayuda corta (la opción que va en el sitio del resumen, `/ajustes/sonido`). */
+.settings-option-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bb-space-2) var(--bb-space-4);
+}
+
 .settings-option-help {
   color: var(--bb-text-2);
   font-size: var(--bb-fs-sm);
@@ -301,4 +309,9 @@
   .settings-preview-action {
     font-size: var(--bb-fs-sm);
   }
+}
+
+/* La ayuda corta de la opción en fila no reserva sus 24 rem: va al lado del conmutador si cabe. */
+.settings-option-inline .settings-option-help {
+  flex: 0 1 auto;
 }

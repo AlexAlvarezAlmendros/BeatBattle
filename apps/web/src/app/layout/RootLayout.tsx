@@ -1,7 +1,8 @@
-import { type MouseEvent, useEffect, useRef } from 'react'
+import { lazy, type MouseEvent, Suspense, useEffect, useRef } from 'react'
 import { Outlet, ScrollRestoration, useLocation, useNavigation, useNavigationType } from 'react-router'
 import { audio } from '../../audio/engine'
 import { useSession } from '../../features/account/session'
+import { usePlayer } from '../../features/player/store'
 import { t } from '../../i18n'
 import { keepsTabFocus } from '../../ui/Tabs'
 // Directo, sin el índice de `ui/Toast`: el marco solo necesita la zona (las regiones vivas); la pieza y
@@ -49,6 +50,21 @@ export function RootLayout() {
       <GameFrame />
     </FrameSlotsProvider>
   )
+}
+
+// La barra del reproductor, en diferido: solo hace falta cuando algo suena (§2.6, `RNF-PERF-01`).
+const PlayerBar = lazy(() =>
+  import('../../features/player/PlayerBar').then((m) => ({ default: m.PlayerBar })),
+)
+
+/** El reproductor global encima de la barra de controles, en cuanto hay una pista (tarea 5.13). */
+function PlayerSlot() {
+  const loaded = usePlayer((state) => state.track !== null)
+  return loaded ? (
+    <Suspense fallback={null}>
+      <PlayerBar />
+    </Suspense>
+  ) : null
 }
 
 /** La primera parte de la ruta: `/ajustes/emails` → `ajustes`. */
@@ -112,6 +128,7 @@ function GameFrame() {
         </div>
       </main>
       {navigated.current && <span key={pathname} className="screen-sweep" aria-hidden="true" />}
+      <PlayerSlot />
       <ControlsBar screen={screen} />
       <ToastViewport />
       <ScrollRestoration />

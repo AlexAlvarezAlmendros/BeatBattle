@@ -20,6 +20,9 @@ import { playSfx } from './synth'
  * - Silencio (tecla M, `useSound`) en el máster; *ducking* con `setMusicPlaying` (`RD-SND-03`).
  */
 
+/** Rampa de la ganancia de sonoridad al cambiar de pista (§4.7.3). */
+export const LOUDNESS_RAMP_MS = 50
+
 /** Separación mínima entre dos `ui.hover` (s): 8 por segundo como mucho (Anexo D). */
 export const HOVER_MIN_GAP = 1 / 8
 /** Y entre dos `ui.move`, el tic del cursor: 12 por segundo como mucho (Anexo D). */
@@ -74,6 +77,8 @@ export class AudioEngine {
   /** ¿Es el elemento que suena una entrada sin sellar? (`RD-MOT-06`) */
   private elementBlind = false
   private elementSources = new WeakMap<HTMLMediaElement, MediaElementAudioSourceNode>()
+  /** Ganancia de sonoridad de cada elemento, entre su fuente y el bus de música (§4.7.3). */
+  private elementGains = new WeakMap<HTMLMediaElement, GainNode>()
   private musicListeners = new Set<(playing: boolean) => void>()
 
   /** ¿Hay ya contexto (ha habido una interacción)? */
@@ -164,7 +169,13 @@ export class AudioEngine {
       source = ctx.createMediaElementSource(element)
       this.elementSources.set(element, source)
     }
-    source.connect(mix.input.music)
+    let gain = this.elementGains.get(element)
+    if (!gain) {
+      gain = ctx.createGain()
+      this.elementGains.set(element, gain)
+    }
+    source.connect(gain)
+    gain.connect(mix.input.music)
     this.element = element
     this.elementBlind = blind
     const update = () => this.announceMusic()
@@ -173,12 +184,33 @@ export class AudioEngine {
     return () => {
       for (const type of ['play', 'pause', 'ended'] as const) element.removeEventListener(type, update)
       source.disconnect()
+      gain.disconnect()
       if (this.element === element) {
         this.element = null
         this.elementBlind = false
       }
       this.announceMusic()
     }
+  }
+
+  /**
+   * La ganancia de sonoridad de un elemento (`RF-PLAY-03`, §4.7.3): en dB (≤ 0, solo atenúa), con una rampa
+   * de `LOUDNESS_RAMP_MS` al cambiar de pista. Sin contexto (nunca debería sonar sin él, pero por si acaso),
+   * con el volumen del propio elemento.
+   */
+  setElementGainDb(element: HTMLMediaElement, db: number): void {
+    const linear = Math.min(1, 10 ** (Math.min(0, db) / 20))
+    const gain = this.elementGains.get(element)
+    const ctx = this.ctx
+    if (!gain || !ctx) {
+      element.volume = linear
+      return
+    }
+    element.volume = 1
+    const now = ctx.currentTime
+    gain.gain.cancelScheduledValues(now)
+    gain.gain.setValueAtTime(gain.gain.value, now)
+    gain.gain.linearRampToValueAtTime(linear, now + LOUDNESS_RAMP_MS / 1000)
   }
 
   /** Avisa cada vez que la música empieza o para (el Escenario enciende o apaga la reactividad). */

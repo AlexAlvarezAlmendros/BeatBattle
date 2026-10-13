@@ -8,7 +8,8 @@
   isolation: isolate;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto 1fr auto;
+  /* HUD, contenido, reproductor (si suena algo, §2.6) y barra de controles. */
+  grid-template-rows: auto 1fr auto auto;
   /*
    * Con la barra despegada (§3.4.1 v0.6.7), la pantalla desborda como poco lo que cuelga de ella
    * (`--bar-tail`, que publica `ControlsBar`; 0 si va pegada): lo de antes de la barra mide como poco el
