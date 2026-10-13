@@ -1,8 +1,14 @@
-import { type DataEnvelope, type SignedUpload, UploadSignRequestSchema } from '@beatbattle/shared'
+import {
+  type DataEnvelope,
+  type EntrySignedUpload,
+  type SignedUpload,
+  UploadSignRequestSchema,
+} from '@beatbattle/shared'
 import type { FastifyInstance } from 'fastify'
 import { requireVerified } from '../../auth/guards'
 import { appError } from '../../lib/errors'
 import type { RateLimiter } from '../../lib/rateLimit'
+import type { EntriesService } from '../entries/service'
 import { avatarFolder } from '../profile/service'
 import type { ImageStorage } from '../storage/cloudinary'
 
@@ -12,31 +18,36 @@ const HOUR_MS = 60 * 60 * 1000
 
 export interface UploadsDeps {
   images: ImageStorage | null
+  /** Firma del audio de una entrada y de su portada (tarea 4.5). */
+  entries: EntriesService | null
   rateLimiter: RateLimiter
   newId: () => string
 }
 
 /**
  * `POST /api/uploads/sign` (guía §4.8.2): los parámetros firmados para subir directo a Cloudinary. El
- * servidor fija el `public_id`; el navegador no elige ni la carpeta ni el nombre. De momento, el avatar.
+ * servidor fija el `public_id`; el navegador no elige ni la carpeta ni el nombre. El avatar va a la carpeta
+ * de la cuenta; el audio de una entrada y su portada, con su *intent* y sin el id del usuario (`RF-ENT-04`).
  */
 export function uploadsRoutes(app: FastifyInstance, deps: UploadsDeps): void {
   app.post(
     '/api/uploads/sign',
     { preHandler: requireVerified },
-    async (req): Promise<DataEnvelope<SignedUpload>> => {
+    async (req): Promise<DataEnvelope<SignedUpload | EntrySignedUpload>> => {
       const request = UploadSignRequestSchema.parse(req.body)
-      // El audio de una entrada y su portada se firman con su *intent* (tarea 4.5); hasta entonces, nunca
-      // como un avatar.
-      if (request.kind !== 'avatar') throw appError('BAD_REQUEST', 'Esta subida todavía no está disponible.')
       const userId = req.user?.id as string
-      if (!deps.images) throw appError('SERVICE_UNAVAILABLE', 'Las subidas no están disponibles.')
+      // El límite cuenta cada firma que se pide, también las que luego no se dan (`RNF-SEC-02`).
       await deps.rateLimiter.enforce({
         key: `upload-sign:user:${userId}`,
         limit: UPLOAD_SIGNS_PER_HOUR,
         windowMs: HOUR_MS,
         now: req.now,
       })
+      if (request.kind !== 'avatar') {
+        if (!deps.entries) throw appError('STORAGE_UNAVAILABLE', 'Las subidas no están disponibles.')
+        return { data: await deps.entries.sign(userId, request, req.now) }
+      }
+      if (!deps.images) throw appError('SERVICE_UNAVAILABLE', 'Las subidas no están disponibles.')
       const publicId = `${avatarFolder(deps.images.prefix, userId)}${deps.newId()}`
       return { data: deps.images.signImageUpload({ publicId, nowMs: req.now, tags: [request.kind] }) }
     },

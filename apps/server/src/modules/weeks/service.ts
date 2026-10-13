@@ -25,10 +25,10 @@ import {
   type WeekCreate,
   type WeekUpdate,
 } from '@beatbattle/shared'
-import { and, asc, count, eq, gt, gte, lt, lte, sql, sum } from 'drizzle-orm'
+import { and, asc, count, eq, gt, gte, inArray, lt, lte, sql, sum } from 'drizzle-orm'
 import { type BatchStatement, runBatch } from '../../db/batch'
 import type { Db } from '../../db/client'
-import { rulesAcceptance, sample, sampleDownload, seenFlag, week } from '../../db/schema'
+import { entry, rulesAcceptance, sample, sampleDownload, seenFlag, week } from '../../db/schema'
 import { auditStatement } from '../../lib/audit'
 import { appError } from '../../lib/errors'
 import type { SampleStorage } from '../storage/samples'
@@ -168,8 +168,28 @@ export function createWeeksService(deps: WeeksDeps) {
         .select({ at: seenFlag.seenAt })
         .from(seenFlag)
         .where(and(eq(seenFlag.userId, viewerId), eq(seenFlag.kind, 'drop'), eq(seenFlag.ref, row.slug)))
-      viewer = { rulesAccepted: accepted?.version === row.rulesVersion, dropSeen: seen !== undefined }
+      const [mine] = await db
+        .select({ id: entry.id, status: entry.status, alias: entry.alias })
+        .from(entry)
+        .where(
+          and(
+            eq(entry.userId, viewerId),
+            eq(entry.weekId, row.id),
+            inArray(entry.status, ['processing', 'active', 'hidden']),
+          ),
+        )
+      viewer = {
+        rulesAccepted: accepted?.version === row.rulesVersion,
+        dropSeen: seen !== undefined,
+        entry: mine
+          ? { id: mine.id, status: mine.status as 'processing' | 'active' | 'hidden', alias: mine.alias }
+          : null,
+      }
     }
+    const [inBattle] = await db
+      .select({ n: count() })
+      .from(entry)
+      .where(and(eq(entry.weekId, row.id), eq(entry.status, 'active')))
     return {
       number: row.number,
       slug: row.slug,
@@ -181,6 +201,7 @@ export function createWeeksService(deps: WeeksDeps) {
       voteEndsAt: row.voteEndsAt,
       challenge: row.challenge,
       golden: row.golden,
+      entries: inBattle?.n ?? 0,
       sample: {
         title: s.title,
         credits: s.credits,

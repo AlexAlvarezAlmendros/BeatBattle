@@ -149,6 +149,7 @@ describe('router (0.10, guía §2.18)', () => {
         coverUrl: '/cover',
         streamUrl: '/stream',
       },
+      entries: 0,
       viewer: null,
     }
     vi.stubGlobal(

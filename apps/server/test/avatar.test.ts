@@ -44,7 +44,7 @@ const confirm = (t: TestApp, cookie: string, publicId: string) =>
   })
 
 describe('avatar (RF-PRF-02)', () => {
-  it('RF-ENT-04: el audio de una entrada no se firma como un avatar (su firma llega con la tarea 4.5)', async () => {
+  it('RF-ENT-04: el audio de una entrada nunca se firma como un avatar (sin almacenamiento de audio, 503)', async () => {
     const fake = fakeImages()
     const t = await makeApp({ images: fake.images })
     const { cookie } = await createAccount(t, { email: 'pau@example.com', username: 'pau' })
@@ -56,7 +56,8 @@ describe('avatar (RF-PRF-02)', () => {
       durationMs: 150_000,
     }
     const res = await sign(t, cookie, entry)
-    expect(res.statusCode).toBe(400)
+    expect(res.statusCode).toBe(503)
+    expect(res.json().error.code).toBe('STORAGE_UNAVAILABLE')
     expect(JSON.stringify(res.json())).not.toContain('avatars/')
   })
 

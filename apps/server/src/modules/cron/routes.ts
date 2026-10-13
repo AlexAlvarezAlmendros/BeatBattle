@@ -8,6 +8,9 @@ import { type DrainDeps, type DrainResult, emailDrain } from '../../email/outbox
 import { appError } from '../../lib/errors'
 import { withLease } from '../../lib/lease'
 import type { AlertsService } from '../alerts/service'
+import { type EntriesTickResult, entriesTick } from '../entries/cleanup'
+import type { EntriesService } from '../entries/service'
+import type { EntryStorage } from '../storage/entries'
 import { type ScheduleDeps, scheduleDropEmails, scheduleGapAlerts } from '../weeks/schedule'
 import { sealDueWeeks } from '../weeks/seal'
 import type { WeeksService } from '../weeks/service'
@@ -20,6 +23,8 @@ export interface TickResult {
   dropEmails: number
   calendarGaps: string[]
   cleaned: { unconfirmedAlerts: number; usernameRedirects: number }
+  /** Intents caducados, entradas en `processing` y huérfanos (tarea 4.9); `null` sin almacenamiento. */
+  entries: EntriesTickResult | null
   drain: DrainResult | null
   /** Tareas que han fallado (las demás siguen). */
   errors: string[]
@@ -31,6 +36,8 @@ export interface CronDeps extends ScheduleDeps {
   drain: DrainDeps
   weeks: WeeksService
   alerts: AlertsService
+  entries: EntriesService
+  entryStorage: EntryStorage | null
 }
 
 function bearerMatches(header: string | undefined, secret: string): boolean {
@@ -58,6 +65,7 @@ export function cronRoutes(app: FastifyInstance, deps: CronDeps): void {
         dropEmails: 0,
         calendarGaps: [],
         cleaned: { unconfirmedAlerts: 0, usernameRedirects: 0 },
+        entries: null,
         drain: null,
         errors: [],
       }
@@ -85,6 +93,19 @@ export function cronRoutes(app: FastifyInstance, deps: CronDeps): void {
           .where(lte(usernameRedirect.expiresAt, now))
           .returning({ old: usernameRedirect.old })
         out.cleaned.usernameRedirects = redirects.length
+      })
+      await step('entries', async () => {
+        if (!deps.entryStorage) return
+        out.entries = await entriesTick(
+          {
+            db: deps.db,
+            storage: deps.entryStorage,
+            entries: deps.entries,
+            newId: deps.newId,
+            publicUrl: deps.publicUrl,
+          },
+          now,
+        )
       })
       await step('emailDrain', async () => {
         out.drain = await emailDrain({ ...deps.drain, now: () => now })

@@ -1,10 +1,11 @@
 import type { QueryClient } from '@tanstack/react-query'
 import { getDefaultNormalizer, screen, within } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 import { renderInRouter } from '../../app/layout/testing'
 import { DROP_ALERT_ID, OTHER_PEOPLE_URL } from '../../app/paths'
 import { t } from '../../i18n'
 import { queryKeys } from '../../net/queryKeys'
+import { useSession } from '../account/session'
 import { HomePage } from './HomePage'
 
 /** El calendario vacío, ya cargado (`GET /api/weeks/current` sin semana ni próxima). */
@@ -68,5 +69,67 @@ describe('HomePage: menú principal en «calendario vacío» y visitante (0.24, 
     expect(items[0]).toHaveAttribute('aria-disabled', 'true')
     expect(items[0]).toHaveTextContent(t('home.loading.detail'))
     expect(items[0]).not.toHaveTextContent(t('home.modes.play.empty'))
+  })
+})
+
+describe('HomePage con la semana en juego y la entrada subida (4.8, §3.8.3)', () => {
+  afterEach(() => useSession.setState({ status: 'loading', me: null }))
+
+  it('RF-ENT-01 (en la web): con su entrada en la semana, Jugar dice «Editar mi entrada» y el cursor va a Jurado', () => {
+    useSession.setState({
+      status: 'signedIn',
+      me: {
+        id: 'u1',
+        email: 'lilbru@example.com',
+        emailVerified: true,
+        username: 'lilbru',
+        displayUsername: 'LilBru',
+        cardNumber: 1,
+        xp: 0,
+        avatarUrl: null,
+        role: 'user',
+      },
+    })
+    const now = Date.now()
+    const live = {
+      number: 42,
+      slug: '2026-w42',
+      label: '2026-W42',
+      seasonId: '2026-T4',
+      phase: 'open',
+      startsAt: now - 3_600_000,
+      submitEndsAt: now + 2 * 86_400_000,
+      voteEndsAt: now + 2 * 86_400_000 + 4 * 3_600_000,
+      challenge: null,
+      golden: false,
+      entries: 7,
+      sample: {
+        title: 'Lluvia en Gràcia',
+        credits: 'Other People Records',
+        origin: null,
+        licenseText: 'Uso libre',
+        bpm: 92,
+        musicalKey: 'Dm',
+        genreHint: null,
+        durationMs: 72_000,
+        peaks: '',
+        chops: [],
+        hasStems: false,
+        coverUrl: '/cover',
+        streamUrl: '/stream',
+      },
+      viewer: {
+        rulesAccepted: true,
+        dropSeen: true,
+        entry: { id: 'e1', status: 'active', alias: 'Tigre Púrpura' },
+      },
+    }
+    renderInRouter(<HomePage />, '/', (client) =>
+      client.setQueryData(queryKeys.weeks.current(), { week: live, next: null }),
+    )
+    const items = within(screen.getByRole('menu', { name: t('home.menu.title') })).getAllByRole('menuitem')
+    expect(items[0]).toHaveTextContent(t('home.modes.play.edit'))
+    expect(items[1]).toHaveAttribute('data-cursor-active', 'true')
+    expect(screen.getByRole('article', { name: 'Lluvia en Gràcia' })).toHaveTextContent('7')
   })
 })

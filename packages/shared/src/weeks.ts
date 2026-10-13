@@ -216,8 +216,21 @@ export const PublicWeekSchema = z.object({
     coverUrl: z.string(),
     streamUrl: z.string(),
   }),
-  /** Lo de quien mira, si tiene sesión. */
-  viewer: z.object({ rulesAccepted: z.boolean(), dropSeen: z.boolean() }).nullable(),
+  /** Entradas en la batalla: un dato de la semana, nunca de una entrada (§3.8.3, `RNF-SEC-04`). */
+  entries: z.number().int().min(0),
+  /**
+   * Lo de quien mira, si tiene sesión. `entry`: su entrada de la semana (en juego, `processing` u oculta),
+   * para que el menú diga «Editar mi entrada» (§3.8.3).
+   */
+  viewer: z
+    .object({
+      rulesAccepted: z.boolean(),
+      dropSeen: z.boolean(),
+      entry: z
+        .object({ id: z.string(), status: z.enum(['processing', 'active', 'hidden']), alias: z.string() })
+        .nullable(),
+    })
+    .nullable(),
 })
 export type PublicWeek = z.infer<typeof PublicWeekSchema>
 

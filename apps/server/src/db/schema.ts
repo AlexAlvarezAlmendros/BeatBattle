@@ -441,3 +441,14 @@ export const vote = sqliteTable(
     check('vote_stars', sql`${table.stars} BETWEEN 1 AND 5`),
   ],
 )
+
+/**
+ * Estado que una tarea programada guarda entre un `tick` y el siguiente (§4.12): p. ej. por dónde va el
+ * barrido de huérfanos (§4.8.5), que se trocea para no pasar del límite de la Admin API.
+ */
+export const jobState = sqliteTable('job_state', {
+  name: text('name').primaryKey(),
+  /** JSON con lo que la tarea necesite. */
+  value: text('value').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+})
