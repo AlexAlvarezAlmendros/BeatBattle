@@ -34,6 +34,13 @@ export type ControlKey =
   | 'jury'
   | 'order'
   | 'filters'
+  | 'rate'
+  | 'pause'
+  | 'seek'
+  | 'note'
+  | 'skip'
+  | 'report'
+  | 'exit'
 
 /** Placa de título del HUD en las pantallas interiores (§3.3 «Placa de título»). */
 export interface TitlePlateConfig {

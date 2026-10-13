@@ -54,7 +54,8 @@ export interface SfxDef {
 /**
  * Los efectos de la tarea 1.4, `vote.unlocked` de la 1.5, los de la interfaz de la 2.27 (`ui.move`,
  * `ui.toggle`, `ui.open`/`ui.close`, `ui.error`, `ui.success`, `nav.page`), `drop.needle` de la 3.17 y los
- * de la subida de la 4.17 (`upload.*`, `ann.newbeat`). El resto del Anexo D llega con sus pantallas.
+ * de la subida de la 4.17 (`upload.*`, `ann.newbeat`) y los del Modo Jurado de la 5.18 (`combo.up`, `jury.swap`). El
+ * resto del Anexo D llega con sus pantallas.
  */
 export const SFX_IDS = [
   'ui.enter',
@@ -87,6 +88,8 @@ export const SFX_IDS = [
   'upload.progress',
   'upload.done',
   'ann.newbeat',
+  'combo.up',
+  'jury.swap',
 ] as const
 
 export type SfxId = (typeof SFX_IDS)[number]
@@ -153,6 +156,8 @@ export function sfxCatalog(key: Key = DEFAULT_KEY, xpCombo = 0): Record<SfxId, S
   // El zumbido de la ranura: la tónica en la 1.ª octava (de 33 a 62 Hz, Anexo D).
   const hum = midiToHz(tonicMidi(key, 1))
   const semitone = 2 ** (1 / 12)
+  // El combo sube un semitono por voto seguido (§3.4.2), hasta ×8.
+  const comboSteps = Math.max(0, Math.min(xpCombo, 8) - 1)
   const fifthUp = 2 ** (7 / 12)
   const majorThird = 2 ** (4 / 12)
   // `gain` compensa lo que el paso banda se come (medido en el render offline, Anexo D).
@@ -566,6 +571,47 @@ export function sfxCatalog(key: Key = DEFAULT_KEY, xpCombo = 0): Record<SfxId, S
     },
     // Estampa del anunciador (§3.9): un golpe con cuerpo y el acorde de quinta de la tónica, seco y corto,
     // a la vez que el rótulo se estampa (escala 1,4 → 1 en 280 ms, Anexo E).
+    // El combo del Modo Jurado (§3.4.2): un blip que sube un semitono por voto seguido (hasta ×8).
+    'combo.up': {
+      jitter: 0,
+      levelDb: -18,
+      duration: 0.12,
+      layers: [
+        tone({
+          wave: 'triangle',
+          freq: [root * semitone ** comboSteps, root * semitone ** (comboSteps + 12)],
+          filter: { type: 'lowpass', freq: at(3200), q: 0.7 },
+          attack: 0.002,
+          decay: 0.09,
+          dur: 0.12,
+          gain: 1.04,
+        }),
+      ],
+    },
+    // Cambio de entrada en el Modo Jurado: un *scratch* corto (ruido con un barrido de tono rápido).
+    'jury.swap': {
+      jitter: 1,
+      levelDb: -16,
+      duration: 0.3,
+      layers: [
+        noise({
+          noise: 'white',
+          filter: { type: 'bandpass', freq: [600, 3800], q: 2.5 },
+          attack: 0.005,
+          decay: 0.22,
+          dur: 0.28,
+          gain: 2.5,
+        }),
+        tone({
+          wave: 'sawtooth',
+          freq: [lowRoot * 4, lowRoot],
+          attack: 0.004,
+          decay: 0.2,
+          dur: 0.26,
+          gain: 0.88,
+        }),
+      ],
+    },
     'ann.newbeat': {
       jitter: 0,
       levelDb: -14,

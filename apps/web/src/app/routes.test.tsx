@@ -38,7 +38,6 @@ const PAGES: { path: string; heading: string; title: string }[] = [
     title: documentTitle(tk('pages.weekResults.title')),
   },
   { path: '/semanas', heading: 'pages.weeks.title', title: documentTitle(tk('pages.weeks.title')) },
-  { path: '/jurado', heading: 'pages.jury.title', title: documentTitle(tk('pages.jury.title')) },
   { path: '/subir', heading: 'pages.upload.title', title: documentTitle(tk('pages.upload.title')) },
   {
     path: '/salon-de-la-fama',

@@ -1,0 +1,386 @@
+/*
+ * Modo Jurado (guía §3.8.7; maquetas `03-jurado` y `06-jurado-movil`): la arena (TÚ · VS · la entrada) y el
+ * panel de combate opaco (onda, combo, estrellas y acciones). En el HUD, el jugador con la escucha mínima, la
+ * caja de ronda con el contador y el alias con la placa rayada. Nunca dos entradas con estrellas.
+ */
+.screen {
+  display: grid;
+  flex: 1 0 auto;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: var(--bb-space-4);
+}
+
+.loading {
+  margin: auto;
+  color: var(--bb-text-2);
+}
+
+/* ── HUD ────────────────────────────────────────────────────────────────────────────────── */
+.hudYou {
+  display: grid;
+  gap: var(--bb-space-1);
+  min-width: 14rem;
+}
+
+.hudName {
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-xl);
+  font-style: italic;
+  font-weight: var(--bb-weight-extrabold);
+  text-transform: uppercase;
+}
+
+.p1 {
+  color: var(--bb-red);
+}
+
+.listenMeter {
+  width: 100%;
+}
+
+.round {
+  display: grid;
+  justify-items: center;
+  padding: var(--bb-space-2) var(--bb-space-6);
+  text-align: center;
+}
+
+.counter {
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-timer);
+  font-weight: var(--bb-weight-bold);
+  line-height: 1;
+}
+
+.hudEntry {
+  display: grid;
+  /* Un alias largo («GALAXIA SILENCIOSA») parte antes que pisar la caja de ronda. */
+  max-width: min(32vw, 28rem);
+  justify-items: end;
+  gap: var(--bb-space-1);
+  text-align: right;
+}
+
+.hudAlias :global(.bb-display) {
+  font-size: var(--bb-fs-xl);
+}
+
+.hidden {
+  padding: var(--bb-space-1) var(--bb-space-3);
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--bb-black) 0 var(--bb-space-1),
+    var(--bb-ink-3) var(--bb-space-1) var(--bb-space-2)
+  );
+  color: var(--bb-text);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+/* ── Arena ──────────────────────────────────────────────────────────────────────────────── */
+.arena {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--bb-space-6);
+  min-height: 0;
+}
+
+.you {
+  position: relative;
+  display: grid;
+  justify-items: start;
+}
+
+.silhouette {
+  /* La arena cabe con el panel entre el HUD y la barra: la silueta y la portada, con el alto de la ventana. */
+  width: min(100%, 26dvh, 22rem);
+}
+
+.youBig {
+  position: absolute;
+  bottom: var(--bb-space-8);
+  left: 0;
+  font-size: var(--bb-fs-3xl);
+}
+
+.youPlate {
+  padding: var(--bb-space-1) var(--bb-space-3);
+  border: var(--bb-stroke-hair) solid var(--bb-line-strong);
+  background: var(--bb-panel);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.versus {
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-4);
+  text-align: center;
+}
+
+.vs {
+  font-size: clamp(4rem, 12dvh, 9rem);
+  line-height: 1;
+}
+
+.alone {
+  max-width: 22rem;
+  padding: var(--bb-space-3) var(--bb-space-4);
+  border: var(--bb-stroke-hair) solid var(--bb-line-strong);
+  background: var(--bb-panel);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.entry {
+  display: grid;
+  justify-items: end;
+  gap: var(--bb-space-3);
+  animation: swap-in var(--bb-dur-swap) var(--bb-ease-out) both;
+}
+
+.cover {
+  position: relative;
+  width: min(100%, 24dvh, 18rem);
+  aspect-ratio: 1;
+}
+
+.cover > :is(canvas, img) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.stamp {
+  position: absolute;
+  top: var(--bb-space-4);
+  left: calc(-1 * var(--bb-space-3));
+}
+
+.title {
+  color: var(--bb-text);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--bb-space-2);
+}
+
+/* El cambio de entrada por la diagonal (§3.8.7, Anexo E): entra desde la izquierda; sin movimiento, fundido. */
+@keyframes swap-in {
+  from {
+    opacity: 0;
+    transform: translateX(calc(-1 * var(--bb-space-16) * var(--bb-motion)));
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Panel de combate ───────────────────────────────────────────────────────────────────── */
+.panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-areas:
+    "wave wave wave"
+    "combo stars actions"
+    "notice notice notice";
+  align-items: center;
+  gap: var(--bb-space-4) var(--bb-space-6);
+  padding: var(--bb-space-4) var(--bb-space-6);
+  background: var(--bb-panel);
+}
+
+.wave {
+  grid-area: wave;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.waveFoot {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--bb-space-4);
+  margin-top: var(--bb-space-2);
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-sm);
+}
+
+.time {
+  white-space: nowrap;
+  color: var(--bb-text);
+  font-family: var(--bb-font-num);
+  font-variant-numeric: tabular-nums;
+}
+
+.combo {
+  grid-area: combo;
+  display: grid;
+  gap: var(--bb-space-2);
+  max-width: 12rem;
+}
+
+.comboCount {
+  color: var(--bb-red);
+  font-size: var(--bb-fs-2xl);
+}
+
+.stars {
+  grid-area: stars;
+}
+
+.actions {
+  grid-area: actions;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--bb-space-2);
+}
+
+.notice {
+  grid-area: notice;
+  color: var(--bb-text);
+}
+
+/* ── Jurado completo ────────────────────────────────────────────────────────────────────── */
+.complete {
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-5);
+  margin: auto;
+  max-width: 36rem;
+  text-align: center;
+}
+
+.completeTitle {
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-title);
+  font-style: italic;
+  text-transform: uppercase;
+}
+
+.completeText {
+  color: var(--bb-text-2);
+}
+
+/* ── Móvil (390 × 844): ronda arriba, la fila «silueta VS alias», la portada y el panel ─────────── */
+@media (max-width: 960px) {
+  .arena {
+    grid-template-columns: auto auto minmax(0, 1fr);
+    gap: var(--bb-space-3);
+  }
+
+  .silhouette {
+    width: var(--bb-space-16);
+  }
+
+  .youBig,
+  .youPlate,
+  .alone,
+  .announcer {
+    display: none;
+  }
+
+  .vs {
+    font-size: var(--bb-fs-3xl);
+  }
+
+  .entry {
+    grid-column: 1 / -1;
+    justify-items: center;
+  }
+
+  .cover {
+    width: min(100%, 15.5rem);
+  }
+
+  .chips {
+    justify-content: center;
+  }
+
+  .panel {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "wave"
+      "stars"
+      "actions"
+      "combo"
+      "notice";
+    padding: var(--bb-space-4);
+  }
+
+  .actions {
+    justify-content: center;
+  }
+}
+
+/*
+ * Ventana baja en escritorio (1366 × 657, 1280 × 720): las estrellas, el control principal, se ven sin
+ * desplazar. La arena se encoge con el alto y el panel aprieta sus huecos.
+ */
+@media (min-width: 961px) and (max-height: 780px) {
+  .screen {
+    gap: var(--bb-space-2);
+  }
+
+  .arena {
+    gap: var(--bb-space-4);
+  }
+
+  .silhouette {
+    width: min(100%, 22dvh);
+  }
+
+  .youBig {
+    bottom: var(--bb-space-6);
+    font-size: var(--bb-fs-2xl);
+  }
+
+  .cover {
+    width: min(100%, 17dvh);
+  }
+
+  .entry {
+    gap: var(--bb-space-2);
+  }
+
+  .versus {
+    gap: var(--bb-space-2);
+  }
+
+  .vs {
+    font-size: clamp(3rem, 9dvh, 9rem);
+  }
+
+  .alone {
+    padding: var(--bb-space-2) var(--bb-space-3);
+  }
+
+  /* El panel en una fila: la onda y el combo, las estrellas y las acciones en columna. */
+  .panel {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "wave stars actions"
+      "combo stars actions"
+      "notice notice notice";
+    gap: var(--bb-space-2) var(--bb-space-6);
+    padding-block: var(--bb-space-3);
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .waveFoot {
+    margin-top: var(--bb-space-1);
+  }
+}

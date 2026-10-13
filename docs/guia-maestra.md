@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.67 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.68 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1900,6 +1900,15 @@ la diagonal (`--bb-dur-swap`, 1,2 s; `jury.swap`); el VS se vuelve a estampar. *
 no tiene barra de vida; el lector anuncia «Modo Jurado · ronda 7 de 23 · escuchando Tigre Púrpura»,
 sin metáfora de combate.
 
+**Ventana baja en escritorio** (≤ 780 px de alto: 1366 × 657, 1280 × 720): la silueta, la portada y el VS
+se encogen con el alto y el panel va en una fila (la onda y el combo, las estrellas, y las acciones en columna):
+las estrellas, el control principal, se ven sin desplazar.
+
+**Comportamiento** (tarea 5.18): la cola se pide al entrar y se ordena aquí (votar la quita, saltar la manda al
+final); `?desde=<id>` empieza por esa entrada (J desde la selección). La ronda cuenta desde lo que ya habías
+puntuado al entrar. Si el audio no carga, lo dice y la entrada pasa al final (`RF-PLAY-09`). Al salir, deja de
+sonar. El combo es de la visita (×8 como mucho) y no da XP hasta la Fase 7.
+
 **Móvil (390×844)**: arriba, ronda, contador («YA PUEDES PUNTUAR») y cerrar; la fila «[silueta] VS
 TIGRE PÚRPURA»; portada de 248 px; chips y la nota; y el panel con onda, medidor de escucha, «Toca una
 estrella», estrellas de 62 px y Pausa · Saltar · Denunciar de 48 px.
@@ -3624,6 +3633,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.68 | **Tarea 5.18.** §3.8.7: la composición en ventana baja (≤ 780 px de alto) y el comportamiento del Modo Jurado (cola ordenada en la visita, `?desde`, ronda, error de audio, salir, combo sin XP). Anexo D: `combo.up` y `jury.swap` en el catálogo, medidos *offline* a su nivel (±0,05 dB). La barra de controles del Modo Jurado: `1 5 PUNTUAR · ESPACIO PAUSA · ←→ BUSCAR` (o `NOTA` con el cursor en las estrellas) `· S SALTAR · R DENUNCIAR · ESC SALIR · M SONIDO`. |
 | 2026-10-13 | 0.6.67 | **Tareas 5.17 y 5.19.** §2.6: la ficha (`/e/:id`) lleva el alias en display (o el productor, revelada), el título, los chips (BPM, tonalidad, duración, géneros y DAW), la descripción, la onda que suena en el reproductor global (saltar con ella no cuenta), las estrellas con la escucha mínima si se puede votar (sin cuenta, «Entra para votar este beat»; sin verificar, «Verifica tu email»), y «Compartir» (la hoja del sistema o copiar el enlace) y «Denunciar». La portada se inclina como la carta al pasar el ratón (`--bb-tilt-card`). En la propia: «Es tu entrada: N votos · M escuchas», sin estrellas ni media. §2.7: la denuncia se hace en un diálogo con los cinco motivos y un detalle de hasta 500 caracteres; la segunda a la misma entrada dice «Ya habías denunciado esta entrada». |
 | 2026-10-13 | 0.6.66 | **Tarea 5.16.** §2.6 y §2.18: «ELIGE ENTRADA» va en su propia ruta, `/semana/:slug/entradas`; `/semana/:slug` sigue siendo el escenario del sample (bases y descarga, Fase 3) y enlaza a ella. Una pantalla para cada trabajo: la del sample ya es alta y la selección llena el alto entre el HUD y la barra (maqueta `02-seleccion`). J lleva al Modo Jurado empezando por la enfocada (`/jurado?desde=<id>`). Su barra de controles: `←↑↓→ MOVER · INTRO ESCUCHAR · J JURADO · Q E ORDEN · F FILTROS · ESC VOLVER · M SONIDO`. **Tareas 5.14 y 5.15** (§4.7.3, §4.7.2): la escucha seguida de 10 s se reinicia con una pausa o un salto; con la cuenta verificada, `listen` se pide al empezar a sonar una entrada ajena y `qualify` al sumar el umbral en `audio.played`, y si el reloj del servidor aún no llega se repite pasado `remainingMs`; las estrellas no despiertan hasta que el servidor da el recibo. El voto optimista cambia `myVote` en la lista y lo revierte con `ui.error` si no se guarda. |
 | 2026-10-13 | 0.6.65 | **Tareas 5.13 y 5.20.** §3.3: el componente «Reproductor» (la barra global: dónde va, qué lleva en escritorio y en móvil, cuándo no sale y su alto en el margen del foco). §2.6: el sample pasa por el mismo reproductor. §4.4: el generador de datos de una semana en juego vive en `apps/server/src/scripts/seedBattle.ts` (necesita la app) y el de los E2E en `tests/e2e/battle.ts`. |

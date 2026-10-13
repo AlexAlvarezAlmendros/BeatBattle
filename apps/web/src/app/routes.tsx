@@ -161,7 +161,10 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'jurado',
-              handle: handle('verified', interior('jury', 'pages.jury.title')),
+              handle: handle('verified', {
+                wedge: 'right',
+                keys: ['rate', 'pause', 'seek', 'skip', 'report', 'exit', 'sound'],
+              }),
               lazy: page(
                 () => import('../features/jury/JuryPage'),
                 (m) => m.JuryPage,
