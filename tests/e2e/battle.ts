@@ -255,3 +255,29 @@ export async function createBattleWeek(
   }
   return { ...week, producers: out }
 }
+
+/** Voto por la API (escucha, reloj +31 s, recibo y voto), para llegar a 5 votos sin pantallas. */
+export async function apiVote(voter: Account, entryId: string, stars: number, clock: Clock, base: string) {
+  const headers = () => ({ origin: base, 'x-bb-test-now': String(clock.api) })
+  const started = await voter.page.request.post(`/api/entries/${entryId}/listen`, { headers: headers() })
+  expect(started.ok(), await started.text()).toBe(true)
+  const { listenId } = (await started.json()).data
+  clock.api += 31_000
+  const qualified = await voter.page.request.post(`/api/entries/${entryId}/listen/qualify`, {
+    headers: headers(),
+    data: { listenId },
+  })
+  expect(qualified.ok(), await qualified.text()).toBe(true)
+  const voted = await voter.page.request.put(`/api/entries/${entryId}/vote`, {
+    headers: headers(),
+    data: { stars },
+  })
+  expect(voted.ok(), await voted.text()).toBe(true)
+}
+
+export async function lastMail(page: Page, email: string, contains: string) {
+  const res = await page.request.get(
+    `/api/test/mailbox?to=${encodeURIComponent(email)}&contains=${encodeURIComponent(contains)}`,
+  )
+  return (await res.json()).data as { subject: string; text: string } | null
+}
