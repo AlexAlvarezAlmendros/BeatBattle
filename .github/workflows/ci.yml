@@ -21,8 +21,9 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     # Con la Fase 1, los E2E pasan de 980 (unos 14 min en el runner) y la batería del motor de análisis
-    # suma más de medio minuto: 20 min se quedaban cortos (la PR #5 se cortó en los E2E).
-    timeout-minutes: 30
+    # suma más de medio minuto: 20 min se quedaban cortos (la PR #5 se cortó en los E2E). Con la Fase 4 son
+    # unos 1050 y tardan ~26 min: 30 min ya no bastaban (la PR #59 se cortó a los 30 min sin ningún fallo).
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
         with:

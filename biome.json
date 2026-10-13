@@ -8,6 +8,7 @@
       "!**/node_modules",
       "!**/generated",
       "!**/drizzle/meta",
+      "!apps/server/src/auth/data/disposable-domains.json",
       "!docs",
       "!.claude"
     ]
