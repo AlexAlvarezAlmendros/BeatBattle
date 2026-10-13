@@ -97,6 +97,11 @@ const EnvSchema = z.object({
 
 export interface AppConfig {
   env: NodeEnv
+  /**
+   * Los buscadores pueden indexar la web (`robots.txt`, §2.15): solo en producción de verdad, nunca en una
+   * preview de Vercel ni en local.
+   */
+  indexable: boolean
   host: string
   port: number
   /** URL pública de la web, sin barra final. */
@@ -337,6 +342,7 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
 
   return {
     env: e.NODE_ENV,
+    indexable: e.NODE_ENV === 'production' && (e.VERCEL_ENV === undefined || e.VERCEL_ENV === 'production'),
     host: e.HOST,
     port: e.PORT,
     publicUrl,

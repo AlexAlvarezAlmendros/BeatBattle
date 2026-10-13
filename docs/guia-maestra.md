@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.76 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.77 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -893,8 +893,13 @@ Panel en `/admin`, solo para el rol `admin`, con la misma estética pero en un m
 - **Tarjetas para stories** (1080×1920), generadas en el navegador: «Estoy en la batalla #41»,
   «He quedado 2.º», «Mi carta de productor». Se comparten con la Web Share API (con ficheros) o se
   descargan.
-- **SEO**: `sitemap.xml` con semanas selladas y perfiles; datos estructurados (`MusicRecording`
-  para entradas selladas, `Event` para cada semana); `robots.txt`; canonical por ruta.
+- **SEO**: `sitemap.xml` con las páginas fijas públicas (`/`, `/semanas`, `/como-funciona`), las semanas
+  selladas (la semana y sus resultados, con `lastmod` del sellado) y los perfiles de quien ha participado en
+  alguna sellada (sin cuentas bloqueadas). Nada de una semana abierta: en voto ciego, un perfil listado al
+  subir diría quién participa. Datos estructurados: `MusicRecording` para entradas selladas, `Event` para
+  cada semana. `robots.txt`: fuera de producción de verdad (previews de Vercel y local) lo cierra todo; en
+  producción cierra la API y las páginas de sesión, admin y autenticación, y enlaza el sitemap. Canonical por
+  ruta. Los dos los sirve la app de Fastify (`vercel.json` los reescribe a `/api`).
 - **Voto ciego y compartir**: compartir una entrada durante la semana enseña su alias y título, no
   su autoría. El productor puede compartir su propia entrada (no se puede impedir), pero la tarjeta
   dice «Escúchala y vota» y no «Vota a X».
@@ -3659,6 +3664,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.77 | **Tarea 6.13.** §2.15: qué lleva el sitemap (páginas fijas, semanas selladas y perfiles de participantes de semanas selladas) y `robots.txt` cerrado fuera de producción de verdad (`indexable` en la configuración). |
 | 2026-10-13 | 0.6.76 | **Tarea 6.12.** §4.7.7, §4.15: las páginas compartibles las sirve la app de Fastify (reescrituras de `vercel.json` a `/api`) y no hay un `api/share.ts` aparte. Se concretan los 404 con el `index.html` tal cual, el 301 del perfil, el escape de los metadatos y el 503 sin la web construida. |
 | 2026-10-13 | 0.6.75 | **Tarea 6.11.** §2.15, §4.10, §4.15: las imágenes OG las pinta la app de Fastify (`/api/og/:kind/:id.png?v=`) y no una función `api/og.tsx` aparte. Se añaden la versión por hash con caché inmutable, los 404 antes de tiempo, el perfil con solo semanas selladas y las portadas por CPU en servidor (SVG medido con resvg, con la calibración de §3.4.5). |
 | 2026-10-13 | 0.6.74 | **Tareas 6.9 y 6.10.** §2.12.2: el reparto del Lunes de batalla por destinatario (separado, sin semana nueva o sin semana cerrada, la ventana de una semana) y que el combinado se decide con el instante del sellado. §4.19.5: la tarjeta de resultado (404 con firma y sin resultado, contenido, fuentes estáticas, caché de una hora). Dependencias de §4.1 fijadas: satori 0.33.5 (la última con más de dos semanas) y `@resvg/resvg-js` 2.6.2; las fuentes, de `@fontsource` (Anybody, Chakra Petch y Oxanium estáticas) en el servidor. |
