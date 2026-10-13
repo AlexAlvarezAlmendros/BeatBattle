@@ -108,7 +108,7 @@ const FEW_SCREENS = [
   { path: '/ajustes/privacidad', heading: 'Privacidad' },
   { path: '/esto-no-existe', heading: 'Bonus stage' },
   { path: '/legal/bases', heading: 'Bases de la competición' },
-  { path: '/semanas', heading: 'Semanas' },
+  { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
 ]
 
 /** Alto máximo de una fila densa (§3.8.14: nombre en display y una línea, «unos 56–72 px»). */
@@ -327,7 +327,7 @@ for (const { viewport, touch, screens } of [
     touch: true,
     screens: [
       { path: '/legal/bases', heading: 'Bases de la competición' },
-      { path: '/semanas', heading: 'Semanas' },
+      { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
       { path: '/subir', heading: 'Subir mi beat' },
       { path: '/esto-no-existe', heading: 'Bonus stage' },
       { path: '/ajustes/accesibilidad', heading: 'Accesibilidad' },
@@ -338,7 +338,7 @@ for (const { viewport, touch, screens } of [
     touch: false,
     screens: [
       { path: '/legal/bases', heading: 'Bases de la competición' },
-      { path: '/semanas', heading: 'Semanas' },
+      { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
     ],
   },
 ]) {
@@ -749,7 +749,7 @@ for (const viewport of [
       { path: '/como-funciona', heading: 'Cómo se juega', boxes: 'ul > li > a' },
       { path: '/ajustes/sonido', heading: 'Sonido y efectos', boxes: 'figure' },
       { path: '/esto-no-existe', heading: 'Bonus stage', boxes: 'figure, a' },
-      { path: '/semanas', heading: 'Semanas', boxes: '*' },
+      { path: '/salon-de-la-fama', heading: 'Salón de la fama', boxes: '*' },
     ]) {
       test(`RD-VIS-02 e: la columna de ${path} queda a la izquierda de la diagonal, también al pie (L1)`, async ({
         page,
@@ -1601,7 +1601,7 @@ for (const viewport of [
       { path: '/como-funciona', heading: 'Cómo se juega' },
       { path: '/ajustes/sonido', heading: 'Sonido y efectos' },
       { path: '/ajustes/accesibilidad', heading: 'Accesibilidad' },
-      { path: '/semanas', heading: 'Semanas' },
+      { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
     ]) {
       test(`§3.1 / §3.8.14: en ${path}, la cuña sigue a la pieza y el granate no pasa del ~24 % (P8)`, async ({
         page,
@@ -1627,8 +1627,7 @@ for (const viewport of [
 test.describe('granate de las provisionales a 1440 × 900', () => {
   for (const { path, heading } of [
     { path: '/subir', heading: 'Subir mi beat' },
-    { path: '/semanas', heading: 'Semanas' },
-    { path: '/semana/2026-41/resultados', heading: 'Resultados' },
+    { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
   ])
     test(`§3.1 / §3.8.14: en ${path}, la cuña sigue al sello y el granate no pasa del 24,5 % (G6)`, async ({
       page,
@@ -1646,7 +1645,7 @@ test.describe('granate de las provisionales a 1440 × 900', () => {
     const shares: number[] = []
     for (const width of [1599, 1600]) {
       await page.setViewportSize({ width, height: 900 })
-      await open(page, '/semanas', 'Semanas')
+      await open(page, '/salon-de-la-fama', 'Salón de la fama')
       await settle(page)
       shares.push(await wineShare(page))
     }
