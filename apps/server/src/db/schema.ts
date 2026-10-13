@@ -1,5 +1,6 @@
 import { ACCENTS, type Accent } from '@beatbattle/shared'
-import { index, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { sql } from 'drizzle-orm'
+import { blob, check, index, integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { user } from './auth-schema'
 
 /** Las tablas de Better Auth (`user`, `session`, `account`, `verification`, `rate_limit`), generadas. */
@@ -176,4 +177,142 @@ export const emailStat = sqliteTable(
     count: integer('count').notNull(),
   },
   (table) => [primaryKey({ columns: [table.scope, table.day, table.metric] })],
+)
+
+// ── Semanas y samples (guía §2.1, §2.4, §4.11, tarea 3.3) ───────────────────────────────────
+
+/**
+ * Sample de una semana (§2.4). Lo sube el admin; duración, bytes, sonoridad y forma de onda los mide el
+ * servidor (§4.8.4), nunca el navegador. Los `public_id` son los de §4.8.1 (`<prefijo>/samples/<id>/…`).
+ */
+export const sample = sqliteTable('sample', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  credits: text('credits').notNull(),
+  origin: text('origin'),
+  licenseText: text('license_text').notNull(),
+  bpm: real('bpm'),
+  musicalKey: text('musical_key'),
+  genreHint: text('genre_hint'),
+  durationMs: integer('duration_ms').notNull(),
+  bytes: integer('bytes').notNull(),
+  format: text('format').notNull(),
+  audioPublicId: text('audio_public_id').notNull(),
+  stemsPublicId: text('stems_public_id'),
+  coverPublicId: text('cover_public_id').notNull(),
+  /** 1000 bins mín/máx en `Int8` (2000 bytes). */
+  peaks: blob('peaks', { mode: 'buffer' }).notNull(),
+  loudnessLufs: real('loudness_lufs'),
+  /** JSON: 8 × `{ startMs, endMs }` para el kit de la semana (§3.7.6). */
+  chops: text('chops').notNull().default('[]'),
+  createdBy: text('created_by').notNull(),
+  createdAt: integer('created_at').notNull(),
+})
+
+/**
+ * Semana (§2.1). Su fase no se guarda: se deriva de los tres instantes y de `now` (`phaseOf`,
+ * `RF-DROP-01`). Los instantes los calcula `scheduleWeek` al programarla, en `Europe/Madrid`.
+ */
+export const week = sqliteTable(
+  'week',
+  {
+    id: text('id').primaryKey(),
+    /** #N desde el lanzamiento, por orden de calendario. */
+    number: integer('number').notNull().unique(),
+    /** `2026-w41`. */
+    slug: text('slug').notNull().unique(),
+    /** `2026-T4`. */
+    seasonId: text('season_id').notNull(),
+    sampleId: text('sample_id')
+      .notNull()
+      .references(() => sample.id),
+    challenge: text('challenge'),
+    blind: integer('blind', { mode: 'boolean' }).notNull().default(true),
+    golden: integer('golden', { mode: 'boolean' }).notNull().default(false),
+    rulesVersion: integer('rules_version').notNull(),
+    startsAt: integer('starts_at').notNull(),
+    submitEndsAt: integer('submit_ends_at').notNull(),
+    voteEndsAt: integer('vote_ends_at').notNull(),
+    sealedAt: integer('sealed_at'),
+    resultRevision: integer('result_revision').notNull().default(0),
+    createdBy: text('created_by').notNull(),
+    createdAt: integer('created_at').notNull(),
+  },
+  (table) => [
+    index('week_starts_at').on(table.startsAt),
+    check(
+      'week_boundaries',
+      sql`${table.startsAt} < ${table.submitEndsAt} AND ${table.submitEndsAt} <= ${table.voteEndsAt}`,
+    ),
+  ],
+)
+
+/** Bases aceptadas por cuenta y semana (`RF-DROP-06`), con la versión que se aceptó. */
+export const rulesAcceptance = sqliteTable(
+  'rules_acceptance',
+  {
+    userId: text('user_id').notNull(),
+    weekId: text('week_id').notNull(),
+    rulesVersion: integer('rules_version').notNull(),
+    acceptedAt: integer('accepted_at').notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.weekId] })],
+)
+
+export const SAMPLE_DOWNLOAD_KINDS = ['original', 'stems'] as const
+export type SampleDownloadKind = (typeof SAMPLE_DOWNLOAD_KINDS)[number]
+
+/** Descargas del sample por cuenta, semana y tipo (`RF-DROP-08`): la primera y cuántas. */
+export const sampleDownload = sqliteTable(
+  'sample_download',
+  {
+    userId: text('user_id').notNull(),
+    weekId: text('week_id').notNull(),
+    kind: text('kind', { enum: SAMPLE_DOWNLOAD_KINDS }).notNull(),
+    count: integer('count').notNull(),
+    firstAt: integer('first_at').notNull(),
+    lastAt: integer('last_at').notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.weekId, table.kind] }),
+    index('sample_download_week').on(table.weekId),
+  ],
+)
+
+export const SEEN_FLAG_KINDS = ['drop', 'ceremony', 'season_champion'] as const
+export type SeenFlagKind = (typeof SEEN_FLAG_KINDS)[number]
+
+/** Lo que una cuenta ya ha visto una vez: la revelación del drop (`RF-DROP-11`), la ceremonia… */
+export const seenFlag = sqliteTable(
+  'seen_flag',
+  {
+    userId: text('user_id').notNull(),
+    kind: text('kind', { enum: SEEN_FLAG_KINDS }).notNull(),
+    ref: text('ref').notNull(),
+    seenAt: integer('seen_at').notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.kind, table.ref] })],
+)
+
+/** *Lease* de las tareas programadas (§4.12): dos ejecuciones de la misma tarea no se pisan. */
+export const jobLease = sqliteTable('job_lease', {
+  name: text('name').primaryKey(),
+  holder: text('holder').notNull(),
+  expiresAt: integer('expires_at').notNull(),
+})
+
+/** Registro de las acciones de admin (`RF-ADM-05`). Nunca se borra ni se edita. */
+export const auditLog = sqliteTable(
+  'audit_log',
+  {
+    id: text('id').primaryKey(),
+    actorId: text('actor_id').notNull(),
+    action: text('action').notNull(),
+    target: text('target').notNull(),
+    reason: text('reason'),
+    /** JSON con lo que cambió. */
+    payload: text('payload'),
+    createdAt: integer('created_at').notNull(),
+  },
+  (table) => [index('audit_log_created').on(table.createdAt)],
 )

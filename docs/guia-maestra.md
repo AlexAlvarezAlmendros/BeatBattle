@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.42 · 2026-10-09 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.43 · 2026-10-09 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -336,7 +336,7 @@ extra y 8 *chops* (marcas de inicio y fin) para el kit sonoro de la semana (§3.
 | Id | Requisito | Aceptación |
 |---|---|---|
 | `RF-DROP-06` | La descarga exige sesión verificada y aceptar las bases de esa semana | Sin aceptar → 409 `RULES_NOT_ACCEPTED`; tras aceptar → 200 con `downloadUrl` firmada |
-| `RF-DROP-07` | La URL de descarga caduca en 1 h y fuerza la descarga como adjunto | La URL contiene firma y `fl_attachment`; pasada 1 h, Cloudinary responde 401 |
+| `RF-DROP-07` | La URL de descarga caduca en 1 h y fuerza la descarga como adjunto | La URL es la API de descarga de Cloudinary (`private_download_url`) con firma, `attachment=true` y `expires_at` a 1 h; pasada 1 h, Cloudinary responde 401 |
 | `RF-DROP-08` | Se registra la primera descarga y el número de descargas por usuario y semana | `sample_download` con `first_at` y `count`; el recuento total aparece en el panel de admin |
 | `RF-DROP-09` | El sample se puede escuchar sin cuenta (versión de escucha en MP3) | Visitante → el reproductor suena; la descarga pide entrar |
 | `RF-DROP-10` | Cuenta atrás hasta el cierre de envíos (fase `open`) o de votos (fase `voting`) | Con el reloj simulado a 59 min 59 s del cierre, el reloj de ronda muestra `00:00:59:59` y está en modo «última hora»; a 1 h y 1 s, `00:01:00:01` y sin ese modo (§3.3, §3.6; `LAST_HOUR_MS`, Anexo B) |
@@ -2338,7 +2338,7 @@ y `beatbattle-preview-<pr>` fuera de ella, para no mezclar nunca entornos).
 | Recurso | `resource_type` / `type` | `public_id` |
 |---|---|---|
 | Sample original | `video` / `authenticated` | `<prefijo>/samples/<sampleId>/original` |
-| Stems del sample | `raw` / `authenticated` | `<prefijo>/samples/<sampleId>/stems` (≤ 10 MB) |
+| Stems del sample | `raw` / `authenticated` | `<prefijo>/samples/<sampleId>/stems.zip` (≤ 10 MB; los `raw` llevan la extensión en el `public_id`) |
 | Portada del sample | `image` / `upload` | `<prefijo>/samples/<sampleId>/cover` |
 | Entrada | `video` / `authenticated` | `<prefijo>/entries/<semana>/<uuid>` (**sin id de usuario**, `RF-ENT-04`) |
 | Portada de entrada | `image` / `authenticated` | `<prefijo>/covers/<entryId>` (firmada para poder ocultarla en voto ciego) |
@@ -2365,8 +2365,10 @@ La firma caduca a la hora (regla de Cloudinary), igual que el `upload_intent`.
 - **Escucha**: derivado `f_mp3,br_192k` (MP3 a 192 kb/s), generado en la subida (`eager`) y
   entregado con URL firmada. Las respuestas públicas de la API incluyen esa URL, nunca el
   `public_id` en crudo.
-- **Descarga del sample**: URL firmada con `fl_attachment` y caducidad de 1 h (como
-  `getDownloadUrl` del sello).
+- **Descarga del sample**: la API de descarga privada de Cloudinary (`private_download_url`), firmada, con
+  `attachment=true` y `expires_at` a 1 h. Una URL de entrega firmada (`s--…--`) **no caduca**: el
+  `expires_at` que pone `getDownloadUrl` del sello solo vale con la autenticación por token (de pago), así
+  que allí no tiene efecto.
 - **Imágenes**: `c_fill,g_auto` + `f_auto,q_auto` a los tamaños de la interfaz (64, 256, 512, 1024).
 
 #### 4.8.4 Verificación y medición en servidor
@@ -2414,7 +2416,11 @@ envían su medición; el servidor usa la mediana cuando hay 3 y marca las discre
 `sign(intent)`, `verify(publicId)`, `streamUrl(publicId)`, `downloadUrl(publicId, ttl)`,
 `measure(publicId)`, `remove(publicId)`, `listByPrefix(prefix, cursor)`, `usage()`. La implementación
 de Cloudinary es la única del lanzamiento. Los E2E usan una implementación falsa en disco que expone
-la misma API, para no depender de la red.
+la misma API, para no depender de la red: con `BB_FAKE_STORAGE=<carpeta>` (prohibida en producción), las
+URLs firmadas con HMAC apuntan a `/api/test/storage/{upload,stream,download}/…`, que imitan la subida
+multipart, la escucha y la descarga como adjunto que caduca (401 pasada la hora). La medición es la misma
+(ffmpeg, `FFMPEG_PATH` o `ffmpeg-static`). Los samples la usan desde la Fase 3 (tarea 3.4): duración,
+sonoridad y forma de onda del sample las mide el servidor al crearlo.
 
 | Id | Requisito | Aceptación |
 |---|---|---|
@@ -2520,15 +2526,15 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | Método | Ruta | Acceso | Descripción |
 |---|---|---|---|
 | * | `/api/auth/*` | — | Better Auth (registro, entrada, salida, verificación, recuperación, OAuth, sesiones, admin) |
-| GET | `/api/weeks/current` | Pública | Semana en curso: sample, fase, fronteras, reto, nº de participantes, flags (ciega, dorada) |
-| GET | `/api/weeks/:slug` | Pública | Una semana |
+| GET | `/api/weeks/current` | Pública | Semana en juego (`open` o `voting`: sample con su MP3 de escucha firmado, fase, fronteras, reto, dorada; con sesión, `viewer` con bases aceptadas y drop visto) y, si no hay, solo **cuándo** es el próximo drop (`next`). Sella de forma perezosa lo que haya cerrado |
+| GET | `/api/weeks/:slug` | Pública | Una semana ya empezada (antes del drop, 404) |
 | GET | `/api/weeks?cursor=` | Pública | Archivo de semanas selladas |
 | GET | `/api/weeks/:slug/entries?order=fair\|new\|random&genre=&bpm=&key=&unvoted=` | Pública | Entradas (sin autoría ni notas si no está sellada); con sesión incluye `myVote` |
 | GET | `/api/weeks/:slug/ticker?since=` | Pública | Eventos de la crónica de la arena (§3.8.3) |
 | GET | `/api/weeks/:slug/results` | Pública | Snapshot de resultados (404 si no está sellada) |
 | POST | `/api/weeks/:slug/rules` | Verif. | Aceptar las bases de la semana |
-| POST | `/api/weeks/:slug/sample/download` | Verif. | URL firmada de descarga (`kind: audio\|stems`) |
-| POST | `/api/uploads/sign` | Verif. | Parámetros firmados (`kind: entry\|entryCover\|avatar\|sample*`) |
+| POST | `/api/weeks/:slug/sample/download` | Verif. | URL firmada de descarga (`kind: original\|stems`), solo en `open` y con las bases aceptadas |
+| POST | `/api/uploads/sign` | Verif. | Parámetros firmados (`kind: entry\|entryCover\|avatar`); los del sample, en `/api/admin/samples/sign` |
 | POST | `/api/weeks/:slug/entries` | Verif. | Registrar la entrada tras la subida |
 | GET | `/api/entries/:id` | Pública | Ficha (respeta el voto ciego) |
 | PATCH | `/api/entries/:id` | Dueño | Editar la ficha (hasta el cierre de envíos) |
@@ -2544,7 +2550,7 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | GET | `/api/jury/queue?week=` | Verif. | Siguientes entradas del Modo Jurado |
 | GET | `/api/me` | Sesión | Perfil, XP, nivel, racha, logros nuevos, flags de ceremonias vistas |
 | PATCH | `/api/me/profile` | Sesión | Editar perfil |
-| POST | `/api/me/seen` | Sesión | Marcar vistos (logros, nivel, ceremonia, drop) |
+| POST | `/api/me/seen` | Sesión | Marcar vistos `{ kind, ref }` (drop desde la Fase 3; logros, nivel y ceremonia en sus fases) |
 | GET · PUT | `/api/me/notifications` | Sesión | Preferencias de aviso |
 | GET | `/api/me/votes?week=` | Sesión | Mis votos |
 | GET | `/api/me/export` | Sesión | Exportación RGPD |
@@ -2558,7 +2564,7 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | GET · POST | `/api/unsubscribe?token=` · `/api/unsubscribe/one-click?token=` | Pública | Página de baja y baja en un clic (RFC 8058) |
 | GET | `/api/email/countdown/:slug.gif` | Pública | Cuenta atrás animada para emails |
 | GET | `/r/:linkId` | Pública | Redirección de enlaces de campaña (clics en agregado) |
-| * | `/api/admin/samples`, `/weeks`, `/reports`, `/votes/anomalies`, `/entries/:id/{hide,disqualify,restore}`, `/weeks/:id/{seal,reseal}`, `/label-pick`, `/usage`, `/audit`, `/campaigns` (CRUD, `/test`, `/schedule`, `/cancel`, `/segment-count`), `/email/{queue,suppressions,stats}` | Admin | Administración (§2.14) |
+| * | `/api/admin/samples` (`/sign`, CRUD), `/weeks` (`GET` con los huecos, `POST`, y `GET`/`PATCH`/`DELETE` de `/:slug` solo antes del drop), `/reports`, `/votes/anomalies`, `/entries/:id/{hide,disqualify,restore}`, `/weeks/:id/{seal,reseal}`, `/label-pick`, `/usage`, `/audit`, `/campaigns` (CRUD, `/test`, `/schedule`, `/cancel`, `/segment-count`), `/email/{queue,suppressions,stats}` | Admin | Administración (§2.14) |
 | GET | `/api/cron/tick` | `CRON_SECRET` | Tareas programadas (§4.12) |
 | GET | `/api/health` | Pública | Salud: `{ data: { status: 'ok', db: 'up', time } }`; si la BD no responde, 503 `SERVICE_UNAVAILABLE` con `details.db = 'down'` (Cloudinary se añade en la Fase 4) |
 | GET | `/api/og/:kind/:id` | Pública | Imagen OG |
@@ -2841,7 +2847,7 @@ Referencias: OWASP ASVS nivel 2 y las chuletas de autenticación, sesiones y sub
 - **Variables**: `BB_PUBLIC_URL`, `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `BETTER_AUTH_SECRET`,
   `GOOGLE_CLIENT_ID/SECRET`, `DISCORD_CLIENT_ID/SECRET`, `CLOUDINARY_*`, `BB_CLOUDINARY_PREFIX`,
   `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `EMAIL_FROM_NAME`, `EMAIL_FROM_ADDRESS` (mismos nombres que
-  el sello), `MAIL_REPLY_TO`, `MAIL_DAILY_LIMIT`, `UNSUBSCRIBE_SECRET`, `SMTP_URL` (solo local, Mailpit), `OTP_NEWSLETTER_API`, `CRON_SECRET`,
+  el sello), `MAIL_REPLY_TO`, `MAIL_DAILY_LIMIT`, `UNSUBSCRIBE_SECRET`, `SMTP_URL` (solo local, Mailpit), `OTP_NEWSLETTER_API`, `CRON_SECRET`, `BB_FAKE_STORAGE` (solo E2E y desarrollo), `FFMPEG_PATH`,
   `IP_HASH_SALT`, `OTP_ORIGINS`, `SENTRY_DSN` (opcional).
 - **Orígenes**: fuera de producción, `ALLOWED_ORIGINS` vale por defecto `http://localhost:5173`. En
   producción `BB_PUBLIC_URL` es obligatoria y su origen siempre se permite; en las previews de Vercel
@@ -3537,6 +3543,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-09 | 0.6.43 | **Servidor de semanas y samples** (tareas 3.3–3.11, §2.4, §4.8, §4.10, §4.11). Cambia: la descarga del sample es la API privada de Cloudinary (`private_download_url` con `attachment=true` y `expires_at`), porque una URL de entrega firmada no caduca (`RF-DROP-07`, §4.8.3). Los stems llevan `.zip` en el `public_id`. Se añaden el almacenamiento falso en disco (`BB_FAKE_STORAGE`, §4.8.6) y `FFMPEG_PATH`. En §4.10 se precisan las rutas de la semana, de la descarga, de lo visto y del admin. Los samples se miden en servidor desde esta fase. |
 | 2026-10-09 | 0.6.42 | **Calendario y fases** (tareas 3.1 y 3.2, §4.5, Anexo B): `calendar` y `phase` en `packages/rules`. Se añade al Anexo B la «hora loca» (`LAST_HOUR_MS`, 1 h, incluida la marca justa) y §2.4 precisa que el sample se descarga solo en `open`. El criterio de `RF-DROP-10` se precisa: con 59 min 59 s por delante, `00:00:59:59` en modo «última hora»; con 1 h y 1 s, `00:01:00:01` sin él. |
 | 2026-10-09 | 0.6.41 | **Lista blanca en local con Gmail** (tarea 2.28, §4.19.1): con las credenciales del Workspace en `.env`, el servidor de desarrollo solo envía a `MAIL_PREVIEW_ALLOWLIST` (vacía: nada). |
 | 2026-10-09 | 0.6.40 | **Efectos de la interfaz** (tarea 2.27, §3.7.3, Anexo D): las definiciones de `ui.move`, `ui.toggle`, `ui.open`/`ui.close`, `ui.error`, `ui.success` y `nav.page` (las tonales, en la tonalidad de la semana), calibradas al nivel del Anexo D en el render offline, y dónde suenan; tope de 12 por segundo para `ui.move`. |

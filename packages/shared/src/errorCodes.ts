@@ -43,6 +43,20 @@ export const ERROR_STATUS = {
   USERNAME_CHANGE_TOO_SOON: 409,
   /** Un enlace del perfil no es `https://` de su sitio; `details.kind` dice cuál. */
   INVALID_LINK: 422,
+  /** Programar una semana que pisa a otra (`RF-DROP-02`). */
+  WEEK_OVERLAP: 409,
+  /** La semana ya ha empezado (o es pasada): no se mueve, cambia ni borra. */
+  WEEK_LOCKED: 409,
+  /** Un sample que usa alguna semana no se borra. */
+  SAMPLE_IN_USE: 409,
+  /** Falta subir el original o la portada, no existe en el almacenamiento o no cumple los límites (§2.4). */
+  SAMPLE_ASSET_INVALID: 422,
+  /** Descargar el sample sin aceptar las bases de la semana (`RF-DROP-06`). */
+  RULES_NOT_ACCEPTED: 409,
+  /** La fase de la semana no permite la operación (p. ej. descargar en `voting`). */
+  WEEK_PHASE_CLOSED: 409,
+  /** No hay almacenamiento de audio configurado (ni Cloudinary ni el falso). */
+  STORAGE_UNAVAILABLE: 503,
   /** Límite de frecuencia superado; la respuesta lleva `Retry-After`. */
   RATE_LIMITED: 429,
   /** Error inesperado; nunca lleva la pila ni mensajes internos. */

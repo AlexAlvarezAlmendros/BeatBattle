@@ -8,10 +8,14 @@ import {
   emailPref,
   emailSubscriber,
   producerProfile,
+  rulesAcceptance,
+  sampleDownload,
+  seenFlag,
   session,
   user,
   usernameRedirect,
   verification,
+  week,
 } from '../../db/schema'
 import type { AccountDataModule } from './registry'
 
@@ -180,6 +184,47 @@ const auth: AccountDataModule = {
   },
 }
 
+/** Bases aceptadas, descargas del sample y lo ya visto, por semana (§2.4, tarea 3.3). */
+const weeks: AccountDataModule = {
+  name: 'weeks',
+  async exportData({ db, userId }) {
+    const rules = await db
+      .select({
+        week: week.slug,
+        rulesVersion: rulesAcceptance.rulesVersion,
+        acceptedAt: rulesAcceptance.acceptedAt,
+      })
+      .from(rulesAcceptance)
+      .innerJoin(week, eq(week.id, rulesAcceptance.weekId))
+      .where(eq(rulesAcceptance.userId, userId))
+    const downloads = await db
+      .select({
+        week: week.slug,
+        kind: sampleDownload.kind,
+        count: sampleDownload.count,
+        firstAt: sampleDownload.firstAt,
+        lastAt: sampleDownload.lastAt,
+      })
+      .from(sampleDownload)
+      .innerJoin(week, eq(week.id, sampleDownload.weekId))
+      .where(eq(sampleDownload.userId, userId))
+    const seen = await db
+      .select({ kind: seenFlag.kind, ref: seenFlag.ref, seenAt: seenFlag.seenAt })
+      .from(seenFlag)
+      .where(eq(seenFlag.userId, userId))
+    return { rulesAccepted: rules, sampleDownloads: downloads, seen }
+  },
+  async cleanup({ db, userId }) {
+    return {
+      statements: [
+        db.delete(rulesAcceptance).where(eq(rulesAcceptance.userId, userId)),
+        db.delete(sampleDownload).where(eq(sampleDownload.userId, userId)),
+        db.delete(seenFlag).where(eq(seenFlag.userId, userId)),
+      ],
+    }
+  },
+}
+
 /**
  * Lo que aún no existe pero la exportación ya nombra (`RF-PRF-05`): entradas (Fase 4), votos (Fase 5) y
  * logros (Fase 7). Cada fase sustituye su parte por un módulo de verdad con su borrado.
@@ -195,4 +240,4 @@ const pending: AccountDataModule = {
 }
 
 /** En el orden del borrado: la cuenta, la última. */
-export const ACCOUNT_DATA: readonly AccountDataModule[] = [pending, profile, email, auth]
+export const ACCOUNT_DATA: readonly AccountDataModule[] = [pending, weeks, profile, email, auth]

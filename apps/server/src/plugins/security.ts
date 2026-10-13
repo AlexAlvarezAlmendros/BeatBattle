@@ -48,6 +48,11 @@ declare module 'fastify' {
      * tamaño). Solo la baja en un clic (RFC 8058), que registra su parser dentro de su propio contexto.
      */
     acceptForm?: boolean
+    /**
+     * Subida al almacenamiento falso de los E2E (`/api/test/storage/upload`, nunca en producción): admite
+     * `multipart/form-data` sin el tope de 64 kB, como Cloudinary. El audio de verdad nunca pasa por la API.
+     */
+    fakeStorageUpload?: boolean
   }
 }
 
@@ -92,13 +97,18 @@ export function registerSecurity(app: FastifyInstance, config: AppConfig): void 
     }
 
     const type = mediaType(req.headers['content-type'])
+    const fakeUpload = req.routeOptions.config.fakeStorageUpload === true
+    if (fakeUpload && config.env === 'production')
+      throw appError('FORBIDDEN', 'El almacenamiento falso no existe en producción.')
     const formAllowed =
-      req.routeOptions.config.acceptForm === true && type !== undefined && FORM_TYPES.has(type)
+      (req.routeOptions.config.acceptForm === true || fakeUpload) &&
+      type !== undefined &&
+      FORM_TYPES.has(type)
     if (hasBody(req.headers) && type !== 'application/json' && !formAllowed)
       throw appError('UNSUPPORTED_MEDIA_TYPE', 'Solo se acepta application/json.')
 
     const length = Number(req.headers['content-length'])
-    if (Number.isFinite(length) && length > BODY_LIMIT_BYTES)
+    if (!fakeUpload && Number.isFinite(length) && length > BODY_LIMIT_BYTES)
       throw appError('PAYLOAD_TOO_LARGE', 'La petición es demasiado grande.')
   })
 
