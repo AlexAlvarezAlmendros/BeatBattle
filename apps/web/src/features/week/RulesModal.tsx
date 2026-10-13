@@ -20,6 +20,7 @@ export function RulesModal({
   error,
   onClose,
   onAccept,
+  submitLabel,
 }: {
   open: boolean
   weekNumber: number
@@ -27,6 +28,8 @@ export function RulesModal({
   error: string | null
   onClose: () => void
   onAccept: () => void
+  /** El botón de aceptar; por defecto, «Aceptar y descargar» (en `/subir`, «Aceptar las bases»). */
+  submitLabel?: string
 }) {
   const [accepted, setAccepted] = useState(false)
   const [missing, setMissing] = useState(false)
@@ -54,7 +57,7 @@ export function RulesModal({
             {t('pages.week.rules.cancel')}
           </Button>
           <Button variant="cta" loading={busy} onClick={submit} keyHint={t('frame.keys.glyph.enter')}>
-            {t('pages.week.rules.submit')}
+            {submitLabel ?? t('pages.week.rules.submit')}
           </Button>
         </>
       }
