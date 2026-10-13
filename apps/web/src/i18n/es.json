@@ -1999,6 +1999,12 @@
   },
   "jury": {
     "loading": "Preparando la cola…",
+    "gate": {
+      "signIn": "El jurado puntúa cada beat de la semana, de 1 a 5, tras escuchar 30 s. Entra con tu cuenta para jugar.",
+      "signInAction": "Entrar",
+      "verify": "Verifica tu email para puntuar: te enviamos el enlace al registrarte.",
+      "verifyAction": "Verificar el email"
+    },
     "queueError": "No hemos podido traer la cola del jurado.",
     "srTitle": "Modo Jurado · ronda {round} de {total} · escuchando {alias}",
     "you": "Tú",
