@@ -1,0 +1,6 @@
+subida: {"publicId":"beatbattle-dev/entries/prueba-real-5-23/e30f7e49-9e46-48cb-9886-09b9309a0c6e","bytes":5793808}
+verificación: {"formato":"mp3","bytes":5793808}
+escucha: {"firmada":true,"mp3":true}
+navegador: {"open":{"tiempo":2.45551,"estado":"playing","analizador":3529,"volumen":1},"session":{"titulo":"Prueba real 5.23","artista":"Tigre Púrpura"},"blind":{"analizador":null,"suena":true}}
+OK
+borrado: {"publicId":"beatbattle-dev/entries/prueba-real-5-23/e30f7e49-9e46-48cb-9886-09b9309a0c6e","ya":true}

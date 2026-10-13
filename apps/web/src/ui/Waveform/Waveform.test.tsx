@@ -120,7 +120,7 @@ describe('Waveform', () => {
 })
 
 describe('Waveform como control (§3.3, RF-PLAY-06)', () => {
-  it('con onSeek es un slider: ←/→ saltan 5 s, Inicio/Fin a los extremos, con su valor en texto', async () => {
+  it('RF-PLAY-06: con onSeek es un slider: ←/→ saltan 5 s, Inicio/Fin a los extremos, con su valor en texto', async () => {
     const { default: userEvent } = await import('@testing-library/user-event')
     const user = userEvent.setup()
     const seeks: number[] = []
