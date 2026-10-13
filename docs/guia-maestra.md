@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.62 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.63 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -743,7 +743,9 @@ botón (un `POST`): abrir el enlace no basta, para que un escáner de correo no 
   retiene hasta las 08:00.
 - **Tope**: como mucho **3 emails no de servicio por usuario y semana** (el del lunes cuenta como
   uno). Prioridad: lunes > recordatorio > jurado > primeros votos > progreso > temporada > marketing.
-  Lo que no cabe se descarta (queda registrado como `skipped`).
+  Lo que no cabe se descarta (queda registrado como `skipped`, motivo `weekly_cap`). La semana del tope va del
+  lunes a las 00:00 al domingo (Madrid) y cuenta por destinatario (cuenta o suscriptor). Se aplica al enviar:
+  lo que ya salió en la semana ocupa su hueco, y entre lo que toca a la vez sale primero lo de más prioridad.
 - **Baja en un clic** en cada email: cabeceras `List-Unsubscribe` y `List-Unsubscribe-Post`
   (RFC 8058; Gmail y Yahoo las exigen a los envíos masivos y aquí van siempre) y enlace visible al
   pie que da de baja solo ese tipo,
@@ -3618,6 +3620,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.63 | **Tarea 5.11.** §2.12.4 (`RF-NOTIF-08`): la semana del tope va del lunes a las 00:00 al domingo en Madrid y cuenta por destinatario; se aplica al enviar (lo ya enviado ocupa su hueco; entre lo que toca a la vez, por prioridad) y lo descartado queda `skipped` con el motivo `weekly_cap`. Lo retenido por las horas de silencio sale a las 08:00 (`not_before`). |
 | 2026-10-13 | 0.6.62 | **Tareas 5.3–5.10.** §4.10: un recibo de escucha por usuario y entrada (volver a empezar no reinicia el reloj de servidor, que cuenta desde la primera vez); `listen` y `qualify` solo en `open` y `voting` y nunca de la propia entrada; `qualify` antes de tiempo da `LISTEN_REQUIRED` con lo que falta. La escucha (`/play`) cuenta una vez por sesión y 3 por hora por IP y entrada, y responde 202 siempre. La crónica da las 5 últimas entradas por alias, los días que quedan y los votos de la semana. La cola del jurado lleva la ronda `{ done, total }`. Denunciar tiene, además, un límite de 20 por hora y usuario. |
 | 2026-10-13 | 0.6.61 | **Tarea 5.2.** §4.10: la lista admite `seed` (volver a barajar «Aleatorio») y su `bpm` es un rango `min-max`; cada entrada lleva `mine` además de `myVote`; `POST /play` lleva un `playId` por sesión de escucha. Códigos nuevos: `OWN_ENTRY` (403), `LISTEN_REQUIRED`, `VOTING_CLOSED` y `REPORT_EXISTS` (409). Motivos de denuncia de §2.7 como ids: `not_sample`, `rights`, `offensive`, `spam`, `other` (detalle de hasta 500 caracteres). §4.14: la exportación y el borrado de la cuenta incluyen los recibos de escucha, las denuncias y las señales de IP (y, de sus entradas sin sellar, los de otros); sustituir el audio o retirar la entrada borra sus recibos de escucha. |
 | 2026-10-13 | 0.6.60 | **Tarea 5.1.** §4.5, módulo `fair`: además de `fairOrder`, `fairSeed` (con sesión, usuario y semana; sin ella, el día en `Europe/Madrid`), `newestOrder`, `randomOrder` (baraja la lista ordenada por id, así no depende del orden de llegada) y `juryQueue` (la cola del Modo Jurado de §2.7: sin las votadas ni la propia, en Ronda justa, y las saltadas al final en el orden del último salto). Las ya votadas, en Ronda justa, van al final con el mismo criterio (la rejilla de §3.8.13 las pone ahí). |

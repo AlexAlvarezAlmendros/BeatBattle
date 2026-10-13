@@ -1,3 +1,4 @@
+import { addDays, localDateOf, mondayOf, scheduleWeek, zonedInstant } from '@beatbattle/rules'
 import type { EmailFamily } from '../db/schema'
 import type { KindInfo } from './catalog'
 
@@ -17,6 +18,48 @@ export const RETRY_DELAYS_MS = [60_000, 5 * 60_000, 30 * 60_000, 2 * 60 * 60_000
 
 /** Como mucho, emails por llamada a `emailDrain` (en Vercel, por `tick`). */
 export const DRAIN_MAX_PER_RUN = 40
+
+/** Horas de silencio (§2.12.4, `RF-NOTIF-08`): nada que no sea de servicio de 22:00 a 08:00 en Madrid. */
+export const QUIET_START_HOUR = 22
+export const QUIET_END_HOUR = 8
+
+/** Como mucho, emails que no son de servicio por destinatario y semana (el del lunes cuenta como uno). */
+export const WEEKLY_CAP = 3
+
+/**
+ * Si `now` cae en las horas de silencio, el instante en que acaban (las 08:00 de Madrid de ese día o del
+ * siguiente); si no, `null`. Lo retenido no se pierde: sale a las 08:00.
+ */
+export function quietUntil(now: number): number | null {
+  const today = localDateOf(now)
+  const end = zonedInstant(today, { hour: QUIET_END_HOUR, minute: 0, second: 0 })
+  if (now < end) return end
+  const start = zonedInstant(today, { hour: QUIET_START_HOUR, minute: 0, second: 0 })
+  return now >= start ? zonedInstant(addDays(today, 1), { hour: QUIET_END_HOUR, minute: 0, second: 0 }) : null
+}
+
+/** Inicio de la semana del tope: el lunes a las 00:00 de Madrid. */
+export function capWeekStart(now: number): number {
+  return scheduleWeek(mondayOf(now)).startsAt
+}
+
+export interface CapInput {
+  /** Emails no de servicio ya enviados a ese destinatario esta semana. */
+  sentThisWeek: number
+  /** Los suyos que tocan ahora (no de servicio), en cualquier orden. */
+  due: readonly DueEmail[]
+}
+
+/**
+ * Tope semanal de un destinatario (`RF-NOTIF-08`): de lo que toca, salen por prioridad los que caben hasta
+ * `WEEKLY_CAP` contando lo ya enviado; el resto se descarta (`skipped`, no se aplaza a otra semana). El tope
+ * se aplica al enviar: lo que salió antes en la semana ocupa su hueco aunque lo de ahora tenga más prioridad.
+ */
+export function planWeeklyCap(input: CapInput): { allow: string[]; skip: string[] } {
+  const room = Math.max(0, WEEKLY_CAP - input.sentThisWeek)
+  const ordered = [...input.due].sort(byPriority).map((email) => email.id)
+  return { allow: ordered.slice(0, room), skip: ordered.slice(room) }
+}
 
 export interface DueEmail {
   id: string
@@ -122,8 +165,8 @@ export type Decision =
 /**
  * Qué hacer con un email **al enviarlo** (no al encolarlo, §4.19.3): el servicio sale siempre
  * (`RF-NOTIF-04`); lo demás respeta la supresión, la suscripción, los interruptores por tipo y, en
- * marketing, el consentimiento (`RF-NOTIF-01`). Las horas de silencio y el tope semanal (`RF-NOTIF-08`)
- * llegan con los avisos que los necesitan (Fase 5).
+ * marketing, el consentimiento (`RF-NOTIF-01`). Las horas de silencio y el tope semanal (`RF-NOTIF-08`) los
+ * aplica antes `emailDrain`, con `quietUntil` y `planWeeklyCap`.
  */
 export function decide(info: KindInfo, recipient: Recipient): Decision {
   if (info.family === 'service') return { action: 'send' }
