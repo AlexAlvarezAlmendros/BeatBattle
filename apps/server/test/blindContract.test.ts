@@ -1,7 +1,10 @@
 import { eq } from 'drizzle-orm'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { producerProfile, user, vote, week } from '../src/db/schema'
 import { type Battle, battle, listener, W42 } from './fixtures/battle'
+
+// Cada prueba crea varias cuentas (alta, verificación) y vota por la API: en la CI pasa de los 5 s.
+vi.setConfig({ testTimeout: 30_000 })
 
 /**
  * Contrato de voto ciego y de «nada de medias antes del sellado» (tarea 5.10; `RNF-SEC-04`, `RF-PLAY-05`,
