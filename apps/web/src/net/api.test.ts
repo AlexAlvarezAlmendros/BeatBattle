@@ -158,4 +158,11 @@ describe('isRetryable', () => {
     expect(isRetryable(new ApiClientError('BAD_RESPONSE', 200, ''))).toBe(false)
     expect(isRetryable(new ApiClientError('BAD_RESPONSE', 404, ''))).toBe(false)
   })
+
+  it('204 sin cuerpo: vale si el esquema admite «nada»; si no, BAD_RESPONSE', async () => {
+    fetchMock.mockResolvedValue(new Response(null, { status: 204 }))
+    await expect(apiFetch('/api/thing', { method: 'POST', schema: z.unknown() })).resolves.toBeUndefined()
+    fetchMock.mockResolvedValue(new Response(null, { status: 204 }))
+    expect((await failure(apiFetch('/api/thing', { schema }))).code).toBe('BAD_RESPONSE')
+  })
 })

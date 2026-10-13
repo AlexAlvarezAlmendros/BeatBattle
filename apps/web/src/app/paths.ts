@@ -62,6 +62,8 @@ export const paths = {
   welcome: () => '/bienvenida',
   /** La página de baja del pie de los avisos (§2.12.4); el token lo pone el email. */
   unsubscribe: (token: string) => `/baja?token=${encodeURIComponent(token)}`,
+  /** La página del enlace de `alert.confirm` (§2.12.3); el token lo pone el email. */
+  alertConfirm: (token: string) => `/alerta?token=${encodeURIComponent(token)}`,
   admin: () => '/admin',
   legal: (doc: LegalDoc) => `/legal/${doc}`,
 } as const

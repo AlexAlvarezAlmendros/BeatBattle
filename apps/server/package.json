@@ -7,6 +7,7 @@
     "start": "tsx --env-file-if-exists=.env src/index.ts",
     "db:generate": "drizzle-kit generate",
     "bounces": "tsx --env-file-if-exists=.env src/scripts/bounceScan.ts",
+    "seed:weeks": "tsx --env-file-if-exists=.env src/scripts/seedWeeks.ts",
     "auth:schema": "auth generate --config src/auth/schema.cli.ts --adapter drizzle --dialect sqlite --output src/db/auth-schema.ts --yes && node scripts/auth-schema-post.mjs",
     "build": "vite build --config build.config.mjs && node scripts/smoke-bundle.mjs",
     "typecheck": "tsc -p tsconfig.json",

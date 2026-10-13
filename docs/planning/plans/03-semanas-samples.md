@@ -114,7 +114,7 @@ todo lo demás.
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 3.15 | Home con datos reales: `MenuWeek` desde `/api/weeks/current`, reloj de ronda con «última hora», el estado vacío «Próximo drop pronto» con el formulario «Avísame del próximo drop» (también en «Cómo se juega»), y la pantalla de título con la semana ISO | ⬜ Listo | 3.8, 3.13 | §3.8.1, §3.8.3, §2.12.3 · `RF-DROP-04`, `RF-DROP-10`, `RF-NOTIF-09` |
+| 3.15 | Home con datos reales: `MenuWeek` desde `/api/weeks/current`, reloj de ronda con «última hora», el estado vacío «Próximo drop pronto» con el formulario «Avísame del próximo drop» (también en «Cómo se juega»), y la pantalla de título con la semana ISO | ✅ Hecho | 3.8, 3.13 | §3.8.1, §3.8.3, §2.12.3 · `RF-DROP-04`, `RF-DROP-10`, `RF-NOTIF-09` · **Hecho:** `HomePage` con `GET /api/weeks/current` (TanStack Query): tarjeta del escenario con el sample que suena (play conectado al motor con *ducking*, `useSamplePlayer`), reloj de ronda hasta el cierre, crónica viva, efectos afinados en la tonalidad del sample, y nueva petición en cada frontera. Sin semana, «Cae el lunes 5 de octubre» o «Próximo drop pronto» y el formulario «Avísame del próximo drop» (también en «Cómo se juega»). Página `/alerta` que confirma con un botón. Mirado en el navegador con la API de prueba y el *seed* (`evidence/f3/home/`): semana abierta a 1440 y 390, los dos vacíos, el play suena (0:02 a los 3 s) y la alerta completa (formulario → buzón de prueba → `/alerta` → confirmada, con el foco en el mensaje). Tests de `weekModel` (`RF-DROP-10`) y del formulario (`RF-NOTIF-09`, `RNF-SEC-02`). La escucha real del sample es del usuario. |
 | 3.16 | `/semana/:slug`: ficha del drop (vinilo-sol al BPM, título y créditos, chips, onda reproducible con el MP3 firmado, cuenta atrás y reto). «Pillar el sample» abre el modal de las bases (5 puntos, enlace a las completas y casilla obligatoria) y descarga. El visitante oye el sample y, al pedir la descarga, le pide entrar | ⬜ Listo | 3.10, 3.15 | §2.4, §3.8.14 · `RF-DROP-06`, `RF-DROP-09` |
 | 3.17 | Revelación del drop (§3.8.2, 6 s, saltable): oscurecer, anunciador «SEMANA N», vinilo que cae, `drop.needle`, título estampado y tragaperras de BPM y tonalidad. Una vez por semana (`seen_flag`; sin sesión, `localStorage`) y «Ver otra vez» en la ficha. Sin movimiento: fundido con los datos fijos | ⬜ Listo | 3.11, 3.15 | §3.8.2, Anexo E · `RF-DROP-11` |
 | 3.18 | Panel `/admin` (modo denso, sin efectos): samples (subida firmada con progreso, metadatos, licencia y editor de 8 *chops* sobre la onda con teclado), calendario de semanas con los huecos en rojo y recuento de descargas por semana | ⬜ Listo | 3.6, 3.7, 3.10 | §2.14 · `RF-ADM-01`, `RF-ADM-02`, `RF-DROP-08` |
@@ -123,7 +123,7 @@ todo lo demás.
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 3.19 | Datos de prueba: `tools/seed` con 3 samples y 3 semanas sobre el almacenamiento falso | ⬜ Listo | 3.7 | — |
+| 3.19 | Datos de prueba: `tools/seed` con 3 samples y 3 semanas sobre el almacenamiento falso | ✅ Hecho | 3.7 | — · **Hecho:** `pnpm --filter @beatbattle/server seed:weeks` (con `BB_FAKE_STORAGE`): tres samples sintéticos (bucle de acordes con bombo, portada PNG de 1024 px generada) medidos con ffmpeg y tres semanas seguidas desde la de hoy (o `--from=`). |
 | 3.20 | E2E del hito con el reloj simulado: el admin programa 3 semanas; la home cambia de semana en la frontera; la descarga exige las bases; sale `battle.drop` (también al suscriptor sin cuenta, tras confirmar) | ⬜ Listo | 3.12–3.19 | §5 · hito |
 | 3.21 | Jurado visual de tres lentes sobre la home viva, la ficha, la revelación, el modal de las bases y el panel de admin | ⬜ Listo | 3.15–3.18 | `RD-VIS-02` (e) |
 | 3.22 | Cierre de la fase: cobertura de ids, hito y roadmap | ⬜ Listo | 3.20, 3.21 | — |
@@ -152,6 +152,7 @@ El lunes sale el email del drop, también a quien solo dejó su email.
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-09 | 3.15, 3.19 | Home viva, alerta sin cuenta en la web y *seed* de semanas; mirado en el navegador. |
 | 2026-10-09 | 3.12–3.14 | Cron, emails del drop, alerta sin cuenta y cuenta atrás en GIF. Guía v0.6.44. |
 | 2026-10-09 | 3.3, 3.5–3.11 | Servidor de semanas y samples con el almacenamiento falso en disco y la medición con ffmpeg. La 3.4 queda 🔄 a falta de la prueba real en Cloudinary. Guía v0.6.43. |
 | 2026-10-09 | 3.1, 3.2 | `calendar` y `phase` en `packages/rules`, con propiedades. Guía v0.6.42. |

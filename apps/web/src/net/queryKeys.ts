@@ -8,4 +8,14 @@
  */
 export const queryKeys = {
   health: () => ['health'] as const,
+  weeks: {
+    all: ['weeks'] as const,
+    current: () => ['weeks', 'current'] as const,
+    detail: (slug: string) => ['weeks', 'detail', slug] as const,
+  },
+  admin: {
+    all: ['admin'] as const,
+    samples: () => ['admin', 'samples'] as const,
+    calendar: () => ['admin', 'weeks'] as const,
+  },
 } as const

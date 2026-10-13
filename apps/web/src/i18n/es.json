@@ -35,7 +35,13 @@
     },
     "dropAlert": {
       "title": "Avísame del próximo drop",
-      "summary": "Muy pronto podrás dejar aquí tu email para que te avisemos de cada drop, sin crear cuenta."
+      "summary": "Deja tu email y te avisamos cada lunes, cuando caiga el sample. Sin crear cuenta.",
+      "email": "Tu email",
+      "submit": "Avísame",
+      "sent": "Hecho. Revisa tu email y confirma la alerta (caduca en 7 días).",
+      "invalid": "Escribe un email válido.",
+      "error": "No hemos podido apuntarte. Prueba otra vez en un momento.",
+      "rateLimited": "Demasiados intentos desde aquí. Prueba dentro de una hora."
     },
     "title": {
       "label": "Beat Battle, torneo semanal de productores",
@@ -99,10 +105,9 @@
     },
     "empty": {
       "kicker": "Próximo drop",
-      "when": "Cada lunes, un sample",
       "title": "El próximo drop está en el horno",
       "summary": "Cada lunes cae un sample nuevo: flipéalo, sube tu beat antes del domingo y deja que la comunidad vote a ciegas. El domingo se sella la semana.",
-      "alertTag": "Pronto"
+      "whenSoon": "Próximo drop pronto"
     },
     "stage": {
       "kickerBefore": "Semana",
@@ -118,7 +123,8 @@
       "time": "{current} / {total}",
       "challenge": "Reto",
       "closesShort": "Cierre de envíos",
-      "votesShort": "Cierre de votos"
+      "votesShort": "Cierre de votos",
+      "pause": "Pausar el sample «{title}»"
     },
     "clock": {
       "closes": "Tiempo · cierre de envíos",
@@ -140,6 +146,11 @@
         "flip": "Flipéalo a tu manera",
         "vote": "La comunidad vota a ciegas",
         "seal": "El domingo se sella la semana"
+      },
+      "live": {
+        "drop": "Nuevo drop: {title}",
+        "sample": "{bpm} BPM · {key}",
+        "closes": "Envíos hasta el {when}"
       }
     }
   },
@@ -294,6 +305,16 @@
       "doneAll": "Hecho: ya solo recibirás los emails imprescindibles de tu cuenta.",
       "error": "No se ha podido aplicar la baja. Vuelve a intentarlo en un momento.",
       "settings": "Cambiar mis avisos en Ajustes"
+    },
+    "alert": {
+      "title": "Alerta de drop",
+      "summary": "Confirma que quieres que te avisemos cada lunes, cuando caiga el sample nuevo.",
+      "confirm": "Confirmar mi alerta",
+      "done": "Alerta confirmada. El próximo lunes te escribimos con el sample.",
+      "invalid": "Este enlace no vale o ha caducado (dura 7 días). Puedes pedir la alerta otra vez.",
+      "error": "No hemos podido confirmarla. Prueba otra vez en un momento.",
+      "signUp": "Crea tu cuenta para descargar el sample y subir tu beat",
+      "again": "Pedir la alerta otra vez"
     }
   },
   "settings": {
@@ -1551,5 +1572,32 @@
       "loading": "Comprobando tu sesión…",
       "settings": "Entra en tu cuenta para cambiar tus ajustes."
     }
+  },
+  "music": {
+    "tonics": {
+      "c": "Do",
+      "cs": "Do♯",
+      "d": "Re",
+      "ds": "Re♯",
+      "e": "Mi",
+      "f": "Fa",
+      "fs": "Fa♯",
+      "g": "Sol",
+      "gs": "Sol♯",
+      "a": "La",
+      "as": "La♯",
+      "b": "Si"
+    },
+    "major": "{tonic} mayor",
+    "minor": "{tonic} menor"
+  },
+  "weekTime": {
+    "range": "{from}–{to} · {code}",
+    "when": "{weekday} {day} a las {time}",
+    "whenToday": "hoy a las {time}",
+    "clockWhen": "{when} · votos hasta las 23:59",
+    "clockWhenVoting": "Envíos cerrados · votos hasta las 23:59",
+    "nextDrop": "Cae el {date}",
+    "noGenre": "Libre"
   }
 }

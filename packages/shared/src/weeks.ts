@@ -72,7 +72,14 @@ const sampleFields = {
 
 /** `POST /api/admin/samples`: el original y la portada ya están subidos; el servidor los verifica y mide. */
 export const SampleCreateSchema = z
-  .object({ sampleId: z.uuid(), ...sampleFields, hasStems: z.boolean().default(false) })
+  .object({
+    sampleId: z.uuid(),
+    ...sampleFields,
+    // La ficha del drop los enseña siempre (§2.4: chips de BPM y tonalidad): al crear, obligatorios.
+    bpm: z.number().min(40).max(250),
+    musicalKey: MusicalKeySchema,
+    hasStems: z.boolean().default(false),
+  })
   .strict()
 export type SampleCreate = z.infer<typeof SampleCreateSchema>
 

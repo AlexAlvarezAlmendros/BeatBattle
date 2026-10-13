@@ -12,6 +12,7 @@ import { useRovingMenu } from '../../ui/hooks/useRovingMenu'
 import { Key } from '../../ui/Key'
 import { singleKeyAllowed } from '../../ui/shortcuts'
 import styles from './HowItWorksPage.module.css'
+import { DropAlertForm } from './menu/DropAlertForm'
 
 /** Una tecla de ayuda de un movimiento: lo que se ve y, si hace falta, cómo se lee. */
 interface MoveKey {
@@ -133,6 +134,7 @@ export function HowItWorksPage() {
     </ul>
   )
 
+  const alertId = useId()
   return (
     <ScreenPage
       title={t('pages.howItWorks.title')}
@@ -167,6 +169,13 @@ export function HowItWorksPage() {
             </li>
           ))}
         </ol>
+      </section>
+      <section className={styles.rules} aria-labelledby={alertId}>
+        <h2 id={alertId} className={cx('bb-label', styles.rulesTitle)}>
+          {t('home.dropAlert.title')}
+        </h2>
+        <p className={styles.alertText}>{t('home.dropAlert.summary')}</p>
+        <DropAlertForm />
       </section>
     </ScreenPage>
   )

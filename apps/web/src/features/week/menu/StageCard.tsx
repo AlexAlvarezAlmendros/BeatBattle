@@ -11,6 +11,8 @@ import { RoundClock } from '../../../ui/RoundClock'
 import { Tag } from '../../../ui/Tag'
 import { VinylSun } from '../../../ui/VinylSun'
 import { Waveform } from '../../../ui/Waveform'
+import { useSamplePlayer } from '../useSamplePlayer'
+import { DropAlertForm } from './DropAlertForm'
 import type { MenuWeek } from './model'
 import styles from './StageCard.module.css'
 
@@ -25,11 +27,12 @@ import styles from './StageCard.module.css'
  * El título del escenario es el elemento más grande con texto de la home: su LCP (`RNF-PERF-02`). Sale
  * con la primera pintura, sin entrada animada.
  */
-export function StageCard({ week }: { week: MenuWeek | null }) {
+export function StageCard({ week, nextDrop }: { week: MenuWeek | null; nextDrop?: string | null }) {
   const titleId = useId()
   const titleRef = useRef<HTMLHeadingElement>(null)
   useFitText(titleRef, week?.title ?? '')
-  if (!week) return <EmptyStage titleId={titleId} />
+  const player = useSamplePlayer(week?.streamUrl, week?.durationSeconds ?? 0)
+  if (!week) return <EmptyStage titleId={titleId} nextDrop={nextDrop ?? null} />
   return (
     <Frame
       as="article"
@@ -79,14 +82,19 @@ export function StageCard({ week }: { week: MenuWeek | null }) {
           className={styles.playButton}
           variant="white"
           iconOnly
-          icon="triangleRight"
-          aria-label={t('home.stage.listen', { title: week.title })}
+          icon={player.playing ? 'pause' : 'triangleRight'}
+          aria-label={t(player.playing ? 'home.stage.pause' : 'home.stage.listen', { title: week.title })}
+          aria-pressed={player.playing}
+          onClick={player.toggle}
         />
         <div className={styles.wave}>
-          <Waveform peaks={week.peaks} height={40} decorative animateIn={false} />
+          <Waveform peaks={week.peaks} height={40} decorative animateIn={false} progress={player.progress} />
         </div>
         <span className={styles.time}>
-          {t('home.stage.time', { current: formatDuration(0), total: formatDuration(week.durationSeconds) })}
+          {t('home.stage.time', {
+            current: formatDuration(player.current),
+            total: formatDuration(week.durationSeconds),
+          })}
         </span>
         <RoundClock
           className={styles.mobileClock}
@@ -98,9 +106,13 @@ export function StageCard({ week }: { week: MenuWeek | null }) {
         />
       </div>
       <div className={styles.foot}>
-        <p className={styles.challenge}>
-          <Tag tone="white">{t('home.stage.challenge')}</Tag> {week.challenge}
-        </p>
+        {week.challenge ? (
+          <p className={styles.challenge}>
+            <Tag tone="white">{t('home.stage.challenge')}</Tag> {week.challenge}
+          </p>
+        ) : (
+          <span />
+        )}
         <p className={styles.entries}>
           <b>{week.entries}</b> {t('home.stage.inBattle')}
         </p>
@@ -109,8 +121,12 @@ export function StageCard({ week }: { week: MenuWeek | null }) {
   )
 }
 
-/** Calendario vacío (§2.19, §3.8.3): sin reloj, con el hueco de «Avísame del próximo drop». */
-function EmptyStage({ titleId }: { titleId: string }) {
+/**
+ * Sin semana en juego (§2.19, §3.8.3): sin reloj. Con el próximo drop programado, cuándo cae; con el
+ * calendario vacío, «Próximo drop pronto» (`RF-DROP-04`). Y el formulario «Avísame del próximo drop»
+ * (§2.12.3, `RF-NOTIF-09`).
+ */
+function EmptyStage({ titleId, nextDrop }: { titleId: string; nextDrop: string | null }) {
   const alertId = useId()
   return (
     <Frame
@@ -124,7 +140,9 @@ function EmptyStage({ titleId }: { titleId: string }) {
       <HalftoneCanvas className={styles.halftone} shape="piece" cell={8} angle={45} ink="wine" />
       <p className={cx(styles.kickers, styles.emptyKickers)}>
         <span className={cx('bb-label', styles.kickerRed)}>{t('home.empty.kicker')}</span>
-        <span className={cx('bb-label', styles.range)}>{t('home.empty.when')}</span>
+        <span className={cx('bb-label', styles.range)} data-next-drop={nextDrop ? '' : undefined}>
+          {nextDrop ?? t('home.empty.whenSoon')}
+        </span>
       </p>
       <h2 id={titleId} className={cx('bb-display', styles.title, styles.emptyTitle)}>
         {t('home.empty.title')}
@@ -132,9 +150,10 @@ function EmptyStage({ titleId }: { titleId: string }) {
       <p className={styles.credits}>{t('home.empty.summary')}</p>
       <section id={DROP_ALERT_ID} className={styles.alert} aria-labelledby={alertId}>
         <h3 id={alertId} className={styles.alertTitle}>
-          <Tag tone="white">{t('home.empty.alertTag')}</Tag> {t('home.dropAlert.title')}
+          {t('home.dropAlert.title')}
         </h3>
         <p className={styles.alertText}>{t('home.dropAlert.summary')}</p>
+        <DropAlertForm />
       </section>
     </Frame>
   )

@@ -39,6 +39,10 @@ export interface MenuWeek {
   clockWhen: string
   /** La barra de la semana del reloj. */
   weekBar: { today: number; progress: number }
+  /** MP3 de escucha firmado del sample (`RF-DROP-09`); sin él, el play no suena (datos de muestra). */
+  streamUrl?: string
+  /** Slug de la semana (`2026-w41`), para enlazar su ficha. */
+  slug?: string
 }
 
 /** El jugador con sesión (sin sesión, el HUD dice «1P · PULSA PARA UNIRTE»). */
@@ -83,6 +87,8 @@ export interface MenuModel {
   lastSealed: { number: number; unseen: boolean } | null
   /** Crónica de la arena (§3.8.3): nunca dice quién ha subido. */
   chronicle: readonly string[]
+  /** Sin semana en juego: cuándo cae el próximo drop («Cae el lunes 12 de octubre»), si está programado. */
+  nextDrop?: string | null
 }
 
 /** Modos del menú principal, en su orden (§3.8.3). */

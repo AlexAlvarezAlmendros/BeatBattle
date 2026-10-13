@@ -14,6 +14,7 @@
 //   --forced-colors           emula el contraste alto (`forced-colors: active`)
 //   --touch                   táctil (`hover: none`, `pointer: coarse`) sin cambiar el tamaño
 //   --eval="expr"             evalúa una expresión antes de capturar e imprime el resultado
+//   --init="js"               ejecuta código antes de que cargue la página (p. ej. fijar sessionStorage)
 //   --headed                  con ventana visible
 import { chromium } from '@playwright/test'
 
@@ -51,6 +52,7 @@ const page = await browser.newPage({
 const logs = []
 page.on('console', (m) => logs.push(`[${m.type()}] ${m.text()}`))
 page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`))
+if (opt.init) await page.addInitScript(opt.init)
 await page.goto(url, { waitUntil: opt.until ?? 'load' })
 await page.waitForTimeout(Number(opt.wait ?? 1500))
 if (opt.eval) {

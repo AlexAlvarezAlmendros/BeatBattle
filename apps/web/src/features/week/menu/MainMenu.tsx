@@ -226,7 +226,7 @@ export function MainMenu({ model, title }: { model: MenuModel; title?: boolean }
   const narrow = useMediaQuery(MOBILE_QUERY)
   const touch = useMediaQuery(TOUCH_QUERY)
   const modesFirst = narrow && !touch
-  const card = <StageCard week={model.week} />
+  const card = <StageCard week={model.week} nextDrop={model.nextDrop} />
   // En la tableta vertical, lo que sobra de alto se reparte alrededor de la tarjeta (CSS): necesita su alto. La
   // tarjeta cambia de sitio (`modesFirst`) y de pieza (sin semana, la del calendario vacío).
   useCardHeight(titleRef, `${modesFirst}|${Boolean(model.week)}`)
