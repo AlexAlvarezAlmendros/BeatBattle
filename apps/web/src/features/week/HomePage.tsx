@@ -8,6 +8,8 @@ import { t } from '../../i18n'
 import { queryKeys } from '../../net/queryKeys'
 import { useCurrentWeek } from '../../net/weeks'
 import { playerOf, useSession } from '../account/session'
+import { DropReveal } from './DropReveal'
+import { rememberDropSeen, seenLocally } from './dropSeen'
 import { MainMenu } from './menu/MainMenu'
 import type { MenuModel } from './menu/model'
 import { menuWeekOf, nextBoundary, nextDropText, whenText } from './weekModel'
@@ -51,6 +53,13 @@ export function HomePage() {
     return () => window.clearTimeout(timer)
   }, [data, queryClient])
 
+  // Al entrar o salir cambia lo de quien mira (bases, revelación vista): otra vez la semana.
+  const meId = me?.id ?? null
+  // biome-ignore lint/correctness/useExhaustiveDependencies: se vuelve a pedir justo cuando cambia la cuenta
+  useEffect(() => {
+    void queryClient.invalidateQueries({ queryKey: queryKeys.weeks.all })
+  }, [meId, queryClient])
+
   // Los efectos tonales van en la tonalidad del sample de la semana (§3.7.1).
   const key = data?.week?.sample.musicalKey
   useEffect(() => {
@@ -60,6 +69,33 @@ export function HomePage() {
   }, [key])
 
   const week = data?.week ? menuWeekOf(data.week, now) : null
+
+  // La revelación del drop (§3.8.2, `RF-DROP-11`): la primera visita a cada semana, tras la pantalla de título.
+  const live = data?.week ?? null
+  const [revealDone, setRevealDone] = useState<string | null>(null)
+  const sessionKnown = useSession((state) => state.status !== 'loading')
+  const unseen =
+    live !== null &&
+    week !== null &&
+    sessionKnown &&
+    revealDone !== live.slug &&
+    !(live.viewer?.dropSeen ?? false) &&
+    !seenLocally(live.slug)
+  const reveal = unseen ? (
+    <DropReveal
+      week={{
+        number: live.number,
+        title: live.sample.title,
+        bpm: live.sample.bpm,
+        musicalKey: live.sample.musicalKey,
+        streamUrl: live.sample.streamUrl,
+      }}
+      onDone={() => {
+        setRevealDone(live.slug)
+        void rememberDropSeen(live.slug, Boolean(me))
+      }}
+    />
+  ) : null
   const model: MenuModel = {
     week,
     player: me ? playerOf(me) : null,
@@ -81,7 +117,7 @@ export function HomePage() {
   return (
     <>
       <DocumentTitle />
-      <MainMenu model={model} />
+      <MainMenu model={model} afterTitle={reveal} />
     </>
   )
 }
