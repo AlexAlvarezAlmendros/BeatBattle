@@ -7,7 +7,7 @@ import { type StoryCard, storyPng } from './storyCard'
  * «Tarjeta para stories» (§2.15, `RF-SHARE-03`): pinta la tarjeta en el navegador y la comparte con la Web
  * Share API (con el fichero) si el sistema lo deja; si no, la descarga.
  */
-export function StoryButton({ card, fileName }: { card: StoryCard; fileName: string }) {
+export function StoryButton({ card, fileName, size }: { card: StoryCard; fileName: string; size?: 'sm' }) {
   const [busy, setBusy] = useState(false)
   const onClick = async () => {
     setBusy(true)
@@ -29,7 +29,7 @@ export function StoryButton({ card, fileName }: { card: StoryCard; fileName: str
     }
   }
   return (
-    <Button variant="outline" disabled={busy} onClick={() => void onClick()}>
+    <Button variant="outline" size={size} disabled={busy} onClick={() => void onClick()}>
       {t('stories.button')}
     </Button>
   )
