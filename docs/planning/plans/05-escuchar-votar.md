@@ -129,7 +129,7 @@ construye aquí lo ve alguien que vota.
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
 | 5.11 | Política al enviar: horas de silencio (22:00–08:00 Madrid, se retiene hasta las 08:00) y tope de 3 avisos por usuario y semana con la prioridad de §2.12.4 (lo que no cabe, `skipped`) | ✅ Hecho | — | §2.12.4, §4.19.3 · `RF-NOTIF-08` · **Hecho:** `quietUntil`, `capWeekStart` y `planWeeklyCap` en `email/policy.ts`, aplicados en `emailDrain` antes del cupo; tests en `test/outbox.test.ts` (silencio con el cambio de hora, retenido hasta las 08:00, 5 avisos → 3 por prioridad y 2 `skipped`, lo enviado antes cuenta, el lunes se reinicia). Guía v0.6.63 |
-| 5.12 | Plantillas `battle.reminder` (sin la variante de racha, F7), `battle.jury_call` y `battle.first_votes`; programación en el `tick` (sábado 18:00, domingo 17:00) y `battle.first_votes` en el `batch` del voto que hace el quinto (de la 5.5), con clave de idempotencia; contrato de voto ciego sobre lo renderizado; capturas en `evidence/f5/emails/` | ⬜ Listo | 5.5, 5.11 | §2.12, §3.8.12, Anexo H · `RF-NOTIF-13`, `RF-NOTIF-02`, `RF-NOTIF-03` |
+| 5.12 | Plantillas `battle.reminder` (sin la variante de racha, F7), `battle.jury_call` y `battle.first_votes`; programación en el `tick` (sábado 18:00, domingo 17:00) y `battle.first_votes` en el `batch` del voto que hace el quinto (de la 5.5), con clave de idempotencia; contrato de voto ciego sobre lo renderizado; capturas en `evidence/f5/emails/` | ✅ Hecho | 5.5, 5.11 | §2.12, §3.8.12, Anexo H · `RF-NOTIF-13`, `RF-NOTIF-02`, `RF-NOTIF-03` · **Hecho:** plantillas en `packages/emails` (74 tests: texto plano, accesibilidad, sin seguimiento, asuntos ≤ 50); `votes/notices.ts` en el `tick` y `battle.first_votes` en el `batch` del quinto voto (retirado si el voto no entra); variante `.votes.gif` de la cuenta atrás; `test/battleNotices.test.ts` (5 tests, con el contrato `RF-NOTIF-13` sobre lo enviado); capturas en `evidence/f5/emails/`. Guía v0.6.64 |
 
 ### Cliente
 
@@ -178,6 +178,7 @@ recordatorio, llamada al jurado y primeros votos salen respetando silencio y top
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-13 | 5.12 | Recordatorio, llamada al jurado y primeros votos, con su programación y el contrato de voto ciego sobre lo enviado (guía v0.6.64). |
 | 2026-10-13 | 5.11 | Horas de silencio y tope semanal de avisos al enviar (guía v0.6.63). |
 | 2026-10-13 | 5.3–5.10 | Servidor del voto: lista, recibo de escucha, voto, denuncia, escuchas, cola, crónica y contrato de voto ciego (guía v0.6.62). `battle.first_votes` pasa a la 5.12. |
 | 2026-10-13 | 5.2 | Esquema (`listen`, `report`, `ip_signal`), esquemas Zod del voto y códigos de error (guía v0.6.61). |

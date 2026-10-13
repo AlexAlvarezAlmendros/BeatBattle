@@ -20,10 +20,12 @@ import type {
 import { and, asc, count, desc, eq, exists, gt, isNotNull, lte, ne, sql } from 'drizzle-orm'
 import type { BatchStatement } from '../../db/batch'
 import type { Db } from '../../db/client'
-import { entry, ipSignal, listen, report, vote, week } from '../../db/schema'
+import { emailOutbox, entry, ipSignal, listen, report, vote, week } from '../../db/schema'
+import { enqueueEmail } from '../../email/outbox'
 import { appError } from '../../lib/errors'
 import { ipHash } from '../../lib/ipHash'
 import type { RateLimiter } from '../../lib/rateLimit'
+import { entryPageUrl } from '../entries/qrRoute'
 import type { EntriesService } from '../entries/service'
 
 /**
@@ -37,6 +39,8 @@ const HOUR_MS = 60 * 60 * 1000
 export const PLAYS_PER_IP_ENTRY_PER_HOUR = 3
 /** Una sesión de escucha (`playId`) cuenta una vez; la clave dura un día. */
 const PLAY_SESSION_TTL_MS = 24 * HOUR_MS
+/** Votos con los que sale `battle.first_votes` (§2.12). */
+export const FIRST_VOTES_AT = 5
 /** Entradas nuevas que da la crónica como mucho. */
 export const TICKER_MAX_ENTRIES = 5
 const DAY_MS = 24 * HOUR_MS
@@ -48,6 +52,8 @@ export interface VotesDeps {
   entries: EntriesService
   rateLimiter: RateLimiter
   newId: () => string
+  /** Origen público de la web, para los enlaces de los emails. */
+  publicUrl: string
   /** Secreto del hash de las IP (§4.14). */
   ipSecret: string
 }
@@ -98,6 +104,43 @@ export function createVotesService(deps: VotesDeps) {
     return w
   }
 
+  /**
+   * `battle.first_votes` (§2.12, tarea 5.12): si este voto nuevo es el quinto de la entrada, el aviso a su dueño
+   * con el número de votos y de escuchas, nunca la media (`RF-NOTIF-13`). Una vez por entrada (y por tanto por
+   * semana): la clave de idempotencia lo garantiza aunque quiten y vuelvan a poner votos.
+   */
+  async function firstVotesEmail(
+    row: EntryRow,
+    w: WeekRow,
+    created: boolean,
+    now: number,
+    id: string,
+  ): Promise<BatchStatement[]> {
+    if (!created) return []
+    const [votes] = await db
+      .select({ n: count() })
+      .from(vote)
+      .where(and(eq(vote.entryId, row.id), eq(vote.voided, false)))
+    if ((votes?.n ?? 0) + 1 !== FIRST_VOTES_AT) return []
+    return [
+      enqueueEmail(db, {
+        id,
+        kind: 'battle.first_votes',
+        target: { userId: row.userId },
+        idempotencyKey: `battle.first_votes:${row.id}`,
+        payload: {
+          weekNumber: w.number,
+          title: row.title,
+          alias: row.alias,
+          votes: FIRST_VOTES_AT,
+          plays: row.playCount,
+          entryUrl: entryPageUrl(deps.publicUrl, row.id),
+        },
+        now,
+      }),
+    ]
+  }
+
   return {
     // ── 5.4: recibo de escucha ──────────────────────────────────────────────────────────────────
 
@@ -143,7 +186,8 @@ export function createVotesService(deps: VotesDeps) {
      * por usuario y entrada y repetir actualiza (`RF-VOTE-02`), nunca la propia (`RF-VOTE-03`), con el recibo
      * cumplido (`RF-VOTE-04`), en `open` o `voting` (`RF-VOTE-05`) y 120 por hora (`RF-VOTE-11`). Las
      * comprobaciones dan el error que toca; el `INSERT … SELECT` condicionado las repite dentro del `batch`
-     * para que una carrera (la semana que cierra, la entrada que se retira) no cuele un voto.
+     * para que una carrera (la semana que cierra, la entrada que se retira) no cuele un voto. El voto que hace
+     * el quinto encola `battle.first_votes` en el mismo `batch` (5.12).
      */
     async vote(
       userId: string,
@@ -151,11 +195,6 @@ export function createVotesService(deps: VotesDeps) {
       stars: number,
       ip: string | null,
       now: number,
-      extra: (info: {
-        row: EntryRow
-        w: WeekRow
-        created: boolean
-      }) => Promise<BatchStatement[]> = async () => [],
     ): Promise<Vote> {
       await deps.rateLimiter.enforce({
         key: `vote:user:${userId}`,
@@ -220,6 +259,7 @@ export function createVotesService(deps: VotesDeps) {
         })
         .returning({ entryId: vote.entryId })
       const signal = ipHash(ip, deps.ipSecret, now)
+      const emailId = deps.newId()
       const rest: BatchStatement[] = [
         ...(signal
           ? [
@@ -229,11 +269,14 @@ export function createVotesService(deps: VotesDeps) {
                 .onConflictDoUpdate({ target: [ipSignal.userId, ipSignal.ipHash], set: { seenAt: now } }),
             ]
           : []),
-        ...(await extra({ row, w, created: !previous })),
+        ...(await firstVotesEmail(row, w, !previous, now, emailId)),
       ]
       const [inserted] = await db.batch([guarded, ...rest])
-      if (inserted.length === 0)
+      if (inserted.length === 0) {
+        // Sin voto no hay aviso: lo que este intento haya encolado, fuera.
+        await db.delete(emailOutbox).where(and(eq(emailOutbox.id, emailId), eq(emailOutbox.status, 'queued')))
         throw appError('CONFLICT', 'No se ha podido guardar el voto. Vuelve a intentarlo.')
+      }
       return { entryId, stars, createdAt: previous?.createdAt ?? now, updatedAt: now }
     },
 
