@@ -11,16 +11,21 @@
 //   loudness   ganancia de reproducción
 //   goldenEar  Spearman con rangos medios
 //
-// El resto de §4.5 llega con la fase que lo usa (ver docs/planning/ROADMAP.md): `calendar`,
-// `phase`, `ranking`, `fair`, `alias`, `xp` (`xpFor`, `streakOf`), `achievements`,
+// De la Fase 3 (tareas 3.1 y 3.2):
+//   calendar   fronteras de la semana en Europe/Madrid, semana ISO, slug y temporada
+//   phase      fase derivada de los instantes, permisos por fase y cuenta atrás
+//
+// El resto de §4.5 llega con la fase que lo usa (ver docs/planning/ROADMAP.md): `ranking`, `fair`, `alias`, `xp` (`xpFor`, `streakOf`), `achievements`,
 // `seasonStandings` y `goldenEar()`.
 
 export * from './balance'
+export * from './calendar'
 export * from './entryAudio'
 export * from './goldenEar'
 export * from './levels'
 export * from './listen'
 export * from './loudness'
+export * from './phase'
 export * from './prng'
 export * from './scoring'
 export * from './season'

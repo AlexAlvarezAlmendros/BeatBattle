@@ -30,8 +30,8 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 |---|------|--------|------|------|
 | 0 | Fundaciones | ✅ Cerrada (2026-10-04, con la dirección «Arena»; PR nueva pendiente de revisión) | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes de la arena (guía v0.6 §3); marco de juego y menú principal navegables con teclado; prueba de marca y de juego (`RD-VIS-02`) |
 | 1 | Spike de sensación y audio | ✅ Cerrada con **GO** (2026-10-08) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio (emulado); efectos con la parte de la app < 10 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
-| 2 | Cuentas y base de email | 🔄 En curso (2.1 hecha) | [02-cuentas-email.md](plans/02-cuentas-email.md) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, presupuesto diario, preferencias, consentimientos y bajas |
-| 3 | Semanas y samples | 🔒 Bloqueada (F2) | — | 3 semanas programadas; cambio de semana en la frontera con reloj simulado; email del drop (también sin cuenta) |
+| 2 | Cuentas y base de email | 🔄 En curso (todo hecho salvo las comprobaciones manuales: Discord real 2.22, IMAP real 2.11 y el cierre 2.26) | [02-cuentas-email.md](plans/02-cuentas-email.md) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, presupuesto diario, preferencias, consentimientos y bajas |
+| 3 | Semanas y samples | 🔄 En curso (arranca con las comprobaciones manuales de la F2 pendientes del usuario) | [03-semanas-samples.md](plans/03-semanas-samples.md) | 3 semanas programadas; cambio de semana en la frontera con reloj simulado; email del drop (también sin cuenta) |
 | 4 | Participar | 🔒 Bloqueada (F3) | — | WAV de 60 MB por trozos con BPM, tonalidad y sonoridad medida; recibo por email |
 | 5 | Escuchar y votar | 🔒 Bloqueada (F4) | — | Todas las reglas `RF-VOTE-*` en verde; Modo Jurado con teclado; recordatorio y llamada al jurado |
 | 6 | Cierre, resultados y ceremonia | 🔒 Bloqueada (F5) | — | Sellado determinista, ceremonia, re-sellado idéntico; Lunes de batalla por email |
@@ -189,6 +189,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-09 | F3 | Plan 03 creado (22 tareas). Empieza mientras la F2 espera solo comprobaciones manuales del usuario: Discord real (2.22), IMAP real (2.11) y el cierre (2.26). |
 | 2026-10-08 | F2 | Plan 02 creado (26 tareas) con las decisiones de dominio, cuenta de envío y proveedores (guía v0.6.20). |
 | 2026-10-08 | F1 | **Fase 1 cerrada con GO** (1.12): `RD-SND-05` reformulado y Android emulado (decisiones del usuario), jurado visual de tres lentes con sus hallazgos corregidos, nuevo `RD-MOT-06` (guía v0.6.19). La Fase 2 pasa a lista. |
 | 2026-10-07 | F1 | 1.8 hecha: ffmpeg cabe en una función de Vercel y mide 52 MB en 3,7 s en frío (guía v0.6.18). La 1.12 pasa a lista. |

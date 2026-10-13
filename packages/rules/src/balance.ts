@@ -78,6 +78,12 @@ export const VOTING_CLOSE_DISPLAY_AT = Object.freeze({
   second: 59,
 } as const satisfies WeeklyWallTime)
 
+/**
+ * «Hora loca» (guía §2.11, §3.3, §3.6): la última hora antes de cada cierre, en la que el reloj de ronda
+ * late. Incluye el instante en que falta justo 1 h (`RF-DROP-10`).
+ */
+export const LAST_HOUR_MS = 3_600_000
+
 // ─── Voto (guía §2.7, §2.8) ─────────────────────────────────────────────────────────────────────
 
 /** Estrella mínima de un voto (votos de 1 a 5 estrellas enteras, `RF-VOTE-01`). */
