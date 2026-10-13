@@ -88,7 +88,14 @@ test('hito de la Fase 6: se vota, se sella, Lunes de batalla, resultados, ceremo
   })
 
   await test.step('RF-RES-09: la home ofrece la ceremonia; se ve, se salta con Esc y queda vista', async () => {
-    const page = third.page
+    // Un contexto en el que la home sí ofrece la ceremonia (los de batalla la dan por vista).
+    const context = await battleContext(browser, base, testIp(41), clock, { ceremonyOffer: true })
+    const page = await context.newPage()
+    const signedIn = await page.request.post('/api/auth/sign-in/email', {
+      headers: { origin: base, 'x-bb-test-now': String(clock.api) },
+      data: { email: third.email, password: PASSWORD },
+    })
+    expect(signedIn.ok(), await signedIn.text()).toBe(true)
     await page.goto('/')
     const offer = page.getByRole('dialog', { name: /sellada/ })
     await expect(offer).toBeVisible({ timeout: 20_000 })
@@ -110,6 +117,7 @@ test('hito de la Fase 6: se vota, se sella, Lunes de batalla, resultados, ceremo
     await page.goto('/')
     await expect(page.getByRole('menuitem', { name: /Resultados/ }).first()).toBeVisible()
     await expect(page.getByRole('dialog', { name: /sellada/ })).toHaveCount(0)
+    await context.close()
   })
 
   await test.step('RF-RES-07 / RF-RES-08: la página de resultados revela al productor, el podio y «tu resultado»', async () => {
