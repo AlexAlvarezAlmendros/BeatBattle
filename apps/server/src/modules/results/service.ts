@@ -1,6 +1,6 @@
 import { isoWeekLabel, localDateOf } from '@beatbattle/rules'
 import type { Archive, DisqualifyRequest, WeekResults } from '@beatbattle/shared'
-import { and, desc, eq, inArray, isNotNull, lt } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNotNull, lt, lte } from 'drizzle-orm'
 import type { Db } from '../../db/client'
 import { auditLog, entry, sample, week } from '../../db/schema'
 import { auditStatement } from '../../lib/audit'
@@ -113,7 +113,14 @@ export function createResultsService(deps: ResultsDeps) {
         .select({ week, title: sample.title, cover: sample.coverPublicId })
         .from(week)
         .innerJoin(sample, eq(sample.id, week.sampleId))
-        .where(and(isNotNull(week.sealedAt), before === null ? undefined : lt(week.startsAt, before)))
+        .where(
+          and(
+            isNotNull(week.sealedAt),
+            // Sellada ya en `now` (con el reloj de prueba se sellan semanas «del futuro»).
+            lte(week.sealedAt, now),
+            before === null ? undefined : lt(week.startsAt, before),
+          ),
+        )
         .orderBy(desc(week.startsAt))
         .limit(ARCHIVE_PAGE_SIZE + 1)
       const page = rows.slice(0, ARCHIVE_PAGE_SIZE)

@@ -274,5 +274,9 @@ describe('archivo y ceremonia (6.7, 6.8)', () => {
     expect((await seen()).statusCode).toBe(204)
     expect((await seen()).statusCode).toBe(204)
     expect((await current()).sealed).toMatchObject({ ceremonySeen: true })
+    // Con el reloj antes del sellado (el de prueba puede ir y volver), ni ceremonia ni archivo.
+    b.t.clock.set(W42.startsAt + HOUR)
+    expect((await current()).sealed).toBeNull()
+    expect((await b.t.app.inject({ method: 'GET', url: '/api/weeks' })).json().data.weeks).toEqual([])
   })
 })

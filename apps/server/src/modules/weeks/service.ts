@@ -363,11 +363,12 @@ export function createWeeksService(deps: WeeksDeps) {
         .where(gt(week.startsAt, now))
         .orderBy(asc(week.startsAt))
         .limit(1)
-      // La última sellada: su ceremonia se ofrece una vez a cada cuenta (`RF-RES-09`).
+      // La última sellada: su ceremonia se ofrece una vez a cada cuenta (`RF-RES-09`). Sellada ya en `now`: con el
+      // reloj de prueba se sellan semanas «del futuro», y la home de ahora no puede ofrecerlas.
       const [last] = await db
         .select({ id: week.id, slug: week.slug, number: week.number, sealedAt: week.sealedAt })
         .from(week)
-        .where(isNotNull(week.sealedAt))
+        .where(and(isNotNull(week.sealedAt), lte(week.sealedAt, now)))
         .orderBy(desc(week.startsAt))
         .limit(1)
       let sealed: CurrentWeek['sealed'] = null
