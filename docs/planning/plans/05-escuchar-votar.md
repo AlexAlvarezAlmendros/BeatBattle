@@ -178,6 +178,6 @@ recordatorio, llamada al jurado y primeros votos salen respetando silencio y top
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
-| 2026-10-13 | — | Plan creado (24 tareas). |
 | 2026-10-13 | 5.2 | Esquema (`listen`, `report`, `ip_signal`), esquemas Zod del voto y códigos de error (guía v0.6.61). |
 | 2026-10-13 | 5.1 | Ronda justa, órdenes y cola del jurado en `packages/rules` con propiedades (guía v0.6.60). |
+| 2026-10-13 | — | Plan creado (24 tareas). |
