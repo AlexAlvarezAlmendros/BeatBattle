@@ -1,2 +1,3 @@
-# BD local de desarrollo (DATABASE_URL=file:./data/local.db) y sus ficheros auxiliares
-data/
+# BD local de desarrollo (DATABASE_URL=file:./data/local.db) y sus ficheros auxiliares. Solo la carpeta
+# de la raíz del paquete: `src/auth/data/` (la lista de dominios desechables) sí va en git.
+/data/

@@ -81,7 +81,8 @@ node tools/shot/ab.mjs [--otp-live]                  # A/B de la antigua prueba 
   compilando. Lo no ejecutado se reporta como «escrito, sin verificar».
 - Identificadores en inglés; textos de UI por claves i18n en castellano; documentación en castellano.
 - **Commits y PRs sin atribución a la IA.** Rama por tarea (`feat/4.3-subida-por-trozos`) y PR a
-  `main` que revisa el usuario; no se mezclan PRs ni se despliega, ni se crean recursos en la nube
-  (Vercel, Turso, Cloudinary, DNS, OAuth) sin su confirmación.
+  `main`. Claude mezcla sus PRs él mismo cuando la CI (`quality`) está en verde, con *merge commit* y en
+  orden si van apiladas (decisión del usuario del 2026-10-13); nunca en rojo. No se despliega ni se crean
+  recursos en la nube (Vercel, Turso, Cloudinary, DNS, OAuth) sin confirmación del usuario.
 - Cambios en la web del sello (`ReactOtpWeb`): rama y PR propias en ese repo desde un
   `git worktree` sobre `origin/main` (su árbol de trabajo suele estar sucio).
