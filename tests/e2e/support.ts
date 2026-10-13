@@ -65,7 +65,6 @@ export const ROUTES = [
   { path: '/dev/menu', heading: 'Beat Battle' },
   { path: '/semana/2026-41/resultados', heading: 'Resultados' },
   { path: '/semanas', heading: 'Semanas' },
-  { path: '/e/0192f3a1', heading: 'Entrada' },
   { path: '/jurado', heading: 'Modo Jurado' },
   { path: '/subir', heading: 'Subir mi beat' },
   { path: '/p/aina', heading: 'aina' },

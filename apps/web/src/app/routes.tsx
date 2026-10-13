@@ -154,10 +154,10 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             {
               path: 'e/:id',
               handle: handle('public', interior('entry', 'pages.entry.title')),
-              lazy: page(
-                () => import('../features/entries/EntryPage'),
-                (m) => m.EntryPage,
-              ),
+              lazy: async () => {
+                const m = await import('../features/entries/EntryPage')
+                return { Component: m.EntryPage, loader: m.entryLoader }
+              },
             },
             {
               path: 'jurado',
