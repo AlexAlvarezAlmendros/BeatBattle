@@ -1540,6 +1540,9 @@
       "skip": "Saltar",
       "report": "Denunciar",
       "exit": "Salir",
+      "podium": "Podio",
+      "standings": "Clasificación",
+      "share": "Compartir",
       "glyph": {
         "up": "↑",
         "upLabel": "Flecha arriba",
@@ -1558,6 +1561,8 @@
         "f": "F",
         "s": "S",
         "r": "R",
+        "t": "T",
+        "x": "X",
         "one": "1",
         "five": "5",
         "space": "Espacio"
@@ -1969,6 +1974,49 @@
     "sheetLabel": "La entrada elegida",
     "note": "Ronda justa: primero, las que menos votos llevan (nadie ve cuántos). Notas y autoría, el domingo.",
     "link": "Elegir entrada"
+  },
+  "results": {
+    "documentTitle": "Resultados de la semana {number}",
+    "kicker": "Resultados oficiales",
+    "title": "Semana {number}",
+    "sealed": "Sellada",
+    "summary": "«{sample}» · {entries} · {votes} · voto ciego revelado",
+    "entries_one": "{count} entrada",
+    "entries_other": "{count} entradas",
+    "votes_one": "{count} voto",
+    "votes_other": "{count} votos",
+    "corrected": "Clasificación corregida el {date}: esta es la buena.",
+    "podiumLabel": "Podio",
+    "champion": "Campeón de la semana",
+    "place": "{position}.º puesto.",
+    "aliasLabel": "Alias:",
+    "hiddenA": "Autoría",
+    "hiddenB": "oculta",
+    "deletedProducer": "Productor eliminado",
+    "score": "{score} de puntuación",
+    "mine": {
+      "label": "Tu resultado",
+      "position": "Posición",
+      "of": "de {total}",
+      "score": "Puntuación",
+      "votes": "Votos",
+      "unranked": "Sin clasificar",
+      "unrankedNote": "Hacen falta 3 votos para entrar en la clasificación."
+    },
+    "playChampion": "Play al campeón",
+    "standings": "Clasificación",
+    "standingsTitle": "Clasificación completa",
+    "rowSubtitle": "era {alias} · {votes}",
+    "unrankedRow": "Sin clasificar · era {alias} · {votes}",
+    "histogram": "Votos por estrellas: {one} de una, {two} de dos, {three} de tres, {four} de cuatro y {five} de cinco.",
+    "empty": {
+      "title": "Semana desierta",
+      "body": "Nadie subió su flip de «{sample}». Sin podio ni ceremonia: el sample de esta semana te espera."
+    },
+    "noPodium": "Ninguna entrada llegó a 3 votos: esta semana no hay podio.",
+    "share": "Compartir",
+    "shareTitle": "Resultados de la semana {number} de Beat Battle",
+    "shared": "Enlace listo para compartir."
   },
   "entryPage": {
     "kicker": "Semana {number} · ficha",

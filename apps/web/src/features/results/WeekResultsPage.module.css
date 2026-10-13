@@ -1,0 +1,524 @@
+/*
+ * Página de resultados (guía §3.8.6, maqueta `04-resultados`): la placa con el sello «SELLADA», el podio con
+ * escena (focos, suelo de trama, peanas de alturas distintas) y, debajo, la barra «TU RESULTADO» y la tabla.
+ * Ningún texto va sobre la trama ni los focos (`RD-VIS-05`): los nombres llevan su fondo negro y la barra
+ * es opaca. Sin movimiento, todo quieto.
+ */
+.page {
+  display: grid;
+  gap: var(--bb-space-4);
+  width: min(100%, 76rem);
+  margin-inline: auto;
+  padding: var(--bb-space-4) var(--bb-gutter) var(--bb-space-10);
+}
+
+.head {
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-3);
+  text-align: center;
+}
+
+.hudPlate {
+  position: relative;
+}
+
+.sealed {
+  position: absolute;
+  top: var(--bb-space-5);
+  right: calc(-1 * (var(--bb-space-16) + var(--bb-space-10)));
+  background: var(--bb-black);
+}
+
+.heading {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.headingKicker {
+  display: block;
+  color: var(--bb-text-2);
+}
+
+.headingTitle {
+  font-size: var(--bb-fs-title);
+  line-height: var(--bb-leading-display);
+}
+
+.summary {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.corrected {
+  color: var(--bb-text);
+  font-weight: var(--bb-weight-semibold);
+  background: var(--bb-panel);
+  border-left: var(--bb-stroke-cursor) solid var(--bb-red);
+  padding: var(--bb-space-2) var(--bb-space-4);
+}
+
+/* ── Podio ─────────────────────────────────────────────────────────────────────────────────────────── */
+
+.podium {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 1fr 1.12fr 1fr;
+  grid-template-areas: "second first third";
+  align-items: end;
+  column-gap: var(--bb-space-2);
+  padding-top: var(--bb-space-2);
+  width: min(100%, 58rem);
+  margin-inline: auto;
+}
+
+/* El suelo de trama (decorativo), detrás de las peanas, con su filete rojo. */
+.floor {
+  position: absolute;
+  inset: auto calc(-1 * var(--bb-space-16)) 0;
+  height: 7.5rem;
+  z-index: -1;
+  border-top: var(--bb-stroke-cursor) solid var(--bb-red);
+  background: var(--bb-wine-3);
+}
+
+.floorDots {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Los tres focos (decorativos), detrás de todo. */
+.beams {
+  position: absolute;
+  inset: 0 0 var(--bb-space-16);
+  z-index: -1;
+  background:
+    linear-gradient(180deg, var(--bb-line), transparent 80%) 16% 0 / 22% 100% no-repeat,
+    linear-gradient(180deg, var(--bb-line-strong), transparent 85%) 50% 0 / 26% 100% no-repeat,
+    linear-gradient(180deg, var(--bb-line), transparent 80%) 84% 0 / 22% 100% no-repeat;
+  clip-path: polygon(
+    10% 0,
+    22% 0,
+    30% 100%,
+    2% 100%,
+    10% 0,
+    41% 0,
+    59% 0,
+    66% 100%,
+    34% 100%,
+    41% 0,
+    78% 0,
+    90% 0,
+    98% 100%,
+    70% 100%,
+    78% 0
+  );
+  opacity: 0.8;
+}
+
+.spot {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  min-width: 0;
+}
+
+.spot[data-place="1"] {
+  grid-area: first;
+}
+
+.spot[data-place="2"] {
+  grid-area: second;
+}
+
+.spot[data-place="3"] {
+  grid-area: third;
+}
+
+.crown {
+  width: var(--bb-space-16);
+  margin-bottom: calc(-1 * var(--bb-space-1));
+  fill: var(--bb-red);
+  stroke: var(--bb-black);
+  stroke-width: var(--bb-stroke-cursor);
+  stroke-linejoin: round;
+}
+
+.champion {
+  margin-bottom: var(--bb-space-3);
+  padding: var(--bb-space-1) var(--bb-space-3);
+  background: var(--bb-white);
+  color: var(--bb-black);
+  font-family: var(--bb-font-display);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-button);
+  font-size: var(--bb-fs-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--bb-tracking-button);
+  rotate: calc(var(--bb-tilt-card) * 1);
+}
+
+.art {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  /* Con poco alto (1366 × 657), las portadas encogen para que el podio y la barra quepan. */
+  width: min(100%, 10rem, 19svh);
+}
+
+.spot[data-place="1"] .art {
+  width: min(100%, 12rem, 23svh);
+}
+
+.cover {
+  display: block;
+  aspect-ratio: 1;
+  padding: var(--bb-stroke-cursor);
+}
+
+.spot[data-place="1"] .cover {
+  --frame-border: var(--bb-red);
+}
+
+.cover > :is(canvas, img) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.art:focus-visible {
+  outline: var(--bb-stroke-cursor) solid var(--bb-white);
+  outline-offset: var(--bb-cursor-gap);
+}
+
+/* Los restos del sello «AUTORÍA OCULTA» que la ceremonia arranca (§3.8.6). */
+.torn {
+  position: absolute;
+  padding: var(--bb-space-1) var(--bb-space-2);
+  background: var(--bb-black);
+  color: var(--bb-white);
+  border: var(--bb-stroke-stamp) solid var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-size: var(--bb-fs-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--bb-tracking-label);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.tornA {
+  top: var(--bb-space-3);
+  left: calc(-1 * var(--bb-space-4));
+  rotate: calc(var(--bb-tilt-stamp) * -1.4);
+  clip-path: polygon(0 0, 100% 0, 92% 30%, 100% 55%, 90% 78%, 96% 100%, 0 100%);
+}
+
+.tornB {
+  right: calc(-1 * var(--bb-space-5));
+  bottom: var(--bb-space-4);
+  rotate: calc(var(--bb-tilt-stamp) * 1.6);
+  clip-path: polygon(8% 0, 100% 0, 100% 100%, 0 100%, 9% 72%, 2% 45%, 10% 22%);
+}
+
+.name {
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-1);
+  margin-top: var(--bb-space-3);
+  max-width: 100%;
+}
+
+.aliasX {
+  padding: var(--bb-space-1) var(--bb-space-2);
+  background: var(--bb-black);
+  color: var(--bb-red);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+  text-decoration: line-through;
+  text-decoration-thickness: var(--bb-stroke);
+}
+
+.producer {
+  max-width: 100%;
+  color: var(--bb-white);
+  font-size: var(--bb-fs-2xl);
+  line-height: var(--bb-leading-display);
+  text-shadow: var(--bb-shadow-hard);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  background: var(--bb-black);
+  padding: 0 var(--bb-space-2);
+}
+
+.spot[data-place="1"] .producer {
+  font-size: var(--bb-fs-3xl);
+}
+
+.producer:focus-visible {
+  outline: var(--bb-stroke-cursor) solid var(--bb-white);
+  outline-offset: var(--bb-cursor-gap);
+}
+
+.score {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-3);
+  margin-top: var(--bb-space-1);
+  padding: var(--bb-space-2) var(--bb-space-3) var(--bb-space-2) var(--bb-space-2);
+  background: var(--bb-black);
+}
+
+.score b {
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xl);
+  font-weight: var(--bb-weight-extrabold);
+}
+
+.score > span:last-child {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-xs);
+  line-height: var(--bb-leading-label);
+  text-align: left;
+}
+
+.medal {
+  width: var(--bb-space-10);
+  height: var(--bb-space-10);
+}
+
+/* Peanas: 1.º roja y la más alta en el centro, 2.º y 3.º a los lados, más bajas. */
+.pedestal {
+  display: grid;
+  width: 100%;
+  margin-top: var(--bb-space-3);
+}
+
+.pedestalTop {
+  height: var(--bb-space-4);
+  background: var(--bb-ink-4);
+  clip-path: polygon(4% 0, 96% 0, 100% 100%, 0 100%);
+}
+
+.pedestalFront {
+  display: grid;
+  place-items: center;
+  height: min(var(--ped-h, 5rem), var(--ped-h-max, 9svh));
+  border-top: var(--bb-stroke) solid var(--bb-white);
+  background: linear-gradient(180deg, var(--bb-panel), var(--bb-black));
+  color: var(--bb-white);
+  font-size: var(--bb-fs-timer);
+  text-shadow: var(--bb-shadow-hard);
+}
+
+.spot[data-place="1"] .pedestalTop {
+  background: var(--bb-face-red-tint);
+}
+
+.spot[data-place="1"] .pedestalFront {
+  --ped-h: 7rem;
+  --ped-h-max: 13svh;
+  background: linear-gradient(180deg, var(--bb-red), var(--bb-face-red-shade));
+  color: var(--bb-black);
+  text-shadow: none;
+}
+
+.spot[data-place="3"] .pedestalFront {
+  --ped-h: 4rem;
+  --ped-h-max: 7svh;
+}
+
+/* Contraste alto: fuera la decoración (el lienzo no se adapta) y las peanas con su contorno. */
+@media (forced-colors: active) {
+  .beams,
+  .floor {
+    display: none;
+  }
+
+  .pedestalFront,
+  .spot[data-place="1"] .pedestalFront {
+    border: var(--bb-stroke) solid CanvasText;
+    forced-color-adjust: none;
+    background: Canvas;
+    color: CanvasText;
+    text-shadow: none;
+  }
+}
+
+.noPodium {
+  justify-self: center;
+  color: var(--bb-text-2);
+  background: var(--bb-panel);
+  padding: var(--bb-space-3) var(--bb-space-5);
+}
+
+/* ── Tu resultado ──────────────────────────────────────────────────────────────────────────────────── */
+
+.mine {
+  --frame-border: var(--bb-red);
+  --frame-fill: var(--bb-panel);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bb-space-4) var(--bb-space-6);
+  padding: var(--bb-space-4) var(--bb-space-5);
+}
+
+.mineStats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bb-space-4) var(--bb-space-6);
+}
+
+.mineTag {
+  padding: var(--bb-space-2) var(--bb-space-4) var(--bb-space-2) var(--bb-space-3);
+  background: var(--bb-red-cta);
+  color: var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-button);
+  text-transform: uppercase;
+  clip-path: polygon(var(--bb-slant-sm) 0, 100% 0, calc(100% - var(--bb-slant-sm)) 100%, 0 100%);
+}
+
+.tile {
+  display: grid;
+  gap: var(--bb-space-1);
+}
+
+.tile small {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tile b {
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xl);
+  font-weight: var(--bb-weight-extrabold);
+  white-space: nowrap;
+}
+
+.tile b span {
+  color: var(--bb-text-3);
+  font-family: var(--bb-font-ui);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-semibold);
+}
+
+.mineActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-3);
+  margin-left: auto;
+}
+
+.mineNote {
+  flex-basis: 100%;
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-sm);
+}
+
+/* ── Clasificación ─────────────────────────────────────────────────────────────────────────────────── */
+
+.standings {
+  display: grid;
+  gap: var(--bb-space-3);
+  scroll-margin-top: var(--bb-space-16);
+}
+
+.standingsTitle {
+  color: var(--bb-text-2);
+}
+
+.rows {
+  display: grid;
+  gap: var(--bb-space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.histogram {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: var(--bb-space-1);
+  height: var(--bb-space-8);
+}
+
+.bar {
+  width: var(--bb-space-2);
+  height: max(var(--bb-stroke), calc(var(--bar) * 100%));
+  background: var(--bb-text-2);
+}
+
+.bar[data-five] {
+  background: var(--bb-red);
+}
+
+.empty {
+  display: grid;
+  justify-items: start;
+  gap: var(--bb-space-4);
+  padding: var(--bb-space-6);
+  width: min(100%, 40rem);
+  justify-self: center;
+}
+
+/* Móvil: el podio se apila (1.º, 2.º, 3.º) sin peanas; los nombres siguen con su fondo. */
+@media (max-width: 720px) {
+  .heading {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
+}
+
+@media (max-width: 640px) {
+  .podium {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "first"
+      "second"
+      "third";
+    row-gap: var(--bb-space-8);
+  }
+
+  .beams,
+  .floor,
+  .pedestal {
+    display: none;
+  }
+
+  .sealed {
+    right: calc(-1 * var(--bb-space-4));
+  }
+
+  .mineActions {
+    margin-left: 0;
+  }
+}

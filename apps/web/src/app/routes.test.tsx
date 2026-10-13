@@ -32,11 +32,6 @@ const tk = (key: string) => {
 /** Rutas de §2.18 → clave del `<h1>` y título esperado de la pestaña. */
 const PAGES: { path: string; heading: string; title: string }[] = [
   { path: '/', heading: 'pages.home.title', title: documentTitle() },
-  {
-    path: '/semana/2026-41/resultados',
-    heading: 'pages.weekResults.title',
-    title: documentTitle(tk('pages.weekResults.title')),
-  },
   { path: '/semanas', heading: 'pages.weeks.title', title: documentTitle(tk('pages.weeks.title')) },
   { path: '/subir', heading: 'pages.upload.title', title: documentTitle(tk('pages.upload.title')) },
   {
@@ -155,6 +150,81 @@ describe('router (0.10, guía §2.18)', () => {
     await waitFor(() =>
       expect(document.title).toBe(documentTitle(t('entryPage.documentTitle', { alias: 'Tigre Púrpura' }))),
     )
+    vi.unstubAllGlobals()
+  })
+
+  it('RF-RES-08: /semana/:slug/resultados pinta la semana sellada: su <h1>, el podio y «tu resultado» (y 404 sin sellar)', async () => {
+    const row = (id: string, alias: string, position: number | null, producer: string) => ({
+      entry: {
+        id,
+        weekSlug: '2026-w41',
+        alias,
+        title: `Flip ${id}`,
+        description: null,
+        bpm: 92,
+        musicalKey: 'Dm',
+        daw: null,
+        genres: [],
+        durationMs: 60_000,
+        peaks: null,
+        gainDb: -6,
+        streamUrl: '/s',
+        cover: { kind: 'generative', seed: 7 },
+        producer: { username: producer, displayName: producer, avatarUrl: null },
+        result: null,
+      },
+      result: {
+        position,
+        scoreMilli: 4210,
+        votes: 5,
+        meanMilli: 4200,
+        medianHalf: 8,
+        histogram: [0, 0, 1, 2, 2],
+        seasonPoints: 0,
+      },
+    })
+    const rows = [
+      row('a', 'Faro Errante', 1, 'kairo'),
+      row('b', 'Cuervo', 2, 'noah'),
+      row('c', 'Medusa', null, 'merce'),
+    ]
+    const results = {
+      week: {
+        slug: '2026-w41',
+        number: 41,
+        sampleTitle: 'Lluvia en Gràcia',
+        sealedAt: 1,
+        revision: 2,
+        correctedAt: Date.UTC(2026, 9, 13, 10),
+      },
+      rows,
+      mine: rows[1],
+    }
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) =>
+        String(input).endsWith('/api/weeks/2026-w41/results')
+          ? new Response(JSON.stringify({ data: results }), {
+              headers: { 'content-type': 'application/json' },
+            })
+          : new Response(JSON.stringify({ error: { code: 'NOT_FOUND', message: '' } }), {
+              status: 404,
+              headers: { 'content-type': 'application/json' },
+            }),
+      ),
+    )
+    renderAt('/semana/2026-w41/resultados')
+    expect(await h1(`${t('results.kicker')} ${t('results.title', { number: 41 })}`)).toBeInTheDocument()
+    await waitFor(() =>
+      expect(document.title).toBe(documentTitle(t('results.documentTitle', { number: 41 }))),
+    )
+    const podium = screen.getByRole('region', { name: t('results.podiumLabel') })
+    expect(within(podium).getByRole('link', { name: 'kairo' })).toBeInTheDocument()
+    // La sin clasificar no sube al podio.
+    expect(within(podium).queryByRole('link', { name: 'merce' })).toBeNull()
+    expect(screen.getByRole('region', { name: t('results.mine.label') })).toHaveTextContent('2.º')
+    // RF-RES-06: el aviso del re-sellado.
+    expect(screen.getByRole('note')).toHaveTextContent(/Clasificación corregida/)
     vi.unstubAllGlobals()
   })
 
