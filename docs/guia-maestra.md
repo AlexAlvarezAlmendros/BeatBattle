@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.70 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.71 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -3290,7 +3290,7 @@ Valores por defecto que la guía ya asume; se confirman o se cambian (y se regis
 | Nombre de marca | «Beat Battle · un juego de Other People» | Fase 0 (afecta al logo y a los textos) |
 | Modelo de semana | Envíos y votos a la vez (§2.1) | Revisable tras la beta |
 | Fecha de lanzamiento y primera temporada | Primera semana completa tras cerrar la Fase 10 | Fase 10 |
-| Dorado como excepción | **No**: medallas y semana dorada en la paleta (§3.2, «Medallas»). Si se aprueba, `#f5c542` solo para el disco de oro del 1.º, la carta de campeón y la semana dorada | Antes de la Fase 6 (podio y medallas) |
+| Dorado como excepción | **Cerrada (2026-10-13): sin dorado.** Medallas, carta de campeón y semana dorada en la paleta (§3.2, «Medallas») | Antes de la Fase 6 (podio y medallas) |
 | Pase de la carta | Cinta propia con física (§3.4.4); alternativa, un expositor giratorio si se percibe como pieza del sello | Fase 7 (carta) |
 
 Cerrada en la v0.6: «Ajustes visuales propuestos por el jurado de la prueba del sello» (tarea 1.12). Ya
@@ -3633,6 +3633,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.71 | §7: cerrada la decisión del dorado (decisión del usuario): **sin dorado**; las medallas, la carta de campeón y la semana dorada van en la paleta del sello. |
 | 2026-10-13 | 0.6.70 | **Tarea 5.22 (jurado visual).** §3.8.13: a 360 px o menos, la rejilla va en dos columnas; en casillas de menos de 9 rem el sello es «✓ n/5»; en móvil, la entrada elegida va en una hoja pegada sobre la barra con su alias, sus datos, «Escuchar» y «Jurado». §3.8.7: en móvil, la ronda, el contador y el alias van en la fila «[silueta] VS ALIAS» de la arena y no en el HUD; el panel en una fila, solo desde 1200 px; sin cuenta o sin verificar, la puerta (silueta, por qué y «Entrar» o «Verificar el email», con sus teclas). §3.8.4: en contraste alto, las estrellas con contorno `CanvasText` y las llenas en `Highlight`. Acta en `docs/planning/evidence/f5/jurado/`. |
 | 2026-10-13 | 0.6.69 | **Tareas 5.9 (cliente) y 5.21.** §3.8.3: la crónica del menú añade a sus líneas las de `/ticker` (cada 30 s): «Nueva entrada: <alias>», «Quedan N días» (o «Último día para subir / votar») y «N votos esta semana» (no sale con 0). §3.8.7: Espacio pausa esté donde esté el cursor, también sobre un botón o una estrella. |
 | 2026-10-13 | 0.6.68 | **Tarea 5.18.** §3.8.7: la composición en ventana baja (≤ 780 px de alto) y el comportamiento del Modo Jurado (cola ordenada en la visita, `?desde`, ronda, error de audio, salir, combo sin XP). Anexo D: `combo.up` y `jury.swap` en el catálogo, medidos *offline* a su nivel (±0,05 dB). La barra de controles del Modo Jurado: `1 5 PUNTUAR · ESPACIO PAUSA · ←→ BUSCAR` (o `NOTA` con el cursor en las estrellas) `· S SALTAR · R DENUNCIAR · ESC SALIR · M SONIDO`. |
