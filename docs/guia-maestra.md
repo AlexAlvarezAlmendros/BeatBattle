@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.63 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.64 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -676,8 +676,8 @@ distintas:
 | `battle.drop` | Aviso | Nuevo drop (si el usuario prefiere emails separados; hasta la Fase 6, en la que llega el combinado, a todos) | Ídem | Lunes 08:00 |
 | `battle.results` | Aviso | Resultados (si prefiere separados) | Participantes y jurados de la semana | Lunes 08:00 o al sellar |
 | `battle.reminder` | Aviso | Descargó el sample y no ha subido (si tiene racha ≥ 3, versión «racha en peligro») | Ese usuario | Sábado 18:00 |
-| `battle.jury_call` | Aviso | Ha votado esta semana y le quedan ≥ 3 entradas por escuchar | Ese usuario | Domingo 17:00 |
-| `battle.first_votes` | Aviso | Su entrada llega a 5 votos (solo el número, nunca la media) | El participante | Inmediato, una vez por semana |
+| `battle.jury_call` | Aviso | Ha votado esta semana y le quedan ≥ 3 entradas por escuchar (activas, ajenas y sin su voto) | Ese usuario | Domingo 17:00 |
+| `battle.first_votes` | Aviso | Su entrada llega a 5 votos (solo el número, nunca la media); se encola en el `batch` del quinto voto | El participante | Inmediato, una vez por entrada (y semana) |
 | `battle.label_pick` | Aviso | Su entrada recibe la Elección del sello | El participante | Inmediato |
 | `game.progress` | Aviso | Cambio de rango o logro épico o legendario (agrupados en uno al día) | El usuario | Diario a las 19:00 si hay algo |
 | `season.wrap` | Aviso | Sellado de la última semana de la temporada: «Tu temporada en cifras» | Quien participó o votó en la temporada | Al sellar |
@@ -2617,7 +2617,7 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | POST | `/api/subscribe` | Pública | Alerta de drop sin cuenta (doble confirmación; 3/h por IP); responde 202 igual para cualquier dirección |
 | POST | `/api/subscribe/confirm` | Pública | Confirmar la alerta con `{ token }` desde la página `/alerta?token=` de la web: un `POST` y no un `GET`, porque los escáneres de enlaces del correo abren los `GET` y confirmarían solos |
 | GET · POST | `/api/unsubscribe?token=` · `/api/unsubscribe/one-click?token=` | Pública | Página de baja y baja en un clic (RFC 8058) |
-| GET | `/api/email/countdown/:slug.gif` | Pública | Cuenta atrás animada para emails |
+| GET | `/api/email/countdown/:slug.gif` | Pública | Cuenta atrás animada para emails, hasta el cierre en curso; `:slug.votes.gif`, siempre hasta el de votos (la llamada al jurado) |
 | GET | `/r/:linkId` | Pública | Redirección de enlaces de campaña (clics en agregado) |
 | * | `/api/admin/samples` (`/sign`, CRUD), `/weeks` (`GET` con los huecos, `POST`, y `GET`/`PATCH`/`DELETE` de `/:slug` solo antes del drop), `/reports`, `/votes/anomalies`, `/entries/:id/{hide,disqualify,restore}`, `/weeks/:id/{seal,reseal}`, `/label-pick`, `/usage`, `/audit`, `/campaigns` (CRUD, `/test`, `/schedule`, `/cancel`, `/segment-count`), `/email/{queue,suppressions,stats}` | Admin | Administración (§2.14) |
 | GET | `/api/cron/tick` | `CRON_SECRET` | Tareas programadas (§4.12) |
@@ -3620,6 +3620,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.64 | **Tarea 5.12.** §2.12: `battle.first_votes` se encola en el `batch` del voto que hace el quinto, una vez por entrada; `battle.jury_call` cuenta las entradas activas, ajenas y sin su voto. La versión «racha en peligro» de `battle.reminder` llega con las rachas (Fase 7). §4.10 y §4.19.5: la cuenta atrás `:slug.votes.gif` va siempre al cierre de votos (la llamada al jurado sale el domingo a las 17:00, con los envíos aún abiertos). |
 | 2026-10-13 | 0.6.63 | **Tarea 5.11.** §2.12.4 (`RF-NOTIF-08`): la semana del tope va del lunes a las 00:00 al domingo en Madrid y cuenta por destinatario; se aplica al enviar (lo ya enviado ocupa su hueco; entre lo que toca a la vez, por prioridad) y lo descartado queda `skipped` con el motivo `weekly_cap`. Lo retenido por las horas de silencio sale a las 08:00 (`not_before`). |
 | 2026-10-13 | 0.6.62 | **Tareas 5.3–5.10.** §4.10: un recibo de escucha por usuario y entrada (volver a empezar no reinicia el reloj de servidor, que cuenta desde la primera vez); `listen` y `qualify` solo en `open` y `voting` y nunca de la propia entrada; `qualify` antes de tiempo da `LISTEN_REQUIRED` con lo que falta. La escucha (`/play`) cuenta una vez por sesión y 3 por hora por IP y entrada, y responde 202 siempre. La crónica da las 5 últimas entradas por alias, los días que quedan y los votos de la semana. La cola del jurado lleva la ronda `{ done, total }`. Denunciar tiene, además, un límite de 20 por hora y usuario. |
 | 2026-10-13 | 0.6.61 | **Tarea 5.2.** §4.10: la lista admite `seed` (volver a barajar «Aleatorio») y su `bpm` es un rango `min-max`; cada entrada lleva `mine` además de `myVote`; `POST /play` lleva un `playId` por sesión de escucha. Códigos nuevos: `OWN_ENTRY` (403), `LISTEN_REQUIRED`, `VOTING_CLOSED` y `REPORT_EXISTS` (409). Motivos de denuncia de §2.7 como ids: `not_sample`, `rights`, `offensive`, `spam`, `other` (detalle de hasta 500 caracteres). §4.14: la exportación y el borrado de la cuenta incluyen los recibos de escucha, las denuncias y las señales de IP (y, de sus entradas sin sellar, los de otros); sustituir el audio o retirar la entrada borra sus recibos de escucha. |

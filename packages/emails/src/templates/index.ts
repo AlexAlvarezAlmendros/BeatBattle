@@ -7,6 +7,9 @@ import { authSecurity } from './authSecurity'
 import { authVerify } from './authVerify'
 import { authWelcome } from './authWelcome'
 import { battleDrop } from './battleDrop'
+import { battleFirstVotes } from './battleFirstVotes'
+import { battleJuryCall } from './battleJuryCall'
+import { battleReminder } from './battleReminder'
 import { entryChanged } from './entryChanged'
 import { entryFailed } from './entryFailed'
 import { entryReceipt } from './entryReceipt'
@@ -20,6 +23,9 @@ export type { AuthSecurityPayload, SecurityChange } from './authSecurity'
 export type { AuthVerifyPayload } from './authVerify'
 export type { AuthWelcomePayload } from './authWelcome'
 export type { BattleDropPayload } from './battleDrop'
+export type { BattleFirstVotesPayload } from './battleFirstVotes'
+export type { BattleJuryCallPayload } from './battleJuryCall'
+export type { BattleReminderPayload } from './battleReminder'
 export type { EntryChangedPayload, EntryReplacedPayload, EntryWithdrawnPayload } from './entryChanged'
 export type { EntryFailedPayload } from './entryFailed'
 export type { EntryReceiptPayload } from './entryReceipt'
@@ -35,6 +41,9 @@ export const TEMPLATES = {
   'admin.calendar_gap': adminCalendarGap,
   'alert.confirm': alertConfirm,
   'battle.drop': battleDrop,
+  'battle.reminder': battleReminder,
+  'battle.jury_call': battleJuryCall,
+  'battle.first_votes': battleFirstVotes,
   'entry.receipt': entryReceipt,
   'entry.failed': entryFailed,
   'entry.changed': entryChanged,

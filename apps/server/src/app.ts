@@ -196,7 +196,17 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   })
   uploadsRoutes(app, { images, entries: entryStorage ? entries : null, rateLimiter, newId })
   entriesRoutes(app, entries)
-  votesRoutes(app, createVotesService({ db, entries, rateLimiter, newId, ipSecret: config.auth.secret }))
+  votesRoutes(
+    app,
+    createVotesService({
+      db,
+      entries,
+      rateLimiter,
+      newId,
+      publicUrl: config.publicUrl,
+      ipSecret: config.auth.secret,
+    }),
+  )
   const weeks = createWeeksService({ db, storage: samples, newId })
   weeksRoutes(app, weeks)
   countdownRoutes(app, { db })

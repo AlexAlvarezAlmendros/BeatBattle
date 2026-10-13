@@ -12,6 +12,7 @@ import type { AlertsService } from '../alerts/service'
 import { type EntriesTickResult, entriesTick } from '../entries/cleanup'
 import type { EntriesService } from '../entries/service'
 import type { EntryStorage } from '../storage/entries'
+import { type NoticeResult, scheduleBattleNotices } from '../votes/notices'
 import { type ScheduleDeps, scheduleDropEmails, scheduleGapAlerts } from '../weeks/schedule'
 import { sealDueWeeks } from '../weeks/seal'
 import type { WeeksService } from '../weeks/service'
@@ -22,6 +23,8 @@ const TICK_LEASE_MS = 5 * 60 * 1000
 export interface TickResult {
   sealed: string[]
   dropEmails: number
+  /** Recordatorios y llamadas al jurado encolados (tarea 5.12). */
+  battleNotices: NoticeResult
   calendarGaps: string[]
   cleaned: { unconfirmedAlerts: number; usernameRedirects: number; ipSignals: number }
   /** Intents caducados, entradas en `processing` y huérfanos (tarea 4.9); `null` sin almacenamiento. */
@@ -64,6 +67,7 @@ export function cronRoutes(app: FastifyInstance, deps: CronDeps): void {
       const out: TickResult = {
         sealed: [],
         dropEmails: 0,
+        battleNotices: { reminders: 0, juryCalls: 0 },
         calendarGaps: [],
         cleaned: { unconfirmedAlerts: 0, usernameRedirects: 0, ipSignals: 0 },
         entries: null,
@@ -83,6 +87,7 @@ export function cronRoutes(app: FastifyInstance, deps: CronDeps): void {
       })
       await step('emailSchedule', async () => {
         out.dropEmails = await scheduleDropEmails(deps, now)
+        out.battleNotices = await scheduleBattleNotices(deps, now)
       })
       await step('adminAlerts', async () => {
         out.calendarGaps = await scheduleGapAlerts({ ...deps, gapsWithin: deps.weeks.gapsWithin }, now)

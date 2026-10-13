@@ -11,18 +11,22 @@ const CACHE_MS = 30_000
 
 /**
  * `GET /api/email/countdown/:slug.gif` (§4.19.5, `RF-NOTIF-14`; tarea 3.14): 60 fotogramas desde el
- * instante de la petición hasta el cierre en curso (envíos en `open`, votos en `voting`). Fuera de esas
+ * instante de la petición hasta el cierre en curso (envíos en `open`, votos en `voting`); con
+ * `:slug.votes.gif`, hasta el cierre de votos también en `open` (tarea 5.12). Fuera de esas
  * fases, o con una semana que no existe, la imagen de ceros: un email viejo nunca da error.
  */
 export function countdownRoutes(app: FastifyInstance, deps: { db: Db }): void {
   const cache = new Map<string, { at: number; gif: Uint8Array }>()
   app.get<{ Params: { file: string } }>('/api/email/countdown/:file', async (req, reply) => {
-    const slug = req.params.file.replace(/\.gif$/, '')
+    // `<semana>.gif`, hasta el cierre en curso; `<semana>.votes.gif`, siempre hasta el de votos (la llamada al
+    // jurado sale el domingo con los envíos aún abiertos).
+    const votes = req.params.file.endsWith('.votes.gif')
+    const slug = req.params.file.replace(/(\.votes)?\.gif$/, '')
     let target = req.now
     if (WeekSlugSchema.safeParse(slug).success) {
       const [row] = await deps.db.select().from(week).where(eq(week.slug, slug))
       const countdown = row ? countdownOf(row, req.now) : null
-      if (countdown) target = countdown.target
+      if (countdown) target = votes && row ? row.voteEndsAt : countdown.target
     }
     const key = `${slug}:${target}`
     let entry = cache.get(key)
