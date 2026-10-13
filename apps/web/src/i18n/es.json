@@ -2007,7 +2007,7 @@
   "jury": {
     "loading": "Preparando la cola…",
     "gate": {
-      "signIn": "El jurado puntúa cada beat de la semana, de 1 a 5, tras escuchar 30 s. Entra con tu cuenta para jugar.",
+      "signIn": "El jurado puntúa cada beat de la semana, de 1 a 5, tras escuchar 30\u00a0s. Entra con tu cuenta para jugar.",
       "signInAction": "Entrar",
       "verify": "Verifica tu email para puntuar: te enviamos el enlace al registrarte.",
       "verifyAction": "Verificar el email"
