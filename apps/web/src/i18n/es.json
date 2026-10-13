@@ -826,6 +826,7 @@
       "notVoted": "sin votar",
       "votedState": "votada {vote} de 5",
       "voted": "✓ Votada {vote}/5",
+      "votedShort": "✓ {vote}/5",
       "error": "no ha cargado",
       "loading": "Cargando entrada…",
       "random": "Aleatorio",
@@ -1965,6 +1966,7 @@
     "any": "Cualquiera",
     "info": "{count} en la lista · tus votadas van al final · orden de escucha, no clasificación",
     "gridLabel": "Entradas de la semana",
+    "sheetLabel": "La entrada elegida",
     "note": "Ronda justa: primero, las que menos votos llevan (nadie ve cuántos). Notas y autoría, el domingo.",
     "link": "Elegir entrada"
   },
@@ -2022,6 +2024,7 @@
     "round": "Ronda {round} / {total}",
     "counterText": "s para puntuar",
     "counterReady": "YA",
+    "mobileCounter": "{left}\u00a0s para puntuar",
     "counterReadyText": "puedes puntuar",
     "blind": "Voto ciego",
     "hidden": "Autoría oculta · se revela al sellar",

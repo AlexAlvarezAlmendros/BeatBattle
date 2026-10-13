@@ -82,3 +82,35 @@
   grid-template-columns: repeat(var(--grid-columns, 6), minmax(0, 1fr));
   gap: var(--bb-space-4) var(--bb-space-3);
 }
+
+/*
+ * Móvil: la ficha de la enfocada en una hoja pegada sobre la barra (y el reproductor), con su alias, sus
+ * datos y escuchar o ir al jurado (§3.8.13; jurado de la 5.22, S2).
+ */
+.sheet {
+  position: sticky;
+  bottom: calc(var(--controls-pinned-h, var(--bb-controls-h)) + var(--player-h, 0px));
+  z-index: var(--bb-z-content);
+  display: grid;
+  gap: var(--bb-space-2);
+  margin-top: var(--bb-space-4);
+  padding: var(--bb-space-3) var(--bb-space-4);
+  border-top: var(--bb-stroke) solid var(--bb-red);
+  background: var(--bb-panel);
+}
+
+.sheetAlias {
+  font-size: var(--bb-fs-xl);
+  line-height: var(--bb-leading-label);
+}
+
+.sheetData {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.sheetActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-2);
+}

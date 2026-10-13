@@ -364,6 +364,23 @@
     padding: var(--bb-space-2) var(--bb-space-3);
   }
 
+  .waveFoot {
+    margin-top: var(--bb-space-1);
+  }
+
+  .panel {
+    gap: var(--bb-space-2) var(--bb-space-6);
+    padding-block: var(--bb-space-3);
+  }
+}
+
+/* La puerta (sin cuenta o sin verificar): la silueta como pieza de la pantalla. */
+.gateSilhouette {
+  width: min(100%, 20rem);
+}
+
+/* Con ancho de sobra (≥ 1200 px) y ventana baja, el panel en una fila. */
+@media (min-width: 1200px) and (max-height: 780px) {
   /* El panel en una fila: la onda y el combo, las estrellas y las acciones en columna. */
   .panel {
     grid-template-columns: minmax(0, 1fr) auto auto;
@@ -379,13 +396,37 @@
     flex-direction: column;
     align-items: stretch;
   }
-
-  .waveFoot {
-    margin-top: var(--bb-space-1);
-  }
 }
 
-/* La puerta (sin cuenta o sin verificar): la silueta como pieza de la pantalla. */
-.gateSilhouette {
-  width: min(100%, 20rem);
+/* La cabeza de móvil del jurado (la ronda y el alias en la arena): solo en la columna única. */
+.mobileHead {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .mobileHead {
+    display: grid;
+    grid-column: 3;
+    grid-row: 1;
+    justify-items: end;
+    gap: var(--bb-space-1);
+    text-align: right;
+  }
+
+  .mobileAlias {
+    font-size: var(--bb-fs-xl);
+    overflow-wrap: anywhere;
+  }
+
+  .mobileHidden {
+    color: var(--bb-text-2);
+    font-size: var(--bb-fs-xs);
+    font-weight: var(--bb-weight-bold);
+    letter-spacing: var(--bb-tracking-label);
+    text-transform: uppercase;
+  }
+
+  .hudEntry {
+    display: none;
+  }
 }

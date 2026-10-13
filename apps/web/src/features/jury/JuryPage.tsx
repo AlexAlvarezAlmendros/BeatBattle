@@ -36,6 +36,7 @@ const NEXT_AFTER_VOTE_MS = 1000
 /** El combo llega hasta ×8 (§3.4.2). */
 const COMBO_MAX = 8
 
+const GATE_KEYS: readonly ControlKey[] = ['enter', 'back', 'sound']
 const JURY_KEYS: readonly ControlKey[] = ['rate', 'pause', 'seek', 'skip', 'report', 'exit', 'sound']
 const JURY_KEYS_ON_STARS: readonly ControlKey[] = ['rate', 'pause', 'note', 'skip', 'report', 'exit', 'sound']
 
@@ -72,6 +73,8 @@ export function JuryPage() {
  * `RF-VOTE-06`): la pantalla lo dice con la silueta del jurado y lleva a entrar o a verificar.
  */
 function JuryGate({ signedIn }: { signedIn: boolean }) {
+  // Aquí no se puntúa: la barra enseña las teclas de la puerta, no las del jurado.
+  useControlKeys(GATE_KEYS)
   return (
     <ScreenPage
       title={t('pages.jury.title')}
@@ -280,6 +283,15 @@ function JuryArena() {
           <p className={styles.youPlate}>
             {t('jury.youPlate', { name, votes: (base.current ?? 0) + done.length })}
           </p>
+        </div>
+        {/* En móvil, la fila «[silueta] VS ALIAS» con la ronda (el HUD no lleva placa ni lado derecho). */}
+        <div className={styles.mobileHead}>
+          <p className="bb-label">
+            {t('jury.round', { round: String(round).padStart(2, '0'), total })} ·{' '}
+            {awake ? t('jury.counterReady') : t('jury.mobileCounter', { left })}
+          </p>
+          <p className={`bb-display ${styles.mobileAlias}`}>{entry.alias}</p>
+          <p className={styles.mobileHidden}>{t('jury.hiddenShort')}</p>
         </div>
         <div className={styles.versus}>
           <Announcer

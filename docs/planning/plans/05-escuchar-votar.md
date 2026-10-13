@@ -149,7 +149,7 @@ construye aquí lo ve alguien que vota.
 |---|-------|--------|------------|-------|
 | 5.20 | Datos de prueba: semana en juego con 24 entradas de varios productores y audios del almacenamiento falso (`tools/seed` y fixtures de E2E) | ✅ Hecho | 5.5 | para la 5.21 y las capturas de la 5.22 · **Hecho:** `apps/server/src/scripts/seedBattle.ts` (por la API con la app en el mismo proceso: 24 entradas medidas y votos en 14 s) y `tests/e2e/battle.ts` (semana con entradas para los E2E de la fase) |
 | 5.21 | E2E del hito: dos usuarios se votan con teclado (rejilla → ficha → Modo Jurado), todas las reglas `RF-VOTE-*` y los tres emails capturados en el `Mailer` en memoria con el reloj simulado | ✅ Hecho | 5.12, 5.16, 5.17, 5.18, 5.19, 5.20 | §5 · hito de la fase · **Hecho:** `tests/e2e/vote.spec.ts` (32 s): Ana elige la entrada de Bea en la rejilla con el teclado, la escucha (audio a 4×, reloj de la API +31 s al empezar) y vota 4 en la ficha con el teclado; su propia ficha no lleva estrellas; Bea entra al Modo Jurado desde el menú, salta con S hasta la de Ana, pausa con Espacio y vota 5 (combo ×1, siguiente entrada); la lista sigue sin medias; al quinto voto sale `battle.first_votes` y con el reloj del sábado 18:00 y el domingo 17:00, `battle.reminder` y `battle.jury_call`, leídos del `Mailer` en memoria |
-| 5.22 | Jurado visual de tres lentes (juego, marca y accesibilidad) sobre la rejilla, la ficha, el Modo Jurado, el reproductor y los emails, en los tamaños de referencia | ⬜ Listo | 5.21 | §3 · `RD-VIS-02` · acta en `evidence/f5/jurado/` |
+| 5.22 | Jurado visual de tres lentes (juego, marca y accesibilidad) sobre la rejilla, la ficha, el Modo Jurado, el reproductor y los emails, en los tamaños de referencia | ✅ Hecho | 5.21 | §3 · `RD-VIS-02` · acta en `evidence/f5/jurado/` · **Hecho:** 30 capturas con `tools/shot/jury-f5.mjs` en cinco tamaños, sin movimiento y en contraste alto; dos altas (J1 HUD del jurado en móvil, C1 estrellas en contraste alto) y cuatro medias (S1, S2, P1, J3) corregidas; bajas abiertas J3 (en parte), B1 y M1. Juego, marca y accesibilidad ✅. E2E afectados: 361 en verde. Guía v0.6.70 |
 | 5.23 | ⚠️ Prueba real: el reproductor global sobre un MP3 firmado de Cloudinary (prefijo de desarrollo), con la ganancia, el analizador y Media Session en Chrome | ⬜ Listo | 5.13 | `RF-PLAY-02`, §4.8 · crea y borra recursos en Cloudinary: con confirmación |
 | 5.24 | Cierre de la fase: criterio de aceptación, cobertura de ids y CI en verde | ⬜ Listo | 5.22, 5.23 | — |
 
@@ -178,6 +178,7 @@ recordatorio, llamada al jurado y primeros votos salen respetando silencio y top
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-13 | 5.22 | Jurado visual de tres lentes: altas y medias corregidas (guía v0.6.70). |
 | 2026-10-13 | 5.9, 5.21 | Crónica del menú con `/ticker` y E2E del hito con teclado y los tres avisos (guía v0.6.69). |
 | 2026-10-13 | 5.18 | Modo Jurado como pantalla VS (guía v0.6.68). |
 | 2026-10-13 | 5.17, 5.19 | Ficha de entrada y denuncia (guía v0.6.67). |

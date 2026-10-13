@@ -103,7 +103,8 @@ export function EntryCell({
       </Frame>
       {voted && !loading && (
         <Stamp size="sm" turn={-0.6} className={styles.stamp} aria-hidden="true">
-          {t('ui.entryCell.voted', { vote: myVote })}
+          <span className={styles.stampLong}>{t('ui.entryCell.voted', { vote: myVote })}</span>
+          <span className={styles.stampShort}>{t('ui.entryCell.votedShort', { vote: myVote })}</span>
         </Stamp>
       )}
       <span className={styles.alias} aria-hidden="true">

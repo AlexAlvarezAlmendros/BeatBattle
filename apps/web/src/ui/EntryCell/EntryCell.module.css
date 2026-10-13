@@ -4,6 +4,8 @@
  */
 .cell {
   position: relative;
+  /* Las casillas estrechas (móvil, 3 columnas) llevan el sello corto (`stampShort`). */
+  container-type: inline-size;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--bb-space-2);
@@ -56,6 +58,22 @@
   left: 50%;
   translate: -50% 0;
   background: var(--bb-black);
+  white-space: nowrap;
+}
+
+/* «✓ VOTADA 4/5» no cabe en una casilla de menos de ~9 rem y pisaba la vecina (jurado de la 5.22, S1). */
+.stampShort {
+  display: none;
+}
+
+@container (max-width: 9rem) {
+  .stampLong {
+    display: none;
+  }
+
+  .stampShort {
+    display: inline;
+  }
 }
 
 /* Aleatorio: «?» en display sobre la trama de relleno. */
