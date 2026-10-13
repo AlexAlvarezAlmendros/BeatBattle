@@ -29,6 +29,8 @@ import { createHealthService } from './modules/health/service'
 import { meRoutes } from './modules/me/routes'
 import { sessionsRoutes } from './modules/me/sessions'
 import { profileRoutes } from './modules/profile/routes'
+import { resultsRoutes } from './modules/results/routes'
+import { createResultsService } from './modules/results/service'
 import { samplesRoutes } from './modules/samples/routes'
 import { createSamplesService } from './modules/samples/service'
 import { createCloudinaryStorage, type ImageStorage } from './modules/storage/cloudinary'
@@ -207,6 +209,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
       ipSecret: config.auth.secret,
     }),
   )
+  resultsRoutes(app, createResultsService({ db, entries, samples, newId }))
   const weeks = createWeeksService({ db, storage: samples, newId })
   weeksRoutes(app, weeks)
   countdownRoutes(app, { db })

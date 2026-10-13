@@ -244,6 +244,18 @@ export type PublicWeek = z.infer<typeof PublicWeekSchema>
 export const CurrentWeekSchema = z.object({
   week: PublicWeekSchema.nullable(),
   next: z.object({ startsAt: z.number().int(), number: z.number().int() }).nullable(),
+  /**
+   * La última semana sellada (Fase 6): para ofrecer su ceremonia una vez (`RF-RES-09`) y enlazar sus
+   * resultados. `ceremonySeen` solo con sesión (sin ella, `null`: lo recuerda el navegador).
+   */
+  sealed: z
+    .object({
+      slug: WeekSlugSchema,
+      number: z.number().int(),
+      sealedAt: z.number().int(),
+      ceremonySeen: z.boolean().nullable(),
+    })
+    .nullable(),
 })
 export type CurrentWeek = z.infer<typeof CurrentWeekSchema>
 
@@ -259,9 +271,12 @@ export const RulesAcceptSchema = z.object({ rulesVersion: z.literal(RULES_VERSIO
 
 /**
  * `POST /api/me/seen`: marcar algo como visto una vez. En la Fase 3, la revelación del drop de una semana
- * (`RF-DROP-11`); la ceremonia y los logros se suman en sus fases.
+ * (`RF-DROP-11`); desde la Fase 6, la ceremonia de resultados de una semana sellada (`RF-RES-09`); los logros
+ * se suman en la suya.
  */
-export const SeenRequestSchema = z.object({ kind: z.literal('drop'), ref: WeekSlugSchema }).strict()
+export const SeenRequestSchema = z
+  .object({ kind: z.enum(['drop', 'ceremony']), ref: WeekSlugSchema })
+  .strict()
 export type SeenRequest = z.infer<typeof SeenRequestSchema>
 
 /** `POST /api/subscribe`: alerta de drop sin cuenta (§2.12.3). */

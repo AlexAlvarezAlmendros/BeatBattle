@@ -219,6 +219,26 @@ export const PublicEntrySchema = z
     streamUrl: z.string(),
     cover: EntryCoverSchema,
     producer: EntryProducerSchema.nullable(),
+    /**
+     * Su resultado, solo con la semana sellada (Fase 6, `RF-PLAY-08`): posición, puntuación, votos e
+     * histograma. Sin sellar, `null` (`RF-PLAY-05`).
+     */
+    result: z
+      .object({
+        position: z.number().int().min(1).nullable(),
+        scoreMilli: z.number().int(),
+        votes: z.number().int().min(0),
+        histogram: z.tuple([
+          z.number().int().min(0),
+          z.number().int().min(0),
+          z.number().int().min(0),
+          z.number().int().min(0),
+          z.number().int().min(0),
+        ]),
+      })
+      .strict()
+      .nullable()
+      .default(null),
   })
   .strict()
 export type PublicEntry = z.infer<typeof PublicEntrySchema>

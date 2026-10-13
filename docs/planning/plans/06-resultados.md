@@ -96,13 +96,13 @@ completa el MVP (F0–F6) para la beta cerrada.
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 6.2 | Tabla `result` y su migración; esquemas Zod de resultados, archivo y ficha sellada en `@beatbattle/shared` | ⬜ Listo | — | §4.11 |
-| 6.3 | Acción de admin: descalificar una entrada con motivo y auditoría (`POST /api/admin/entries/:id/disqualify`) | ⬜ Listo | 6.2 | §2.13, §2.14 · lo mínimo para `RF-RES-06`; la moderación completa, en la F10 |
-| 6.4 | El sellado clasifica: votos válidos (sin bloqueados, anulados ni de entradas retiradas o descalificadas), `rank` y snapshot en `result` con la revisión 1, en el mismo paso perezoso e idempotente con *lease*; semana desierta | ⬜ Listo | 6.1, 6.2 | §2.8, §4.12 · `RF-RES-03..05`, `RF-RES-10` · test de concurrencia (dos sellados a la vez) |
-| 6.5 | Re-sellado explícito (`POST /api/admin/weeks/:slug/reseal`): revisión nueva, auditoría y aviso público | ⬜ Listo | 6.3, 6.4 | §2.8 · `RF-RES-06` |
-| 6.6 | `GET /api/weeks/:slug/results` (404 sin sellar), con «tu resultado» y el aviso de corrección; la ficha y la lista de una semana sellada, con su posición, puntuación, votos e histograma | ⬜ Listo | 6.4 | §2.8, §4.10 · `RF-RES-07`, `RF-PLAY-08` · contrato: sin sellar, nada |
-| 6.7 | `GET /api/weeks?cursor=`: el archivo de semanas selladas, paginado, con su sample, número de entradas y podio | ⬜ Listo | 6.4 | §2.9 · `RF-ARC-01` |
-| 6.8 | La ceremonia vista: `seen_flag` `ceremony` por usuario y semana (`POST /api/me/seen`) y la semana sellada sin ver en `GET /api/weeks/current` | ⬜ Listo | 6.4 | §2.8 · `RF-RES-09` |
+| 6.2 | Tabla `result` y su migración; esquemas Zod de resultados, archivo y ficha sellada en `@beatbattle/shared` | ✅ Hecho | — | §4.11 · Hecho: tabla y migración `0007_resultados`; esquemas `results.ts`. |
+| 6.3 | Acción de admin: descalificar una entrada con motivo y auditoría (`POST /api/admin/entries/:id/disqualify`) | ✅ Hecho | 6.2 | §2.13, §2.14 · lo mínimo para `RF-RES-06`; la moderación completa, en la F10 · Hecho: 204 con auditoría `entry.disqualify`; 403 sin admin (test). |
+| 6.4 | El sellado clasifica: votos válidos (sin bloqueados, anulados ni de entradas retiradas o descalificadas), `rank` y snapshot en `result` con la revisión 1, en el mismo paso perezoso e idempotente con *lease*; semana desierta | ✅ Hecho | 6.1, 6.2 | §2.8, §4.12 · `RF-RES-03..05`, `RF-RES-10` · test de concurrencia (dos sellados a la vez) · Hecho: `snapshotStatements` en el `batch` del sellado; tests de válidos, concurrencia y semana desierta. |
+| 6.5 | Re-sellado explícito (`POST /api/admin/weeks/:slug/reseal`): revisión nueva, auditoría y aviso público | ✅ Hecho | 6.3, 6.4 | §2.8 · `RF-RES-06` · Hecho: revisión nueva condicionada, auditoría `week.reseal`, `correctedAt`; sin cambios, las mismas filas. |
+| 6.6 | `GET /api/weeks/:slug/results` (404 sin sellar), con «tu resultado» y el aviso de corrección; la ficha y la lista de una semana sellada, con su posición, puntuación, votos e histograma | ✅ Hecho | 6.4 | §2.8, §4.10 · `RF-RES-07`, `RF-PLAY-08` · contrato: sin sellar, nada · Hecho: 404 sin sellar; `result` en la ficha y la lista; `mine`. |
+| 6.7 | `GET /api/weeks?cursor=`: el archivo de semanas selladas, paginado, con su sample, número de entradas y podio | ✅ Hecho | 6.4 | §2.9 · `RF-ARC-01` · Hecho: 20 por página, cursor `startsAt`; test con 60 semanas. |
+| 6.8 | La ceremonia vista: `seen_flag` `ceremony` por usuario y semana (`POST /api/me/seen`) y la semana sellada sin ver en `GET /api/weeks/current` | ✅ Hecho | 6.4 | §2.8 · `RF-RES-09` · Hecho: `seen_flag` `ceremony` y `current.sealed.ceremonySeen`. |
 
 ### Emails
 
@@ -165,5 +165,6 @@ resultado y el sample nuevo; y lo que se comparte enseña la cara del juego sin 
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-13 | 6.2–6.8 | Servidor de resultados: snapshot al sellar, descalificar y re-sellar, `/results`, archivo y ceremonia vista; 9 tests en `results.test.ts` (guía v0.6.73). |
 | 2026-10-13 | 6.1 | `rank` en `packages/rules` con propiedades (guía v0.6.72). |
 | 2026-10-13 | — | Plan creado (23 tareas). Sin dorado (decisión del usuario). XP, oído de oro y temporadas, en la F7; Elección del sello, en la F9; moderación completa y despliegue, en la F10. |

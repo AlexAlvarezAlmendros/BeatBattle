@@ -27,6 +27,7 @@ const ENTRY: OwnEntry = {
   streamUrl: '/stream',
   cover: { kind: 'generative', seed: 7 },
   producer: null,
+  result: null,
   status: 'active',
   receiptCode: 'BB-2026W42-0001',
   format: 'wav',

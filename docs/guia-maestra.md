@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.72 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.73 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -539,7 +539,7 @@ ofrece la ceremonia de revelación. Dura unos 25 s y se puede saltar.
 | `RF-RES-06` | Re-sellado explícito con revisión, auditoría y aviso público | Descalificar tras sellar y re-sellar → `result_revision = 2` y aviso visible |
 | `RF-RES-07` | Revelación de identidades en voto ciego al sellar | Tras el sellado, la API pública devuelve el productor de cada entrada |
 | `RF-RES-08` | Página de resultados con podio, tabla, «Tu resultado» y reparto de XP | E2E con dos semanas simuladas |
-| `RF-RES-09` | Ceremonia ofrecida una vez por usuario y semana, saltable y repetible | `results_seen` por usuario y semana; Esc la salta; «Ver la ceremonia» la repite |
+| `RF-RES-09` | Ceremonia ofrecida una vez por usuario y semana, saltable y repetible | `seen_flag` `ceremony` por usuario y semana; Esc la salta; «Ver la ceremonia» la repite |
 | `RF-RES-10` | Semana sin entradas: «Semana desierta», sin podio ni ceremonia | Sellar una semana vacía da un snapshot vacío y la página lo explica |
 
 ### 2.9 Archivo, salón de la fama y temporadas
@@ -2593,12 +2593,12 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | Método | Ruta | Acceso | Descripción |
 |---|---|---|---|
 | * | `/api/auth/*` | — | Better Auth (registro, entrada, salida, verificación, recuperación, OAuth, sesiones, admin) |
-| GET | `/api/weeks/current` | Pública | Semana en juego (`open` o `voting`: sample con su MP3 de escucha firmado, fase, fronteras, reto, dorada; con sesión, `viewer` con bases aceptadas y drop visto) y, si no hay, solo **cuándo** es el próximo drop (`next`). Sella de forma perezosa lo que haya cerrado |
+| GET | `/api/weeks/current` | Pública | Semana en juego (`open` o `voting`: sample con su MP3 de escucha firmado, fase, fronteras, reto, dorada; con sesión, `viewer` con bases aceptadas y drop visto) y, si no hay, solo **cuándo** es el próximo drop (`next`). Siempre, la última semana sellada (`sealed`, con `ceremonySeen` si hay sesión). Sella de forma perezosa lo que haya cerrado |
 | GET | `/api/weeks/:slug` | Pública | Una semana ya empezada (antes del drop, 404) |
-| GET | `/api/weeks?cursor=` | Pública | Archivo de semanas selladas |
+| GET | `/api/weeks?cursor=` | Pública | Archivo de semanas selladas, de la más reciente a la más antigua, 20 por página (`next` es el cursor), con su sample, número de entradas y podio |
 | GET | `/api/weeks/:slug/entries?order=fair\|new\|random&genre=&bpm=&key=&unvoted=&seed=` | Pública | Entradas (sin autoría ni notas si no está sellada); con sesión incluye `myVote` y `mine`. `bpm` es un rango `90-110`; `seed` vuelve a barajar «Aleatorio» |
 | GET | `/api/weeks/:slug/ticker?since=` | Pública | Eventos de la crónica de la arena (§3.8.3): las 5 últimas entradas por su alias, los días que quedan hasta el cierre de la fase (enteros, hacia abajo) y los votos de toda la semana |
-| GET | `/api/weeks/:slug/results` | Pública | Snapshot de resultados (404 si no está sellada) |
+| GET | `/api/weeks/:slug/results` | Pública | Snapshot vigente de resultados con la autoría revelada (las clasificadas primero), la revisión y `correctedAt` del último re-sellado, y con sesión «tu resultado» (`mine`). 404 si no está sellada |
 | POST | `/api/weeks/:slug/rules` | Verif. | Aceptar las bases de la semana |
 | POST | `/api/weeks/:slug/sample/download` | Verif. | URL firmada de descarga (`kind: original\|stems`), solo en `open` y con las bases aceptadas |
 | POST | `/api/uploads/sign` | Verif. | Parámetros firmados (`kind: entry\|entryCover\|avatar`); los del sample, en `/api/admin/samples/sign` |
@@ -2618,7 +2618,7 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | GET | `/api/jury/queue?week=` | Verif. | Siguientes entradas del Modo Jurado (`juryQueue`) y la ronda `{ done, total }`; fuera de `open` y `voting`, vacía |
 | GET | `/api/me` | Sesión | Perfil, XP, nivel, racha, logros nuevos, flags de ceremonias vistas |
 | PATCH | `/api/me/profile` | Sesión | Editar perfil |
-| POST | `/api/me/seen` | Sesión | Marcar vistos `{ kind, ref }` (drop desde la Fase 3; logros, nivel y ceremonia en sus fases) |
+| POST | `/api/me/seen` | Sesión | Marcar vistos `{ kind, ref }` (`drop` desde la Fase 3 y `ceremony` desde la 6, 404 si la semana no está sellada; logros y nivel en sus fases) |
 | GET · PUT | `/api/me/notifications` | Sesión | Preferencias de aviso |
 | GET | `/api/me/votes?week=` | Sesión | Mis votos |
 | GET | `/api/me/export` | Sesión | Exportación RGPD |
@@ -2632,7 +2632,7 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | GET · POST | `/api/unsubscribe?token=` · `/api/unsubscribe/one-click?token=` | Pública | Página de baja y baja en un clic (RFC 8058) |
 | GET | `/api/email/countdown/:slug.gif` | Pública | Cuenta atrás animada para emails, hasta el cierre en curso; `:slug.votes.gif`, siempre hasta el de votos (la llamada al jurado) |
 | GET | `/r/:linkId` | Pública | Redirección de enlaces de campaña (clics en agregado) |
-| * | `/api/admin/samples` (`/sign`, CRUD), `/weeks` (`GET` con los huecos, `POST`, y `GET`/`PATCH`/`DELETE` de `/:slug` solo antes del drop), `/reports`, `/votes/anomalies`, `/entries/:id/{hide,disqualify,restore}`, `/weeks/:id/{seal,reseal}`, `/label-pick`, `/usage`, `/audit`, `/campaigns` (CRUD, `/test`, `/schedule`, `/cancel`, `/segment-count`), `/email/{queue,suppressions,stats}` | Admin | Administración (§2.14) |
+| * | `/api/admin/samples` (`/sign`, CRUD), `/weeks` (`GET` con los huecos, `POST`, y `GET`/`PATCH`/`DELETE` de `/:slug` solo antes del drop), `/reports`, `/votes/anomalies`, `/entries/:id/{hide,disqualify,restore}`, `/weeks/:slug/{seal,reseal}`, `/label-pick`, `/usage`, `/audit`, `/campaigns` (CRUD, `/test`, `/schedule`, `/cancel`, `/segment-count`), `/email/{queue,suppressions,stats}` | Admin | Administración (§2.14) |
 | GET | `/api/cron/tick` | `CRON_SECRET` | Tareas programadas (§4.12) |
 | GET | `/api/health` | Pública | Salud: `{ data: { status: 'ok', db: 'up', time } }`; si la BD no responde, 503 `SERVICE_UNAVAILABLE` con `details.db = 'down'` (Cloudinary se añade en la Fase 4) |
 | GET | `/api/og/:kind/:id` | Pública | Imagen OG |
@@ -2760,6 +2760,7 @@ CREATE TABLE result (
   season_points INTEGER NOT NULL,
   PRIMARY KEY (week_id, revision, entry_id)
 );
+CREATE INDEX result_entry ON result(entry_id);
 
 CREATE TABLE label_pick (week_id TEXT PRIMARY KEY, entry_id TEXT NOT NULL, note TEXT,
   picked_by TEXT NOT NULL, picked_at INTEGER NOT NULL);
@@ -3633,6 +3634,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.73 | **Tareas 6.2–6.8.** §4.10: `GET /api/weeks/:slug/results` devuelve la revisión, `correctedAt` y «tu resultado»; el archivo pagina de 20 en 20 con el podio; `GET /api/weeks/current` añade la última semana sellada (`sealed`) y `POST /api/me/seen` acepta `ceremony`; el re-sellado va por `slug`. §4.11: índice `result_entry`. `RF-RES-09` se guarda en `seen_flag` (`kind = ceremony`), no en una tabla `results_seen`. El sellado escribe el snapshot en el mismo `batch` que marca la semana; los votos válidos excluyen cuentas bloqueadas o borradas, votos anulados y entradas no activas. |
 | 2026-10-13 | 0.6.72 | **Tarea 6.1.** §4.5, `ranking`: la fila de cada entrada (la de la tabla `result`) y la comparación exacta de puntuaciones con enteros. Sin votos en la semana, la puntuación es 0. Los votos a entradas que no están en la lista no cuentan, tampoco para la media `m`. |
 | 2026-10-13 | 0.6.71 | §7: cerrada la decisión del dorado (decisión del usuario): **sin dorado**; las medallas, la carta de campeón y la semana dorada van en la paleta del sello. |
 | 2026-10-13 | 0.6.70 | **Tarea 5.22 (jurado visual).** §3.8.13: a 360 px o menos, la rejilla va en dos columnas; en casillas de menos de 9 rem el sello es «✓ n/5»; en móvil, la entrada elegida va en una hoja pegada sobre la barra con su alias, sus datos, «Escuchar» y «Jurado». §3.8.7: en móvil, la ronda, el contador y el alias van en la fila «[silueta] VS ALIAS» de la arena y no en el HUD; el panel en una fila, solo desde 1200 px; sin cuenta o sin verificar, la puerta (silueta, por qué y «Entrar» o «Verificar el email», con sus teclas). §3.8.4: en contraste alto, las estrellas con contorno `CanvasText` y las llenas en `Highlight`. Acta en `docs/planning/evidence/f5/jurado/`. |

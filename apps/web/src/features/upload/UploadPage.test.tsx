@@ -43,7 +43,7 @@ function weekWith(overrides: Partial<PublicWeek> = {}): PublicWeek {
 
 function render(week: PublicWeek | null) {
   return renderInRouter(<UploadPage />, '/subir', (client) =>
-    client.setQueryData<CurrentWeek>(queryKeys.weeks.current(), { week, next: null }),
+    client.setQueryData<CurrentWeek>(queryKeys.weeks.current(), { week, next: null, sealed: null }),
   )
 }
 
@@ -94,6 +94,7 @@ describe('/subir: comprobaciones previas (§2.5, paso 1)', () => {
       streamUrl: '/stream',
       cover: { kind: 'generative', seed: 7 },
       producer: null,
+      result: null,
       status: 'active',
       receiptCode: 'BB-2026W42-0001',
       format: 'wav',
@@ -115,6 +116,7 @@ describe('/subir: comprobaciones previas (§2.5, paso 1)', () => {
           },
         }),
         next: null,
+        sealed: null,
       })
       client.setQueryData(queryKeys.entries.mine('2026-w42'), own)
     })

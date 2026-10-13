@@ -298,7 +298,7 @@ describe('semana pública (3.8, 3.9)', () => {
     const { id } = await createSample(t)
     await scheduleWeek(t, '2026-10-12', id)
     const current = async () => (await t.app.inject({ method: 'GET', url: '/api/weeks/current' })).json().data
-    expect(await current()).toEqual({ week: null, next: { startsAt: W42.startsAt, number: 1 } })
+    expect(await current()).toEqual({ week: null, next: { startsAt: W42.startsAt, number: 1 }, sealed: null })
     expect((await t.app.inject({ method: 'GET', url: '/api/weeks/2026-w42' })).statusCode).toBe(404)
     t.clock.set(W42.startsAt - 1)
     expect((await current()).week).toBeNull()
