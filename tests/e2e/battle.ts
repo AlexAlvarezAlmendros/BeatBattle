@@ -67,7 +67,12 @@ export async function battleContext(
   baseURL: string,
   ip: string,
   clock: Clock,
-  options: { viewport?: { width: number; height: number }; touch?: boolean } = {},
+  options: {
+    viewport?: { width: number; height: number }
+    touch?: boolean
+    /** Deja que la home ofrezca la ceremonia (el hito de la Fase 6 la prueba). */
+    ceremonyOffer?: boolean
+  } = {},
 ): Promise<BrowserContext> {
   const context = await browser.newContext({
     baseURL,
@@ -75,14 +80,17 @@ export async function battleContext(
     ...(options.viewport ? { viewport: options.viewport } : {}),
     ...(options.touch ? { isMobile: true, hasTouch: true } : {}),
   })
-  await context.addInitScript(() => {
+  await context.addInitScript((ceremonyOffer) => {
     window.sessionStorage.setItem('bb:title-seen', 'yes')
     // La revelación del drop sale la primera vez de cada semana: aquí se da por vista.
     const getItem = Storage.prototype.getItem
     Storage.prototype.getItem = function (key: string) {
-      return key.startsWith('bb:drop-seen:') ? 'yes' : getItem.call(this, key)
+      // Ni la revelación del drop ni la oferta de la ceremonia: cada hito las prueba aparte.
+      return key.startsWith('bb:drop-seen:') || (!ceremonyOffer && key.startsWith('bb:ceremony-seen:'))
+        ? 'yes'
+        : getItem.call(this, key)
     }
-  })
+  }, Boolean(options.ceremonyOffer))
   // El reloj de la API en cada petición del navegador (las de `page.request` lo llevan explícito).
   await context.route('**/api/**', (route) => {
     const headers = route.request().headers()
