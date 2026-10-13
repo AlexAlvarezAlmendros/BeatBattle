@@ -18,13 +18,17 @@
 // De la Fase 4 (tarea 4.1):
 //   alias      alias de batalla sin repetirse en la semana, número de recibo y semilla de la portada
 //
-// El resto de §4.5 llega con la fase que lo usa (ver docs/planning/ROADMAP.md): `ranking`, `fair`, `xp` (`xpFor`, `streakOf`), `achievements`,
+// De la Fase 5 (tarea 5.1):
+//   fair       Ronda justa, Recién subidas, Aleatorio y la cola del Modo Jurado
+//
+// El resto de §4.5 llega con la fase que lo usa (ver docs/planning/ROADMAP.md): `ranking`, `xp` (`xpFor`, `streakOf`), `achievements`,
 // `seasonStandings` y `goldenEar()`.
 
 export * from './alias'
 export * from './balance'
 export * from './calendar'
 export * from './entryAudio'
+export * from './fair'
 export * from './goldenEar'
 export * from './levels'
 export * from './listen'

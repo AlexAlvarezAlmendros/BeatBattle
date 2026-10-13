@@ -3,6 +3,7 @@ import * as alias from '../src/alias'
 import * as balance from '../src/balance'
 import * as calendar from '../src/calendar'
 import * as entryAudio from '../src/entryAudio'
+import * as fair from '../src/fair'
 import * as goldenEar from '../src/goldenEar'
 import * as rules from '../src/index'
 import * as levels from '../src/levels'
@@ -18,6 +19,7 @@ const modules = {
   balance,
   calendar,
   entryAudio,
+  fair,
   goldenEar,
   levels,
   listen,
