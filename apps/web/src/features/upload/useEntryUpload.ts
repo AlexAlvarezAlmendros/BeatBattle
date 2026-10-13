@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from 'react'
 import { audio } from '../../audio/engine'
 import { t } from '../../i18n'
 import { ApiClientError } from '../../net/api'
-import { createEntry, signEntryUpload } from '../../net/entries'
+import { createEntry, replaceEntryAudio, signEntryUpload } from '../../net/entries'
 import { uploadInChunks } from './chunkedUpload'
 import type { EntrySheetResult } from './EntrySheet'
 import { entryProblemMessage } from './entryFile'
@@ -56,6 +56,8 @@ export function uploadErrorMessage(error: unknown): string {
         : t('pages.upload.errors.asset')
     case 'ENTRY_EXISTS':
       return t('pages.upload.errors.exists')
+    case 'ENTRY_HAS_VOTES':
+      return t('pages.upload.edit.hasVotes')
     case 'SUBMISSIONS_CLOSED':
       return t('pages.upload.closed.summary')
     case 'RULES_NOT_ACCEPTED':
@@ -87,15 +89,23 @@ export function useEntryUpload() {
   const controller = useRef<AbortController | null>(null)
 
   const start = useCallback(
-    async (input: { weekSlug: string; file: File; durationMs: number; sheet: EntrySheetResult }) => {
+    async (input: {
+      weekSlug: string
+      file: File
+      durationMs: number
+      /** La ficha (al registrar); al sustituir el audio no hace falta. */
+      sheet?: EntrySheetResult
+      /** Sustituir el audio de esta entrada (`RF-ENT-08`) en vez de registrar una nueva. */
+      replacing?: string
+    }) => {
       const abort = new AbortController()
       controller.current = abort
       const { signal } = abort
-      const { weekSlug, file, durationMs, sheet } = input
+      const { weekSlug, file, durationMs, sheet, replacing } = input
       setState({ stage: 'uploading', sent: 0, total: file.size, speed: null, remaining: null })
       try {
         let coverIntentId: string | undefined
-        if (sheet.cover) {
+        if (sheet?.cover && !replacing) {
           const coverSigned = await signEntryUpload(
             { kind: 'entryCover', weekSlug, mime: sheet.cover.type as 'image/png', bytes: sheet.cover.size },
             signal,
@@ -116,6 +126,7 @@ export function useEntryUpload() {
             mime: mimeOf(file) as 'audio/wav',
             bytes: file.size,
             durationMs,
+            ...(replacing ? { replacing } : {}),
           },
           signal,
         )
@@ -144,11 +155,17 @@ export function useEntryUpload() {
           },
         })
         setState({ stage: 'registering', total: file.size })
-        const entry = await createEntry(
-          weekSlug,
-          { intentId: signed.intentId, ...(coverIntentId ? { coverIntentId } : {}), ...sheet.fields },
-          signal,
-        )
+        const entry = replacing
+          ? await replaceEntryAudio(replacing, signed.intentId, signal)
+          : await createEntry(
+              weekSlug,
+              {
+                intentId: signed.intentId,
+                ...(coverIntentId ? { coverIntentId } : {}),
+                ...(sheet as EntrySheetResult).fields,
+              },
+              signal,
+            )
         audio.play('upload.done')
         setState({ stage: 'done', entry })
         return entry

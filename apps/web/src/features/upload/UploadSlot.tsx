@@ -30,10 +30,13 @@ export function UploadSlot({
   analysis,
   onFile,
   onReset,
+  autoFocus = true,
 }: {
   analysis: EntryAnalysis
   onFile: (file: File) => void
   onReset: () => void
+  /** Llevarse el foco al llegar (la página de subir); en la edición, el foco empieza en la ficha. */
+  autoFocus?: boolean
 }) {
   const reduced = useReducedMotion()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -47,8 +50,8 @@ export function UploadSlot({
   const idle = analysis.stage === 'idle' || analysis.stage === 'problem'
   // Al llegar, «Elegir archivo» tiene el foco: Intro abre el selector (foco = cursor, §3.3).
   useEffect(() => {
-    if (idle) pickRef.current?.focus({ preventScroll: true })
-  }, [idle])
+    if (idle && autoFocus) pickRef.current?.focus({ preventScroll: true })
+  }, [idle, autoFocus])
 
   const spinning = analysis.stage === 'reading' || analysis.stage === 'analyzing'
   useEffect(() => {

@@ -572,6 +572,14 @@ export function createEntriesService(deps: EntriesDeps) {
       }
     },
 
+    /** `GET /api/weeks/:slug/entries/mine`: la entrada propia de la semana (`/subir` en edición), o `null`. */
+    async mineBySlug(userId: string, slug: string, now: number): Promise<OwnEntry | null> {
+      const [w] = await db.select().from(week).where(eq(week.slug, slug))
+      if (!w) return null
+      const row = await liveEntry(userId, w.id)
+      return row ? toOwn(row, w, now) : null
+    },
+
     /** La entrada propia de una semana (para `viewer.entry` y `/subir`), o `null`. */
     async ownEntry(userId: string, weekId: string, now: number): Promise<OwnEntry | null> {
       const row = await liveEntry(userId, weekId)

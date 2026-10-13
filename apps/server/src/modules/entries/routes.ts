@@ -44,6 +44,18 @@ export function entriesRoutes(app: FastifyInstance, service: EntriesService): vo
     },
   )
 
+  app.get<{ Params: { slug: string } }>(
+    '/api/weeks/:slug/entries/mine',
+    { preHandler: requireSession },
+    async (req): Promise<DataEnvelope<OwnEntry>> => {
+      const slug = WeekSlugSchema.safeParse(req.params.slug)
+      if (!slug.success) throw appError('NOT_FOUND', 'No existe esa semana.')
+      const own = await service.mineBySlug(userOf(req), slug.data, req.now)
+      if (!own) throw appError('NOT_FOUND', 'No tienes entrada en esta semana.')
+      return { data: own }
+    },
+  )
+
   app.get<{ Params: { id: string } }>('/api/entries/:id', async (req): Promise<DataEnvelope<PublicEntry>> => {
     return { data: await service.publicEntry(idOf(req), req.user?.id ?? null) }
   })

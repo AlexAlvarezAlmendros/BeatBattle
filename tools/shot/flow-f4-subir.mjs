@@ -53,8 +53,10 @@ const browser = await chromium.launch({
   channel: 'chrome',
   args: ['--ignore-gpu-blocklist', '--use-angle=vulkan', '--enable-features=Vulkan', '--disable-lcd-text'],
 })
+/** El alto de cada ancho de los que juzga el jurado (los reales: portátil bajo, tableta, móviles). */
+const HEIGHTS = { 1440: 900, 1366: 657, 1024: 768, 390: 844, 320: 568 }
 const ctx = await browser.newContext({
-  viewport: touch ? { width: Number(width), height: 844 } : { width: Number(width), height: 900 },
+  viewport: { width: Number(width), height: HEIGHTS[width] ?? (touch ? 844 : 900) },
   isMobile: touch,
   hasTouch: touch,
 })
@@ -120,4 +122,24 @@ await shot('subir-dentro')
 await page.goto(`${origin}/`)
 await page.waitForTimeout(2000)
 await shot('menu-con-entrada')
+// Edición (4.18): la ficha, sustituir el audio sin votos y retirar.
+await page.goto(`${origin}/subir`)
+await page.getByRole('heading', { name: 'Tu ficha' }).waitFor({ timeout: 15_000 })
+await page.waitForTimeout(600)
+await shot('editar')
+await page.getByLabel('Título').fill('Bruma en Gràcia (v2)')
+await page.getByRole('button', { name: /Guardar la ficha/ }).click()
+await page.getByText('Ficha guardada.').waitFor({ timeout: 15_000 })
+await page.locator('input[type="file"][accept*="wav"]').setInputFiles(wavPath)
+await page.getByRole('button', { name: 'Sustituir el audio' }).waitFor({ timeout: 60_000 })
+await page.getByRole('button', { name: 'Sustituir el audio' }).click()
+await page.getByText('Audio sustituido').waitFor({ timeout: 120_000 })
+await shot('editar-sustituido')
+await page.getByRole('button', { name: 'Retirar mi entrada' }).click()
+await page.waitForTimeout(500)
+await shot('retirar-confirmar')
+await page.getByRole('button', { name: 'Sí, retirarla' }).click()
+await page.getByRole('region', { name: 'Inserta tu beat' }).waitFor({ timeout: 15_000 })
+await page.waitForTimeout(400)
+await shot('retirada')
 await browser.close()

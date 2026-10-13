@@ -40,6 +40,11 @@ export function createEntry(slug: string, body: EntryCreate, signal?: AbortSigna
   })
 }
 
+/** `GET /api/weeks/:slug/entries/mine`: la entrada propia de la semana, para editarla. */
+export function getMyEntry(slug: string, signal?: AbortSignal): Promise<OwnEntry> {
+  return apiFetch(`/api/weeks/${encodeURIComponent(slug)}/entries/mine`, { schema: OwnEntrySchema, signal })
+}
+
 /** `PATCH /api/entries/:id`: la ficha, hasta el cierre de envíos. */
 export function updateEntry(id: string, body: EntryUpdate): Promise<OwnEntry> {
   return apiFetch(`/api/entries/${encodeURIComponent(id)}`, { method: 'PATCH', body, schema: OwnEntrySchema })

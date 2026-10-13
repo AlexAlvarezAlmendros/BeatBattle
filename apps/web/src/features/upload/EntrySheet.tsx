@@ -28,10 +28,11 @@ import {
   validateDraft,
 } from './entrySheet'
 
-/** Lo que sale de la hoja: la ficha para la API y la portada propia, si la hay. */
+/** Lo que sale de la hoja: la ficha para la API y la portada propia, si la hay (o quitarla, en edición). */
 export interface EntrySheetResult {
   fields: ReturnType<typeof draftToFields>
   cover: File | null
+  removeCover?: boolean
 }
 
 const ORDER: DraftField[] = ['title', 'bpm', 'daw', 'genres', 'description', 'declaration']
@@ -49,6 +50,8 @@ export function EntrySheet({
   onSubmit,
   blind,
   busy = false,
+  mode = 'create',
+  hasOwnCover = false,
 }: {
   draft: EntryDraft
   onChange: (draft: EntryDraft) => void
@@ -56,12 +59,18 @@ export function EntrySheet({
   /** La semana es de voto ciego (por defecto): la portada propia queda oculta hasta el sellado. */
   blind: boolean
   busy?: boolean
+  /** `edit`: la ficha de una entrada ya subida (sin declaración, «Guardar la ficha»). */
+  mode?: 'create' | 'edit'
+  /** En edición, la entrada ya tiene portada propia (se puede quitar). */
+  hasOwnCover?: boolean
 }) {
   const formRef = useRef<HTMLFormElement>(null)
   const coverRef = useRef<HTMLInputElement>(null)
   const [errors, setErrors] = useState<DraftErrors>({})
   const [cover, setCover] = useState<File | null>(null)
   const [coverError, setCoverError] = useState<string | null>(null)
+  const [removeCover, setRemoveCover] = useState(false)
+  const edit = mode === 'edit'
   const keyId = useId()
   const dawId = useId()
   const genresId = useId()
@@ -82,7 +91,8 @@ export function EntrySheet({
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
-    const found = validateDraft(draft, messages)
+    // En edición no hay declaración: ya se hizo al subir.
+    const found = validateDraft(edit ? { ...draft, declaration: true } : draft, messages)
     setErrors(found)
     const first = ORDER.find((field) => found[field])
     if (first) {
@@ -91,7 +101,7 @@ export function EntrySheet({
         ?.focus()
       return
     }
-    onSubmit({ fields: draftToFields(draft), cover })
+    onSubmit({ fields: draftToFields(edit ? { ...draft, declaration: true } : draft), cover, removeCover })
   }
 
   const toggleGenre = (genre: BeatGenre, on: boolean) => {
@@ -110,12 +120,15 @@ export function EntrySheet({
       return
     }
     setCoverError(null)
+    setRemoveCover(false)
     setCover(file)
   }
 
   return (
     <Frame as="form" ref={formRef} variant="panel" className={styles.sheet} onSubmit={submit} noValidate>
-      <h2 className={cx('bb-display', styles.heading)}>{t('pages.upload.sheet.title')}</h2>
+      <h2 className={cx('bb-display', styles.heading)}>
+        {edit ? t('pages.upload.sheet.editTitle') : t('pages.upload.sheet.title')}
+      </h2>
       <div data-field="title">
         <TextField
           label={t('pages.upload.sheet.fields.title')}
@@ -131,7 +144,7 @@ export function EntrySheet({
         <div data-field="bpm">
           <TextField
             label={t('pages.upload.sheet.fields.bpm')}
-            hint={t('pages.upload.sheet.hints.suggested')}
+            hint={edit ? undefined : t('pages.upload.sheet.hints.suggested')}
             value={draft.bpm}
             inputMode="decimal"
             autoComplete="off"
@@ -231,6 +244,12 @@ export function EntrySheet({
               </Button>
             </>
           )}
+          {!cover && hasOwnCover && !removeCover && (
+            <Button variant="outline" size="sm" onClick={() => setRemoveCover(true)}>
+              {t('pages.upload.sheet.cover.removeOwn')}
+            </Button>
+          )}
+          {removeCover && <span className={styles.coverName}>{t('pages.upload.sheet.cover.removed')}</span>}
         </div>
         <input
           ref={coverRef}
@@ -246,23 +265,25 @@ export function EntrySheet({
         />
         {coverError && <PaperNotice live>{coverError}</PaperNotice>}
       </div>
-      <div data-field="declaration">
-        <FilterChip
-          variant="plate"
-          label={t('pages.upload.sheet.fields.declaration')}
-          pressed={draft.declaration}
-          onChange={(value) => set('declaration', value)}
-          aria-describedby={errors.declaration ? 'declaration-missing' : undefined}
-        />
-        {errors.declaration && (
-          <p id="declaration-missing" className={styles.error} role="alert">
-            {errors.declaration}
-          </p>
-        )}
-      </div>
+      {!edit && (
+        <div data-field="declaration">
+          <FilterChip
+            variant="plate"
+            label={t('pages.upload.sheet.fields.declaration')}
+            pressed={draft.declaration}
+            onChange={(value) => set('declaration', value)}
+            aria-describedby={errors.declaration ? 'declaration-missing' : undefined}
+          />
+          {errors.declaration && (
+            <p id="declaration-missing" className={styles.error} role="alert">
+              {errors.declaration}
+            </p>
+          )}
+        </div>
+      )}
       <div className={styles.actions}>
         <Button type="submit" variant="cta" size="lg" loading={busy} keyHint={t('frame.keys.glyph.enter')}>
-          {t('pages.upload.sheet.submit')}
+          {edit ? t('pages.upload.sheet.save') : t('pages.upload.sheet.submit')}
         </Button>
       </div>
     </Frame>

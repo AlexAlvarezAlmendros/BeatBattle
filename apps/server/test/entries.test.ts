@@ -618,3 +618,23 @@ describe('los emails de la entrada salen con su plantilla (4.12)', () => {
     expect(mail?.text).toContain('Tu beat dura 0:20. El mínimo son 30 segundos.')
   })
 })
+
+describe('la entrada propia para editarla (4.18)', () => {
+  it('GET /api/weeks/:slug/entries/mine: la suya, con su recibo; sin entrada, 404; sin sesión, 401', async () => {
+    const { cookie } = await openWeek()
+    const mine = (s: string | undefined) =>
+      t.app.inject({
+        method: 'GET',
+        url: '/api/weeks/2026-w42/entries/mine',
+        headers: s ? { cookie: s } : {},
+      })
+    expect((await mine(cookie)).statusCode).toBe(404)
+    const own = (await create(cookie, (await upload(cookie)).intentId)).json().data
+    const res = await mine(cookie)
+    expect(res.statusCode).toBe(200)
+    expect(res.json().data).toMatchObject({ id: own.id, receiptCode: own.receiptCode, canReplaceAudio: true })
+    const other = await producer('aina')
+    expect((await mine(other.cookie)).statusCode).toBe(404)
+    expect((await mine(undefined)).statusCode).toBe(401)
+  })
+})

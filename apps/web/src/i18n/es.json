@@ -273,6 +273,8 @@
         "cover": {
           "add": "Añadir portada",
           "change": "Cambiar portada",
+          "removeOwn": "Quitar mi portada",
+          "removed": "Se quitará al guardar: volverá tu portada generativa.",
           "remove": "Quitar",
           "blind": "En voto ciego tu portada no se ve hasta el domingo: mientras, todos verán tu portada generativa.",
           "open": "Esta semana no es de voto ciego: tu portada se verá desde ya.",
@@ -287,6 +289,8 @@
           "description": "La descripción no puede pasar de 280 caracteres.",
           "declaration": "Marca la declaración para entrar en la batalla."
         },
+        "save": "Guardar la ficha",
+        "editTitle": "Tu ficha",
         "submit": "Entrar en la batalla"
       },
       "genres": {
@@ -333,6 +337,24 @@
         "menu": "Volver al menú"
       },
       "retry": "Volver a intentarlo",
+      "edit": {
+        "kicker": "Recibo {receipt}",
+        "loadError": "No hemos podido cargar tu entrada. Vuelve a intentarlo en un momento.",
+        "saved": "Ficha guardada.",
+        "replaceTitle": "Sustituir el audio",
+        "replaceSummary": "Mientras tu entrada no tenga votos puedes cambiar el audio: conservas tu alias y tu número de recibo.",
+        "replace": "Sustituir el audio",
+        "replaced": "Audio sustituido: te hemos mandado el recibo actualizado.",
+        "hasVotes": "Tu entrada ya tiene votos: el audio no se puede cambiar. Puedes editar la ficha hasta el cierre.",
+        "withdrawTitle": "Retirar mi entrada",
+        "withdrawSummary": "Se borra tu audio y, si tenía votos, se pierden. Después puedes volver a subir otra hasta el cierre.",
+        "withdraw": "Retirar mi entrada",
+        "withdrawError": "No hemos podido retirar tu entrada. Vuelve a intentarlo.",
+        "confirmTitle": "¿Retirar tu entrada?",
+        "confirmSummary": "{alias} sale de la batalla: se borran el audio y sus votos. No se puede deshacer.",
+        "keep": "No, seguir dentro",
+        "confirm": "Sí, retirarla"
+      },
       "problems": {
         "unsupportedFormat": "Eso no suena a audio. Prueba con WAV, AIFF, FLAC o MP3.",
         "fileTooLarge": "Tu archivo pesa {size} MB. El máximo son 100 MB.",
