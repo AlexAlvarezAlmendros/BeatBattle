@@ -35,6 +35,7 @@ import { appError } from '../../lib/errors'
 import type { AudioMeasurement } from '../../media/measure'
 import type { ImageStorage } from '../storage/cloudinary'
 import type { EntryAsset, EntryStorage } from '../storage/entries'
+import { entryPageUrl, qrUrl } from './qrRoute'
 import { waveformUrl } from './waveformRoute'
 
 /**
@@ -254,6 +255,27 @@ export function createEntriesService(deps: EntriesDeps) {
     return { asset, measured }
   }
 
+  /**
+   * La huella del audio (`RF-ENT-11`): el MD5 que calcula el servidor al medirlo, si leyó el fichero entero.
+   * Si no se pudo medir dentro del presupuesto, la del almacenamiento: el falso la da, la Admin API de
+   * Cloudinary no (prueba real de la 4.10), y entonces queda vacía hasta que el `tick` la mida.
+   */
+  function fingerprintOf(asset: EntryAsset, measured: AudioMeasurement | null): string {
+    if (measured?.md5 && measured.bytesRead === asset.bytes) return measured.md5
+    return asset.etag
+  }
+
+  /** Otra cuenta con el mismo audio (`RF-ENT-11`). Una huella vacía no se sabe: nunca es duplicado. */
+  async function twinOf(etag: string, userId: string): Promise<{ id: string } | undefined> {
+    if (!etag) return undefined
+    const [twin] = await db
+      .select({ id: entry.id })
+      .from(entry)
+      .where(and(eq(entry.etag, etag), ne(entry.userId, userId)))
+      .limit(1)
+    return twin
+  }
+
   function receiptOf(row: Pick<WeekRow, 'startsAt'>, receiptNumber: number): string {
     return receiptCode(isoWeekLabel(localDateOf(row.startsAt)), receiptNumber)
   }
@@ -321,10 +343,12 @@ export function createEntriesService(deps: EntriesDeps) {
       receivedAt: row.submittedAt,
       /** Hasta cuándo se edita la ficha (el cierre de envíos). */
       editUntil: w.submitEndsAt,
-      entryUrl: `${deps.publicUrl}/e/${row.id}`,
+      entryUrl: entryPageUrl(deps.publicUrl, row.id),
       editUrl: `${deps.publicUrl}/subir`,
       /** PNG de la onda medida, firmado (§4.19.5). */
       waveformUrl: deps.emailSecret ? waveformUrl(deps.publicUrl, deps.emailSecret, row.id, row.etag) : null,
+      /** PNG del QR a la ficha, firmado (§2.12.1, §4.19.5). */
+      qrUrl: deps.emailSecret ? qrUrl(deps.publicUrl, deps.emailSecret, row.id) : null,
     }
   }
 
@@ -453,11 +477,8 @@ export function createEntriesService(deps: EntriesDeps) {
         .select({ n: max(entry.receiptNumber) })
         .from(entry)
         .where(eq(entry.weekId, w.id))
-      const [twin] = await db
-        .select({ id: entry.id })
-        .from(entry)
-        .where(and(eq(entry.etag, asset.etag), ne(entry.userId, userId)))
-        .limit(1)
+      const etag = fingerprintOf(asset, measured)
+      const twin = await twinOf(etag, userId)
       const row: EntryRow = {
         id,
         weekId: w.id,
@@ -473,7 +494,7 @@ export function createEntriesService(deps: EntriesDeps) {
         daw: input.daw,
         tags: JSON.stringify(input.genres),
         audioPublicId: intent.publicId,
-        etag: asset.etag,
+        etag,
         format: asset.format,
         bytes: asset.bytes,
         durationMs: asset.durationMs ?? measured?.durationMs ?? intent.declaredDurationMs ?? 0,
@@ -506,7 +527,7 @@ export function createEntriesService(deps: EntriesDeps) {
             id: deps.newId(),
             kind: 'entry.receipt',
             target: { userId },
-            idempotencyKey: `entry.receipt:${row.id}:${row.etag}`,
+            idempotencyKey: `entry.receipt:${row.id}:${row.audioPublicId}`,
             payload: receiptPayload(row, w),
             now,
           }),
@@ -650,14 +671,11 @@ export function createEntriesService(deps: EntriesDeps) {
         if (error instanceof AssetFailure) return reject(userId, intent, w, error, now)
         throw error
       }
-      const [twin] = await db
-        .select({ id: entry.id })
-        .from(entry)
-        .where(and(eq(entry.etag, asset.etag), ne(entry.userId, userId)))
-        .limit(1)
+      const etag = fingerprintOf(asset, measured)
+      const twin = await twinOf(etag, userId)
       const changes: Partial<EntryRow> = {
         audioPublicId: intent.publicId,
-        etag: asset.etag,
+        etag,
         format: asset.format,
         bytes: asset.bytes,
         durationMs: asset.durationMs ?? measured?.durationMs ?? intent.declaredDurationMs ?? 0,
@@ -681,7 +699,7 @@ export function createEntriesService(deps: EntriesDeps) {
                 id: deps.newId(),
                 kind: 'entry.changed',
                 target: { userId },
-                idempotencyKey: `entry.changed:${row.id}:${next.etag}`,
+                idempotencyKey: `entry.changed:${row.id}:${next.audioPublicId}`,
                 payload: { change: 'replaced', ...receiptPayload(next, w) },
                 now,
               }),

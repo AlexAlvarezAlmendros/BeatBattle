@@ -32,6 +32,9 @@ describe('entry.receipt (§2.12.1)', () => {
       expect(text, piece).toContain(piece)
     expect(email.html).toContain(`src="${ENTRY_RECEIPT_FIXTURE.waveformUrl?.replace('&', '&amp;')}"`)
     expect(email.html).toContain('alt="Forma de onda de «Bruma en Gràcia», 2:31"')
+    // 4.13: el QR a la ficha, con su texto alternativo.
+    expect(email.html).toContain(`src="${ENTRY_RECEIPT_FIXTURE.qrUrl}"`)
+    expect(email.html).toContain('alt="Código QR que abre tu entrada"')
     expect(email.html).toContain(`href="${ENTRY_RECEIPT_FIXTURE.entryUrl}"`)
     expect(email.html).toContain(`href="${ENTRY_RECEIPT_FIXTURE.editUrl}"`)
     expect(email.subject).toBe('Ya estás en la batalla #41 · BB-2026W41-0007')

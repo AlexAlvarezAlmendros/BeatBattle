@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.56 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.58 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -390,7 +390,7 @@ las bases) y la portada propia queda oculta hasta el sellado: se muestra la gene
 | `RF-ENT-08` | El audio solo se sustituye si la entrada no tiene votos | Con un voto → 409 `ENTRY_HAS_VOTES` |
 | `RF-ENT-09` | Retirar la entrada borra su audio y sus votos y libera el hueco | Tras retirarla puede subir otra |
 | `RF-ENT-10` | En voto ciego, la portada propia y la identidad no se exponen antes del sellado, ni en la UI ni en la API pública | La respuesta pública de una entrada en una semana sin sellar no contiene `userId`, `username`, `avatar` ni `coverUrl` propio |
-| `RF-ENT-11` | Detección de audio duplicado por `etag` de Cloudinary | Dos cuentas que suben el mismo fichero → la segunda se crea, pero queda marcada para revisión del admin |
+| `RF-ENT-11` | Detección de audio duplicado por su huella (MD5 que calcula el servidor al medir, §4.8.4) | Dos cuentas que suben el mismo fichero → la segunda se crea, pero queda marcada para revisión del admin |
 | `RF-ENT-12` | La subida reintenta automáticamente ante cortes de red (3 intentos con espera exponencial) y conserva la ficha rellenada | Cortar la red al 50 % y recuperarla → la subida continúa o se reintenta sin perder el formulario |
 
 ### 2.6 Escuchar: reproductor, lista y ficha de entrada
@@ -2131,6 +2131,7 @@ con el DOM. Las versiones se fijan en la tarea 0.1, alineadas con las de Orchard
 | Medición de audio en servidor | **ffmpeg** (`ffmpeg-static`) con `ebur128` | Sonoridad y forma de onda autoritativas; validado en Vercel en la Fase 1 (*spike* 1.8: ~80 MB de función, 3,7 s en frío para 52 MB) |
 | Email | **nodemailer** + **Gmail** (SMTP con contraseña de aplicación) + **React Email**; **Mailpit** en local | Decisión del usuario: el mismo sistema que el sello y sin coste. Sus límites se gestionan con presupuesto diario y cola (§4.19) |
 | Imágenes OG | **satori + resvg** (`@vercel/og`) | Imágenes con la dirección de arte del juego en servidor |
+| Códigos QR | **qrcode** (solo en el servidor) | Decisión del usuario (2026-10-13, tarea 4.13): la matriz (modo byte, Reed-Solomon, máscaras) la calcula `qrcode`; el PNG lo pinta el codificador propio de la onda (§4.19.5) |
 | Tests | **Vitest**, **fast-check**, **Testing Library**, **Playwright** | Unitarios, propiedades, componentes y E2E |
 | Lint y formato | **Biome** | Estándar del usuario |
 | CI | GitHub Actions | Lint, tipos, tests, build, E2E y preview |
@@ -2416,8 +2417,12 @@ Al registrar la entrada:
 
 1. Se carga el `upload_intent` (del usuario, pendiente, no caducado).
 2. **Admin API** `resource(public_id)` → existe, está en la carpeta esperada, `bytes ≤ 100 MB`,
-   formato permitido, `30 s ≤ duration ≤ 240 s` (`validateEntryAudio`), creado después del *intent*. Se guarda el `etag`
-   para detectar duplicados (`RF-ENT-11`).
+   formato permitido y creado después del *intent*. La Admin API **no da ni el `etag` ni la duración**
+   (solo la respuesta de la subida, que ve el navegador y no vale como prueba; comprobado en la prueba real
+   de la 4.10): la duración se valida con la **medida** (`30 s ≤ duración ≤ 240 s`, `validateEntryAudio`) y
+   la **huella** para los duplicados (`RF-ENT-11`) es el MD5 que calcula el servidor de los bytes que lee al
+   medir, solo si los lee todos. Sin medir (`processing`), la huella queda vacía, no se compara con nada y
+   la pone el `tick` al completar la entrada, que marca entonces el duplicado.
 3. **Medición**: Node descarga el original con una URL firmada temporal y lo pasa a ffmpeg por la
    entrada estándar según llega (`pipe:0`, sin disco); ffmpeg, en una sola pasada (`asplit`), calcula
    sonoridad integrada y pico real (`ebur128=peak=true`) y saca la señal a 8 kHz mono para la forma de
@@ -3175,6 +3180,11 @@ CREATE TABLE entry_receipt_seq (week_id TEXT PRIMARY KEY, last INTEGER NOT NULL)
   del audio (`v`: los 12 primeros caracteres del `etag`, así un audio sustituido tiene otra URL); sin firma
   válida, 403. Sin onda (en `processing` o ya borrada), la línea plana. La petición no se registra
   (`RF-NOTIF-12`) y se cachea una semana.
+- **QR del recibo**: `GET /api/email/qr/:entryId.png?sig=`, la matriz de `qrcode` (nivel de corrección M)
+  pintada con el mismo codificador PNG: módulos negros sobre blanco con el margen de silencio de 4 módulos y
+  6 px por módulo (en el email, a 132 px). Codifica la ficha pública de la entrada (`/e/:id`), que en voto
+  ciego no dice nada de la autoría (`RF-ENT-10`). Firma HMAC sobre el id; sin firma válida, 403. No consulta
+  la BD, no se registra (`RF-NOTIF-12`) y se cachea un mes.
 
 #### 4.19.6 Bajas
 
@@ -3608,6 +3618,8 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.58 | **Tarea 4.13 (decisión del usuario).** §4.1: `qrcode` como dependencia del servidor para la matriz de los códigos QR. §4.19.5: el QR del recibo (`/api/email/qr/:entryId.png?sig=`), firmado, a la ficha pública de la entrada. El recibo de §2.12.1 ya lo llevaba en la especificación. |
+| 2026-10-13 | 0.6.57 | **Tarea 4.10 (prueba real contra Cloudinary).** §4.8.4 y `RF-ENT-11`: la Admin API no da el `etag` ni la duración; la huella de los duplicados es el MD5 que calcula el servidor al medir (si lee el fichero entero) y la duración se valida con la medida. Sin medir, la huella queda vacía y la pone el `tick`. El almacenamiento falso imita a la Admin API (sin `etag` ni duración en la verificación). Las claves de idempotencia de los emails de la entrada van por el `public_id` del audio, no por la huella. |
 | 2026-10-13 | 0.6.56 | **Tarea 4.20 (jurado de la F4).** §3.8.5: la boca de la ranura, el rodillo de la tragaperras con el porcentaje a la vista, el medidor de súper de 28 px con marcas a tercios, la franja del anunciador en dos líneas con su alto reservado, una sola acción en la celebración, la vista y el foco al panel nuevo en cada cambio, qué estados llenan el alto, la ranura compacta de la edición y el aviso al retirar; lo que oye el lector en el análisis y la subida; Esc no hace nada mientras se verifica. §3.4.1: `[ESC] CANCELAR` en la barra mientras dura algo que Esc detiene. |
 | 2026-10-10 | 0.6.55 | **Tarea 4.18.** §4.10: `GET /api/weeks/:slug/entries/mine` (la entrada propia para editarla en `/subir`). |
 | 2026-10-10 | 0.6.54 | **Tarea 4.11.** §3.4.5: cada entrada lleva su portada generativa (semilla, tónica y BPM) pintada por CPU con la calibración por medida en `packages/covers` (`painter.ts`) con la paleta de los tokens; `GenerativeCover` en la web y el banco `/dev/portadas`; `RD-VIS-04` medido con 48 y 200 semillas (peor desviación 0,5 % en rojo, 1,2 % y 2,1 % en luminancia). |

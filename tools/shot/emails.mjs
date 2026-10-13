@@ -3,7 +3,8 @@
  * Capturas de la galería de emails (guía §4.19.4): abre cada HTML que deja
  * `packages/emails/scripts/gallery.tsx` a 600 px (escritorio) y a 390 px (móvil) y guarda la página entera.
  * Con una carpeta de ondas (`apps/server/src/scripts/emailWaveforms.ts`), la onda de los recibos de ejemplo
- * se sirve desde allí por su versión (`?v=`), en vez de pedirla a la web de producción. Chrome va sin
+ * se sirve desde allí por su versión (`?v=`), y el QR del ejemplo, de `qr.png`, en vez de pedirlos a la web
+ * de producción. Chrome va sin
  * suavizado LCD, para que no cuente como color fuera de la paleta (acta F3, M12; acta F4, M10).
  *
  *   node tools/shot/emails.mjs <carpeta-de-html> <carpeta-de-capturas> [carpeta-de-ondas]
@@ -22,6 +23,10 @@ for (const file of (await readdir(input)).filter((f) => f.endsWith('.html') && f
         const version = new URL(route.request().url()).searchParams.get('v')
         return route.fulfill({ path: path.join(waveforms, `${version}.png`), contentType: 'image/png' })
       })
+    if (waveforms)
+      await page.route('**/api/email/qr/*', (route) =>
+        route.fulfill({ path: path.join(waveforms, 'qr.png'), contentType: 'image/png' }),
+      )
     await page.goto(`file://${path.resolve(input, file)}`)
     await page.waitForLoadState('networkidle')
     const name = `${file.replace('.html', '')}-${width}.png`

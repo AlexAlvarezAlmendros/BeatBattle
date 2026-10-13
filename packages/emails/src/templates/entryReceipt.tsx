@@ -1,6 +1,6 @@
 /** @jsxRuntime automatic */
 /** @jsxImportSource react */
-import { Img, Link } from '@react-email/components'
+import { Column, Img, Link, Row, Section } from '@react-email/components'
 import { Button } from '../components/Button'
 import { Card } from '../components/Card'
 import { Layout } from '../components/Layout'
@@ -53,6 +53,8 @@ export interface EntryReceiptPayload {
   editUrl: string
   /** PNG firmado de la onda medida (§4.19.5), o `null` si el servidor no firma imágenes. */
   waveformUrl: string | null
+  /** PNG firmado del QR a la ficha de la entrada (§2.12.1, §4.19.5), o `null` si no se firma. */
+  qrUrl?: string | null
 }
 
 /** A partir de aquí el pico real se avisa: «tu master clipa» (§2.12.1). */
@@ -137,6 +139,26 @@ export function ReceiptBody({
           />
         ) : null}
         <Button href={p.entryUrl}>Escuchar mi entrada</Button>
+        {p.qrUrl ? (
+          // El QR a la ficha (§2.12.1), para abrirla en el móvil si el recibo se lee en el ordenador. El PNG
+          // lleva su margen blanco: es lo que leen bien las cámaras sobre la tarjeta oscura.
+          <Section style={{ margin: '16px 0 8px' }}>
+            <Row>
+              <Column style={{ width: '132px', verticalAlign: 'middle' }}>
+                <Img
+                  src={p.qrUrl}
+                  width="132"
+                  height="132"
+                  alt="Código QR que abre tu entrada"
+                  style={{ display: 'block', width: '132px', height: '132px' }}
+                />
+              </Column>
+              <Column style={{ paddingLeft: '16px', verticalAlign: 'middle' }}>
+                <Paragraph muted>Desde el móvil: escanéalo y abre tu entrada.</Paragraph>
+              </Column>
+            </Row>
+          </Section>
+        ) : null}
         <Paragraph>
           <Link href={p.editUrl} style={{ color: mail.text, fontWeight: 700 }}>
             Editar la ficha
@@ -176,12 +198,13 @@ export const ENTRY_RECEIPT_FIXTURE: EntryReceiptPayload = {
   entryUrl: 'https://battle.otherpeople.es/e/7b0c6a0e',
   editUrl: 'https://battle.otherpeople.es/subir',
   waveformUrl: 'https://battle.otherpeople.es/api/email/waveform/7b0c6a0e.png?v=a1b2c3d4e5f6&sig=ejemplo',
+  qrUrl: 'https://battle.otherpeople.es/api/email/qr/7b0c6a0e.png?sig=ejemplo',
 }
 
 /**
  * `entry.receipt` (§2.12.1, Anexo H, `RF-NOTIF-06`): el ticket de la entrada verificada, con su informe
  * técnico (sonoridad, ajuste a −14 LUFS, pico real con aviso de clip y la onda), la hora de recepción y la
- * huella. El QR a la ficha llega con la tarea 4.13; mientras, el botón.
+ * huella, el botón y el QR a la ficha.
  */
 export const entryReceipt: EmailTemplate<EntryReceiptPayload> = {
   subject: (p) => clip(`Ya estás en la batalla #${p.weekNumber} · ${p.receiptCode}`, 50),

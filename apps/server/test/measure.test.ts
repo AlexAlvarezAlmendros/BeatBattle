@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { describe, expect, it } from 'vitest'
 import { measureAudio, WAVEFORM_BINS, waveformPeaks } from '../src/media/measure'
 import { sineWav } from './fixtures/wav'
@@ -14,6 +15,13 @@ describe('measureAudio (ffmpeg)', () => {
     // Amplitud 0,316 → ±40 de 127 en cada tramo.
     expect(Math.max(...result.peaks)).toBeGreaterThanOrEqual(38)
     expect(Math.min(...result.peaks)).toBeLessThanOrEqual(-38)
+  })
+
+  it('RF-ENT-11: la huella es el MD5 de los bytes leídos al medir, y cuenta cuántos son', async () => {
+    const wav = sineWav({ seconds: 3 })
+    const result = await measureAudio(wav)
+    expect(result.md5).toBe(createHash('md5').update(wav).digest('hex'))
+    expect(result.bytesRead).toBe(wav.byteLength)
   })
 
   it('lo que no es audio falla, sin colgar el proceso', async () => {

@@ -17,8 +17,8 @@ import type { DiskMeta, DiskSampleStorage } from './samples'
  * | portada | `image` / `authenticated` | `<prefijo>/entry-covers/<semana>/<uuid>` |
  *
  * El navegador sube por trozos directo a Cloudinary (§4.7.4) con una sola firma; el servidor verifica con
- * la Admin API (carpeta, bytes, formato, duración, fecha y `etag`) y mide leyendo el original por URL
- * firmada (§4.8.4). Dos implementaciones con la misma API: Cloudinary y la falsa en disco de los E2E.
+ * la Admin API (carpeta, bytes, formato y fecha: la Admin API no da el `etag` ni la duración) y mide leyendo
+ * el original por URL firmada, con la huella MD5 de lo que lee (§4.8.4). Dos implementaciones con la misma API: Cloudinary y la falsa en disco de los E2E.
  */
 
 export const ENTRY_ASSET_KINDS = ['entry', 'entryCover'] as const
@@ -284,9 +284,11 @@ export function createDiskEntryStorage(
         publicId,
         format: meta.format,
         bytes: meta.bytes,
-        etag: meta.etag ?? '',
+        // Como la Admin API de Cloudinary, que no da ni el `etag` ni la duración (prueba real de la 4.10): la
+        // huella y la duración las saca el servidor al medir. La respuesta de la subida sí lleva el `etag`.
+        etag: '',
         createdAtMs: meta.createdAtMs ?? 0,
-        durationMs: meta.durationMs ?? null,
+        durationMs: null,
         width: meta.width,
         height: meta.height,
       }
