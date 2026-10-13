@@ -108,7 +108,7 @@ construye aquí lo ve alguien que vota.
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| 5.1 | `packages/rules`: `fairOrder(entries, { viewer, weekId, day, votedIds, votes })` (sin votar → menos votos → `hash(userId, weekId, entryId)`; visitantes, por día), `randomOrder` con semilla, `newestOrder` y `juryQueue` (activas, ajenas y sin votar en Ronda justa; saltar manda al final) | ✅ Hecho | — | §2.6, §2.7 · `RF-PLAY-04`, `RF-VOTE-09` · propiedades con fast-check: determinismo, permutación, 0/2/5, propias nunca en la cola · **Hecho:** `fair.ts` con `fairSeed`, `fairOrder`, `newestOrder`, `randomOrder` y `juryQueue`; 11 tests en `test/fair.test.ts` (el ejemplo 0/2/5, grupos y votos crecientes, permutación independiente del orden de llegada, semilla por usuario y por día en Madrid, saltos y voto quitado). Guía v0.6.60 (§4.5) |
+| 5.1 | `packages/rules`: `fairOrder(entradas, votos, votadas, semilla)` con `fairSeed` (sin votar → menos votos → `hash(userId, weekId, entryId)`; visitantes, por día), `randomOrder` con semilla, `newestOrder` y `juryQueue` (activas, ajenas y sin votar en Ronda justa; saltar manda al final) | ✅ Hecho | — | §2.6, §2.7 · `RF-PLAY-04`, `RF-VOTE-09` · propiedades con fast-check: determinismo, permutación, 0/2/5, propias nunca en la cola · **Hecho:** `fair.ts` con `fairSeed`, `fairOrder`, `newestOrder`, `randomOrder` y `juryQueue`; 11 tests en `test/fair.test.ts` (el ejemplo 0/2/5, grupos y votos crecientes, permutación independiente del orden de llegada, semilla por usuario y por día en Madrid, saltos y voto quitado). Guía v0.6.60 (§4.5) |
 
 ### Servidor
 

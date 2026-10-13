@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.59 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.60 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2241,7 +2241,7 @@ tests de propiedades.
 | `listen` | `listenThresholdMs(duracionMs)` |
 | `scoring` | `bayes(votos, m, C)`; `mean`; `median`; `histogram` |
 | `ranking` | `rank(entradas, votos) → Result[]` con desempates, ex aequo y elegibilidad de podio |
-| `fair` | `fairOrder(entradas, votosPorEntrada, votadasPorUsuario, semilla)` |
+| `fair` | `fairOrder(entradas, votosPorEntrada, votadasPorUsuario, semilla)` con `fairSeed(semana, usuario \| instante)` (visitantes: el día en Madrid); `newestOrder`; `randomOrder(entradas, semilla)`; `juryQueue(entradas, votos, votadas, semilla, { excluded, skipped })` (sin votadas ni la propia; las saltadas, al final) |
 | `alias` | `battleAlias(entryId, ocupados)` con listas de adjetivos y sustantivos (Anexo I) |
 | `season` | `seasonPoints(posicion, clasificada)`; `seasonStandings(resultados)` |
 | `levels` | `xpForLevel(n)`; `levelOf(xp)`; `levelProgress(xp)` (barra del HUD); `rankTitle(nivel)` → **id de rango** (`crateDigger` … `otherPeople`; el texto sale de i18n con `rank.<id>`); `streakBonus` y `streakBonusPercent` |
@@ -3618,6 +3618,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.60 | **Tarea 5.1.** §4.5, módulo `fair`: además de `fairOrder`, `fairSeed` (con sesión, usuario y semana; sin ella, el día en `Europe/Madrid`), `newestOrder`, `randomOrder` (baraja la lista ordenada por id, así no depende del orden de llegada) y `juryQueue` (la cola del Modo Jurado de §2.7: sin las votadas ni la propia, en Ronda justa, y las saltadas al final en el orden del último salto). Las ya votadas, en Ronda justa, van al final con el mismo criterio (la rejilla de §3.8.13 las pone ahí). |
 | 2026-10-13 | 0.6.59 | §3.5 y §4.17 (`RNF-PERF-02`): el LCP de la home es un texto del menú, el título del escenario o, si es más pequeño (el calendario vacío, «En el horno», desde el jurado de la F3), la etiqueta de la placa elegida. Lo que se exige no cambia: un texto, nunca el lienzo ni el logo, pintado con la primera pintura. |
 | 2026-10-13 | 0.6.58 | **Tarea 4.13 (decisión del usuario).** §4.1: `qrcode` como dependencia del servidor para la matriz de los códigos QR. §4.19.5: el QR del recibo (`/api/email/qr/:entryId.png?sig=`), firmado, a la ficha pública de la entrada. El recibo de §2.12.1 ya lo llevaba en la especificación. |
 | 2026-10-13 | 0.6.57 | **Tarea 4.10 (prueba real contra Cloudinary).** §4.8.4 y `RF-ENT-11`: la Admin API no da el `etag` ni la duración; la huella de los duplicados es el MD5 que calcula el servidor al medir (si lee el fichero entero) y la duración se valida con la medida. Sin medir, la huella queda vacía y la pone el `tick`. El almacenamiento falso imita a la Admin API (sin `etag` ni duración en la verificación). Las claves de idempotencia de los emails de la entrada van por el `public_id` del audio, no por la huella. |
