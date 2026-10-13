@@ -192,3 +192,19 @@
     display: none;
   }
 }
+
+/*
+ * Contraste alto (`forced-colors: active`, RNF-A11Y-01): el modo no ajusta el trazo del SVG y la estrella
+ * blanca desaparecía en el esquema claro (jurado de la 5.22, C1). El contorno va en `CanvasText` y las
+ * llenas, macizas en `Highlight`, como los segmentos del medidor.
+ */
+@media (forced-colors: active) {
+  .glyph {
+    forced-color-adjust: none;
+    stroke: CanvasText;
+  }
+
+  .star[data-on] .glyph {
+    fill: Highlight;
+  }
+}

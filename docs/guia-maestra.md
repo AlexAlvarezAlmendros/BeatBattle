@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.69 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.70 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -3633,6 +3633,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.70 | **Tarea 5.22 (jurado visual).** §3.8.13: a 360 px o menos, la rejilla va en dos columnas; en casillas de menos de 9 rem el sello es «✓ n/5»; en móvil, la entrada elegida va en una hoja pegada sobre la barra con su alias, sus datos, «Escuchar» y «Jurado». §3.8.7: en móvil, la ronda, el contador y el alias van en la fila «[silueta] VS ALIAS» de la arena y no en el HUD; el panel en una fila, solo desde 1200 px; sin cuenta o sin verificar, la puerta (silueta, por qué y «Entrar» o «Verificar el email», con sus teclas). §3.8.4: en contraste alto, las estrellas con contorno `CanvasText` y las llenas en `Highlight`. Acta en `docs/planning/evidence/f5/jurado/`. |
 | 2026-10-13 | 0.6.69 | **Tareas 5.9 (cliente) y 5.21.** §3.8.3: la crónica del menú añade a sus líneas las de `/ticker` (cada 30 s): «Nueva entrada: <alias>», «Quedan N días» (o «Último día para subir / votar») y «N votos esta semana» (no sale con 0). §3.8.7: Espacio pausa esté donde esté el cursor, también sobre un botón o una estrella. |
 | 2026-10-13 | 0.6.68 | **Tarea 5.18.** §3.8.7: la composición en ventana baja (≤ 780 px de alto) y el comportamiento del Modo Jurado (cola ordenada en la visita, `?desde`, ronda, error de audio, salir, combo sin XP). Anexo D: `combo.up` y `jury.swap` en el catálogo, medidos *offline* a su nivel (±0,05 dB). La barra de controles del Modo Jurado: `1 5 PUNTUAR · ESPACIO PAUSA · ←→ BUSCAR` (o `NOTA` con el cursor en las estrellas) `· S SALTAR · R DENUNCIAR · ESC SALIR · M SONIDO`. |
 | 2026-10-13 | 0.6.67 | **Tareas 5.17 y 5.19.** §2.6: la ficha (`/e/:id`) lleva el alias en display (o el productor, revelada), el título, los chips (BPM, tonalidad, duración, géneros y DAW), la descripción, la onda que suena en el reproductor global (saltar con ella no cuenta), las estrellas con la escucha mínima si se puede votar (sin cuenta, «Entra para votar este beat»; sin verificar, «Verifica tu email»), y «Compartir» (la hoja del sistema o copiar el enlace) y «Denunciar». La portada se inclina como la carta al pasar el ratón (`--bb-tilt-card`). En la propia: «Es tu entrada: N votos · M escuchas», sin estrellas ni media. §2.7: la denuncia se hace en un diálogo con los cinco motivos y un detalle de hasta 500 caracteres; la segunda a la misma entrada dice «Ya habías denunciado esta entrada». |

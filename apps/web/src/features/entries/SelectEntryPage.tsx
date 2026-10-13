@@ -17,6 +17,7 @@ import { formatNumber, t } from '../../i18n'
 import { queryKeys } from '../../net/queryKeys'
 import { entryListSearch, listEntries } from '../../net/votes'
 import { weekQuery } from '../../net/weeks'
+import { Button } from '../../ui/Button'
 import { FilterChip } from '../../ui/Chip'
 import { GenerativeCover } from '../../ui/CoverArt'
 import { EntryCell } from '../../ui/EntryCell'
@@ -37,6 +38,8 @@ export function selectEntryLoader(args: LoaderFunctionArgs): Promise<PublicWeek>
 }
 
 const MOBILE = '(max-width: 720px)'
+/** A 360 px o menos, dos columnas: con tres, los alias largos se cortaban (jurado de la 5.22, S1). */
+const NARROW = '(max-width: 360px)'
 
 /**
  * «ELIGE ENTRADA» (guía §3.8.13, §2.6; tarea 5.16): la plantilla de la semana con la ficha de luchador de la
@@ -67,7 +70,8 @@ export function SelectEntryPage() {
   })
   const entries = list.data?.entries ?? []
   const mobile = useMediaQuery(MOBILE)
-  const columns = mobile ? 3 : 6
+  const narrow = useMediaQuery(NARROW)
+  const columns = narrow ? 2 : mobile ? 3 : 6
   const navigate = useNavigate()
   const votingOpen = week.phase === 'open' || week.phase === 'voting'
   const tracks = useMemo(
@@ -144,7 +148,8 @@ export function SelectEntryPage() {
       kicker={t('selection.kicker', { number: week.number })}
       summary={t('selection.summary', { count: formatNumber(total) })}
       documentTitle={t('selection.documentTitle', { number: week.number })}
-      piece={fighter}
+      // En móvil, la ficha de la enfocada va en la hoja de abajo (§3.8.13).
+      piece={mobile ? null : fighter}
       // En la columna única (móvil), la plantilla antes que la ficha: se elige y la ficha la sigue.
       panelFirst
       fill
@@ -235,6 +240,34 @@ export function SelectEntryPage() {
         <EntryCell itemProps={grid.getItemProps(entries.length)} />
       </div>
       <p className={styles.note}>{t('selection.note')}</p>
+      {mobile && focused && (
+        <section className={styles.sheet} aria-label={t('selection.sheetLabel')}>
+          <p className={`bb-display ${styles.sheetAlias}`}>{focused.alias}</p>
+          <p className={styles.sheetData}>
+            {[
+              focused.bpm === null ? null : `${Math.round(focused.bpm)}\u00a0BPM`,
+              focused.musicalKey ? musicalKeyName(focused.musicalKey) : null,
+              focused.myVote
+                ? t('ui.entryCell.voted', { vote: focused.myVote })
+                : t('ui.fighterCard.notVoted'),
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+          <div className={styles.sheetActions}>
+            <Button size="sm" icon="triangleRight" onClick={() => listen(grid.activeIndex)}>
+              {t('frame.keys.listen')}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => navigate(`${paths.jury()}?desde=${encodeURIComponent(focused.id)}`)}
+            >
+              {t('frame.keys.jury')}
+            </Button>
+          </div>
+        </section>
+      )}
     </ScreenPage>
   )
 }
