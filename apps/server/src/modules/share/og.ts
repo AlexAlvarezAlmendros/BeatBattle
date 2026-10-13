@@ -29,6 +29,9 @@ export type OgData =
       phase: 'open' | 'voting' | 'sealing' | 'sealed'
       /** La cuenta atrás congelada: hasta cuándo dura la fase, en palabras. */
       deadline: string | null
+      /** Del drop al cierre de votos (el `Event` de los datos estructurados). */
+      startsAt: number
+      endsAt: number
     }
   | {
       kind: 'entry'
@@ -40,6 +43,7 @@ export type OgData =
       bpm: number | null
       musicalKey: string | null
       coverSeed: string
+      durationMs: number | null
       /** Solo si la semana no es ciega o ya está sellada. */
       producer: string | null
       /** Solo con la semana sellada. */
@@ -111,6 +115,8 @@ async function weekData(db: Db, slug: string, now: number): Promise<OgData | nul
         : phase === 'voting'
           ? madridShort(row.week.voteEndsAt - 60_000)
           : null,
+    startsAt: row.week.startsAt,
+    endsAt: row.week.voteEndsAt,
   }
 }
 
@@ -152,6 +158,7 @@ async function entryData(db: Db, id: string, now: number): Promise<OgData | null
     bpm: row.entry.bpm,
     musicalKey: row.entry.musicalKey,
     coverSeed: String(row.entry.coverSeed),
+    durationMs: row.entry.durationMs,
     producer: person ? nameOf(person) : null,
     result: res ? { position: res.position, scoreMilli: res.scoreMilli, votes: res.votes } : null,
     votingOpen: ['open', 'voting'].includes(phaseOf(row.week, now)),
@@ -208,10 +215,17 @@ async function resultsData(db: Db, slug: string): Promise<OgData | null> {
 
 async function profileData(db: Db, username: string): Promise<OgData | null> {
   const [person] = await db
-    .select({ id: user.id, username: user.username, displayUsername: user.displayUsername, name: user.name })
+    .select({
+      id: user.id,
+      username: user.username,
+      displayUsername: user.displayUsername,
+      name: user.name,
+      banned: user.banned,
+    })
     .from(user)
     .where(eq(user.username, username.toLowerCase()))
-  if (!person?.username) return null
+  // Como el perfil público: una cuenta bloqueada no tiene página (§2.3).
+  if (!person?.username || person.banned) return null
   // Solo semanas selladas: una abierta y ciega no puede decir quién participa.
   const rows = await db
     .select({ position: result.position, revision: result.revision, current: week.resultRevision })
