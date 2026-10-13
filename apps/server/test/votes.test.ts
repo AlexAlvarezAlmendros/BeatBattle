@@ -1,9 +1,12 @@
 import { and, eq } from 'drizzle-orm'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { entry, ipSignal, listen, report, user, vote, week } from '../src/db/schema'
 import { type Battle, battle, entryValues, HOUR, listener, W42 } from './fixtures/battle'
 import { json } from './fixtures/weeks'
 import { createAccount } from './helpers'
+
+// Cada prueba crea varias cuentas (alta, verificación) y vota por la API: en la CI pasa de los 5 s.
+vi.setConfig({ testTimeout: 30_000 })
 
 let b: Battle
 afterEach(async () => {
