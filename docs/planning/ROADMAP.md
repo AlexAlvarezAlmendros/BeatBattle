@@ -35,7 +35,7 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 | 4 | Participar | ✅ Cerrada (2026-10-13) | [04-participar.md](plans/04-participar.md) | WAV de 60 MB por trozos con BPM, tonalidad y sonoridad medida; recibo por email |
 | 5 | Escuchar y votar | ✅ Cerrada (2026-10-13) | [05-escuchar-votar.md](plans/05-escuchar-votar.md) | Todas las reglas `RF-VOTE-*` en verde; Modo Jurado con teclado; recordatorio y llamada al jurado |
 | 6 | Cierre, resultados y ceremonia | ✅ Cerrada (2026-10-15) | [06-resultados.md](plans/06-resultados.md) | Sellado determinista, ceremonia, re-sellado idéntico; Lunes de batalla por email |
-| — | **Beta cerrada** | 🔒 | — | 15–25 productores, 3 semanas reales |
+| — | **Beta cerrada** | 🔄 En curso (B.2 y B.4; lo demás espera al usuario) | [beta-cerrada.md](plans/beta-cerrada.md) | 15–25 productores, 3 semanas reales |
 | 7 | Capa de juego | 🔒 Bloqueada (beta) | — | XP, niveles, rachas, logros, temporadas y carta con su pase de torneo |
 | 8 | Sorpresas y pulido audiovisual | 🔒 Bloqueada (F7) | — | Anexo F completo con variantes accesibles; kit de la semana |
 | 9 | Integración con Other People y email marketing | 🔒 Bloqueada (beta) | — | PR en `ReactOtpWeb` con widget y menú; campaña real a un segmento con consentimiento; alta en la newsletter del sello |
@@ -182,10 +182,10 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 | Decisión | Por defecto | Se cierra en | Notas |
 |---|---|---|---|
 | Newsletter del sello desde BeatBattle | Casilla opcional en el registro | F9 | Necesita que la API de newsletter del sello acepte `source` |
-| Premios | Sin premio material; visibilidad y Elección del sello | Antes de la beta | Con premios, revisar bases y fiscalidad |
+| Premios | **Cerrada (2026-10-15):** sin premio material; visibilidad y Elección del sello | — | Con premios, revisar bases y fiscalidad |
 | Origen y licencia de los samples | Del sello o de sus productores, con licencia escrita | Antes de F3 | — |
 | Nombre de marca | «Beat Battle · un juego de Other People» | F0 (0.24) | Logo, lockup «by [OTP.]» y textos |
-| Móviles de 781 a ~840 px de alto (360×800, 375×812, 393×786) | El menú con todos los datos se desplaza 35–94 px (la placa enfocada siempre se ve) | Antes de la beta | Opciones: subir el móvil bajo hasta ~840 px (cabe, con una franja vacía de ~180 px a 375×812) o un paso intermedio con el logo en una línea y la tarjeta sin plegar. Acta de la 0.28 |
+| Móviles de 781 a ~840 px de alto (360×800, 375×812, 393×786) | **Cerrada (2026-10-15):** se queda así para la beta (el menú se desplaza 35–94 px; la placa enfocada siempre se ve) | — | Opciones: subir el móvil bajo hasta ~840 px (cabe, con una franja vacía de ~180 px a 375×812) o un paso intermedio con el logo en una línea y la tarjeta sin plegar. Acta de la 0.28 |
 | Pase de la carta | Cinta propia con física | F7 | Alternativa: expositor giratorio si se percibe como pieza del sello (guía §3.4.4) |
 | Modelo de semana | Envíos y votos a la vez | Tras la beta | Revisar con datos de participación |
 | Fecha de lanzamiento | Primera semana completa tras F10 | F10 | — |
@@ -195,6 +195,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-15 | Beta | Plan de la beta creado (10 tareas): textos legales y guía de despliegue, ya; recursos, despliegue, calendario e invitaciones, con el usuario. |
 | 2026-10-15 | F6 | **Fase 6 cerrada** (6.23): los seis criterios. Ceremonia en 3D en el Escenario (6.17b, decisión del usuario) y efectos `cer.*` escuchados y aprobados por el usuario. Mezcladas las PR #74–#90. Validadores de previsualización y de datos estructurados, con el despliegue. Siguiente: beta cerrada (despliegue, decisión del usuario). |
 | 2026-10-13 | F6 | Plan 06 creado (23 tareas). Decisión del usuario: sin dorado. |
 | 2026-10-13 | F5 | **Fase 5 cerrada** (5.24): los seis criterios. Prueba real del reproductor contra Cloudinary (5.23, con la confirmación del usuario), jurado visual de tres lentes (5.22) y E2E del hito con teclado y los tres avisos (5.21). Mezcladas las PR #62–#72. La Fase 6 pasa a lista. |

@@ -107,7 +107,7 @@ const FEW_SCREENS = [
   { path: '/ajustes/sesiones', heading: 'Sesiones' },
   { path: '/ajustes/privacidad', heading: 'Privacidad' },
   { path: '/esto-no-existe', heading: 'Bonus stage' },
-  { path: '/legal/bases', heading: 'Bases de la competición' },
+  { path: '/temporada/t4', heading: 'Temporada' },
   { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
 ]
 
@@ -326,7 +326,7 @@ for (const { viewport, touch, screens } of [
     viewport: { width: 820, height: 1180 },
     touch: true,
     screens: [
-      { path: '/legal/bases', heading: 'Bases de la competición' },
+      { path: '/temporada/t4', heading: 'Temporada' },
       { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
       { path: '/subir', heading: 'Subir mi beat' },
       { path: '/esto-no-existe', heading: 'Bonus stage' },
@@ -337,7 +337,7 @@ for (const { viewport, touch, screens } of [
     viewport: { width: 960, height: 800 },
     touch: false,
     screens: [
-      { path: '/legal/bases', heading: 'Bases de la competición' },
+      { path: '/temporada/t4', heading: 'Temporada' },
       { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
     ],
   },
@@ -461,9 +461,9 @@ for (const viewport of [
 }
 
 /**
- * Los legales (§3.8.14 «Admin y legales», v0.6.6) usan la plantilla de las interiores: el sello «EN
- * OBRAS» en la columna de la pieza, centrado en ella, el bloque centrado entre el HUD y la barra y las
- * pestañas en una fila de rótulos cortos, con el nombre completo en el título del panel.
+ * Los legales (§3.8.14 «Admin y legales»; plan de la beta, B.2) usan la plantilla de las interiores como pantalla
+ * de contenido: el índice del documento en la columna de la pieza, el texto en el panel (con el nombre completo
+ * como título, el `<h1>`) y las pestañas en una fila de rótulos cortos.
  */
 for (const viewport of [
   { width: 1440, height: 900 },
@@ -473,27 +473,17 @@ for (const viewport of [
   test.describe(`${viewport.width} × ${viewport.height}, legales`, () => {
     test.use({ viewport })
 
-    test('RD-VIS-02 e: /legal/bases usa la plantilla de las interiores: sello en la columna de la pieza, bloque centrado y pestañas cortas en una fila (§3.8.14)', async ({
+    test('RD-VIS-02 e / RNF-PRIV-05: /legal/privacidad: el índice en la columna de la pieza, el texto en el panel y pestañas cortas en una fila (§3.8.14)', async ({
       page,
     }) => {
-      await open(page, '/legal/bases', 'Bases de la competición')
+      await open(page, '/legal/privacidad', 'Política de privacidad')
       await settle(page)
+      const index = page.locator(`${PIECE} nav[aria-label="Índice del documento"]`)
+      await expect(index.getByRole('link')).toHaveCount(8)
+      await expect(index.getByRole('link').first()).toHaveText('Quién trata tus datos')
+      await expect(page.locator(`${PANEL} h2`).first()).toHaveText('Quién trata tus datos')
       const box = await block(page)
-      expect(
-        Math.abs(box.above - box.below),
-        `arriba ${box.above} px · abajo ${box.below} px`,
-      ).toBeLessThanOrEqual(24)
-      expect(
-        Math.abs(box.piece.bottom - box.panel.bottom),
-        'pieza y panel, del mismo alto',
-      ).toBeLessThanOrEqual(2)
-      // El sello, dentro de la columna de la pieza y centrado en ella.
-      const stamp = await boxes(page, { stamp: `${PIECE} [data-stamp]` })
-      const pieceMiddle = (box.piece.top + box.piece.bottom) / 2
-      const stampMiddle = (stamp.stamp.top + stamp.stamp.bottom) / 2
-      expect(Math.abs(pieceMiddle - stampMiddle), 'sello centrado en vertical').toBeLessThanOrEqual(8)
-      expect(stamp.stamp.left).toBeGreaterThanOrEqual(box.piece.left)
-      expect(stamp.stamp.right).toBeLessThanOrEqual(box.piece.right + 8)
+      expect(box.piece.right, 'el índice, a la izquierda del texto').toBeLessThanOrEqual(box.panel.left)
       // Las pestañas: rótulos cortos en una fila, con [E] justo después de la última.
       const nav = 'main nav[aria-label="Documentos legales"]'
       const tabs = page.locator(`${nav} a`)
@@ -502,7 +492,7 @@ for (const viewport of [
       expect(keys.lines, 'pestañas en una fila').toBe(1)
       expect(keys.e.left - keys.lastRight).toBeLessThanOrEqual(16)
       // El nombre completo, en el título del panel (el <h1>).
-      await expect(page.locator(`${PANEL} h1`)).toHaveText('Bases de la competición')
+      await expect(page.locator(`${PANEL} h1`)).toHaveText('Política de privacidad')
       await expect(page.locator(`${PANEL} h1`)).toBeVisible()
     })
   })

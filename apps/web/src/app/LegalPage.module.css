@@ -1,0 +1,103 @@
+/*
+ * Textos legales (§3.8.14 «Admin y legales»): el índice y la versión en la columna de la pieza; el texto en el
+ * panel, con su medida de lectura. Los huecos que rellena el sello (`[[…]]`) se marcan para que se vean.
+ */
+.piece {
+  display: grid;
+  align-content: start;
+  gap: var(--bb-space-5);
+  padding: var(--bb-space-5);
+  background: var(--bb-panel);
+}
+
+.index ol {
+  display: grid;
+  gap: var(--bb-space-2);
+  margin: var(--bb-space-3) 0 0;
+  padding-left: var(--bb-space-5);
+}
+
+.index a {
+  color: var(--bb-text);
+  text-decoration: none;
+}
+
+.index a:hover {
+  text-decoration: underline;
+}
+
+.version {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-sm);
+}
+
+.text {
+  display: grid;
+  gap: var(--bb-space-4);
+  max-width: 68ch;
+  color: var(--bb-text-2);
+  line-height: var(--bb-leading-body);
+}
+
+.text h2 {
+  margin-top: var(--bb-space-4);
+  color: var(--bb-text);
+  font-size: var(--bb-fs-xl);
+  font-weight: var(--bb-weight-bold);
+  scroll-margin-top: var(--bb-space-16);
+}
+
+.text h3 {
+  color: var(--bb-text);
+  font-size: var(--bb-fs-lg);
+  font-weight: var(--bb-weight-semibold);
+}
+
+.text :is(ul, ol) {
+  display: grid;
+  gap: var(--bb-space-2);
+  margin: 0;
+  padding-left: var(--bb-space-6);
+}
+
+.text strong {
+  color: var(--bb-text);
+}
+
+.text code {
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-sm);
+  color: var(--bb-text);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--bb-fs-sm);
+}
+
+.table :is(th, td) {
+  padding: var(--bb-space-2) var(--bb-space-3);
+  border-bottom: var(--bb-stroke-hair) solid var(--bb-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  color: var(--bb-text);
+  font-weight: var(--bb-weight-bold);
+}
+
+.placeholder {
+  padding: 0 var(--bb-space-1);
+  background: var(--bb-wine);
+  color: var(--bb-white);
+  outline: var(--bb-stroke-hair) solid var(--bb-red);
+}
+
+@media (max-width: 720px) {
+  .table {
+    display: block;
+    overflow-x: auto;
+  }
+}
