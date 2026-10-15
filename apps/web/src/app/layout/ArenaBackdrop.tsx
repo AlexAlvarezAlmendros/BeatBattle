@@ -1,5 +1,6 @@
 import { texture, textureMobile } from '@beatbattle/shared/tokens'
 import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
+import { useCeremonyStage } from '../../stage/ceremony'
 import { arenaUsesStage, useStageQuality } from '../../stage/quality'
 import { whenIdleAfterFirstPaint } from '../../ui/afterFirstPaint'
 import { HalftoneCanvas } from '../../ui/arena/HalftoneCanvas'
@@ -66,12 +67,16 @@ export function ArenaBackdrop({ wedge, rays = true }: { wedge: ArenaWedge; rays?
   const onLive = useCallback(() => setLive(true), [])
   // Con calidad baja o apagada (la sonda o la elegida a mano), la arena estática (§3.5, 1.2).
   const quality = useStageQuality((state) => state.quality)
-  const stage = allowed && load && arena !== null && arenaUsesStage(quality)
+  // Con calidad baja, el 3D solo en las ceremonias (§3.5): el Escenario se monta mientras dura una.
+  const ceremony = useCeremonyStage((state) => state.element !== null)
+  const stage =
+    allowed && load && arena !== null && (arenaUsesStage(quality) || (ceremony && quality === 'baja'))
 
   return (
     <div
       ref={setArena}
       className={styles.arena}
+      data-arena=""
       data-wedge={wedge}
       data-stage-live={stage && live ? '' : undefined}
       aria-hidden="true"

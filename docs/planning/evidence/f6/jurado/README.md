@@ -23,9 +23,9 @@ tarjeta de resultado están en `../emails`, `../og` y `../tarjeta`.
 | Id | Gravedad | Hallazgo | Nota |
 |---|---|---|---|
 | B1 | Baja | A 1366 × 657 y 1024 × 768, «TU RESULTADO» queda bajo el pliegue | Se llega desplazando o con T (clasificación); permitido en las pantallas de contenido (§3.8.14) |
-| B2 | Media | Los seis efectos `cer.*` están medidos a su nivel *offline*, pero **nadie los ha escuchado** | Escucharlos (`tools/shot/sfx-wav.mjs … cer.*` deja los WAV) |
+| ~~B2~~ | — | Los seis efectos `cer.*`, sin escuchar | **Cerrado** (2026-10-15): el usuario los ha escuchado y dan el visto bueno |
 | B3 | Baja | En el archivo, en escritorio, los botones de escuchar del podio quedan lejos de su fila | Revisar con la rejilla de «selección de escenario» si llega |
-| B4 | Media | La ceremonia es 2D (DOM): los vinilos y el podio en 3D con las vistas ancladas del Escenario (§3.5) no están | Anotado en la guía (§3.8.6, v0.6.81) como pendiente |
+| ~~B4~~ | — | La ceremonia era 2D (DOM) | **Cerrado** (tarea 6.17b, decisión del usuario: «la ceremonia tiene que ser 3D»): podio, focos, portadas, sello, medallas y corona en el Escenario; fotogramas `ceremonia-*` de 1440 y 390 (con y sin movimiento) rehechos. 60 fps y 39 llamadas de dibujo en el momento del campeón, también con la calidad baja |
 
 ## Lentes
 

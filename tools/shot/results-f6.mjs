@@ -106,7 +106,10 @@ if (pages.has('ceremonia'))
         ['tu-resultado', 24_000],
       ]) {
         await page.waitForTimeout(Math.max(0, ms - (Date.now() - started)))
-        await shot(page, `ceremonia-${name}${reduced ? '-sin-movimiento' : ''}`, size)
+        // Solo la ventana: la capa es fija y una captura de página entera la estira.
+        await page.screenshot({
+          path: join(out, `ceremonia-${name}${reduced ? '-sin-movimiento' : ''}-${size.name}.png`),
+        })
       }
       await ctx.close()
     }
