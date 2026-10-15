@@ -35,7 +35,7 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 | 4 | Participar | ✅ Cerrada (2026-10-13) | [04-participar.md](plans/04-participar.md) | WAV de 60 MB por trozos con BPM, tonalidad y sonoridad medida; recibo por email |
 | 5 | Escuchar y votar | ✅ Cerrada (2026-10-13) | [05-escuchar-votar.md](plans/05-escuchar-votar.md) | Todas las reglas `RF-VOTE-*` en verde; Modo Jurado con teclado; recordatorio y llamada al jurado |
 | 6 | Cierre, resultados y ceremonia | ✅ Cerrada (2026-10-15) | [06-resultados.md](plans/06-resultados.md) | Sellado determinista, ceremonia, re-sellado idéntico; Lunes de batalla por email |
-| — | **Beta cerrada** | 🔒 | — | 15–25 productores, 3 semanas reales |
+| — | **Beta cerrada** | 🔄 En curso (B.2 y B.4; lo demás espera al usuario) | [beta-cerrada.md](plans/beta-cerrada.md) | 15–25 productores, 3 semanas reales |
 | 7 | Capa de juego | 🔒 Bloqueada (beta) | — | XP, niveles, rachas, logros, temporadas y carta con su pase de torneo |
 | 8 | Sorpresas y pulido audiovisual | 🔒 Bloqueada (F7) | — | Anexo F completo con variantes accesibles; kit de la semana |
 | 9 | Integración con Other People y email marketing | 🔒 Bloqueada (beta) | — | PR en `ReactOtpWeb` con widget y menú; campaña real a un segmento con consentimiento; alta en la newsletter del sello |
@@ -195,6 +195,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-15 | Beta | Plan de la beta creado (10 tareas): textos legales y guía de despliegue, ya; recursos, despliegue, calendario e invitaciones, con el usuario. |
 | 2026-10-15 | F6 | **Fase 6 cerrada** (6.23): los seis criterios. Ceremonia en 3D en el Escenario (6.17b, decisión del usuario) y efectos `cer.*` escuchados y aprobados por el usuario. Mezcladas las PR #74–#90. Validadores de previsualización y de datos estructurados, con el despliegue. Siguiente: beta cerrada (despliegue, decisión del usuario). |
 | 2026-10-13 | F6 | Plan 06 creado (23 tareas). Decisión del usuario: sin dorado. |
 | 2026-10-13 | F5 | **Fase 5 cerrada** (5.24): los seis criterios. Prueba real del reproductor contra Cloudinary (5.23, con la confirmación del usuario), jurado visual de tres lentes (5.22) y E2E del hito con teclado y los tres avisos (5.21). Mezcladas las PR #62–#72. La Fase 6 pasa a lista. |
