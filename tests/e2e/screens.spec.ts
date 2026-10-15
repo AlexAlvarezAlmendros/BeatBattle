@@ -1628,7 +1628,6 @@ test.describe('granate de las provisionales a 1440 × 900', () => {
   for (const { path, heading } of [
     { path: '/subir', heading: 'Subir mi beat' },
     { path: '/semanas', heading: 'Semanas' },
-    { path: '/semana/2026-41/resultados', heading: 'Resultados' },
   ])
     test(`§3.1 / §3.8.14: en ${path}, la cuña sigue al sello y el granate no pasa del 24,5 % (G6)`, async ({
       page,

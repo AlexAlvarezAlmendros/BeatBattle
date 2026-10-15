@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.77 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.78 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1884,7 +1884,13 @@ medalla con su nombre. El 1.º lleva corona y la cinta «CAMPEÓN DE LA SEMANA»
 la pegatina OTP con su rótulo. Debajo, la barra **TU RESULTADO** (posición, puntuación, votos, XP,
 puntos de temporada, oído de oro) con «▶ Play al campeón [Intro]» y «Clasificación [T]»; después, la
 tabla completa en filas de marcador con histograma. Nunca «K.O.» ni «gana a…»: nadie ha tumbado a nadie.
-Sin movimiento: podio quieto que aparece por fundidos, con los mismos textos.
+Sin movimiento: podio quieto que aparece por fundidos, con los mismos textos. La pantalla va **sin cuña**: el
+podio, con sus focos, ocupa todo el ancho, y la placa del HUD es la de la semana con su sello. Teclas: ← →
+recorren el podio, Intro escucha la enfocada, T lleva a la clasificación y X comparte. En móvil (≤ 720 px)
+el `<h1>` visible lleva el rótulo y la semana, y el podio se apila (1.º, 2.º, 3.º) sin peanas ni focos. Con
+poco alto, las portadas y las peanas encogen con la ventana y el resto se desplaza. En contraste alto, sin
+focos ni suelo de trama, y las peanas con su contorno. Los datos de XP, temporada y oído de oro de «TU
+RESULTADO» llegan con la Fase 7, y la Elección del sello, con la 9.
 
 #### 3.8.7 Modo Jurado (VS)
 
@@ -3664,6 +3670,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.78 | **Tarea 6.15.** §3.8.6, página de resultados: sin cuña, placa del HUD con la semana y su sello, teclas (← → podio, Intro, T, X), móvil apilado, poco alto y contraste alto. |
 | 2026-10-13 | 0.6.77 | **Tarea 6.13.** §2.15: qué lleva el sitemap (páginas fijas, semanas selladas y perfiles de participantes de semanas selladas) y `robots.txt` cerrado fuera de producción de verdad (`indexable` en la configuración). |
 | 2026-10-13 | 0.6.76 | **Tarea 6.12.** §4.7.7, §4.15: las páginas compartibles las sirve la app de Fastify (reescrituras de `vercel.json` a `/api`) y no hay un `api/share.ts` aparte. Se concretan los 404 con el `index.html` tal cual, el 301 del perfil, el escape de los metadatos y el 503 sin la web construida. |
 | 2026-10-13 | 0.6.75 | **Tarea 6.11.** §2.15, §4.10, §4.15: las imágenes OG las pinta la app de Fastify (`/api/og/:kind/:id.png?v=`) y no una función `api/og.tsx` aparte. Se añaden la versión por hash con caché inmutable, los 404 antes de tiempo, el perfil con solo semanas selladas y las portadas por CPU en servidor (SVG medido con resvg, con la calibración de §3.4.5). |

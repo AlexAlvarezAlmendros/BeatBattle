@@ -53,6 +53,9 @@ export const CONTROL_KEYS: Readonly<
   skip: { keys: [{ glyph: 'frame.keys.glyph.s' }], verb: 'frame.keys.skip' },
   report: { keys: [{ glyph: 'frame.keys.glyph.r' }], verb: 'frame.keys.report' },
   exit: { keys: [{ glyph: 'frame.keys.glyph.escape' }], verb: 'frame.keys.exit' },
+  podium: { keys: [ARROW_LEFT, ARROW_RIGHT], verb: 'frame.keys.podium' },
+  standings: { keys: [{ glyph: 'frame.keys.glyph.t' }], verb: 'frame.keys.standings' },
+  share: { keys: [{ glyph: 'frame.keys.glyph.x' }], verb: 'frame.keys.share' },
 }
 
 /**

@@ -137,11 +137,23 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'semana/:slug/resultados',
-              handle: handle('public', interior('weekResults', 'pages.weekResults.title')),
-              lazy: page(
-                () => import('../features/results/WeekResultsPage'),
-                (m) => m.WeekResultsPage,
-              ),
+              // Sin cuña (maqueta 04): el podio con sus focos va a todo lo ancho y ningún texto cae sobre la
+              // diagonal (`RD-VIS-05`).
+              handle: handle('public', {
+                ...interior('weekResults', 'pages.weekResults.title', [
+                  'podium',
+                  'listen',
+                  'standings',
+                  'share',
+                  'back',
+                  'sound',
+                ]),
+                wedge: 'none',
+              }),
+              lazy: async () => {
+                const m = await import('../features/results/WeekResultsPage')
+                return { Component: m.WeekResultsPage, loader: m.weekResultsLoader }
+              },
             },
             {
               path: 'semanas',

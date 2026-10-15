@@ -25,6 +25,7 @@ export const queryKeys = {
     queue: (week?: string) => ['jury', 'queue', week ?? 'current'] as const,
   },
   ticker: (slug: string) => ['ticker', slug] as const,
+  results: (slug: string) => ['results', slug] as const,
   admin: {
     all: ['admin'] as const,
     samples: () => ['admin', 'samples'] as const,

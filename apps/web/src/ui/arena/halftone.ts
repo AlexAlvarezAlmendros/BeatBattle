@@ -113,6 +113,8 @@ export const HALFTONE_SHAPES = {
     const shade = 1 - 0.55 * Math.max(0, (u - 0.5) * 1.6 + (0.5 - v) * 0.6)
     return ((r - 0.27) / 0.715) ** 0.9 * groove * shade * 0.95
   },
+  /** Suelo del podio (§3.8.6, maqueta `04-resultados`): crece hacia abajo, sin puntos arriba (los nombres). */
+  podiumFloor: (_u, v) => clamp01((v - 0.2) / 0.8) ** 1.3 * 0.9,
 } satisfies Record<string, HalftoneShape>
 
 export type HalftoneShapeName = keyof typeof HALFTONE_SHAPES
