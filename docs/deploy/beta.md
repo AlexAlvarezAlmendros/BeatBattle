@@ -29,22 +29,24 @@ openssl rand -base64 48   # BETTER_AUTH_SECRET, UNSUBSCRIBE_SECRET
 openssl rand -base64 32   # CRON_SECRET, IP_HASH_SALT
 ```
 
+**Estado (2026-10-15):** el proyecto `beatbattle` ya existe (equipo `alexalvarezalmendros-projects`, enlazado al repositorio, `fra1`, Node 22) con las construcciones en pausa: su *Ignored Build Step* es `exit 0`, así que los `push` a `main` no despliegan. Para el primer despliegue (B.6) se quita ese comando en *Settings → Git*. Ya tiene las variables que no dependen de nadie (abajo, con ✅); la copia local está en `apps/server/.env.production` (fuera del repo).
+
 ## 3. Variables de producción (panel de Vercel)
 
 | Variable | Valor |
 |---|---|
-| `BB_PUBLIC_URL` | `https://battle.otherpeople.es` |
-| `TRUST_PROXY` | `1` |
+| ✅ `BB_PUBLIC_URL` | `https://battle.otherpeople.es` |
+| ✅ `TRUST_PROXY` | `1` |
 | `DATABASE_URL`, `DATABASE_AUTH_TOKEN` | Los de Turso |
-| `BETTER_AUTH_SECRET` | Nuevo |
+| ✅ `BETTER_AUTH_SECRET` | Nuevo |
 | `GOOGLE_CLIENT_ID/SECRET`, `DISCORD_CLIENT_ID/SECRET` | Los de las apps de OAuth (opcionales) |
 | `GMAIL_USER`, `GMAIL_APP_PASSWORD` | La dirección de BeatBattle y su contraseña de aplicación |
 | `EMAIL_FROM_NAME`, `EMAIL_FROM_ADDRESS` | `Beat Battle · Other People` y la misma dirección que `GMAIL_USER` |
 | `MAIL_REPLY_TO` | El buzón del sello |
-| `MAIL_DAILY_LIMIT` | `1900` con el Workspace |
-| `UNSUBSCRIBE_SECRET`, `CRON_SECRET`, `IP_HASH_SALT` | Nuevos |
+| ✅ `MAIL_DAILY_LIMIT` | `1900` con el Workspace |
+| ✅ `UNSUBSCRIBE_SECRET`, `CRON_SECRET`, `IP_HASH_SALT` | Nuevos |
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Los de la cuenta de BeatBattle |
-| `BB_CLOUDINARY_PREFIX` | `beatbattle` |
+| ✅ `BB_CLOUDINARY_PREFIX` | `beatbattle` |
 
 Vacías en producción: `SMTP_URL`, `BB_FAKE_STORAGE`, `BB_TEST_CLOCK`, `MIGRATIONS_DIR` (la de por defecto) y
 `MAIL_PREVIEW_ALLOWLIST`. En las previews: `BB_CLOUDINARY_PREFIX=beatbattle-preview-<pr>`, una base de datos de

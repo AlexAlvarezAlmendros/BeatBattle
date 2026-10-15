@@ -182,10 +182,10 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 | Decisión | Por defecto | Se cierra en | Notas |
 |---|---|---|---|
 | Newsletter del sello desde BeatBattle | Casilla opcional en el registro | F9 | Necesita que la API de newsletter del sello acepte `source` |
-| Premios | Sin premio material; visibilidad y Elección del sello | Antes de la beta | Con premios, revisar bases y fiscalidad |
+| Premios | **Cerrada (2026-10-15):** sin premio material; visibilidad y Elección del sello | — | Con premios, revisar bases y fiscalidad |
 | Origen y licencia de los samples | Del sello o de sus productores, con licencia escrita | Antes de F3 | — |
 | Nombre de marca | «Beat Battle · un juego de Other People» | F0 (0.24) | Logo, lockup «by [OTP.]» y textos |
-| Móviles de 781 a ~840 px de alto (360×800, 375×812, 393×786) | El menú con todos los datos se desplaza 35–94 px (la placa enfocada siempre se ve) | Antes de la beta | Opciones: subir el móvil bajo hasta ~840 px (cabe, con una franja vacía de ~180 px a 375×812) o un paso intermedio con el logo en una línea y la tarjeta sin plegar. Acta de la 0.28 |
+| Móviles de 781 a ~840 px de alto (360×800, 375×812, 393×786) | **Cerrada (2026-10-15):** se queda así para la beta (el menú se desplaza 35–94 px; la placa enfocada siempre se ve) | — | Opciones: subir el móvil bajo hasta ~840 px (cabe, con una franja vacía de ~180 px a 375×812) o un paso intermedio con el logo en una línea y la tarjeta sin plegar. Acta de la 0.28 |
 | Pase de la carta | Cinta propia con física | F7 | Alternativa: expositor giratorio si se percibe como pieza del sello (guía §3.4.4) |
 | Modelo de semana | Envíos y votos a la vez | Tras la beta | Revisar con datos de participación |
 | Fecha de lanzamiento | Primera semana completa tras F10 | F10 | — |
