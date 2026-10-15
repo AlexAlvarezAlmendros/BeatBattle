@@ -5,8 +5,8 @@ import {
   battleContext,
   type Clock,
   createBattleWeek,
-  lastMail,
   signUp,
+  tickUntilMail,
 } from './battle'
 import { expectNoAxeViolations, runSuffix, testIp } from './support'
 
@@ -20,7 +20,6 @@ import { expectNoAxeViolations, runSuffix, testIp } from './support'
  * La semana es la del 21 de marzo de 2033 (nada más en la BD de los E2E cae ahí).
  */
 
-const CRON_SECRET = 'e2e-cron-secret-0123456789abcdefghij'
 /** Sábado 26 a las 18:00 y domingo 27 a las 17:00 en Madrid (UTC+1: aún no ha cambiado la hora). */
 const SATURDAY_18 = Date.UTC(2033, 2, 26, 17, 0)
 const SUNDAY_17 = Date.UTC(2033, 2, 27, 16, 0)
@@ -161,11 +160,7 @@ test('hito de la Fase 5: dos usuarios se votan con el teclado; recordatorio, lla
     for (const voter of others.slice(0, 4)) await apiVote(voter, ana.entryId, 3, clock, base)
     // Mediodía del martes (fuera de las horas de silencio) y el `tick` envía.
     clock.api = Date.UTC(2033, 2, 22, 11, 0)
-    const tick = await ana.page.request.get('/api/cron/tick', {
-      headers: { authorization: `Bearer ${CRON_SECRET}`, 'x-bb-test-now': String(clock.api) },
-    })
-    expect(tick.ok(), await tick.text()).toBe(true)
-    const mail = await lastMail(ana.page, ana.email, 'Tu beat ya suena')
+    const mail = await tickUntilMail(ana.page.request, clock.api, ana.email, 'Tu beat ya suena')
     expect(mail?.subject).toBe('Tu beat ya suena: 5 votos')
     expect(mail?.text).not.toMatch(/media|puntuaci[oó]n|posici[oó]n/i)
   })
@@ -195,19 +190,13 @@ test('hito de la Fase 5: dos usuarios se votan con el teclado; recordatorio, lla
         })
       ).ok(),
     ).toBe(true)
-    for (const at of [SATURDAY_18, SUNDAY_17]) {
-      const tick = await late.page.request.get('/api/cron/tick', {
-        headers: { authorization: `Bearer ${CRON_SECRET}`, 'x-bb-test-now': String(at) },
-      })
-      expect(tick.ok(), await tick.text()).toBe(true)
-    }
-    expect((await lastMail(late.page, late.email, 'para subir tu flip'))?.subject).toMatch(
-      /^Te quedan ~\d+ h para subir tu flip$/,
-    )
+    expect(
+      (await tickUntilMail(late.page.request, SATURDAY_18, late.email, 'para subir tu flip'))?.subject,
+    ).toMatch(/^Te quedan ~\d+ h para subir tu flip$/)
     // Ana ha votado una y le quedan más de 3 por escuchar.
-    expect((await lastMail(late.page, ana.email, 'beats por escuchar'))?.subject).toMatch(
-      /^Te quedan \d+ beats por escuchar$/,
-    )
+    expect(
+      (await tickUntilMail(late.page.request, SUNDAY_17, ana.email, 'beats por escuchar'))?.subject,
+    ).toMatch(/^Te quedan \d+ beats por escuchar$/)
     await context.close()
   })
 })

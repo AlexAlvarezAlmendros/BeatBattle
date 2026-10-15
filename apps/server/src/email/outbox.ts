@@ -322,7 +322,11 @@ export async function emailDrain(
       oldest: min(emailOutbox.sentAt),
     })
     .from(emailOutbox)
-    .where(and(eq(emailOutbox.status, 'sent'), gt(emailOutbox.sentAt, windowStart)))
+    // Lo enviado en las últimas 24 h hasta ahora: con el reloj de prueba (que va y vuelve) puede haber envíos
+    // «del futuro», que no cuentan en esta ventana.
+    .where(
+      and(eq(emailOutbox.status, 'sent'), gt(emailOutbox.sentAt, windowStart), lte(emailOutbox.sentAt, now)),
+    )
 
   const plan = planBudget({
     limit: deps.dailyLimit,

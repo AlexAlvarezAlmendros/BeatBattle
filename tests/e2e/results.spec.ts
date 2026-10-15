@@ -5,9 +5,9 @@ import {
   battleContext,
   type Clock,
   createBattleWeek,
-  lastMail,
   PASSWORD,
   signUp,
+  tickUntilMail,
 } from './battle'
 import { expectNoAxeViolations, runSuffix, testIp } from './support'
 
@@ -81,10 +81,10 @@ test('hito de la Fase 6: se vota, se sella, Lunes de batalla, resultados, ceremo
     const body = (await tick.json()).data
     expect(body.sealed).toContain(week.slug)
     expect(body.mondayEmails.monday).toBeGreaterThanOrEqual(4)
-    const mail = await lastMail(first.page, first.email, 'Nuevo drop')
+    const mail = await tickUntilMail(first.page.request, clock.api, first.email, 'Nuevo drop')
     expect(mail?.subject).toMatch(/^1\.º en la #\d+ · Nuevo drop: /)
     expect(mail?.text).toContain('Ver la ceremonia')
-    const other = await lastMail(second.page, second.email, 'Nuevo drop')
+    const other = await tickUntilMail(second.page.request, clock.api, second.email, 'Nuevo drop')
     expect(other?.subject).toMatch(/^2\.º en la #\d+ · Nuevo drop: /)
   })
 
