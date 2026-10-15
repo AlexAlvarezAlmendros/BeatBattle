@@ -1,9 +1,32 @@
+import type { AdminSample } from '@beatbattle/shared'
 import { screen } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { renderInRouter } from '../../app/layout/testing'
 import { t } from '../../i18n'
 import { useSession } from '../account/session'
-import { AdminPage } from './AdminPage'
+import { AdminPage, ScheduleForm } from './AdminPage'
+
+const SAMPLE: AdminSample = {
+  id: 's1',
+  title: 'Polvo de vinilo',
+  credits: '',
+  origin: null,
+  licenseText: '',
+  bpm: null,
+  musicalKey: null,
+  genreHint: null,
+  durationMs: 1000,
+  bytes: 1,
+  format: 'wav',
+  loudnessLufs: null,
+  peaks: '',
+  chops: [],
+  hasStems: false,
+  coverUrl: '',
+  streamUrl: '',
+  weeks: [],
+  createdAt: 0,
+}
 
 const ME = {
   id: 'u1',
@@ -34,5 +57,11 @@ describe('AdminPage (§2.14)', () => {
     renderInRouter(<AdminPage />, '/admin')
     expect(screen.getByRole('heading', { name: t('admin.calendar.title') })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: t('admin.samples.title') })).toBeInTheDocument()
+  })
+
+  it('RF-ADM-02: el selector de semana dorada explica qué es', () => {
+    renderInRouter(<ScheduleForm gaps={['2099-01-05']} samples={[SAMPLE]} onDone={() => {}} />, '/admin')
+    const chip = screen.getByRole('button', { name: t('admin.calendar.golden') })
+    expect(chip).toHaveAccessibleDescription(t('admin.calendar.goldenHelp'))
   })
 })

@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.87 · 2026-10-15 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.88 · 2026-10-15 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -854,7 +854,9 @@ queda en `audit_log` (`user.grant_admin`, sin el email) como cualquier otra acci
 - **Samples**: subir y editar (audio, stems, portada, licencia, metadatos, *chops* con un editor de
   onda para marcar los 8 trozos).
 - **Calendario de semanas**: programar semanas futuras con su sample, reto, voto ciego sí/no, semana
-  dorada sí/no. Vista de calendario con huecos marcados en rojo.
+  dorada sí/no. Vista de calendario con huecos marcados en rojo. Bajo el selector de la semana dorada, una
+  línea explica qué es (§2.11: sorpresa sin anunciar, XP doble, ascuas y logro, sin tocar la clasificación) y
+  que, mientras la capa de juego (Fase 7) no exista, solo se guarda.
 - **Modo denso** (Fase 3): pantalla sin pieza con el panel a todo lo ancho (`ScreenPage wide`), tablas con
   filete y sin efectos. `/admin` reúne el calendario y la lista de samples; `/admin/samples/:id` (`nuevo`)
   es el editor: subida firmada con progreso, ficha, nueva medición y los 8 *chops* sobre la onda (clic para
@@ -3707,6 +3709,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-15 | 0.6.88 | §2.14: el selector de la semana dorada del calendario lleva una línea que explica qué es y que, sin la capa de juego (Fase 7), de momento solo se guarda (petición del usuario). |
 | 2026-10-15 | 0.6.87 | **El primer admin** (§2.14): en producción nadie podía dar el rol `admin` (solo los tests y la semilla local). `pnpm admin:grant <email>` lo da a una cuenta existente, en el mismo `batch` que su registro en `audit_log`. La beta empieza el lunes 19 de octubre (decisión del usuario). |
 | 2026-10-15 | 0.6.86 | **Salir de la cuenta** (`RF-AUTH-11`, nuevo): la guía decía que la sesión actual «se sale», pero ninguna pantalla lo ofrecía y en la beta no había forma de cerrar sesión. §2.3: «Cerrar sesión» en Ajustes → Cuenta y «Salir» en la fila de «Esta sesión» de Ajustes → Sesiones; vacía los datos de la cuenta en la web y vuelve al menú. |
 | 2026-10-15 | 0.6.85 | **Primer despliegue: la función caía entera** (`FUNCTION_INVOCATION_FAILED` en todas las rutas, también al entrar con Google y Discord): satori importa `harfbuzzjs`, que carga `hb.wasm` del disco al importarse, y la traza de Vercel no lo incluye; el rechazo sin manejar tumbaba el proceso. §4.15: `hb.wasm` y el binario de ffmpeg (que §4.8.4 ya daba por incluido y no lo estaba) en `includeFiles`, y `pnpm build` comprueba la función como la monta Vercel (`scripts/smoke-vercel.mjs`, con `@vercel/nft` de desarrollo). |
