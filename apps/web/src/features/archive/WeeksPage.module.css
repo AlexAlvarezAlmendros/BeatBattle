@@ -1,0 +1,140 @@
+/* Archivo (guía §2.9): una tarjeta por semana sellada con su sample, sus entradas y su podio. */
+.weeks {
+  display: grid;
+  gap: var(--bb-space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--bb-space-4);
+  padding: var(--bb-space-4);
+}
+
+.cover {
+  grid-row: span 2;
+  width: var(--bb-space-16);
+  height: var(--bb-space-16);
+  overflow: hidden;
+  clip-path: polygon(
+    var(--bb-cut-md) 0,
+    100% 0,
+    100% calc(100% - var(--bb-cut-md)),
+    calc(100% - var(--bb-cut-md)) 100%,
+    0 100%,
+    0 var(--bb-cut-md)
+  );
+}
+
+.cover > :is(img, canvas) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.link {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.info {
+  display: grid;
+  gap: var(--bb-space-2);
+  min-width: 0;
+}
+
+.heading {
+  display: grid;
+  gap: var(--bb-space-1);
+}
+
+.heading > .bb-label,
+.heading > span {
+  color: var(--bb-text-3);
+}
+
+.title {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-xl);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.title:hover {
+  text-decoration: underline;
+}
+
+.meta,
+.note {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-sm);
+}
+
+.podium {
+  grid-column: 2;
+  display: grid;
+  gap: var(--bb-space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--bb-space-3);
+}
+
+.medal {
+  width: var(--bb-space-8);
+  height: var(--bb-space-8);
+}
+
+.position {
+  font-family: var(--bb-font-num);
+  font-weight: var(--bb-weight-extrabold);
+}
+
+.entry {
+  color: var(--bb-text-2);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.entry b {
+  color: var(--bb-white);
+}
+
+.entry:hover {
+  text-decoration: underline;
+}
+
+.more {
+  justify-self: center;
+}
+
+@media (max-width: 720px) {
+  .card {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .cover {
+    grid-row: auto;
+  }
+
+  .podium,
+  .link {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  .link {
+    justify-self: start;
+  }
+}

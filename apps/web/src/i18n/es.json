@@ -1975,6 +1975,20 @@
     "note": "Ronda justa: primero, las que menos votos llevan (nadie ve cuántos). Notas y autoría, el domingo.",
     "link": "Elegir entrada"
   },
+  "archive": {
+    "kicker": "Archivo",
+    "summary": "Las semanas selladas, de la más reciente a la más antigua, con su podio.",
+    "week": "Semana {number}",
+    "entries_one": "{count} entrada",
+    "entries_other": "{count} entradas",
+    "noPodium": "Sin podio: ninguna entrada llegó a 3 votos.",
+    "empty": "Semana desierta.",
+    "results": "Resultados",
+    "more": "Más semanas",
+    "none": "Todavía no hay semanas selladas. La primera se sella el domingo.",
+    "play": "Escuchar «{title}»",
+    "error": "No se ha podido cargar el archivo. Prueba otra vez en un momento."
+  },
   "results": {
     "documentTitle": "Resultados de la semana {number}",
     "kicker": "Resultados oficiales",

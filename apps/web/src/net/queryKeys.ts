@@ -26,6 +26,7 @@ export const queryKeys = {
   },
   ticker: (slug: string) => ['ticker', slug] as const,
   results: (slug: string) => ['results', slug] as const,
+  archive: () => ['archive'] as const,
   admin: {
     all: ['admin'] as const,
     samples: () => ['admin', 'samples'] as const,
