@@ -116,17 +116,17 @@ describe('vercel.json: construcción y función', () => {
     expect(config.regions).toEqual(['fra1'])
   })
 
-  it('la función api/index.ts lleva las migraciones, las fuentes de las imágenes y el index.html, con un máximo de 10 s', () => {
-    // Las fuentes (tarea 6.10) y el index.html de las páginas compartibles (6.12) se leen con rutas que el
-    // trazador de Vercel no ve.
+  it('la función api/index.ts lleva las migraciones, las fuentes, el index.html, el hb.wasm de satori y ffmpeg, con un máximo de 10 s', () => {
+    // Las fuentes (tarea 6.10), el index.html de las páginas compartibles (6.12), el hb.wasm que harfbuzzjs
+    // carga al importarse y el binario de ffmpeg se leen con rutas que el trazador de Vercel no ve (guía §4.15).
     expect(config.functions['api/index.ts']).toEqual({
       includeFiles:
-        '{apps/server/drizzle/**,apps/server/node_modules/@fontsource/*/files/*-latin-*-normal.woff,apps/web/dist/index.html}',
+        '{apps/server/drizzle/**,apps/server/node_modules/@fontsource/*/files/*-latin-*-normal.woff,apps/web/dist/index.html,node_modules/.pnpm/harfbuzzjs@*/node_modules/harfbuzzjs/hb.wasm,node_modules/.pnpm/ffmpeg-static@*/node_modules/ffmpeg-static/ffmpeg}',
       maxDuration: 10,
     })
   })
 
-  it('el build empaqueta la API antes de la función y la prueba con node puro', () => {
+  it('el build empaqueta la API antes de la función y la prueba con node puro y como la monta Vercel', () => {
     const rootPackage = JSON.parse(
       readFileSync(new URL('../../../package.json', import.meta.url), 'utf8'),
     ) as {
@@ -139,7 +139,7 @@ describe('vercel.json: construcción y función', () => {
     expect(config.buildCommand).toBe('pnpm build')
     expect(rootPackage.scripts.build).toContain('pnpm --filter @beatbattle/server build')
     expect(serverPackage.scripts.build).toBe(
-      'vite build --config build.config.mjs && node scripts/smoke-bundle.mjs',
+      'vite build --config build.config.mjs && node scripts/smoke-bundle.mjs && node scripts/smoke-vercel.mjs',
     )
   })
 
