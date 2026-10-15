@@ -13,10 +13,15 @@ import { SessionsSettingsPage } from './SessionsSettings'
 
 // `better-fetch` guarda `fetch` al cargar: el cliente de Better Auth se sustituye entero.
 vi.mock('../account/authClient', () => ({
-  authClient: { changeEmail: vi.fn(), changePassword: vi.fn(), revokeOtherSessions: vi.fn() },
+  authClient: {
+    changeEmail: vi.fn(),
+    changePassword: vi.fn(),
+    revokeOtherSessions: vi.fn(),
+    signOut: vi.fn(),
+  },
 }))
 const auth = vi.mocked(authClient, { deep: true }) as unknown as Record<
-  'changeEmail' | 'changePassword' | 'revokeOtherSessions',
+  'changeEmail' | 'changePassword' | 'revokeOtherSessions' | 'signOut',
   ReturnType<typeof vi.fn>
 >
 
@@ -73,12 +78,22 @@ function mockApi(handler: Handler) {
 
 function renderPage(element: ReactElement, path: string) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  const router = createMemoryRouter([{ path: '*', element }], { initialEntries: [path] })
-  return render(
-    <QueryClientProvider client={client}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
+  const router = createMemoryRouter(
+    [
+      { path: '/', element: <p>menú</p> },
+      { path: '*', element },
+    ],
+    { initialEntries: [path] },
   )
+  return {
+    ...render(
+      <QueryClientProvider client={client}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>,
+    ),
+    router,
+    client,
+  }
 }
 
 afterEach(() => {
@@ -173,6 +188,28 @@ describe('Ajustes → Cuenta (§2.3)', () => {
     await userEvent.click(submit)
     expect(await screen.findByText(t('settings.account.password.changed'))).toBeInTheDocument()
   })
+
+  it('RF-AUTH-11: «Cerrar sesión» sale en el servidor, deja al visitante sin datos de la cuenta y vuelve al menú', async () => {
+    auth.signOut.mockResolvedValue({ data: { success: true }, error: null })
+    useSession.setState({ status: 'signedIn', me: ME })
+    const { router, client } = renderPage(<AccountSettingsPage />, '/ajustes/cuenta')
+    client.setQueryData(['me', 'sessions'], [])
+    await userEvent.click(screen.getByRole('button', { name: t('settings.account.signOut.submit') }))
+    await waitFor(() => expect(router.state.location.pathname).toBe('/'))
+    expect(auth.signOut).toHaveBeenCalledOnce()
+    expect(useSession.getState()).toMatchObject({ status: 'anonymous', me: null })
+    expect(client.getQueryData(['me', 'sessions'])).toBeUndefined()
+  })
+
+  it('RF-AUTH-11: si no se puede salir, la sesión sigue y lo dice', async () => {
+    auth.signOut.mockResolvedValue({ data: null, error: { status: 500, message: 'caído' } })
+    useSession.setState({ status: 'signedIn', me: ME })
+    const { router } = renderPage(<AccountSettingsPage />, '/ajustes/cuenta')
+    await userEvent.click(screen.getByRole('button', { name: t('settings.account.signOut.submit') }))
+    expect(await screen.findByText(t('settings.account.signOut.error'))).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/ajustes/cuenta')
+    expect(useSession.getState().status).toBe('signedIn')
+  })
 })
 
 describe('Ajustes → Sesiones (§2.3)', () => {
@@ -204,7 +241,12 @@ describe('Ajustes → Sesiones (§2.3)', () => {
     const rows = within(sessionList).getAllByRole('listitem')
     expect(rows[0]).toHaveTextContent('Chrome en Linux')
     expect(rows[0]).toHaveTextContent(t('settings.sessions.current'))
-    expect(within(rows[0] as HTMLElement).queryByRole('button')).toBeNull()
+    // La actual no se cierra como las demás: se sale (RF-AUTH-11).
+    expect(
+      within(rows[0] as HTMLElement)
+        .getAllByRole('button')
+        .map((button) => button.getAttribute('aria-label')),
+    ).toEqual([t('settings.sessions.signOutLabel')])
     expect(rows[1]).toHaveTextContent(t('settings.sessions.unknownDevice'))
     await userEvent.click(screen.getByRole('button', { name: t('settings.sessions.closeOthers') }))
     expect(await screen.findByText(t('settings.sessions.closedOthers'))).toBeInTheDocument()

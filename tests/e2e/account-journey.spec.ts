@@ -155,3 +155,21 @@ test('RNF-SEC-03: A contra B — A no ve ni cierra las sesiones de B, ni edita s
     expect((await anonymous.request.get(path)).status(), path).toBe(401)
   await Promise.all([a.context.close(), b.context.close(), anonymous.close()])
 })
+
+test('RF-AUTH-11: «Cerrar sesión» en Ajustes → Cuenta sale de verdad (sin cookie, /api/me vacío) y vuelve al menú', async ({
+  browser,
+  baseURL,
+}) => {
+  const origin = baseURL as string
+  const run = runSuffix()
+  const name = `sale${run}`
+  const { context, page } = await verifiedAccount(browser, origin, testIp(35), `${name}@example.com`, name)
+  await open(page, '/ajustes/cuenta', 'Cuenta')
+  await page.getByRole('button', { name: 'Cerrar sesión' }).click()
+  await expect(page).toHaveURL(`${origin}/`)
+  expect((await (await page.request.get('/api/me')).json()).data).toBeNull()
+  expect((await context.cookies()).map((cookie) => cookie.name)).not.toContain('bb.session_token')
+  await page.goto('/ajustes/cuenta')
+  await expect(page.getByText('Entra para cambiar tu email o tu contraseña.')).toBeVisible()
+  await context.close()
+})

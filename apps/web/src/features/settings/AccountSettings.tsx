@@ -9,13 +9,15 @@ import { type Errors, placeError, textOf } from '../account/authErrors'
 import { Done, focusFirstInvalid, PaperNotice, StrengthMeter } from '../account/FormBits'
 import { RequireSession } from '../account/RequireSession'
 import { useSession } from '../account/session'
+import { useSignOut } from '../account/useSignOut'
 import { SettingsGroup, SettingsSection } from './SettingsSection'
 import styles from './SettingsSection.module.css'
 
 /**
  * `/ajustes/cuenta` (guía §2.3, tarea 2.16): cambiar el email (se aprueba desde la dirección actual y
  * después se confirma la nueva) y la contraseña (con la actual y, por defecto, cerrando las demás
- * sesiones). Los dos avisan con `auth.security`. Google y Discord llegan con la 2.22.
+ * sesiones). Los dos avisan con `auth.security`. Google y Discord llegan con la 2.22. Al final, salir de la
+ * cuenta en este navegador (`RF-AUTH-11`).
  */
 export function AccountSettingsPage() {
   return (
@@ -23,6 +25,7 @@ export function AccountSettingsPage() {
       <RequireSession reason={t('settings.account.require')}>
         <ChangeEmailForm />
         <ChangePasswordForm />
+        <SignOutGroup />
       </RequireSession>
     </SettingsSection>
   )
@@ -154,5 +157,20 @@ function ChangePasswordForm() {
         </Button>
       </SettingsGroup>
     </form>
+  )
+}
+
+function SignOutGroup() {
+  const { signOut, busy, failed } = useSignOut()
+  return (
+    <SettingsGroup title={t('settings.account.signOut.title')} layout="stack">
+      <div className="settings-option">
+        <Button variant="outline" loading={busy} onClick={() => void signOut()}>
+          {t('settings.account.signOut.submit')}
+        </Button>
+        <p className="settings-option-help">{t('settings.account.signOut.help')}</p>
+      </div>
+      {failed && <PaperNotice>{t('settings.account.signOut.error')}</PaperNotice>}
+    </SettingsGroup>
   )
 }

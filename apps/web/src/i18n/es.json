@@ -522,7 +522,7 @@
     },
     "account": {
       "title": "Cuenta",
-      "summary": "El email con el que entras y tu contraseña.",
+      "summary": "El email con el que entras, tu contraseña y salir de la cuenta.",
       "require": "Entra para cambiar tu email o tu contraseña.",
       "email": {
         "title": "Email",
@@ -539,6 +539,12 @@
         "closeOthersHelp": "Si alguien más conocía la contraseña, lo saca de la cuenta en todos los demás navegadores.",
         "submit": "Cambiar contraseña",
         "changed": "Contraseña cambiada. Te hemos enviado un aviso por email."
+      },
+      "signOut": {
+        "title": "Salir",
+        "submit": "Cerrar sesión",
+        "help": "Sales de la cuenta en este navegador. Donde la tengas abierta, sigue abierta.",
+        "error": "No se ha podido cerrar la sesión. Vuelve a probar."
       }
     },
     "profile": {
@@ -637,6 +643,8 @@
       "opened": "Abierta el {date}",
       "close": "Cerrar",
       "closeLabel": "Cerrar la sesión de {device}",
+      "signOut": "Salir",
+      "signOutLabel": "Cerrar esta sesión (salir de la cuenta en este navegador)",
       "closeOthers": "Cerrar las demás",
       "closeOthersHelp": "Cierra todas menos esta y te avisa por email.",
       "closed": "Sesión cerrada.",
@@ -692,6 +700,7 @@
         "password": "La de entrar con tu email; cámbiala cuando quieras.",
         "google": "Entra con tu cuenta de Google, sin contraseña.",
         "discord": "Entra con tu cuenta de Discord, sin contraseña.",
+        "signOut": "Sales de la cuenta en este navegador; las demás sesiones siguen.",
         "name": "Cómo te llamas en tu carta de productor.",
         "avatar": "La imagen de tu carta de productor.",
         "links": "Instagram, SoundCloud, YouTube, Spotify o BeatStars, en tu perfil.",
@@ -741,6 +750,7 @@
         "quietHours": "Horas de silencio",
         "activeSessions": "Sesiones activas",
         "closeOthers": "Cerrar las demás",
+        "signOut": "Cerrar sesión",
         "export": "Exportar mis datos",
         "deleteAccount": "Borrar la cuenta",
         "textSize": "Tamaño de texto",

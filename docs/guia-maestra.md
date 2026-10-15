@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.85 · 2026-10-15 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.86 · 2026-10-15 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -265,7 +265,8 @@ Cambiarla pide la actual y, por defecto, cierra las demás sesiones.
 **Sesiones** (Ajustes → Sesiones, `RF-AUTH-10`). `GET /api/me/sessions` da, de cada sesión abierta, el
 navegador resumido, cuándo se abrió, su última actividad (Better Auth la renueva como mucho una vez al
 día) y si es la actual, que va primero; nunca el token ni la IP. `DELETE /api/me/sessions/:id` cierra una
-de la propia cuenta (la actual no: para eso se sale). «Cerrar las demás» es
+de la propia cuenta (la actual no: para eso se sale, `RF-AUTH-11`: «Cerrar sesión» en Ajustes → Cuenta y
+«Salir» en la fila de «Esta sesión»; las demás sesiones siguen abiertas). «Cerrar las demás» es
 `/api/auth/revoke-other-sessions`, que avisa. No se usa `list-sessions` de Better Auth: devuelve el
 token de cada sesión al navegador y exige una sesión de menos de un día.
 
@@ -310,6 +311,7 @@ historial de entradas con su posición.
 | `RF-AUTH-08` | Recuperación de contraseña por email; al usarla se revocan todas las sesiones | Tras restablecerla, una sesión abierta en otro navegador queda revocada |
 | `RF-AUTH-09` | Dominios de email desechables rechazados | `x@mailinator.com` → `EMAIL_DISPOSABLE` |
 | `RF-AUTH-10` | Lista de sesiones activas con opción de cerrar las demás | Ajustes → Sesiones lista navegador y última actividad; «Cerrar las demás» las revoca |
+| `RF-AUTH-11` | Salir de la cuenta en este navegador desde Ajustes → Cuenta y desde la fila de «Esta sesión» en Ajustes → Sesiones | «Cerrar sesión» revoca la sesión (`/api/auth/sign-out`), borra la cookie, vacía los datos de la cuenta en la web y vuelve al menú como visitante; `/api/me` da `null`. Si falla, la sesión sigue y se dice |
 | `RF-PRF-01` | Perfil público con los campos descritos | `/p/:username` responde 200 con los datos; 404 con la página propia si no existe |
 | `RF-PRF-02` | El avatar se sube a Cloudinary con firma, se recorta a cuadrado y se entrega a 256 px | Subir un PNG de 4000 px sirve una imagen de 256×256 en WebP o AVIF |
 | `RF-PRF-03` | El cambio de `username` está limitado a una vez cada 30 días y mantiene una redirección desde el anterior durante 30 días | `/p/antiguo` redirige 301 a `/p/nuevo` |
@@ -3703,6 +3705,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-15 | 0.6.86 | **Salir de la cuenta** (`RF-AUTH-11`, nuevo): la guía decía que la sesión actual «se sale», pero ninguna pantalla lo ofrecía y en la beta no había forma de cerrar sesión. §2.3: «Cerrar sesión» en Ajustes → Cuenta y «Salir» en la fila de «Esta sesión» de Ajustes → Sesiones; vacía los datos de la cuenta en la web y vuelve al menú. |
 | 2026-10-15 | 0.6.85 | **Primer despliegue: la función caía entera** (`FUNCTION_INVOCATION_FAILED` en todas las rutas, también al entrar con Google y Discord): satori importa `harfbuzzjs`, que carga `hb.wasm` del disco al importarse, y la traza de Vercel no lo incluye; el rechazo sin manejar tumbaba el proceso. §4.15: `hb.wasm` y el binario de ffmpeg (que §4.8.4 ya daba por incluido y no lo estaba) en `includeFiles`, y `pnpm build` comprueba la función como la monta Vercel (`scripts/smoke-vercel.mjs`, con `@vercel/nft` de desarrollo). |
 | 2026-10-15 | 0.6.84 | **B.3: textos legales completos.** Anexo A: el organizador con los datos que el sello ya publica en `otherpeople.es` (NIF A00982223, domicilio en Igualada, `justsomeotherpeople@gmail.com` como contacto) y premios sin premio material en la beta (visibilidad y «Elección del sello»). `docs/legal/*` sin huecos, con las transferencias fuera de la UE (Marco de Privacidad UE-EE. UU. o cláusulas tipo) y los datos del prestador en los términos (LSSI art. 10). `pnpm preflight` rechaza un cupo de más de 450 con una cuenta `@gmail.com` (§4.19.1) y ya no pide «una dirección propia»: la cuenta es la del Workspace del sello, como dice §4.19.1. |
 | 2026-10-15 | 0.6.83 | **Plan de la beta, B.2 y B.4.** §3.8.14: los legales con sus textos (borradores de la beta en `docs/legal/`, con los datos del sello por rellenar), con el índice en la columna de la pieza. `RNF-PRIV-05` apunta a su texto. Guía de despliegue en `docs/deploy/beta.md` y `pnpm preflight`. |
