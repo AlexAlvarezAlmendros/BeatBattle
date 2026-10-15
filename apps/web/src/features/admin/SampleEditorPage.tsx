@@ -16,6 +16,7 @@ import {
   createSample,
   deleteSample,
   signSampleUpload,
+  UploadError,
   updateSample,
   uploadSigned,
 } from '../../net/admin'
@@ -35,11 +36,15 @@ const ACCEPT: Record<SampleUploadPart, string> = {
   stems: '.zip,application/zip',
 }
 
+/** El error de una subida con su motivo, si lo hay (el panel es para el admin: el motivo técnico le sirve). */
+const uploadErrorText = (reason: string | null) =>
+  reason ? t('admin.sample.uploadErrorWith', { reason }) : t('admin.sample.uploadError')
+
 type UploadState =
   | { status: 'idle' }
   | { status: 'uploading'; fraction: number }
   | { status: 'done' }
-  | { status: 'error' }
+  | { status: 'error'; reason: string | null }
 
 /**
  * `/admin/samples/:id` (`nuevo` para uno nuevo) — el editor de samples del panel (§2.14; tarea 3.18,
@@ -93,7 +98,7 @@ function UploadSlot({
       : state.status === 'done'
         ? t('admin.sample.uploaded')
         : state.status === 'error'
-          ? t('admin.sample.uploadError')
+          ? uploadErrorText(state.reason)
           : ''
   return (
     <div className={styles.slot}>
@@ -124,11 +129,15 @@ function UploadSlot({
       >
         {state.status === 'done' ? t('admin.sample.replace') : t('admin.sample.choose')}
       </Button>
-      <span className={styles.slotState} aria-hidden="true">
+      <span
+        className={styles.slotState}
+        data-error={state.status === 'error' || undefined}
+        aria-hidden="true"
+      >
         {state.status === 'uploading' &&
           t('admin.sample.uploading', { percent: Math.round(state.fraction * 100) })}
         {state.status === 'done' && t('admin.sample.uploaded')}
-        {state.status === 'error' && t('admin.sample.uploadError')}
+        {state.status === 'error' && uploadErrorText(state.reason)}
       </span>
       <span className="sr-only" role="status">
         {announced}
@@ -184,8 +193,14 @@ function SampleForm({ sample }: { sample: AdminSample | null }) {
         await updateSample(sample.id, { hasStems: true })
         refresh(sample.id)
       }
-    } catch {
-      setUploads((current) => ({ ...current, [part]: { status: 'error' } }))
+    } catch (cause) {
+      const reason =
+        cause instanceof UploadError
+          ? (cause.reason ?? `HTTP ${cause.status}`)
+          : cause instanceof ApiClientError
+            ? cause.message
+            : null
+      setUploads((current) => ({ ...current, [part]: { status: 'error', reason } }))
     }
   }
 
