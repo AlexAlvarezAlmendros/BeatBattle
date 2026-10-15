@@ -317,3 +317,11 @@ pre {
   /* biome-ignore lint/complexity/noImportantStyles: la pausa del usuario manda sobre cualquier pieza */
   animation-iteration-count: 1 !important;
 }
+
+/*
+ * Ceremonia de resultados en 3D (§3.8.6): el Escenario pinta el podio detrás de la capa de la ceremonia, así que
+ * del marco solo queda la arena (con el lienzo); lo demás no se ve mientras dura (ya está `inert`).
+ */
+:root[data-ceremony="3d"] .game-frame > :not([data-arena]) {
+  visibility: hidden;
+}

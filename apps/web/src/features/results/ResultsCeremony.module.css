@@ -23,7 +23,74 @@
   animation: bb-cer-fade var(--bb-dur-slow) var(--bb-ease-out) both;
 }
 
+/* En 3D, el Escenario pinta detrás de esta capa (el velo deja de tapar). */
+.shade[data-3d] {
+  background: transparent;
+}
+
+/* El ancla de la vista 3D: toda la capa, sin recibir nada. */
+.stageAnchor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Los nombres del podio en 3D, al pie de cada peana (la vista dice dónde cae). */
+.labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.label3d {
+  position: fixed;
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-1);
+  width: min(34vw, 26rem);
+  translate: -50% var(--bb-space-3);
+  text-align: center;
+  animation: bb-cer-fade var(--bb-dur-base) var(--bb-ease-out) both;
+}
+
+.labelPosition {
+  padding: 0 var(--bb-space-2);
+  background: var(--bb-black);
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xl);
+  font-weight: var(--bb-weight-extrabold);
+}
+
+.labelAlias,
+.labelProducer {
+  max-width: 100%;
+  padding: 0 var(--bb-space-2);
+  background: var(--bb-black);
+  font-size: var(--bb-fs-2xl);
+  line-height: var(--bb-leading-display);
+  text-shadow: var(--bb-shadow-hard);
+  overflow-wrap: anywhere;
+}
+
+.label3d[data-place="1"] :is(.labelAlias, .labelProducer) {
+  font-size: var(--bb-fs-3xl);
+}
+
+.labelProducer {
+  animation: bb-cer-glitch var(--cer-name) steps(4) both;
+}
+
+.labelScore {
+  padding: 0 var(--bb-space-2);
+  background: var(--bb-black);
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-md);
+}
+
 .announcerSlot {
+  grid-row: 1;
   position: relative;
   width: min(100%, 40rem);
   min-height: var(--bb-space-16);
@@ -31,6 +98,7 @@
 
 /* Del 10.º al 4.º: cruzan la pantalla de derecha a izquierda, uno tras otro. */
 .burst {
+  grid-row: 2;
   position: relative;
   align-self: center;
   display: grid;
@@ -55,6 +123,7 @@
 
 /* Un puesto bajo su foco. */
 .spot {
+  grid-row: 2;
   position: relative;
   isolation: isolate;
   align-self: center;
@@ -220,6 +289,7 @@
 
 /* Tu resultado, al final. */
 .mine {
+  grid-row: 2;
   align-self: center;
   display: grid;
   justify-items: center;
@@ -252,6 +322,8 @@
 }
 
 .foot {
+  /* Siempre abajo: en 3D, la fila del medio no lleva nada del DOM (el podio lo pinta el Escenario). */
+  grid-row: 3;
   position: relative;
   display: flex;
   justify-content: space-between;
@@ -348,6 +420,16 @@
 @media (max-width: 720px) {
   .alias,
   .producer {
+    font-size: var(--bb-fs-2xl);
+  }
+
+  /* En móvil va un solo nombre, centrado: todo el ancho. */
+  .label3d {
+    width: 90vw;
+  }
+
+  .label3d :is(.labelAlias, .labelProducer),
+  .label3d[data-place="1"] :is(.labelAlias, .labelProducer) {
     font-size: var(--bb-fs-2xl);
   }
 }

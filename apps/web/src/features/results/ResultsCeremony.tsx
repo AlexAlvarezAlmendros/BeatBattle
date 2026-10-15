@@ -4,11 +4,20 @@ import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { audio } from '../../audio/engine'
 import { t } from '../../i18n'
+import {
+  endCeremonyStage,
+  setCeremonyChampion,
+  setCeremonyStep,
+  startCeremonyStage,
+  useCeremonyStage,
+} from '../../stage/ceremony'
+import { stageBurst } from '../../stage/runtime'
 import { Announcer } from '../../ui/Announcer'
 import { Button } from '../../ui/Button'
 import { GenerativeCover } from '../../ui/CoverArt'
 import { flash } from '../../ui/flash/flash'
 import { cx } from '../../ui/forceState'
+import { useMediaQuery } from '../../ui/hooks/useMediaQuery'
 import { useReducedMotion } from '../../ui/hooks/useReducedMotion'
 import { Medal, type MedalPlace } from '../../ui/Medal'
 import { OtpSlapImage } from '../../ui/OtpSlap'
@@ -45,6 +54,8 @@ export const CEREMONY_TIMELINE = {
 } as const
 
 /** Puestos que cruzan en ráfaga (§3.8.6): del 10.º al 4.º. */
+/** Móvil: un solo nombre bajo el podio 3D. */
+const NARROW_QUERY = '(max-width: 720px)'
 const BURST_FROM = 10
 const BURST_TO = 4
 const CONFETTI = 24
@@ -65,7 +76,13 @@ export function ResultsCeremony({ results, onDone }: { results: WeekResults; onD
   const [confetti, setConfetti] = useState<{ area: number; opacity: number } | null>(null)
   const [live, setLive] = useState('')
   const skipRef = useRef<HTMLButtonElement>(null)
+  const stageRef = useRef<HTMLDivElement>(null)
   const done = useRef(false)
+  // En 3D (§3.5): el Escenario pinta el podio detrás de esta capa en cuanto su vista ha pintado; hasta entonces
+  // (o sin él: sin WebGL, calidad apagada o «reducir movimiento»), los puestos en 2D.
+  const live3d = useCeremonyStage((state) => state.live) && !reduced
+  const projected = useCeremonyStage((state) => state.projected)
+  const narrow = useMediaQuery(NARROW_QUERY)
   const podium = data.rows.filter((row) => isMedal(row.result.position))
   const burst = data.rows
     .filter((row) => {
@@ -95,6 +112,36 @@ export function ResultsCeremony({ results, onDone }: { results: WeekResults; onD
     }
   }, [])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: se monta una vez
+  useEffect(() => {
+    if (reduced || !stageRef.current) return
+    startCeremonyStage(
+      stageRef.current,
+      podium.map((row) => ({
+        place: row.result.position as MedalPlace,
+        cover:
+          row.entry.cover.kind === 'own'
+            ? { kind: 'own', url: row.entry.cover.url }
+            : {
+                kind: 'generative',
+                seed: row.entry.cover.seed,
+                bpm: row.entry.bpm,
+                musicalKey: row.entry.musicalKey,
+              },
+      })),
+      CEREMONY_TIMELINE.tearMs,
+    )
+    return () => endCeremonyStage()
+  }, [])
+
+  useEffect(() => {
+    if (!live3d) return
+    document.documentElement.dataset.ceremony = '3d'
+    return () => {
+      delete document.documentElement.dataset.ceremony
+    }
+  }, [live3d])
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: la línea de tiempo se monta una vez
   useEffect(() => {
     const T = CEREMONY_TIMELINE
@@ -117,16 +164,19 @@ export function ResultsCeremony({ results, onDone }: { results: WeekResults; onD
       const snippet = place === 1 ? T.championSnippetMs : T.snippetMs
       schedule(start, () => {
         mark(`place:${place}`)
+        setCeremonyStep(place, 'spot')
         const peaks = row.entry.peaks ? decodePeaks(row.entry.peaks) : []
         const fromMs = loudestWindowMs(peaks, row.entry.durationMs, snippet)
         usePlayer.getState().play(entryTrack(row.entry, { votable: false }), { fromMs })
       })
       schedule(start + T.tear, () => {
         mark(`tear:${place}`)
+        setCeremonyStep(place, 'tear')
         audio.play('cer.tear')
       })
       schedule(start + T.name, () => {
         mark(`name:${place}`)
+        setCeremonyStep(place, 'name')
         audio.play('cer.reveal')
         setLive(
           t('ceremony.place', {
@@ -144,9 +194,24 @@ export function ResultsCeremony({ results, onDone }: { results: WeekResults; onD
       schedule(T.heartbeat, () => audio.play('cer.heartbeat'))
       schedule(T.champion, () => {
         mark('champion')
+        setCeremonyChampion()
         audio.play('cer.airhorn')
         audio.play('cer.confetti')
-        const grant = reduced ? null : flash.request({ reason: 'ceremony', area: 0.25, opacity: 0.4 })
+        if (reduced) return
+        // En 3D, el confeti del Escenario sobre el campeón; si no, el del DOM. Los dos, con el limitador.
+        const stage = useCeremonyStage.getState()
+        const champion = stage.projected[1]
+        if (stage.live && champion) {
+          stageBurst({
+            kind: 'confetti',
+            x: champion.x,
+            y: champion.y - window.innerHeight * 0.35,
+            reason: 'ceremony',
+            area: 0.25,
+          })
+          return
+        }
+        const grant = flash.request({ reason: 'ceremony', area: 0.25, opacity: 0.4 })
         if (grant) setConfetti({ area: grant.area, opacity: grant.opacity })
       })
     }
@@ -202,7 +267,8 @@ export function ResultsCeremony({ results, onDone }: { results: WeekResults; onD
       <p className="sr-only" aria-live="polite">
         {live}
       </p>
-      <div className={styles.shade} aria-hidden="true" />
+      <div className={styles.shade} data-3d={live3d || undefined} aria-hidden="true" />
+      <div ref={stageRef} className={styles.stageAnchor} aria-hidden="true" />
       <div className={styles.announcerSlot} aria-hidden="true">
         {reached('champion') && !showMine ? (
           <Announcer key="champion" className={styles.announcer} text={t('ceremony.champion')} silent />
@@ -223,7 +289,30 @@ export function ResultsCeremony({ results, onDone }: { results: WeekResults; onD
         </div>
       )}
 
-      {current && !showMine && (
+      {live3d && !showMine && (
+        <div className={styles.labels} aria-hidden="true">
+          {podium
+            .filter((row) => reached(`place:${row.result.position}`))
+            // En móvil no caben tres nombres bajo el podio: el del último puesto revelado, centrado.
+            .filter((row) => !narrow || row.entry.id === current?.entry.id)
+            .map((row) => {
+              const place = row.result.position as MedalPlace
+              const at = projected[place]
+              if (!at) return null
+              return (
+                <Label3d
+                  key={row.entry.id}
+                  row={row}
+                  revealed={reached(`name:${place}`)}
+                  x={narrow ? window.innerWidth / 2 : at.x}
+                  y={at.y}
+                />
+              )
+            })}
+        </div>
+      )}
+
+      {current && !showMine && !live3d && (
         <Spotlight
           key={current.entry.id}
           row={current}
@@ -346,6 +435,27 @@ function MineCard({ row }: { row: ResultRow }) {
       <p className={styles.mineScore}>
         {t('ceremony.mineScore', { score: scoreOf(scoreMilli), votes: t('results.votes', { count: votes }) })}
       </p>
+    </div>
+  )
+}
+
+/** El nombre de un puesto del podio en 3D, al pie de su peana: el alias y, revelado, el productor. */
+function Label3d({ row, revealed, x, y }: { row: ResultRow; revealed: boolean; x: number; y: number }) {
+  const place = row.result.position as MedalPlace
+  return (
+    <div className={styles.label3d} style={{ left: x, top: y }} data-place={place}>
+      <span className={styles.labelPosition}>{place}.º</span>
+      {revealed ? (
+        <>
+          <span className={cx('bb-display', styles.labelProducer)}>{producerOf(row)}</span>
+          <span className={styles.aliasX}>{row.entry.alias}</span>
+          <span className={styles.labelScore}>
+            {scoreOf(row.result.scoreMilli)} · {t('results.votes', { count: row.result.votes })}
+          </span>
+        </>
+      ) : (
+        <span className={cx('bb-display', styles.labelAlias)}>{row.entry.alias}</span>
+      )}
     </div>
   )
 }

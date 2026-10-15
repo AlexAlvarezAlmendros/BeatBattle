@@ -11,6 +11,7 @@ import { setStageRunning, useStageRuntime } from './runtime'
 import styles from './Stage.module.css'
 import fragmentShader from './shaders/arenaHalftone.frag.glsl?raw'
 import vertexShader from './shaders/fullscreen.vert.glsl?raw'
+import { CeremonyView } from './views/CeremonyView'
 import { type ViewStats, VinylView } from './views/VinylView'
 
 /**
@@ -301,7 +302,15 @@ function RenderPass() {
 /** Las vistas ancladas que han pedido las pantallas (`useStageView`). */
 function StageViews() {
   const anchors = useStageRuntime((state) => state.anchors)
-  return anchors.map((anchor) => <VinylView key={anchor.id} anchor={anchor} stats={debug?.views ?? null} />)
+  return (
+    <>
+      {anchors.map((anchor) => (
+        <VinylView key={anchor.id} anchor={anchor} stats={debug?.views ?? null} />
+      ))}
+      {/* La ceremonia de resultados (§3.8.6), cuando la hay. */}
+      <CeremonyView />
+    </>
+  )
 }
 
 /**

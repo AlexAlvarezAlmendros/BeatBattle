@@ -2,6 +2,7 @@ import type { WeekResults } from '@beatbattle/shared'
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
+import { setCeremonyLive, setCeremonyProjected, useCeremonyStage } from '../../stage/ceremony'
 import { resetPlayerForTests } from '../player/store'
 import { CEREMONY_TIMELINE, ResultsCeremony } from './ResultsCeremony'
 
@@ -104,5 +105,32 @@ describe('ceremonia de resultados (6.17, §3.8.6)', () => {
     render(<ResultsCeremony results={RESULTS} onDone={again} />)
     fireEvent.click(screen.getByRole('button', { name: new RegExp(t('ceremony.skip')) }))
     expect(again).toHaveBeenCalledOnce()
+  })
+
+  it('RF-RES-09 / §3.5: en 3D, el Escenario recibe el podio y los pasos; los nombres van donde caen sus peanas', () => {
+    const { unmount } = render(<ResultsCeremony results={RESULTS} onDone={vi.fn()} />)
+    const stage = () => useCeremonyStage.getState()
+    expect(stage().element).not.toBeNull()
+    expect(
+      stage()
+        .places.map((item) => item.place)
+        .sort(),
+    ).toEqual([1, 2, 3])
+    act(() => vi.advanceTimersByTime(CEREMONY_TIMELINE.places[3] + CEREMONY_TIMELINE.name))
+    expect(stage().places.find((item) => item.place === 3)?.step).toBe('name')
+    // Sin la vista pintada, el respaldo 2D.
+    expect(document.documentElement.dataset.ceremony).toBeUndefined()
+    // La vista pinta y dice dónde cae la peana del 3.º: el nombre va ahí y la página de detrás se oculta.
+    act(() => {
+      setCeremonyProjected(3, { x: 300, y: 500 })
+      setCeremonyLive(true)
+    })
+    expect(document.documentElement.dataset.ceremony).toBe('3d')
+    const label = screen.getByText('merce').closest('div') as HTMLElement
+    expect(label.style.left).toBe('300px')
+    expect(label.style.top).toBe('500px')
+    unmount()
+    expect(stage().element).toBeNull()
+    expect(document.documentElement.dataset.ceremony).toBeUndefined()
   })
 })

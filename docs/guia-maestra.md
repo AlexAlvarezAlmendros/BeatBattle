@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.81 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.82 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1886,8 +1886,20 @@ sonoridad igualada. El confeti es del DOM, pide permiso al limitador de destello
 opacidad que este autoriza. La ceremonia es una capa modal (lo de detrás queda `inert`) y se salta con Esc,
 Intro, espacio, «Saltar» o un clic. La página de resultados la abre con «Ver la ceremonia» (R) o con
 `?ceremonia` (desde la home), y al cerrarla queda vista (`RF-RES-09`). Sin movimiento, los mismos pasos por
-fundidos, sin confeti. El XP que rueda en tu carta llega con la Fase 7. En la Fase 6 la ceremonia se pinta en el
-DOM (2D); los vinilos y el podio en 3D con las vistas ancladas del Escenario (§3.5) quedan pendientes.
+fundidos, sin confeti. El XP que rueda en tu carta llega con la Fase 7.
+
+**En 3D** (decisión del usuario, tarea 6.17b), el podio lo pinta el Escenario en una vista anclada a toda la
+capa de la ceremonia, con cámara en perspectiva y fondo negro. Tiene tres peanas (la del 1.º, roja y la más
+alta, en el centro), con su número en el frente, y un foco por puesto (luz y haz que se apaga al llegar a la
+peana). Cada entrada tiene su portada en pie sobre su peana, con el sello «AUTORÍA OCULTA» en dos trozos que se
+despegan y caen. El vinilo-medalla baja por el haz y gira, y la corona aparece con «¡CAMPEÓN!». La cámara se
+acerca al puesto que se revela y se aleja con el campeón; en vertical, más lejos, para que quepan las tres
+peanas. El confeti es el de las partículas del Escenario (con el limitador). Los textos siguen siendo DOM: la
+vista proyecta el pie de cada peana y el nombre va ahí; en móvil, solo el del último puesto, centrado.
+Mientras pinta el 3D, del marco solo queda la arena (lo demás, oculto e `inert`). Con la calidad baja, el
+Escenario se monta solo para la ceremonia (§3.5). Con «reducir movimiento», con la calidad apagada, sin WebGL o
+hasta que la vista pinta su primer fotograma, la ceremonia en 2D del DOM. Presupuesto: 60 fps y unas 40
+llamadas de dibujo (§4.17).
 
 **Página de resultados** (`/semana/:slug/resultados`): placa de título «RESULTADOS OFICIALES · SEMANA
 40» con el sello «SELLADA»; **podio con escena**: suelo de trama, tres focos y **peanas de alturas
@@ -3685,6 +3697,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-15 | 0.6.82 | **Tarea 6.17b** (decisión del usuario: «la ceremonia tiene que ser 3D»). §3.8.6: la ceremonia en el Escenario, con su escena, cámara, nombres proyectados, respaldo 2D y Escenario solo para ella con la calidad baja. Los efectos `cer.*`, escuchados y aprobados por el usuario. |
 | 2026-10-13 | 0.6.81 | **Tarea 6.22 (jurado visual).** §3.8.6: «Ver la ceremonia» y la tarjeta para stories van en la línea de la semana, y la ceremonia en 3D queda pendiente (hoy es DOM). Acta en `docs/planning/evidence/f6/jurado/`. |
 | 2026-10-13 | 0.6.80 | **Tarea 6.14.** §2.15: las tarjetas para stories, qué llevan y dónde están; la carta de productor, en la Fase 7. |
 | 2026-10-13 | 0.6.79 | **Tarea 6.17.** §3.8.6: la línea de tiempo de la ceremonia, el momento más enérgico de cada beat (`loudestWindowMs`), el confeti con el limitador, la capa modal, cómo se abre y cuándo queda vista. Anexo D: el redoble dura 4 s, y los seis `cer.*` están medidos *offline* a su nivel. Corregido el chasquido de la primera muestra en las capas de ruido con retardo: cada capa parte de ganancia 0. |
