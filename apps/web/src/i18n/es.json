@@ -2019,6 +2019,13 @@
     "shared": "Enlace listo para compartir."
   },
   "entryPage": {
+    "result": {
+      "label": "Resultado de la semana",
+      "position": "Posición",
+      "score": "Puntuación",
+      "votes": "Votos",
+      "link": "Ver los resultados"
+    },
     "kicker": "Semana {number} · ficha",
     "documentTitle": "{alias} · ficha",
     "hidden": "Autoría oculta",

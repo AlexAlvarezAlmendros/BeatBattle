@@ -100,3 +100,38 @@
 .stars {
   justify-self: start;
 }
+
+/* El resultado de una semana sellada (`RF-PLAY-08`): medalla, posición, puntuación, votos e histograma. */
+.result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--bb-space-3) var(--bb-space-6);
+  padding: var(--bb-space-3) var(--bb-space-4);
+  background: var(--bb-panel);
+  border-left: var(--bb-stroke-cursor) solid var(--bb-red);
+}
+
+.resultMedal {
+  width: var(--bb-space-12);
+  height: var(--bb-space-12);
+}
+
+.resultTile {
+  display: grid;
+  gap: var(--bb-space-1);
+}
+
+.resultTile small {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.resultTile b {
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xl);
+  font-weight: var(--bb-weight-extrabold);
+}

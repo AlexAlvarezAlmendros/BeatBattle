@@ -460,23 +460,6 @@
   padding: 0;
 }
 
-.histogram {
-  display: inline-flex;
-  align-items: flex-end;
-  gap: var(--bb-space-1);
-  height: var(--bb-space-8);
-}
-
-.bar {
-  width: var(--bb-space-2);
-  height: max(var(--bb-stroke), calc(var(--bar) * 100%));
-  background: var(--bb-text-2);
-}
-
-.bar[data-five] {
-  background: var(--bb-red);
-}
-
 .empty {
   display: grid;
   justify-items: start;

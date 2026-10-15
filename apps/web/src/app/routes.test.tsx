@@ -153,6 +153,47 @@ describe('router (0.10, guía §2.18)', () => {
     vi.unstubAllGlobals()
   })
 
+  it('RF-PLAY-08: la ficha de una entrada sellada enseña el productor, la posición, la puntuación, los votos y el histograma', async () => {
+    const entry = {
+      id: '0192f3a2',
+      weekSlug: '2026-w41',
+      alias: 'Tigre Púrpura',
+      title: 'Bruma en Gràcia',
+      description: null,
+      bpm: 140,
+      musicalKey: 'Am',
+      daw: null,
+      genres: [],
+      durationMs: 180_000,
+      peaks: null,
+      gainDb: -6,
+      streamUrl: 'https://res.cloudinary.com/demo/e.mp3',
+      cover: { kind: 'generative', seed: 7 },
+      producer: { username: 'kairo', displayName: 'kairo.wav', avatarUrl: null },
+      result: { position: 2, scoreMilli: 4410, votes: 38, histogram: [1, 2, 5, 12, 18] },
+    }
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) =>
+        String(input).endsWith('/api/entries/0192f3a2')
+          ? new Response(JSON.stringify({ data: entry }), { headers: { 'content-type': 'application/json' } })
+          : new Response(JSON.stringify({ error: { code: 'NOT_FOUND', message: '' } }), {
+              status: 404,
+              headers: { 'content-type': 'application/json' },
+            }),
+      ),
+    )
+    renderAt('/e/0192f3a2')
+    expect(await h1('kairo.wav')).toBeInTheDocument()
+    const result = screen.getByRole('region', { name: t('entryPage.result.label') })
+    expect(result).toHaveTextContent('2.º')
+    expect(result).toHaveTextContent('4,41')
+    expect(result).toHaveTextContent('38')
+    expect(within(result).getByRole('img', { name: /18 de cinco/ })).toBeInTheDocument()
+    expect(screen.queryByText(t('entryPage.hidden'))).toBeNull()
+    vi.unstubAllGlobals()
+  })
+
   it('RF-RES-08: /semana/:slug/resultados pinta la semana sellada: su <h1>, el podio y «tu resultado» (y 404 sin sellar)', async () => {
     const row = (id: string, alias: string, position: number | null, producer: string) => ({
       entry: {
