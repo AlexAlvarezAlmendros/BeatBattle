@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.80 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.81 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1886,14 +1886,16 @@ sonoridad igualada. El confeti es del DOM, pide permiso al limitador de destello
 opacidad que este autoriza. La ceremonia es una capa modal (lo de detrás queda `inert`) y se salta con Esc,
 Intro, espacio, «Saltar» o un clic. La página de resultados la abre con «Ver la ceremonia» (R) o con
 `?ceremonia` (desde la home), y al cerrarla queda vista (`RF-RES-09`). Sin movimiento, los mismos pasos por
-fundidos, sin confeti. El XP que rueda en tu carta llega con la Fase 7.
+fundidos, sin confeti. El XP que rueda en tu carta llega con la Fase 7. En la Fase 6 la ceremonia se pinta en el
+DOM (2D); los vinilos y el podio en 3D con las vistas ancladas del Escenario (§3.5) quedan pendientes.
 
 **Página de resultados** (`/semana/:slug/resultados`): placa de título «RESULTADOS OFICIALES · SEMANA
 40» con el sello «SELLADA»; **podio con escena**: suelo de trama, tres focos y **peanas de alturas
 distintas** (1.º roja en el centro, 2.º a la izquierda, 3.º a la derecha, número gigante en la cara de
 cada peana); sobre cada una, la portada con los restos del sello arrancado, el alias tachado (rojo sobre
 negro, 13 px), el **productor en display** (nunca en letra decorativa), la puntuación, los votos y la
-medalla con su nombre. El 1.º lleva corona y la cinta «CAMPEÓN DE LA SEMANA»; la «Elección del sello»,
+medalla con su nombre. Bajo la placa, la línea de la semana con «Ver la ceremonia [R]» y, si participaste, «Tarjeta para
+stories». El 1.º lleva corona y la cinta «CAMPEÓN DE LA SEMANA»; la «Elección del sello»,
 la pegatina OTP con su rótulo. Debajo, la barra **TU RESULTADO** (posición, puntuación, votos, XP,
 puntos de temporada, oído de oro) con «▶ Play al campeón [Intro]» y «Clasificación [T]»; después, la
 tabla completa en filas de marcador con histograma. Nunca «K.O.» ni «gana a…»: nadie ha tumbado a nadie.
@@ -3683,6 +3685,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.81 | **Tarea 6.22 (jurado visual).** §3.8.6: «Ver la ceremonia» y la tarjeta para stories van en la línea de la semana, y la ceremonia en 3D queda pendiente (hoy es DOM). Acta en `docs/planning/evidence/f6/jurado/`. |
 | 2026-10-13 | 0.6.80 | **Tarea 6.14.** §2.15: las tarjetas para stories, qué llevan y dónde están; la carta de productor, en la Fase 7. |
 | 2026-10-13 | 0.6.79 | **Tarea 6.17.** §3.8.6: la línea de tiempo de la ceremonia, el momento más enérgico de cada beat (`loudestWindowMs`), el confeti con el limitador, la capa modal, cómo se abre y cuándo queda vista. Anexo D: el redoble dura 4 s, y los seis `cer.*` están medidos *offline* a su nivel. Corregido el chasquido de la primera muestra en las capas de ruido con retardo: cada capa parte de ganancia 0. |
 | 2026-10-13 | 0.6.78 | **Tarea 6.15.** §3.8.6, página de resultados: sin cuña, placa del HUD con la semana y su sello, teclas (← → podio, Intro, T, X), móvil apilado, poco alto y contraste alto. |

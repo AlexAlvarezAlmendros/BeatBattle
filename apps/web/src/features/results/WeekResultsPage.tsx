@@ -149,23 +149,44 @@ export function WeekResultsPage() {
             {t('results.title', { number: week.number })}
           </span>
         </h1>
-        <p className={styles.summary}>
-          {t('results.summary', {
-            sample: week.sampleTitle,
-            entries: t('results.entries', { count: rows.length }),
-            votes: t('results.votes', { count: totalVotes }),
-          })}
-        </p>
-        {podium.length > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            keyHint={t('frame.keys.glyph.r')}
-            onClick={() => setCeremony(true)}
-          >
-            {t('ceremony.watch')}
-          </Button>
-        )}
+        {/* La línea de la semana, con «Ver la ceremonia» y la tarjeta para stories a su lado (maqueta 04). */}
+        <div className={styles.summaryRow}>
+          <p className={styles.summary}>
+            {t('results.summary', {
+              sample: week.sampleTitle,
+              entries: t('results.entries', { count: rows.length }),
+              votes: t('results.votes', { count: totalVotes }),
+            })}
+          </p>
+          {podium.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              keyHint={t('frame.keys.glyph.r')}
+              onClick={() => setCeremony(true)}
+            >
+              {t('ceremony.watch')}
+            </Button>
+          )}
+          {mine?.result.position && week && (
+            <StoryButton
+              size="sm"
+              fileName={`beatbattle-semana-${week.number}.png`}
+              card={{
+                kind: 'result',
+                weekNumber: week.number,
+                sampleTitle: week.sampleTitle,
+                title: mine.entry.title,
+                producer: mine.entry.producer?.displayName ?? '',
+                position: mine.result.position,
+                score: scoreOf(mine.result.scoreMilli),
+                votes: t('results.votes', { count: mine.result.votes }),
+                cover: storyCover(mine.entry),
+                url: `${window.location.origin}${paths.entry(mine.entry.id)}`,
+              }}
+            />
+          )}
+        </div>
         {week.correctedAt !== null && (
           <p className={styles.corrected} role="note">
             {t('results.corrected', { date: formatDate(week.correctedAt) })}
@@ -188,7 +209,6 @@ export function WeekResultsPage() {
           )}
           <MineBar
             mine={mine}
-            week={week}
             ranked={ranked}
             onPlayChampion={champion ? () => play(champion) : null}
             onStandings={showStandings}
@@ -308,13 +328,11 @@ const visualOrder = (row: ResultRow) => ({ 2: 0, 1: 1, 3: 2 })[row.result.positi
 /** La barra «TU RESULTADO» (`RF-RES-08`): posición, puntuación y votos; sin participar, solo los botones. */
 function MineBar({
   mine,
-  week,
   ranked,
   onPlayChampion,
   onStandings,
 }: {
   mine: ResultRow | null
-  week: WeekResults['week']
   ranked: number
   onPlayChampion: (() => void) | null
   onStandings: () => void
@@ -346,23 +364,6 @@ function MineBar({
         <Button variant="white" keyHint={t('frame.keys.glyph.t')} onClick={onStandings}>
           {t('results.standings')}
         </Button>
-        {mine?.result.position && week && (
-          <StoryButton
-            fileName={`beatbattle-semana-${week.number}.png`}
-            card={{
-              kind: 'result',
-              weekNumber: week.number,
-              sampleTitle: week.sampleTitle,
-              title: mine.entry.title,
-              producer: mine.entry.producer?.displayName ?? '',
-              position: mine.result.position,
-              score: scoreOf(mine.result.scoreMilli),
-              votes: t('results.votes', { count: mine.result.votes }),
-              cover: storyCover(mine.entry),
-              url: `${window.location.origin}${paths.entry(mine.entry.id)}`,
-            }}
-          />
-        )}
       </div>
       {mine && mine.result.position === null && (
         <p className={styles.mineNote}>{t('results.mine.unrankedNote')}</p>
