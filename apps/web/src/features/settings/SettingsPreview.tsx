@@ -80,6 +80,11 @@ const PREVIEW: Record<SettingsSectionKey, readonly PreviewOption[]> = {
       help: 'settings.preview.help.discord',
       action: 'settings.preview.values.connect',
     },
+    {
+      label: 'settings.preview.options.signOut',
+      help: 'settings.preview.help.signOut',
+      action: 'settings.preview.values.close',
+    },
   ],
   profile: [
     {

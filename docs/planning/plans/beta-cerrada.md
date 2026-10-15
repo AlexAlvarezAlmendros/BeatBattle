@@ -61,6 +61,7 @@ BeatBattle en producción con tres semanas jugadas por productores reales y un a
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-15 | B.6 | El usuario entra en producción con Google y Discord, pero no puede salir: no había «Cerrar sesión» en ninguna pantalla. `RF-AUTH-11` (guía v0.6.86): en Ajustes → Cuenta y en la fila de «Esta sesión»; tests de Testing Library y E2E, mirado en 1440 y 390. |
 | 2026-10-15 | B.6 | El primer despliegue (lo lanzó el usuario) caía entero: faltaba el `hb.wasm` de satori en la función. `includeFiles` con `hb.wasm` y ffmpeg, y `pnpm build` comprueba la función como la monta Vercel (guía v0.6.85). |
 | 2026-10-15 | B.3, B.5 | Textos legales completos con los datos publicados del sello (guía v0.6.84); `preflight` comprueba el cupo con una cuenta `@gmail.com`. Turso y `MAIL_REPLY_TO` en Vercel; Cloudinary comprobado. |
 | 2026-10-15 | B.1, B.5 | Decisiones del usuario: sin premio material y el menú de los móviles de 781–840 px como está. Proyecto de Vercel creado con sus variables de producción (sin construir todavía). |
