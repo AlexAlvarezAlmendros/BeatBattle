@@ -135,7 +135,7 @@ completa el MVP (F0–F6) para la beta cerrada.
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
 | 6.20 | Datos de prueba: una semana sellada con su clasificación (en `seedBattle` y en los fixtures de E2E) | ✅ Hecho | 6.4 | para la 6.21 y las capturas de la 6.22 · Hecho: `seedBattle.ts … sealed` (la anterior sellada con 11 de 12 clasificadas y la de este lunes abierta); el fixture de E2E va con la 6.21. |
-| 6.21 | E2E del hito: una semana simulada se vota, se cierra y se sella; los resultados y la ceremonia (y saltarla); re-sellar sin cambios da el mismo snapshot y, tras descalificar, la revisión 2 con su aviso; sale el Lunes de batalla | ⬜ Listo | 6.9, 6.15, 6.17, 6.18, 6.19, 6.20 | §5 · hito |
+| 6.21 | E2E del hito: una semana simulada se vota, se cierra y se sella; los resultados y la ceremonia (y saltarla); re-sellar sin cambios da el mismo snapshot y, tras descalificar, la revisión 2 con su aviso; sale el Lunes de batalla | ✅ Hecho | 6.9, 6.15, 6.17, 6.18, 6.19, 6.20 | §5 · hito · Hecho: `tests/e2e/results.spec.ts` (se vota, se sella, Lunes de batalla, oferta y ceremonia saltada con Esc y vista, resultados con axe, tarjeta para stories de 1080 × 1920, re-sellado sin cambios y tras descalificar, archivo). En local, con `screens`, `a11y`, `brand`, `text-size`, `navigation` y `vote`. De paso: la ceremonia y el archivo, solo de semanas ya selladas en ese instante (el reloj de prueba sellaba semanas «del futuro»). |
 | 6.22 | Jurado visual de tres lentes: resultados, ceremonia (fotogramas), archivo, ficha sellada, emails del lunes, imágenes OG y tarjetas de stories | ⬜ Listo | 6.21 | `RD-VIS-02` |
 | 6.23 | Cierre de la fase: criterio de aceptación, cobertura de ids y CI en verde | ⬜ Listo | 6.22 | — |
 
@@ -165,6 +165,7 @@ resultado y el sample nuevo; y lo que se comparte enseña la cara del juego sin 
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-13 | 6.21 | E2E del hito. |
 | 2026-10-13 | 6.14 | Tarjetas para stories (guía v0.6.80). |
 | 2026-10-13 | 6.19 | La home ofrece la ceremonia. |
 | 2026-10-13 | 6.17 | Ceremonia de resultados (guía v0.6.79). |
