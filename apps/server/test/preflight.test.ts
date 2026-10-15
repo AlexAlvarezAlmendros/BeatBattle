@@ -53,6 +53,13 @@ describe('preflight de producción (beta, B.4)', () => {
     expect(JSON.stringify({ problems, warnings })).not.toContain('abcdabcdabcdabcd')
   })
 
+  it('RF-NOTIF-17 / §4.19.1: con una cuenta @gmail.com, un cupo de más de 450 no pasa', () => {
+    const personal = { ...READY, GMAIL_USER: 'sello@gmail.com', EMAIL_FROM_ADDRESS: 'sello@gmail.com' }
+    expect(preflight(personal).problems.map((issue) => issue.variable)).toEqual(['MAIL_DAILY_LIMIT'])
+    expect(preflight({ ...personal, MAIL_DAILY_LIMIT: '450' }).problems).toEqual([])
+    expect(preflight({ ...READY, MAIL_DAILY_LIMIT: '1900' }).problems).toEqual([])
+  })
+
   it('con el entorno vacío, lo que pide el propio servidor (el secreto de Better Auth y la URL pública)', () => {
     const variables = preflight({}).problems.map((issue) => issue.variable)
     expect(variables).toEqual(expect.arrayContaining(['BETTER_AUTH_SECRET', 'BB_PUBLIC_URL', 'CRON_SECRET']))

@@ -1,12 +1,12 @@
 # Política de privacidad
 
-> Borrador para la beta (versión 1, 15 de octubre de 2026). Los datos entre corchetes dobles los completa el sello
-> antes de publicarla; antes del lanzamiento público la revisa alguien con criterio legal.
+> Versión de la beta (versión 1, 15 de octubre de 2026). Antes del lanzamiento público la revisa alguien con
+> criterio legal.
 
 ## Quién trata tus datos
 
-El responsable es **Other People Records** ([[razón social]], NIF [[NIF]], [[domicilio]]). Para cualquier cosa sobre
-tus datos, escribe a [[email de contacto]].
+El responsable es **Other People Records** (NIF A00982223, Av. Europa, Carrer de Dinamarca, 35, 08700 Igualada,
+Barcelona). Para cualquier cosa sobre tus datos, escribe a justsomeotherpeople@gmail.com.
 
 BeatBattle es la competición semanal de beats del sello: una cuenta propia, separada de la web del sello.
 
@@ -61,13 +61,16 @@ Con nadie para su propio uso. Nos ayudan, como encargados del tratamiento:
 - **Google** (Gmail, que transporta los emails que te enviamos).
 - **Google** o **Discord**, solo si eliges entrar con ellos.
 
+Varios son empresas de Estados Unidos. Cuando tratan datos fuera de la UE, lo hacen con el Marco de Privacidad
+de Datos UE-EE. UU. o con las cláusulas contractuales tipo de la Comisión Europea.
+
 Tu perfil público, tus entradas (tras el sellado, con tu nombre) y los resultados son públicos por naturaleza
 de la competición.
 
 ## Tus derechos
 
 Desde **Ajustes → Privacidad** puedes descargar todos tus datos y borrar tu cuenta. También puedes pedirnos
-acceso, rectificación, supresión, oposición, limitación o portabilidad en [[email de contacto]]. Si crees que
+acceso, rectificación, supresión, oposición, limitación o portabilidad en justsomeotherpeople@gmail.com. Si crees que
 no lo hacemos bien, puedes reclamar ante la Agencia Española de Protección de Datos (aepd.es).
 
 ## Edad

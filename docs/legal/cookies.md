@@ -1,6 +1,6 @@
 # Política de cookies
 
-> Borrador para la beta (versión 1, 15 de octubre de 2026).
+> Versión de la beta (versión 1, 15 de octubre de 2026).
 
 BeatBattle solo usa **cookies técnicas**, las necesarias para que funcione. No usamos cookies de analítica, de
 publicidad ni de terceros, así que no hace falta pedirte permiso ni enseñarte un aviso.
