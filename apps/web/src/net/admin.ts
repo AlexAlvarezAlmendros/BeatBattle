@@ -94,7 +94,9 @@ export class UploadError extends Error {
 export function uploadReason(body: string): string | null {
   try {
     const message = (JSON.parse(body) as { error?: { message?: unknown } }).error?.message
-    return typeof message === 'string' && message.trim() ? message.trim().replace(/\.+$/, '').slice(0, 160) : null
+    return typeof message === 'string' && message.trim()
+      ? message.trim().replace(/\.+$/, '').slice(0, 160)
+      : null
   } catch {
     return null
   }
