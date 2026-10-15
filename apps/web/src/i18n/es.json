@@ -1871,6 +1871,7 @@
       "challengeField": "Reto extra (opcional)",
       "blind": "Voto ciego",
       "golden": "Semana dorada",
+      "goldenHelp": "Semana dorada: una sorpresa sin anunciar, una o dos al año. Con la capa de juego trae XP doble, ascuas en la arena y su propio logro; no toca los votos ni la clasificación. Hoy solo se guarda: durante la beta no cambia nada de la semana.",
       "submit": "Programar la semana",
       "noSamples": "Sube antes un sample.",
       "past": "Semanas anteriores",

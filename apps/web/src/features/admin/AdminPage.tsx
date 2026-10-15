@@ -195,7 +195,7 @@ function WeeksTable({
   )
 }
 
-function ScheduleForm({
+export function ScheduleForm({
   gaps,
   samples,
   onDone,
@@ -215,7 +215,7 @@ function ScheduleForm({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState<string | null>(null)
-  const ids = { monday: useId(), sample: useId(), title: useId() }
+  const ids = { monday: useId(), sample: useId(), title: useId(), golden: useId() }
   const chosenMonday = monday || future[0] || ''
   const chosenSample = sampleId || samples[0]?.id || ''
 
@@ -284,8 +284,12 @@ function ScheduleForm({
           label={t('admin.calendar.golden')}
           pressed={golden}
           onChange={setGolden}
+          aria-describedby={ids.golden}
         />
       </div>
+      <p id={ids.golden} className={styles.muted}>
+        {t('admin.calendar.goldenHelp')}
+      </p>
       {error && <PaperNotice live>{error}</PaperNotice>}
       {done && <Done>{done}</Done>}
       <Button type="submit" variant="cta" loading={busy} className={styles.submit}>
