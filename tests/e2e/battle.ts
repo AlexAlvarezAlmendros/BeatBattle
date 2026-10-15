@@ -1,4 +1,10 @@
-import { type Browser, type BrowserContext, expect, type Page } from '@playwright/test'
+import {
+  type APIRequestContext,
+  type Browser,
+  type BrowserContext,
+  expect,
+  type Page,
+} from '@playwright/test'
 
 /**
  * Una semana en juego con entradas, para los E2E de la Fase 5 (tarea 5.20): el admin sube el sample y
@@ -288,4 +294,34 @@ export async function lastMail(page: Page, email: string, contains: string) {
     `/api/test/mailbox?to=${encodeURIComponent(email)}&contains=${encodeURIComponent(contains)}`,
   )
   return (await res.json()).data as { subject: string; text: string } | null
+}
+
+/** El secreto del `tick` en los E2E (el de `playwright.config.ts`). */
+export const CRON_SECRET = 'e2e-cron-secret-0123456789abcdefghij'
+
+/**
+ * Llama al `tick` con el reloj `now` hasta que el email llega al buzón de prueba (o se rinde a las `tries`). La
+ * BD de los E2E es compartida: el drop de cada lunes sale a todas sus cuentas y cada pasada envía como mucho
+ * 40, en orden de prioridad (el servicio delante, los avisos después). Con el `tick` cada 15 minutos, en
+ * producción el aviso llega en la pasada siguiente; aquí, en la vuelta siguiente del bucle.
+ */
+export async function tickUntilMail(
+  request: APIRequestContext,
+  now: number,
+  email: string,
+  contains: string,
+  tries = 20,
+): Promise<{ subject: string; text: string } | null> {
+  for (let i = 0; i < tries; i++) {
+    const tick = await request.get('/api/cron/tick', {
+      headers: { authorization: `Bearer ${CRON_SECRET}`, 'x-bb-test-now': String(now) },
+    })
+    expect(tick.ok(), await tick.text()).toBe(true)
+    const res = await request.get(
+      `/api/test/mailbox?to=${encodeURIComponent(email)}&contains=${encodeURIComponent(contains)}`,
+    )
+    const mail = (await res.json()).data as { subject: string; text: string } | null
+    if (mail) return mail
+  }
+  return null
 }
