@@ -32,9 +32,9 @@ Lo demás de la beta no añade requisitos: pone en producción los de F0–F6 y 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
 | B.1 | ⚠️ Decisiones de antes de la beta: premios (por defecto, sin premio material), el menú en los móviles de 781–840 px de alto (acta de la 0.28), fecha de la primera semana y la lista de 15–25 productores | 🔒 Usuario | — | ROADMAP «Decisiones abiertas» |
-| B.2 | Textos legales en `docs/legal/` (privacidad, términos, cookies y bases del Anexo A) y su página `/legal/:doc` en lugar de la provisional; los datos del sello (razón social, NIF, domicilio, email de contacto) como huecos a rellenar | ⬜ Listo | — | §4.14, Anexo A · `RNF-PRIV-05` |
-| B.3 | ⚠️ Revisión de los textos por el usuario y los datos del sello | 🔒 B.2 | B.2 | Antes del lanzamiento público, revisión con criterio legal (F10) |
-| B.4 | Guía de despliegue (`docs/deploy/beta.md`): recursos, variables, orden y comprobaciones; `pnpm preflight`, que valida las variables de producción sin red | ⬜ Listo | — | §4.15 |
+| B.2 | Textos legales en `docs/legal/` (privacidad, términos, cookies y bases del Anexo A) y su página `/legal/:doc` en lugar de la provisional; los datos del sello (razón social, NIF, domicilio, email de contacto) como huecos a rellenar | ✅ Hecho | — | §4.14, Anexo A · `RNF-PRIV-05` · Hecho: `docs/legal/{privacidad,terminos,cookies,bases}.md` y `/legal/:doc` con el índice y el texto (`app/legal/markdown.tsx`, 4 tests); mirada en 1440 y 390. Pasa a la B.3 (revisión del usuario y datos del sello). |
+| B.3 | ⚠️ Revisión de los textos por el usuario y los datos del sello | 🔒 Usuario | B.2 | Antes del lanzamiento público, revisión con criterio legal (F10) |
+| B.4 | Guía de despliegue (`docs/deploy/beta.md`): recursos, variables, orden y comprobaciones; `pnpm preflight`, que valida las variables de producción sin red | ✅ Hecho | — | §4.15 · Hecho: `docs/deploy/beta.md` y `pnpm --filter @beatbattle/server preflight` (`config/preflight.ts`, 3 tests). |
 | B.5 | ⚠️ Recursos: proyecto de Vercel (`fra1`), Turso (UE), Cloudinary (prefijo `beatbattle`), dominio `battle.otherpeople.es`, Gmail propia de BeatBattle (contraseña de aplicación), OAuth de Google y Discord con las URL de producción, secretos y la variable `BB_TICK_URL` del flujo de GitHub | 🔒 Usuario | B.4 | Nada se crea sin confirmación (CLAUDE.md) |
 | B.6 | ⚠️ Preview y producción: desplegar, prueba de humo (salud, registro, subida real, voto, sellado de una semana de prueba, Lunes de batalla a una lista blanca), validadores (`RF-SHARE-01`, `RF-SHARE-05`) y lo escrito sin verificar (reescrituras de las páginas compartibles, `includeFiles` de las fuentes y del `index.html`) | 🔒 B.5 | B.5 | |
 | B.7 | ⚠️ Calendario real: samples del sello con su licencia y 3 semanas programadas | 🔒 B.5 | B.5 | |
@@ -61,4 +61,5 @@ BeatBattle en producción con tres semanas jugadas por productores reales y un a
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-15 | B.2, B.4 | Textos legales (borradores con huecos para los datos del sello) y su página; guía de despliegue y `preflight` (guía v0.6.83). |
 | 2026-10-15 | — | Plan creado al cerrar la F6. B.2 y B.4 se pueden hacer ya; el resto espera al usuario. |

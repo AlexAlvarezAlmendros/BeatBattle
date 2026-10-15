@@ -750,7 +750,8 @@
     "changeSection": "cambiar sección"
   },
   "legal": {
-    "summary": "Aquí irá el texto de este documento legal.",
+    "index": "Índice",
+    "indexLabel": "Índice del documento",
     "docs": {
       "bases": "Bases de la competición",
       "terminos": "Términos de uso",

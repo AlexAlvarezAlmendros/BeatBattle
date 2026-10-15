@@ -11,7 +11,8 @@
     "auth:schema": "auth generate --config src/auth/schema.cli.ts --adapter drizzle --dialect sqlite --output src/db/auth-schema.ts --yes && node scripts/auth-schema-post.mjs",
     "build": "vite build --config build.config.mjs && node scripts/smoke-bundle.mjs",
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "preflight": "tsx --env-file-if-exists=.env.production src/scripts/preflight.ts"
   },
   "dependencies": {
     "@beatbattle/covers": "workspace:^",
