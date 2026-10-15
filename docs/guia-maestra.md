@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.84 · 2026-10-15 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.85 · 2026-10-15 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2970,7 +2970,11 @@ Referencias: OWASP ASVS nivel 2 y las chuletas de autenticación, sesiones y sub
   OG y la tarjeta de resultado y sirve las páginas compartibles: no hay `api/og.tsx` ni `api/share.ts`
   aparte), región `fra1`. `api/index.ts` importa `apps/server/dist/vercel.mjs`, un ESM con los
   paquetes `@beatbattle/*` dentro que `pnpm build` genera con Vite SSR (`apps/server/build.config.mjs`)
-  y comprueba cargándolo con `node` puro y pidiendo `/api/health` (`scripts/smoke-bundle.mjs`). Se
+  y comprueba cargándolo con `node` puro y pidiendo `/api/health` (`scripts/smoke-bundle.mjs`) y, después,
+  como lo monta Vercel (`scripts/smoke-vercel.mjs`): copia solo la traza de `@vercel/nft` más el
+  `includeFiles` de `vercel.json` y arranca ahí. Lo que la API lee del disco y la traza no ve va en
+  `includeFiles`: las migraciones, las fuentes de las imágenes, el `index.html`, el `hb.wasm` de
+  `harfbuzzjs` (satori lo carga al importarse; sin él la función cae entera) y el binario de ffmpeg. Se
   valida en la primera preview (tarea 1.8). *Preview* por PR con su base de datos (rama de Turso) y su prefijo de
   Cloudinary.
 - **Turso** (UE), copias del proveedor + exportación semanal propia.
@@ -3699,6 +3703,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-15 | 0.6.85 | **Primer despliegue: la función caía entera** (`FUNCTION_INVOCATION_FAILED` en todas las rutas, también al entrar con Google y Discord): satori importa `harfbuzzjs`, que carga `hb.wasm` del disco al importarse, y la traza de Vercel no lo incluye; el rechazo sin manejar tumbaba el proceso. §4.15: `hb.wasm` y el binario de ffmpeg (que §4.8.4 ya daba por incluido y no lo estaba) en `includeFiles`, y `pnpm build` comprueba la función como la monta Vercel (`scripts/smoke-vercel.mjs`, con `@vercel/nft` de desarrollo). |
 | 2026-10-15 | 0.6.84 | **B.3: textos legales completos.** Anexo A: el organizador con los datos que el sello ya publica en `otherpeople.es` (NIF A00982223, domicilio en Igualada, `justsomeotherpeople@gmail.com` como contacto) y premios sin premio material en la beta (visibilidad y «Elección del sello»). `docs/legal/*` sin huecos, con las transferencias fuera de la UE (Marco de Privacidad UE-EE. UU. o cláusulas tipo) y los datos del prestador en los términos (LSSI art. 10). `pnpm preflight` rechaza un cupo de más de 450 con una cuenta `@gmail.com` (§4.19.1) y ya no pide «una dirección propia»: la cuenta es la del Workspace del sello, como dice §4.19.1. |
 | 2026-10-15 | 0.6.83 | **Plan de la beta, B.2 y B.4.** §3.8.14: los legales con sus textos (borradores de la beta en `docs/legal/`, con los datos del sello por rellenar), con el índice en la columna de la pieza. `RNF-PRIV-05` apunta a su texto. Guía de despliegue en `docs/deploy/beta.md` y `pnpm preflight`. |
 | 2026-10-15 | 0.6.82 | **Tarea 6.17b** (decisión del usuario: «la ceremonia tiene que ser 3D»). §3.8.6: la ceremonia en el Escenario, con su escena, cámara, nombres proyectados, respaldo 2D y Escenario solo para ella con la calidad baja. Los efectos `cer.*`, escuchados y aprobados por el usuario. |

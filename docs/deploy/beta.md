@@ -86,7 +86,8 @@ rm apps/server/.env.production               # no se queda en el disco
   `/semana/:slug/resultados` (`RF-SHARE-01`), y el de datos estructurados (`RF-SHARE-05`).
 - `robots.txt` y `sitemap.xml` en producción; en la preview, `robots.txt` cierra todo.
 - Lo escrito sin verificar hasta ahora: que la función reciba la URL original en las reescrituras de las páginas
-  compartibles y que `includeFiles` lleve las fuentes de las imágenes y el `index.html`.
+  compartibles. Que `includeFiles` lleve lo que la API lee del disco lo comprueba `pnpm build`
+  (`scripts/smoke-vercel.mjs`); el primer despliegue cayó entero por el `hb.wasm` de satori (guía v0.6.85).
 
 ## 7. Durante la beta (B.9)
 

@@ -6,7 +6,7 @@
   "regions": ["fra1"],
   "functions": {
     "api/index.ts": {
-      "includeFiles": "{apps/server/drizzle/**,apps/server/node_modules/@fontsource/*/files/*-latin-*-normal.woff,apps/web/dist/index.html}",
+      "includeFiles": "{apps/server/drizzle/**,apps/server/node_modules/@fontsource/*/files/*-latin-*-normal.woff,apps/web/dist/index.html,node_modules/.pnpm/harfbuzzjs@*/node_modules/harfbuzzjs/hb.wasm,node_modules/.pnpm/ffmpeg-static@*/node_modules/ffmpeg-static/ffmpeg}",
       "maxDuration": 10
     }
   },
