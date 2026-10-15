@@ -9,6 +9,7 @@ import { Tag } from '../../ui/Tag'
 import { authClient } from '../account/authClient'
 import { Done, PaperNotice } from '../account/FormBits'
 import { RequireSession } from '../account/RequireSession'
+import { useSignOut } from '../account/useSignOut'
 import { SettingsGroup, SettingsSection, SettingsStatus } from './SettingsSection'
 import styles from './SettingsSection.module.css'
 
@@ -17,7 +18,8 @@ const ClosedSchema = z.object({ closed: z.literal(true) })
 
 /**
  * `/ajustes/sesiones` (guía §2.3, `RF-AUTH-10`, tarea 2.20): dónde está abierta la cuenta (navegador
- * resumido y última actividad, la actual primero), cerrar una y «Cerrar las demás», que avisa por email.
+ * resumido y última actividad, la actual primero), cerrar una y «Cerrar las demás», que avisa por email. La
+ * actual se cierra saliendo (`RF-AUTH-11`).
  */
 export function SessionsSettingsPage() {
   return (
@@ -39,6 +41,7 @@ function SessionList() {
     queryFn: ({ signal }) => apiFetch('/api/me/sessions', { schema: ActiveSessionListSchema, signal }),
   })
   const refresh = () => client.invalidateQueries({ queryKey: SESSIONS_KEY })
+  const signOut = useSignOut()
   const closeOne = useMutation({
     mutationFn: (id: string) =>
       apiFetch(`/api/me/sessions/${encodeURIComponent(id)}`, { method: 'DELETE', schema: ClosedSchema }),
@@ -91,7 +94,17 @@ function SessionList() {
                   {t('settings.sessions.opened', { date: formatDate(session.createdAt) })}
                 </p>
               </div>
-              {!session.current && (
+              {session.current ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  loading={signOut.busy}
+                  aria-label={t('settings.sessions.signOutLabel')}
+                  onClick={() => void signOut.signOut()}
+                >
+                  {t('settings.sessions.signOut')}
+                </Button>
+              ) : (
                 <Button
                   variant="outline"
                   size="sm"
@@ -116,7 +129,7 @@ function SessionList() {
           <p className="settings-option-help">{t('settings.sessions.alone')}</p>
         )}
       </SettingsGroup>
-      {closeOne.isError || closeOthers.isError ? (
+      {closeOne.isError || closeOthers.isError || signOut.failed ? (
         <PaperNotice>{t('settings.sessions.actionError')}</PaperNotice>
       ) : (
         done && <Done>{done}</Done>
