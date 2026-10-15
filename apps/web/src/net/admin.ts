@@ -80,9 +80,30 @@ export const updateWeek = (slug: string, patch: WeekUpdate): Promise<AdminWeek> 
 export const unscheduleWeek = (slug: string) =>
   apiFetch(`/api/admin/weeks/${encodeURIComponent(slug)}`, { method: 'DELETE', schema: z.unknown() })
 
+/** Una subida rechazada por el almacenamiento, con su código y, si lo da, su motivo (Cloudinary: `error.message`). */
+export class UploadError extends Error {
+  constructor(
+    readonly status: number,
+    readonly reason: string | null,
+  ) {
+    super(`subida: ${status}${reason ? ` (${reason})` : ''}`)
+  }
+}
+
+/** El motivo de un rechazo de Cloudinary (`{ "error": { "message": … } }`), sin el punto final y recortado; si no lo hay, null. */
+export function uploadReason(body: string): string | null {
+  try {
+    const message = (JSON.parse(body) as { error?: { message?: unknown } }).error?.message
+    return typeof message === 'string' && message.trim() ? message.trim().replace(/\.+$/, '').slice(0, 160) : null
+  } catch {
+    return null
+  }
+}
+
 /**
  * Sube un fichero directamente al almacenamiento con la firma del servidor (§4.8.2): el audio nunca pasa
- * por la API. `XMLHttpRequest` y no `fetch` porque da el progreso de la subida.
+ * por la API. `XMLHttpRequest` y no `fetch` porque da el progreso de la subida. Si el almacenamiento la
+ * rechaza, el error lleva su motivo para que el panel lo enseñe.
  */
 export function uploadSigned(
   upload: { uploadUrl: string; fields: Record<string, string> },
@@ -100,7 +121,9 @@ export function uploadSigned(
       if (event.lengthComputable) onProgress(event.loaded / event.total)
     }
     xhr.onload = () =>
-      xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error(`subida: ${xhr.status}`))
+      xhr.status >= 200 && xhr.status < 300
+        ? resolve()
+        : reject(new UploadError(xhr.status, uploadReason(xhr.responseText)))
     xhr.onerror = () => reject(new Error('subida: sin conexión'))
     xhr.onabort = () => reject(new DOMException('cancelada', 'AbortError'))
     signal?.addEventListener('abort', () => xhr.abort())

@@ -1910,6 +1910,7 @@
       "uploading": "Subiendo… {percent} %",
       "uploaded": "Subido",
       "uploadError": "La subida ha fallado. Prueba otra vez.",
+      "uploadErrorWith": "La subida ha fallado: {reason}. Prueba otra vez.",
       "removeStems": "Quitar los stems",
       "fields": "Ficha",
       "titleField": "Título",
