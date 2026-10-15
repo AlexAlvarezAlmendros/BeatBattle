@@ -66,6 +66,11 @@ export function markDropSeen(slug: string): Promise<unknown> {
   return apiFetch('/api/me/seen', { method: 'POST', body: { kind: 'drop', ref: slug }, schema: Nothing })
 }
 
+/** Marcar la ceremonia de una semana sellada como vista (`RF-RES-09`): la home deja de ofrecerla. */
+export function markCeremonySeen(slug: string): Promise<unknown> {
+  return apiFetch('/api/me/seen', { method: 'POST', body: { kind: 'ceremony', ref: slug }, schema: Nothing })
+}
+
 /** Alerta de drop sin cuenta (§2.12.3): siempre «revisa tu email», sin decir si la dirección ya estaba. */
 export function subscribeToDrops(email: string): Promise<unknown> {
   return apiFetch('/api/subscribe', { method: 'POST', body: { email }, schema: Nothing })

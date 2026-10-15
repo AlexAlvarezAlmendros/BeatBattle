@@ -1,0 +1,353 @@
+/*
+ * Ceremonia de resultados (§3.8.6): capa a toda la pantalla, con velo opaco, por encima del marco (como la
+ * revelación del drop, §3.8.2). Los tiempos de cada paso viven en `CEREMONY_TIMELINE` (la línea de tiempo de la
+ * ceremonia, §3.6) y llegan aquí como variables (`--cer-tear`, `--cer-name`, `--cer-burst`); aquí, solo cómo
+ * entra cada pieza. Sin movimiento (Anexo E), las piezas aparecen por fundido y nada se desplaza.
+ */
+.ceremony {
+  position: fixed;
+  inset: 0;
+  z-index: var(--bb-z-ceremony);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  justify-items: center;
+  padding: var(--bb-space-6) var(--bb-gutter) var(--bb-space-5);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.shade {
+  position: absolute;
+  inset: 0;
+  background: var(--bb-black);
+  animation: bb-cer-fade var(--bb-dur-slow) var(--bb-ease-out) both;
+}
+
+.announcerSlot {
+  position: relative;
+  width: min(100%, 40rem);
+  min-height: var(--bb-space-16);
+}
+
+/* Del 10.º al 4.º: cruzan la pantalla de derecha a izquierda, uno tras otro. */
+.burst {
+  position: relative;
+  align-self: center;
+  display: grid;
+  gap: var(--bb-space-3);
+  width: min(100%, 36rem);
+}
+
+.burstCard {
+  padding: var(--bb-space-3) var(--bb-space-5);
+  background: var(--bb-panel);
+  border-left: var(--bb-stroke-cursor) solid var(--bb-red);
+  color: var(--bb-text);
+  font-size: var(--bb-fs-lg);
+  animation: bb-cer-cross var(--cer-burst) var(--bb-ease-out) both;
+}
+
+.burstCard b {
+  font-family: var(--bb-font-num);
+  font-weight: var(--bb-weight-extrabold);
+  color: var(--bb-red);
+}
+
+/* Un puesto bajo su foco. */
+.spot {
+  position: relative;
+  isolation: isolate;
+  align-self: center;
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-3);
+  text-align: center;
+}
+
+.beam {
+  position: absolute;
+  inset: -50vh -20% 0;
+  z-index: -1;
+  background: linear-gradient(180deg, var(--bb-line-strong), transparent 80%);
+  clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
+  animation: bb-cer-fade var(--bb-dur-reward) var(--bb-ease-out) both;
+}
+
+.crown {
+  width: var(--bb-space-16);
+  fill: var(--bb-red);
+  stroke: var(--bb-black);
+  stroke-width: var(--bb-stroke-cursor);
+  stroke-linejoin: round;
+  animation: bb-cer-stamp var(--bb-dur-slam) var(--bb-ease-back) both;
+}
+
+/* El vinilo-medalla baja por el haz. */
+.medal {
+  width: var(--bb-space-16);
+  height: var(--bb-space-16);
+  animation: bb-cer-descend var(--bb-dur-reward) var(--bb-ease-out) both;
+}
+
+.cover {
+  position: relative;
+  width: min(40vmin, 16rem);
+  aspect-ratio: 1;
+}
+
+.spot[data-place="1"] .cover {
+  width: min(46vmin, 19rem);
+}
+
+.cover > :is(canvas, img) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* El sello «AUTORÍA OCULTA», en dos trozos que se despegan al arrancarlo. */
+.seal {
+  position: absolute;
+  top: 42%;
+  padding: var(--bb-space-2) var(--bb-space-3);
+  background: var(--bb-black);
+  color: var(--bb-white);
+  border: var(--bb-stroke-stamp) solid var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-size: var(--bb-fs-md);
+  text-transform: uppercase;
+  letter-spacing: var(--bb-tracking-label);
+  white-space: nowrap;
+}
+
+.sealA {
+  right: 50%;
+  rotate: calc(var(--bb-tilt-stamp) * -0.6);
+  clip-path: polygon(0 0, 100% 0, 92% 30%, 100% 55%, 90% 78%, 96% 100%, 0 100%);
+}
+
+.sealB {
+  left: 50%;
+  rotate: calc(var(--bb-tilt-stamp) * -0.6);
+  clip-path: polygon(8% 0, 100% 0, 100% 100%, 0 100%, 9% 72%, 2% 45%, 10% 22%);
+}
+
+.spot:not([data-reveal="spot"]) .sealA {
+  animation: bb-cer-tear-a var(--cer-tear) var(--bb-ease-in-out) both;
+}
+
+.spot:not([data-reveal="spot"]) .sealB {
+  animation: bb-cer-tear-b var(--cer-tear) var(--bb-ease-in-out) both;
+}
+
+.position {
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-2xl);
+  font-weight: var(--bb-weight-extrabold);
+  color: var(--bb-red);
+}
+
+.names {
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-1);
+  min-height: var(--bb-space-16);
+}
+
+.alias,
+.producer {
+  font-size: var(--bb-fs-3xl);
+  line-height: var(--bb-leading-display);
+  text-shadow: var(--bb-shadow-hard);
+  overflow-wrap: anywhere;
+}
+
+/* El alias se tuerce hasta el nombre del productor. */
+.producer {
+  animation: bb-cer-glitch var(--cer-name) steps(4) both;
+}
+
+.aliasX {
+  padding: var(--bb-space-1) var(--bb-space-2);
+  background: var(--bb-black);
+  color: var(--bb-red);
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+  text-decoration: line-through;
+}
+
+.score {
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-lg);
+  animation: bb-cer-fade var(--bb-dur-base) var(--bb-ease-out) both;
+}
+
+/* Confeti en la paleta, dentro del área que autoriza el limitador de destellos (≤ 25 %, ≤ 40 %). */
+.confetti {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
+  width: var(--confetti-size);
+  height: var(--confetti-size);
+  pointer-events: none;
+}
+
+.confetti span {
+  position: absolute;
+  top: 0;
+  left: calc(var(--i) * 4%);
+  width: var(--bb-space-2);
+  height: var(--bb-space-3);
+  background: var(--bb-red);
+  animation: bb-cer-fall var(--bb-dur-swap) var(--bb-ease-out) both;
+  animation-delay: calc(var(--i) * var(--bb-stagger-wave) * 20);
+}
+
+.confetti span[data-tone="1"] {
+  background: var(--bb-white);
+}
+
+.confetti span[data-tone="2"] {
+  background: var(--bb-wine);
+}
+
+/* Tu resultado, al final. */
+.mine {
+  align-self: center;
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-3);
+  padding: var(--bb-space-6) var(--bb-space-10);
+  background: var(--bb-panel);
+  border: var(--bb-stroke) solid var(--bb-red);
+  animation: bb-cer-stamp var(--bb-dur-slam) var(--bb-ease-back) both;
+}
+
+.mineTag {
+  padding: var(--bb-space-2) var(--bb-space-4);
+  background: var(--bb-red-cta);
+  color: var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  text-transform: uppercase;
+}
+
+.minePosition {
+  font-size: var(--bb-fs-timer);
+  line-height: var(--bb-leading-display);
+}
+
+.mineScore {
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-lg);
+}
+
+.foot {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.announcer {
+  width: 100%;
+}
+
+/* Sin movimiento (Anexo E): fundidos y cambios de texto, nada se desplaza ni se tuerce. */
+.ceremony[data-reduced] :is(.burstCard, .medal, .crown, .mine, .sealA, .sealB, .producer) {
+  animation-name: bb-cer-fade;
+}
+
+.ceremony[data-reduced] .spot:not([data-reveal="spot"]) :is(.sealA, .sealB) {
+  animation-name: bb-cer-fade-out;
+}
+
+@keyframes bb-cer-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes bb-cer-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes bb-cer-cross {
+  from {
+    translate: calc(60vw * var(--bb-motion)) 0;
+    opacity: 0;
+  }
+}
+
+@keyframes bb-cer-descend {
+  from {
+    translate: 0 calc(-60vh * var(--bb-motion));
+  }
+}
+
+@keyframes bb-cer-stamp {
+  from {
+    scale: calc(1 + 0.3 * var(--bb-motion));
+    opacity: 0;
+  }
+}
+
+@keyframes bb-cer-tear-a {
+  to {
+    translate: calc(-40% * var(--bb-motion)) calc(30vh * var(--bb-motion));
+    rotate: calc(var(--bb-tilt-stamp) * -4);
+    opacity: 0;
+  }
+}
+
+@keyframes bb-cer-tear-b {
+  to {
+    translate: calc(40% * var(--bb-motion)) calc(30vh * var(--bb-motion));
+    rotate: calc(var(--bb-tilt-stamp) * 4);
+    opacity: 0;
+  }
+}
+
+@keyframes bb-cer-glitch {
+  0% {
+    opacity: 0;
+    translate: calc(var(--bb-space-2) * var(--bb-motion)) 0;
+  }
+
+  50% {
+    opacity: 1;
+    translate: calc(-1 * var(--bb-space-2) * var(--bb-motion)) 0;
+  }
+}
+
+@keyframes bb-cer-fall {
+  from {
+    translate: 0 calc(-20vh * var(--bb-motion));
+    rotate: 0turn;
+  }
+
+  to {
+    translate: 0 100%;
+    rotate: 2turn;
+    opacity: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .alias,
+  .producer {
+    font-size: var(--bb-fs-2xl);
+  }
+}

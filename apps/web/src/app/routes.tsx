@@ -145,6 +145,7 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
                   'listen',
                   'standings',
                   'share',
+                  'replay',
                   'back',
                   'sound',
                 ]),

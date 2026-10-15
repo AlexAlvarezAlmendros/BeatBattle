@@ -56,6 +56,7 @@ export const CONTROL_KEYS: Readonly<
   podium: { keys: [ARROW_LEFT, ARROW_RIGHT], verb: 'frame.keys.podium' },
   standings: { keys: [{ glyph: 'frame.keys.glyph.t' }], verb: 'frame.keys.standings' },
   share: { keys: [{ glyph: 'frame.keys.glyph.x' }], verb: 'frame.keys.share' },
+  replay: { keys: [{ glyph: 'frame.keys.glyph.r' }], verb: 'frame.keys.replay' },
 }
 
 /**

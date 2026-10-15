@@ -1,7 +1,7 @@
 import type { ResultRow, WeekResults } from '@beatbattle/shared'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
-import { Link, type LoaderFunctionArgs, useLoaderData } from 'react-router'
+import { Link, type LoaderFunctionArgs, useLoaderData, useSearchParams } from 'react-router'
 import { DocumentTitle } from '../../app/DocumentTitle'
 import { useControlKeys } from '../../app/layout/screen'
 import { FrameSlot } from '../../app/layout/slots'
@@ -9,7 +9,9 @@ import { paths } from '../../app/paths'
 import { notFound } from '../../app/routes'
 import { formatDate, formatNumber, t } from '../../i18n'
 import { ApiClientError } from '../../net/api'
+import { queryKeys } from '../../net/queryKeys'
 import { resultsQuery } from '../../net/results'
+import { markCeremonySeen } from '../../net/weeks'
 import { HalftoneCanvas } from '../../ui/arena/HalftoneCanvas'
 import { Button } from '../../ui/Button'
 import { GenerativeCover } from '../../ui/CoverArt'
@@ -21,8 +23,10 @@ import { Stamp } from '../../ui/Stamp'
 import { useShortcuts } from '../../ui/shortcuts'
 import { TitlePlate } from '../../ui/TitlePlate'
 import { Done } from '../account/FormBits'
+import { useSession } from '../account/session'
 import { usePlayer } from '../player/store'
 import { entryTrack } from '../player/tracks'
+import { ResultsCeremony } from './ResultsCeremony'
 import { MiniHistogram, scoreOf } from './score'
 import styles from './WeekResultsPage.module.css'
 
@@ -36,7 +40,7 @@ export async function weekResultsLoader({ params, request }: LoaderFunctionArgs)
   }
 }
 
-const KEYS = ['podium', 'listen', 'standings', 'share', 'back', 'sound'] as const
+const KEYS = ['podium', 'listen', 'standings', 'share', 'replay', 'back', 'sound'] as const
 
 const isMedal = (position: number | null): position is MedalPlace =>
   position === 1 || position === 2 || position === 3
@@ -63,7 +67,20 @@ export function WeekResultsPage() {
   const standingsRef = useRef<HTMLElement>(null)
   const shortcuts = useShortcuts((state) => state.enabled)
   const [shared, setShared] = useState(false)
-  useControlKeys(KEYS)
+  const [params, setParams] = useSearchParams()
+  // `?ceremonia`: la home la ofrece la primera vez tras el sellado (`RF-RES-09`).
+  const [ceremony, setCeremony] = useState(() => params.has('ceremonia') && podium.length > 0)
+  const signedIn = useSession((state) => state.me !== null)
+  const queryClient = useQueryClient()
+  useControlKeys(ceremony ? null : KEYS)
+  const endCeremony = () => {
+    setCeremony(false)
+    if (params.has('ceremonia')) setParams({}, { replace: true })
+    if (signedIn)
+      void markCeremonySeen(week.slug)
+        .then(() => queryClient.invalidateQueries({ queryKey: queryKeys.weeks.current() }))
+        .catch(() => {})
+  }
 
   const play = (row: ResultRow) => usePlayer.getState().play(entryTrack(row.entry, { votable: false }))
   const showStandings = () => {
@@ -98,6 +115,9 @@ export function WeekResultsPage() {
       } else if (key === 'x') {
         event.preventDefault()
         void share()
+      } else if (key === 'r' && podium.length > 0) {
+        event.preventDefault()
+        setCeremony(true)
       }
     }
     window.addEventListener('keydown', onKey)
@@ -135,6 +155,16 @@ export function WeekResultsPage() {
             votes: t('results.votes', { count: totalVotes }),
           })}
         </p>
+        {podium.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            keyHint={t('frame.keys.glyph.r')}
+            onClick={() => setCeremony(true)}
+          >
+            {t('ceremony.watch')}
+          </Button>
+        )}
         {week.correctedAt !== null && (
           <p className={styles.corrected} role="note">
             {t('results.corrected', { date: formatDate(week.correctedAt) })}
@@ -162,6 +192,7 @@ export function WeekResultsPage() {
             onStandings={showStandings}
           />
           {shared && <Done>{t('results.shared')}</Done>}
+          {ceremony && <ResultsCeremony results={data} onDone={endCeremony} />}
           <section ref={standingsRef} className={styles.standings} aria-labelledby="standings-title">
             <h2 id="standings-title" className={cx('bb-label', styles.standingsTitle)}>
               {t('results.standingsTitle')}

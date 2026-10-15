@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.78 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.79 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1875,6 +1875,16 @@ retirar, un aviso lo dice antes de la ranura vacía. Errores en tono de juego pe
    de nivel, se encadena la animación de nivel.
 5. Cierre en la **página de resultados**.
 
+La línea de tiempo (`CEREMONY_TIMELINE`) fija los instantes: el 3.º a los 7 s, el 2.º a los 11,5 s, el latido
+a los 15,5 s, el 1.º a los 17,5 s, «¡CAMPEÓN!» a los 19,5 s, tu resultado a los 23,5 s y el cierre a los
+26,5 s. La ráfaga va de uno en uno cada 600 ms. El momento más enérgico de cada beat es la ventana de su forma
+de onda medida con más amplitud (`loudestWindowMs`, `packages/audio`); suena por el reproductor global, con la
+sonoridad igualada. El confeti es del DOM, pide permiso al limitador de destellos y va dentro del área y la
+opacidad que este autoriza. La ceremonia es una capa modal (lo de detrás queda `inert`) y se salta con Esc,
+Intro, espacio, «Saltar» o un clic. La página de resultados la abre con «Ver la ceremonia» (R) o con
+`?ceremonia` (desde la home), y al cerrarla queda vista (`RF-RES-09`). Sin movimiento, los mismos pasos por
+fundidos, sin confeti. El XP que rueda en tu carta llega con la Fase 7.
+
 **Página de resultados** (`/semana/:slug/resultados`): placa de título «RESULTADOS OFICIALES · SEMANA
 40» con el sello «SELLADA»; **podio con escena**: suelo de trama, tres focos y **peanas de alturas
 distintas** (1.º roja en el centro, 2.º a la izquierda, 3.º a la derecha, número gigante en la cara de
@@ -3508,7 +3518,7 @@ efectos al 100 %; variación = desafinación aleatoria por disparo.
 | `jury.swap` | Cambio de entrada | *Scratch* corto (ruido con barrido de tono rápido) | 300 ms | −16 | ±1 st |
 | `level.up` | Subir de nivel | Fanfarria: arpegio de 6 notas + acorde, FM brillante | 1,6 s | −8 | 0 |
 | `ach.common/rare/epic/legendary` | Logro | Campanitas de 2 / 3 / 4 notas / acorde con coro de ruido filtrado | 0,5–2 s | −14 a −8 | 0 |
-| `cer.drumroll` | Ceremonia | Redoble de caja sintética (ráfagas de ruido) en crescendo | 3–5 s | −14→−8 | 0 |
+| `cer.drumroll` | Ceremonia | Redoble de caja sintética (ráfagas de ruido) en crescendo | 4 s (de 3–5) | −14→−8 | 0 |
 | `cer.tear` | Se arranca el sello «AUTORÍA OCULTA» (§3.8.6) | Papel que se rasga | 300 ms | −16 | 0 |
 | `cer.reveal` | Revelación de cada puesto | Golpe de bombo + platillo | 800 ms | −8 | 0 |
 | `cer.heartbeat` | Suspense antes del 1.º | Latido grave | 2 s | −14 | 0 |
@@ -3670,6 +3680,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.79 | **Tarea 6.17.** §3.8.6: la línea de tiempo de la ceremonia, el momento más enérgico de cada beat (`loudestWindowMs`), el confeti con el limitador, la capa modal, cómo se abre y cuándo queda vista. Anexo D: el redoble dura 4 s, y los seis `cer.*` están medidos *offline* a su nivel. Corregido el chasquido de la primera muestra en las capas de ruido con retardo: cada capa parte de ganancia 0. |
 | 2026-10-13 | 0.6.78 | **Tarea 6.15.** §3.8.6, página de resultados: sin cuña, placa del HUD con la semana y su sello, teclas (← → podio, Intro, T, X), móvil apilado, poco alto y contraste alto. |
 | 2026-10-13 | 0.6.77 | **Tarea 6.13.** §2.15: qué lleva el sitemap (páginas fijas, semanas selladas y perfiles de participantes de semanas selladas) y `robots.txt` cerrado fuera de producción de verdad (`indexable` en la configuración). |
 | 2026-10-13 | 0.6.76 | **Tarea 6.12.** §4.7.7, §4.15: las páginas compartibles las sirve la app de Fastify (reescrituras de `vercel.json` a `/api`) y no hay un `api/share.ts` aparte. Se concretan los 404 con el `index.html` tal cual, el 301 del perfil, el escape de los metadatos y el 503 sin la web construida. |

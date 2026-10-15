@@ -54,8 +54,8 @@ export interface SfxDef {
 /**
  * Los efectos de la tarea 1.4, `vote.unlocked` de la 1.5, los de la interfaz de la 2.27 (`ui.move`,
  * `ui.toggle`, `ui.open`/`ui.close`, `ui.error`, `ui.success`, `nav.page`), `drop.needle` de la 3.17 y los
- * de la subida de la 4.17 (`upload.*`, `ann.newbeat`) y los del Modo Jurado de la 5.18 (`combo.up`, `jury.swap`). El
- * resto del Anexo D llega con sus pantallas.
+ * de la subida de la 4.17 (`upload.*`, `ann.newbeat`), los del Modo Jurado de la 5.18 (`combo.up`, `jury.swap`) y
+ * los de la ceremonia de resultados de la 6.17 (`cer.*`). El resto del Anexo D llega con sus pantallas.
  */
 export const SFX_IDS = [
   'ui.enter',
@@ -90,6 +90,12 @@ export const SFX_IDS = [
   'ann.newbeat',
   'combo.up',
   'jury.swap',
+  'cer.drumroll',
+  'cer.tear',
+  'cer.reveal',
+  'cer.heartbeat',
+  'cer.airhorn',
+  'cer.confetti',
 ] as const
 
 export type SfxId = (typeof SFX_IDS)[number]
@@ -639,6 +645,123 @@ export function sfxCatalog(key: Key = DEFAULT_KEY, xpCombo = 0): Record<SfxId, S
           }),
         ),
       ],
+    },
+    // Ceremonia de resultados (§3.8.6, tarea 6.17). Redoble de caja: ráfagas de ruido cada 50 ms que crecen de
+    // −14 a −8 dB (el nivel es el del final).
+    'cer.drumroll': {
+      jitter: 0,
+      levelDb: -8,
+      duration: 4,
+      layers: Array.from({ length: 76 }, (_, index) =>
+        noise({
+          noise: 'white',
+          filter: { type: 'bandpass', freq: at(2600), q: 0.9 },
+          attack: 0.002,
+          decay: 0.035,
+          dur: 0.05,
+          gain: 3.84 * 10 ** ((-6 * (1 - index / 75)) / 20),
+          delay: index * 0.05,
+        }),
+      ),
+    },
+    // El sello «AUTORÍA OCULTA» que se rasga: ruido que barre hacia arriba con chasquidos de fibra.
+    'cer.tear': {
+      jitter: 0,
+      levelDb: -16,
+      duration: 0.3,
+      layers: [
+        noise({
+          noise: 'white',
+          filter: { type: 'bandpass', freq: [900, 5200], q: 1.8 },
+          attack: 0.004,
+          decay: 0.22,
+          dur: 0.28,
+          gain: 4.5,
+        }),
+        ...[0.03, 0.08, 0.12, 0.17, 0.21].map((delay) =>
+          noise({
+            noise: 'white',
+            filter: { type: 'highpass', freq: at(3500), q: 0.7 },
+            attack: 0.001,
+            decay: 0.008,
+            dur: 0.02,
+            gain: 1.84,
+            delay,
+          }),
+        ),
+      ],
+    },
+    // Cada puesto que se revela: bombo que cae a la tónica grave y un platillo largo.
+    'cer.reveal': {
+      jitter: 0,
+      levelDb: -8,
+      duration: 0.8,
+      layers: [
+        tone({ freq: [lowRoot * 2, lowRoot / 2], attack: 0.002, decay: 0.25, dur: 0.4, gain: 0.97 }),
+        noise({
+          noise: 'white',
+          filter: { type: 'highpass', freq: [7000, 5000], q: 0.6 },
+          attack: 0.003,
+          decay: 0.6,
+          dur: 0.78,
+          gain: 0.43,
+          delay: 0.01,
+        }),
+      ],
+    },
+    // Suspense antes del 1.º: dos latidos graves («lub-dub») en 2 s.
+    'cer.heartbeat': {
+      jitter: 0,
+      levelDb: -14,
+      duration: 2,
+      layers: [0, 0.22, 1, 1.22].map((delay, index) =>
+        tone({
+          freq: [lowRoot, lowRoot / 1.5],
+          filter: { type: 'lowpass', freq: at(400), q: 0.7 },
+          attack: 0.006,
+          decay: 0.14,
+          dur: 0.22,
+          gain: index % 2 === 0 ? 0.91 : 0.64,
+          delay,
+        }),
+      ),
+    },
+    // El 1.º: bocina, tres sierras desafinadas con su envolvente de tono, en tres ráfagas.
+    'cer.airhorn': {
+      jitter: 0,
+      levelDb: -8,
+      duration: 1.4,
+      layers: [0, 0.45, 0.9].flatMap((delay, burst) =>
+        [0.99, 1, 1.012].map((detune) =>
+          tone({
+            wave: 'sawtooth',
+            freq: [root * detune * 0.94, root * detune],
+            filter: { type: 'lowpass', freq: at(3000), q: 0.8 },
+            attack: 0.01,
+            decay: burst === 2 ? 0.45 : 0.3,
+            dur: burst === 2 ? 0.5 : 0.38,
+            gain: 0.46,
+            delay,
+          }),
+        ),
+      ),
+    },
+    // Confeti: crujido brillante de ruido agudo.
+    'cer.confetti': {
+      jitter: 0,
+      levelDb: -20,
+      duration: 1,
+      layers: Array.from({ length: 14 }, (_, index) =>
+        noise({
+          noise: 'white',
+          filter: { type: 'highpass', freq: at(6000 + (index % 4) * 900), q: 0.7 },
+          attack: 0.001,
+          decay: 0.02,
+          dur: 0.04,
+          gain: 1.82,
+          delay: index * 0.065,
+        }),
+      ),
     },
   }
 }

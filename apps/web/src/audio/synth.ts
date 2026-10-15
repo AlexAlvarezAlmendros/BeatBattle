@@ -12,6 +12,9 @@ export const dbToGain = (db: number) => 10 ** (db / 20)
 
 /** Envolvente: 0 → pico en `attack` y caída exponencial con constante `decay`/4. */
 function envelope(gain: AudioParam, t0: number, peak: number, attack: number, decay: number, dur: number) {
+  // En silencio desde el principio: un `GainNode` nace a 1, y si la fuente de una capa con retardo arranca entre
+  // dos muestras, su primera muestra pasaba entera antes de `t0` (un chasquido de unos −15 dBFS).
+  gain.value = 0
   gain.setValueAtTime(0, t0)
   gain.linearRampToValueAtTime(peak, t0 + Math.max(0.001, attack))
   gain.setTargetAtTime(0, t0 + attack, Math.max(0.004, decay / 4))
