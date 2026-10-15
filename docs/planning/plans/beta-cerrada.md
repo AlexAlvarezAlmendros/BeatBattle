@@ -31,7 +31,7 @@ Lo demás de la beta no añade requisitos: pone en producción los de F0–F6 y 
 
 | # | Tarea | Estado | Depende de | Notas |
 |---|-------|--------|------------|-------|
-| B.1 | ⚠️ Decisiones de antes de la beta: premios (por defecto, sin premio material), el menú en los móviles de 781–840 px de alto (acta de la 0.28), fecha de la primera semana y la lista de 15–25 productores | 🔄 En curso (2026-10-15: sin premio material y el menú móvil como está; faltan la fecha y los productores) | — | ROADMAP «Decisiones abiertas» |
+| B.1 | ⚠️ Decisiones de antes de la beta: premios (por defecto, sin premio material), el menú en los móviles de 781–840 px de alto (acta de la 0.28), fecha de la primera semana y la lista de 15–25 productores | 🔄 En curso (2026-10-15: sin premio material, el menú móvil como está y la primera semana el **lunes 19 de octubre de 2026**; faltan los productores) | — | ROADMAP «Decisiones abiertas» |
 | B.2 | Textos legales en `docs/legal/` (privacidad, términos, cookies y bases del Anexo A) y su página `/legal/:doc` en lugar de la provisional; los datos del sello (razón social, NIF, domicilio, email de contacto) como huecos a rellenar | ✅ Hecho | — | §4.14, Anexo A · `RNF-PRIV-05` · Hecho: `docs/legal/{privacidad,terminos,cookies,bases}.md` y `/legal/:doc` con el índice y el texto (`app/legal/markdown.tsx`, 4 tests); mirada en 1440 y 390. Pasa a la B.3 (revisión del usuario y datos del sello). |
 | B.3 | ⚠️ Revisión de los textos por el usuario y los datos del sello | ✅ Hecho | B.2 | Antes del lanzamiento público, revisión con criterio legal (F10) · Hecho (2026-10-15; el usuario delega la redacción): los datos que el sello ya publica en `otherpeople.es` (NIF, domicilio, contacto), premios sin premio material, transferencias fuera de la UE y los datos del prestador en los términos; ningún `[[…]]` (guía v0.6.84) |
 | B.4 | Guía de despliegue (`docs/deploy/beta.md`): recursos, variables, orden y comprobaciones; `pnpm preflight`, que valida las variables de producción sin red | ✅ Hecho | — | §4.15 · Hecho: `docs/deploy/beta.md` y `pnpm --filter @beatbattle/server preflight` (`config/preflight.ts`, 3 tests). |
@@ -61,6 +61,7 @@ BeatBattle en producción con tres semanas jugadas por productores reales y un a
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-15 | B.1, B.6 | La beta empieza el lunes 19 de octubre. `admin:grant` (guía v0.6.87) y el usuario ya es admin en producción (su cuenta de Google; queda en `audit_log`). |
 | 2026-10-15 | B.6 | El usuario entra en producción con Google y Discord, pero no puede salir: no había «Cerrar sesión» en ninguna pantalla. `RF-AUTH-11` (guía v0.6.86): en Ajustes → Cuenta y en la fila de «Esta sesión»; tests de Testing Library y E2E, mirado en 1440 y 390. |
 | 2026-10-15 | B.6 | El primer despliegue (lo lanzó el usuario) caía entero: faltaba el `hb.wasm` de satori en la función. `includeFiles` con `hb.wasm` y ffmpeg, y `pnpm build` comprueba la función como la monta Vercel (guía v0.6.85). |
 | 2026-10-15 | B.3, B.5 | Textos legales completos con los datos publicados del sello (guía v0.6.84); `preflight` comprueba el cupo con una cuenta `@gmail.com`. Turso y `MAIL_REPLY_TO` en Vercel; Cloudinary comprobado. |
