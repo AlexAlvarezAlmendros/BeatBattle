@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.86 · 2026-10-15 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.87 · 2026-10-15 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -847,7 +847,9 @@ estaba sellada, hace falta re-sellar (`RF-RES-06`).
 ### 2.14 Administración
 
 Panel en `/admin`, solo para el rol `admin`, con la misma estética pero en un modo más denso
-(tablas, sin efectos).
+(tablas, sin efectos). El primer admin de un entorno no lo puede nombrar nadie desde el panel: sale de la
+consola, `pnpm --filter @beatbattle/server admin:grant <email>`, sobre una cuenta que ya ha entrado una vez;
+queda en `audit_log` (`user.grant_admin`, sin el email) como cualquier otra acción de admin (`RF-ADM-05`).
 
 - **Samples**: subir y editar (audio, stems, portada, licencia, metadatos, *chops* con un editor de
   onda para marcar los 8 trozos).
@@ -3705,6 +3707,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-15 | 0.6.87 | **El primer admin** (§2.14): en producción nadie podía dar el rol `admin` (solo los tests y la semilla local). `pnpm admin:grant <email>` lo da a una cuenta existente, en el mismo `batch` que su registro en `audit_log`. La beta empieza el lunes 19 de octubre (decisión del usuario). |
 | 2026-10-15 | 0.6.86 | **Salir de la cuenta** (`RF-AUTH-11`, nuevo): la guía decía que la sesión actual «se sale», pero ninguna pantalla lo ofrecía y en la beta no había forma de cerrar sesión. §2.3: «Cerrar sesión» en Ajustes → Cuenta y «Salir» en la fila de «Esta sesión» de Ajustes → Sesiones; vacía los datos de la cuenta en la web y vuelve al menú. |
 | 2026-10-15 | 0.6.85 | **Primer despliegue: la función caía entera** (`FUNCTION_INVOCATION_FAILED` en todas las rutas, también al entrar con Google y Discord): satori importa `harfbuzzjs`, que carga `hb.wasm` del disco al importarse, y la traza de Vercel no lo incluye; el rechazo sin manejar tumbaba el proceso. §4.15: `hb.wasm` y el binario de ffmpeg (que §4.8.4 ya daba por incluido y no lo estaba) en `includeFiles`, y `pnpm build` comprueba la función como la monta Vercel (`scripts/smoke-vercel.mjs`, con `@vercel/nft` de desarrollo). |
 | 2026-10-15 | 0.6.84 | **B.3: textos legales completos.** Anexo A: el organizador con los datos que el sello ya publica en `otherpeople.es` (NIF A00982223, domicilio en Igualada, `justsomeotherpeople@gmail.com` como contacto) y premios sin premio material en la beta (visibilidad y «Elección del sello»). `docs/legal/*` sin huecos, con las transferencias fuera de la UE (Marco de Privacidad UE-EE. UU. o cláusulas tipo) y los datos del prestador en los términos (LSSI art. 10). `pnpm preflight` rechaza un cupo de más de 450 con una cuenta `@gmail.com` (§4.19.1) y ya no pide «una dirección propia»: la cuenta es la del Workspace del sello, como dice §4.19.1. |

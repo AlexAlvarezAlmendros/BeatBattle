@@ -73,6 +73,17 @@ rm apps/server/.env.production               # no se queda en el disco
 2. Producción desde `main`.
 3. La prueba de humo en producción con una cuenta del equipo.
 
+## 5 bis. El primer admin
+
+Entra una vez en producción (email, Google o Discord) y, desde la copia local de las variables:
+
+```bash
+pnpm --filter @beatbattle/server admin:grant <tu-email>   # dice a qué base va; queda en audit_log
+```
+
+No aplica migraciones: la base la crea el servidor en su primer arranque. Hecho el 2026-10-15 con la cuenta del
+usuario.
+
 ## 6. Prueba de humo (B.6)
 
 - `GET /api/health` → 200 con la base de datos arriba.

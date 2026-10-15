@@ -189,6 +189,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 | Pase de la carta | Cinta propia con física | F7 | Alternativa: expositor giratorio si se percibe como pieza del sello (guía §3.4.4) |
 | Modelo de semana | Envíos y votos a la vez | Tras la beta | Revisar con datos de participación |
 | Fecha de lanzamiento | Primera semana completa tras F10 | F10 | — |
+| Primera semana de la beta | **Cerrada (2026-10-15):** lunes 19 de octubre de 2026 | — | — |
 | Dependabot | Activarlo en la Fase 10 | F10 | Abre PRs en GitHub: necesita confirmación |
 
 ## Registro de avance
