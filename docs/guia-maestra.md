@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.79 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.80 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -892,7 +892,10 @@ Panel en `/admin`, solo para el rol `admin`, con la misma estética pero en un m
   perfil solo cuenta semanas selladas: si contara las abiertas, diría quién está en una batalla ciega.
 - **Tarjetas para stories** (1080×1920), generadas en el navegador: «Estoy en la batalla #41»,
   «He quedado 2.º», «Mi carta de productor». Se comparten con la Web Share API (con ficheros) o se
-  descargan.
+  descargan. Se pintan en un contexto 2D por CPU con la portada generativa de la entrada, el título, el alias
+  (o el productor, tras el sellado), el sample, el enlace a la ficha y la firma. La de la batalla está en la
+  ficha de la propia entrada sin sellar y dice «Escúchala y vota»; la del puesto, en «TU RESULTADO». La carta
+  de productor llega con la Fase 7.
 - **SEO**: `sitemap.xml` con las páginas fijas públicas (`/`, `/semanas`, `/como-funciona`), las semanas
   selladas (la semana y sus resultados, con `lastmod` del sellado) y los perfiles de quien ha participado en
   alguna sellada (sin cuentas bloqueadas). Nada de una semana abierta: en voto ciego, un perfil listado al
@@ -3680,6 +3683,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-13 | 0.6.80 | **Tarea 6.14.** §2.15: las tarjetas para stories, qué llevan y dónde están; la carta de productor, en la Fase 7. |
 | 2026-10-13 | 0.6.79 | **Tarea 6.17.** §3.8.6: la línea de tiempo de la ceremonia, el momento más enérgico de cada beat (`loudestWindowMs`), el confeti con el limitador, la capa modal, cómo se abre y cuándo queda vista. Anexo D: el redoble dura 4 s, y los seis `cer.*` están medidos *offline* a su nivel. Corregido el chasquido de la primera muestra en las capas de ruido con retardo: cada capa parte de ganancia 0. |
 | 2026-10-13 | 0.6.78 | **Tarea 6.15.** §3.8.6, página de resultados: sin cuña, placa del HUD con la semana y su sello, teclas (← → podio, Intro, T, X), móvil apilado, poco alto y contraste alto. |
 | 2026-10-13 | 0.6.77 | **Tarea 6.13.** §2.15: qué lleva el sitemap (páginas fijas, semanas selladas y perfiles de participantes de semanas selladas) y `robots.txt` cerrado fuera de producción de verdad (`indexable` en la configuración). |

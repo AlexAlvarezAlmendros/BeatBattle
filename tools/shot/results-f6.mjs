@@ -2,13 +2,13 @@
 // `apps/server/src/scripts/seedBattle.ts … sealed`: la página de resultados (sin sesión y con la de alguien
 // que participó), en los tamaños de referencia; sin movimiento y en contraste alto, la de escritorio. Uso:
 //   node tools/shot/results-f6.mjs <origen> <carpeta> <semana sellada> [páginas]
-// `páginas`: lista separada por comas de `resultados` y `ceremonia` (por defecto, todas).
+// `páginas`: lista separada por comas de `resultados`, `ceremonia` y `stories` (por defecto, todas).
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { chromium } from '@playwright/test'
 
 const [origin = 'http://localhost:5176', out = '.', slug = '2026-w41', only = ''] = process.argv.slice(2)
-const pages = new Set((only || 'resultados,ceremonia').split(','))
+const pages = new Set((only || 'resultados,ceremonia,stories').split(','))
 mkdirSync(out, { recursive: true })
 
 const SIZES = [
@@ -110,6 +110,17 @@ if (pages.has('ceremonia'))
       }
       await ctx.close()
     }
+
+// Tarjeta para stories (6.14): «He quedado N.º» desde los resultados, descargada (sin Web Share en Chrome de escritorio).
+if (pages.has('stories')) {
+  const { ctx, page } = await context(SIZES[0], { account: middle })
+  await page.goto(`${origin}/semana/${slug}/resultados`)
+  const download = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Tarjeta para stories' }).click()
+  const file = await download
+  await file.saveAs(join(out, 'stories-resultado.png'))
+  await ctx.close()
+}
 
 await browser.close()
 console.log(`Capturas en ${out}`)
