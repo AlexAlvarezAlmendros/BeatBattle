@@ -170,6 +170,21 @@ describe('presupuesto diario (§4.19.1)', () => {
   })
 })
 
+describe('presupuesto diario con el reloj de prueba', () => {
+  it('RF-NOTIF-17: los envíos «del futuro» (el reloj de prueba vuelve atrás) no gastan el cupo de ahora', async () => {
+    const h = await harness(4)
+    for (const id of ['a', 'b', 'c', 'd', 'e', 'f']) await addUser(h.db, id)
+    // Un día después se gasta el cupo entero…
+    h.clock.t = T0 + 24 * 60 * 60 * 1000
+    for (const id of ['a', 'b', 'c']) await h.enqueue('battle.reminder', { userId: id })
+    expect(await emailDrain(h.deps)).toMatchObject({ sent: 3 })
+    // …y al volver a hoy, esos envíos no cuentan.
+    h.clock.t = T0
+    for (const id of ['d', 'e', 'f']) await h.enqueue('battle.jury_call', { userId: id })
+    expect(await emailDrain(h.deps)).toMatchObject({ sent: 3, deferred: 0 })
+  })
+})
+
 describe('cola de salida (§4.19.3)', () => {
   it('RF-NOTIF-02: reencolar con la misma clave no duplica', async () => {
     const h = await harness()

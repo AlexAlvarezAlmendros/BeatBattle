@@ -6,6 +6,7 @@ import {
   type Page,
   test,
 } from '@playwright/test'
+import { tickUntilMail } from './battle'
 import { expectNoAxeViolations, runSuffix, testIp } from './support'
 
 /**
@@ -21,7 +22,6 @@ import { expectNoAxeViolations, runSuffix, testIp } from './support'
  */
 
 const PASSWORD = 'lluvia en gràcia 92'
-const CRON_SECRET = 'e2e-cron-secret-0123456789abcdefghij'
 
 /** Las tres semanas (2031-w12, w13 y w14), en ms UTC: lunes 00:00 y cierres de Madrid. */
 const W12 = { slug: '2031-w12', monday: '2031-03-17', startsAt: 1931468400000, submitEndsAt: 1932058800000 }
@@ -274,14 +274,10 @@ test('hito de la Fase 3: admin, calendario, cambio de semana en la frontera, bas
   })
 
   await test.step('RF-NOTIF-09: el tick del lunes a las 08:00 manda el drop, también al suscriptor sin cuenta', async () => {
-    const tick = await fan.request.get('/api/cron/tick', {
-      headers: { authorization: `Bearer ${CRON_SECRET}`, 'x-bb-test-now': String(DROP_MAIL_AT) },
-    })
-    expect(tick.ok(), await tick.text()).toBe(true)
-    const toFan = await lastMail(fan.request, fanEmail)
+    const toFan = await tickUntilMail(fan.request, DROP_MAIL_AT, fanEmail, 'Nuevo drop')
     expect(toFan?.subject).toBe('Nuevo drop: Lluvia de marzo · 92 BPM · Re menor')
     expect(toFan?.text).toContain('crea la tuya')
-    const toProducer = await lastMail(fan.request, producerEmail)
+    const toProducer = await tickUntilMail(fan.request, DROP_MAIL_AT, producerEmail, 'Nuevo drop')
     expect(toProducer?.subject).toBe('Nuevo drop: Lluvia de marzo · 92 BPM · Re menor')
     expect(toProducer?.text).not.toContain('crea la tuya')
   })
