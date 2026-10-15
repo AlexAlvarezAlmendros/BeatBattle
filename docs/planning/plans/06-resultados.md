@@ -1,6 +1,6 @@
 # Plan 06 — Cierre, resultados y ceremonia
 
-> Fase: 6 de 10 | Estado: 🔄 En curso | Iniciado: 2026-10-13 | Cerrado: —
+> Fase: 6 de 10 | Estado: ✅ Cerrada | Iniciado: 2026-10-13 | Cerrado: 2026-10-15
 > Hito del roadmap: una semana simulada se sella, la ceremonia se reproduce, re-sellar da el mismo snapshot y
 > sale el Lunes de batalla.
 
@@ -138,7 +138,7 @@ completa el MVP (F0–F6) para la beta cerrada.
 | 6.20 | Datos de prueba: una semana sellada con su clasificación (en `seedBattle` y en los fixtures de E2E) | ✅ Hecho | 6.4 | para la 6.21 y las capturas de la 6.22 · Hecho: `seedBattle.ts … sealed` (la anterior sellada con 11 de 12 clasificadas y la de este lunes abierta); el fixture de E2E va con la 6.21. |
 | 6.21 | E2E del hito: una semana simulada se vota, se cierra y se sella; los resultados y la ceremonia (y saltarla); re-sellar sin cambios da el mismo snapshot y, tras descalificar, la revisión 2 con su aviso; sale el Lunes de batalla | ✅ Hecho | 6.9, 6.15, 6.17, 6.18, 6.19, 6.20 | §5 · hito · Hecho: `tests/e2e/results.spec.ts` (se vota, se sella, Lunes de batalla, oferta y ceremonia saltada con Esc y vista, resultados con axe, tarjeta para stories de 1080 × 1920, re-sellado sin cambios y tras descalificar, archivo). En local, con `screens`, `a11y`, `brand`, `text-size`, `navigation` y `vote`. De paso: la ceremonia y el archivo, solo de semanas ya selladas en ese instante (el reloj de prueba sellaba semanas «del futuro»). |
 | 6.22 | Jurado visual de tres lentes: resultados, ceremonia (fotogramas), archivo, ficha sellada, emails del lunes, imágenes OG y tarjetas de stories | ✅ Hecho | 6.21 | `RD-VIS-02` · Hecho: acta en `evidence/f6/jurado` (J1–J6 corregidos; abiertos B1–B4: «TU RESULTADO» bajo el pliegue con poco alto, `cer.*` sin escuchar, botones del archivo y la ceremonia en 3D). |
-| 6.23 | Cierre de la fase: criterio de aceptación, cobertura de ids y CI en verde | ⬜ Listo | 6.22 | — |
+| 6.23 | Cierre de la fase: criterio de aceptación, cobertura de ids y CI en verde | ✅ Hecho | 6.22 | — · Hecho: los seis criterios (abajo) y la cobertura de ids; PR #74–#90 mezcladas con la CI en verde. |
 
 ---
 
@@ -160,12 +160,32 @@ resultado y el sample nuevo; y lo que se comparte enseña la cara del juego sin 
 5. Jurado visual de tres lentes sin hallazgos altos ni medios abiertos.
 6. `pnpm check`, `typecheck`, `test`, `build` y `e2e` en verde en la CI.
 
+**Cierre (2026-10-15):**
+
+1. ✅ Todos los ids de la tabla con su test (ninguno sin cubrir). `RF-OTP-04` (Elección del sello) queda para la
+   Fase 9, como decía el plan. `RF-SHARE-01` y `RF-SHARE-05` tienen sus tests de metadatos, sitemap y datos
+   estructurados; el paso por los validadores de previsualización y de datos estructurados necesita una URL
+   pública y queda para el despliegue (Fase 10).
+2. ✅ E2E del hito (`tests/e2e/results.spec.ts`, 6.21) en verde en la CI: se vota, se sella, Lunes de batalla,
+   oferta y ceremonia (en 3D desde la 6.17b), tarjeta para stories, re-sellado sin cambios y tras descalificar,
+   y archivo.
+3. ✅ Determinismo: `rank` con propiedades (fast-check, 6.1); re-sellar sin cambios da el mismo snapshot
+   (`results.test.ts` y el E2E).
+4. ✅ Voto ciego: sin sellar, ni la API (`blindContract.test.ts`, `results.test.ts`), ni las imágenes OG
+   (`og.test.ts`), ni los metadatos (`share.test.ts`), ni los emails (`monday.test.ts`) dicen autoría ni cifras;
+   después, sí.
+5. ✅ Jurado visual (6.22): J1–J6 corregidos; B2 (efectos `cer.*`, escuchados y aprobados por el usuario) y B4
+   (ceremonia en 3D, 6.17b) cerrados; abiertos solo B1 y B3, de gravedad baja.
+6. ✅ `check`, `typecheck`, `test`, `build` y `e2e` en verde en la CI de `main`.
+
+
 ---
 
 ## Registro de avance
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-15 | 6.23 | **Fase 6 cerrada.** Los seis criterios; PR #74–#90 mezcladas. Siguiente: la beta cerrada, que necesita el despliegue (decisión del usuario). |
 | 2026-10-15 | 6.17b | Ceremonia en 3D (guía v0.6.82). El usuario escucha y aprueba los `cer.*`: B2 y B4 del jurado, cerrados. |
 | 2026-10-13 | 6.22 | Jurado visual (guía v0.6.81). |
 | 2026-10-13 | 6.21 | E2E del hito. |
