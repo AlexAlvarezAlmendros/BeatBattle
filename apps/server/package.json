@@ -12,7 +12,8 @@
     "build": "vite build --config build.config.mjs && node scripts/smoke-bundle.mjs && node scripts/smoke-vercel.mjs",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "preflight": "tsx --env-file-if-exists=.env.production src/scripts/preflight.ts"
+    "preflight": "tsx --env-file-if-exists=.env.production src/scripts/preflight.ts",
+    "admin:grant": "tsx --env-file-if-exists=.env.production src/scripts/grantAdmin.ts"
   },
   "dependencies": {
     "@beatbattle/covers": "workspace:^",
