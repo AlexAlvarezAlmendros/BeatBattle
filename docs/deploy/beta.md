@@ -7,16 +7,16 @@ en la nube o envía algo fuera: **solo con la confirmación del usuario**.
 
 - Decisiones de la beta cerradas (B.1): premios, el menú en los móviles de 781–840 px de alto, fecha de la
   primera semana y la lista de productores.
-- Textos legales revisados y con los datos del sello (B.3): `docs/legal/*.md` sin ningún `[[…]]`.
+- ✅ Textos legales con los datos del sello (B.3, 2026-10-15): `docs/legal/*.md` sin ningún `[[…]]`.
 - `main` en verde en la CI.
 
 ## 2. Recursos ⚠️
 
 | Recurso | Qué crear | Notas |
 |---|---|---|
-| Turso | Una base de datos en la UE (`beatbattle`) y un token de escritura | `DATABASE_URL=libsql://…` y `DATABASE_AUTH_TOKEN`. Las migraciones se aplican solas al arrancar |
+| Turso | Una base de datos en la UE y un token de escritura | `DATABASE_URL=libsql://…` y `DATABASE_AUTH_TOKEN`. Las migraciones se aplican solas al arrancar. La integración de Turso en Vercel crea además `bb_TURSO_DATABASE_URL` y `bb_TURSO_AUTH_TOKEN` (también en preview); el servidor no las lee, así que las previews no tocan la base de producción |
 | Cloudinary | La cuenta de BeatBattle (la misma de desarrollo) | Producción usa el prefijo `beatbattle`; las previews, `beatbattle-preview-<pr>` |
-| Gmail | Una dirección del Workspace de `otherpeople.es` propia de BeatBattle, con verificación en dos pasos y una contraseña de aplicación | Nunca la de la tienda del sello. SPF, DKIM y DMARC de Google en el dominio |
+| Gmail | La cuenta del Workspace del sello (guía §4.19.1, `contacto@otherpeople.es`), la misma que usa la web del sello, con verificación en dos pasos y su contraseña de aplicación | Cupo compartido con la web del sello (riesgo aceptado en §4.19.1). Con una cuenta `@gmail.com`, `MAIL_DAILY_LIMIT` de 450 como mucho (`preflight` lo comprueba). SPF, DKIM y DMARC de Google en el dominio |
 | Dominio | `battle.otherpeople.es` como CNAME a Vercel | Lo pide Vercel al añadir el dominio |
 | Vercel | El proyecto desde el repositorio de GitHub, región `fra1` | `vercel.json` ya trae la construcción, las reescrituras, las cabeceras y el cron diario |
 | OAuth (opcional) | Apps de Google y de Discord | URL de retorno: `https://battle.otherpeople.es/api/auth/callback/google` y `…/discord` |
@@ -31,21 +31,23 @@ openssl rand -base64 32   # CRON_SECRET, IP_HASH_SALT
 
 **Estado (2026-10-15):** el proyecto `beatbattle` ya existe (equipo `alexalvarezalmendros-projects`, enlazado al repositorio, `fra1`, Node 22) con las construcciones en pausa: su *Ignored Build Step* es `exit 0`, así que los `push` a `main` no despliegan. Para el primer despliegue (B.6) se quita ese comando en *Settings → Git*. Ya tiene las variables que no dependen de nadie (abajo, con ✅); la copia local está en `apps/server/.env.production` (fuera del repo).
 
+**Estado (2026-10-15, más tarde):** Turso conectado (vacío; las migraciones entran en el primer arranque) y en Vercel solo para producción; Cloudinary comprobado con su `ping` y en la copia local. Faltan en Vercel Cloudinary y Gmail (los añade el usuario en el panel: el agente no lee esos secretos).
+
 ## 3. Variables de producción (panel de Vercel)
 
 | Variable | Valor |
 |---|---|
 | ✅ `BB_PUBLIC_URL` | `https://battle.otherpeople.es` |
 | ✅ `TRUST_PROXY` | `1` |
-| `DATABASE_URL`, `DATABASE_AUTH_TOKEN` | Los de Turso |
+| ✅ `DATABASE_URL`, `DATABASE_AUTH_TOKEN` | Los de Turso (solo en producción) |
 | ✅ `BETTER_AUTH_SECRET` | Nuevo |
 | `GOOGLE_CLIENT_ID/SECRET`, `DISCORD_CLIENT_ID/SECRET` | Los de las apps de OAuth (opcionales) |
-| `GMAIL_USER`, `GMAIL_APP_PASSWORD` | La dirección de BeatBattle y su contraseña de aplicación |
+| `GMAIL_USER`, `GMAIL_APP_PASSWORD` | La dirección del Workspace del sello y su contraseña de aplicación |
 | `EMAIL_FROM_NAME`, `EMAIL_FROM_ADDRESS` | `Beat Battle · Other People` y la misma dirección que `GMAIL_USER` |
-| `MAIL_REPLY_TO` | El buzón del sello |
-| ✅ `MAIL_DAILY_LIMIT` | `1900` con el Workspace |
+| ✅ `MAIL_REPLY_TO` | El buzón del sello (`justsomeotherpeople@gmail.com`, el contacto de sus textos legales) |
+| ✅ `MAIL_DAILY_LIMIT` | `1900` con el Workspace; `450` con una cuenta `@gmail.com` |
 | ✅ `UNSUBSCRIBE_SECRET`, `CRON_SECRET`, `IP_HASH_SALT` | Nuevos |
-| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Los de la cuenta de BeatBattle |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Los de la cuenta de BeatBattle (la de desarrollo, con el secreto ya rotado) |
 | ✅ `BB_CLOUDINARY_PREFIX` | `beatbattle` |
 
 Vacías en producción: `SMTP_URL`, `BB_FAKE_STORAGE`, `BB_TEST_CLOCK`, `MIGRATIONS_DIR` (la de por defecto) y

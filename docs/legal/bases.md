@@ -1,10 +1,11 @@
 # Bases de la competición
 
-> Borrador para la beta (versión 1, 15 de octubre de 2026). Antes del lanzamiento
+> Versión de la beta (versión 1, 15 de octubre de 2026). Antes del lanzamiento
 > público las revisa alguien con criterio legal. Las bases están versionadas y cada semana guarda la versión que
 > aceptaste.
 
-1. **Organiza** Other People Records ([[razón social]], NIF [[NIF]]) a través de BeatBattle.
+1. **Organiza** Other People Records (NIF A00982223, Av. Europa, Carrer de Dinamarca, 35, 08700 Igualada,
+   Barcelona) a través de BeatBattle.
 2. **Participan** personas mayores de 14 años con cuenta verificada. Una entrada por persona y semana.
 3. **Calendario:** el sample sale el lunes a las 00:00 (hora de Madrid). Se puede subir hasta el domingo a las
    20:00 y votar hasta el domingo a las 23:59. Después se sella la semana y se publican los resultados.
@@ -23,8 +24,10 @@
    por suerte). Desempates: más votos, mayor mediana y más votos de 5; si todo empata, comparten puesto. Para el
    podio hacen falta al menos 3 votos válidos. Se explica en «Cómo se juega».
 10. **Moderación:** la organización puede descalificar entradas o anular votos que incumplan estas bases, con
-    exposición de motivos y vía de reclamación en [[email de contacto]]. Si eso cambia una semana ya sellada, se
+    exposición de motivos y vía de reclamación en justsomeotherpeople@gmail.com. Si eso cambia una semana ya sellada, se
     re-sella la clasificación y se publica el aviso.
-11. **Premios:** si los hay, se describen en la ficha de la semana. Los premios por encima de 300 € tienen
-    obligaciones fiscales (retención o ingreso a cuenta del IRPF) que se detallan en ese momento.
+11. **Premios:** en la beta no hay premio material. El podio gana visibilidad: sale en los resultados, en el
+    Salón de la fama y en la difusión del sello, y el sello puede destacar una entrada como «Elección del
+    sello». Si alguna semana hubiera premio, se describiría en su ficha antes de abrirla, con estas bases
+    actualizadas.
 12. **Datos:** según la política de privacidad.

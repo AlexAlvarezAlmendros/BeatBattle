@@ -1,11 +1,11 @@
 # Términos de uso
 
-> Borrador para la beta (versión 1, 15 de octubre de 2026). Antes del lanzamiento público los revisa alguien
+> Versión de la beta (versión 1, 15 de octubre de 2026). Antes del lanzamiento público los revisa alguien
 > con criterio legal.
 
 ## Qué es BeatBattle
 
-Una competición semanal de beats organizada por **Other People Records** ([[razón social]], NIF [[NIF]]): cada
+Una competición semanal de beats organizada por **Other People Records** (NIF A00982223): cada
 lunes sale un sample, los productores suben su versión y la comunidad vota. Las reglas de cada semana están en
 las **bases**, que aceptas antes de descargar el sample.
 
@@ -39,4 +39,8 @@ retirar funciones, y te avisamos de los cambios importantes. Puedes borrar tu cu
 
 ## Ley aplicable
 
-Estos términos se rigen por la ley española. Para cualquier duda, escribe a [[email de contacto]].
+Estos términos se rigen por la ley española. Para cualquier duda, escribe a justsomeotherpeople@gmail.com.
+
+## Quién está detrás
+
+**Other People Records** · NIF A00982223 · Av. Europa, Carrer de Dinamarca, 35, 08700 Igualada, Barcelona · justsomeotherpeople@gmail.com.

@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.83 · 2026-10-13 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.84 · 2026-10-15 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -3369,7 +3369,8 @@ no aplica: BeatBattle deja de copiar la web del sello (§3.1).
 > Borrador funcional para la beta. Antes del lanzamiento público lo revisa alguien con criterio
 > legal. Las bases están versionadas (`rules_version`) y cada semana guarda la versión aceptada.
 
-1. **Organiza** Other People Records (datos del sello) a través de BeatBattle.
+1. **Organiza** Other People Records (NIF A00982223, domicilio en Igualada; los datos completos, los
+   publicados en `otherpeople.es`) a través de BeatBattle.
 2. **Participan** personas mayores de 14 años con cuenta verificada. Una entrada por persona y
    semana.
 3. **Material**: la entrada debe usar de forma reconocible el sample de la semana. El resto del
@@ -3387,9 +3388,10 @@ no aplica: BeatBattle deja de copiar la web del sello (§3.1).
 8. **Clasificación**: media bayesiana con los desempates publicados en `/como-funciona`.
 9. **Moderación**: la organización puede descalificar entradas o anular votos que incumplan estas
    bases, con exposición de motivos y vía de reclamación.
-10. **Premios**: si los hay, se describen en la ficha de la semana; los premios por encima de 300 €
-    tienen obligaciones fiscales (retención o ingreso a cuenta del IRPF) que se detallan en ese
-    momento.
+10. **Premios**: en la beta no hay premio material (decisión del usuario del 2026-10-15); el podio gana
+    visibilidad (resultados, Salón de la fama, difusión del sello) y puede haber «Elección del sello».
+    Si una semana tuviera premio, se describe en su ficha antes de abrirla y se revisan estas bases
+    (los premios por encima de 300 € tienen retención o ingreso a cuenta del IRPF).
 11. **Datos**: según la política de privacidad.
 
 ### Anexo B — Tabla de equilibrado (`packages/rules/balance.ts`)
@@ -3697,6 +3699,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-15 | 0.6.84 | **B.3: textos legales completos.** Anexo A: el organizador con los datos que el sello ya publica en `otherpeople.es` (NIF A00982223, domicilio en Igualada, `justsomeotherpeople@gmail.com` como contacto) y premios sin premio material en la beta (visibilidad y «Elección del sello»). `docs/legal/*` sin huecos, con las transferencias fuera de la UE (Marco de Privacidad UE-EE. UU. o cláusulas tipo) y los datos del prestador en los términos (LSSI art. 10). `pnpm preflight` rechaza un cupo de más de 450 con una cuenta `@gmail.com` (§4.19.1) y ya no pide «una dirección propia»: la cuenta es la del Workspace del sello, como dice §4.19.1. |
 | 2026-10-15 | 0.6.83 | **Plan de la beta, B.2 y B.4.** §3.8.14: los legales con sus textos (borradores de la beta en `docs/legal/`, con los datos del sello por rellenar), con el índice en la columna de la pieza. `RNF-PRIV-05` apunta a su texto. Guía de despliegue en `docs/deploy/beta.md` y `pnpm preflight`. |
 | 2026-10-15 | 0.6.82 | **Tarea 6.17b** (decisión del usuario: «la ceremonia tiene que ser 3D»). §3.8.6: la ceremonia en el Escenario, con su escena, cámara, nombres proyectados, respaldo 2D y Escenario solo para ella con la calidad baja. Los efectos `cer.*`, escuchados y aprobados por el usuario. |
 | 2026-10-13 | 0.6.81 | **Tarea 6.22 (jurado visual).** §3.8.6: «Ver la ceremonia» y la tarjeta para stories van en la línea de la semana, y la ceremonia en 3D queda pendiente (hoy es DOM). Acta en `docs/planning/evidence/f6/jurado/`. |

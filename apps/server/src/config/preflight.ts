@@ -14,6 +14,9 @@ export interface PreflightResult {
   warnings: EnvIssue[]
 }
 
+/** Cupo de `MAIL_DAILY_LIMIT` con un Gmail normal (§4.19.1). */
+const GMAIL_PERSONAL_LIMIT = 450
+
 const has = (env: Readonly<Record<string, string | undefined>>, key: string) => Boolean(env[key]?.trim())
 
 export function preflight(source: Readonly<Record<string, string | undefined>>): PreflightResult {
@@ -36,9 +39,16 @@ export function preflight(source: Readonly<Record<string, string | undefined>>):
     need(key, 'Cloudinary: la cuenta de BeatBattle (audio e imágenes)')
   if (env.BB_CLOUDINARY_PREFIX !== 'beatbattle')
     problems.push({ variable: 'BB_CLOUDINARY_PREFIX', message: 'en producción, «beatbattle» (RF-STO-06)' })
-  need('GMAIL_USER', 'la dirección de Gmail propia de BeatBattle')
+  need('GMAIL_USER', 'la dirección de Gmail que envía (la del Workspace del sello, §4.19.1)')
   need('GMAIL_APP_PASSWORD', 'su contraseña de aplicación')
   need('MAIL_REPLY_TO', 'el buzón del sello que recibe las respuestas')
+  // Un Gmail normal deja ~500 envíos al día, no los ~2.000 del Workspace (§4.19.1): el cupo, por debajo.
+  const limit = Number(env.MAIL_DAILY_LIMIT ?? 1900)
+  if (env.GMAIL_USER?.trim().toLowerCase().endsWith('@gmail.com') && limit > GMAIL_PERSONAL_LIMIT)
+    problems.push({
+      variable: 'MAIL_DAILY_LIMIT',
+      message: `con una cuenta @gmail.com, como mucho ${GMAIL_PERSONAL_LIMIT} (Gmail corta a unos 500 al día)`,
+    })
   need('CRON_SECRET', 'el secreto de /api/cron/tick (Vercel Cron y GitHub Actions)')
   need('UNSUBSCRIBE_SECRET', 'la clave de los enlaces de baja (RFC 8058)')
   need('IP_HASH_SALT', 'la sal del hash de IP (antiabuso)')
