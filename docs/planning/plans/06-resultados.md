@@ -128,7 +128,7 @@ completa el MVP (F0–F6) para la beta cerrada.
 | 6.16 | La ficha de una semana sellada: posición, puntuación, votos e histograma de 5 barras, y el productor | ✅ Hecho | 6.6 | §2.6 · `RF-PLAY-08` · Hecho: el bloque del resultado en `EntryPage` (medalla, posición, puntuación, votos, histograma y enlace a los resultados); test `RF-PLAY-08`; mirada en 1440 y 390. |
 | 6.17 | Ceremonia (~25 s): luces fuera, del 10.º al 4.º, 3.º–2.º–1.º con foco, medalla, sello arrancado y el momento más enérgico de cada beat sincronizado con el reloj de audio, «¡CAMPEÓN!», tu resultado; saltable con Esc, repetible, sin movimiento por fundidos y efectos `cer.*` | ✅ Hecho | 6.15 | §3.8.6, §3.6, Anexos D y E · `RF-RES-09` · destellos por `flash.request()` · Hecho: `ResultsCeremony` con su línea de tiempo y los seis `cer.*` (renderizados *offline* y medidos a su nivel del Anexo D; escritos, sin escuchar). `loudestWindowMs` con propiedades. Fotogramas en 1440 y 390, sin movimiento también (`results-f6.mjs ceremonia`). Tests `RF-RES-09` (timeline, Esc y «Saltar»). De paso, corregido un chasquido de la síntesis (test). |
 | 6.18 | Archivo `/semanas`: semanas selladas paginadas con su sample, entradas y podio, escuchables | ✅ Hecho | 6.7 | §2.9 · `RF-ARC-01` · Hecho: `WeeksPage` con `useInfiniteQuery` (20 por página, «Más semanas»), sample (o su vinilo-sol si la portada no carga), entradas, podio que suena y enlace a los resultados; mirada en 1440 y 390. La paginación la prueba el servidor (`RF-ARC-01`) y el E2E de la 6.21. |
-| 6.19 | La home ofrece la ceremonia la primera vez tras el sellado y el menú enlaza la última semana sellada | ⬜ Listo | 6.8, 6.17 | §2.8, §3.8.3 · `RF-RES-09` |
+| 6.19 | La home ofrece la ceremonia la primera vez tras el sellado y el menú enlaza la última semana sellada | ✅ Hecho | 6.8, 6.17 | §2.8, §3.8.3 · `RF-RES-09` · Hecho: `CeremonyOffer` en la home (tras la pantalla de título y nunca encima de la revelación del drop), vista con sesión en el servidor y sin ella en el navegador; el modo «Resultados» del menú lleva a la última sellada (con `?ceremonia` si no se ha visto). Mirada en 1440; el recorrido entero, en el E2E de la 6.21. |
 
 ### Verificación y cierre
 
@@ -165,6 +165,7 @@ resultado y el sample nuevo; y lo que se comparte enseña la cara del juego sin 
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-13 | 6.19 | La home ofrece la ceremonia. |
 | 2026-10-13 | 6.17 | Ceremonia de resultados (guía v0.6.79). |
 | 2026-10-13 | 6.18 | Archivo de semanas. |
 | 2026-10-13 | 6.16 | Ficha sellada. |

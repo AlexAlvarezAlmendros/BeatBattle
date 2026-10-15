@@ -149,7 +149,8 @@ export function menuEntries({ week, player, lastSealed, loading = false }: MenuM
       }
     : {
         mode: 'results',
-        to: paths.weekResults(String(lastSealed.number)),
+        // Sin verla aún, el modo abre la ceremonia (`RF-RES-09`); vista, los resultados.
+        to: `${paths.weekResults(lastSealed.slug)}${lastSealed.unseen ? '?ceremonia' : ''}`,
         disabled: false,
         detail: lastSealed.unseen ? <Tag tone="white">{t('home.modes.results.new')}</Tag> : undefined,
         extra: t('home.modes.results.week', { number: lastSealed.number }),

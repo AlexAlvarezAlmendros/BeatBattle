@@ -9,6 +9,8 @@ import { queryKeys } from '../../net/queryKeys'
 import { ticker } from '../../net/votes'
 import { useCurrentWeek } from '../../net/weeks'
 import { playerOf, useSession } from '../account/session'
+import { CeremonyOffer } from '../results/CeremonyOffer'
+import { ceremonySeenLocally, rememberCeremonySeen } from '../results/ceremonySeen'
 import { DropReveal } from './DropReveal'
 import { rememberDropSeen, seenLocally } from './dropSeen'
 import { MainMenu } from './menu/MainMenu'
@@ -129,6 +131,26 @@ export function HomePage() {
       }}
     />
   ) : null
+
+  // La ceremonia de la última semana sellada (`RF-RES-09`): se ofrece una vez, nunca encima de la revelación.
+  const sealed = data?.sealed ?? null
+  const [offerDone, setOfferDone] = useState<string | null>(null)
+  const ceremonyUnseen =
+    sealed !== null &&
+    sessionKnown &&
+    offerDone !== sealed.slug &&
+    !(sealed.ceremonySeen ?? false) &&
+    !ceremonySeenLocally(sealed.slug)
+  const offer =
+    ceremonyUnseen && !unseen && sealed ? (
+      <CeremonyOffer
+        week={sealed}
+        onDismiss={() => {
+          setOfferDone(sealed.slug)
+          void rememberCeremonySeen(sealed.slug, Boolean(me))
+        }}
+      />
+    ) : null
   const model: MenuModel = {
     week,
     loading: isPending,
@@ -136,7 +158,7 @@ export function HomePage() {
     player: me ? { ...playerOf(me), uploaded: Boolean(data?.week?.viewer?.entry) } : null,
     season: data?.week ? (data.week.seasonId.split('-')[1] ?? null) : null,
     champion: null,
-    lastSealed: null,
+    lastSealed: sealed ? { slug: sealed.slug, number: sealed.number, unseen: ceremonyUnseen } : null,
     chronicle:
       week && data?.week
         ? [
@@ -153,7 +175,7 @@ export function HomePage() {
   return (
     <>
       <DocumentTitle />
-      <MainMenu model={model} afterTitle={reveal} />
+      <MainMenu model={model} afterTitle={reveal ?? offer} />
     </>
   )
 }

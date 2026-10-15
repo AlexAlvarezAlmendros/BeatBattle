@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { auditLog, entry, result, sample, user, vote, week } from '../src/db/schema'
 import { sealWeek } from '../src/modules/weeks/seal'
-import { type Battle, battle, W42 } from './fixtures/battle'
+import { type Battle, battle, HOUR, W42 } from './fixtures/battle'
 import { json } from './fixtures/weeks'
 
 // Cada prueba crea varias cuentas: en la CI pasa de los 5 s.
@@ -274,5 +274,9 @@ describe('archivo y ceremonia (6.7, 6.8)', () => {
     expect((await seen()).statusCode).toBe(204)
     expect((await seen()).statusCode).toBe(204)
     expect((await current()).sealed).toMatchObject({ ceremonySeen: true })
+    // Con el reloj antes del sellado (el de prueba puede ir y volver), ni ceremonia ni archivo.
+    b.t.clock.set(W42.startsAt + HOUR)
+    expect((await current()).sealed).toBeNull()
+    expect((await b.t.app.inject({ method: 'GET', url: '/api/weeks' })).json().data.weeks).toEqual([])
   })
 })

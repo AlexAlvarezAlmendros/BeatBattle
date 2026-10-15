@@ -47,7 +47,7 @@ function renderMenu(model: Partial<MenuModel> = {}) {
     player: PLAYER,
     season: null,
     champion: null,
-    lastSealed: { number: 40, unseen: true },
+    lastSealed: { slug: '2026-w40', number: 40, unseen: true },
     chronicle: ['Hola'],
     ...model,
   }

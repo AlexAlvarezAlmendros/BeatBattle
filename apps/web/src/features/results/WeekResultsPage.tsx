@@ -11,7 +11,6 @@ import { formatDate, formatNumber, t } from '../../i18n'
 import { ApiClientError } from '../../net/api'
 import { queryKeys } from '../../net/queryKeys'
 import { resultsQuery } from '../../net/results'
-import { markCeremonySeen } from '../../net/weeks'
 import { HalftoneCanvas } from '../../ui/arena/HalftoneCanvas'
 import { Button } from '../../ui/Button'
 import { GenerativeCover } from '../../ui/CoverArt'
@@ -26,6 +25,7 @@ import { Done } from '../account/FormBits'
 import { useSession } from '../account/session'
 import { usePlayer } from '../player/store'
 import { entryTrack } from '../player/tracks'
+import { rememberCeremonySeen } from './ceremonySeen'
 import { ResultsCeremony } from './ResultsCeremony'
 import { MiniHistogram, scoreOf } from './score'
 import styles from './WeekResultsPage.module.css'
@@ -76,10 +76,9 @@ export function WeekResultsPage() {
   const endCeremony = () => {
     setCeremony(false)
     if (params.has('ceremonia')) setParams({}, { replace: true })
-    if (signedIn)
-      void markCeremonySeen(week.slug)
-        .then(() => queryClient.invalidateQueries({ queryKey: queryKeys.weeks.current() }))
-        .catch(() => {})
+    void rememberCeremonySeen(week.slug, signedIn).then(() =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.weeks.current() }),
+    )
   }
 
   const play = (row: ResultRow) => usePlayer.getState().play(entryTrack(row.entry, { votable: false }))

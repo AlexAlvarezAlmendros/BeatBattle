@@ -76,7 +76,7 @@ export function DevMenuPage() {
       title: t('dev.menu.champion.title'),
       score: t('dev.menu.champion.score'),
     },
-    lastSealed: { number: 40, unseen: true },
+    lastSealed: { slug: '2026-w40', number: 40, unseen: true },
     chronicle: [t('dev.menu.chronicle.entry'), t('dev.menu.chronicle.days'), t('dev.menu.chronicle.votes')],
   }
   return (

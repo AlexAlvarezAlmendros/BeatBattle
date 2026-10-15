@@ -84,7 +84,7 @@ export interface MenuModel {
   champion: MenuChampion | null
   player: MenuPlayer | null
   /** Última semana sellada y si tiene ceremonia sin ver. */
-  lastSealed: { number: number; unseen: boolean } | null
+  lastSealed: { slug: string; number: number; unseen: boolean } | null
   /** Crónica de la arena (§3.8.3): nunca dice quién ha subido. */
   chronicle: readonly string[]
   /**
