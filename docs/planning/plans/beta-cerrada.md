@@ -61,6 +61,7 @@ BeatBattle en producción con tres semanas jugadas por productores reales y un a
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-16 | B.7 | Arreglo en el editor de samples (guía v0.6.90): con el audio y la portada elegidos seguidos, cada subida pedía su propio id y el sample no se podía crear. Era el fallo intermitente de `weeks.spec.ts` en la CI. |
 | 2026-10-16 | B.5, B.6, B.7 | Tick de GitHub en marcha. Producción sana: salud con la BD arriba, sin errores de la función en 24 h, `robots.txt` y `sitemap.xml` bien. El tick avisa de que el lunes 19 aún no tiene semana. Gmail: la cuenta del sello (guía v0.6.89). |
 | 2026-10-15 | B.1, B.6 | La beta empieza el lunes 19 de octubre. `admin:grant` (guía v0.6.87) y el usuario ya es admin en producción (su cuenta de Google; queda en `audit_log`). |
 | 2026-10-15 | B.6 | El usuario entra en producción con Google y Discord, pero no puede salir: no había «Cerrar sesión» en ninguna pantalla. `RF-AUTH-11` (guía v0.6.86): en Ajustes → Cuenta y en la fila de «Esta sesión»; tests de Testing Library y E2E, mirado en 1440 y 390. |
