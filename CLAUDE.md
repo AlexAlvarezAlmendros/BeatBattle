@@ -72,7 +72,7 @@ node tools/shot/ab.mjs [--otp-live]                  # A/B de la antigua prueba 
 - **Email:** todo email entra por `email_outbox` en el mismo `batch` que el hecho que lo provoca, con
   clave de idempotencia y su familia (servicio, aviso, marketing). Marketing solo con consentimiento
   registrado; baja en un clic; sin píxeles de seguimiento; ningún email revela datos sin sellar.
-  Transporte: nodemailer + Gmail (cuenta propia de BeatBattle, TLS verificado, cupo diario con
+  Transporte: nodemailer + Gmail (el Gmail del sello, guía §4.19.1; TLS verificado, cupo diario con
   reserva de servicio). En local se usa Mailpit; en tests, el `Mailer` en memoria. Nunca se envían emails a personas reales
   sin confirmación.
 - **Sonido:** efectos generados por código (`SfxDef`), afinados en la tonalidad de la semana; ningún

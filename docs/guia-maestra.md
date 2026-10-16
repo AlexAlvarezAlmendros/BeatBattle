@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.88 · 2026-10-15 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.89 · 2026-10-16 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -3084,16 +3084,18 @@ el original); el top 3 conserva el original. El panel de uso (`RF-ADM-04`) avisa
 Decisión del usuario: **el mismo sistema que la web del sello** (`ReactOtpWeb/backend/services/emailService.js`),
 nodemailer con Gmail y contraseña de aplicación, con estas mejoras:
 
-- **`contacto@otherpeople.es`**, del Google Workspace del sello (decisión del usuario del 2026-10-08).
-  Riesgo aceptado: el límite diario es por cuenta, así que si la web del sello envía desde la misma
+- **`justsomeotherpeople@gmail.com`**, el Gmail del sello, con la contraseña de aplicación que ya usa su web
+  (decisión del usuario del 2026-10-16: `otherpeople.es` no tiene Workspace, así que el
+  `contacto@otherpeople.es` del 2026-10-08 no existe). Es un Gmail normal: cupo de **450** al día y `From`
+  la propia dirección. Riesgo aceptado: el límite diario es por cuenta, así que si la web del sello envía desde la misma
   dirección, un lunes con mucha actividad compartiría cupo con sus entradas y licencias. Si pasa, se
   cambia a una dirección propia de Beat Battle sin tocar nada más (solo `GMAIL_USER` y su contraseña). Requiere
-  verificación en dos pasos para generar la contraseña de aplicación. El Workspace da más cupo (~2.000 al
-  día) y mejor entrega que un Gmail normal, con `From` del dominio.
+  verificación en dos pasos para generar la contraseña de aplicación. Un Workspace daría más cupo (~2.000 al
+  día) y mejor entrega, con `From` del dominio; para la beta (15–25 productores) basta el Gmail.
 - **TLS verificado**: conexión a `smtp.gmail.com:465` con `secure: true` y **sin**
   `rejectUnauthorized: false` (el código del sello lo desactiva; aquí no se copia).
-- **Remitente coherente con la cuenta**: `From` es la dirección del Workspace con nombre visible «Beat
-  Battle · Other People» (con un Gmail normal sería la propia dirección de Gmail). Nunca un
+- **Remitente coherente con la cuenta**: `From` es la propia dirección de Gmail con nombre visible «Beat
+  Battle · Other People» (con un Workspace sería la dirección del dominio). Nunca un
   `From` de un dominio que la cuenta no controla (el sello usa `noreply@otherpeople.com`, que Gmail
   reescribe o manda a spam). `Reply-To` a un buzón real del sello.
 - **Ritmo**: un destinatario por mensaje (nunca CCO masiva), transporte en *pool* con una conexión y
@@ -3135,7 +3137,7 @@ nodemailer con Gmail y contraseña de aplicación, con estas mejoras:
   definitivos). El lector del aviso es puro (`parseBounce`) y el buzón va detrás de una interfaz
   (`BounceMailbox`): `imapflow` (2.2.5) en producción, un falso en los tests. Hasta el `tick` de la
   Fase 3 se lanza a mano: `pnpm --filter @beatbattle/server bounces`.
-- Con el Workspace del sello: DKIM de Google activado, SPF con `include:_spf.google.com` y DMARC
+- Si se pasa a un Workspace: DKIM de Google activado, SPF con `include:_spf.google.com` y DMARC
   empezando en `p=none`. Antes del primer envío real se comprueba qué tiene ya el DNS de `otherpeople.es`;
   cualquier cambio en él lo confirma el usuario.
 - Antes del lanzamiento, cada plantilla pasa una prueba de spam (p. ej. mail-tester) con nota ≥ 9/10.
@@ -3356,7 +3358,7 @@ Valores por defecto que la guía ya asume; se confirman o se cambian (y se regis
 |---|---|---|
 | Dominio | **Cerrada (2026-10-08): `battle.otherpeople.es`** | Antes de la Fase 2 (afecta a OAuth y cookies) |
 | Cuenta de Cloudinary | **Propia de BeatBattle**, mismo sistema que el sello | Antes de la Fase 4 |
-| Cuenta de Gmail para enviar | **Cerrada (2026-10-08): `contacto@otherpeople.es`**, del Google Workspace del sello (§4.19.1) | Antes de la Fase 2 |
+| Cuenta de Gmail para enviar | **Cerrada (2026-10-16): `justsomeotherpeople@gmail.com`**, el Gmail del sello, con un cupo de 450 al día (§4.19.1; la del 2026-10-08, `contacto@otherpeople.es`, no existía) | Antes de la Fase 2 |
 | Newsletter del sello desde BeatBattle | Casilla opcional en el registro que da de alta en la newsletter del sello | Fase 9 |
 | Proveedores sociales | **Cerrada (2026-10-08): Google y Discord** | Fase 2 |
 | Premios | Sin premio material; visibilidad en el sello y Elección del sello. Si hay premios, revisar bases y fiscalidad (Anexo A) | Antes de la beta |
@@ -3709,6 +3711,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-16 | 0.6.89 | §4.19.1, §7: los emails salen de `justsomeotherpeople@gmail.com`, el Gmail del sello (decisión del usuario), con `MAIL_DAILY_LIMIT` de 450: `otherpeople.es` no tiene Workspace. |
 | 2026-10-15 | 0.6.88 | §2.14: el selector de la semana dorada del calendario lleva una línea que explica qué es y que, sin la capa de juego (Fase 7), de momento solo se guarda (petición del usuario). |
 | 2026-10-15 | 0.6.87 | **El primer admin** (§2.14): en producción nadie podía dar el rol `admin` (solo los tests y la semilla local). `pnpm admin:grant <email>` lo da a una cuenta existente, en el mismo `batch` que su registro en `audit_log`. La beta empieza el lunes 19 de octubre (decisión del usuario). |
 | 2026-10-15 | 0.6.86 | **Salir de la cuenta** (`RF-AUTH-11`, nuevo): la guía decía que la sesión actual «se sale», pero ninguna pantalla lo ofrecía y en la beta no había forma de cerrar sesión. §2.3: «Cerrar sesión» en Ajustes → Cuenta y «Salir» en la fila de «Esta sesión» de Ajustes → Sesiones; vacía los datos de la cuenta en la web y vuelve al menú. |
