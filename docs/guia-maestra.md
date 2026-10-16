@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.89 · 2026-10-16 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.90 · 2026-10-16 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -3711,6 +3711,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-16 | 0.6.90 | §2.14 (arreglo, `RF-ADM-01`): en un sample nuevo, las subidas que empiezan mientras se firma la primera esperan su id. Elegir la portada antes de que volviera la firma del audio daba dos ids y «Crear el sample» decía «La parte «original» no está subida» (lo destapó la CI en `weeks.spec.ts`). |
 | 2026-10-16 | 0.6.89 | §4.19.1, §7: los emails salen de `justsomeotherpeople@gmail.com`, el Gmail del sello (decisión del usuario), con `MAIL_DAILY_LIMIT` de 450: `otherpeople.es` no tiene Workspace. |
 | 2026-10-15 | 0.6.88 | §2.14: el selector de la semana dorada del calendario lleva una línea que explica qué es y que, sin la capa de juego (Fase 7), de momento solo se guarda (petición del usuario). |
 | 2026-10-15 | 0.6.87 | **El primer admin** (§2.14): en producción nadie podía dar el rol `admin` (solo los tests y la semilla local). `pnpm admin:grant <email>` lo da a una cuenta existente, en el mismo `batch` que su registro en `audit_log`. La beta empieza el lunes 19 de octubre (decisión del usuario). |

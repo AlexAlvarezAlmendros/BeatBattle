@@ -45,7 +45,7 @@ function requireStorage(storage: SampleStorage | null): SampleStorage {
 }
 
 function assetProblem(part: SamplePart, asset: SampleAsset | null): string | null {
-  if (!asset) return 'no está subido'
+  if (!asset) return 'no está subida'
   if (!SAMPLE_FORMATS[part].includes(asset.format.toLowerCase())) return `formato ${asset.format} no admitido`
   if (asset.bytes > SAMPLE_MAX_BYTES[part]) return 'pasa del tamaño máximo'
   if (

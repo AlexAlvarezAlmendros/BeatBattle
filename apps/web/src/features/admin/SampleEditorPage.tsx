@@ -146,10 +146,14 @@ function UploadSlot({
   )
 }
 
-function SampleForm({ sample }: { sample: AdminSample | null }) {
+export function SampleForm({ sample }: { sample: AdminSample | null }) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [sampleId, setSampleId] = useState<string | null>(sample?.id ?? null)
+  // El id de un sample nuevo lo da la primera firma; las subidas que empiezan mientras llega la esperan. Sin
+  // esto, elegir la portada antes de que vuelva la firma del audio pedía otro id y el audio quedaba en el
+  // primero: «Crear el sample» decía que no estaba subido.
+  const pendingId = useRef<Promise<string> | null>(sample ? Promise.resolve(sample.id) : null)
   const [uploads, setUploads] = useState<Record<SampleUploadPart, UploadState>>({
     original: { status: sample ? 'done' : 'idle' },
     cover: { status: sample ? 'done' : 'idle' },
@@ -174,11 +178,23 @@ function SampleForm({ sample }: { sample: AdminSample | null }) {
     void queryClient.invalidateQueries({ queryKey: [...queryKeys.admin.samples(), id] })
   }
 
+  const signShared = async (part: SampleUploadPart) => {
+    if (pendingId.current) return signSampleUpload(part, await pendingId.current)
+    const first = signSampleUpload(part)
+    const id = first.then((signed) => signed.sampleId)
+    pendingId.current = id
+    // Si la primera firma falla, la siguiente subida vuelve a pedir un id.
+    id.catch(() => {
+      if (pendingId.current === id) pendingId.current = null
+    })
+    return first
+  }
+
   const upload = async (part: SampleUploadPart, file: File) => {
     setMessage(null)
     setUploads((current) => ({ ...current, [part]: { status: 'uploading', fraction: 0 } }))
     try {
-      const signed = await signSampleUpload(part, sampleId ?? undefined)
+      const signed = await signShared(part)
       setSampleId(signed.sampleId)
       await uploadSigned(signed.upload, file, (fraction) =>
         setUploads((current) => ({ ...current, [part]: { status: 'uploading', fraction } })),
