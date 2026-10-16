@@ -16,11 +16,11 @@ en la nube o envía algo fuera: **solo con la confirmación del usuario**.
 |---|---|---|
 | Turso | Una base de datos en la UE y un token de escritura | `DATABASE_URL=libsql://…` y `DATABASE_AUTH_TOKEN`. Las migraciones se aplican solas al arrancar. La integración de Turso en Vercel crea además `bb_TURSO_DATABASE_URL` y `bb_TURSO_AUTH_TOKEN` (también en preview); el servidor no las lee, así que las previews no tocan la base de producción |
 | Cloudinary | La cuenta de BeatBattle (la misma de desarrollo) | Producción usa el prefijo `beatbattle`; las previews, `beatbattle-preview-<pr>` |
-| Gmail | La cuenta del Workspace del sello (guía §4.19.1, `contacto@otherpeople.es`), la misma que usa la web del sello, con verificación en dos pasos y su contraseña de aplicación | Cupo compartido con la web del sello (riesgo aceptado en §4.19.1). Con una cuenta `@gmail.com`, `MAIL_DAILY_LIMIT` de 450 como mucho (`preflight` lo comprueba). SPF, DKIM y DMARC de Google en el dominio |
+| Gmail | `justsomeotherpeople@gmail.com` (guía §4.19.1), el Gmail del sello, con la contraseña de aplicación que ya usa su web | Cupo compartido con la web del sello (riesgo aceptado en §4.19.1). Es una cuenta `@gmail.com`: `MAIL_DAILY_LIMIT` de 450 como mucho (`preflight` lo comprueba). Sin DNS que tocar: el `From` es la propia dirección de Gmail |
 | Dominio | `battle.otherpeople.es` como CNAME a Vercel | Lo pide Vercel al añadir el dominio |
 | Vercel | El proyecto desde el repositorio de GitHub, región `fra1` | `vercel.json` ya trae la construcción, las reescrituras, las cabeceras y el cron diario |
 | OAuth (opcional) | Apps de Google y de Discord | URL de retorno: `https://battle.otherpeople.es/api/auth/callback/google` y `…/discord` |
-| GitHub | La variable `BB_TICK_URL` (`https://battle.otherpeople.es/api/cron/tick`) y el secreto `BB_CRON_SECRET` (el mismo valor que `CRON_SECRET`) | El flujo `tick.yml` llama al tick cada 15 minutos; sin la variable no hace nada |
+| ✅ GitHub | La variable `BB_TICK_URL` (`https://battle.otherpeople.es/api/cron/tick`) y el secreto `BB_CRON_SECRET` (el mismo valor que `CRON_SECRET`) | El flujo `tick.yml` llama al tick cada 15 minutos; sin la variable no hace nada |
 
 Secretos nuevos (uno por entorno, nunca los de desarrollo):
 
@@ -33,6 +33,10 @@ openssl rand -base64 32   # CRON_SECRET, IP_HASH_SALT
 
 **Estado (2026-10-15, más tarde):** Turso conectado (vacío; las migraciones entran en el primer arranque) y en Vercel solo para producción; Cloudinary comprobado con su `ping` y en la copia local. Faltan en Vercel Cloudinary y Gmail (los añade el usuario en el panel: el agente no lee esos secretos).
 
+**Estado (2026-10-16):** Cloudinary y OAuth en Vercel, y la subida de un sample funciona en producción. El tick de
+GitHub ya llama cada 15 minutos (lanzado a mano, responde sin errores). Falta Gmail: `GMAIL_USER`,
+`GMAIL_APP_PASSWORD`, `EMAIL_FROM_ADDRESS` y `MAIL_DAILY_LIMIT` a 450.
+
 ## 3. Variables de producción (panel de Vercel)
 
 | Variable | Valor |
@@ -42,10 +46,10 @@ openssl rand -base64 32   # CRON_SECRET, IP_HASH_SALT
 | ✅ `DATABASE_URL`, `DATABASE_AUTH_TOKEN` | Los de Turso (solo en producción) |
 | ✅ `BETTER_AUTH_SECRET` | Nuevo |
 | `GOOGLE_CLIENT_ID/SECRET`, `DISCORD_CLIENT_ID/SECRET` | Los de las apps de OAuth (opcionales) |
-| `GMAIL_USER`, `GMAIL_APP_PASSWORD` | La dirección del Workspace del sello y su contraseña de aplicación |
+| `GMAIL_USER`, `GMAIL_APP_PASSWORD` | `justsomeotherpeople@gmail.com` y su contraseña de aplicación |
 | `EMAIL_FROM_NAME`, `EMAIL_FROM_ADDRESS` | `Beat Battle · Other People` y la misma dirección que `GMAIL_USER` |
 | ✅ `MAIL_REPLY_TO` | El buzón del sello (`justsomeotherpeople@gmail.com`, el contacto de sus textos legales) |
-| ✅ `MAIL_DAILY_LIMIT` | `1900` con el Workspace; `450` con una cuenta `@gmail.com` |
+| `MAIL_DAILY_LIMIT` | `450` (cuenta `@gmail.com`; hoy en Vercel está a `1900` y hay que bajarlo) |
 | ✅ `UNSUBSCRIBE_SECRET`, `CRON_SECRET`, `IP_HASH_SALT` | Nuevos |
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Los de la cuenta de BeatBattle (la de desarrollo, con el secreto ya rotado) |
 | ✅ `BB_CLOUDINARY_PREFIX` | `beatbattle` |
