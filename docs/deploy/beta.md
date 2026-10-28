@@ -37,6 +37,10 @@ openssl rand -base64 32   # CRON_SECRET, IP_HASH_SALT
 GitHub ya llama cada 15 minutos (lanzado a mano, responde sin errores). Falta Gmail: `GMAIL_USER`,
 `GMAIL_APP_PASSWORD`, `EMAIL_FROM_ADDRESS` y `MAIL_DAILY_LIMIT` a 450.
 
+**Estado (2026-10-28):** Gmail en Vercel (`GMAIL_USER`, `GMAIL_APP_PASSWORD` y `EMAIL_FROM_ADDRESS`, los puso el
+usuario). Falta `MAIL_DAILY_LIMIT` a 450. Producción sirve todavía la PR #99: los despliegues de la #100 a la #103 se
+cancelaron por el *Ignored Build Step*, y las variables nuevas solo entran con un despliegue nuevo (B.6).
+
 ## 3. Variables de producción (panel de Vercel)
 
 | Variable | Valor |
@@ -45,13 +49,13 @@ GitHub ya llama cada 15 minutos (lanzado a mano, responde sin errores). Falta Gm
 | ✅ `TRUST_PROXY` | `1` |
 | ✅ `DATABASE_URL`, `DATABASE_AUTH_TOKEN` | Los de Turso (solo en producción) |
 | ✅ `BETTER_AUTH_SECRET` | Nuevo |
-| `GOOGLE_CLIENT_ID/SECRET`, `DISCORD_CLIENT_ID/SECRET` | Los de las apps de OAuth (opcionales) |
-| `GMAIL_USER`, `GMAIL_APP_PASSWORD` | `justsomeotherpeople@gmail.com` y su contraseña de aplicación |
-| `EMAIL_FROM_NAME`, `EMAIL_FROM_ADDRESS` | `Beat Battle · Other People` y la misma dirección que `GMAIL_USER` |
+| ✅ `GOOGLE_CLIENT_ID/SECRET`, `DISCORD_CLIENT_ID/SECRET` | Los de las apps de OAuth (opcionales) |
+| ✅ `GMAIL_USER`, `GMAIL_APP_PASSWORD` | `justsomeotherpeople@gmail.com` y su contraseña de aplicación |
+| ✅ `EMAIL_FROM_NAME`, `EMAIL_FROM_ADDRESS` | `Beat Battle · Other People` y la misma dirección que `GMAIL_USER` |
 | ✅ `MAIL_REPLY_TO` | El buzón del sello (`justsomeotherpeople@gmail.com`, el contacto de sus textos legales) |
 | `MAIL_DAILY_LIMIT` | `450` (cuenta `@gmail.com`; hoy en Vercel está a `1900` y hay que bajarlo) |
 | ✅ `UNSUBSCRIBE_SECRET`, `CRON_SECRET`, `IP_HASH_SALT` | Nuevos |
-| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Los de la cuenta de BeatBattle (la de desarrollo, con el secreto ya rotado) |
+| ✅ `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Los de la cuenta de BeatBattle (la de desarrollo, con el secreto ya rotado) |
 | ✅ `BB_CLOUDINARY_PREFIX` | `beatbattle` |
 
 Vacías en producción: `SMTP_URL`, `BB_FAKE_STORAGE`, `BB_TEST_CLOCK`, `MIGRATIONS_DIR` (la de por defecto) y
