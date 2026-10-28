@@ -1,6 +1,6 @@
 # BeatBattle — Roadmap del proyecto
 
-> Última actualización: 2026-10-13
+> Última actualización: 2026-10-28
 
 Competición semanal de beats a partir de un sample, con la estética de **Other People Records** y
 alma de videojuego: cada lunes cae un sample, los productores suben su *flip* y la comunidad vota
@@ -30,12 +30,12 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 |---|------|--------|------|------|
 | 0 | Fundaciones | ✅ Cerrada (2026-10-04, con la dirección «Arena»; PR nueva pendiente de revisión) | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes de la arena (guía v0.6 §3); marco de juego y menú principal navegables con teclado; prueba de marca y de juego (`RD-VIS-02`) |
 | 1 | Spike de sensación y audio | ✅ Cerrada con **GO** (2026-10-08) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio (emulado); efectos con la parte de la app < 10 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
-| 2 | Cuentas y base de email | 🔄 En curso (todo hecho salvo las comprobaciones manuales: Discord real 2.22, IMAP real 2.11 y el cierre 2.26) | [02-cuentas-email.md](plans/02-cuentas-email.md) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, presupuesto diario, preferencias, consentimientos y bajas |
+| 2 | Cuentas y base de email | 🔄 En curso (todo hecho salvo IMAP real 2.11, que llega con el Gmail de producción, y el cierre 2.26) | [02-cuentas-email.md](plans/02-cuentas-email.md) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, presupuesto diario, preferencias, consentimientos y bajas |
 | 3 | Semanas y samples | 🔄 En curso (hito cumplido: E2E del hito, jurado ✅ y prueba real en Cloudinary ✅; solo falta la conformidad del usuario con la excepción n.º 1 del acta, 3.21) | [03-semanas-samples.md](plans/03-semanas-samples.md) | 3 semanas programadas; cambio de semana en la frontera con reloj simulado; email del drop (también sin cuenta) |
 | 4 | Participar | ✅ Cerrada (2026-10-13) | [04-participar.md](plans/04-participar.md) | WAV de 60 MB por trozos con BPM, tonalidad y sonoridad medida; recibo por email |
 | 5 | Escuchar y votar | ✅ Cerrada (2026-10-13) | [05-escuchar-votar.md](plans/05-escuchar-votar.md) | Todas las reglas `RF-VOTE-*` en verde; Modo Jurado con teclado; recordatorio y llamada al jurado |
 | 6 | Cierre, resultados y ceremonia | ✅ Cerrada (2026-10-15) | [06-resultados.md](plans/06-resultados.md) | Sellado determinista, ceremonia, re-sellado idéntico; Lunes de batalla por email |
-| — | **Beta cerrada** | 🔄 En curso (B.2 y B.4; lo demás espera al usuario) | [beta-cerrada.md](plans/beta-cerrada.md) | 15–25 productores, 3 semanas reales |
+| — | **Beta cerrada** | 🔄 En curso (online y anuncio el domingo 15 de noviembre; primera ronda el lunes 16) | [beta-cerrada.md](plans/beta-cerrada.md) | 15–25 productores, 3 semanas reales (16 de noviembre – 6 de diciembre) |
 | 7 | Capa de juego | 🔒 Bloqueada (beta) | — | XP, niveles, rachas, logros, temporadas y carta con su pase de torneo |
 | 8 | Sorpresas y pulido audiovisual | 🔒 Bloqueada (F7) | — | Anexo F completo con variantes accesibles; kit de la semana |
 | 9 | Integración con Other People y email marketing | 🔒 Bloqueada (beta) | — | PR en `ReactOtpWeb` con widget y menú; campaña real a un segmento con consentimiento; alta en la newsletter del sello |
@@ -43,13 +43,16 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 
 ## Foco actual
 
-**El MVP está completo:** la **Fase 6** (cierre, resultados y ceremonia, [plan 06](plans/06-resultados.md)) se cerró el
-2026-10-15. Lo siguiente es la **beta cerrada**, que necesita al usuario: desplegar (Vercel, Turso, Cloudinary de
-producción, dominio y Gmail de BeatBattle) y elegir a los productores. La
-**Fase 2** y la **Fase 3** tienen su hito cumplido y solo esperan al usuario:
+**El MVP está completo** (fases 0–6, cerradas el 2026-10-15). La **beta cerrada** sale online y se anuncia el
+**domingo 15 de noviembre de 2026**, y su primera ronda empieza el **lunes 16** (decisión del usuario del 2026-10-28;
+la fecha anterior, el 19 de octubre, pasó sin semanas programadas). El calendario hacia atrás está en el
+[plan de la beta](plans/beta-cerrada.md#calendario). Lo próximo, hasta el domingo 1 de noviembre: el cupo de Gmail a
+450, desplegar `main` (producción sirve todavía la PR #99) y la prueba de humo con un email real.
 
-- **F2:** Discord real (2.22), IMAP real (2.11) y el cierre (2.26).
-- **F3:** la conformidad con la excepción n.º 1 del acta del jurado (3.21). La prueba real (3.4) ya está hecha.
+La **Fase 2** y la **Fase 3** tienen su hito cumplido y solo esperan al usuario:
+
+- **F2:** IMAP real (2.11, con el Gmail de producción) y el cierre (2.26).
+- **F3:** la conformidad con la excepción n.º 1 del acta del jurado (3.21).
 
 ## Grafo de dependencias
 
@@ -175,6 +178,10 @@ producción, dominio y Gmail de BeatBattle) y elegir a los productores. La
 - 2026-10-13 — **Sin dorado** (decisión del usuario, al empezar la Fase 6): las medallas del podio, la carta de
   campeón y la semana dorada van en la paleta del sello (guía §3.2 «Medallas», §3.4.3, §7).
 
+- 2026-10-28 — **La beta sale el domingo 15 de noviembre** (decisión del usuario): ese día se anuncia y se abre, y la
+  primera ronda empieza el lunes 16 a las 00:00 (Madrid); tres semanas, hasta el domingo 6 de diciembre. Sustituye al
+  lunes 19 de octubre, que pasó sin semanas programadas. Calendario en el [plan de la beta](plans/beta-cerrada.md#calendario).
+
 ## Decisiones abiertas
 
 Cada una tiene un valor por defecto que la guía ya asume (§7).
@@ -189,13 +196,14 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 | Pase de la carta | Cinta propia con física | F7 | Alternativa: expositor giratorio si se percibe como pieza del sello (guía §3.4.4) |
 | Modelo de semana | Envíos y votos a la vez | Tras la beta | Revisar con datos de participación |
 | Fecha de lanzamiento | Primera semana completa tras F10 | F10 | — |
-| Primera semana de la beta | **Cerrada (2026-10-15):** lunes 19 de octubre de 2026 | — | — |
+| Primera semana de la beta | **Cerrada (2026-10-28):** online y anuncio el domingo 15 de noviembre de 2026; primera ronda el lunes 16 | — | Sustituye al lunes 19 de octubre (decisión del 2026-10-15), que pasó sin semanas programadas |
 | Dependabot | Activarlo en la Fase 10 | F10 | Abre PRs en GitHub: necesita confirmación |
 
 ## Registro de avance
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-28 | Beta | **Nueva fecha** (decisión del usuario): online y anuncio el domingo 15 de noviembre, primera ronda el lunes 16 y tres semanas hasta el 6 de diciembre; el 19 de octubre pasó sin semanas. Calendario hacia atrás en el plan. Gmail en Vercel (el usuario); faltan el cupo a 450 y desplegar `main` (producción sirve la #99). 2.22 hecha (Discord real en producción). |
 | 2026-10-15 | Beta | Plan de la beta creado (10 tareas): textos legales y guía de despliegue, ya; recursos, despliegue, calendario e invitaciones, con el usuario. |
 | 2026-10-15 | F6 | **Fase 6 cerrada** (6.23): los seis criterios. Ceremonia en 3D en el Escenario (6.17b, decisión del usuario) y efectos `cer.*` escuchados y aprobados por el usuario. Mezcladas las PR #74–#90. Validadores de previsualización y de datos estructurados, con el despliegue. Siguiente: beta cerrada (despliegue, decisión del usuario). |
 | 2026-10-13 | F6 | Plan 06 creado (23 tareas). Decisión del usuario: sin dorado. |
