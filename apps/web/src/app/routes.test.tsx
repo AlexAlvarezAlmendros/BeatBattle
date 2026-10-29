@@ -1,6 +1,6 @@
 import { scheduleWeek } from '@beatbattle/rules'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, matchRoutes, type RouteObject, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -35,12 +35,6 @@ const PAGES: { path: string; heading: string; title: string }[] = [
   { path: '/', heading: 'pages.home.title', title: documentTitle() },
   { path: '/semanas', heading: 'pages.weeks.title', title: documentTitle(tk('pages.weeks.title')) },
   { path: '/subir', heading: 'pages.upload.title', title: documentTitle(tk('pages.upload.title')) },
-  {
-    path: '/salon-de-la-fama',
-    heading: 'pages.hallOfFame.title',
-    title: documentTitle(tk('pages.hallOfFame.title')),
-  },
-  { path: '/temporada/t4', heading: 'pages.season.title', title: documentTitle(tk('pages.season.title')) },
   {
     path: '/como-funciona',
     heading: 'pages.howItWorks.title',
@@ -115,6 +109,33 @@ describe('router (0.10, guía §2.18)', () => {
     await waitFor(() =>
       expect(document.title).toBe(documentTitle(t('pages.profile.documentTitle', { name: 'Aina' }))),
     )
+    vi.unstubAllGlobals()
+  })
+
+  it('/salon-de-la-fama y /temporada/:id piden sus datos y pintan su <h1> y su título (tareas 7.25 y 7.26)', async () => {
+    const hall = {
+      weeklyWinners: [],
+      seasonChampions: [],
+      records: { mostWins: null, longestStreak: null, bestScore: null, mostVotesCast: null },
+    }
+    const standings = { season: { id: '2026-T4', sealedWeeks: 0, closed: false }, rows: [] }
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async (input: RequestInfo | URL) =>
+          new Response(JSON.stringify({ data: String(input).includes('/api/seasons/') ? standings : hall }), {
+            headers: { 'content-type': 'application/json' },
+          }),
+      ),
+    )
+    renderAt('/salon-de-la-fama')
+    expect(await h1(t('pages.hallOfFame.title'))).toBeInTheDocument()
+    await waitFor(() => expect(document.title).toBe(documentTitle(t('pages.hallOfFame.title'))))
+    cleanup()
+    renderAt('/temporada/2026-T4')
+    const heading = t('pages.season.heading', { season: 'T4 de 2026' })
+    expect(await h1(heading)).toBeInTheDocument()
+    await waitFor(() => expect(document.title).toBe(documentTitle(heading)))
     vi.unstubAllGlobals()
   })
 
