@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.107 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.115 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1501,6 +1501,17 @@ tarjeta de la semana. Ese pliegue (sin las cifras del medidor ni las teselas de 
 **del móvil táctil**: con teclado y ratón en una ventana estrecha o ampliada, las cifras y las teselas
 siguen visibles, en una segunda fila del HUD si hace falta (§3.8.3, WCAG 1.4.4 y 1.4.10).
 
+**La capa de juego del HUD** (Fase 7, tarea 7.18). El nivel, el rango y el medidor salen de `GET /api/me` (`game`,
+§2.10): el XP de verdad de la cuenta, en vivo. Las teselas de la derecha van en todas las pantallas del marco de juego
+con sesión, salvo donde la pantalla pone lo suyo en ese lado (el Modo Jurado, la entrada a ciegas): la **temporada**
+del lunes de hoy («TEMPORADA T4» y «12 PTS · 9.º»; sin puesto todavía, solo «0 PTS») y la **racha** («RACHA» y «×3»,
+también «×0»). Sin temporada, sin su tesela. El lector las oye enteras («Temporada T4: 12 puntos, puesto 9»,
+«Racha: 3 semanas»). Lo que gana un hecho en vivo (el voto, la subida) se suma a la sesión en cuanto responde el
+servidor, pero **el medidor lo enseña cuando lo traga** (§3.4.2) o cuando sale el aviso de su logro (§3.8.8): hasta
+entonces sigue en lo de antes, con su nivel, y al subir lo recorre el brillo (Anexo E). En el nivel 20, el máximo, el
+medidor va lleno con «NV 20 · MÁX». Lo ganado se repite en una **región viva** educada (`RNF-A11Y-07`): «+5 XP», el
+logro y el nivel.
+
 Los enlaces legales (bases, términos, privacidad, cookies) están en Opciones → Privacidad, en «Cómo
 se juega» y, en las pantallas interiores, en el hueco derecho de la barra de controles («Legal»).
 
@@ -2504,7 +2515,9 @@ tests de propiedades.
   `['entries', slug, order]`…). El voto es una mutación **optimista** con reversión y sonido de
   error si falla.
 - **Zustand** con almacenes pequeños: `player` (cola, pista, posición, escucha acumulada), `audio`
-  (volúmenes, silencio, kit), `hud` (cola de XP flotante, avisos de logro), `stage` (calidad,
+  (volúmenes, silencio, kit), `hud` (cola de XP flotante con el XP que el medidor aún no ha tragado, avisos de
+  logro y de nivel en cola, lo que dice la región viva y la retención mientras una capa a pantalla completa —la
+  pantalla de título, la revelación del drop, la ceremonia— tapa el marco; tarea 7.18), `stage` (calidad,
   uniformes, vistas activas), `ui` (modales, puerta de entrada).
 - Cliente de API tipado con los esquemas de `@beatbattle/shared`; sobre de respuesta
   `{ data } | { error: { code, message, details? } }`, como Orchard.
@@ -3995,6 +4008,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.115 | **Tarea 7.18.** §3.4.1, «La capa de juego del HUD»: nivel, rango y medidor desde `GET /api/me` (`game`), en vivo; las teselas de temporada («TEMPORADA T4 · 12 PTS · 9.º», sin puesto solo los puntos) y racha («×3», también «×0») en todas las pantallas del marco de juego con sesión salvo donde la pantalla ocupa ese lado; lo ganado en vivo se suma a la sesión al responder el servidor, pero el medidor lo enseña cuando lo traga el «+XP» o sale el aviso de su logro; en el nivel 20, «NV 20 · MÁX»; región viva educada para el XP, los logros y el nivel. §4.7.2: lo que guarda el almacén `hud` (el XP aún sin tragar, los avisos en cola, la región viva y la retención mientras una capa a pantalla completa tapa el marco). |
 | 2026-10-29 | 0.6.107 | **Tarea 7.13** (huecos G1 y G13 del plan 07, resueltos). §2.10, «Lo público y lo propio»: **lo público solo cuenta semanas selladas** (el perfil público con su XP, nivel, teselas, historial, logros y vitrina, su OG, la temporada y el salón: los movimientos y logros con `week_id` sellado o nulo; nulo solo lo llevan hechos que no dependen de jugar una semana, como `profile_done`, `share_card` y el `level_20` que cruzan) y **`GET /api/me` es de su dueño y va en vivo** (XP, nivel y nivel visto, racha con comodín, temporada, logros sin ver y ceremonia de temporada pendiente); lo ya visto sale una vez (`RF-GAME-09`). §2.3: el perfil público con su capa de juego y la vitrina en `PUT /api/me/profile`. §2.15: la OG del perfil, con la misma regla. §4.10: `GET /api/me` y `POST /api/me/seen` (`level`, `achievement`, `season_champion`) con su forma; `GET /api/profiles/:username` en vez de `/api/producers/:username` (G13) y `GET · PUT /api/me/profile` en vez de `PATCH`, que nunca existieron. §4.11: la condición de lo público sobre `week_id`. |
 | 2026-10-29 | 0.6.106 | **Tarea 7.12.** §2.9, salón de la fama: todo sale de los snapshots vigentes de las semanas selladas (los ganadores en 1.ª posición, ex aequo incluidos; los campeones de cada temporada cerrada; más victorias; la racha más larga con el comodín; la mejor puntuación de una entrada clasificada; más votos emitidos, los válidos que contó cada snapshot); con la misma cifra, el récord es de quien llegó antes; un productor eliminado sigue como «Productor eliminado». §4.10: `GET /api/hall-of-fame` con su forma. |
 | 2026-10-29 | 0.6.105 | **Tarea 7.11** (hueco G7 del plan 07, resuelto: el cierre de la temporada). §2.9: una temporada se cierra cuando ha acabado su trimestre (00:00 del día 1 del siguiente, hora de Madrid) y todas sus semanas están selladas: la cierra el sellado de la semana de su último lunes, que siempre acaba después del trimestre, en su `batch`; sin semana ese lunes, el primer `tick` tras el fin del trimestre; sin semanas, nunca. Sus campeones (la primera fila, también ex aequo) ganan `season_champ` y su ceremonia queda pendiente hasta la marca `season_champion` (`RF-ARC-05` lo dice así); los campeones salen de los snapshots, así que re-sellar una semana de una temporada cerrada puede cambiarlos (gana el nuevo, pierde con su XP quien deja de serlo de toda temporada cerrada). §4.5: `seasonEndsAt` e `isSeasonClosed`. §4.10: `GET /api/seasons/:id/standings` con su forma. §4.11: el cierre en el `batch` del sellado y en el `tick` (`job_state` `seasonClose`). §4.12: `sealWeeks` cierra las temporadas sin semana el último lunes. |

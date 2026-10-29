@@ -1,3 +1,4 @@
+import { isAchievementId } from '@beatbattle/rules'
 import { describe, expect, it } from 'vitest'
 import es from './es.json'
 import { formatDuration } from './format'
@@ -112,7 +113,10 @@ describe('i18n: es.json', () => {
 
   it('las claves van en camelCase y el guion bajo solo marca plurales con su _other', () => {
     for (const [key] of leaves) {
-      for (const segment of key.split('.')) {
+      for (const [index, segment] of key.split('.').entries()) {
+        // Los textos de los logros van por su id del catálogo (`achievement.<id>.name`, la `hintKey` de las reglas):
+        // ese segmento es un dato (`first_drop`), no una clave.
+        if (index === 1 && key.startsWith('achievement.') && isAchievementId(segment)) continue
         expect(segment, key).toMatch(/^[a-z][a-zA-Z0-9]*(?:_(?:zero|one|two|few|many|other))?$/)
       }
     }

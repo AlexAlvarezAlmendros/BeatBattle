@@ -135,10 +135,6 @@
       "closes": "Tiempo · cierre de envíos",
       "votes": "Tiempo · cierre de votos"
     },
-    "hud": {
-      "streak": "Racha",
-      "streakValue": "×{count}"
-    },
     "chronicle": {
       "insert": "{action} · Crédito {credit}",
       "insertAction": "Inserta tu beat",
@@ -948,6 +944,18 @@
     }
   },
   "dev": {
+    "rewards": {
+      "title": "Recompensas (banco)",
+      "summary": "La capa de juego del HUD con una sesión de muestra: el «+XP» que vuela al medidor, los avisos de logro de cada rareza y la subida de nivel.",
+      "vote": "Votar (+5 XP)",
+      "upload": "Subir (+125 XP y logros)",
+      "common": "Logro común",
+      "rare": "Logro raro",
+      "epic": "Logro épico",
+      "legendary": "Logro legendario",
+      "level": "Subir de nivel",
+      "stack": "Cuatro logros a la vez"
+    },
     "listen": {
       "title": "Escucha (spike de Cloudinary)",
       "steps": "Subir, esperar el derivado y escuchar",
@@ -1617,7 +1625,9 @@
       "xp": "Experiencia",
       "xpText": "{value} de {max} XP para el nivel {next}",
       "xpStart": "XP {value}",
-      "xpEnd": "NV {next} · {max}"
+      "xpEnd": "NV {next} · {max}",
+      "xpTextMax": "{value} XP · nivel {level}, el máximo",
+      "xpEndMax": "NV {level} · MÁX"
     }
   },
   "screen": {
@@ -2159,5 +2169,201 @@
     "emptyTitle": "Aún no hay entradas",
     "emptyText": "En cuanto alguien suba su flip, aquí estará para que lo puntúes.",
     "backToMenu": "Volver al menú"
+  },
+  "achievement": {
+    "first_drop": {
+      "name": "Primer sample",
+      "desc": "Descarga tu primer sample."
+    },
+    "first_entry": {
+      "name": "Primera piedra",
+      "desc": "Sube tu primera entrada."
+    },
+    "profile_done": {
+      "name": "Carta de presentación",
+      "desc": "Completa tu perfil: avatar, bio y un enlace."
+    },
+    "first_vote": {
+      "name": "Primer veredicto",
+      "desc": "Emite tu primer voto."
+    },
+    "share_card": {
+      "name": "Altavoz",
+      "desc": "Comparte una tarjeta."
+    },
+    "early_bird": {
+      "name": "Madrugador",
+      "desc": "Sube la primera entrada de una semana."
+    },
+    "streak_3": {
+      "name": "En racha",
+      "desc": "Clasifica 3 semanas seguidas."
+    },
+    "entries_10": {
+      "name": "Diez de diez",
+      "desc": "Sube 10 entradas."
+    },
+    "jury_full": {
+      "name": "Jurado completo",
+      "desc": "Vota todas las entradas de una semana (5 o más)."
+    },
+    "votes_100": {
+      "name": "Oído fino",
+      "desc": "Emite 100 votos."
+    },
+    "podium": {
+      "name": "Al podio",
+      "desc": "Entra por primera vez en el top 3."
+    },
+    "challenge": {
+      "name": "Reto aceptado",
+      "desc": "Cumple el reto extra de una semana y queda en el top 10."
+    },
+    "streak_8": {
+      "name": "Imparable",
+      "desc": "Clasifica 8 semanas seguidas."
+    },
+    "entries_50": {
+      "name": "Catálogo",
+      "desc": "Sube 50 entradas."
+    },
+    "win": {
+      "name": "Disco de oro",
+      "desc": "Gana una semana."
+    },
+    "unanimous": {
+      "name": "Unanimidad",
+      "desc": "Saca una media de 4,8 o más con 10 votos o más."
+    },
+    "votes_1000": {
+      "name": "Juez supremo",
+      "desc": "Emite 1.000 votos."
+    },
+    "golden_ear": {
+      "name": "Oído de oro",
+      "desc": "Anticipa el criterio del jurado en una semana."
+    },
+    "label_pick": {
+      "name": "Elegido por el sello",
+      "desc": "Recibe la Elección del sello."
+    },
+    "streak_26": {
+      "name": "Medio año sin fallar",
+      "desc": "Clasifica 26 semanas seguidas."
+    },
+    "win_3": {
+      "name": "Platino",
+      "desc": "Gana 3 semanas."
+    },
+    "season_champ": {
+      "name": "Campeón de temporada",
+      "desc": "Gana una temporada."
+    },
+    "level_20": {
+      "name": "De la familia",
+      "desc": "Llega al nivel 20."
+    },
+    "last_minute": {
+      "name": "Al límite",
+      "desc": "Sube en los últimos 10 minutos antes del cierre de envíos.",
+      "hint": "El reloj aprieta, y tú también."
+    },
+    "night_owl": {
+      "name": "Búho",
+      "desc": "Vota 10 entradas entre las 03:00 y las 05:00.",
+      "hint": "Hay quien vota cuando todos duermen."
+    },
+    "scratch": {
+      "name": "Scratcher",
+      "desc": "Siete clics seguidos en el logo.",
+      "hint": "Al logo le gusta que lo rayen."
+    },
+    "konami": {
+      "name": "Rebobinado",
+      "desc": "Activa el modo cassette.",
+      "hint": "Arriba, arriba, abajo, abajo…"
+    },
+    "pad_404": {
+      "name": "Perdido con flow",
+      "desc": "Graba un bucle en el beat pad del 404.",
+      "hint": "Perderse también tiene ritmo."
+    },
+    "screwed": {
+      "name": "Chopped & screwed",
+      "desc": "Mantén Espacio sobre el vinilo del sample 5 segundos.",
+      "hint": "Hay discos que suenan mejor despacio."
+    },
+    "human_metronome": {
+      "name": "Metrónomo humano",
+      "desc": "Acierta el BPM del sample (±1) marcando el tempo.",
+      "hint": "Tu mano sabe contar tiempos."
+    },
+    "detective": {
+      "name": "Detective",
+      "desc": "Acierta 5 productores en «Adivina el productor».",
+      "hint": "Detrás de cada alias hay alguien."
+    },
+    "comeback": {
+      "name": "Remontada",
+      "desc": "De la mitad baja al top 3 en semanas seguidas.",
+      "hint": "Desde abajo se ve mejor el podio."
+    },
+    "golden_week": {
+      "name": "Cajón dorado",
+      "desc": "Participa en una semana dorada.",
+      "hint": "Hay semanas que brillan más."
+    },
+    "double": {
+      "name": "Doblete",
+      "desc": "Gana dos semanas seguidas.",
+      "hint": "Lo bueno, si se repite, dos veces bueno."
+    },
+    "oracle": {
+      "name": "Oráculo",
+      "desc": "Oído de oro 3 semanas seguidas.",
+      "hint": "Tu oído no falla, y lo sabes."
+    },
+    "revetlla": {
+      "name": "Revetlla",
+      "desc": "Visita la web la noche del 23 de junio.",
+      "hint": "La noche más corta del año."
+    }
+  },
+  "game": {
+    "hud": {
+      "season": "Temporada {season}",
+      "seasonValue": "{points} PTS · {position}.º",
+      "seasonValueUnranked": "{points} PTS",
+      "seasonSr": "Temporada {season}: {points} puntos, puesto {position}",
+      "seasonSrUnranked": "Temporada {season}: {points} puntos, aún sin puesto",
+      "streak": "Racha",
+      "streakValue": "×{count}",
+      "streakSr_one": "Racha: {count} semana",
+      "streakSr_other": "Racha: {count} semanas"
+    },
+    "live": {
+      "region": "Recompensas",
+      "xp": "+{amount} XP",
+      "achievement": "Logro conseguido: {name}, {rarity}, +{xp} XP",
+      "level": "¡Nivel {level}!",
+      "levelRank": "¡Nivel {level}! Ahora eres {rank}"
+    },
+    "rarity": {
+      "common": "Común",
+      "rare": "Raro",
+      "epic": "Épico",
+      "legendary": "Legendario"
+    },
+    "float": "+{amount} XP",
+    "notice": {
+      "unlocked": "Logro desbloqueado",
+      "xp": "+{xp} XP",
+      "legendary": "¡LOGRO LEGENDARIO!",
+      "level": "¡NIVEL {level}!",
+      "levelPlate": "Nivel",
+      "rank": "¡AHORA ERES {rank}!",
+      "rankSame": "Sigues como {rank}",
+      "skip": "Pulsa cualquier tecla para seguir"
+    }
   }
 }
