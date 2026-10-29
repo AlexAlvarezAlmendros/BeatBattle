@@ -24,6 +24,8 @@ import { qrRoutes } from './modules/entries/qrRoute'
 import { entriesRoutes } from './modules/entries/routes'
 import { createEntriesService } from './modules/entries/service'
 import { waveformRoutes } from './modules/entries/waveformRoute'
+import { gameRoutes } from './modules/game/routes'
+import { createGameService } from './modules/game/service'
 import { healthRoutes } from './modules/health/routes'
 import { createHealthService } from './modules/health/service'
 import { meRoutes } from './modules/me/routes'
@@ -162,8 +164,11 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   const rateLimiter = createRateLimiter({ db })
   const storage = config.storage ? createCloudinaryStorage(config.storage) : null
   const images = deps.images === undefined ? storage : deps.images
+  // La capa de juego (Fase 7): cada hecho mete su XP y sus logros en su propio `batch`.
+  const game = createGameService({ db, newId })
   meRoutes(app, { db, images })
-  profileRoutes(app, { db, images, rateLimiter })
+  gameRoutes(app, { db, game, rateLimiter })
+  profileRoutes(app, { db, images, rateLimiter, game })
   accountRoutes(app, { db, images, emails, rateLimiter })
 
   const samples =
@@ -196,6 +201,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   const entries = createEntriesService({
     db,
     storage: entryStorage,
+    game,
     newId,
     publicUrl: config.publicUrl,
     measureBudgetMs: deps.measureBudgetMs,
@@ -209,6 +215,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     createVotesService({
       db,
       entries,
+      game,
       rateLimiter,
       newId,
       publicUrl: config.publicUrl,
@@ -220,7 +227,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   ogRoutes(app, { db })
   shareRoutes(app, { db, publicUrl: config.publicUrl, indexHtml: deps.indexHtml ?? indexHtmlLoader() })
   seoRoutes(app, { db, publicUrl: config.publicUrl, indexable: config.indexable })
-  const weeks = createWeeksService({ db, storage: samples, newId })
+  const weeks = createWeeksService({ db, storage: samples, newId, game })
   weeksRoutes(app, weeks)
   countdownRoutes(app, { db })
   waveformRoutes(app, { db, secret: config.auth.secret })

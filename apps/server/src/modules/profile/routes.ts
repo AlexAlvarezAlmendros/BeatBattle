@@ -11,6 +11,7 @@ import { requireSession } from '../../auth/guards'
 import type { Db } from '../../db/client'
 import { appError } from '../../lib/errors'
 import type { RateLimiter } from '../../lib/rateLimit'
+import type { GameService } from '../game/service'
 import type { ImageStorage } from '../storage/cloudinary'
 import {
   changeUsername,
@@ -30,11 +31,13 @@ export interface ProfileDeps {
   db: Db
   images: ImageStorage | null
   rateLimiter: RateLimiter
+  /** La capa de juego (`profile_done`, tarea 7.9). */
+  game: GameService
 }
 
 /** Perfil de productor (§2.3, §3.8.10, tarea 2.18). */
 export function profileRoutes(app: FastifyInstance, deps: ProfileDeps): void {
-  const store: ProfileStore = { db: deps.db, images: deps.images }
+  const store: ProfileStore = { db: deps.db, images: deps.images, game: deps.game }
   const orphan = (req: FastifyRequest) => (publicId: string, error: unknown) =>
     req.log.warn({ publicId, err: error }, 'avatar anterior sin borrar en Cloudinary')
   const limit = (req: FastifyRequest) =>

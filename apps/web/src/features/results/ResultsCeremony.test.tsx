@@ -46,6 +46,7 @@ const RESULTS: WeekResults = {
     row('e', null, 'nadie'),
   ],
   mine: row('d', 4, 'lil'),
+  myGame: { xp: 100, goldenEar: false, seasonPoints: 12 },
 }
 
 beforeEach(() => {

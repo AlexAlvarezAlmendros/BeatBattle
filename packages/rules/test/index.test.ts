@@ -13,6 +13,7 @@ import * as loudness from '../src/loudness'
 import * as phase from '../src/phase'
 import * as prng from '../src/prng'
 import * as ranking from '../src/ranking'
+import * as replay from '../src/replay'
 import * as scoring from '../src/scoring'
 import * as season from '../src/season'
 import * as xp from '../src/xp'
@@ -31,6 +32,7 @@ const modules = {
   phase,
   prng,
   ranking,
+  replay,
   scoring,
   season,
   xp,

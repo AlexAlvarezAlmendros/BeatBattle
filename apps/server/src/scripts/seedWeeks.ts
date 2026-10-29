@@ -17,6 +17,7 @@ import { week } from '../db/schema'
 import { systemClock } from '../lib/clock'
 import { createUuidV7 } from '../lib/ids'
 import { measureAudio } from '../media/measure'
+import { createGameService } from '../modules/game/service'
 import { createSamplesService } from '../modules/samples/service'
 import { createDiskSampleStorage } from '../modules/storage/samples'
 import { createWeeksService } from '../modules/weeks/service'
@@ -180,7 +181,7 @@ const storage = createDiskSampleStorage({
 const ids = createUuidV7()
 const newId = () => ids(systemClock)
 const samples = createSamplesService({ db, storage, measure: (source) => measureAudio(source), newId })
-const weeks = createWeeksService({ db, storage, newId })
+const weeks = createWeeksService({ db, storage, newId, game: createGameService({ db, newId }) })
 
 const fromArg = process.argv.find((arg) => arg.startsWith('--from='))?.slice('--from='.length)
 const first = fromArg ? parseLocalDate(fromArg) : mondayOf(systemClock.now())

@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.101 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.104 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -527,6 +527,33 @@ mediana, histograma, puntos de temporada) y marca la semana `sealed_at`. El snap
 explícito que crea una revisión nueva y queda registrado (auditoría y aviso en la página de
 resultados: «Clasificación corregida el …»).
 
+**El sellado y la capa de juego.** En el mismo `batch` que el snapshot, y calculado **después** de la clasificación
+y a partir de ella (`RF-GAME-10`), el sellado da lo que depende del resultado (§2.10): el XP de resultado (clasificar,
+top 10 o podio, con la racha en juego y la semana dorada), el **oído de oro** de cada jurado, la **racha**
+(`streak_state`, con el comodín) y los **logros de resultado** (`podium`, `win`, `win_3`, `double`, `comeback`,
+`unanimous`, `challenge`, `streak_3`, `streak_8`, `streak_26`, `golden_ear` y `oracle`). Todo eso es una función de las
+semanas selladas en su revisión vigente, y el libro la sigue también cuando se corrige una (hueco G2 del plan 07):
+
+- El sellado y cada re-sellado **vuelven a jugar** las semanas selladas desde la que se sella o se corrige hasta la
+  última, porque las posteriores dependen de ella (la racha, `double`, `comeback`, `oracle`, `win_3`), y escriben solo
+  la diferencia.
+- El XP de resultado y el de oído de oro de cada una de esas semanas queda **igual al que da la revisión vigente**: la
+  primera vez, con su movimiento; después, con un **ajuste** referido a la semana y a la revisión que lo provoca, que
+  puede restar (§4.11). Quien baja por la corrección devuelve la diferencia; quien sube, la cobra.
+- Un logro de resultado que ahora se cumple en una de esas semanas y la cuenta no tenía, se gana en la primera en que
+  se cumple. Uno que se ganó en una de ellas y **ya no se cumple en ninguna semana sellada** se **retira con su XP**
+  (si se vuelve a ganar más adelante, se cobra otra vez, una sola). Los ganados en semanas anteriores a la corregida no
+  se tocan.
+- La racha guardada queda la que dan las semanas selladas.
+- No cambia lo ganado en vivo (§2.10: subir, la primera entrada, los votos y el jurado completo, con sus logros),
+  aunque la racha con la que se pagó subir ya no sea la misma, ni `level_20`, que se gana al cruzar el nivel.
+- Si el re-sellado no cambia el snapshot, no cambia nada para nadie; repetir un sellado o un re-sellado tampoco
+  (`RF-GAME-01`).
+
+Es lo que pide el juego limpio (§1.3): nadie se queda con el XP ni con el logro de un puesto que era de otra entrada,
+y la entrada que sube con la corrección cobra lo que le toca. Congelar lo ganado sería más simple, pero dejaría el
+libro diciendo una clasificación que ya no existe.
+
 **Página de resultados** (`/semana/:slug/resultados`): podio con los tres primeros (vinilos de
 oro, platino y diamante, §3.4.3), tabla completa con posición, alias revelado → productor,
 puntuación, votos e histograma en miniatura, «Tu resultado» destacado si participaste, el reparto de
@@ -544,7 +571,7 @@ ofrece la ceremonia de revelación. Dura unos 25 s y se puede saltar.
 | `RF-RES-05` | El sellado excluye votos no válidos | Bloquear a un votante antes del sellado elimina su efecto |
 | `RF-RES-06` | Re-sellado explícito con revisión, auditoría y aviso público | Descalificar tras sellar y re-sellar → `result_revision = 2` y aviso visible |
 | `RF-RES-07` | Revelación de identidades en voto ciego al sellar | Tras el sellado, la API pública devuelve el productor de cada entrada |
-| `RF-RES-08` | Página de resultados con podio, tabla, «Tu resultado» y reparto de XP | E2E con dos semanas simuladas |
+| `RF-RES-08` | Página de resultados con podio, tabla, «Tu resultado» y reparto de XP | E2E con dos semanas simuladas; servidor: `myGame` dice el XP del sellado de quien mira (con los ajustes de un re-sellado), su oído de oro y sus puntos de temporada |
 | `RF-RES-09` | Ceremonia ofrecida una vez por usuario y semana, saltable y repetible | `seen_flag` `ceremony` por usuario y semana; Esc la salta; «Ver la ceremonia» la repite |
 | `RF-RES-10` | Semana sin entradas: «Semana desierta», sin podio ni ceremonia | Sellar una semana vacía da un snapshot vacío y la página lo explica |
 
@@ -596,6 +623,22 @@ pura del XP total.
 - **Semana dorada:** duplica el XP de los eventos de esa semana (Anexo B), no el de los logros, que es siempre
   el de su rareza (sin racha ni semana dorada). Cada importe con bonus se redondea al entero antes de duplicarlo
   (Anexo G).
+- **Dónde se gana en vivo**, en el mismo `batch` que el hecho y solo si el hecho ocurre (§4.11):
+  - **La entrada que pasa a `active`** (al registrarla si la medición cabe, al sustituir el audio o cuando el `tick`
+    completa una en `processing`): subir, la primera entrada de la semana (con `early_bird`, que va con ella: si dos
+    entradas llegan a la vez, el XP y el logro son solo de la que se queda la primera), `first_entry`, `entries_10`, `entries_50`,
+    `last_minute` y `golden_week`. La racha en juego se calcula con las semanas selladas en su revisión vigente; si
+    la anterior ya cerró y nadie la había sellado, se sella antes (perezoso, como al leer).
+  - **El voto**: los 5 XP con el tope, `first_vote`, `votes_100`, `votes_1000`, `night_owl` y, al votar la última de
+    las entradas activas ajenas (5 o más), el **jurado completo** (50 XP, una vez por semana) con `jury_full`.
+    Cambiar la nota no da nada nuevo.
+  - **La descarga del sample** (`first_drop`), **el perfil guardado** con avatar, bio y un enlace (`profile_done`, al
+    guardar los datos o el avatar) y `level_20` al cruzar el nivel 20 con cualquiera de ellos.
+  - **Lo que solo ocurre en el navegador** (compartir una tarjeta, `share_card`; los secretos de la Fase 8) llega por
+    `POST /api/me/achievements` (§4.10): una lista blanca, un límite por hora y nada más que el logro y su XP.
+  - La respuesta del voto y la de la entrada (registrarla y sustituir el audio) dicen lo ganado,
+    `game: { xp, achievements, level }`, para el «+5 XP» flotante, el aviso de logro y la subida de nivel; una entrada
+    que queda en `processing` no gana nada hasta que el `tick` la activa (`game.xp = 0`).
 
 **Niveles y rangos.** 20 niveles con curva `150 · (n − 1)^1,6` (Anexo B). Cada pocos niveles cambia
 el **rango** (título visible en la carta): *Excavador de cajones* → *Loopero* → *Sampleador* →
@@ -614,6 +657,8 @@ semana mala no destroce meses.
   salvada **no suma**: la racha se queda como estaba, también para el bonus y para `streak_3`, `streak_8` y
   `streak_26`. Con el comodín de esa temporada ya gastado, fallar la rompe (vuelve a 0).
 - La **mejor racha** es la más larga que ha tenido la cuenta (el récord del salón de la fama).
+- La racha la aplica el sellado a quien tiene entrada en la semana y a quien tenía racha (si no participa, gasta el
+  comodín o la pierde); `streak_state` es su caché, y la verdad, las semanas selladas en su revisión vigente (§2.8).
 
 **Logros.** Unos 35, en cuatro rarezas (común, raro, épico, legendario), algunos **ocultos** («???»
 con una pista críptica). Catálogo completo en el Anexo C. Desbloquear uno lanza el aviso de logro
@@ -2365,6 +2410,7 @@ tests de propiedades.
 | `season` | `seasonPoints(posicion, clasificada)`; `seasonStandings(resultados)` (puntos, victorias, podios, media y posición con ex aequo) y `seasonChampions(tabla)` |
 | `levels` | `xpForLevel(n)`; `levelOf(xp)`; `levelProgress(xp)` (barra del HUD); `rankTitle(nivel)` → **id de rango** (`crateDigger` … `otherPeople`; el texto sale de i18n con `rank.<id>`); `streakBonus` y `streakBonusPercent` |
 | `xp` | `xpFor(evento, contexto)`; `streakOf(historial)` (Fase 7) |
+| `replay` | `replaySealedWeeks(semanas)` → por cada semana sellada de una cuenta, en orden de número: el XP de resultado (con la racha en juego) y de oído de oro, la racha tras ella y los logros de resultado que se cumplen (una semana sin sellar en medio se salta). Lo usan el sellado y el re-sellado (§2.8) y el reprocesado |
 | `prng` | `hashOf(...partes)`, `sfc32`, `createRng(semilla)` con `next`, `int`, `pick`, `shuffle`; `rngFor(...partes)` para flujos con nombre |
 | `loudness` | `playbackGainDb(lufs)` (solo atenúa) |
 | `achievements` | Catálogo (Anexo C) como datos (id, rareza, oculto, clave de la pista, eventos que lo miran y fase de su disparador) + `evaluate(evento, contexto) → logros nuevos`; `nightOwlWindow(instante)` y `isRevetllaNight(instante)` en hora de Madrid |
@@ -2555,8 +2601,9 @@ Al registrar la entrada:
    (`node_modules/ffmpeg-static/ffmpeg`), y el script de instalación de `ffmpeg-static`, que lo descarga,
    tiene que estar permitido en el gestor de paquetes (`onlyBuiltDependencies` desde pnpm 10); la CI
    comprueba que el binario existe.
-4. Entrada, XP y logros se escriben en un único `batch` (XP y logros, desde la Fase 7: hasta entonces, la
-   entrada y su email en la cola).
+4. Entrada, email en la cola, XP y logros se escriben en un único `batch` (la capa de juego, §2.10 y §4.11,
+   condicionada a que la entrada quede activa); la respuesta lleva lo ganado (`game`). La entrada que el `tick`
+   completa hace lo mismo en su `batch`.
 5. Si cualquier paso falla, se borra el recurso, el *intent* queda `failed`, sale `entry.failed` y se devuelve
    el motivo: el código de `validateEntryAudio` (`DURATION_OUT_OF_RANGE`…) o `ENTRY_ASSET_INVALID` con
    `details.reason` (`missing`: no está; `mismatch`: no es el firmado o es anterior al *intent*;
@@ -2707,27 +2754,28 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | GET | `/api/weeks?cursor=` | Pública | Archivo de semanas selladas, de la más reciente a la más antigua, 20 por página (`next` es el cursor), con su sample, número de entradas y podio |
 | GET | `/api/weeks/:slug/entries?order=fair\|new\|random&genre=&bpm=&key=&unvoted=&seed=` | Pública | Entradas (sin autoría ni notas si no está sellada); con sesión incluye `myVote` y `mine`. `bpm` es un rango `90-110`; `seed` vuelve a barajar «Aleatorio» |
 | GET | `/api/weeks/:slug/ticker?since=` | Pública | Eventos de la crónica de la arena (§3.8.3): las 5 últimas entradas por su alias, los días que quedan hasta el cierre de la fase (enteros, hacia abajo) y los votos de toda la semana |
-| GET | `/api/weeks/:slug/results` | Pública | Snapshot vigente de resultados con la autoría revelada (las clasificadas primero), la revisión y `correctedAt` del último re-sellado, y con sesión «tu resultado» (`mine`). 404 si no está sellada |
+| GET | `/api/weeks/:slug/results` | Pública | Snapshot vigente de resultados con la autoría revelada (las clasificadas primero), la revisión y `correctedAt` del último re-sellado, y con sesión «tu resultado» (`mine`) y lo que el sellado le dio (`myGame`: XP de resultado y de oído de oro de la revisión vigente, si ganó el oído de oro y sus puntos de temporada; sin sesión, `null`). 404 si no está sellada |
 | POST | `/api/weeks/:slug/rules` | Verif. | Aceptar las bases de la semana |
 | POST | `/api/weeks/:slug/sample/download` | Verif. | URL firmada de descarga (`kind: original\|stems`), solo en `open` y con las bases aceptadas |
 | POST | `/api/uploads/sign` | Verif. | Parámetros firmados (`kind: entry\|entryCover\|avatar`); los del sample, en `/api/admin/samples/sign` |
-| POST | `/api/weeks/:slug/entries` | Verif. | Registrar la entrada tras la subida (con la casilla del reto, `challengeClaimed`, si la semana tiene reto: `RF-ENT-13`) |
+| POST | `/api/weeks/:slug/entries` | Verif. | Registrar la entrada tras la subida (con la casilla del reto, `challengeClaimed`, si la semana tiene reto: `RF-ENT-13`); responde la entrada propia y lo ganado al pasar a `active` (`game: { xp, achievements, level }`, §2.10) |
 | GET | `/api/weeks/:slug/entries/mine` | Sesión | La entrada propia de la semana, con su estado, recibo, medición y si se puede sustituir el audio (`/subir` en edición) |
 | GET | `/api/entries/:id` | Pública | Ficha (respeta el voto ciego); sellada, con su resultado y la casilla del reto (`result.challengeClaimed`) |
 | PATCH | `/api/entries/:id` | Dueño | Editar la ficha y la casilla del reto (hasta el cierre de envíos) |
-| PUT | `/api/entries/:id/audio` | Dueño | Sustituir el audio (sin votos) |
+| PUT | `/api/entries/:id/audio` | Dueño | Sustituir el audio (sin votos); como registrar, con `game` |
 | DELETE | `/api/entries/:id` | Dueño | Retirar |
 | GET | `/api/entries/:id/stats` | Dueño | Votos y escuchas propios (sin media) |
 | POST | `/api/entries/:id/listen` | Verif. | Inicio de escucha → `{ listenId, thresholdMs, startedAt }`; un recibo por usuario y entrada (volver a empezar no reinicia el reloj); solo en `open` y `voting` y nunca de la propia |
 | POST | `/api/entries/:id/listen/qualify` | Verif. | Cumplir el umbral `{ listenId }`; antes de tiempo, 409 `LISTEN_REQUIRED` con `details.remainingMs` |
 | POST | `/api/entries/:id/play` | Pública | Contar una escucha (≥ 10 s) `{ playId }`, una por sesión de escucha y como mucho 3 por hora por IP y entrada; responde 202 cuente o no |
-| PUT · DELETE | `/api/entries/:id/vote` | Verif. | Votar `{ stars }` o quitar el voto |
+| PUT · DELETE | `/api/entries/:id/vote` | Verif. | Votar `{ stars }` (responde el voto y lo ganado, `game`: el «+5 XP» de `RF-GAME-08`) o quitar el voto |
 | POST | `/api/entries/:id/report` | Verif. | Denunciar |
 | POST | `/api/entries/:id/guess` | Verif. | «Adivina el productor» (Fase 8) |
 | GET | `/api/jury/queue?week=` | Verif. | Siguientes entradas del Modo Jurado (`juryQueue`) y la ronda `{ done, total }`; fuera de `open` y `voting`, vacía |
 | GET | `/api/me` | Sesión | Perfil, XP, nivel, racha, logros nuevos, flags de ceremonias vistas |
 | PATCH | `/api/me/profile` | Sesión | Editar perfil |
 | POST | `/api/me/seen` | Sesión | Marcar vistos `{ kind, ref }` (`drop` desde la Fase 3 y `ceremony` desde la 6, 404 si la semana no está sellada; logros y nivel en sus fases) |
+| POST | `/api/me/achievements` | Sesión | Un logro que ocurre en el navegador `{ achievement }` (hueco G5): solo los de la lista blanca `BROWSER_ACHIEVEMENTS` (en la Fase 7, `share_card`, al compartir o descargar una tarjeta; la Fase 8 suma sus secretos, cada uno con la prueba que comprueba `evaluate` y el reloj del servidor); cualquier otro → 422 `VALIDATION_FAILED`. 10 por hora y cuenta (429 después). Da el logro y su XP (y `level_20` si ese XP cruza el nivel, como cualquier hecho), nada de los eventos del Anexo B; repetirlo no suma. Responde lo ganado (`game`) |
 | GET · PUT | `/api/me/notifications` | Sesión | Preferencias de aviso |
 | GET | `/api/me/votes?week=` | Sesión | Mis votos |
 | GET | `/api/me/export` | Sesión | Exportación RGPD |
@@ -2934,8 +2982,8 @@ calculado (`xpFor` de `packages/rules`):
 | `first_entry_of_week` | Primera entrada de la semana (una para toda la batalla) | la semana | la semana |
 | `vote` | Primer voto a cada entrada | la entrada | la semana |
 | `jury_complete` | Jurado completo | la semana | la semana |
-| `result` | Clasificar, top 10 o podio, al sellar | la semana | la semana |
-| `golden_ear` | Oído de oro, al sellar | la semana | la semana |
+| `result` | Clasificar, top 10 o podio, al sellar | la semana; un ajuste del re-sellado, `<semana>#<semana corregida>:<revisión>` | la semana |
+| `golden_ear` | Oído de oro, al sellar | la semana; un ajuste, como en `result` | la semana |
 | `producer_guess` | Acertar el productor (Fase 8) | la entrada | la semana |
 | `achievement` | Un logro (su rareza) | el id del logro | la del hecho que lo desbloquea, o `NULL` |
 
@@ -2949,9 +2997,20 @@ calculado (`xpFor` de `packages/rules`):
   cuenta tiene menos de 40 movimientos `vote` en esa semana): dos votos a la vez no lo pasan.
 - `week_id` sirve para el tope y para que lo público pueda contar solo lo de semanas selladas; el XP de un logro se
   refiere al logro (`kind = 'achievement'`, `ref` = su id), así que también se gana una sola vez.
-- `achievement_unlock` es una fila por cuenta y logro, para siempre (ningún logro se retira); `seen_at` dice si ya
-  vio su aviso. `streak_state` guarda lo de `advanceStreak` (la racha, la mejor, la última semana aplicada y la
-  temporada del comodín).
+- `achievement_unlock` es una fila por cuenta y logro (ningún logro se retira, salvo los de resultado en un
+  re-sellado, §2.8); `seen_at` dice si ya vio su aviso. `streak_state` guarda lo de `advanceStreak` (la racha, la
+  mejor, la última semana aplicada y la temporada del comodín); es una caché de lo que dan las semanas selladas.
+- **El sellado** (`modules/game/sealing.ts`, `sealingStatements`) recibe la clasificación ya calculada
+  (`computeSnapshot`, que no importa nada de la capa de juego) y prepara, para el `batch` del sellado o del re-sellado,
+  lo de §2.8: re-juega con `replaySealedWeeks` las semanas selladas de cada cuenta afectada (quien tiene entrada, XP
+  del sellado o un logro de resultado en las semanas re-jugadas, quien gana el oído de oro y quien tenía racha; solo
+  cuentas que existen) y escribe la diferencia con lo que dice el libro: un movimiento `result` o `golden_ear` por
+  semana (el primero con `ref` = la semana, los ajustes con la revisión), los logros nuevos, la retirada de los que ya
+  no se cumplen (su fila y su movimiento, las únicas sentencias que borran del libro), la racha y, por cuenta tocada,
+  `level_20` y la caché. Todo con la condición de que la semana quede sellada con esa revisión. El oído de oro de la
+  semana sale de sus votos válidos (los del snapshot) y solo de jurados con cuenta. Para las semanas que no se
+  re-juegan, el oído de oro es el que dice el libro. El sellado perezoso sella en orden de número y no hace nada con
+  una semana ya sellada.
 - Las sentencias las prepara el módulo **`game`** del servidor (`modules/game`) para el `batch` de quien provoca el
   hecho: `plan(cuenta, { xp, events, achievements, now })` da los movimientos (los de 0 XP fuera), los logros que
   desbloquean sus eventos (`evaluate`, contra los que ya tiene) con el XP de su rareza, `level_20` y, la última, la
@@ -2960,6 +3019,17 @@ calculado (`xpFor` de `packages/rules`):
   además lo que gana la cuenta (`game: { xp, achievements, level }` de las respuestas): una vista previa con lo que
   ya hay en el libro; la verdad es el `batch`. `voteGrant` calcula el XP de un voto con el libro (primer voto a
   la entrada, tope de la semana).
+- **Condición del hecho** (`guard`): cada sentencia de la capa de juego repite en su `WHERE` una condición sobre lo
+  que el propio `batch` acaba de escribir, así que nada se gana si el hecho no ocurre, aunque el hecho sea un
+  `INSERT … SELECT` condicionado que puede no escribir nada: el XP de un voto, si el voto quedó guardado con ese
+  instante; el de una entrada, si quedó `active`. El XP de un logro solo entra si el logro está, y `early_bird`, si
+  la fila `first_entry_of_week` de esa semana es de la cuenta.
+- Los ganchos en vivo (`entryActivated`, `voteCast`, `sampleDownloaded`, `profileUpdated`) cuentan lo que piden los
+  eventos de `evaluate`: las **entradas** son las filas `entry` del libro (una por semana con entrada que llegó a
+  `active`); los **votos**, las filas de `vote` de la cuenta (con los anulados; los quitados ya no están); los de la
+  franja de `night_owl`, por su `created_at` (votos nuevos, no cambios); el jurado completo, las entradas activas
+  ajenas de la semana y las que ha votado. La **racha en juego** de subir sale de las semanas selladas anteriores
+  (`streakOf` sobre su revisión vigente), no de la caché `streak_state`.
 
 ### 4.12 Tiempo, calendario y tareas programadas
 
@@ -2997,7 +3067,7 @@ Referencias: OWASP ASVS nivel 2 y las chuletas de autenticación, sesiones y sub
 | Contraseñas | Las gestiona Better Auth (hash *scrypt* por defecto). Mínimo 12, máximo 128, comprobación de filtradas (`haveIBeenPwned`), medidor `zxcvbn-ts` en el cliente. |
 | Sesiones | Cookie `__Secure-bb.session_token`, `HttpOnly`, `Secure`, `SameSite=Lax`, solo del host. 30 días deslizantes. Revocación al cambiar o restablecer la contraseña y al bloquear. |
 | CSRF | `SameSite=Lax` + comprobación de origen de Better Auth (`trustedOrigins`) + comprobación de `Origin` propia en `/api/*` + solo JSON. |
-| Fuerza bruta y abuso | Better Auth: entrar 5/min por IP, registrarse 3/h por IP, recuperación 3/h. App: votos 120/h, inicio de escucha 300/h, firmas de subida 10/h, denuncias 20/día, cambios de perfil 30/h, escuchas públicas 1 por IP y entrada cada 10 min. Contadores en BD (en serverless no hay memoria compartida). |
+| Fuerza bruta y abuso | Better Auth: entrar 5/min por IP, registrarse 3/h por IP, recuperación 3/h. App: votos 120/h, inicio de escucha 300/h, firmas de subida 10/h, denuncias 20/día, cambios de perfil 30/h, logros declarados por el navegador 10/h, escuchas públicas 1 por IP y entrada cada 10 min. Contadores en BD (en serverless no hay memoria compartida). |
 | Bots y cuentas falsas | Verificación de email obligatoria, dominios desechables bloqueados, informe de votos anómalos (§2.13). Plugin de captcha (Turnstile) preparado y **desactivado**; se activa si aparecen registros masivos. |
 | Autorización | Toda consulta de recursos propios se filtra por el `user.id` de la sesión; nunca se acepta un id de usuario del cliente. Test E2E: A no puede editar, retirar ni ver las estadísticas de la entrada de B. |
 | Subidas | El servidor fija `public_id`, carpeta, tipo y formatos permitidos en la firma; verifica el recurso con la Admin API antes de aceptarlo; el audio nunca atraviesa la API. |
@@ -3619,7 +3689,8 @@ con la pista).
 - **Por eventos.** Cada logro dice qué eventos lo miran: descargar el sample, la entrada que pasa a `active`, el
   perfil guardado, el voto, compartir una tarjeta, el sellado, el cierre de la temporada, el cambio de XP y, desde la
   Fase 8 y la 9, los secretos, «Adivina el productor» y la Elección del sello. Uno ya conseguido no se repite y
-  **ningún logro se retira** (como el XP en vivo, §2.10).
+  **ningún logro se retira** (como el XP en vivo, §2.10), salvo un logro de resultado cuando un re-sellado corrige la
+  semana que lo dio y ya no se cumple en ninguna semana sellada (§2.8): se retira con su XP.
 - **Recuentos.** «Entradas» son las semanas con una entrada que llegó a `active` (retirarla después no la
   descuenta). «Votos» son los que tiene la cuenta, uno por entrada (también los anulados; los quitados, no).
 - **Al subir.** `early_bird` es la primera entrada de la semana (§2.10). `last_minute`, una entrada creada en los 10
@@ -3627,7 +3698,7 @@ con la pista).
   en una semana dorada.
 - **Al votar.** `jury_full` sigue la regla del jurado completo del Anexo B: todas las entradas activas ajenas, si
   son 5 o más.
-- **Al sellar**, con la revisión del snapshot:
+- **Al sellar**, con la revisión vigente del snapshot (y otra vez en cada re-sellado, §2.8):
   - `podium` y `win`: top 3 y 1.ª posición, ex aequo incluidos. `win_3`: 3 victorias en total. `double`: 1.º en
     dos semanas de número consecutivo.
   - `unanimous`: media aritmética de los votos válidos de su entrada ≥ 4,8, con 10 o más.
@@ -3642,7 +3713,9 @@ con la pista).
   el del navegador se puede adelantar. `night_owl` pide votar 10 entradas distintas (votos nuevos, no cambios)
   entre las 03:00 y las 05:00 de una misma noche. `revetlla`, una visita entre las 21:00 del 23 de junio y las 06:00
   del 24.
-- **El resto.** `profile_done`: avatar, bio y al menos un enlace. `level_20`: el XP total llega al nivel 20, también
+- **El resto.** `share_card`: compartir o descargar una tarjeta; lo declara el navegador (`POST /api/me/achievements`,
+  §4.10), que es quien sabe que se ha compartido, y por eso solo da su XP (25), con lista blanca y límite.
+  `profile_done`: avatar, bio y al menos un enlace. `level_20`: el XP total llega al nivel 20, también
   si lo empuja el XP de otro logro. `season_champ`: campeón o campeón ex aequo (§2.9). Los secretos (Fase 8): `scratch`,
   7 clics en el logo en 3 s; `konami`, la secuencia ↑↑↓↓←→←→BA; `pad_404`, grabar un bucle con al menos un golpe;
   `screwed`, mantener Espacio 5 s; `human_metronome`, un tempo marcado con 8 pulsos a ±1 BPM del del sample (sin BPM
@@ -3865,6 +3938,9 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.104 | **Tarea 7.14** (hueco G5 del plan 07, resuelto: los logros que ocurren en el navegador). §4.10: `POST /api/me/achievements { achievement }`, con sesión, solo con los logros de la lista blanca `BROWSER_ACHIEVEMENTS` (en la Fase 7, `share_card`; la Fase 8 suma sus secretos con su prueba), cualquier otro → 422, 10 por hora y cuenta, sin más XP que el del logro (y `level_20` si lo cruza) y repetirlo no suma; responde lo ganado. §2.10, §4.13 y Anexo C al día. |
+| 2026-10-29 | 0.6.103 | **Tarea 7.10** (hueco G2 del plan 07, resuelto: el re-sellado y la capa de juego). §2.8: el sellado da, en su `batch` y a partir de la clasificación ya calculada, el XP de resultado, el oído de oro, la racha y los logros de resultado; todo es una función de las semanas selladas en su revisión vigente y **el libro la sigue**: cada (re-)sellado re-juega desde la semana corregida hasta la última y escribe la diferencia, con **ajustes que pueden restar** referidos a la revisión, los logros de resultado que ya no se cumplen en ninguna semana sellada **se retiran con su XP** y los que ahora se cumplen se ganan; lo ganado en vivo y `level_20` no cambian; sin cambios en el snapshot, nada cambia. `RF-RES-08` con `myGame`. §2.10: la racha la aplica el sellado (también a quien no participa y tenía racha); `streak_state` es caché. Anexo C: la excepción a «ningún logro se retira». §4.5: `replaySealedWeeks`. §4.10: `myGame` en los resultados. §4.11: la referencia de los ajustes, el módulo `sealing` y el sellado perezoso en orden de número. |
+| 2026-10-29 | 0.6.102 | **Tarea 7.9** (ganchos en vivo de la capa de juego). §2.10: dónde se gana en vivo, en el `batch` del hecho y solo si ocurre: la entrada que pasa a `active` (al registrar, al sustituir el audio o en el `tick`; `early_bird` va con la fila de la primera entrada), el voto (con el jurado completo al votar la última de las activas ajenas), la descarga del sample y el perfil guardado (datos o avatar); la racha en juego sale de las semanas selladas y, si la anterior cerró sin sellar, se sella antes. §4.8.4 paso 4 al día. §4.10: el voto, registrar la entrada y sustituir el audio responden lo ganado (`game: { xp, achievements, level }`). §4.11: la condición del hecho (`guard`) en cada sentencia, el XP de un logro solo si el logro está y qué cuenta cada gancho para `evaluate`. |
 | 2026-10-29 | 0.6.101 | **Tarea 7.15.** §4.14, registro de datos de la cuenta: la lista de módulos al día (semanas, entradas y votos, y la capa de juego con su libro de XP, logros y racha); entradas, votos y capa de juego comparten la sección `game` de la exportación, cuyas claves se juntan (`xpEvents`, `achievements` y `streak`, con la semana por su slug; el formato sigue en `beatbattle-export/1`, solo se añade `streak`); borrar la cuenta quita su XP, sus logros y su racha en el mismo `batch`, y lo que otras cuentas ganaron votando sus entradas se queda. |
 | 2026-10-29 | 0.6.100 | **Tarea 7.8.** §4.11, libro de XP: el módulo `game` del servidor prepara las sentencias para el `batch` del hecho (`plan` con los movimientos, los logros de sus eventos con su XP, `level_20` y la caché) y devuelve lo que gana la cuenta como vista previa; `level_20` se decide en SQL dentro del mismo `batch` con la suma del libro, así que también lo cruza el XP de otro logro; `voteGrant`, el XP de un voto contado en el libro. |
 | 2026-10-29 | 0.6.99 | **Tarea 7.7** (hueco G4 del plan 07, resuelto). §2.5: la ficha lleva la casilla «Cumplo el reto extra» solo si la semana tiene reto, editable hasta el cierre de envíos como el resto; la marca solo la ve su dueño hasta el sellado y después va con el resultado (`RF-ENT-13`, nuevo). §4.10: registrar y editar aceptan `challengeClaimed` y la ficha sellada lo lleva en `result`. §4.11: `entry.challenge_claimed`; `xp_event` con `week_id` (para el tope de votos y para lo público), el índice único por cuenta, tipo y referencia y uno parcial que deja una sola «primera entrada» por semana; `achievement_unlock` con `week_id`; la tabla de tipos y referencias del **libro de XP**, escrito con `ON CONFLICT DO NOTHING` en el `batch` del hecho, sin filas a 0, con `producer_profile.xp` recalculada como la suma del libro en el mismo `batch` y el tope semanal contado dentro del `INSERT`. Anexo C: `challenge` apunta a la columna. Migración `0008_capa_de_juego`, solo aditiva. |

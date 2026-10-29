@@ -37,6 +37,22 @@ export type EntryResult = z.infer<typeof EntryResultSchema>
 export const ResultRowSchema = z.object({ entry: PublicEntrySchema, result: EntryResultSchema }).strict()
 export type ResultRow = z.infer<typeof ResultRowSchema>
 
+/**
+ * La capa de juego de quien mira en una semana sellada (tarea 7.10; «TU RESULTADO», §2.8): lo que le ha dado el sellado
+ * en la revisión vigente, con los ajustes de los re-sellados.
+ */
+export const MyWeekGameSchema = z
+  .object({
+    /** XP de resultado y de oído de oro de la semana (× racha, × 2 en dorada). */
+    xp: z.number().int().min(0),
+    /** Ganó el oído de oro de la semana (nunca sus votos, `RNF-PRIV-04`). */
+    goldenEar: z.boolean(),
+    /** Puntos de temporada de su entrada (0 sin entrada clasificada). */
+    seasonPoints: z.number().int().min(0),
+  })
+  .strict()
+export type MyWeekGame = z.infer<typeof MyWeekGameSchema>
+
 /** `GET /api/weeks/:slug/results`. */
 export const WeekResultsSchema = z
   .object({
@@ -56,6 +72,8 @@ export const WeekResultsSchema = z
     rows: z.array(ResultRowSchema),
     /** La entrada de quien mira (con sesión) y su resultado, si participó. */
     mine: ResultRowSchema.nullable(),
+    /** Con sesión, lo que el sellado le ha dado en la semana (XP, oído de oro y puntos de temporada); sin sesión, `null`. */
+    myGame: MyWeekGameSchema.nullable(),
   })
   .strict()
 export type WeekResults = z.infer<typeof WeekResultsSchema>
