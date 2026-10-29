@@ -321,6 +321,15 @@
   font-size: var(--bb-fs-lg);
 }
 
+/* El XP del sellado, que rueda (§3.8.6, tarea 7.21): Oxanium rojo, como el «+XP» de §3.4.2. */
+.mineXp {
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-2xl);
+  font-weight: var(--bb-weight-extrabold);
+  font-variant-numeric: tabular-nums;
+}
+
 .foot {
   /* Siempre abajo: en 3D, la fila del medio no lleva nada del DOM (el podio lo pinta el Escenario). */
   grid-row: 3;

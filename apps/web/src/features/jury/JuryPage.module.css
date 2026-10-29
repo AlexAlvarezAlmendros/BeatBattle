@@ -272,6 +272,14 @@
   text-align: center;
 }
 
+/* El logro de la visita, en su panel opaco (ningún texto sobre la trama, `RD-VIS-05`). */
+.completeBadge {
+  --frame-fill: var(--bb-panel);
+  width: 100%;
+  padding: var(--bb-space-3) var(--bb-space-4);
+  text-align: start;
+}
+
 .completeTitle {
   font-family: var(--bb-font-display);
   font-size: var(--bb-fs-title);

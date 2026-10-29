@@ -947,8 +947,8 @@
     "rewards": {
       "title": "Recompensas (banco)",
       "summary": "La capa de juego del HUD con una sesión de muestra: el «+XP» que vuela al medidor, los avisos de logro de cada rareza y la subida de nivel.",
-      "vote": "Votar (+5 XP)",
-      "upload": "Subir (+125 XP y logros)",
+      "vote": "Votar (+5 XP)",
+      "upload": "Subir (+125 XP y logros)",
       "common": "Logro común",
       "rare": "Logro raro",
       "epic": "Logro épico",
@@ -1814,7 +1814,6 @@
       "title": "Bienvenido a la batalla",
       "summary": "{name}, tu carta de luchador ya está impresa. Ahora toca ganarse lo que lleva dentro.",
       "goalTitle": "Tu primer logro",
-      "goalName": "Primer sample",
       "goalHow": "Descarga el sample de la semana en cuanto caiga el lunes.",
       "play": "Ir al menú",
       "profile": "Completar mi perfil"
@@ -2062,12 +2061,20 @@
       "score": "Puntuación",
       "votes": "Votos",
       "unranked": "Sin clasificar",
-      "unrankedNote": "Hacen falta 3 votos para entrar en la clasificación."
+      "unrankedNote": "Hacen falta 3 votos para entrar en la clasificación.",
+      "xp": "XP",
+      "xpValue": "+{xp} XP",
+      "seasonPoints": "Temporada",
+      "seasonPointsValue": "{points} PTS",
+      "goldenEar": "Oído de oro",
+      "goldenEarYes": "Sí",
+      "goldenEarNo": "No"
     },
     "playChampion": "Play al campeón",
     "standings": "Clasificación",
     "standingsTitle": "Clasificación completa",
     "rowSubtitle": "era {alias} · {votes}",
+    "rowXp": "{subtitle} · +{xp} XP",
     "unrankedRow": "Sin clasificar · era {alias} · {votes}",
     "histogram": "Votos por estrellas: {one} de una, {two} de dos, {three} de tres, {four} de cuatro y {five} de cinco.",
     "empty": {

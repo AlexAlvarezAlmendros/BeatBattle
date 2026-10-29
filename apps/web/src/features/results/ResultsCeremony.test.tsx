@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
 import { setCeremonyLive, setCeremonyProjected, useCeremonyStage } from '../../stage/ceremony'
+import { useHud } from '../game/hudStore'
 import { resetPlayerForTests } from '../player/store'
 import { CEREMONY_TIMELINE, ResultsCeremony } from './ResultsCeremony'
 
@@ -92,6 +93,23 @@ describe('ceremonia de resultados (6.17, §3.8.6)', () => {
     expect(onDone).not.toHaveBeenCalled()
     act(() => vi.advanceTimersByTime(CEREMONY_TIMELINE.total - CEREMONY_TIMELINE.mine))
     expect(onDone).toHaveBeenCalledOnce()
+  })
+
+  it('RF-RES-08: tu carta hace rodar el XP del sellado hasta su cifra', () => {
+    render(<ResultsCeremony results={RESULTS} onDone={() => {}} />)
+    // Primero sale la carta; después rueda (sus fotogramas empiezan al montarse).
+    act(() => vi.advanceTimersByTime(CEREMONY_TIMELINE.mine + 10))
+    act(() => vi.advanceTimersByTime(1500))
+    const xp = document.querySelector('[data-mine-xp]')
+    expect(xp).toHaveAttribute('data-mine-xp', '100')
+    expect(xp?.textContent?.replace(/\s+/g, ' ')).toBe('+100 XP')
+  })
+
+  it('§3.8.8: mientras dura, los avisos de la capa de juego esperan (y salen al cerrarse)', () => {
+    const { unmount } = render(<ResultsCeremony results={RESULTS} onDone={() => {}} />)
+    expect(useHud.getState().holds).toBe(1)
+    unmount()
+    expect(useHud.getState().holds).toBe(0)
   })
 
   it('RF-RES-09: Esc la salta (una sola vez) y «Saltar» también', () => {
