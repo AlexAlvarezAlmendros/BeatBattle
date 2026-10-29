@@ -1,6 +1,6 @@
 # BeatBattle — Roadmap del proyecto
 
-> Última actualización: 2026-10-28
+> Última actualización: 2026-10-29
 
 Competición semanal de beats a partir de un sample, con la estética de **Other People Records** y
 alma de videojuego: cada lunes cae un sample, los productores suben su *flip* y la comunidad vota
@@ -36,9 +36,9 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 | 5 | Escuchar y votar | ✅ Cerrada (2026-10-13) | [05-escuchar-votar.md](plans/05-escuchar-votar.md) | Todas las reglas `RF-VOTE-*` en verde; Modo Jurado con teclado; recordatorio y llamada al jurado |
 | 6 | Cierre, resultados y ceremonia | ✅ Cerrada (2026-10-15) | [06-resultados.md](plans/06-resultados.md) | Sellado determinista, ceremonia, re-sellado idéntico; Lunes de batalla por email |
 | — | **Beta cerrada** | 🔄 En curso (online y anuncio el domingo 15 de noviembre; primera ronda el lunes 16) | [beta-cerrada.md](plans/beta-cerrada.md) | 15–25 productores, 3 semanas reales (16 de noviembre – 6 de diciembre) |
-| 7 | Capa de juego | 🔒 Bloqueada (beta) | — | XP, niveles, rachas, logros, temporadas y carta con su pase de torneo |
+| 7 | Capa de juego | 🔄 En curso (plan creado el 2026-10-29) | [07-capa-de-juego.md](plans/07-capa-de-juego.md) | XP, niveles, rachas, logros, temporadas y carta con su pase de torneo |
 | 8 | Sorpresas y pulido audiovisual | 🔒 Bloqueada (F7) | — | Anexo F completo con variantes accesibles; kit de la semana |
-| 9 | Integración con Other People y email marketing | 🔒 Bloqueada (beta) | — | PR en `ReactOtpWeb` con widget y menú; campaña real a un segmento con consentimiento; alta en la newsletter del sello |
+| 9 | Integración con Other People y email marketing | ⬜ Pendiente (sin plan; desde el 2026-10-29 no espera a la beta) | — | PR en `ReactOtpWeb` con widget y menú; campaña real a un segmento con consentimiento; alta en la newsletter del sello |
 | 10 | Moderación, legal y lanzamiento | 🔒 Bloqueada (F7–F9) | — | Legal publicado; auditorías sin hallazgos altos; presupuestos cumplidos |
 
 ## Foco actual
@@ -48,6 +48,9 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 la fecha anterior, el 19 de octubre, pasó sin semanas programadas). El calendario hacia atrás está en el
 [plan de la beta](plans/beta-cerrada.md#calendario). Lo próximo, hasta el domingo 1 de noviembre: el cupo de Gmail a
 450, desplegar `main` (producción sirve todavía la PR #99) y la prueba de humo con un email real.
+
+En paralelo a la preparación de la beta, el desarrollo sigue con la **Fase 7** (capa de juego,
+[plan 07](plans/07-capa-de-juego.md)): el usuario abrió F7–F10 el 2026-10-29 y desplegar sigue siendo decisión suya.
 
 La **Fase 2** y la **Fase 3** tienen su hito cumplido y solo esperan al usuario:
 
@@ -66,6 +69,9 @@ La **Fase 2** y la **Fase 3** tienen su hito cumplido y solo esperan al usuario:
                             │               │
                      F8 sorpresas           └─────► F10 moderación, legal y lanzamiento
 ```
+
+Desde el 2026-10-29 (decisión del usuario) la F7 y la F9 ya no esperan a la beta: cuelgan de la F6 y avanzan en
+paralelo con ella; la F8 sigue esperando a la F7 y la F10, a la F7–F9.
 
 ## Leyenda de estados
 
@@ -182,6 +188,12 @@ La **Fase 2** y la **Fase 3** tienen su hito cumplido y solo esperan al usuario:
   primera ronda empieza el lunes 16 a las 00:00 (Madrid); tres semanas, hasta el domingo 6 de diciembre. Sustituye al
   lunes 19 de octubre, que pasó sin semanas programadas. Calendario en el [plan de la beta](plans/beta-cerrada.md#calendario).
 
+- 2026-10-29 — **F7–F10 antes de que acabe la beta** (decisión del usuario: «todo hasta el lanzamiento»): se salta la
+  puerta del roadmap que dejaba la capa de juego, la integración con el sello y la moderación para después de la beta.
+  La infraestructura (despliegues, variables de Vercel) sigue en manos del usuario, y durante la beta `main` puede ir
+  por delante de producción: cada PR deja `main` desplegable (migraciones aditivas, nada a medias a la vista). Plan de
+  la Fase 7 en [07-capa-de-juego.md](plans/07-capa-de-juego.md).
+
 ## Decisiones abiertas
 
 Cada una tiene un valor por defecto que la guía ya asume (§7).
@@ -193,7 +205,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 | Origen y licencia de los samples | Del sello o de sus productores, con licencia escrita | Antes de F3 | — |
 | Nombre de marca | «Beat Battle · un juego de Other People» | F0 (0.24) | Logo, lockup «by [OTP.]» y textos |
 | Móviles de 781 a ~840 px de alto (360×800, 375×812, 393×786) | **Cerrada (2026-10-15):** se queda así para la beta (el menú se desplaza 35–94 px; la placa enfocada siempre se ve) | — | Opciones: subir el móvil bajo hasta ~840 px (cabe, con una franja vacía de ~180 px a 375×812) o un paso intermedio con el logo en una línea y la tarjeta sin plegar. Acta de la 0.28 |
-| Pase de la carta | Cinta propia con física | F7 | Alternativa: expositor giratorio si se percibe como pieza del sello (guía §3.4.4) |
+| Pase de la carta | Cinta propia con física | F7 (tarea 7.23) | Alternativa: expositor giratorio si se percibe como pieza del sello (guía §3.4.4) |
 | Modelo de semana | Envíos y votos a la vez | Tras la beta | Revisar con datos de participación |
 | Fecha de lanzamiento | Primera semana completa tras F10 | F10 | — |
 | Primera semana de la beta | **Cerrada (2026-10-28):** online y anuncio el domingo 15 de noviembre de 2026; primera ronda el lunes 16 | — | Sustituye al lunes 19 de octubre (decisión del 2026-10-15), que pasó sin semanas programadas |
@@ -203,6 +215,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-29 | F7 | **F7–F10 abiertas antes de que acabe la beta** (decisión del usuario, «todo hasta el lanzamiento»): `main` puede ir por delante de producción y desplegar sigue siendo suyo. Plan 07 creado (36 tareas); la planificación destapa 14 huecos de la guía (G1–G14 del plan) que se resuelven al empezar su tarea. La F9 ya no espera a la beta. |
 | 2026-10-28 | Beta | **Nueva fecha** (decisión del usuario): online y anuncio el domingo 15 de noviembre, primera ronda el lunes 16 y tres semanas hasta el 6 de diciembre; el 19 de octubre pasó sin semanas. Calendario hacia atrás en el plan. Gmail en Vercel (el usuario); faltan el cupo a 450 y desplegar `main` (producción sirve la #99). 2.22 hecha (Discord real en producción). |
 | 2026-10-15 | Beta | Plan de la beta creado (10 tareas): textos legales y guía de despliegue, ya; recursos, despliegue, calendario e invitaciones, con el usuario. |
 | 2026-10-15 | F6 | **Fase 6 cerrada** (6.23): los seis criterios. Ceremonia en 3D en el Escenario (6.17b, decisión del usuario) y efectos `cer.*` escuchados y aprobados por el usuario. Mezcladas las PR #74–#90. Validadores de previsualización y de datos estructurados, con el despliegue. Siguiente: beta cerrada (despliegue, decisión del usuario). |
