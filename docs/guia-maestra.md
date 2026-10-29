@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.90 · 2026-10-16 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.92 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -3323,15 +3323,21 @@ arriba, siguiendo el recorrido del usuario: cuenta → sample → subir → vota
 0.1 scaffold ─┬─► F0 fundaciones ─────────────┐
               └─► F1 spike (GO/NO-GO) ────GO──┴─► F2 cuentas ─► F3 semanas ─► F4 participar ─► F5 votar ─► F6 resultados
                                                                                                           │
-                                       BETA CERRADA ◄─────────────────────────────────────────────────────┘
-                                            │
-                     F7 capa de juego ◄─────┼─────► F9 integración OTP y email marketing
-                            │               │
-                     F8 sorpresas           └─────► F10 moderación, legal y lanzamiento
+                     ┌──────────────────────────────┬─────────────────────────────────────────────────────┤
+                     ▼                              ▼                                                     ▼
+              F7 capa de juego          F9 integración OTP y email marketing                       BETA CERRADA
+                     │                              │                                              (en paralelo)
+              F8 sorpresas                          │
+                     │                              │
+                     └──────────────┬───────────────┘
+                                    ▼
+                     F10 moderación, legal y lanzamiento
 ```
 
-F0 y F1 van en paralelo tras el scaffold. F7 y F9 pueden ir en paralelo tras la beta; F8 necesita la
-F7 (logros); F10 cierra.
+F0 y F1 van en paralelo tras el scaffold. Desde el 2026-10-29 (decisión del usuario, «todo hasta el
+lanzamiento») F7 y F9 **no esperan a la beta**: cuelgan de la F6 y avanzan en paralelo con ella, y `main` puede ir
+por delante de producción (desplegar sigue siendo decisión del usuario). F8 necesita la F7 (logros); F10 necesita
+F7–F9 y cierra.
 
 ## 6. Riesgos y mitigaciones
 
@@ -3711,6 +3717,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.92 | §5 (hueco G14 del plan 07): el texto y el grafo ya no ponen la F7 y la F9 tras la beta. Desde el 2026-10-29 (decisión del usuario, «todo hasta el lanzamiento») cuelgan de la F6 y avanzan en paralelo con la beta; la F8 sigue tras la F7 y la F10, tras la F7–F9. |
 | 2026-10-16 | 0.6.90 | §2.14 (arreglo, `RF-ADM-01`): en un sample nuevo, las subidas que empiezan mientras se firma la primera esperan su id. Elegir la portada antes de que volviera la firma del audio daba dos ids y «Crear el sample» decía «La parte «original» no está subida» (lo destapó la CI en `weeks.spec.ts`). |
 | 2026-10-16 | 0.6.89 | §4.19.1, §7: los emails salen de `justsomeotherpeople@gmail.com`, el Gmail del sello (decisión del usuario), con `MAIL_DAILY_LIMIT` de 450: `otherpeople.es` no tiene Workspace. |
 | 2026-10-15 | 0.6.88 | §2.14: el selector de la semana dorada del calendario lleva una línea que explica qué es y que, sin la capa de juego (Fase 7), de momento solo se guarda (petición del usuario). |

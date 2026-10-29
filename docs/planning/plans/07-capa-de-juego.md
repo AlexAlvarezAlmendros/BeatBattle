@@ -86,24 +86,25 @@ email, `game.progress` y `season.wrap`. Todo es **cosmético**: nada de esto toc
 ## Huecos y contradicciones de la guía
 
 La planificación los destapa; **no se corrigen aquí** (otra rama puede estar tocando la guía). Cada uno se resuelve
-en la guía, con versión y registro de cambios, en el commit de la tarea que lo necesita y antes de su código.
+en la guía, con versión y registro de cambios, en el commit de la tarea que lo necesita y antes de su código. La
+columna «Resuelto» dice la decisión y la versión de la guía que la recoge.
 
-| # | Hueco | Dónde | Tarea |
-|---|---|---|---|
-| G1 | **XP y logros públicos frente al voto ciego.** El perfil público enseña XP, nivel y logros (§2.3), y el XP de subir se gana al subir (§3.8.5): el XP o un `first_entry`/`early_bird`/`last_minute` que aparecen a mitad de semana dicen quién participa en una batalla ciega, justo lo que §2.15 evita en el sitemap y en la OG del perfil. Propuesta: lo público (perfil, OG, salón) solo cuenta el XP y los logros ligados a entradas de semanas selladas; el HUD y `me`, todo | §1.3, §2.3, §2.15 | 7.13, 7.24, 7.28 |
-| G2 | **Re-sellado y capa de juego.** No se dice qué pasa con el XP de resultado, el oído de oro, la racha, los puntos y los logros (`podium`, `win`…) cuando un re-sellado cambia posiciones; con `xp_event` idempotente se quedarían los de la revisión 1. Opciones: congelar lo ganado, o un ajuste con referencia por revisión (que puede restar) y logros que nunca se retiran | §2.8, §2.10 | 7.10 |
-| G3 | **XP de subir y racha.** El bonus de racha multiplica el XP de subir, pero al subir la semana aún no está clasificada (`streakBonusPercent` cuenta «incluida la actual»). Falta fijar con qué racha se calcula y qué pasa si la entrada acaba sin clasificar; y si la «primera entrada de la semana» se retira | §2.10, Anexo B | 7.1, 7.9 |
-| G4 | **`challenge`.** «Marcar que cumples el reto extra» no tiene casilla en la ficha (§2.5), columna en `entry` (§4.11) ni campo en la API; y enseñarlo antes del sellado distinguiría a una entrada (§1.3), así que solo se vería después | §2.5, §4.11, Anexo C | 7.5, 7.7, 7.10 |
-| G5 | **Logros que ocurren en el navegador.** `share_card` (y los secretos de la F8) no tienen ruta para llegar al servidor: falta en §4.10 con su lista blanca y su límite | §4.10, Anexo C | 7.14 |
-| G6 | **La ceremonia corta del campeón de temporada** (`RF-ARC-05`) no está diseñada: ni pantalla en §3.8, ni variante en el Anexo E, ni efecto en el Anexo D | §2.9, §3.8 | 7.27 |
-| G7 | **Cierre de temporada.** «Al sellar la última semana» no cubre un último lunes del trimestre sin semana programada. Propuesta: cierra al sellar la última semana programada del trimestre o, si no la hay, en el primer `tick` tras el fin del trimestre | §2.9, §4.12 | 7.4, 7.11 |
-| G8 | **`night_owl`** («entre las 03:00 y las 05:00») no dice en qué hora: la sesión nocturna del Anexo F es la local y el servidor solo conoce la de Madrid | Anexo C | 7.5 |
-| G9 | **Oído de oro.** No aclara si la media de la semana `m` también se recalcula sin los votos del jurado; y §2.10 dice «la clasificación final» mientras el Anexo G correlaciona con las puntuaciones | §2.10, Anexo G | 7.3 |
-| G10 | **Desempate de temporada.** «Mejor puntuación media»: ¿media de la puntuación de sus semanas clasificadas? ¿Entra en la tabla quien solo tiene semanas sin clasificar (0 puntos)? | §2.9 | 7.4 |
-| G11 | **XP de un voto quitado** (`RF-VOTE-13`) **o anulado** por moderación: no se dice si se retira | §2.7, §2.10 | 7.1, 7.9 |
-| G12 | **Semana dorada.** «× 2 a todo lo de esa semana»: ¿también el XP de los logros desbloqueados esa semana? | Anexo B | 7.1 |
-| G13 | **Ruta del perfil.** §2.3 dice `GET /api/profiles/:username` (la que existe) y §4.10, `GET /api/producers/:username` | §2.3, §4.10 | 7.13 |
-| G14 | **§5 sigue diciendo que F7 y F9 van tras la beta** (texto y grafo); la decisión del 2026-10-29 lo cambia | §5 | primer commit de la F7 que toque la guía |
+| # | Hueco | Dónde | Tarea | Resuelto |
+|---|---|---|---|---|
+| G1 | **XP y logros públicos frente al voto ciego.** El perfil público enseña XP, nivel y logros (§2.3), y el XP de subir se gana al subir (§3.8.5): el XP o un `first_entry`/`early_bird`/`last_minute` que aparecen a mitad de semana dicen quién participa en una batalla ciega, justo lo que §2.15 evita en el sitemap y en la OG del perfil. Propuesta: lo público (perfil, OG, salón) solo cuenta el XP y los logros ligados a entradas de semanas selladas; el HUD y `me`, todo | §1.3, §2.3, §2.15 | 7.13, 7.24, 7.28 | — |
+| G2 | **Re-sellado y capa de juego.** No se dice qué pasa con el XP de resultado, el oído de oro, la racha, los puntos y los logros (`podium`, `win`…) cuando un re-sellado cambia posiciones; con `xp_event` idempotente se quedarían los de la revisión 1. Opciones: congelar lo ganado, o un ajuste con referencia por revisión (que puede restar) y logros que nunca se retiran | §2.8, §2.10 | 7.10 | — |
+| G3 | **XP de subir y racha.** El bonus de racha multiplica el XP de subir, pero al subir la semana aún no está clasificada (`streakBonusPercent` cuenta «incluida la actual»). Falta fijar con qué racha se calcula y qué pasa si la entrada acaba sin clasificar; y si la «primera entrada de la semana» se retira | §2.10, Anexo B | 7.1, 7.9 | — |
+| G4 | **`challenge`.** «Marcar que cumples el reto extra» no tiene casilla en la ficha (§2.5), columna en `entry` (§4.11) ni campo en la API; y enseñarlo antes del sellado distinguiría a una entrada (§1.3), así que solo se vería después | §2.5, §4.11, Anexo C | 7.5, 7.7, 7.10 | — |
+| G5 | **Logros que ocurren en el navegador.** `share_card` (y los secretos de la F8) no tienen ruta para llegar al servidor: falta en §4.10 con su lista blanca y su límite | §4.10, Anexo C | 7.14 | — |
+| G6 | **La ceremonia corta del campeón de temporada** (`RF-ARC-05`) no está diseñada: ni pantalla en §3.8, ni variante en el Anexo E, ni efecto en el Anexo D | §2.9, §3.8 | 7.27 | — |
+| G7 | **Cierre de temporada.** «Al sellar la última semana» no cubre un último lunes del trimestre sin semana programada. Propuesta: cierra al sellar la última semana programada del trimestre o, si no la hay, en el primer `tick` tras el fin del trimestre | §2.9, §4.12 | 7.4, 7.11 | — |
+| G8 | **`night_owl`** («entre las 03:00 y las 05:00») no dice en qué hora: la sesión nocturna del Anexo F es la local y el servidor solo conoce la de Madrid | Anexo C | 7.5 | — |
+| G9 | **Oído de oro.** No aclara si la media de la semana `m` también se recalcula sin los votos del jurado; y §2.10 dice «la clasificación final» mientras el Anexo G correlaciona con las puntuaciones | §2.10, Anexo G | 7.3 | — |
+| G10 | **Desempate de temporada.** «Mejor puntuación media»: ¿media de la puntuación de sus semanas clasificadas? ¿Entra en la tabla quien solo tiene semanas sin clasificar (0 puntos)? | §2.9 | 7.4 | — |
+| G11 | **XP de un voto quitado** (`RF-VOTE-13`) **o anulado** por moderación: no se dice si se retira | §2.7, §2.10 | 7.1, 7.9 | — |
+| G12 | **Semana dorada.** «× 2 a todo lo de esa semana»: ¿también el XP de los logros desbloqueados esa semana? | Anexo B | 7.1 | — |
+| G13 | **Ruta del perfil.** §2.3 dice `GET /api/profiles/:username` (la que existe) y §4.10, `GET /api/producers/:username` | §2.3, §4.10 | 7.13 | — |
+| G14 | **§5 sigue diciendo que F7 y F9 van tras la beta** (texto y grafo); la decisión del 2026-10-29 lo cambia | §5 | primer commit de la F7 que toque la guía | ✅ v0.6.92: §5 (texto y grafo) cuelga la F7 y la F9 de la F6, en paralelo con la beta, citando la decisión del 2026-10-29; la F10 tras la F7–F9 |
 
 ## Dependencia con otras fases
 
