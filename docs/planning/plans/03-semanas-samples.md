@@ -1,6 +1,6 @@
 # Plan 03 — Semanas y samples
 
-> Fase: 3 de 10 | Estado: 🔄 En curso | Iniciado: 2026-10-09 | Cerrado: —
+> Fase: 3 de 10 | Estado: ✅ Cerrada | Iniciado: 2026-10-09 | Cerrado: 2026-10-29
 > Hito del roadmap: el admin programa 3 semanas; con el reloj simulado, la home cambia de semana en la
 > frontera, la descarga exige las bases y sale el email del drop (también a suscriptores sin cuenta).
 
@@ -126,7 +126,7 @@ todo lo demás.
 | 3.19 | Datos de prueba: `tools/seed` con 3 samples y 3 semanas sobre el almacenamiento falso | ✅ Hecho | 3.7 | — · **Hecho:** `pnpm --filter @beatbattle/server seed:weeks` (con `BB_FAKE_STORAGE`): tres samples sintéticos (bucle de acordes con bombo, portada PNG de 1024 px generada) medidos con ffmpeg y tres semanas seguidas desde la de hoy (o `--from=`). |
 | 3.20 | E2E del hito con el reloj simulado: el admin programa 3 semanas; la home cambia de semana en la frontera; la descarga exige las bases; sale `battle.drop` (también al suscriptor sin cuenta, tras confirmar) | ✅ Hecho | 3.12–3.19 | §5 · hito · **Hecho:** `tests/e2e/weeks.spec.ts` con el reloj simulado (`page.clock` en el navegador y `x-bb-test-now` en cada `/api` por una ruta de Playwright), semanas de marzo de 2031: el admin sube un sample por el panel y guarda sus 8 chops (`RF-ADM-01`), sube dos más por la API con la firma y programa las 3 semanas por el formulario (la del cambio de hora, 167 h, `RF-ADM-02`/`RF-DROP-05`); un visitante pide la alerta en la home y la confirma en `/alerta`; la home cambia sola de semana en la frontera y la revelación sale una vez (se salta con Esc y no vuelve al recargar, `RF-DROP-11`); un productor verificado descarga tras aceptar las bases (`RF-DROP-06`); el `tick` del lunes a las 08:00 manda `battle.drop` al productor y al suscriptor (`RF-NOTIF-09`). Otro test: con 59 min 59 s, `00:00:59:59` y «hora loca»; con 1 h y 1 s, sin ella (`RF-DROP-10`). La API de los E2E arranca con `BB_FAKE_STORAGE` y `CRON_SECRET`; `POST /api/test/role` da el rol de admin (solo en test). |
 | 3.21 | Jurado visual de tres lentes sobre la home viva, la ficha, la revelación, el modal de las bases y el panel de admin | ✅ Hecho | 3.15–3.18 | `RD-VIS-02` (e) · Acta en `docs/planning/evidence/f3/jurado/README.md`. Marca ✅ y accesibilidad ✅ al tercer pase; juego ✅ al sexto con la excepción n.º 1, **corregida el 2026-10-29** (guía v0.6.91): de 721 a 1199 px y hasta 859 de alto, el reloj de ronda va en la tarjeta y la columna de modos se junta; desde 62 em la crónica va al lado de la firma y la barra del menú tiene dos filas. A 1024 × 768 y 1180 × 720 el menú cabe sin desplazar con la barra entera, también con `/dev/menu?largo`. Verificado con capturas de antes y después a los tamaños del jurado (ningún otro tamaño cambia), con el recorrido de las placas con el teclado y con los E2E de encaje (`fit.spec.ts`, `controls-bar.spec.ts`). Todas las altas y medias, corregidas; las bajas abiertas, con su motivo en el acta. |
-| 3.22 | Cierre de la fase: cobertura de ids, hito y roadmap | ⬜ Listo | 3.4, 3.20, 3.21 | Solo esperaba a la 3.21, ya cerrada (J1 corregida). La prueba real (3.4) ya está hecha y el hito se cumple (3.20). |
+| 3.22 | Cierre de la fase: cobertura de ids, hito y roadmap | ✅ Hecho | 3.4, 3.20, 3.21 | Hecho (2026-10-29): los seis criterios. CI en verde sobre `main` con `check`, `typecheck`, `test` y `e2e` (PR #107); propiedades de `calendar` y `phase` con las semanas de 167 y 169 h; E2E del hito (3.20); descarga firmada contra Cloudinary real (3.4); jurado de tres lentes sin altas ni medias abiertas tras corregir J1 en la 3.21; los 21 ids de la cobertura, verificados. |
 
 ---
 
@@ -152,6 +152,7 @@ El lunes sale el email del drop, también a quien solo dejó su email.
 
 | Fecha | Tarea | Notas |
 |-------|-------|-------|
+| 2026-10-29 | 3.22 | **Fase 3 cerrada**: los seis criterios del plan, con J1 corregida en la 3.21 (PR #107). |
 | 2026-10-29 | 3.21 | J1 corregida: el menú cabe a 1024 × 768 y 1180 × 720 con la barra entera (reloj en la tarjeta, columna de modos a `--bb-space-1` y crónica al lado de la firma desde 62 em). Lente de juego ✅ sin excepciones. Guía v0.6.91. La 3.22 pasa a lista. |
 | 2026-10-13 | 3.4 | Prueba real contra Cloudinary con un beat del sello: subida, escucha, descarga como adjunto y 401 pasada la caducidad. Solo queda la 3.21 (conformidad del usuario) para cerrar. |
 | 2026-10-10 | 3.20, 3.21 | E2E del hito en verde. Jurado de tres lentes en seis pases: marca y accesibilidad ✅, juego ✅ con la excepción n.º 1 pendiente de la conformidad del usuario. Guía v0.6.47. |
