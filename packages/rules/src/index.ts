@@ -27,6 +27,7 @@
 // De la Fase 7 (tareas 7.1–7.6, la capa de juego):
 //   xp         `xpFor` con la tabla del Anexo B (racha en juego, topes, semana dorada); `streakOf` y
 //              `advanceStreak`, la racha con el comodín de temporada
+//   goldenEar  `goldenEar(jurado, votos)`, con la semana recalculada sin sus votos
 
 export * from './alias'
 export * from './balance'

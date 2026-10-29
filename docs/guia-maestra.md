@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.94 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.95 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -607,11 +607,14 @@ semana mala no destroce meses.
 con una pista críptica). Catálogo completo en el Anexo C. Desbloquear uno lanza el aviso de logro
 (§3.8.8).
 
-**Oído de oro.** Al sellar, a cada jurado con ≥ 8 votos en la semana se le calcula la correlación
-de Spearman entre sus estrellas y la clasificación final. Con ρ ≥ 0,6 gana XP y cuenta para el logro.
-Premia anticipar el criterio del resto del jurado. Para que nadie se dé la razón a sí mismo, la
-puntuación de cada entrada se recalcula **sin su propio voto** antes de correlacionar. Como el XP
-no influye en la clasificación (`RF-GAME-10`), votar «como la mayoría» no da ventaja a nadie.
+**Oído de oro.** Al sellar, a cada jurado con ≥ 8 votos válidos en la semana se le calcula la correlación
+de Spearman entre sus estrellas y la **puntuación** final de las entradas que votó (la puntuación y no la
+posición, que las entradas sin clasificar no tienen). Con ρ ≥ 0,6 gana XP y cuenta para el logro.
+Premia anticipar el criterio del resto del jurado. Para que nadie se dé la razón a sí mismo, la semana se
+recalcula **como si no hubiera votado**: sin sus votos en la puntuación de cada entrada ni en la media `m` de la
+semana. Las puntuaciones se comparan exactas, sin redondear. Si ρ no está definida (sus estrellas son todas
+iguales, o sin sus votos las puntuaciones empatan todas), no hay oído de oro. Como el XP no influye en la
+clasificación (`RF-GAME-10`), votar «como la mayoría» no da ventaja a nadie.
 
 **Carta de productor.** La identidad de juego del usuario (§3.4.4): avatar, nombre, rango, nivel,
 color de acento, estadísticas y los tres logros elegidos para la vitrina. En el perfil cuelga de su
@@ -2343,7 +2346,7 @@ tests de propiedades.
 | `prng` | `hashOf(...partes)`, `sfc32`, `createRng(semilla)` con `next`, `int`, `pick`, `shuffle`; `rngFor(...partes)` para flujos con nombre |
 | `loudness` | `playbackGainDb(lufs)` (solo atenúa) |
 | `achievements` | Catálogo (Anexo C) como datos + `evaluate(evento, contexto) → logros nuevos` |
-| `goldenEar` | `spearman(a, b)`; `goldenEar(votosDelUsuario, resultados)` |
+| `goldenEar` | `spearman(a, b)`; `goldenEar(jurado, votosDeLaSemana)` → votos, ρ y si gana (recalcula la semana sin los votos del jurado, también la media `m`) |
 | `balance` | **Todas** las constantes del Anexo B. Ningún número mágico fuera de este fichero. |
 
 ### 4.6 Audio compartido (`packages/audio`)
@@ -3670,6 +3673,12 @@ fórmula de Pearson sobre rangos. Casos de prueba: sin empates, `[1,2,3,4,5]` fr
 `[4,4; 4,0; 3,8333; 3,5; 3,9]` → rangos `[5; 3,5; 3,5; 2; 1]` y `[5; 4; 2; 1; 3]` → **ρ = 6/√95 ≈
 0,6156** (la fórmula clásica sin corregir daría 0,625).
 
+**Oído de oro** (`RF-GAME-06`): un jurado vota 8 entradas con `[4, 1, 4, 4, 5, 2, 3, 1]` estrellas, y cada una
+tiene además un voto de otra cuenta: `[4, 1, 3, 3, 2, 3, 1, 1]`. Sin sus votos, `m = 18/8 = 2,25` y las
+puntuaciones son `(5 · 2,25 + v) / 6` → rangos `[8; 2; 6; 6; 4; 6; 2; 2]` frente a los de sus estrellas `[6; 1,5; 6;
+6; 8; 3; 4; 1,5]` → **ρ = 22/√1501 ≈ 0,5678: no gana**. Contando sus propios votos habría salido 69/79 ≈ 0,8734:
+por eso se quitan. Si a la 7.ª le hubiera dado 2 estrellas en vez de 3, **ρ = 24/√1482 ≈ 0,6234: gana**.
+
 **Niveles.** `xpNivel(n) = 50 · round(150 · (n − 1)^1,6 / 50)`; `nivel(xp)` = mayor `n ≤ 20` con
 `xpNivel(n) ≤ xp`.
 
@@ -3747,6 +3756,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.95 | **Tarea 7.3** (hueco G9 del plan 07). §2.10: el oído de oro correlaciona con la **puntuación** de las entradas que votó (no con la posición, que las sin clasificar no tienen), con ≥ 8 votos válidos, y recalcula la semana **como si no hubiera votado**: sin sus votos tampoco en la media `m`. Puntuaciones exactas, sin redondear; sin ρ definida no hay oído de oro. §4.5: `goldenEar(jurado, votosDeLaSemana)`. Anexo G: el caso de `RF-GAME-06` (no gana con ρ = 22/√1501, habría ganado con sus votos; gana cambiando una estrella). |
 | 2026-10-29 | 0.6.94 | **Tarea 7.2.** §2.10 y Anexo G: la racha cuenta las semanas selladas por su número (`week.number`), así que un hueco del calendario no la rompe; fallar es sellar una semana sin entrada clasificada. El comodín es el de la temporada de la semana fallada, solo se gasta si hay racha que salvar y la semana salvada no suma (ni al bonus ni a `streak_3/8/26`). La mejor racha es la más larga. El escenario de `RF-GAME-04`, paso a paso. |
 | 2026-10-29 | 0.6.93 | **Tarea 7.1** (huecos G3, G11 y G12 del plan 07). §2.10, Anexo B y Anexo G: subir da su XP al pasar a `active`, una vez por semana, con la **racha en juego** (la de las semanas selladas más esta, la misma con la que se paga el resultado); la primera entrada de la semana es la primera en pasar a `active`. **El XP en vivo no se retira**: ni al retirar la entrada o no clasificar, ni al quitar un voto (volver a votar no suma), ni cuando un voto queda anulado (sigue contando para el tope). La semana dorada duplica los eventos del Anexo B de esa semana, no los logros, que no llevan racha ni dorada. Redondeo: el bonus, al entero con las mitades hacia arriba, y la dorada duplica el entero. El jurado completo cuenta las entradas activas ajenas (5 o más). |
 | 2026-10-29 | 0.6.92 | §5 (hueco G14 del plan 07): el texto y el grafo ya no ponen la F7 y la F9 tras la beta. Desde el 2026-10-29 (decisión del usuario, «todo hasta el lanzamiento») cuelgan de la F6 y avanzan en paralelo con la beta; la F8 sigue tras la F7 y la F10, tras la F7–F9. |

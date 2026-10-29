@@ -14,6 +14,7 @@ import * as prng from '../src/prng'
 import * as ranking from '../src/ranking'
 import * as scoring from '../src/scoring'
 import * as season from '../src/season'
+import * as xp from '../src/xp'
 
 const modules = {
   alias,
@@ -30,6 +31,7 @@ const modules = {
   ranking,
   scoring,
   season,
+  xp,
 }
 
 describe('@beatbattle/rules', () => {
