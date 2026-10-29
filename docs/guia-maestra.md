@@ -626,7 +626,7 @@ pura del XP total.
 - **Dónde se gana en vivo**, en el mismo `batch` que el hecho y solo si el hecho ocurre (§4.11):
   - **La entrada que pasa a `active`** (al registrarla si la medición cabe, al sustituir el audio o cuando el `tick`
     completa una en `processing`): subir, la primera entrada de la semana (con `early_bird`, que va con ella: si dos
-    llegan a la vez, los dos solo son de quien se queda la primera), `first_entry`, `entries_10`, `entries_50`,
+    entradas llegan a la vez, el XP y el logro son solo de la que se queda la primera), `first_entry`, `entries_10`, `entries_50`,
     `last_minute` y `golden_week`. La racha en juego se calcula con las semanas selladas en su revisión vigente; si
     la anterior ya cerró y nadie la había sellado, se sella antes (perezoso, como al leer).
   - **El voto**: los 5 XP con el tope, `first_vote`, `votes_100`, `votes_1000`, `night_owl` y, al votar la última de
