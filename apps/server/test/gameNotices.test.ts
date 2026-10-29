@@ -93,7 +93,7 @@ async function history(users: { id: string; stars: number[] }[]) {
       id,
       number,
       slug: `2026-${id}`,
-      seasonId: '2026-T4',
+      seasonId: number === 1 ? '2026-T3' : '2026-T4',
       sampleId: s?.id as string,
       rulesVersion: 1,
       ...bounds,
