@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.115 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.116 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1522,6 +1522,21 @@ otras pantallas), sube 24 px con el muelle de recompensa y lo «traga» el medid
 pulso. Nunca se pinta encima de una tecla ni de una estrella. El combo del Modo Jurado es un
 **medidor de súper** de 8 segmentos con «×3 COMBO · +5 XP por voto»; cada voto seguido llena un
 segmento y sube un semitono (`combo.up`, hasta ×8). Saltar no rompe el combo; salir sí.
+
+Cómo vuela (tarea 7.19):
+
+- **Cuánto**: el XP del hecho que dice la respuesta (`game.xp`, §2.10) **sin el de sus logros**, que va en el aviso de
+  cada uno (§3.8.8). Sin XP del hecho (un voto repetido, pasado el tope), no sale nada.
+- **Dónde nace**, junto a lo que lo provoca y nunca encima de una tecla ni de una estrella: a la derecha de su caja si
+  cabe en la ventana y, si no, encima de ella, alineado a su borde derecho. En el Modo Jurado, el medidor del combo; en
+  la ficha, el grupo de estrellas; en la subida, la línea «+125 XP» de la celebración (§3.8.5).
+- **El vuelo** (900 ms, `--bb-dur-reward`): sube 24 px con el muelle de recompensa y a mitad de camino vuela al medidor
+  de XP del HUD, que lo traga: el medidor sube con su brillo (Anexo E) y suena `xp.gain` (en el Modo Jurado, más agudo
+  con el combo). Si el HUD no lleva el medidor (el Modo Jurado, cuyo lado izquierdo es el medidor de escucha) o no se
+  ve (la página bajada), sube y se funde donde nació; el XP se suma igual. Va sobre una placa negra, para que su texto
+  no pase por encima de la trama ni de los rayos (`RD-VIS-05`).
+- **Sin movimiento**, «+5 XP» aparece y se funde donde nace, sin desplazarse, y el medidor lo toma sin brillo. El modo
+  serio lo deja: es información, no espectáculo.
 
 #### 3.4.3 Medallas de vinilo
 
@@ -4008,6 +4023,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.116 | **Tarea 7.19.** §3.4.2, «Cómo vuela»: el «+XP» lleva el XP del hecho sin el de sus logros (van en su aviso) y no sale sin XP; nace a la derecha de lo que lo provoca si cabe y si no encima (el medidor del combo, el grupo de estrellas, la línea «+XP» de la subida), nunca sobre una tecla ni una estrella; sube 24 px con el muelle de recompensa y vuela al medidor del HUD, que lo traga con su brillo y `xp.gain` (más agudo con el combo); sin medidor a la vista (el Modo Jurado) se funde donde nació; va sobre una placa negra (`RD-VIS-05`); sin movimiento, aparece y se funde en su sitio; el modo serio lo deja. |
 | 2026-10-29 | 0.6.115 | **Tarea 7.18.** §3.4.1, «La capa de juego del HUD»: nivel, rango y medidor desde `GET /api/me` (`game`), en vivo; las teselas de temporada («TEMPORADA T4 · 12 PTS · 9.º», sin puesto solo los puntos) y racha («×3», también «×0») en todas las pantallas del marco de juego con sesión salvo donde la pantalla ocupa ese lado; lo ganado en vivo se suma a la sesión al responder el servidor, pero el medidor lo enseña cuando lo traga el «+XP» o sale el aviso de su logro; en el nivel 20, «NV 20 · MÁX»; región viva educada para el XP, los logros y el nivel. §4.7.2: lo que guarda el almacén `hud` (el XP aún sin tragar, los avisos en cola, la región viva y la retención mientras una capa a pantalla completa tapa el marco). |
 | 2026-10-29 | 0.6.107 | **Tarea 7.13** (huecos G1 y G13 del plan 07, resueltos). §2.10, «Lo público y lo propio»: **lo público solo cuenta semanas selladas** (el perfil público con su XP, nivel, teselas, historial, logros y vitrina, su OG, la temporada y el salón: los movimientos y logros con `week_id` sellado o nulo; nulo solo lo llevan hechos que no dependen de jugar una semana, como `profile_done`, `share_card` y el `level_20` que cruzan) y **`GET /api/me` es de su dueño y va en vivo** (XP, nivel y nivel visto, racha con comodín, temporada, logros sin ver y ceremonia de temporada pendiente); lo ya visto sale una vez (`RF-GAME-09`). §2.3: el perfil público con su capa de juego y la vitrina en `PUT /api/me/profile`. §2.15: la OG del perfil, con la misma regla. §4.10: `GET /api/me` y `POST /api/me/seen` (`level`, `achievement`, `season_champion`) con su forma; `GET /api/profiles/:username` en vez de `/api/producers/:username` (G13) y `GET · PUT /api/me/profile` en vez de `PATCH`, que nunca existieron. §4.11: la condición de lo público sobre `week_id`. |
 | 2026-10-29 | 0.6.106 | **Tarea 7.12.** §2.9, salón de la fama: todo sale de los snapshots vigentes de las semanas selladas (los ganadores en 1.ª posición, ex aequo incluidos; los campeones de cada temporada cerrada; más victorias; la racha más larga con el comodín; la mejor puntuación de una entrada clasificada; más votos emitidos, los válidos que contó cada snapshot); con la misma cifra, el récord es de quien llegó antes; un productor eliminado sigue como «Productor eliminado». §4.10: `GET /api/hall-of-fame` con su forma. |

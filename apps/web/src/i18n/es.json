@@ -2153,6 +2153,7 @@
     "thresholdMark": "{s}\u00a0s",
     "combo": "Combo",
     "comboText": "Combo ×{count}",
+    "comboXp": "+{xp} XP por voto",
     "play": "Escuchar",
     "pause": "Pausa",
     "skip": "Saltar",

@@ -228,6 +228,18 @@
   max-width: 12rem;
 }
 
+/* «×4» y, a su lado, «COMBO» con «+5 XP POR VOTO» debajo (maqueta `03b-jurado-votado`, §3.4.2). */
+.comboHead {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-2);
+}
+
+.comboLabels {
+  display: grid;
+  gap: var(--bb-space-1);
+}
+
 .comboCount {
   color: var(--bb-red);
   font-size: var(--bb-fs-2xl);

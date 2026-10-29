@@ -1,4 +1,4 @@
-import { listenThresholdMs } from '@beatbattle/rules'
+import { type AchievementId, listenThresholdMs, XP_VOTE } from '@beatbattle/rules'
 import type { PublicEntry } from '@beatbattle/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -172,6 +172,9 @@ function JuryArena() {
   }, [status])
 
   const starsRef = useRef<HTMLDivElement>(null)
+  const comboRef = useRef<HTMLDivElement>(null)
+  // Los logros de esta visita: «¡JURADO COMPLETO!» enseña el suyo si llega (§3.8.7).
+  const earned = useRef<AchievementId[]>([])
   // Las teclas del Modo Jurado, estén donde estén el foco y el cursor (§3.8.7).
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -350,16 +353,22 @@ function JuryArena() {
           </p>
         </div>
         <div className={styles.combo}>
-          <p>
+          <p className={styles.comboHead}>
             <span className={`bb-display ${styles.comboCount}`}>×{combo}</span>{' '}
-            <span className="bb-label">{t('jury.combo')}</span>
+            <span className={styles.comboLabels}>
+              <span className="bb-label">{t('jury.combo')}</span>{' '}
+              <span className="bb-label">{t('jury.comboXp', { xp: XP_VOTE })}</span>
+            </span>
           </p>
-          <Meter
-            value={Math.min(combo, COMBO_MAX)}
-            max={COMBO_MAX}
-            label={t('jury.combo')}
-            valueText={t('jury.comboText', { count: combo })}
-          />
+          {/* El «+5 XP» de cada voto nace a su derecha (§3.4.2). */}
+          <div ref={comboRef}>
+            <Meter
+              value={Math.min(combo, COMBO_MAX)}
+              max={COMBO_MAX}
+              label={t('jury.combo')}
+              valueText={t('jury.comboText', { count: combo })}
+            />
+          </div>
         </div>
         {/* biome-ignore lint/a11y/noStaticElementInteractions: solo sigue si el cursor está en las estrellas (la barra dice «NOTA») */}
         <div
@@ -377,8 +386,9 @@ function JuryArena() {
             listen={listen}
             next
             onVote={async (stars) => {
-              await vote(stars)
               const nextCombo = Math.min(combo + 1, COMBO_MAX)
+              const cast = await vote(stars, { anchor: comboRef.current, combo: nextCombo })
+              earned.current = [...earned.current, ...cast.game.achievements]
               setCombo(nextCombo)
               audio.play('combo.up', { xpCombo: nextCombo })
               window.setTimeout(() => {
