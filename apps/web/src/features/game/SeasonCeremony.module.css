@@ -1,0 +1,244 @@
+/*
+ * Ceremonia del campeón de temporada (§3.8.15): capa a toda la pantalla con velo opaco por encima del marco, como la de
+ * resultados (§3.8.6). Arriba la placa de fin de temporada y el anunciador; en medio, la carta (o las cartas, con ex
+ * aequo); debajo, las cifras; abajo, la firma y «Saltar». Los instantes de cada paso viven en `SEASON_CEREMONY_TIMELINE`
+ * (la línea de tiempo de la ceremonia, §3.6): aquí, solo cómo entra cada pieza. Sin movimiento (Anexo E), fundidos de
+ * `--bb-dur-fast` y nada se desplaza ni se estampa.
+ */
+.ceremony {
+  position: fixed;
+  inset: 0;
+  z-index: var(--bb-z-ceremony);
+  display: grid;
+  grid-template:
+    "plate" auto
+    "announcer" auto
+    "stage" minmax(0, 1fr)
+    "line" auto
+    "foot" auto
+    / minmax(0, 1fr);
+  justify-items: center;
+  align-items: center;
+  gap: var(--bb-space-3);
+  padding: var(--bb-space-6) var(--bb-gutter) var(--bb-space-5);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* Opaco: ningún texto queda sobre la trama ni los rayos de la arena (`RD-VIS-05`). */
+.shade {
+  position: absolute;
+  inset: 0;
+  background: var(--bb-black);
+  animation: bb-scer-fade var(--bb-dur-base) var(--bb-ease-out) both;
+}
+
+.plate {
+  grid-area: plate;
+  position: relative;
+  animation: bb-scer-fade var(--bb-dur-base) var(--bb-ease-out) both;
+}
+
+.announcerSlot {
+  grid-area: announcer;
+  position: relative;
+  width: min(100%, 44rem);
+  min-height: var(--bb-space-16);
+}
+
+.announcer {
+  width: 100%;
+}
+
+/*
+ * La fila de la carta: un contenedor con su alto, para que la carta (63 × 88) quepa en él con el ancho que haga falta:
+ * hasta el de la carta del perfil, lo que deje el alto y, con ex aequo, su parte de la fila (con margen para su giro).
+ */
+.stage {
+  grid-area: stage;
+  position: relative;
+  container-type: size;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.cards {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--bb-space-5);
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.slot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(
+    calc(var(--bb-space-16) * 5.5),
+    calc(100cqh * 63 / 88 - var(--bb-space-4)),
+    calc((100cqw - (var(--cards) - 1) * var(--bb-space-5)) / var(--cards) - var(--bb-space-5))
+  );
+  /* La carta cae estampada en el acorde de `cer.season` (escala 1,25 → 1 con el muelle de las estampas). */
+  animation: bb-scer-slam var(--bb-dur-slam) var(--bb-ease-back) both;
+}
+
+/*
+ * El foco que la ilumina desde arriba: en la fila de la carta y detrás de ella, nunca detrás de un texto (la placa y el
+ * anunciador quedan por encima de la fila, las cifras por debajo; `RD-VIS-05`).
+ */
+.beam {
+  position: absolute;
+  inset: 0 0 18%;
+  background: linear-gradient(180deg, transparent, var(--bb-line-strong) 15%, transparent 90%);
+  clip-path: polygon(44% 0, 56% 0, 78% 100%, 22% 100%);
+  pointer-events: none;
+  animation: bb-scer-fade var(--bb-dur-reward) var(--bb-ease-out) both;
+}
+
+.line {
+  grid-area: line;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-1);
+  min-height: calc(var(--bb-space-16) + var(--bb-space-2));
+  text-align: center;
+}
+
+.headline {
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-xl);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-button);
+  line-height: var(--bb-leading-display);
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+  animation: bb-scer-fade var(--bb-dur-base) var(--bb-ease-out) both;
+}
+
+.headline[data-you] {
+  color: var(--bb-red);
+}
+
+.stats {
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-lg);
+  font-weight: var(--bb-weight-bold);
+  animation: bb-scer-fade var(--bb-dur-base) var(--bb-ease-out) both;
+}
+
+/*
+ * Confeti en la paleta, dentro del área que autoriza el limitador de destellos (≤ 25 %, ≤ 40 %): una caja en la fila de
+ * la carta, por detrás de ella (cae a sus lados y nunca encima de un texto). Espectáculo.
+ */
+.confetti {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  translate: -50% 0;
+  width: var(--confetti-size);
+  height: var(--confetti-size);
+  pointer-events: none;
+}
+
+.confetti span {
+  position: absolute;
+  top: 0;
+  left: calc(var(--i) * 5%);
+  width: var(--bb-space-2);
+  height: var(--bb-space-3);
+  background: var(--bb-red);
+  animation: bb-scer-fall var(--bb-dur-swap) var(--bb-ease-out) both;
+  animation-delay: calc(var(--i) * var(--bb-stagger-wave) * 10);
+}
+
+.confetti span[data-tone="1"] {
+  background: var(--bb-white);
+}
+
+.confetti span[data-tone="2"] {
+  background: var(--bb-wine);
+}
+
+.foot {
+  grid-area: foot;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* Sin movimiento (Anexo E): fundidos de 150 ms; la carta aparece sin estampa (y es la plana, `RF-GAME-07`). */
+.ceremony[data-reduced] :is(.shade, .plate, .slot, .beam, .headline, .stats) {
+  animation-name: bb-scer-fade;
+  animation-duration: var(--bb-dur-fast);
+}
+
+/* Modo serio: sin estampa (el anunciador y el confeti ya se van solos). */
+:global(:root[data-serious]) .slot {
+  animation-name: bb-scer-fade;
+}
+
+@keyframes bb-scer-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes bb-scer-slam {
+  from {
+    scale: calc(1 + 0.25 * var(--bb-motion));
+    opacity: 0;
+  }
+}
+
+/* Cae por la caja que autoriza el limitador, de arriba abajo, y se apaga. */
+@keyframes bb-scer-fall {
+  from {
+    top: 0;
+    rotate: 0turn;
+  }
+
+  to {
+    top: 100%;
+    rotate: 2turn;
+    opacity: 0;
+  }
+}
+
+/*
+ * Con poco alto y ventana apaisada (1366 × 657, un móvil tumbado…), en una columna la carta no cabría con su texto a
+ * 12 px (`RD-VIS-05`): la carta a la izquierda, con todo el alto, y la placa, el anunciador y las cifras a su derecha.
+ */
+@media (max-height: 760px) and (min-aspect-ratio: 4 / 3) {
+  .ceremony {
+    grid-template:
+      "stage ." minmax(0, 1fr)
+      "stage plate" auto
+      "stage announcer" auto
+      "stage line" auto
+      "stage ." minmax(0, 1fr)
+      "foot foot" auto
+      / minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--bb-space-3) var(--bb-space-6);
+    padding-top: var(--bb-space-4);
+    padding-bottom: var(--bb-space-3);
+  }
+}
+
+/* Contraste alto: sin foco ni confeti (la carta ya trae su marco del sistema). */
+@media (forced-colors: active) {
+  .beam,
+  .confetti {
+    display: none;
+  }
+}

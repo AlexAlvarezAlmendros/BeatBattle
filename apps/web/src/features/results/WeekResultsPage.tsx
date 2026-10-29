@@ -24,6 +24,7 @@ import { useShortcuts } from '../../ui/shortcuts'
 import { TitlePlate } from '../../ui/TitlePlate'
 import { Done } from '../account/FormBits'
 import { useSession } from '../account/session'
+import { SeasonCeremonyCue } from '../game/seasonCeremony'
 import { usePlayer } from '../player/store'
 import { entryTrack } from '../player/tracks'
 import { StoryButton } from '../share/StoryButton'
@@ -222,7 +223,8 @@ export function WeekResultsPage() {
             onStandings={showStandings}
           />
           {shared && <Done>{t('results.shared')}</Done>}
-          {ceremony && <ResultsCeremony results={data} onDone={endCeremony} />}
+          {/* La del campeón de temporada (§3.8.15), si es de esta temporada: al abrir o tras la de la semana. */}
+          {ceremony ? <ResultsCeremony results={data} onDone={endCeremony} /> : <SeasonCeremonyCue />}
           <section ref={standingsRef} className={styles.standings} aria-labelledby="standings-title">
             <h2 id="standings-title" className={cx('bb-label', styles.standingsTitle)}>
               {t('results.standingsTitle')}

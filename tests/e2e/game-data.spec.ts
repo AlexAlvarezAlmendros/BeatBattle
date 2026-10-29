@@ -7,7 +7,8 @@ import { runSuffix, testIp } from './support'
  * Los datos de prueba de la capa de juego (tarea 7.32): una temporada jugada por la API (`playSeason`) deja lo que
  * necesitan la 7.33 y las capturas de la 7.35 —niveles de varios rangos, logros de cada rareza, una racha con el
  * comodín gastado, una temporada cerrada con su campeón y récords en el salón de la fama— y, como todo lo escribieron
- * los ganchos en vivo, reprocesar no añade nada (`RF-GAME-01`).
+ * los ganchos en vivo, reprocesar no añade nada (`RF-GAME-01`). Con ella, la ceremonia corta del campeón de la 7.27
+ * (§3.8.15): sale una vez en el menú, al campeón y a quien no lo es, y los avisos esperan a que se cierre.
  *
  * Las semanas son las de marzo de 2034 (la 2034-T1; nada más en la BD de los E2E cae ahí). Sella, así que va en su
  * propio proyecto, después de los que sellan otras semanas (`playwright.config.ts`).
@@ -35,7 +36,7 @@ const RARITY: Record<string, 'common' | 'rare' | 'epic' | 'legendary'> = {
   season_champ: 'legendary',
 }
 
-test('RF-GAME-01, RF-ARC-02, RF-ARC-05: una temporada jugada deja rangos, logros de cada rareza, el comodín gastado, su campeón y el salón; reprocesar no añade nada', async ({
+test('RF-GAME-01, RF-ARC-02, RF-ARC-05: una temporada jugada deja rangos, logros de cada rareza, el comodín gastado, su campeón con su ceremonia (una vez) y el salón; reprocesar no añade nada', async ({
   browser,
   baseURL,
 }) => {
@@ -111,6 +112,57 @@ test('RF-GAME-01, RF-ARC-02, RF-ARC-05: una temporada jugada deja rangos, logros
     expect(unlocked.get(season.jury[0]?.username as string)).toEqual(
       expect.arrayContaining(['first_vote', 'jury_full', 'golden_ear']),
     )
+  })
+
+  await test.step('RF-ARC-05 / §3.8.15: la ceremonia corta sale una vez en el menú, con la carta de campeón; los avisos esperan a que se cierre', async () => {
+    const page = champion.page
+    await page.goto('/')
+    const ceremony = page.getByRole('dialog', { name: 'Ceremonia del campeón de la temporada T1 de 2034' })
+    await expect(ceremony).toBeVisible({ timeout: 15_000 })
+    // Su carta, la de campeón, y a ella dicho: «¡Eres el campeón…!» con las cifras de su clasificación.
+    await expect(ceremony.locator('[data-producer-card][data-variant="champion"]')).toContainText(
+      champion.username,
+    )
+    await expect(ceremony.getByText('¡Eres el campeón de la temporada T1 de 2034!')).toBeVisible()
+    await expect(ceremony).toContainText('4 victorias')
+    // §3.8.8: mientras dura, ningún aviso de logro ni de nivel (los tiene pendientes: el sellado le dio varios).
+    await expect(page.locator('[data-notice]')).toHaveCount(0)
+    // RD-MOT-01: Esc la salta (y no lleva al menú: ya está en él, y la tecla no le llega).
+    await page.keyboard.press('Escape')
+    await expect(ceremony).toHaveCount(0)
+    await expect(page).toHaveURL(/\/$/)
+    // Al cerrarse, salen sus avisos.
+    await expect(page.locator('[data-notice]').first()).toBeVisible()
+    // Queda vista en el servidor: recargar no la repite.
+    await expect
+      .poll(async () => {
+        const res = await page.request.get('/api/me', { headers: headers() })
+        return (await res.json()).data.game.seasonCeremony
+      })
+      .toBeNull()
+    await page.reload()
+    await page.waitForTimeout(1500)
+    await expect(page.locator('[data-season-ceremony]')).toHaveCount(0)
+  })
+
+  await test.step('RF-ARC-05 / §3.8.15: quien no es campeón la ve igual, dicha del campeón, y una tecla la salta', async () => {
+    const page = second.page
+    const me = (await (await page.request.get('/api/me', { headers: headers() })).json()).data
+    expect(me.game.seasonCeremony).toEqual({ seasonId: '2034-T1', champion: false })
+    await page.goto('/')
+    const ceremony = page.getByRole('dialog', { name: 'Ceremonia del campeón de la temporada T1 de 2034' })
+    await expect(ceremony.getByText('Campeón de la temporada T1 de 2034', { exact: true })).toBeVisible({
+      timeout: 15_000,
+    })
+    await expect(ceremony.locator('[data-producer-card]')).toContainText(champion.username)
+    await page.keyboard.press('ArrowDown')
+    await expect(ceremony).toHaveCount(0)
+    await expect
+      .poll(async () => {
+        const res = await page.request.get('/api/me', { headers: headers() })
+        return (await res.json()).data.game.seasonCeremony
+      })
+      .toBeNull()
   })
 
   await test.step('RF-GAME-04: quien falló la segunda semana tiene el comodín de la temporada gastado y su racha sigue', async () => {

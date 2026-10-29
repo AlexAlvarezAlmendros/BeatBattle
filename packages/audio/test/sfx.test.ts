@@ -1,6 +1,7 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
 import {
+  SEASON_FANFARE_HIT,
   SFX_IDS,
   type SfxLayer,
   sfxCatalog,
@@ -41,6 +42,8 @@ const ANNEX_D: Record<string, { duration: number; levelDb: number; jitter: numbe
   'cer.heartbeat': { duration: 2, levelDb: -14, jitter: 0 },
   'cer.airhorn': { duration: 1.4, levelDb: -8, jitter: 0 },
   'cer.confetti': { duration: 1, levelDb: -20, jitter: 0 },
+  // La fanfarria del campeón de temporada (7.27).
+  'cer.season': { duration: 2.4, levelDb: -8, jitter: 0 },
   // Logros (7.17): la fila del anexo da de 0,5 a 2 s y de −14 a −8 dB; cada rareza, un tramo.
   'ach.common': { duration: 0.5, levelDb: -14, jitter: 0 },
   'ach.rare': { duration: 0.8, levelDb: -12, jitter: 0 },
@@ -271,6 +274,66 @@ describe('efectos de logro (Anexo D, 7.17)', () => {
           expect(first[id].jitter, id).toBe(0)
           expect(second[id], id).toEqual(first[id])
         }
+      }),
+    )
+  })
+})
+
+describe('fanfarria del campeón de temporada (Anexo D, 7.27)', () => {
+  it('RD-SND-02 / §3.8.15: «ta-ta» en la quinta y, en el impacto, el acorde de la tríada con su octava, bombo, bajo y platillo', () => {
+    const def = sfxCatalog()['cer.season']
+    const brass = def.layers.filter((layer) => layer.wave === 'sawtooth')
+    const pickup = brass.filter((layer) => (layer.delay ?? 0) < SEASON_FANFARE_HIT)
+    const chord = brass.filter((layer) => (layer.delay ?? 0) >= SEASON_FANFARE_HIT)
+    expect(pickup).toHaveLength(2)
+    expect(pickup.map((layer) => layer.freq?.[0])).toEqual([659.2551138257398, 659.2551138257398])
+    // El acorde: La4, Do5, Mi5 y La5 en La menor, rasgueado en menos de 50 ms, con el paso bajo que se abre.
+    expect(chord.map((layer) => Math.round(midiOf(layer.freq?.[0] ?? 0)))).toEqual([69, 72, 76, 81])
+    expect(Math.max(...chord.map((layer) => layer.delay ?? 0))).toBeLessThan(SEASON_FANFARE_HIT + 0.05)
+    for (const layer of chord) {
+      expect(layer.filter?.type).toBe('lowpass')
+      expect(layer.filter?.freq[1]).toBeGreaterThan(layer.filter?.freq[0] as number)
+    }
+    // Todo lo demás cae en el impacto (el bombo, el bajo y el platillo), que es cuando se estampa la carta.
+    const rest = def.layers.filter((layer) => layer.wave !== 'sawtooth')
+    expect(rest.length).toBeGreaterThanOrEqual(3)
+    for (const layer of rest) expect(layer.delay ?? 0).toBeGreaterThanOrEqual(SEASON_FANFARE_HIT)
+    expect(SEASON_FANFARE_HIT).toBeLessThan(def.duration)
+  })
+
+  it('§3.7.1 / 7.27: la fanfarria suena en la tonalidad de la semana: cada nota, de la tríada de la tónica (y de su pentatónica), sin desafinar', () => {
+    fc.assert(
+      fc.property(anyKey, (key) => {
+        const def = sfxCatalog(key)['cer.season']
+        const scale = pentatonicClasses(key)
+        const triad = [0, key.mode === 'minor' ? 3 : 4, 7].map((step) => (key.tonic + step) % 12)
+        const pitches = pitchesOf(def)
+        expect(pitches.length).toBeGreaterThan(0)
+        for (const hz of pitches) {
+          const midi = midiOf(hz)
+          expect(Math.abs(midi - Math.round(midi)), `${hz} Hz`).toBeLessThan(1e-6)
+          const pitchClass = ((Math.round(midi) % 12) + 12) % 12
+          expect(triad, `${hz} Hz`).toContain(pitchClass)
+          expect(scale, `${hz} Hz`).toContain(pitchClass)
+        }
+        // El acorde, en la 4.ª octava desde la tónica.
+        const chord = def.layers.filter(
+          (layer) => (layer.delay ?? 0) >= SEASON_FANFARE_HIT && layer.wave === 'sawtooth',
+        )
+        expect(midiOf(chord[0]?.freq?.[0] ?? 0)).toBeCloseTo(tonicMidi(key, 4))
+      }),
+    )
+    const a = sfxCatalog({ tonic: 9, mode: 'minor' })['cer.season']
+    const d = sfxCatalog({ tonic: 2, mode: 'major' })['cer.season']
+    expect(pitchesOf(a)).not.toEqual(pitchesOf(d))
+  })
+
+  it('RD-SND-02 / 7.27: la fanfarria es determinista: sin variación por disparo y la misma definición en cada llamada', () => {
+    fc.assert(
+      fc.property(anyKey, (key) => {
+        const first = sfxCatalog(key)['cer.season']
+        expect(first.jitter).toBe(0)
+        expect(sfxCatalog(key)['cer.season']).toEqual(first)
       }),
     )
   })
