@@ -286,7 +286,8 @@ export function MainMenu({
       )}
       {week && (
         <FrameSlot name="hudCenter">
-          {/* En la tableta vertical, el reloj va en la tarjeta de la semana, como en el móvil (CSS). */}
+          {/* En la tableta vertical y en la composición intermedia baja (de 721 a 1199 px y hasta 859 de
+              alto), el reloj va en la tarjeta de la semana, como en el móvil (CSS). */}
           <div className={styles.hudClock}>
             <RoundClock
               target={week.closesAt}

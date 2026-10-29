@@ -26,9 +26,10 @@ export const STAGE_TITLE_MIN_FONT_PX = 24
  * Tarjeta del escenario de la semana (guía §3.8.3): marco rojo con trama (`Frame` `stage`). Con la
  * semana en juego, el vinilo-sol girando, «SEMANA 41 · ESCENARIO», el título, los créditos, los chips
  * (BPM, tonalidad, duración, género sugerido), el play con la onda, el reto y las entradas en la
- * batalla; en móvil, compacta y con el reloj en línea. Sin semana (calendario vacío, §2.19), «El
- * próximo drop está en el horno» y el hueco del formulario «Avísame del próximo drop» (§2.12.3, que
- * llega con la Fase 3).
+ * batalla; en móvil, compacta y con el reloj en línea (en la tableta vertical y en la composición
+ * intermedia baja, también con el reloj en línea, en el sitio de la onda). Sin semana (calendario vacío,
+ * §2.19), «El próximo drop está en el horno» y el hueco del formulario «Avísame del próximo drop»
+ * (§2.12.3, que llega con la Fase 3).
  *
  * El título del escenario es el elemento más grande con texto de la home: su LCP (`RNF-PERF-02`). Sale
  * con la primera pintura, sin entrada animada.

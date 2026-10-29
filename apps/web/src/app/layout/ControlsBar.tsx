@@ -130,10 +130,12 @@ function ScreenLoopsPause() {
  * Parte del alto de la ventana a partir de la cual la barra deja de ir pegada al pie (§3.4.1): el 15 %,
  * **en cualquier ventana y con cualquier entrada** (v0.6.7). Con las teclas en su fila (y en el menú, la
  * crónica en otra), pegada entera se comía la primera vista: a 360 × 640 con teclado medía 154 px, el
- * 24 %, y el menú no enseñaba ninguna placa (jurado de la 0.28, L8); a 1024 × 768 con teclado, 127 px
- * (16,5 %), y tapaba el dato de la placa 06, el panel de ayuda y el play, la onda y el reto de la
- * tarjeta, porque fuera de las ventanas pequeñas el límite era el 25 % (tercer pase sobre la v0.6.6, B1).
- * En táctil, la de las interiores (firma y «Legal» debajo) mide 98 px: el 15,3 % a 360 × 640.
+ * 24 %, y el menú no enseñaba ninguna placa (jurado de la 0.28, L8); a 1024 × 768 con teclado, con tres
+ * filas, 127 px (16,5 %), y tapaba el dato de la placa 06, el panel de ayuda y el play, la onda y el reto
+ * de la tarjeta, porque fuera de las ventanas pequeñas el límite era el 25 % (tercer pase sobre la v0.6.6,
+ * B1). Desde la v0.6.91 la crónica va al lado de la firma desde 62 em y ahí la barra del menú tiene dos
+ * filas (84 px, el 10,9 %): va pegada entera (jurado de la 3.21, J1). En táctil, la de las interiores
+ * (firma y «Legal» debajo) mide 98 px: el 15,3 % a 360 × 640.
  */
 export const CONTROLS_MAX_VIEWPORT_SHARE = 0.15
 
@@ -166,7 +168,8 @@ const BAR_TAIL_VAR = '--bar-tail'
  *   columna al lado de la firma centrada, baja a su propia fila, centrado (jurado de la 0.28, M3r: en
  *   móvil se centraba el grupo y la firma quedaba descentrada). Igual: lo que cabe de verdad. La crónica
  *   del menú no se mide: llena su columna (si un mensaje no cabe en una línea, parte en dos dentro del
- *   alto de su botón de pausa) y por debajo de 1200 px va siempre en su fila.
+ *   alto de su botón de pausa) y por debajo de 62 em (992 px con la letra por defecto) va siempre en su
+ *   fila (CSS).
  * - **Alto real** en `CONTROLS_HEIGHT_VAR`, para que ningún control enfocado quede debajo de la barra
  *   (§3.3): con las teclas en su fila crece y un margen fijo no basta. Si la barra pasa de
  *   `CONTROLS_MAX_VIEWPORT_SHARE` del alto de la ventana (el 15 %, en cualquier ventana y con cualquier
