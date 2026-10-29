@@ -184,8 +184,8 @@
 /*
  * El dato de la pantalla (la crónica del menú) no pasa de su columna: antes, más ancho que ella, se
  * salía hacia la izquierda y pisaba la firma (jurado de la 0.28). Si un mensaje no cabe en una línea, la
- * crónica parte en dos, alineadas a la derecha, junto a su botón (`Chronicle`; F6); por debajo de 1200 px
- * va en su propia fila, centrada (más abajo).
+ * crónica parte en dos, alineadas a la derecha, junto a su botón (`Chronicle`; F6); por debajo de 62 em
+ * (992 px) va en su propia fila, centrada (más abajo).
  */
 .right[data-claimed] {
   justify-self: stretch;
@@ -223,13 +223,21 @@
 }
 
 /*
- * ── Por debajo de 1200 px, la crónica en su fila ────────────────────────────────────────────
- * La crónica no cabe al lado de la firma centrada sin cortarse: baja a su propia fila, centrada bajo la
+ * ── Por debajo de 62 em (992 px con la letra por defecto), la crónica en su fila ──────────────────
+ * Ahí la crónica no cabe al lado de la firma centrada sin cortarse: baja a su propia fila, centrada bajo la
  * firma, también en móvil con teclado (jurado de la 0.28: de 721 a 900 px «Inserta tu beat» pisaba
  * «Other People Records», la firma de `RF-OTP-01`). Las teclas van al lado de la firma o, si no caben,
  * en su fila.
+ *
+ * Desde 62 em va al lado de la firma, como a partir de 1200 px: su columna deja como poco 13 rem al texto
+ * (con la pausa y `--bar-gap`), y los mensajes de la crónica caben ahí en dos líneas, el crédito partido por
+ * su «·». Con las teclas en su fila, la barra del menú tiene dos filas (84 px) en vez de tres (127): a
+ * 1024 × 768 y a 1180 × 720 no pasa del 15 % y va pegada entera, con las teclas, el crédito y la pausa a la
+ * vista (§3.4.1 v0.6.91; jurado de la 3.21, J1: con tres filas se despegaba y solo se veía la firma). El
+ * umbral va en `em` (crece con la letra del navegador, como la firma y la crónica) y nunca pasa de 1199 px:
+ * a partir de 1200 px la crónica va siempre al lado de la firma.
  */
-@media (max-width: 1199px) {
+@media (max-width: 1199px) and (max-width: 61.9375em) {
   .right[data-claimed] {
     grid-row: 2;
     grid-column: 1 / -1;
@@ -246,7 +254,7 @@
   }
 }
 
-@media (min-width: 721px) and (max-width: 1199px) {
+@media (min-width: 721px) and (max-width: 1199px) and (max-width: 61.9375em) {
   .bar:has(.right[data-claimed]) {
     padding-top: var(--bb-space-1);
   }
@@ -288,7 +296,7 @@
   grid-row: 2;
 }
 
-@media (max-width: 1199px) {
+@media (max-width: 1199px) and (max-width: 61.9375em) {
   .bar[data-unpinned] .right[data-claimed] {
     grid-row: 2;
   }

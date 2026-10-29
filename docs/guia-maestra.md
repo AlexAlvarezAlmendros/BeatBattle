@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.90 · 2026-10-16 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.97 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -556,6 +556,14 @@ ofrece la ceremonia de revelación. Dura unos 25 s y se puede saltar.
   y 1 punto por cada entrada clasificada fuera del top 10. Desempate: más victorias, después más
   podios, después mejor puntuación media. La clasificación de la temporada en curso es pública
   (solo con semanas selladas).
+  - **Quién entra:** quien tiene al menos una entrada clasificada en una semana sellada de la temporada (cada una
+    da como poco 1 punto). Quien solo tiene semanas sin clasificar no aparece.
+  - **Victorias y podios:** semanas en 1.ª posición y en el top 3, ex aequo incluidos.
+  - **Puntuación media:** la media de la puntuación del snapshot (`result`) de sus entradas clasificadas en la
+    temporada, comparada exacta.
+  - Si todo empata, comparten posición (1, 1, 3), y en la primera son **campeones ex aequo**.
+  - **La última semana de una temporada** es la de su último lunes: la semana cuyo lunes siguiente ya cae en
+    otro trimestre (la del 2026-12-28 cierra la 2026-T4).
 
 | Id | Requisito | Aceptación |
 |---|---|---|
@@ -572,6 +580,19 @@ Se guarda como un **libro de movimientos** idempotente (`xp_event` con clave ún
 `usuario + tipo + referencia`): repetir un evento nunca suma dos veces. El nivel es una función
 pura del XP total.
 
+- **Subir** da su XP cuando la entrada pasa a `active`, una vez por semana, con el bonus de la **racha en juego**:
+  la que dejan las semanas selladas más esta, como si clasificara. Es la misma racha con la que se paga el
+  resultado al sellar si clasifica. La **primera entrada de la semana** es la primera que pasa a `active`; hay una
+  por semana.
+- **El XP en vivo no se retira.** Si la entrada se retira o acaba sin clasificar, el XP de subir y el de primera
+  entrada se quedan, y la primera entrada no pasa a otra. Quitar un voto (`RF-VOTE-13`) no resta y volver a votar
+  esa entrada no suma (cuenta el primer voto a cada entrada). Un voto que deja de ser válido (anulado por
+  moderación, o de una entrada retirada o descalificada) conserva su XP y sigue contando para el tope semanal:
+  quien vota limpio no pierde lo ganado por lo que hagan otros, y el fraude se sanciona en moderación (§2.13).
+- **Semana dorada:** duplica el XP de los eventos de esa semana (Anexo B), no el de los logros, que es siempre
+  el de su rareza (sin racha ni semana dorada). Cada importe con bonus se redondea al entero antes de duplicarlo
+  (Anexo G).
+
 **Niveles y rangos.** 20 niveles con curva `150 · (n − 1)^1,6` (Anexo B). Cada pocos niveles cambia
 el **rango** (título visible en la carta): *Excavador de cajones* → *Loopero* → *Sampleador* →
 *Beatmaker* → *Productor* → *Arquitecto del groove* → *Maestro del bounce* → *Jefe de estudio* →
@@ -582,15 +603,26 @@ segunda suma un +10 % al XP de subir y de resultado, hasta +50 %. Saltarse una s
 un **comodín de racha** por temporada (se gasta solo la primera semana que fallas), para que una
 semana mala no destroce meses.
 
+- Cuentan las semanas **selladas**, en el orden de su número (`week.number`, correlativo entre las semanas
+  programadas): un hueco del calendario no rompe nada. **Fallar** es sellar una semana sin una entrada clasificada
+  (sin entrada, sin clasificar, retirada o descalificada).
+- El comodín es el de la temporada de la semana fallada y solo se gasta si hay racha que salvar. La semana
+  salvada **no suma**: la racha se queda como estaba, también para el bonus y para `streak_3`, `streak_8` y
+  `streak_26`. Con el comodín de esa temporada ya gastado, fallar la rompe (vuelve a 0).
+- La **mejor racha** es la más larga que ha tenido la cuenta (el récord del salón de la fama).
+
 **Logros.** Unos 35, en cuatro rarezas (común, raro, épico, legendario), algunos **ocultos** («???»
 con una pista críptica). Catálogo completo en el Anexo C. Desbloquear uno lanza el aviso de logro
 (§3.8.8).
 
-**Oído de oro.** Al sellar, a cada jurado con ≥ 8 votos en la semana se le calcula la correlación
-de Spearman entre sus estrellas y la clasificación final. Con ρ ≥ 0,6 gana XP y cuenta para el logro.
-Premia anticipar el criterio del resto del jurado. Para que nadie se dé la razón a sí mismo, la
-puntuación de cada entrada se recalcula **sin su propio voto** antes de correlacionar. Como el XP
-no influye en la clasificación (`RF-GAME-10`), votar «como la mayoría» no da ventaja a nadie.
+**Oído de oro.** Al sellar, a cada jurado con ≥ 8 votos válidos en la semana se le calcula la correlación
+de Spearman entre sus estrellas y la **puntuación** final de las entradas que votó (la puntuación y no la
+posición, que las entradas sin clasificar no tienen). Con ρ ≥ 0,6 gana XP y cuenta para el logro.
+Premia anticipar el criterio del resto del jurado. Para que nadie se dé la razón a sí mismo, la semana se
+recalcula **como si no hubiera votado**: sin sus votos en la puntuación de cada entrada ni en la media `m` de la
+semana. Las puntuaciones se comparan exactas, sin redondear. Si ρ no está definida (sus estrellas son todas
+iguales, o sin sus votos las puntuaciones empatan todas), no hay oído de oro. Como el XP no influye en la
+clasificación (`RF-GAME-10`), votar «como la mayoría» no da ventaja a nadie.
 
 **Carta de productor.** La identidad de juego del usuario (§3.4.4): avatar, nombre, rango, nivel,
 color de acento, estadísticas y los tres logros elegidos para la vitrina. En el perfil cuelga de su
@@ -1349,15 +1381,17 @@ con su propia firma, §3.1) y las de autenticación, admin y legales, que usan u
   «Legal» va a su lado, separado por un filete (`--bb-stroke-hair`, `--bb-line`), si cabe, y si no,
   debajo y centrado. **Las teclas nunca se cortan ni se esconden con teclado**: entre la última tecla y
   la firma queda siempre `--bar-gap`; si no caben, primero se aprietan sus huecos y después van en su
-  propia fila (de 721 a 1199 px la crónica va además en otra fila, centrada bajo la firma, y nunca pasa
-  de su columna). Va pegada al pie de la ventana también en móvil (firma de 24 px): la firma se ve al
+  propia fila (por debajo de 62 em, unos 992 px con la letra por defecto, la crónica va además en otra fila,
+  centrada bajo la firma; desde 62 em, en la columna de la derecha, como a partir de 1200 px, y nunca pasa de
+  su columna). Va pegada al pie de la ventana también en móvil (firma de 24 px): la firma se ve al
   abrir cualquier pantalla, aunque sea más alta que la ventana. Si la barra pasa del **15 % del alto de
   la ventana** (con teclado en una ventana baja o estrecha: móvil apaisado, escritorio ampliado), se
   despega y va al final de la pantalla **salvo la fila de la firma, que sigue pegada al pie** (el marco mide como poco el alto de la
   ventana más lo que se despega, para que al abrir solo se vea esa fila, entera): la firma se ve siempre
   al abrir (`RF-OTP-01`) y el contenido no queda tapado (WCAG 1.4.10 y 2.4.11). El 15 % vale
-  en cualquier ventana y con cualquier entrada (a 1024×768 con teclado la barra tiene tres filas y se
-  despega; en táctil, en una ventana baja, «Legal» se va al final y la firma se queda). Pegada o no, ningún
+  en cualquier ventana y con cualquier entrada (a 900×700 con teclado la del menú tiene tres filas y se
+  despega; a 1024×768 y 1180×720 tiene dos, 84 px, y va pegada entera; en táctil, en una ventana baja,
+  «Legal» se va al final y la firma se queda). Pegada o no, ningún
   control enfocado queda debajo de ella (su alto real es el margen del foco), el anillo del cursor de sus
   piezas cabe entero en la ventana y, con la barra despegada, al llegar con el foco a sus piezas la
   pantalla va al final. En móvil se centra el contenido de las piezas (pegatina, rótulos y filete), no sus
@@ -1754,7 +1788,8 @@ hasta 968 px, porque ahí la barra lleva más filas). La misma composición apre
 esconder nada**: placas de `--bb-plate-h-low` (de 44 a 70 px, nunca por debajo de `--bb-target`) que
 descuentan lo que la barra mide de más, tarjeta apretada, márgenes de 8 px y el logo ocupando el alto
 que queda, con el lockup a su tamaño. Cabe sin desplazar a 1440×789 (la ventana real de una pantalla de
-1440×900), 1366×657, 1536×730, 1280×720 y 1920×955; a 1440×900 no cambia nada.
+1440×900), 1366×657, 1536×730, 1280×720 y 1920×955, y en la composición intermedia, a 1024×768 y 1180×720
+(con el reloj en la tarjeta, más abajo); a 1440×900 no cambia nada.
 
 **Ventana grande** (≥ 1600 px de ancho o ≥ 1000 px de alto). La composición escala con
 `min(100vw / 1440, 100dvh / 900)`, acotado entre 1 y 1,33 (logo, placas, cuerpos en display, columnas y
@@ -1768,9 +1803,16 @@ discontinua de la barra.
 **Composición intermedia** (de 721 a ~1199 px en horizontal: tabletas apaisadas y escritorio ampliado;
 tamaños de prueba 1024×768, 900×700 y 823×514, que es 1440×900 al 175 %). Dos columnas con la lista
 estrecha de §3.3 (dato y tecla en una segunda línea), el HUD apilado si no cabe, la crónica bajo la firma
-y el lockup estrecho; todas las placas en reposo con el mismo alto y el mismo cuerpo de rótulo. Mover el
-cursor trae a la vista también el panel de ayuda. **Tableta vertical** (de 721 a 1199 px en vertical,
-como 768×1024 y 820×1180): la composición apilada de móvil **escalada con el ancho** (el logo ocupa el
+(al lado desde 62 em, §3.4.1) y el lockup estrecho; todas las placas en reposo con el mismo alto y el mismo
+cuerpo de rótulo. Mover el cursor trae a la vista también el panel de ayuda. **Con la ventana baja (hasta
+859 px de alto)**, el reloj de ronda pasa a la tarjeta, en línea y en el sitio de la onda y del «0:00 /
+1:12», que repiten el play y la duración (como en la tableta vertical): el HUD queda en una fila. La columna
+de modos va a `--bb-space-1` (lo que la separa del HUD, el relleno de la franja de «ELIGE MODO», la
+separación entre placas y la de la ayuda). Así cabe sin desplazar a 1024×768 y 1180×720, también con un
+título largo y la tonalidad larga, con la tarjeta y la ayuda por encima de la línea discontinua y la barra
+entera a la vista (teclas, firma, crédito y pausa). Por encima de 859 px el reloj sigue en el HUD (es el
+alto por debajo del cual, con el reloj en el HUD, el menú ya no cabe a 992 px de ancho). **Tableta
+vertical** (de 721 a 1199 px en vertical, como 768×1024 y 820×1180): la composición apilada de móvil **escalada con el ancho** (el logo ocupa el
 ancho útil, en dos líneas si le da el alto y si no en una; placas de `--bb-plate-h`, que en táctil ceden
 hasta `--bb-target` para caber; lo que sobra de alto, a partes iguales entre el lockup y la tarjeta y entre
 la tarjeta y «ELIGE MODO», nunca arriba), que cabe sin desplazar en táctil; con teclado y ratón, como no
@@ -2309,20 +2351,20 @@ tests de propiedades.
 
 | Módulo | Funciones principales |
 |---|---|
-| `calendar` | `scheduleWeek(lunesLocal, tz)` → instantes UTC de las fronteras; `mondayOf(instante)`, `nextMonday`; `isoWeekLabel` («2026-W41»), `weekSlug` («2026-w41») y `mondayOfSlug`; `seasonOf(lunes)` («2026-T4») |
+| `calendar` | `scheduleWeek(lunesLocal, tz)` → instantes UTC de las fronteras; `mondayOf(instante)`, `nextMonday`; `isoWeekLabel` («2026-W41»), `weekSlug` («2026-w41») y `mondayOfSlug`; `seasonOf(lunes)` («2026-T4») e `isLastWeekOfSeason(lunes)` |
 | `phase` | `phaseOf(semana, now)`; `canSubmit`, `canVote`, `canDownload` (solo en `open`); `countdownOf(semana, now)` → cierre, lo que falta y «hora loca» |
 | `listen` | `listenThresholdMs(duracionMs)` |
 | `scoring` | `bayes(votos, m, C)`; `mean`; `median`; `histogram` |
 | `ranking` | `rank(entradas, votos) → Result[]` con desempates, ex aequo y elegibilidad de podio: una fila por entrada con posición (o `null` sin clasificar), puntuación × 1000, votos, media × 1000, mediana × 2, histograma y puntos de temporada; compara las puntuaciones con productos cruzados enteros (sin redondeo) |
 | `fair` | `fairOrder(entradas, votosPorEntrada, votadasPorUsuario, semilla)` con `fairSeed(semana, usuario \| instante)` (visitantes: el día en Madrid); `newestOrder`; `randomOrder(entradas, semilla)`; `juryQueue(entradas, votos, votadas, semilla, { excluded, skipped })` (sin votadas ni la propia; las saltadas, al final) |
 | `alias` | `battleAlias(entryId, ocupados)` con listas de adjetivos y sustantivos (Anexo I) |
-| `season` | `seasonPoints(posicion, clasificada)`; `seasonStandings(resultados)` |
+| `season` | `seasonPoints(posicion, clasificada)`; `seasonStandings(resultados)` (puntos, victorias, podios, media y posición con ex aequo) y `seasonChampions(tabla)` |
 | `levels` | `xpForLevel(n)`; `levelOf(xp)`; `levelProgress(xp)` (barra del HUD); `rankTitle(nivel)` → **id de rango** (`crateDigger` … `otherPeople`; el texto sale de i18n con `rank.<id>`); `streakBonus` y `streakBonusPercent` |
 | `xp` | `xpFor(evento, contexto)`; `streakOf(historial)` (Fase 7) |
 | `prng` | `hashOf(...partes)`, `sfc32`, `createRng(semilla)` con `next`, `int`, `pick`, `shuffle`; `rngFor(...partes)` para flujos con nombre |
 | `loudness` | `playbackGainDb(lufs)` (solo atenúa) |
-| `achievements` | Catálogo (Anexo C) como datos + `evaluate(evento, contexto) → logros nuevos` |
-| `goldenEar` | `spearman(a, b)`; `goldenEar(votosDelUsuario, resultados)` |
+| `achievements` | Catálogo (Anexo C) como datos (id, rareza, oculto, clave de la pista, eventos que lo miran y fase de su disparador) + `evaluate(evento, contexto) → logros nuevos`; `nightOwlWindow(instante)` y `isRevetllaNight(instante)` en hora de Madrid |
+| `goldenEar` | `spearman(a, b)`; `goldenEar(jurado, votosDeLaSemana)` → votos, ρ y si gana (recalcula la semana sin los votos del jurado, también la media `m`) |
 | `balance` | **Todas** las constantes del Anexo B. Ningún número mágico fuera de este fichero. |
 
 ### 4.6 Audio compartido (`packages/audio`)
@@ -3323,15 +3365,21 @@ arriba, siguiendo el recorrido del usuario: cuenta → sample → subir → vota
 0.1 scaffold ─┬─► F0 fundaciones ─────────────┐
               └─► F1 spike (GO/NO-GO) ────GO──┴─► F2 cuentas ─► F3 semanas ─► F4 participar ─► F5 votar ─► F6 resultados
                                                                                                           │
-                                       BETA CERRADA ◄─────────────────────────────────────────────────────┘
-                                            │
-                     F7 capa de juego ◄─────┼─────► F9 integración OTP y email marketing
-                            │               │
-                     F8 sorpresas           └─────► F10 moderación, legal y lanzamiento
+                     ┌──────────────────────────────┬─────────────────────────────────────────────────────┤
+                     ▼                              ▼                                                     ▼
+              F7 capa de juego          F9 integración OTP y email marketing                       BETA CERRADA
+                     │                              │                                              (en paralelo)
+              F8 sorpresas                          │
+                     │                              │
+                     └──────────────┬───────────────┘
+                                    ▼
+                     F10 moderación, legal y lanzamiento
 ```
 
-F0 y F1 van en paralelo tras el scaffold. F7 y F9 pueden ir en paralelo tras la beta; F8 necesita la
-F7 (logros); F10 cierra.
+F0 y F1 van en paralelo tras el scaffold. Desde el 2026-10-29 (decisión del usuario, «todo hasta el
+lanzamiento») F7 y F9 **no esperan a la beta**: cuelgan de la F6 y avanzan en paralelo con ella, y `main` puede ir
+por delante de producción (desplegar sigue siendo decisión del usuario). F8 necesita la F7 (logros); F10 necesita
+F7–F9 y cierra.
 
 ## 6. Riesgos y mitigaciones
 
@@ -3429,16 +3477,16 @@ no aplica: BeatBattle deja de copiar la web del sello (§3.1).
 
 | Evento | XP | Notas |
 |---|---|---|
-| Subir entrada | 100 | × bonus de racha |
-| Primera entrada de la semana | +25 | La primera de **toda** la semana (como el logro `early_bird`), no la primera del usuario |
-| Votar (primer voto a cada entrada) | 5 | Tope: 40 votos con XP por semana |
-| Jurado completo (todas las entradas, mín. 5) | 50 | — |
+| Subir entrada | 100 | × bonus de la racha en juego (§2.10); una vez por semana, aunque se retire y se vuelva a subir |
+| Primera entrada de la semana | +25 | La primera de **toda** la semana en pasar a `active` (como el logro `early_bird`), no la primera del usuario; se queda aunque se retire |
+| Votar (primer voto a cada entrada) | 5 | Tope: 40 votos con XP por semana. Quitarlo no lo resta y volver a votar no lo suma; anulado, se queda y cuenta para el tope |
+| Jurado completo (todas las entradas, mín. 5) | 50 | Haber votado todas las entradas activas que puede votar (las ajenas), si son 5 o más; una vez por semana |
 | Clasificar | 25 | × bonus de racha |
 | Top 10 / 3.º / 2.º / 1.º | 100 / 250 / 350 / 500 | × bonus de racha; sustituyen a «clasificar» |
 | Oído de oro | 75 | — |
 | Acertar productor (Fase 8) | 15 | Tope: 5 por semana |
-| Logro | Según rareza: 25 / 75 / 150 / 300 | — |
-| Semana dorada | × 2 a todo lo de esa semana | — |
+| Logro | Según rareza: 25 / 75 / 150 / 300 | Sin bonus de racha ni semana dorada |
+| Semana dorada | × 2 a todo lo de esa semana | A los eventos de esta tabla de esa semana (subir, primera entrada, votos, jurado completo, resultado, oído de oro y acertar productor), después de redondear; no a los logros |
 | Bonus de racha | +10 % por semana desde la 2.ª, máx. +50 % | Un comodín por temporada |
 
 **Niveles**: XP acumulado para el nivel `n` = `round50(150 · (n − 1)^1,6)`.
@@ -3511,6 +3559,40 @@ con la pista).
 | `double` 🔒 | Doblete | Ganar dos semanas seguidas | L |
 | `oracle` 🔒 | Oráculo | Oído de oro 3 semanas seguidas | L |
 | `revetlla` 🔒 | Revetlla | Visitar la web la noche del 23 de junio | R |
+
+**Cómo se evalúan** (`evaluate(evento, contexto)` de `packages/rules`; los umbrales, en `balance.ts`):
+
+- **Por eventos.** Cada logro dice qué eventos lo miran: descargar el sample, la entrada que pasa a `active`, el
+  perfil guardado, el voto, compartir una tarjeta, el sellado, el cierre de la temporada, el cambio de XP y, desde la
+  Fase 8 y la 9, los secretos, «Adivina el productor» y la Elección del sello. Uno ya conseguido no se repite y
+  **ningún logro se retira** (como el XP en vivo, §2.10).
+- **Recuentos.** «Entradas» son las semanas con una entrada que llegó a `active` (retirarla después no la
+  descuenta). «Votos» son los que tiene la cuenta, uno por entrada (también los anulados; los quitados, no).
+- **Al subir.** `early_bird` es la primera entrada de la semana (§2.10). `last_minute`, una entrada creada en los 10
+  min anteriores al cierre de envíos: `submit_ends_at − 10 min ≤ submitted_at < submit_ends_at`. `golden_week`, subir
+  en una semana dorada.
+- **Al votar.** `jury_full` sigue la regla del jurado completo del Anexo B: todas las entradas activas ajenas, si
+  son 5 o más.
+- **Al sellar**, con la revisión del snapshot:
+  - `podium` y `win`: top 3 y 1.ª posición, ex aequo incluidos. `win_3`: 3 victorias en total. `double`: 1.º en
+    dos semanas de número consecutivo.
+  - `unanimous`: media aritmética de los votos válidos de su entrada ≥ 4,8, con 10 o más.
+  - `comeback`: por debajo de la mediana de las clasificadas en una semana (`2 · posición > clasificadas + 1`) y top 3
+    en la siguiente por número.
+  - `streak_3`, `streak_8` y `streak_26`: la racha de §2.10 (la semana salvada por el comodín no suma).
+  - `golden_ear`: el oído de oro de esa semana. `oracle`: oído de oro en 3 semanas de número consecutivo.
+  - `challenge`: la entrada marcó en su ficha que cumple el reto extra de la semana (solo se puede si la semana
+    tiene reto) y queda en el top 10. La marca no se enseña a nadie hasta el sellado: distinguiría a una entrada en
+    pleno voto ciego (§1.3).
+- **Franjas horarias, en hora de Madrid** (la de la semana) y con el reloj del servidor, que es quien las comprueba:
+  el del navegador se puede adelantar. `night_owl` pide votar 10 entradas distintas (votos nuevos, no cambios)
+  entre las 03:00 y las 05:00 de una misma noche. `revetlla`, una visita entre las 21:00 del 23 de junio y las 06:00
+  del 24.
+- **El resto.** `profile_done`: avatar, bio y al menos un enlace. `level_20`: el XP total llega al nivel 20, también
+  si lo empuja el XP de otro logro. `season_champ`: campeón o campeón ex aequo (§2.9). Los secretos (Fase 8): `scratch`,
+  7 clics en el logo en 3 s; `konami`, la secuencia ↑↑↓↓←→←→BA; `pad_404`, grabar un bucle con al menos un golpe;
+  `screwed`, mantener Espacio 5 s; `human_metronome`, un tempo marcado con 8 pulsos a ±1 BPM del del sample (sin BPM
+  del sample, no hay logro); `detective`, 5 aciertos en total. `label_pick` (Fase 9): recibir la Elección del sello.
 
 ### Anexo D — Catálogo de efectos de sonido
 
@@ -3643,10 +3725,25 @@ fórmula de Pearson sobre rangos. Casos de prueba: sin empates, `[1,2,3,4,5]` fr
 `[4,4; 4,0; 3,8333; 3,5; 3,9]` → rangos `[5; 3,5; 3,5; 2; 1]` y `[5; 4; 2; 1; 3]` → **ρ = 6/√95 ≈
 0,6156** (la fórmula clásica sin corregir daría 0,625).
 
+**Oído de oro** (`RF-GAME-06`): un jurado vota 8 entradas con `[4, 1, 4, 4, 5, 2, 3, 1]` estrellas, y cada una
+tiene además un voto de otra cuenta: `[4, 1, 3, 3, 2, 3, 1, 1]`. Sin sus votos, `m = 18/8 = 2,25` y las
+puntuaciones son `(5 · 2,25 + v) / 6` → rangos `[8; 2; 6; 6; 4; 6; 2; 2]` frente a los de sus estrellas `[6; 1,5; 6;
+6; 8; 3; 4; 1,5]` → **ρ = 22/√1501 ≈ 0,5678: no gana**. Contando sus propios votos habría salido 69/79 ≈ 0,8734:
+por eso se quitan. Si a la 7.ª le hubiera dado 2 estrellas en vez de 3, **ρ = 24/√1482 ≈ 0,6234: gana**.
+
 **Niveles.** `xpNivel(n) = 50 · round(150 · (n − 1)^1,6 / 50)`; `nivel(xp)` = mayor `n ≤ 20` con
 `xpNivel(n) ≤ xp`.
 
-**Racha.** `bonus = min(0,5, 0,1 · (racha − 1))` para `racha ≥ 2`.
+**Racha.** `bonus = min(0,5, 0,1 · (racha − 1))` para `racha ≥ 2`. Escenario de `RF-GAME-04`: clasifica las
+semanas 1–4 de una temporada (racha 4, bonus 30 %), falla la 5.ª (gasta el comodín: sigue en 4), falla la 6.ª (se
+rompe: 0; la mejor sigue en 4) y, si clasifica la 7.ª, empieza otra vez en 1. Si en vez de fallar la 6.ª la
+clasifica, la racha pasa a 5: la semana salvada no cuenta.
+
+**XP de un evento.** `xp = dorada · ⌊(base · (100 + b) + 50) / 100⌋`, con `b` el bonus de racha en puntos
+porcentuales (solo en subir y en el resultado; 0 en el resto) y `dorada` = 2 en semana dorada y 1 si no: el bonus
+se redondea al entero con las mitades hacia arriba y la semana dorada duplica el entero. Subir con racha 4 →
+100 · 1,3 = **130** (260 en dorada); clasificar con racha 2 → 25 · 1,1 = 27,5 → **28** (56 en dorada); ganar con
+racha 6 → 500 · 1,5 = **750**; 50 votos en una semana → 40 · 5 = **200** como mucho (`RF-GAME-03`).
 
 **Ganancia de sonoridad.** `gananciaDb = min(0, −14 − lufs)`.
 
@@ -3711,6 +3808,13 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.97 | **Tarea 7.5** (huecos G8 y G4, la parte de la regla, del plan 07). Anexo C, «Cómo se evalúan»: por eventos, sin repetir ni retirar ningún logro; qué cuentan «entradas» y «votos»; la ventana de `last_minute` con `submitted_at`; `comeback` por debajo de la mediana de las clasificadas; `double` y `oracle` por semanas de número consecutivo; `challenge`, marcar el reto extra en la ficha y quedar en el top 10, con la marca oculta hasta el sellado (§1.3). **Las franjas horarias de los logros van en hora de Madrid y con el reloj del servidor** (`night_owl`: 10 votos a entradas distintas entre las 03:00 y las 05:00 de una misma noche; `revetlla`: de las 21:00 del 23 de junio a las 06:00 del 24). Los umbrales de los secretos de la Fase 8. §4.5: qué lleva el catálogo y `nightOwlWindow` e `isRevetllaNight`. |
+| 2026-10-29 | 0.6.96 | **Tarea 7.4** (hueco G10 del plan 07). §2.9: entra en la clasificación de la temporada quien tiene al menos una entrada clasificada en una semana sellada (quien solo tiene semanas sin clasificar, no); victorias y podios cuentan los ex aequo; la puntuación media es la de la puntuación del snapshot de sus entradas clasificadas, comparada exacta; con todo empatado comparten posición y en la primera son campeones ex aequo. La última semana de una temporada es la de su último lunes. §4.5: `seasonStandings`, `seasonChampions` e `isLastWeekOfSeason`. |
+| 2026-10-29 | 0.6.95 | **Tarea 7.3** (hueco G9 del plan 07). §2.10: el oído de oro correlaciona con la **puntuación** de las entradas que votó (no con la posición, que las sin clasificar no tienen), con ≥ 8 votos válidos, y recalcula la semana **como si no hubiera votado**: sin sus votos tampoco en la media `m`. Puntuaciones exactas, sin redondear; sin ρ definida no hay oído de oro. §4.5: `goldenEar(jurado, votosDeLaSemana)`. Anexo G: el caso de `RF-GAME-06` (no gana con ρ = 22/√1501, habría ganado con sus votos; gana cambiando una estrella). |
+| 2026-10-29 | 0.6.94 | **Tarea 7.2.** §2.10 y Anexo G: la racha cuenta las semanas selladas por su número (`week.number`), así que un hueco del calendario no la rompe; fallar es sellar una semana sin entrada clasificada. El comodín es el de la temporada de la semana fallada, solo se gasta si hay racha que salvar y la semana salvada no suma (ni al bonus ni a `streak_3/8/26`). La mejor racha es la más larga. El escenario de `RF-GAME-04`, paso a paso. |
+| 2026-10-29 | 0.6.93 | **Tarea 7.1** (huecos G3, G11 y G12 del plan 07). §2.10, Anexo B y Anexo G: subir da su XP al pasar a `active`, una vez por semana, con la **racha en juego** (la de las semanas selladas más esta, la misma con la que se paga el resultado); la primera entrada de la semana es la primera en pasar a `active`. **El XP en vivo no se retira**: ni al retirar la entrada o no clasificar, ni al quitar un voto (volver a votar no suma), ni cuando un voto queda anulado (sigue contando para el tope). La semana dorada duplica los eventos del Anexo B de esa semana, no los logros, que no llevan racha ni dorada. Redondeo: el bonus, al entero con las mitades hacia arriba, y la dorada duplica el entero. El jurado completo cuenta las entradas activas ajenas (5 o más). |
+| 2026-10-29 | 0.6.92 | §5 (hueco G14 del plan 07): el texto y el grafo ya no ponen la F7 y la F9 tras la beta. Desde el 2026-10-29 (decisión del usuario, «todo hasta el lanzamiento») cuelgan de la F6 y avanzan en paralelo con la beta; la F8 sigue tras la F7 y la F10, tras la F7–F9. |
+| 2026-10-29 | 0.6.91 | **Tarea 3.21 (jurado visual de la Fase 3, J1).** §3.8.3, composición intermedia: con la ventana baja (de 721 a 1199 px y hasta 859 de alto), el reloj de ronda pasa a la tarjeta en el sitio de la onda y del tiempo (el HUD queda en una fila) y la columna de modos va a `--bb-space-1`. §3.4.1: la crónica va al lado de la firma desde 62 em (antes, siempre en su fila por debajo de 1200 px): la barra del menú tiene dos filas (84 px) y no se despega a 1024×768 ni a 1180×720. El menú cabe sin desplazar a esos dos tamaños con los datos normales y con `?largo`; lo demás (desde 1200 px, la tableta vertical y el móvil) no cambia. Acta en `docs/planning/evidence/f3/jurado/`. |
 | 2026-10-16 | 0.6.90 | §2.14 (arreglo, `RF-ADM-01`): en un sample nuevo, las subidas que empiezan mientras se firma la primera esperan su id. Elegir la portada antes de que volviera la firma del audio daba dos ids y «Crear el sample» decía «La parte «original» no está subida» (lo destapó la CI en `weeks.spec.ts`). |
 | 2026-10-16 | 0.6.89 | §4.19.1, §7: los emails salen de `justsomeotherpeople@gmail.com`, el Gmail del sello (decisión del usuario), con `MAIL_DAILY_LIMIT` de 450: `otherpeople.es` no tiene Workspace. |
 | 2026-10-15 | 0.6.88 | §2.14: el selector de la semana dorada del calendario lleva una línea que explica qué es y que, sin la capa de juego (Fase 7), de momento solo se guarda (petición del usuario). |

@@ -156,7 +156,10 @@
   white-space: nowrap;
 }
 
-/* El reloj del HUD, sin caja propia (en la tableta vertical se esconde: va en la tarjeta). */
+/*
+ * El reloj del HUD, sin caja propia (en la tableta vertical y en la composición intermedia baja se esconde:
+ * va en la tarjeta).
+ */
 .hudClock {
   display: contents;
 }
@@ -268,10 +271,12 @@
  *
  * A 900 px de alto la maqueta queda como está; por debajo de unos 640 ya no cabe y se desplaza.
  *
- * Por debajo de 1200 px de ancho, la ventana es baja hasta los 968 px de alto: ahí la barra lleva la
- * crónica en su fila y, con teclado, las teclas en otra (`ControlsBar`), hasta 69 px más que la de la
- * maqueta (127 frente a 58), así que el alto que le queda al menú es el de una ventana de 899 px. A
- * 721 × 900 la composición de la maqueta se desplazaba 23 px; esta, que ya era la de 721 × 899, cabe.
+ * Por debajo de 1200 px de ancho, la ventana es baja hasta los 968 px de alto: ahí la barra puede llevar
+ * la crónica en su fila (por debajo de 62 em) y, con teclado, las teclas en otra (`ControlsBar`), hasta
+ * 69 px más que la de la maqueta (127 frente a 58), así que el alto que le queda al menú es el de una
+ * ventana de 899 px. A 721 × 900 la composición de la maqueta se desplazaba 23 px; esta, que ya era la de
+ * 721 × 899, cabe. Hasta 859 px de alto, además, el reloj pasa a la tarjeta (más abajo, «Composición
+ * intermedia baja»).
  */
 @media (min-width: 721px) and (max-height: 899px),
   (min-width: 721px) and (max-width: 1199px) and (max-height: 968px) {
@@ -373,7 +378,7 @@
    *
    * `--menu-bar-extra`: lo que la barra pegada mide de más que la de la maqueta (su alto real,
    * `--controls-pinned-h`, frente a `--bb-controls-h`): con teclado, las teclas en su fila si no caben al
-   * lado de la firma y, por debajo de 1200 px, la crónica en la suya (`ControlsBar`). Las placas se lo
+   * lado de la firma y, por debajo de 62 em, la crónica en la suya (`ControlsBar`). Las placas se lo
    * reparten entre las seis (cinco en reposo y la elegida, `--bb-plate-on-scale` veces), sin bajar del
    * objetivo táctil: a 1280 × 720 la barra lleva las teclas en su fila (84 px) y el menú se desplazaba
    * 6 px. Despegada (0), no cuenta. Se reparten también el sitio de la línea discontinua de la barra
@@ -421,6 +426,46 @@
     --menu-lockup-compact-max: calc(27rem - var(--bb-space-2));
     max-width: var(--menu-lockup-compact-max);
     min-height: 0;
+    margin-top: var(--bb-space-1);
+  }
+}
+
+/*
+ * ── Composición intermedia baja (de 721 a 1199 px de ancho y hasta 859 de alto; §3.8.3 v0.6.91) ──────
+ * A 1024 × 768 el menú no cabía (jurado de la 3.21, J1): el reloj del HUD (145 px de alto) y la lista
+ * estrecha (placas de dos líneas) empujaban la tarjeta y la ayuda bajo la línea discontinua de la barra, y la
+ * barra, con tres filas, pasaba del 15 % y se despegaba: quedaban fuera las teclas, el crédito y la pausa.
+ * Aquí, como en la tableta vertical:
+ *
+ * - El reloj de ronda pasa a la tarjeta, en el sitio de la onda (`StageCard`): el HUD queda en una fila (el
+ *   jugador y las teselas, o «Pulsa para unirte» y el sonido) y el menú gana unos 80 px.
+ * - La columna de modos va a `--bb-space-1`: lo que la separa del HUD, el relleno de la franja de «ELIGE
+ *   MODO» (el del móvil), la separación entre placas (la de la ventana más baja) y la de la ayuda.
+ * - La barra lleva la crónica al lado de la firma desde 62 em (`ControlsBar`): dos filas, 84 px, pegada.
+ *
+ * Así cabe sin desplazar a 1024 × 768 y a 1180 × 720, también con un título largo y la tonalidad larga. El
+ * umbral es el alto por debajo del cual, con el reloj en el HUD, el menú ya no cabe a 992 px de ancho (855);
+ * por encima queda la ventana baja con el reloj en el HUD (cabe a 1024 × 900 y 1100 × 900). Nunca coincide
+ * con la tableta vertical, que a 721 px de ancho empieza en 961 de alto.
+ */
+@media (min-width: 721px) and (max-width: 1199px) and (max-height: 859px) {
+  .hudClock {
+    display: none;
+  }
+
+  .modes {
+    padding-top: var(--bb-space-1);
+  }
+
+  .head {
+    padding-block: var(--bb-space-1);
+  }
+
+  .plates {
+    gap: var(--bb-space-1);
+  }
+
+  .help {
     margin-top: var(--bb-space-1);
   }
 }

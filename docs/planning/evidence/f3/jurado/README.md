@@ -1,6 +1,7 @@
 # Acta del jurado visual de la Fase 3 (tarea 3.21)
 
-> **Fecha:** 2026-10-10 · **Rama:** `feat/3.20-e2e-jurado` · **Guía:** v0.6.42 → **v0.6.47** ·
+> **Fecha:** 2026-10-10 (J1, 2026-10-29) · **Rama:** `feat/3.20-e2e-jurado` (J1: `fix/3.21-menu-1024`) ·
+> **Guía:** v0.6.42 → **v0.6.47** (J1: **v0.6.91**) ·
 > **Requisito:** `RD-VIS-02` (e) sobre las pantallas nuevas de la fase:
 > - la home viva (menú con la semana real, pantalla de título, calendario vacío y carga);
 > - la ficha del drop `/semana/:slug` y el modal de las bases;
@@ -12,9 +13,9 @@
 > **Resultado:**
 > - **Marca:** ✅ al tercer pase.
 > - **Accesibilidad:** ✅ al tercer pase.
-> - **Juego:** ✅ al sexto pase **con la excepción de la n.º 1**, que está **pendiente de la conformidad del usuario**. Sin esa conformidad, la lente queda ❌ solo por esa.
+> - **Juego:** ✅. Al sexto pase quedaba la excepción n.º 1 (J1, el menú a 1024 × 768); **se corrigió después, en esta misma tarea** (2026-10-29, guía v0.6.91), sin excepciones pendientes.
 >
-> Todas las demás altas y medias están corregidas y verificadas. Las bajas que siguen abiertas llevan su motivo.
+> Todas las altas y medias están corregidas y verificadas. Las bajas que siguen abiertas llevan su motivo.
 
 ## Cómo se juzgó
 
@@ -41,7 +42,7 @@ Las capturas de esta carpeta son las del último pase.
 | Lente | 1.er pase | 2.º pase | 3.er pase | 4.º pase | 5.º pase | 6.º pase |
 |---|---|---|---|---|---|---|
 | **Marca** (paleta, firma, «Lo que nunca se imita», granate, §1.3) | ❌ 1 · 4 · 7 | ❌ (dos medias nuevas: el signo ♯ y el título de la revelación) | ✅ | — | — | — |
-| **Juego** (maquetas, menú de recreativa) | ❌ 2 · 11 · 8 | ❌ (J1 y seis medias, tres nuevas con el título largo) | ❌ (J31 alta y J32 media, con la tonalidad larga) | ❌ (J34, regresión alta del arreglo de J31) | ❌ (J37 alta, J38 y J39 medias) | ✅ con la excepción de la n.º 1 (pendiente de la conformidad del usuario; sin ella, ❌ solo por esa) |
+| **Juego** (maquetas, menú de recreativa) | ❌ 2 · 11 · 8 | ❌ (J1 y seis medias, tres nuevas con el título largo) | ❌ (J31 alta y J32 media, con la tonalidad larga) | ❌ (J34, regresión alta del arreglo de J31) | ❌ (J37 alta, J38 y J39 medias) | ✅ con la excepción de la n.º 1; J1 se corrigió después (2026-10-29): ✅ sin excepciones |
 | **Accesibilidad** (WCAG 2.2 AA, `RD-VIS-05`, teclado) | ❌ 3 · 7 · 10 | ❌ (dos medias nuevas: A21 y A22) | ✅ | — | — | — |
 
 - Las cifras son hallazgos altos · medios · bajos.
@@ -71,7 +72,7 @@ g < 0,45·r y b < 0,6·r, en la primera ventana; techo 24,5 % a 1440). Medido so
 
 | # | Hallazgo (lente · gravedad) | Qué se hizo | Verificación |
 |---|---|---|---|
-| J1 | El menú no cabe a 1024 × 768: la tarjeta crece, la barra se despega y sus teclas, el crédito y la pausa quedan fuera de la primera vista (juego · alta) | **No se corrige en esta fase: es una excepción** (ver «Excepción», abajo) | `menu-1024` |
+| J1 | El menú no cabe a 1024 × 768: la tarjeta crece, la barra se despega y sus teclas, el crédito y la pausa quedan fuera de la primera vista (juego · alta) | **Corregido el 2026-10-29** (§3.8.3 y §3.4.1, v0.6.91; ver «J1, el menú a 1024 × 768», abajo). De 721 a 1199 px y hasta 859 de alto, el reloj de ronda pasa a la tarjeta en el sitio de la onda (el HUD queda en una fila) y la columna de modos va a `--bb-space-1`. Desde 62 em la crónica va al lado de la firma: la barra del menú tiene dos filas (84 px) y va pegada entera | Antes: `menu-1024`. Después: `menu-1024-arreglo`, `menu-largo-1024-arreglo`, `menu-largo-1024-tactil-arreglo`, `menu-largo-1180-arreglo`, `menu-largo-1180-ajustes-arreglo`. Sin cambios: `menu-largo-1280-arreglo`, `menu-1440-arreglo`. E2E «composición intermedia baja» y 1024 × 768 y 1180 × 720 en los de encaje del menú, con `/dev/menu?largo` (`fit.spec.ts`), y «barra pegada» (`controls-bar.spec.ts`) |
 | J2 | Con el calendario vacío, a 390 × 844 el formulario «Avísame» alargaba la tarjeta y la placa 06 quedaba bajo la barra (juego · alta) | Formulario compacto en una fila (`DropAlertForm compact`), con el rótulo para el lector (`labelHidden`) y el ejemplo «Tu email». En los teléfonos bajos se pliega el título del aviso | `vacio-390`; E2E de encaje |
 | J3 | Con la semana abierta, el cursor 1P empezaba en Jurado (juego · media) | `MainMenu`: el cursor sigue a la primera opción disponible hasta que la persona lo mueve | `menu-1440`. Que empiece en Jurado mientras carga y pase a Jugar al llegar los datos es lo acordado aquí, no un hallazgo |
 | J4 · A13 | «Licencia de uso» parecía un rótulo con un hueco vacío (juego · media) | La licencia es una sección con su `h2` y su texto | `ficha-1440` |
@@ -153,32 +154,61 @@ g < 0,45·r y b < 0,6·r, en la primera ventana; techo 24,5 % a 1440). Medido so
 | A31 | «Revisa los chops 1» con un solo chop | Corregido después del 3.er pase, con las formas `invalidList_one` e `invalidList_other`. La lente no lo ha vuelto a mirar |
 | A32 | El aviso de guardar repetía la regla genérica | Después del 3.er pase, el aviso dice «el motivo está bajo su fila». La lente no lo ha vuelto a mirar |
 
-## Excepción: J1, el menú a 1024 × 768 (PENDIENTE DE CONFORMIDAD DEL USUARIO)
+## J1, el menú a 1024 × 768: corregida en la tarea 3.21
 
-**Qué pasa** (`menu-1024`):
-- A 1024 × 768 el menú principal no cabe sin desplazar: la tarjeta de la semana y el panel de ayuda acaban
-  bajo la línea discontinua de la barra.
-- La barra se despega: solo se ve la firma, y quedan fuera de la primera vista las teclas, «Inserta tu beat · Crédito» y la pausa.
-- Con datos reales (chips largos, título largo) la tarjeta crece todavía más que con los de la maqueta.
+Al cerrar el sexto pase quedó como excepción, pendiente de la conformidad del usuario. Se corrigió el
+2026-10-29, en esta misma tarea (rama `fix/3.21-menu-1024`, guía v0.6.91). Ya no hay nada pendiente: la
+lente de juego queda ✅ sin excepciones.
 
-**Por qué es una excepción:**
-- El desborde viene de la composición intermedia de la Fase 0. A 1024 × 768, la barra con la crónica en su fila
-  y las teclas en otra mide más que la de la maqueta.
-- Esta fase no lo ha empeorado. Con el título largo, la tarjeta acaba donde con el corto.
-- Se probaron arreglos en esta fase y se revirtieron: rompían otras composiciones que ya estaban verificadas.
-- Arreglarlo es rehacer la composición de 721–1199 px para la ventana baja, con sus E2E de encaje. No cabe en esta fase.
+**Qué pasaba** (`menu-1024`):
+- A 1024 × 768 el menú principal no cabía sin desplazar: la tarjeta de la semana y el panel de ayuda acababan
+  bajo la línea discontinua de la barra (a 741 px, con la línea a 703).
+- La barra se despegaba: con las teclas en una fila, la firma en otra y la crónica en una tercera medía 127 px,
+  más del 15 % de la ventana. Al abrir solo se veía la firma; las teclas, «Inserta tu beat · Crédito» y la
+  pausa quedaban fuera de la primera vista.
+- Con datos reales (el título largo y «Fa sostenido menor») la tarjeta crecía todavía más. A 1180 × 720 y
+  1100 × 768 pasaba lo mismo (se desplazaba 156 y 115 px).
 
-**Propuesta:** dejar J1 como alta abierta, con una tarea propia: «encaje del menú a 1024 × 768 con datos reales»,
-con 1024 × 768 y `/dev/menu?largo` en los E2E de encaje del menú.
+**Por qué no bastaba con apretar:** el reloj del HUD mide 145 px de alto y, de 721 a 1199 px, la lista de
+modos es estrecha (dato y tecla en una segunda línea: placas de 62 px). Aun con la barra en dos filas, a
+1024 × 768 la columna de modos necesitaba unos 550 px y quedaban 511; a 1180 × 720, 463.
 
-**Estado:** la lente de juego da el ✅ **solo con esta excepción aceptada**. Falta la conformidad del usuario.
-Hasta que llegue, la lente de juego queda ❌ por J1 y la tarea 3.21 no se puede cerrar.
+**Qué se hizo** (composición intermedia baja, de 721 a 1199 px de ancho y hasta 859 de alto; §3.8.3):
+- **El reloj de ronda pasa a la tarjeta**, en línea y en el sitio de la onda y del «0:00 / 1:12», como en la
+  tableta vertical. La tarjeta mide lo mismo y el HUD queda en una fila (el jugador y las teselas): el menú
+  gana unos 80 px. El vinilo, los chips, el reto y las entradas se quedan.
+- **La columna de modos va a `--bb-space-1`**: lo que la separa del HUD, el relleno de la franja de «ELIGE
+  MODO» (el del móvil), la separación entre placas y la de la ayuda.
+- **La barra** (§3.4.1): desde 62 em (992 px con la letra por defecto) la crónica va al lado de la firma,
+  como a partir de 1200 px. La del menú tiene dos filas (teclas; firma y crónica con su pausa), mide 84 px
+  (el 10,9 % a 1024 × 768) y va pegada entera. Por debajo de 62 em, o con la letra del navegador grande, sigue
+  en su fila.
+- Por encima de 859 px de alto el reloj sigue en el HUD: con él, el menú cabe desde unos 855 px a 992 de ancho
+  y desde unos 845 a 1024 (1024 × 900 y 1100 × 900 siguen como estaban, ahora con la barra en dos filas).
+
+**Resultado** (medido con `/dev/menu` y `/dev/menu?largo`):
+- A 1024 × 768 y 1180 × 720 cabe sin desplazar, con los datos de la maqueta y con los largos. La tarjeta y la
+  ayuda acaban en la línea discontinua (676 y 628 px), y la barra se ve entera: teclas, firma, crédito y pausa.
+- Recorriendo las seis placas con el teclado, cada una (con su anillo) queda entera por encima de la barra.
+  También a 1024 × 768 táctil (la tableta apaisada: barra de una fila, 58 px).
+- Granate a 1024 × 768: 14,8 % (antes, 16,1 % con los mismos datos).
+- 900 × 700 y 823 × 514 (por debajo de 62 em) mejoran: la barra sigue despegada, como dice §3.4.1, pero el
+  reloj en la tarjeta deja el HUD en una fila. A 900 × 700 el menú acaba sobre la fila de la firma.
+- **Ningún otro tamaño cambia.** Capturas de antes y después de `/dev/menu` y `/dev/menu?largo` a 1440 × 900,
+  1440 × 789, 1366 × 657, 1920 × 1080, 1280 × 720, 768 × 1024 y 820 × 1180 táctiles, y 414 × 736, 390 × 844,
+  375 × 667, 360 × 640 y 320 × 568 táctiles. Las medidas (barra, tarjeta, ayuda, placas, firma, crónica y
+  desplazamiento) son las mismas. Píxel a píxel, los teléfonos y las tabletas verticales son idénticos; en
+  escritorio solo cambia el giro del vinilo.
 
 ## Capturas
 
 | Fichero | Qué enseña |
 |---|---|
-| `menu-1440`, `menu-1024`, `menu-390` | Menú con la semana real (título largo y «Fa sostenido menor») |
+| `menu-1440`, `menu-1024`, `menu-390` | Menú con la semana real (título largo y «Fa sostenido menor»). `menu-1024` es el de antes del arreglo de J1 |
+| `menu-1024-arreglo`, `menu-largo-1024-arreglo` | J1 corregida: `/dev/menu` y `/dev/menu?largo` a 1024 × 768, con el reloj en la tarjeta y la barra entera |
+| `menu-largo-1024-tactil-arreglo` | Lo mismo a 1024 × 768 táctil (la tableta apaisada: la barra en una fila) |
+| `menu-largo-1180-arreglo`, `menu-largo-1180-ajustes-arreglo` | `/dev/menu?largo` a 1180 × 720, y con AJUSTES elegida (la última placa, entera sobre la barra) |
+| `menu-largo-1280-arreglo`, `menu-1440-arreglo` | Tamaños que no cambian con el arreglo de J1 (1280 × 720 y 1440 × 900) |
 | `menu-largo-1440`, `menu-largo-1280` | `/dev/menu?largo`: la tarjeta acaba sobre la barra (J38) |
 | `menu-cargando-1440`, `menu-cargando-390` | Mientras llega la semana (J39 y J40) |
 | `vacio-1440`, `vacio-390` | Calendario vacío con el formulario compacto |
