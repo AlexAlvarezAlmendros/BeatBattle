@@ -205,11 +205,15 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'salon-de-la-fama',
-              handle: handle('public', interior('hallOfFame', 'pages.hallOfFame.title')),
-              lazy: page(
-                () => import('../features/archive/HallOfFamePage'),
-                (m) => m.HallOfFamePage,
+              // ← → recorren los campeones semana a semana (§3.8.14, tarea 7.25).
+              handle: handle(
+                'public',
+                interior('hallOfFame', 'pages.hallOfFame.title', ['winners', 'back', 'sound']),
               ),
+              lazy: async () => {
+                const m = await import('../features/archive/HallOfFamePage')
+                return { Component: m.HallOfFamePage, loader: m.hallOfFameLoader }
+              },
             },
             {
               path: 'temporada/:id',

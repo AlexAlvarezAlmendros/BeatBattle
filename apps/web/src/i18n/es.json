@@ -457,7 +457,38 @@
     },
     "hallOfFame": {
       "title": "Salón de la fama",
-      "summary": "Aquí irán los ganadores, los campeones y los récords."
+      "summary": "Ganadores, campeones y récords: todo sale de las semanas selladas.",
+      "archive": "Ver el archivo",
+      "currentSeason": "Temporada {season}",
+      "records": {
+        "title": "Récords",
+        "mostWins": "Más victorias",
+        "longestStreak": "Racha más larga",
+        "bestScore": "Mejor puntuación",
+        "mostVotesCast": "Más votos emitidos",
+        "wins_one": "{count} victoria",
+        "wins_other": "{count} victorias",
+        "weeks_one": "{count} semana",
+        "weeks_other": "{count} semanas",
+        "votes_one": "{count} voto",
+        "votes_other": "{count} votos",
+        "seeEntry": "Ver la entrada",
+        "none": "Todavía sin récord."
+      },
+      "winners": {
+        "title": "Campeones semana a semana",
+        "count_one": "{count} semana",
+        "count_other": "{count} semanas",
+        "none": "Todavía no se ha sellado ninguna semana.",
+        "week": "Semana {number}"
+      },
+      "champions": {
+        "title": "Campeones de temporada",
+        "kicker_one": "Campeón de temporada",
+        "kicker_other": "Campeones ex aequo",
+        "noneKicker": "Sin campeones todavía",
+        "none": "Ninguna temporada se ha cerrado aún. Esta es la que está en juego:"
+      }
     },
     "season": {
       "title": "Temporada",
@@ -1647,6 +1678,7 @@
       "share": "Compartir",
       "replay": "Ceremonia",
       "flip": "Girar carta",
+      "winners": "Ganadores",
       "glyph": {
         "up": "↑",
         "upLabel": "Flecha arriba",
@@ -2411,5 +2443,8 @@
       "description": "Visita la web la noche del 23 de junio.",
       "hint": "La noche más corta del año."
     }
+  },
+  "season": {
+    "label": "T{quarter} de {year}"
   }
 }
