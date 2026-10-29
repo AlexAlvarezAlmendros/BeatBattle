@@ -82,7 +82,8 @@ const columns = {
   showcase: producerProfile.showcase,
 }
 
-function parseLinks(raw: string): ProfileLinks {
+/** Los enlaces guardados (`producer_profile.links`, JSON), solo los de los sitios conocidos. */
+export function parseLinks(raw: string): ProfileLinks {
   try {
     const value = JSON.parse(raw) as Record<string, unknown>
     const links: ProfileLinks = {}

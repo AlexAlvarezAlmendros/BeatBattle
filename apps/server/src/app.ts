@@ -247,6 +247,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     publicUrl: config.publicUrl,
     newId,
     cronSecret: config.cronSecret,
+    gameReprocess: config.gameReprocess,
     cardSecret: config.auth.secret,
     drain: drainDeps,
     weeks,
@@ -255,7 +256,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     entryStorage,
   })
   // El buzón de los E2E: solo en test, nunca en desarrollo ni en producción.
-  if (config.env === 'test') testingRoutes(app, mailer, db)
+  if (config.env === 'test') testingRoutes(app, mailer, db, newId)
   // Spike de Cloudinary (tarea 1.7): solo fuera de producción.
   if (config.env !== 'production')
     storageSpikeRoutes(app, storage, {

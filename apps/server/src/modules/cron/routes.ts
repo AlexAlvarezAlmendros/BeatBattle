@@ -12,6 +12,7 @@ import type { AlertsService } from '../alerts/service'
 import { type EntriesTickResult, entriesTick } from '../entries/cleanup'
 import type { EntriesService } from '../entries/service'
 import { scheduleProgressEmails } from '../game/progress'
+import { type ReprocessSummary, reprocessDone, reprocessGame } from '../game/reprocess'
 import { type MondayResult, scheduleMondayEmails } from '../results/monday'
 import { closeDueSeasons } from '../seasons/closing'
 import type { EntryStorage } from '../storage/entries'
@@ -24,6 +25,11 @@ import type { WeeksService } from '../weeks/service'
 const TICK_LEASE_MS = 5 * 60 * 1000
 
 export interface TickResult {
+  /**
+   * El reprocesado de la capa de juego (tarea 7.16): solo con `BB_GAME_REPROCESS` y hasta que termina una vez;
+   * `null` si no toca.
+   */
+  gameReprocess: ReprocessSummary | null
   sealed: string[]
   /** Temporadas que el `tick` ha dado por cerradas, con sus campeones (tarea 7.11, hueco G7). */
   closedSeasons: string[]
@@ -45,6 +51,8 @@ export interface TickResult {
 export interface CronDeps extends ScheduleDeps {
   db: Db
   cronSecret: string | null
+  /** Paso opcional: reprocesar la capa de juego una vez (`BB_GAME_REPROCESS`, apagado por defecto). */
+  gameReprocess?: boolean
   /** Firma de la tarjeta de resultado del Lunes de batalla. */
   cardSecret: string
   drain: DrainDeps
@@ -75,6 +83,7 @@ export function cronRoutes(app: FastifyInstance, deps: CronDeps): void {
     const holder = deps.newId()
     const result = await withLease(deps.db, { name: 'tick', holder, ttlMs: TICK_LEASE_MS, now }, async () => {
       const out: TickResult = {
+        gameReprocess: null,
         sealed: [],
         closedSeasons: [],
         mondayEmails: { monday: 0, drop: 0, results: 0 },
@@ -94,6 +103,12 @@ export function cronRoutes(app: FastifyInstance, deps: CronDeps): void {
           req.log.error({ err: error, task: name }, 'tarea del tick fallida')
         }
       }
+      // Antes de sellar: así lo que ya pasó (el campeón de una temporada que cierra el `tick`) lleva el instante de su
+      // hecho y no el de ahora. Una sola vez; después, no hace nada aunque siga encendido.
+      await step('gameReprocess', async () => {
+        if (!deps.gameReprocess || (await reprocessDone(deps.db))) return
+        out.gameReprocess = await reprocessGame({ db: deps.db, now, newId: deps.newId, apply: true })
+      })
       await step('sealWeeks', async () => {
         out.sealed = await sealDueWeeks(deps.db, { now, holder })
         // Con todo sellado, las temporadas cuyo trimestre ha acabado (sin semana el último lunes, §2.9).

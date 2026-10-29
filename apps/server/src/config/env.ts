@@ -62,6 +62,11 @@ const EnvSchema = z.object({
   FFMPEG_PATH: z.string().optional(),
   /** Secreto de `/api/cron/tick` (§4.12): Vercel Cron y GitHub Actions lo mandan como `Bearer`. */
   CRON_SECRET: z.string().min(32, { error: 'debe tener al menos 32 caracteres' }).optional(),
+  /**
+   * Paso opcional del `tick` (§4.12, tarea 7.16): reprocesa la capa de juego una vez (lo que ya pasó antes de que
+   * existiera). Apagado por defecto; en producción, solo con la confirmación del usuario y para un despliegue.
+   */
+  BB_GAME_REPROCESS: bool.default('0'),
   /** Entorno de Vercel (`production`, `preview`, `development`): las previews también van con NODE_ENV=production. */
   VERCEL_ENV: z.string().optional(),
   /** Email (§4.19.1): Mailpit en local (`smtp://127.0.0.1:1025`); nunca en producción ni en preview. */
@@ -122,6 +127,8 @@ export interface AppConfig {
   fakeStorageDir: string | null
   /** Secreto de `/api/cron/tick`; sin él la ruta responde 503 (§4.12). */
   cronSecret: string | null
+  /** El `tick` reprocesa la capa de juego una vez (`BB_GAME_REPROCESS`, tarea 7.16); apagado por defecto. */
+  gameReprocess: boolean
   /** Email (§4.19.1). */
   mail: MailConfig
   /** Cuentas (§4.9). */
@@ -364,6 +371,7 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
         : null,
     fakeStorageDir: e.BB_FAKE_STORAGE ?? null,
     cronSecret: e.CRON_SECRET ?? null,
+    gameReprocess: truthy(e.BB_GAME_REPROCESS),
     auth: {
       secret: e.BETTER_AUTH_SECRET ?? DEV_AUTH_SECRET,
       secureCookies: production,
