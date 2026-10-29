@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.100 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.101 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -3032,8 +3032,13 @@ Referencias: OWASP ASVS nivel 2 y las chuletas de autenticación, sesiones y sub
   - **Registro de datos de la cuenta** (`modules/account`): cada módulo que guarda datos personales dice
     qué exporta y qué borra. Hoy: la cuenta de Better Auth (sesiones con IP y navegador, métodos de
     entrada sin tokens ni contraseña, verificaciones pendientes), el perfil (redirecciones de nombre y
-    avatar) y el email (preferencias, historial de consentimientos, cola y suscripción a la alerta con la
-    misma dirección). Entradas, votos, XP y logros salen ya como listas vacías y cada fase pone su módulo.
+    avatar), el email (preferencias, historial de consentimientos, cola y suscripción a la alerta con la
+    misma dirección), las semanas (bases aceptadas, descargas, lo ya visto), las entradas y los votos (con
+    las escuchas, las denuncias y las señales de IP) y la **capa de juego** (módulo `game`: el libro de XP, los
+    logros y la racha). Entradas, votos y capa de juego comparten la sección `game` de la exportación (dos
+    módulos pueden compartir sección: sus claves se juntan). Al borrar, el XP, los logros y la racha de la
+    cuenta se van en el mismo `batch`; lo que otras cuentas ganaron votando sus entradas se queda (su
+    referencia es el id de la entrada, que ya no lleva a nadie, y el XP en vivo no se retira, §2.10).
   - **Exportar** (`GET /api/me/export`, 10 por hora): JSON descargable (`beatbattle-<nombre>-<día>.json`,
     formato `beatbattle-export/1`).
   - **Borrar** (`DELETE /api/me { confirm }`): confirmación escrita con el nombre de productor; todas las
@@ -3857,6 +3862,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.101 | **Tarea 7.15.** §4.14, registro de datos de la cuenta: la lista de módulos al día (semanas, entradas y votos, y la capa de juego con su libro de XP, logros y racha); entradas, votos y capa de juego comparten la sección `game` de la exportación, cuyas claves se juntan (`xpEvents`, `achievements` y `streak`, con la semana por su slug; el formato sigue en `beatbattle-export/1`, solo se añade `streak`); borrar la cuenta quita su XP, sus logros y su racha en el mismo `batch`, y lo que otras cuentas ganaron votando sus entradas se queda. |
 | 2026-10-29 | 0.6.100 | **Tarea 7.8.** §4.11, libro de XP: el módulo `game` del servidor prepara las sentencias para el `batch` del hecho (`plan` con los movimientos, los logros de sus eventos con su XP, `level_20` y la caché) y devuelve lo que gana la cuenta como vista previa; `level_20` se decide en SQL dentro del mismo `batch` con la suma del libro, así que también lo cruza el XP de otro logro; `voteGrant`, el XP de un voto contado en el libro. |
 | 2026-10-29 | 0.6.99 | **Tarea 7.7** (hueco G4 del plan 07, resuelto). §2.5: la ficha lleva la casilla «Cumplo el reto extra» solo si la semana tiene reto, editable hasta el cierre de envíos como el resto; la marca solo la ve su dueño hasta el sellado y después va con el resultado (`RF-ENT-13`, nuevo). §4.10: registrar y editar aceptan `challengeClaimed` y la ficha sellada lo lleva en `result`. §4.11: `entry.challenge_claimed`; `xp_event` con `week_id` (para el tope de votos y para lo público), el índice único por cuenta, tipo y referencia y uno parcial que deja una sola «primera entrada» por semana; `achievement_unlock` con `week_id`; la tabla de tipos y referencias del **libro de XP**, escrito con `ON CONFLICT DO NOTHING` en el `batch` del hecho, sin filas a 0, con `producer_profile.xp` recalculada como la suma del libro en el mismo `batch` y el tope semanal contado dentro del `INSERT`. Anexo C: `challenge` apunta a la columna. Migración `0008_capa_de_juego`, solo aditiva. |
 | 2026-10-29 | 0.6.97 | **Tarea 7.5** (huecos G8 y G4, la parte de la regla, del plan 07). Anexo C, «Cómo se evalúan»: por eventos, sin repetir ni retirar ningún logro; qué cuentan «entradas» y «votos»; la ventana de `last_minute` con `submitted_at`; `comeback` por debajo de la mediana de las clasificadas; `double` y `oracle` por semanas de número consecutivo; `challenge`, marcar el reto extra en la ficha y quedar en el top 10, con la marca oculta hasta el sellado (§1.3). **Las franjas horarias de los logros van en hora de Madrid y con el reloj del servidor** (`night_owl`: 10 votos a entradas distintas entre las 03:00 y las 05:00 de una misma noche; `revetlla`: de las 21:00 del 23 de junio a las 06:00 del 24). Los umbrales de los secretos de la Fase 8. §4.5: qué lleva el catálogo y `nightOwlWindow` e `isRevetllaNight`. |

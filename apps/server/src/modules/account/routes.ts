@@ -29,6 +29,9 @@ export interface AccountDeps {
   rateLimiter: RateLimiter
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+
 /** Versión del formato de la exportación: cambia si cambia la forma del JSON. */
 export const EXPORT_FORMAT = 'beatbattle-export/1'
 
@@ -53,7 +56,12 @@ export function accountRoutes(app: FastifyInstance, deps: AccountDeps): void {
     })
     const ctx = await contextOf(userId, req.now)
     const sections: Record<string, unknown> = {}
-    for (const module of ACCOUNT_DATA) sections[module.name] = await module.exportData(ctx)
+    for (const module of ACCOUNT_DATA) {
+      // Dos módulos pueden compartir sección (entradas y capa de juego, en `game`): sus claves se juntan.
+      const data = await module.exportData(ctx)
+      const previous = sections[module.name]
+      sections[module.name] = isRecord(previous) && isRecord(data) ? { ...previous, ...data } : data
+    }
     const day = new Date(req.now).toISOString().slice(0, 10)
     const name = (req.user as { username?: string | null }).username ?? 'cuenta'
     reply.header('Content-Disposition', `attachment; filename="beatbattle-${name}-${day}.json"`)

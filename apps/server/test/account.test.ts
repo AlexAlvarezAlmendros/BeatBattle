@@ -1,7 +1,11 @@
+import { eq } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
+import { runBatch } from '../src/db/batch'
+import { achievementUnlock, producerProfile, sample, streakState, week, xpEvent } from '../src/db/schema'
 import type { MemoryMailer } from '../src/email/mailer'
+import { createGameService } from '../src/modules/game/service'
 import type { ImageStorage } from '../src/modules/storage/cloudinary'
-import { createAccount, makeApp, ORIGIN, TEST_PASSWORD, type TestApp } from './helpers'
+import { createAccount, makeApp, ORIGIN, T0, TEST_PASSWORD, type TestApp } from './helpers'
 
 const exportOf = (t: TestApp, cookie: string) =>
   t.app.inject({ method: 'GET', url: '/api/me/export', headers: { cookie } })
@@ -99,8 +103,9 @@ describe('exportar los datos (RF-PRF-05)', () => {
       listens: [],
       reports: [],
       ipSignals: [],
-      achievements: [],
       xpEvents: [],
+      achievements: [],
+      streak: null,
     })
     // Nada que sirva para entrar: ni el hash de la contraseña ni los tokens de sesión.
     const accounts = await t.db.$client.execute('select password from account')
@@ -177,5 +182,122 @@ describe('borrar la cuenta (RF-PRF-04)', () => {
       payload: { confirm: 'x' },
     })
     expect(res.statusCode).toBe(401)
+  })
+})
+
+describe('la capa de juego en los datos de la cuenta (7.15, §4.14)', () => {
+  let ids = 0
+  /** Una semana sellada mínima (con su sample), para que la exportación diga su slug. */
+  async function sealedWeek(t: TestApp): Promise<string> {
+    await t.db.insert(sample).values({
+      id: 'sample-1',
+      title: 'Lluvia en Gràcia',
+      credits: 'Other People Records',
+      licenseText: 'Uso libre para la batalla.',
+      durationMs: 6000,
+      bytes: 1000,
+      format: 'wav',
+      audioPublicId: 'beatbattle-test/samples/s1/original',
+      coverPublicId: 'beatbattle-test/samples/s1/cover',
+      peaks: Buffer.alloc(2000),
+      createdBy: 'admin',
+      createdAt: T0,
+    })
+    await t.db.insert(week).values({
+      id: 'week-41',
+      number: 1,
+      slug: '2026-w41',
+      seasonId: '2026-T4',
+      sampleId: 'sample-1',
+      rulesVersion: 1,
+      startsAt: T0,
+      submitEndsAt: T0 + 100,
+      voteEndsAt: T0 + 200,
+      sealedAt: T0 + 300,
+      createdBy: 'admin',
+      createdAt: T0,
+    })
+    return 'week-41'
+  }
+
+  /** Lo que una cuenta ha jugado en la semana: subir, la primera entrada, un voto, el resultado y dos logros. */
+  async function play(t: TestApp, userId: string, weekId: string, entries: { own: string; voted: string }) {
+    const game = createGameService({ db: t.db, newId: () => `xp-${++ids}` })
+    const plan = await game.plan(userId, {
+      xp: [
+        { kind: 'entry', ref: weekId, weekId, amount: 100 },
+        { kind: 'first_entry_of_week', ref: weekId, weekId, amount: 25 },
+        { kind: 'vote', ref: entries.voted, weekId, amount: 5, weeklyCap: 40 },
+        { kind: 'result', ref: weekId, weekId, amount: 250 },
+      ],
+      achievements: [
+        { id: 'first_entry', ref: entries.own, weekId },
+        { id: 'podium', ref: weekId, weekId },
+      ],
+      now: T0 + 400,
+    })
+    await runBatch(t.db, [
+      ...plan.statements,
+      game.streakStatement(userId, { current: 3, best: 5, lastWeekNumber: 1, jokerSeason: '2026-T4' }),
+    ])
+  }
+
+  it('RF-PRF-05: la exportación lleva el libro de XP, los logros y la racha, con la semana por su slug', async () => {
+    const t = await makeApp()
+    const { id, cookie } = await createAccount(t, { email: 'aina@example.com', username: 'aina' })
+    await play(t, id, await sealedWeek(t), { own: 'entry-a', voted: 'entry-b' })
+    const game = (await exportOf(t, cookie)).json().data.game
+    expect(game.xpEvents).toEqual([
+      { kind: 'achievement', ref: 'first_entry', week: '2026-w41', amount: 25, createdAt: T0 + 400 },
+      { kind: 'achievement', ref: 'podium', week: '2026-w41', amount: 75, createdAt: T0 + 400 },
+      { kind: 'entry', ref: 'week-41', week: '2026-w41', amount: 100, createdAt: T0 + 400 },
+      { kind: 'first_entry_of_week', ref: 'week-41', week: '2026-w41', amount: 25, createdAt: T0 + 400 },
+      { kind: 'result', ref: 'week-41', week: '2026-w41', amount: 250, createdAt: T0 + 400 },
+      { kind: 'vote', ref: 'entry-b', week: '2026-w41', amount: 5, createdAt: T0 + 400 },
+    ])
+    expect(game.achievements).toEqual([
+      { id: 'first_entry', ref: 'entry-a', week: '2026-w41', unlockedAt: T0 + 400, seenAt: null },
+      { id: 'podium', ref: 'week-41', week: '2026-w41', unlockedAt: T0 + 400, seenAt: null },
+    ])
+    expect(game.streak).toEqual({ current: 3, best: 5, lastWeekNumber: 1, jokerSeason: '2026-T4' })
+    // Con lo de las entradas y los votos, en la misma sección.
+    expect(Object.keys(game)).toEqual(
+      expect.arrayContaining(['entries', 'votes', 'xpEvents', 'achievements']),
+    )
+    // Y la caché del perfil, la suma del libro.
+    expect((await exportOf(t, cookie)).json().data.profile.xp).toBe(480)
+  })
+
+  it('RF-PRF-04, RNF-PRIV-01: borrar la cuenta quita su XP, sus logros y su racha en el batch del borrado; lo de otros se queda', async () => {
+    const t = await makeApp()
+    const aina = await createAccount(t, { email: 'aina@example.com', username: 'aina' })
+    const bru = await createAccount(t, { email: 'bru@example.com', username: 'bru' })
+    const weekId = await sealedWeek(t)
+    await play(t, aina.id, weekId, { own: 'entry-a', voted: 'entry-b' })
+    // Bru vota la entrada de Aina (y no tiene la primera entrada: es de Aina).
+    await play(t, bru.id, weekId, { own: 'entry-b', voted: 'entry-a' })
+    const [before] = await t.db
+      .select({ xp: producerProfile.xp })
+      .from(producerProfile)
+      .where(eq(producerProfile.userId, bru.id))
+
+    expect((await remove(t, aina.cookie, 'aina')).statusCode).toBe(200)
+    for (const table of [xpEvent, achievementUnlock, streakState])
+      expect(await t.db.select().from(table).where(eq(table.userId, aina.id))).toEqual([])
+    // Lo de Bru, intacto: también el XP del voto a la entrada de Aina.
+    expect(await t.db.select().from(xpEvent).where(eq(xpEvent.userId, bru.id))).toHaveLength(5)
+    expect(
+      await t.db.select().from(achievementUnlock).where(eq(achievementUnlock.userId, bru.id)),
+    ).toHaveLength(2)
+    expect(await t.db.select().from(streakState).where(eq(streakState.userId, bru.id))).toHaveLength(1)
+    const [after] = await t.db
+      .select({ xp: producerProfile.xp })
+      .from(producerProfile)
+      .where(eq(producerProfile.userId, bru.id))
+    expect(after?.xp).toBe(before?.xp)
+    // Ni rastro de su id en las tablas de la capa de juego (el resto lo mira RF-PRF-04 arriba).
+    const tables = await everything(t)
+    for (const table of ['xp_event', 'achievement_unlock', 'streak_state'])
+      expect(tables[table]?.includes(aina.id), `${table} conserva la cuenta`).toBe(false)
   })
 })
