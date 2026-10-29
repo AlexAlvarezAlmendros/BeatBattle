@@ -114,6 +114,34 @@ usuario.
 - Copia semanal de Turso (las del proveedor más una exportación propia, §4.15).
 - Los errores de la función en Vercel y la cola de email (`/admin`).
 
+## 7 bis. La capa de juego: el reprocesado ⚠️ (tarea 7.16)
+
+Cuando el usuario despliegue la Fase 7, quien jugó la beta antes no tiene XP ni logros: el reprocesado (guía §2.10,
+§4.11) se los da con lo que ya pasó (descargas, entradas, votos, semanas selladas y temporadas cerradas). **Solo con
+la confirmación del usuario**, una vez desplegada la Fase 7 (el servidor ya ha aplicado la migración
+`0008_capa_de_juego` al arrancar) y cuanto antes: lo que pase en vivo entre el despliegue y el reprocesado lo
+escriben los ganchos y el reprocesado lo respeta (el corte), pero es mejor que el hueco sea corto.
+
+```bash
+vercel env pull apps/server/.env.production --environment=production
+# 1. Simulación: dice a qué base va y lo que añadiría, sin escribir nada.
+pnpm --filter @beatbattle/server exec tsx --env-file=.env.production src/scripts/gameReprocess.ts
+# 2. Con el visto bueno del usuario a esos números:
+pnpm --filter @beatbattle/server exec tsx --env-file=.env.production src/scripts/gameReprocess.ts --apply --remote
+# 3. Otra pasada: tiene que decir «Nada que añadir».
+pnpm --filter @beatbattle/server exec tsx --env-file=.env.production src/scripts/gameReprocess.ts
+rm apps/server/.env.production
+```
+
+- Es idempotente: repetirlo no suma nada. Si se corta a medias, se vuelve a lanzar (el corte queda guardado en
+  `job_state` antes de escribir).
+- Cada movimiento y cada logro llevan la fecha de su hecho: no sale `game.progress` por lo pasado y los avisos de
+  logro no se amontonan (entran ya vistos). La subida de nivel sale una vez a cada jugador, con su nivel.
+- **Alternativa sin la copia local**: la variable `BB_GAME_REPROCESS=1` en Vercel hace que el siguiente `tick` lo
+  haga una vez (antes de sellar) y lo deje apuntado; después se quita la variable. Va dentro de la función, con su
+  límite de tiempo: para la beta sobra, pero el script es la vía preferida.
+- No borra ni resta nada; si un número no cuadra, se corrige con un re-sellado (§2.8), no repitiendo el reprocesado.
+
 ## 8. Pendiente aparte
 
 - Borrar el proyecto de Vercel del spike de ffmpeg (fase 1) y rotar su secreto (lo hace el usuario en el panel).

@@ -1,0 +1,43 @@
+Asunto: Nuevo rango: Beatmaker y 2 logros
+Preheader: Nivel 7: «Sampleador» se queda atrás. Y +300 XP en logros: Disco de oro y Oído de oro.
+
+http://localhost:5173
+
+Nuevo rango · nivel 7
+
+
+BEATMAKER
+
+Dejas atrás «Sampleador»: tu carta de productor ya dice Beatmaker.
+
+El siguiente rango, Productor, llega en el nivel 9.
+
+Logro épico · +150 XP
+
+
+DISCO DE ORO
+
+Ganar una semana.
+
+Logro épico · +150 XP
+
+
+OÍDO DE ORO
+
+Anticipar el criterio del jurado en una semana (ρ ≥ 0,6).
+
+Tu progreso del lunes 19 de octubre
+
+Rango, nivel y vitrina de logros, en tu carta de productor.
+
+Ver mi carta http://localhost:5173/p/mar_beats
+
+Lo que ganas durante una semana en juego llega aquí el día que se sella: hasta entonces, el voto es ciego.
+
+----------------------------------------
+
+Un juego de Other People Records
+
+Recibes este aviso porque juegas en Beat Battle y lo tienes activado.
+
+Preferencias de email http://localhost:5173/ajustes/emails

@@ -5,6 +5,7 @@ import type { Db } from '../../db/client'
 import { user } from '../../db/schema'
 import { EMAIL_CATALOG, type EmailKind } from '../../email/catalog'
 import type { Mailer, MemoryMailer } from '../../email/mailer'
+import { reprocessGame } from '../game/reprocess'
 
 /**
  * Solo con `NODE_ENV=test` y el `Mailer` en memoria (los E2E, guía §4.15): `GET /api/test/mailbox?to=` da
@@ -14,14 +15,25 @@ import type { Mailer, MemoryMailer } from '../../email/mailer'
  * tipo: los avisos de la batalla aún no salen (Fase 3), y el E2E del hito prueba la baja con él.
  * `POST /api/test/role { email, role }` da o quita el rol de admin (los E2E del panel, Fase 3: en producción
  * el rol lo pone el plugin `admin` de Better Auth, a mano).
+ * `POST /api/test/game/reprocess` reprocesa la capa de juego con el reloj de la petición y responde su resumen (tarea
+ * 7.16: los E2E comprueban que reprocesar no duplica nada; fuera de test, el script `game:reprocess`).
  * En desarrollo y en producción las rutas no existen (`buildApp` no las registra).
  */
-export function testingRoutes(app: FastifyInstance, mailer: Mailer | null, db: Db): void {
+export function testingRoutes(
+  app: FastifyInstance,
+  mailer: Mailer | null,
+  db: Db,
+  newId: () => string,
+): void {
   const RoleSchema = z.object({ email: z.email(), role: z.enum(['user', 'admin']) }).strict()
   app.post('/api/test/role', async (req) => {
     const { email, role } = RoleSchema.parse(req.body)
     await db.update(user).set({ role }).where(sql`lower(${user.email}) = ${email.toLowerCase()}`)
     return { data: { email, role } }
+  })
+  app.post('/api/test/game/reprocess', async (req) => {
+    const summary = await reprocessGame({ db, now: req.now, newId, apply: true })
+    return { data: summary }
   })
   const memory = mailer as MemoryMailer | null
   if (!memory || typeof memory.lastTo !== 'function') return
