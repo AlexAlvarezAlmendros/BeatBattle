@@ -12,6 +12,11 @@
  * Con `sealed` (tarea 6.20), la semana jugada es la **anterior** y queda sellada con su clasificación (para
  * mirar los resultados, la ceremonia, el archivo y la ficha sellada), y la de este lunes queda abierta con
  * otro sample y sin entradas (la home ofrece la ceremonia de la sellada).
+ *
+ * Con `season` (tarea 7.32), una historia para la capa de juego (`seedSeason.ts`): la temporada anterior entera,
+ * jugada y cerrada con su campeón, las semanas ya selladas de la temporada en curso y esta abierta con entradas;
+ * niveles de varios rangos, logros de cada rareza, rachas con el comodín gastado y récords para el salón de la fama.
+ * `entradas` y `votantes` no cuentan: son 12 productores y 3 jurados.
  *   NODE_ENV=test DATABASE_URL=file:<bd.db> BB_FAKE_STORAGE=<carpeta> BB_TEST_CLOCK=1 PORT=3102 \
  *     pnpm --filter @beatbattle/server start
  *
@@ -27,11 +32,13 @@ import { user } from '../db/schema'
 import { createMemoryMailer } from '../email/mailer'
 import { fixedClock } from '../lib/clock'
 import { createDiskSampleStorage } from '../modules/storage/samples'
+import { seedSeason } from './seedSeason'
 
 const [dbFile, storageDir, producersArg = '24', votersArg = '2', mode = 'open'] = process.argv.slice(2)
 if (!dbFile || !storageDir)
-  throw new Error('Uso: seedBattle.ts <bd.db> <carpeta> [entradas] [votantes] [sealed]')
+  throw new Error('Uso: seedBattle.ts <bd.db> <carpeta> [entradas] [votantes] [sealed|season]')
 const SEALED = mode === 'sealed'
+const SEASON = mode === 'season'
 
 const ORIGIN = 'http://localhost:5176'
 const PASSWORD = 'lluvia en gràcia 92'
@@ -182,6 +189,12 @@ async function newSample(title: string, bpm: number, musicalKey: string, root: n
     musicalKey,
     hasStems: false,
   })
+}
+if (SEASON) {
+  await seedSeason({ app, db, clock, files, password: PASSWORD, admin, account, call, beat, newSample })
+  await app.close()
+  db.$client.close()
+  process.exit(0)
 }
 const sample = await newSample('Lluvia en Gràcia', 92, 'Dm', 147)
 const weekSlug = slugOf(monday)

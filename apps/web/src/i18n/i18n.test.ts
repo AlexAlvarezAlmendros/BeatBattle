@@ -114,8 +114,8 @@ describe('i18n: es.json', () => {
   it('las claves van en camelCase y el guion bajo solo marca plurales con su _other', () => {
     for (const [key] of leaves) {
       for (const [index, segment] of key.split('.').entries()) {
-        // Salvo el id de un logro del Anexo C (`achievement.<id>.name`, tarea 7.22): es el dato del catálogo de
-        // `@beatbattle/rules`, cuyo `hintKey` ya lleva esa forma.
+        // Los textos de los logros van por su id del catálogo (`achievement.<id>.name`, la `hintKey` de las reglas):
+        // ese segmento es un dato (`first_drop`), no una clave.
         if (index === 1 && key.startsWith('achievement.') && isAchievementId(segment)) continue
         expect(segment, key).toMatch(/^[a-z][a-zA-Z0-9]*(?:_(?:zero|one|two|few|many|other))?$/)
       }

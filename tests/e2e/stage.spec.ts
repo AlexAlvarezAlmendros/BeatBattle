@@ -157,6 +157,9 @@ test.describe('Escenario, capa 0', () => {
     page,
   }) => {
     await setStage(page.context(), null, 'alta')
+    // En desarrollo cada módulo es una petición: el búfer de tiempos de recursos (250 por defecto) se llena antes
+    // de que llegue el Escenario y sus entradas se pierden.
+    await page.addInitScript(() => performance.setResourceTimingBufferSize(2000))
     const errors = collectErrors(page)
     await page.goto('/')
     test.skip(!(await webglAvailable(page)), 'sin WebGL: se queda la arena estática')

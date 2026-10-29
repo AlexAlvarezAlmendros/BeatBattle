@@ -29,7 +29,8 @@
 //              `advanceStreak`, la racha con el comodín de temporada
 //   goldenEar  `goldenEar(jurado, votos)`, con la semana recalculada sin sus votos
 //   replay     `replaySealedWeeks`: lo que da el sellado (XP de resultado, oído de oro, racha y logros de resultado)
-//              re-jugado sobre las semanas selladas de una cuenta (tarea 7.10)
+//              re-jugado sobre las semanas selladas de una cuenta (tarea 7.10); `replayAccount`, toda la historia
+//              de una cuenta en orden de calendario, la base del reprocesado (tarea 7.16)
 //   season     `seasonStandings` (desempates y ex aequo) y `seasonChampions`; `isLastWeekOfSeason` en `calendar`
 //   achievements  el catálogo del Anexo C como datos y `evaluate(evento, contexto)`
 

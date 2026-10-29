@@ -1,11 +1,27 @@
-import type { EntryList } from '@beatbattle/shared'
+import type { EntryList, Me } from '@beatbattle/shared'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, renderHook } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
 import { audio } from '../../audio/engine'
 import { queryKeys } from '../../net/queryKeys'
+import { EMPTY_ME_GAME } from '../../test/game'
+import { useSession } from '../account/session'
+import { useHud } from '../game/hudStore'
 import { starsListen, useVote } from './useVote'
+
+const ME: Me = {
+  id: 'u1',
+  email: 'aina@example.com',
+  emailVerified: true,
+  username: 'aina',
+  displayUsername: 'Aina',
+  role: 'user',
+  cardNumber: 7,
+  xp: 0,
+  avatarUrl: null,
+  game: EMPTY_ME_GAME,
+}
 
 let fetchMock: Mock<typeof fetch>
 const respond = (body: unknown, status = 200) =>
@@ -61,7 +77,7 @@ describe('voto optimista (§3.8.4, §4.7.2)', () => {
     let resolve: (value: Response) => void = () => {}
     fetchMock.mockReturnValue(new Promise((r) => (resolve = r)))
     const { result, myVote } = setup()
-    let done: Promise<void> = Promise.resolve()
+    let done: Promise<unknown> = Promise.resolve()
     act(() => {
       done = result.current.vote(5)
     })
@@ -81,6 +97,31 @@ describe('voto optimista (§3.8.4, §4.7.2)', () => {
     expect(myVote()).toBe(5)
     expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/entries/e-1/vote')
     expect(fetchMock.mock.calls[0]?.[1]).toMatchObject({ method: 'PUT', body: JSON.stringify({ stars: 5 }) })
+  })
+
+  it('RF-GAME-08: lo ganado por el voto va al HUD: la sesión al momento y el «+5 XP» desde lo que lo provoca', async () => {
+    useSession.setState({ status: 'signedIn', me: { ...ME, game: { ...EMPTY_ME_GAME, xp: 125 }, xp: 125 } })
+    useHud.getState().reset()
+    fetchMock.mockResolvedValue(
+      respond({
+        data: {
+          entryId: 'e-1',
+          stars: 4,
+          createdAt: 1,
+          updatedAt: 2,
+          game: { xp: 5, achievements: [], level: 1 },
+        },
+      }),
+    )
+    const anchor = document.createElement('div')
+    const { result } = setup()
+    await act(async () => {
+      await result.current.vote(4, { anchor, combo: 2 })
+    })
+    expect(useSession.getState().me?.game.xp).toBe(130)
+    expect(useHud.getState().floats).toEqual([expect.objectContaining({ amount: 5, combo: 2 })])
+    act(() => useHud.getState().reset())
+    useSession.setState({ status: 'anonymous', me: null })
   })
 
   it('si no se guarda, vuelve la nota anterior, suena `ui.error` y el error llega a las estrellas', async () => {

@@ -1,10 +1,11 @@
 import type { EntryAudioProblem } from '@beatbattle/rules'
-import type { OwnEntry } from '@beatbattle/shared'
+import type { EntryCreated } from '@beatbattle/shared'
 import { useCallback, useRef, useState } from 'react'
 import { audio } from '../../audio/engine'
 import { t } from '../../i18n'
 import { ApiClientError } from '../../net/api'
 import { createEntry, replaceEntryAudio, signEntryUpload } from '../../net/entries'
+import { applyGameDelta } from '../game/rewards'
 import { uploadInChunks } from './chunkedUpload'
 import type { EntrySheetResult } from './EntrySheet'
 import { entryProblemMessage } from './entryFile'
@@ -41,7 +42,7 @@ export type EntryUploadState =
       remaining: number | null
     }
   | { stage: 'registering'; total: number }
-  | { stage: 'done'; entry: OwnEntry }
+  | { stage: 'done'; entry: EntryCreated }
   | { stage: 'error'; message: string }
 
 /** La frase de un fallo de la subida o del registro (§2.19, en tono de juego pero claro). */
@@ -167,6 +168,9 @@ export function useEntryUpload() {
               signal,
             )
         audio.play('upload.done')
+        // Al sustituir el audio, lo ganado (si la entrada pasa a `active` por primera vez) va al HUD ya; al registrarla,
+        // lo lanza la celebración en el impacto del anunciador (§3.8.5).
+        if (replacing) applyGameDelta(entry.game)
         setState({ stage: 'done', entry })
         return entry
       } catch (error) {

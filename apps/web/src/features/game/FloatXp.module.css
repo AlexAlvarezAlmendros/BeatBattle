@@ -1,0 +1,42 @@
+/*
+ * El «+XP» flotante (§3.4.2): Oxanium rojo sobre una placa negra en paralelogramo (su texto nunca va sobre la trama ni
+ * los rayos que cruza al volar, `RD-VIS-05`), por encima del marco y por debajo de la ceremonia. No se pulsa.
+ */
+.float {
+  position: fixed;
+  z-index: var(--bb-z-toast);
+  padding: var(--bb-space-1) var(--bb-space-3);
+  background: var(--bb-black);
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-lg);
+  font-weight: var(--bb-weight-bold);
+  line-height: 1;
+  white-space: nowrap;
+  clip-path: polygon(var(--bb-slant-sm) 0, 100% 0, calc(100% - var(--bb-slant-sm)) 100%, 0 100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Junto a lo que lo provoca: a su derecha, centrado en vertical; encima, alineado a su borde derecho. */
+.float[data-side="right"] {
+  translate: 0 -50%;
+}
+
+.float[data-side="above"] {
+  translate: -100% -100%;
+}
+
+.float[data-side="meter"] {
+  translate: -50% 0;
+}
+
+/* Contraste alto: el texto y su placa con los colores del sistema. */
+@media (forced-colors: active) {
+  .float {
+    border: var(--bb-stroke) solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    clip-path: none;
+  }
+}

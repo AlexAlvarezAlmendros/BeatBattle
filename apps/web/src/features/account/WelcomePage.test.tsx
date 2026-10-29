@@ -1,6 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { renderInRouter } from '../../app/layout/testing'
+import { t } from '../../i18n'
 import { EMPTY_ME_GAME } from '../../test/game'
 import { useSession } from './session'
 import { WelcomePage } from './WelcomePage'
@@ -29,6 +30,17 @@ describe('bienvenida (§3.8.9)', () => {
       screen.getByRole('article', { name: 'Carta de luchador de Kairo.wav, número 42, estándar' }),
     ).toHaveTextContent('#0042')
     expect(screen.getByText('Primer sample')).toBeInTheDocument()
+  })
+
+  it('RF-GAME-05: el primer logro sale del catálogo (Anexo C) con su rareza, su descripción y su XP', () => {
+    useSession.setState({ status: 'signedIn', me: ME })
+    renderInRouter(<WelcomePage />, '/bienvenida')
+    const badge = document.querySelector('[data-achievement]')
+    expect(badge).toHaveAttribute('data-achievement', 'first_drop')
+    expect(badge).toHaveAttribute('data-rarity', 'common')
+    expect(badge).toHaveTextContent(t('game.rarity.common'))
+    expect(badge).toHaveTextContent(t('achievement.first_drop.description'))
+    expect(badge?.textContent?.replace(/\s+/g, ' ')).toContain('+25 XP')
   })
 
   it('sin sesión, a entrar', async () => {

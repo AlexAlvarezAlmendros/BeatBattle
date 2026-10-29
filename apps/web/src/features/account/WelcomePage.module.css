@@ -46,18 +46,14 @@
 
 .goal {
   display: grid;
-  gap: var(--bb-space-1);
+  gap: var(--bb-space-3);
   padding: var(--bb-space-4);
   border: var(--bb-stroke) solid var(--bb-line-strong);
   background: var(--bb-panel-2);
 }
 
-.goalName {
-  font-family: var(--bb-font-display);
-  font-size: var(--bb-fs-lg);
-  font-style: italic;
-  font-weight: var(--bb-weight-black);
-  text-transform: uppercase;
+.goalBadge {
+  padding-block: var(--bb-space-1);
 }
 
 .goalHow {

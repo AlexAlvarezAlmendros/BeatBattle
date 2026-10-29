@@ -1,5 +1,5 @@
 import type { RouteObject } from 'react-router'
-import { MENU_SCREEN, simpleScreen } from './layout/screen'
+import { interiorScreen, MENU_SCREEN, simpleScreen } from './layout/screen'
 
 /**
  * Rutas que solo existen en desarrollo: la galería y el menú con datos de muestra. En la construcción
@@ -76,6 +76,17 @@ export const devRoutes: RouteObject[] = import.meta.env.DEV
           },
         },
         lazy: async () => ({ Component: (await import('../ui/gallery/CardBenchPage')).CardBenchPage }),
+      },
+      {
+        // Banco de la capa de juego del HUD (7.18–7.20): sesión de muestra, «+XP», avisos de logro y nivel.
+        path: 'dev/recompensas',
+        handle: {
+          access: 'public',
+          screen: interiorScreen({ kicker: 'frame.plates.dev', title: 'dev.rewards.title' }),
+        },
+        lazy: async () => ({
+          Component: (await import('../features/game/DevRewardsPage')).DevRewardsPage,
+        }),
       },
       {
         // El menú principal con los datos de muestra de las maquetas (0.24), para compararlo con ellas.

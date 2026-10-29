@@ -135,10 +135,6 @@
       "closes": "Tiempo · cierre de envíos",
       "votes": "Tiempo · cierre de votos"
     },
-    "hud": {
-      "streak": "Racha",
-      "streakValue": "×{count}"
-    },
     "chronicle": {
       "insert": "{action} · Crédito {credit}",
       "insertAction": "Inserta tu beat",
@@ -1675,6 +1671,18 @@
       "intro": "La carta de productor en sus cuatro variantes (estándar, roja, holo y campeón), anverso y reverso. La primera fila gira con C.",
       "front": "Anverso",
       "back": "Reverso"
+    },
+    "rewards": {
+      "title": "Recompensas (banco)",
+      "summary": "La capa de juego del HUD con una sesión de muestra: el «+XP» que vuela al medidor, los avisos de logro de cada rareza y la subida de nivel.",
+      "vote": "Votar (+5 XP)",
+      "upload": "Subir (+125 XP y logros)",
+      "common": "Logro común",
+      "rare": "Logro raro",
+      "epic": "Logro épico",
+      "legendary": "Logro legendario",
+      "level": "Subir de nivel",
+      "stack": "Cuatro logros a la vez"
     }
   },
   "rank": {
@@ -1785,7 +1793,9 @@
       "xp": "Experiencia",
       "xpText": "{value} de {max} XP para el nivel {next}",
       "xpStart": "XP {value}",
-      "xpEnd": "NV {next} · {max}"
+      "xpEnd": "NV {next} · {max}",
+      "xpTextMax": "{value} XP · nivel {level}, el máximo",
+      "xpEndMax": "NV {level} · MÁX"
     }
   },
   "screen": {
@@ -1972,7 +1982,6 @@
       "title": "Bienvenido a la batalla",
       "summary": "{name}, tu carta de luchador ya está impresa. Ahora toca ganarse lo que lleva dentro.",
       "goalTitle": "Tu primer logro",
-      "goalName": "Primer sample",
       "goalHow": "Descarga el sample de la semana en cuanto caiga el lunes.",
       "play": "Ir al menú",
       "profile": "Completar mi perfil"
@@ -2220,7 +2229,14 @@
       "score": "Puntuación",
       "votes": "Votos",
       "unranked": "Sin clasificar",
-      "unrankedNote": "Hacen falta 3 votos para entrar en la clasificación."
+      "unrankedNote": "Hacen falta 3 votos para entrar en la clasificación.",
+      "xp": "XP",
+      "xpValue": "+{xp} XP",
+      "seasonPoints": "Temporada",
+      "seasonPointsValue": "{points} PTS",
+      "goldenEar": "Oído de oro",
+      "goldenEarYes": "Sí",
+      "goldenEarNo": "No"
     },
     "playChampion": "Play al campeón",
     "standings": "Clasificación",
@@ -2235,7 +2251,8 @@
     "noPodium": "Ninguna entrada llegó a 3 votos: esta semana no hay podio.",
     "share": "Compartir",
     "shareTitle": "Resultados de la semana {number} de Beat Battle",
-    "shared": "Enlace listo para compartir."
+    "shared": "Enlace listo para compartir.",
+    "rowXp": "{subtitle} · +{xp} XP"
   },
   "entryPage": {
     "result": {
@@ -2326,7 +2343,8 @@
     "allVotedText": "Ya has puntuado todas las entradas de la semana. Puedes cambiar tus votos en sus fichas hasta el cierre.",
     "emptyTitle": "Aún no hay entradas",
     "emptyText": "En cuanto alguien suba su flip, aquí estará para que lo puntúes.",
-    "backToMenu": "Volver al menú"
+    "backToMenu": "Volver al menú",
+    "comboXp": "+{xp} XP por voto"
   },
   "achievement": {
     "first_drop": {
@@ -2489,5 +2507,42 @@
   },
   "season": {
     "label": "T{quarter} de {year}"
+  },
+  "game": {
+    "hud": {
+      "season": "Temporada {season}",
+      "seasonValue": "{points} PTS · {position}.º",
+      "seasonValueUnranked": "{points} PTS",
+      "seasonSr": "Temporada {season}: {points} puntos, puesto {position}",
+      "seasonSrUnranked": "Temporada {season}: {points} puntos, aún sin puesto",
+      "streak": "Racha",
+      "streakValue": "×{count}",
+      "streakSr_one": "Racha: {count} semana",
+      "streakSr_other": "Racha: {count} semanas"
+    },
+    "live": {
+      "region": "Recompensas",
+      "xp": "+{amount} XP",
+      "achievement": "Logro conseguido: {name}, {rarity}, +{xp} XP",
+      "level": "¡Nivel {level}!",
+      "levelRank": "¡Nivel {level}! Ahora eres {rank}"
+    },
+    "rarity": {
+      "common": "Común",
+      "rare": "Raro",
+      "epic": "Épico",
+      "legendary": "Legendario"
+    },
+    "float": "+{amount} XP",
+    "notice": {
+      "unlocked": "Logro desbloqueado",
+      "xp": "+{xp} XP",
+      "legendary": "¡LOGRO LEGENDARIO!",
+      "level": "¡NIVEL {level}!",
+      "levelPlate": "Nivel",
+      "levelUp": "Subes al nivel {level}",
+      "rank": "¡AHORA ERES {rank}!",
+      "skip": "Pulsa una tecla o toca para seguir"
+    }
   }
 }
