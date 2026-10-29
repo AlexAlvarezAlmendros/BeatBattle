@@ -127,7 +127,8 @@ a.recordHolder:hover {
 .strip {
   min-width: 0;
   overflow-x: auto;
-  padding: var(--bb-cursor-gap) var(--bb-space-3) var(--bb-space-3);
+  /* Sitio para el cursor (4 + 3 px fuera de la casilla): la tira recorta lo que se sale. */
+  padding: calc(var(--bb-cursor-gap) + var(--bb-stroke-cursor)) var(--bb-space-3) var(--bb-space-3);
   margin-inline: calc(var(--bb-space-3) * -1);
   scroll-padding-inline: var(--bb-space-3);
   scrollbar-color: var(--bb-ink-4) transparent;

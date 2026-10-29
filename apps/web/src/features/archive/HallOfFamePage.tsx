@@ -7,6 +7,7 @@ import { t } from '../../i18n'
 import { hallOfFameQuery } from '../../net/game'
 import { Button } from '../../ui/Button'
 import { GenerativeCover } from '../../ui/CoverArt'
+import { Cursor } from '../../ui/Cursor'
 import { frameAttributes } from '../../ui/Frame'
 import { useMediaQuery } from '../../ui/hooks/useMediaQuery'
 import { useRovingMenu } from '../../ui/hooks/useRovingMenu'
@@ -164,6 +165,7 @@ export function HallOfFamePage() {
                     {...frameAttributes({ cut: 'md' })}
                     className={styles.winner}
                   >
+                    <Cursor cut="md" />
                     <span className={styles.winnerCover} aria-hidden="true">
                       {winner.cover.kind === 'own' ? (
                         <img src={winner.cover.url} alt="" />

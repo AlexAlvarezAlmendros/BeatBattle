@@ -9,6 +9,7 @@ import {
   achievementName,
 } from '../../ui/AchievementBadge'
 import { Button } from '../../ui/Button'
+import { Cursor } from '../../ui/Cursor'
 import { useMediaQuery } from '../../ui/hooks/useMediaQuery'
 import { useRovingGrid } from '../../ui/hooks/useRovingGrid'
 import { singleKeyAllowed, useShortcuts } from '../../ui/shortcuts'
@@ -86,6 +87,7 @@ export function AchievementGrid({ unlocks }: { unlocks: readonly AchievementUnlo
           const unlocked = item.unlockedAt !== null
           return (
             <li key={item.id} {...grid.getItemProps(index)} aria-label={achievementLabel(item.id, unlocked)}>
+              <Cursor cut="md" />
               <AchievementBadge id={item.id} unlocked={unlocked} className={styles.achievementBadge} />
             </li>
           )

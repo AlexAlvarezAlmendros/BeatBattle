@@ -98,7 +98,8 @@ async function wineShare(page: Page, rows?: readonly [number, number]): Promise<
 
 /**
  * Las interiores de poco contenido (§3.8.14 «Reparto del alto»): «Cómo se juega», Opciones (con la
- * sección de más filas, Sonido, y las de menos), la 404 y una provisional.
+ * sección de más filas, Sonido, y las de menos) y la 404. El salón de la fama y la temporada, que eran las
+ * provisionales de esta lista, son pantallas de contenido desde la Fase 7 (tareas 7.25 y 7.26).
  */
 const FEW_SCREENS = [
   { path: '/como-funciona', heading: 'Cómo se juega' },
@@ -107,8 +108,6 @@ const FEW_SCREENS = [
   { path: '/ajustes/sesiones', heading: 'Sesiones' },
   { path: '/ajustes/privacidad', heading: 'Privacidad' },
   { path: '/esto-no-existe', heading: 'Bonus stage' },
-  { path: '/temporada/t4', heading: 'Temporada' },
-  { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
 ]
 
 /** Alto máximo de una fila densa (§3.8.14: nombre en display y una línea, «unos 56–72 px»). */
@@ -326,21 +325,13 @@ for (const { viewport, touch, screens } of [
     viewport: { width: 820, height: 1180 },
     touch: true,
     screens: [
-      { path: '/temporada/t4', heading: 'Temporada' },
-      { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
       { path: '/subir', heading: 'Subir mi beat' },
       { path: '/esto-no-existe', heading: 'Bonus stage' },
       { path: '/ajustes/accesibilidad', heading: 'Accesibilidad' },
     ],
   },
-  {
-    viewport: { width: 960, height: 800 },
-    touch: false,
-    screens: [
-      { path: '/temporada/t4', heading: 'Temporada' },
-      { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
-    ],
-  },
+  // A 960 × 800 lo probaban el salón de la fama y la temporada cuando eran provisionales (un sello y un panel
+  // cortos); desde la Fase 7 son pantallas de contenido (tareas 7.25 y 7.26), que llenan el alto y se desplazan.
 ]) {
   test.describe(`${viewport.width} × ${viewport.height}${touch ? ' táctil' : ''}, una columna`, () => {
     test.use({ viewport, isMobile: touch, hasTouch: touch })
@@ -1615,10 +1606,7 @@ for (const viewport of [
  * saltaban al 22,8 % entre 1599 y 1600 px.
  */
 test.describe('granate de las provisionales a 1440 × 900', () => {
-  for (const { path, heading } of [
-    { path: '/subir', heading: 'Subir mi beat' },
-    { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
-  ])
+  for (const { path, heading } of [{ path: '/subir', heading: 'Subir mi beat' }])
     test(`§3.1 / §3.8.14: en ${path}, la cuña sigue al sello y el granate no pasa del 24,5 % (G6)`, async ({
       page,
     }) => {
@@ -1635,7 +1623,7 @@ test.describe('granate de las provisionales a 1440 × 900', () => {
     const shares: number[] = []
     for (const width of [1599, 1600]) {
       await page.setViewportSize({ width, height: 900 })
-      await open(page, '/salon-de-la-fama', 'Salón de la fama')
+      await open(page, '/subir', 'Subir mi beat')
       await settle(page)
       shares.push(await wineShare(page))
     }
