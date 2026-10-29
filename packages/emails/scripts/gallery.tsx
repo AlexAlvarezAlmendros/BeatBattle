@@ -13,6 +13,11 @@ import { BATTLE_REMINDER_STREAK_FIXTURE, battleReminder } from '../src/templates
 import { battleResults } from '../src/templates/battleResults'
 import { ENTRY_WITHDRAWN_FIXTURE, entryChanged } from '../src/templates/entryChanged'
 import { GAME_PROGRESS_LEGENDARY_FIXTURE, gameProgress } from '../src/templates/gameProgress'
+import {
+  SEASON_WRAP_CHAMPION_FIXTURE,
+  SEASON_WRAP_JUROR_FIXTURE,
+  seasonWrap,
+} from '../src/templates/seasonWrap'
 
 const [out = 'galeria-emails', publicUrl = 'http://localhost:5173'] = process.argv.slice(2)
 await mkdir(out, { recursive: true })
@@ -31,7 +36,8 @@ for (const kind of kinds) {
 }
 // Variantes que no son el ejemplo de su plantilla: la retirada de `entry.changed`; el Lunes de batalla de una
 // alerta sin cuenta (el podio, sin parte personal ni «tu partida»); el recordatorio con racha en peligro; el progreso
-// del día con un solo logro legendario, y los resultados de una semana desierta.
+// del día con un solo logro legendario; los resultados de una semana desierta, y la temporada de la campeona y la de
+// quien solo votó.
 const variants = [
   {
     name: 'entry.changed.withdrawn',
@@ -58,6 +64,18 @@ const variants = [
     name: 'game.progress.legendary',
     template: gameProgress,
     payload: GAME_PROGRESS_LEGENDARY_FIXTURE,
+    family: 'battle',
+  },
+  {
+    name: 'season.wrap.champion',
+    template: seasonWrap,
+    payload: SEASON_WRAP_CHAMPION_FIXTURE,
+    family: 'battle',
+  },
+  {
+    name: 'season.wrap.juror',
+    template: seasonWrap,
+    payload: SEASON_WRAP_JUROR_FIXTURE,
     family: 'battle',
   },
   {

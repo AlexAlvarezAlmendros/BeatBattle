@@ -9,7 +9,7 @@ import { OG_KINDS, type OgKind, ogData, ogVersion } from './og'
  * unos resultados o un perfil. Con la versión vigente (`v`, la que ponen los metadatos), caché inmutable de un
  * año: si lo que se ve cambia, cambia la URL. Sin versión o con una vieja, la imagen de ahora con caché corta.
  * Lo que no existe o aún no se puede enseñar (una semana antes del drop, unos resultados sin sellar, una
- * entrada retirada), 404.
+ * entrada retirada), 404. Las peticiones no se registran: la del perfil (su carta) va en el resumen de temporada.
  */
 
 const IMMUTABLE = 'public, max-age=31536000, immutable'
@@ -19,6 +19,8 @@ const ID = /^[\w-]{1,64}$/
 export function ogRoutes(app: FastifyInstance, deps: { db: Db }): void {
   app.get<{ Params: { kind: string; file: string }; Querystring: { v?: string } }>(
     '/api/og/:kind/:file',
+    // La carta del perfil va también en `season.wrap` (7.30): quien pide la imagen no se registra (`RF-NOTIF-12`).
+    { logLevel: 'silent' },
     async (req, reply) => {
       const kind = req.params.kind as OgKind
       const id = req.params.file.replace(/\.png$/, '')

@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.132 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.133 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -822,7 +822,7 @@ distintas:
 | `battle.first_votes` | Aviso | Su entrada llega a 5 votos (solo el número, nunca la media); se encola en el `batch` del quinto voto | El participante | Inmediato, una vez por entrada (y semana) |
 | `battle.label_pick` | Aviso | Su entrada recibe la Elección del sello | El participante | Inmediato |
 | `game.progress` | Aviso | Subida de rango o logro épico o legendario (agrupados en uno al día; lo de una semana ciega, el día que se sella, §2.12.7) | El usuario | Diario a las 19:00 si hay algo |
-| `season.wrap` | Aviso | Sellado de la última semana de la temporada: «Tu temporada en cifras» | Quien participó o votó en la temporada | Al sellar |
+| `season.wrap` | Aviso | Cierre de la temporada (el sellado de su última semana o, sin semana el último lunes, el primer `tick` tras el trimestre, §2.9): «Tu temporada en cifras» | Quien participó o votó en la temporada (cuentas verificadas) | Al cerrarla (en su `batch`; horas de silencio y tope al enviar) |
 | `mkt.campaign` | Marketing | Campaña creada en el panel | Segmento elegido ∩ consentimiento | Programado |
 | `mkt.reactivation` | Marketing | 4 semanas sin subir ni votar | Ese usuario | Como mucho una vez cada 8 semanas |
 
@@ -966,6 +966,22 @@ ciego quién ha subido ni cuánto le ha dado su entrada (§1.3, `RF-NOTIF-13`).
   del sábado sale en su versión de racha: «Tu racha de 5 semanas está en juego», lo que pasa si la semana se sella sin
   una entrada suya clasificada (gasta el comodín de la temporada y la racha no sube o, con el comodín ya gastado,
   vuelve a 0) y el bonus de la racha en juego. Mismos destinatarios, clave y prioridad que el recordatorio.
+- **Tu temporada en cifras** (`season.wrap`, tarea 7.30). Se encola en el `batch` que cierra la temporada (§2.9, hueco
+  G7): el del sellado de su última semana o el del primer `tick` tras el fin del trimestre si no hubo semana el último
+  lunes (ese `tick` también la mira si la cerró el sellado: la clave no duplica; y no resume una temporada cerrada hace
+  más de una semana, como el primer `tick` tras desplegar la capa de juego). A cada cuenta verificada que **participó**
+  (una entrada en el snapshot de alguna de sus semanas, clasificada o no) o **votó** (algún voto que contó en ellos),
+  uno por cuenta y temporada (`season.wrap:user:<cuenta>:<temporada>`, `RF-NOTIF-02`).
+  - **Contenido**: el puesto en la clasificación de la temporada con sus puntos, victorias y podios (o «sin
+    clasificar», o «como jurado»), el campeón o los campeones ex aequo, las semanas jugadas, el mejor puesto de una
+    semana, los votos emitidos (los que contaron en los snapshots), los logros de la temporada (los de sus semanas y los
+    sin semana conseguidos en el trimestre, con los que da y quita ese mismo `batch`: `season_champ` incluido), la
+    **carta del trimestre** (la imagen OG del perfil, §2.15) y los botones a la clasificación (`/temporada/:id`) y a su
+    carta. Asunto «Tu T4 de 2026 en cifras» y, al campeón, «¡Campeón de la T4 de 2026!».
+  - **Nada sin sellar** (`RF-NOTIF-13`): todo es de las semanas de la temporada, que están selladas o se sellan en ese
+    `batch`. La temporada siguiente puede estar ya en juego: ni sus votos ni sus logros (los de una semana suya no
+    entran, aunque se ganen antes de que salga el email). Preferencia (`season_on`), horas de silencio, tope semanal y
+    baja en un clic, al enviar (§2.12.4).
 
 | Id | Requisito | Aceptación |
 |---|---|---|
@@ -980,10 +996,10 @@ ciego quién ha subido ni cuánto le ha dado su entrada (§1.3, `RF-NOTIF-13`).
 | `RF-NOTIF-09` | Alerta de drop sin cuenta con doble confirmación, caducidad de 7 días y fusión al registrarse | E2E completo con el email capturado |
 | `RF-NOTIF-10` | Supresión por rebote duro, detectado en el buzón de envío por IMAP | Un aviso de rebote permanente en el buzón suprime la dirección; el siguiente envío a ella queda `suppressed` |
 | `RF-NOTIF-11` | Campañas con editor por bloques, segmentos con recuento, prueba, programación, cancelación, estimación de días y estadísticas agregadas | E2E de admin con el `Mailer` en memoria; con un segmento de 900 y un cupo libre de 300 al día, estima 3 días |
-| `RF-NOTIF-12` | Sin píxeles de seguimiento; clics contados solo en agregado | Ninguna plantilla incluye imágenes de 1×1 ni parámetros por usuario en las URL de imágenes. Única excepción, la imagen que **es** el contenido del email y solo tiene sentido para su destinatario (la onda del recibo, la tarjeta de resultado, §4.19.5): firmada, sin id de usuario en la URL, con caché larga y sin registrar la petición |
+| `RF-NOTIF-12` | Sin píxeles de seguimiento; clics contados solo en agregado | Ninguna plantilla incluye imágenes de 1×1 ni parámetros por usuario en las URL de imágenes. Única excepción, la imagen que **es** el contenido del email y solo tiene sentido para su destinatario (la onda del recibo, la tarjeta de resultado, §4.19.5): firmada, sin id de usuario en la URL, con caché larga y sin registrar la petición. La carta de `season.wrap` es la imagen OG pública del perfil (la misma que ve cualquiera que comparta el perfil): sin parámetros y sin registrar la petición |
 | `RF-NOTIF-13` | Ningún email filtra datos sellados antes de tiempo ni rompe el voto ciego | Test de contrato sobre el contenido renderizado de cada plantilla con una semana sin sellar |
 | `RF-NOTIF-14` | Cuenta atrás animada en vivo y tarjeta de resultado personal (URL firmada) | La imagen de la cuenta atrás cambia entre dos peticiones separadas un minuto; la tarjeta sin firma → 403 |
-| `RF-NOTIF-15` | «Tu temporada en cifras» al cerrar cada temporada | Test con una temporada simulada |
+| `RF-NOTIF-15` | «Tu temporada en cifras» al cerrar cada temporada, en su `batch`, a quien participó o votó | Test con una temporada simulada: al sellar la última semana (y, sin semana el último lunes, en el primer `tick` tras el trimestre) sale una vez a cada participante y jurado verificado, sin nada de la temporada siguiente |
 | `RF-NOTIF-16` | Consentimientos registrados (fecha, texto mostrado, origen) y exportados con los datos del usuario | Aparecen en `/api/me/export` |
 | `RF-NOTIF-17` | Presupuesto de envío en ventana móvil de 24 h, con reserva para servicio y reparto por prioridad | Con un límite de 10 y 15 en cola (3 de servicio): salen los 3 de servicio y 7 por prioridad; 5 se aplazan con su `not_before` |
 | `RF-NOTIF-18` | Conexión con Gmail con TLS verificado y credenciales solo en variables de entorno | El transporte rechaza un servidor SMTP de prueba con certificado autofirmado; ningún secreto en el repo |
@@ -3259,7 +3275,9 @@ calculado (`xpFor` de `packages/rules`):
   re-sellado, se lo retira a quien deja de ser campeón de toda temporada cerrada; con la misma condición que el resto
   del sellado. Si su último lunes no tiene semana, lo hace el `tick` (`closeDueSeasons`): recorre en orden las
   temporadas que aún no había mirado, se para en la primera que no está cerrada y apunta hasta dónde ha llegado en
-  `job_state` (`seasonClose`), en el mismo `batch` que los logros.
+  `job_state` (`seasonClose`), en el mismo `batch` que los logros. En los dos `batch`, `season.wrap` (§2.12.7,
+  `modules/seasons/wrap.ts`): el del sellado lo encola si es ese sellado el que cierra la temporada (con el snapshot
+  recién calculado y los logros que da o quita); el del `tick`, si la temporada se cerró hace una semana o menos.
 - Las sentencias las prepara el módulo **`game`** del servidor (`modules/game`) para el `batch` de quien provoca el
   hecho: `plan(cuenta, { xp, events, achievements, now })` da los movimientos (los de 0 XP fuera), los logros que
   desbloquean sus eventos (`evaluate`, contra los que ya tiene) con el XP de su rareza, `level_20` y, la última, la
@@ -3710,6 +3728,10 @@ CREATE TABLE entry_receipt_seq (week_id TEXT PRIMARY KEY, last INTEGER NOT NULL)
   del audio (`v`: los 12 primeros caracteres del `etag`, así un audio sustituido tiene otra URL); sin firma
   válida, 403. Sin onda (en `processing` o ya borrada), la línea plana. La petición no se registra
   (`RF-NOTIF-12`) y se cachea una semana.
+- **Carta del trimestre** (`season.wrap`, tarea 7.30): la imagen OG del perfil (`GET /api/og/profile/:username.png`,
+  §2.15), que es la carta de productor con lo público (solo semanas selladas). Es pública, así que no lleva firma; va
+  sin `v` (la de ahora, con caché de cinco minutos) y la ruta de las imágenes OG no registra las peticiones
+  (`RF-NOTIF-12`).
 - **QR del recibo**: `GET /api/email/qr/:entryId.png?sig=`, la matriz de `qrcode` (nivel de corrección M)
   pintada con el mismo codificador PNG: módulos negros sobre blanco con el margen de silencio de 4 módulos y
   6 px por módulo (en el email, a 132 px). Codifica la ficha pública de la entrada (`/e/:id`), que en voto
@@ -4197,7 +4219,7 @@ racha 6 → 500 · 1,5 = **750**; 50 votos en una semana → 40 · 5 = **200** c
 | `battle.first_votes` | «Tu beat ya suena: 5 votos» | Número de votos y de escuchas (sin media), botón para compartir |
 | `battle.label_pick` | «El sello ha elegido tu beat» | Frase del sello, enlace a la página de resultados y al widget del sello |
 | `game.progress` | «Nuevo rango: Beatmaker» / «Logro desbloqueado: Disco de oro» / «Nuevo rango: Loopero y 1 logro» | Tarjeta del rango (el nuevo, el que deja atrás, el nivel y el siguiente) y una por logro épico o legendario (nombre, condición, rareza y XP), botón a la carta (§2.12.7) |
-| `season.wrap` | «Tu T4 de 2026 en cifras» | Posición en la temporada, campeón, semanas jugadas, mejor puesto, votos emitidos, logros, la carta del trimestre |
+| `season.wrap` | «Tu T4 de 2026 en cifras» / «¡Campeón de la T4 de 2026!» | Posición en la temporada (puntos, victorias y podios; «sin clasificar» o «como jurado»), campeón o campeones ex aequo, semanas jugadas, mejor puesto, votos emitidos, logros de la temporada, la carta del trimestre (la imagen OG del perfil), botones a la clasificación y a la carta (§2.12.7) |
 | `mkt.campaign` | Lo define la campaña | Bloques del editor |
 | `mkt.reactivation` | «La batalla sigue sin ti» | Lo que se ha perdido (ganadores recientes, sample actual), botón para volver |
 
@@ -4233,6 +4255,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.133 | **Tarea 7.30** (`season.wrap`). §2.12 y §2.12.7: «Tu temporada en cifras» se encola en el `batch` que cierra la temporada (el sellado de su última semana o el primer `tick` tras el trimestre sin semana el último lunes; el `tick` no resume una temporada cerrada hace más de una semana) a cada cuenta verificada que participó o votó, una por cuenta y temporada; puesto, campeones, semanas, mejor puesto, votos que contaron, logros de la temporada (con los del propio `batch`) y la carta del trimestre; nada de la temporada siguiente. §4.19.5 y `RF-NOTIF-12`: la carta es la imagen OG pública del perfil, sin parámetros y sin registrar la petición. `RF-NOTIF-15` concreta su aceptación. §4.11: `season.wrap` en los dos `batch` del cierre. Anexo H: el asunto del campeón y el contenido. |
 | 2026-10-29 | 0.6.132 | **Tarea 7.28** (compartir la carta). §2.15: «Mi carta de productor» para *stories* en el perfil propio (D y «Compartir mi carta»: la carta pintada por CPU, inclinada −3° en la variante que se ve, «ENTRA EN LA BATALLA» y la dirección del perfil); compartida o descargada cualquiera de las tres tarjetas, con sesión, se declara `share_card` con la tarjeta, y cancelar la hoja de compartir no cuenta; **la imagen OG del perfil es su carta** (el anverso en su variante y, al lado, nombre, rango, nivel y cifras), con nivel, variante y logros de lo público. §2.10 y §4.10: `POST /api/me/achievements` lleva `card` y la de la batalla, su entrada (suya, si no 404): el logro va con la semana de la entrada (hueco G1, cerrado). §3.4.4: D en el perfil propio y la carta en un lienzo 2D por CPU (`cardCanvas`, la de *stories* y la textura de la 7.23). §3.8.10: D solo en el propio. §4.5: módulo `card` (las variantes, compartidas con el servidor). |
 | 2026-10-29 | 0.6.126 | **Tarea 7.32** (datos de prueba de la capa de juego). §4.4: el modo `season` de `seedBattle` (`seedSeason.ts`: la temporada anterior entera y cerrada con su campeón, las semanas selladas de la actual y esta abierta, jugadas por la API, con niveles de varios rangos, logros de cada rareza, rachas con el comodín gastado y récords del salón de la fama; al final, el reprocesado no tiene nada que añadir) y `playSeason` en los E2E (`tests/e2e/game.ts`). |
 | 2026-10-29 | 0.6.125 | **Tarea 7.16** (el reprocesado de la capa de juego). §2.10: lo que pasó antes de la capa de juego lo reparte el reprocesado, re-jugado en orden de calendario con las reglas de siempre; solo añade lo que falta (dos pasadas, o sobre lo que ya escribieron los ganchos en vivo, no cambian nada), cada fila lleva el instante de su hecho (no saca `game.progress`) y sus logros entran ya vistos; el nivel visto no cambia. `RF-GAME-01` amplía su aceptación con el reprocesado. §4.5: `replayAccount` en `replay`. §4.11: el reprocesado (script `game:reprocess`, con `--apply` y `--remote`; el corte guardado en `job_state` `gameReprocess` antes de escribir; qué re-juega, qué escribe y qué no puede recuperar). §4.12: el paso opcional `gameReprocess` del `tick` (`BB_GAME_REPROCESS`, una vez, antes de `sealWeeks`). §4.15: `BB_GAME_REPROCESS`. §4.16: `POST /api/test/game/reprocess` en los E2E. |

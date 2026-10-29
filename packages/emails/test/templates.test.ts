@@ -61,6 +61,12 @@ describe('plantillas de email (§3.8.12, §4.19.4)', () => {
           expect(src).toMatch(/\/api\/og\/result\/\d{4}-w\d{2}\/[\w-]+\?sig=[\w-]+$/)
           continue
         }
+        // La carta del trimestre de `season.wrap` (7.30): la imagen OG del perfil, pública (la misma que ve quien
+        // abre un enlace al perfil) y sin parámetros; el servidor no registra quién la pide.
+        if (src.includes('/api/og/profile/')) {
+          expect(src).toMatch(/^https:\/\/[^/]+\/api\/og\/profile\/[\w.-]+\.png$/)
+          continue
+        }
         // Las imágenes del juego, la cuenta atrás en vivo (§4.19.5) o la portada del sample (Cloudinary).
         const allowed = [
           `${PUBLIC_URL}/img/email/`,

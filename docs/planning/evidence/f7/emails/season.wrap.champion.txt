@@ -1,0 +1,47 @@
+Asunto: ¡Campeón de la T4 de 2026!
+Preheader: 1.º de 12 con 287 puntos, 13 semanas en juego y 98 votos.
+
+http://localhost:5184
+
+Temporada T4 de 2026 · cerrada
+
+
+¡CAMPEÓN DE LA TEMPORADA!
+
+287 puntos en la clasificación de la temporada, con 6 victorias y 11 podios.
+
+Tu carta ya lleva la corona.
+
+Ver la clasificación http://localhost:5184/temporada/2026-T4
+
+La temporada en cifras
+
+TEMPORADA 2026-T4
+
+Semanas jugadas 13
+
+Mejor puesto 1.º
+
+Votos emitidos 98
+
+Logros 3
+
+Platino · logro legendario · +300 XP
+
+Doblete · logro legendario · +300 XP
+
+Campeón de temporada · logro legendario · +300 XP
+
+Tu carta del trimestre
+
+Ver mi carta http://localhost:5184/p/kairo.wav
+
+La temporada siguiente ya está en juego: lo que ganes en sus semanas sale en tu carta cuando se sellan.
+
+----------------------------------------
+
+Un juego de Other People Records
+
+Recibes este aviso porque juegas en Beat Battle y lo tienes activado.
+
+Preferencias de email http://localhost:5184/ajustes/emails

@@ -4,8 +4,9 @@
  * `packages/emails/scripts/gallery.tsx` a 600 px (escritorio) y a 390 px (móvil) y guarda la página entera.
  * Con una carpeta de ondas (`apps/server/src/scripts/emailWaveforms.ts`), la onda de los recibos de ejemplo
  * se sirve desde allí por su versión (`?v=`), y el QR del ejemplo, de `qr.png`, en vez de pedirlos a la web
- * de producción; la tarjeta de resultado, de `card.png`. Chrome va sin
- * suavizado LCD, para que no cuente como color fuera de la paleta (acta F3, M12; acta F4, M10).
+ * de producción; la tarjeta de resultado, de `card.png`, y la carta del perfil de `season.wrap`, de
+ * `profile-card.png`. Chrome va sin suavizado LCD, para que no cuente como color fuera de la paleta (acta F3, M12;
+ * acta F4, M10).
  *
  *   node tools/shot/emails.mjs <carpeta-de-html> <carpeta-de-capturas> [carpeta-de-ondas]
  */
@@ -31,6 +32,11 @@ for (const file of (await readdir(input)).filter((f) => f.endsWith('.html') && f
     if (waveforms)
       await page.route('**/api/og/result/**', (route) =>
         route.fulfill({ path: path.join(waveforms, 'card.png'), contentType: 'image/png' }),
+      )
+    // La carta del perfil (7.30) de `season.wrap`, de `profile-card.png` (la pinta `media/ogImages`).
+    if (waveforms)
+      await page.route('**/api/og/profile/**', (route) =>
+        route.fulfill({ path: path.join(waveforms, 'profile-card.png'), contentType: 'image/png' }),
       )
     await page.goto(`file://${path.resolve(input, file)}`)
     await page.waitForLoadState('networkidle')
