@@ -3575,7 +3575,7 @@ con la pista).
     tiene reto) y queda en el top 10. La marca no se enseña a nadie hasta el sellado: distinguiría a una entrada en
     pleno voto ciego (§1.3).
 - **Franjas horarias, en hora de Madrid** (la de la semana) y con el reloj del servidor, que es quien las comprueba:
-  el del navegador se puede adelantar. `night_owl` cuenta los votos a 10 entradas distintas emitidos (no cambiados)
+  el del navegador se puede adelantar. `night_owl` pide votar 10 entradas distintas (votos nuevos, no cambios)
   entre las 03:00 y las 05:00 de una misma noche. `revetlla`, una visita entre las 21:00 del 23 de junio y las 06:00
   del 24.
 - **El resto.** `profile_done`: avatar, bio y al menos un enlace. `level_20`: el XP total llega al nivel 20, también
