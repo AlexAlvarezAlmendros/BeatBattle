@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.125 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.126 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2443,7 +2443,11 @@ beatbattle/
 ├─ tools/
 │  ├─ shot/                   capturas, bancos de FPS y de audio (de Orchard)
 │  └─ seed/                   (vacío) el generador de una semana en juego con entradas y votos es
-│                             `apps/server/src/scripts/seedBattle.ts` (usa la app); en E2E, `tests/e2e/battle.ts`
+│                             `apps/server/src/scripts/seedBattle.ts` (usa la app); en E2E, `tests/e2e/battle.ts`.
+│                             Su modo `season` (`seedSeason.ts`) juega la temporada anterior entera (cerrada con su
+│                             campeón), las semanas ya selladas de la actual y esta abierta, con 12 productores y 3
+│                             jurados: niveles de varios rangos, logros de cada rareza, rachas con el comodín gastado
+│                             y récords del salón de la fama; en E2E, `tests/e2e/game.ts` (`playSeason`)
 └─ docs/                      guia-maestra.md, planning/, legal/, security/
 ```
 
@@ -4028,6 +4032,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.126 | **Tarea 7.32** (datos de prueba de la capa de juego). §4.4: el modo `season` de `seedBattle` (`seedSeason.ts`: la temporada anterior entera y cerrada con su campeón, las semanas selladas de la actual y esta abierta, jugadas por la API, con niveles de varios rangos, logros de cada rareza, rachas con el comodín gastado y récords del salón de la fama; al final, el reprocesado no tiene nada que añadir) y `playSeason` en los E2E (`tests/e2e/game.ts`). |
 | 2026-10-29 | 0.6.125 | **Tarea 7.16** (el reprocesado de la capa de juego). §2.10: lo que pasó antes de la capa de juego lo reparte el reprocesado, re-jugado en orden de calendario con las reglas de siempre; solo añade lo que falta (dos pasadas, o sobre lo que ya escribieron los ganchos en vivo, no cambian nada), cada fila lleva el instante de su hecho (no saca `game.progress`) y sus logros entran ya vistos; el nivel visto no cambia. `RF-GAME-01` amplía su aceptación con el reprocesado. §4.5: `replayAccount` en `replay`. §4.11: el reprocesado (script `game:reprocess`, con `--apply` y `--remote`; el corte guardado en `job_state` `gameReprocess` antes de escribir; qué re-juega, qué escribe y qué no puede recuperar). §4.12: el paso opcional `gameReprocess` del `tick` (`BB_GAME_REPROCESS`, una vez, antes de `sealWeeks`). §4.15: `BB_GAME_REPROCESS`. §4.16: `POST /api/test/game/reprocess` en los E2E. |
 | 2026-10-29 | 0.6.107 | **Tarea 7.13** (huecos G1 y G13 del plan 07, resueltos). §2.10, «Lo público y lo propio»: **lo público solo cuenta semanas selladas** (el perfil público con su XP, nivel, teselas, historial, logros y vitrina, su OG, la temporada y el salón: los movimientos y logros con `week_id` sellado o nulo; nulo solo lo llevan hechos que no dependen de jugar una semana, como `profile_done`, `share_card` y el `level_20` que cruzan) y **`GET /api/me` es de su dueño y va en vivo** (XP, nivel y nivel visto, racha con comodín, temporada, logros sin ver y ceremonia de temporada pendiente); lo ya visto sale una vez (`RF-GAME-09`). §2.3: el perfil público con su capa de juego y la vitrina en `PUT /api/me/profile`. §2.15: la OG del perfil, con la misma regla. §4.10: `GET /api/me` y `POST /api/me/seen` (`level`, `achievement`, `season_champion`) con su forma; `GET /api/profiles/:username` en vez de `/api/producers/:username` (G13) y `GET · PUT /api/me/profile` en vez de `PATCH`, que nunca existieron. §4.11: la condición de lo público sobre `week_id`. |
 | 2026-10-29 | 0.6.106 | **Tarea 7.12.** §2.9, salón de la fama: todo sale de los snapshots vigentes de las semanas selladas (los ganadores en 1.ª posición, ex aequo incluidos; los campeones de cada temporada cerrada; más victorias; la racha más larga con el comodín; la mejor puntuación de una entrada clasificada; más votos emitidos, los válidos que contó cada snapshot); con la misma cifra, el récord es de quien llegó antes; un productor eliminado sigue como «Productor eliminado». §4.10: `GET /api/hall-of-fame` con su forma. |
