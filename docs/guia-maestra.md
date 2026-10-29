@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.92 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.93 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -571,6 +571,19 @@ ofrece la ceremonia de revelación. Dura unos 25 s y se puede saltar.
 Se guarda como un **libro de movimientos** idempotente (`xp_event` con clave única por
 `usuario + tipo + referencia`): repetir un evento nunca suma dos veces. El nivel es una función
 pura del XP total.
+
+- **Subir** da su XP cuando la entrada pasa a `active`, una vez por semana, con el bonus de la **racha en juego**:
+  la que dejan las semanas selladas más esta, como si clasificara. Es la misma racha con la que se paga el
+  resultado al sellar si clasifica. La **primera entrada de la semana** es la primera que pasa a `active`; hay una
+  por semana.
+- **El XP en vivo no se retira.** Si la entrada se retira o acaba sin clasificar, el XP de subir y el de primera
+  entrada se quedan, y la primera entrada no pasa a otra. Quitar un voto (`RF-VOTE-13`) no resta y volver a votar
+  esa entrada no suma (cuenta el primer voto a cada entrada). Un voto que deja de ser válido (anulado por
+  moderación, o de una entrada retirada o descalificada) conserva su XP y sigue contando para el tope semanal:
+  quien vota limpio no pierde lo ganado por lo que hagan otros, y el fraude se sanciona en moderación (§2.13).
+- **Semana dorada:** duplica el XP de los eventos de esa semana (Anexo B), no el de los logros, que es siempre
+  el de su rareza (sin racha ni semana dorada). Cada importe con bonus se redondea al entero antes de duplicarlo
+  (Anexo G).
 
 **Niveles y rangos.** 20 niveles con curva `150 · (n − 1)^1,6` (Anexo B). Cada pocos niveles cambia
 el **rango** (título visible en la carta): *Excavador de cajones* → *Loopero* → *Sampleador* →
@@ -3435,16 +3448,16 @@ no aplica: BeatBattle deja de copiar la web del sello (§3.1).
 
 | Evento | XP | Notas |
 |---|---|---|
-| Subir entrada | 100 | × bonus de racha |
-| Primera entrada de la semana | +25 | La primera de **toda** la semana (como el logro `early_bird`), no la primera del usuario |
-| Votar (primer voto a cada entrada) | 5 | Tope: 40 votos con XP por semana |
-| Jurado completo (todas las entradas, mín. 5) | 50 | — |
+| Subir entrada | 100 | × bonus de la racha en juego (§2.10); una vez por semana, aunque se retire y se vuelva a subir |
+| Primera entrada de la semana | +25 | La primera de **toda** la semana en pasar a `active` (como el logro `early_bird`), no la primera del usuario; se queda aunque se retire |
+| Votar (primer voto a cada entrada) | 5 | Tope: 40 votos con XP por semana. Quitarlo no lo resta y volver a votar no lo suma; anulado, se queda y cuenta para el tope |
+| Jurado completo (todas las entradas, mín. 5) | 50 | Haber votado todas las entradas activas que puede votar (las ajenas), si son 5 o más; una vez por semana |
 | Clasificar | 25 | × bonus de racha |
 | Top 10 / 3.º / 2.º / 1.º | 100 / 250 / 350 / 500 | × bonus de racha; sustituyen a «clasificar» |
 | Oído de oro | 75 | — |
 | Acertar productor (Fase 8) | 15 | Tope: 5 por semana |
-| Logro | Según rareza: 25 / 75 / 150 / 300 | — |
-| Semana dorada | × 2 a todo lo de esa semana | — |
+| Logro | Según rareza: 25 / 75 / 150 / 300 | Sin bonus de racha ni semana dorada |
+| Semana dorada | × 2 a todo lo de esa semana | A los eventos de esta tabla de esa semana (subir, primera entrada, votos, jurado completo, resultado, oído de oro y acertar productor), después de redondear; no a los logros |
 | Bonus de racha | +10 % por semana desde la 2.ª, máx. +50 % | Un comodín por temporada |
 
 **Niveles**: XP acumulado para el nivel `n` = `round50(150 · (n − 1)^1,6)`.
@@ -3654,6 +3667,12 @@ fórmula de Pearson sobre rangos. Casos de prueba: sin empates, `[1,2,3,4,5]` fr
 
 **Racha.** `bonus = min(0,5, 0,1 · (racha − 1))` para `racha ≥ 2`.
 
+**XP de un evento.** `xp = dorada · ⌊(base · (100 + b) + 50) / 100⌋`, con `b` el bonus de racha en puntos
+porcentuales (solo en subir y en el resultado; 0 en el resto) y `dorada` = 2 en semana dorada y 1 si no: el bonus
+se redondea al entero con las mitades hacia arriba y la semana dorada duplica el entero. Subir con racha 4 →
+100 · 1,3 = **130** (260 en dorada); clasificar con racha 2 → 25 · 1,1 = 27,5 → **28** (56 en dorada); ganar con
+racha 6 → 500 · 1,5 = **750**; 50 votos en una semana → 40 · 5 = **200** como mucho (`RF-GAME-03`).
+
 **Ganancia de sonoridad.** `gananciaDb = min(0, −14 − lufs)`.
 
 ### Anexo H — Emails
@@ -3717,6 +3736,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.93 | **Tarea 7.1** (huecos G3, G11 y G12 del plan 07). §2.10, Anexo B y Anexo G: subir da su XP al pasar a `active`, una vez por semana, con la **racha en juego** (la de las semanas selladas más esta, la misma con la que se paga el resultado); la primera entrada de la semana es la primera en pasar a `active`. **El XP en vivo no se retira**: ni al retirar la entrada o no clasificar, ni al quitar un voto (volver a votar no suma), ni cuando un voto queda anulado (sigue contando para el tope). La semana dorada duplica los eventos del Anexo B de esa semana, no los logros, que no llevan racha ni dorada. Redondeo: el bonus, al entero con las mitades hacia arriba, y la dorada duplica el entero. El jurado completo cuenta las entradas activas ajenas (5 o más). |
 | 2026-10-29 | 0.6.92 | §5 (hueco G14 del plan 07): el texto y el grafo ya no ponen la F7 y la F9 tras la beta. Desde el 2026-10-29 (decisión del usuario, «todo hasta el lanzamiento») cuelgan de la F6 y avanzan en paralelo con la beta; la F8 sigue tras la F7 y la F10, tras la F7–F9. |
 | 2026-10-16 | 0.6.90 | §2.14 (arreglo, `RF-ADM-01`): en un sample nuevo, las subidas que empiezan mientras se firma la primera esperan su id. Elegir la portada antes de que volviera la firma del audio daba dos ids y «Crear el sample» decía «La parte «original» no está subida» (lo destapó la CI en `weeks.spec.ts`). |
 | 2026-10-16 | 0.6.89 | §4.19.1, §7: los emails salen de `justsomeotherpeople@gmail.com`, el Gmail del sello (decisión del usuario), con `MAIL_DAILY_LIMIT` de 450: `otherpeople.es` no tiene Workspace. |

@@ -24,8 +24,8 @@
 // De la Fase 6 (tarea 6.1):
 //   ranking    la clasificación de la semana: bayesiana, desempates, ex aequo y podio
 //
-// El resto de §4.5 llega con la fase que lo usa (ver docs/planning/ROADMAP.md): `xp` (`xpFor`, `streakOf`), `achievements`,
-// `seasonStandings` y `goldenEar()`.
+// De la Fase 7 (tareas 7.1–7.6, la capa de juego):
+//   xp         `xpFor` con la tabla del Anexo B (racha en juego, topes, semana dorada)
 
 export * from './alias'
 export * from './balance'
@@ -41,3 +41,4 @@ export * from './prng'
 export * from './ranking'
 export * from './scoring'
 export * from './season'
+export * from './xp'
