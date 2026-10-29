@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.97 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.98 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -3630,7 +3630,10 @@ efectos al 100 %; variación = desafinación aleatoria por disparo.
 | `combo.up` | Combo en el Modo Jurado | Blip + un semitono por combo | 120 ms | −18 | 0 |
 | `jury.swap` | Cambio de entrada | *Scratch* corto (ruido con barrido de tono rápido) | 300 ms | −16 | ±1 st |
 | `level.up` | Subir de nivel | Fanfarria: arpegio de 6 notas + acorde, FM brillante | 1,6 s | −8 | 0 |
-| `ach.common/rare/epic/legendary` | Logro | Campanitas de 2 / 3 / 4 notas / acorde con coro de ruido filtrado | 0,5–2 s | −14 a −8 | 0 |
+| `ach.common` | Logro común | 2 campanitas FM (el timbre de `ui.success`) de la tríada de la tónica: quinta → octava | 0,5 s | −14 | 0 |
+| `ach.rare` | Logro raro | 3 campanitas de la tríada: tercera → quinta → octava | 0,8 s | −12 | 0 |
+| `ach.epic` | Logro épico | 4 campanitas de la tríada: tónica → tercera → quinta → octava | 1,2 s | −10 | 0 |
+| `ach.legendary` | Logro legendario | Acorde de campanas de la tríada rasgueado en 90 ms y coro de ruido rosa por pasos banda estrechos en el acorde (una octava abajo) y la tónica dos octavas abajo, que crece en 0,5 s | 2 s | −8 | 0 |
 | `cer.drumroll` | Ceremonia | Redoble de caja sintética (ráfagas de ruido) en crescendo | 4 s (de 3–5) | −14→−8 | 0 |
 | `cer.tear` | Se arranca el sello «AUTORÍA OCULTA» (§3.8.6) | Papel que se rasga | 300 ms | −16 | 0 |
 | `cer.reveal` | Revelación de cada puesto | Golpe de bombo + platillo | 800 ms | −8 | 0 |
@@ -3808,6 +3811,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.98 | **Tarea 7.17.** Anexo D: la fila `ach.common/rare/epic/legendary` se desdobla en cuatro con su duración y su nivel (0,5 / 0,8 / 1,2 / 2 s y −14 / −12 / −10 / −8 dB, dentro del rango que daba) y sus notas: la tríada de la tónica de la semana, que cae en la pentatónica en mayor y en menor (§3.7.1). |
 | 2026-10-29 | 0.6.97 | **Tarea 7.5** (huecos G8 y G4, la parte de la regla, del plan 07). Anexo C, «Cómo se evalúan»: por eventos, sin repetir ni retirar ningún logro; qué cuentan «entradas» y «votos»; la ventana de `last_minute` con `submitted_at`; `comeback` por debajo de la mediana de las clasificadas; `double` y `oracle` por semanas de número consecutivo; `challenge`, marcar el reto extra en la ficha y quedar en el top 10, con la marca oculta hasta el sellado (§1.3). **Las franjas horarias de los logros van en hora de Madrid y con el reloj del servidor** (`night_owl`: 10 votos a entradas distintas entre las 03:00 y las 05:00 de una misma noche; `revetlla`: de las 21:00 del 23 de junio a las 06:00 del 24). Los umbrales de los secretos de la Fase 8. §4.5: qué lleva el catálogo y `nightOwlWindow` e `isRevetllaNight`. |
 | 2026-10-29 | 0.6.96 | **Tarea 7.4** (hueco G10 del plan 07). §2.9: entra en la clasificación de la temporada quien tiene al menos una entrada clasificada en una semana sellada (quien solo tiene semanas sin clasificar, no); victorias y podios cuentan los ex aequo; la puntuación media es la de la puntuación del snapshot de sus entradas clasificadas, comparada exacta; con todo empatado comparten posición y en la primera son campeones ex aequo. La última semana de una temporada es la de su último lunes. §4.5: `seasonStandings`, `seasonChampions` e `isLastWeekOfSeason`. |
 | 2026-10-29 | 0.6.95 | **Tarea 7.3** (hueco G9 del plan 07). §2.10: el oído de oro correlaciona con la **puntuación** de las entradas que votó (no con la posición, que las sin clasificar no tienen), con ≥ 8 votos válidos, y recalcula la semana **como si no hubiera votado**: sin sus votos tampoco en la media `m`. Puntuaciones exactas, sin redondear; sin ρ definida no hay oído de oro. §4.5: `goldenEar(jurado, votosDeLaSemana)`. Anexo G: el caso de `RF-GAME-06` (no gana con ρ = 22/√1501, habría ganado con sus votos; gana cambiando una estrella). |
