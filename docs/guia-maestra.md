@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.107 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.125 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -664,6 +664,15 @@ pura del XP total.
   - La respuesta del voto y la de la entrada (registrarla y sustituir el audio) dicen lo ganado,
     `game: { xp, achievements, level }`, para el «+5 XP» flotante, el aviso de logro y la subida de nivel; una entrada
     que queda en `processing` no gana nada hasta que el `tick` la activa (`game.xp = 0`).
+- **Lo que pasó antes de la capa de juego** lo reparte el **reprocesado** (§4.11; tarea 7.16): el XP y los logros de
+  las descargas, las entradas, los votos, las semanas selladas y las temporadas cerradas, re-jugados en orden de
+  calendario con las mismas reglas que en vivo (la racha en juego, el tope de votos, el jurado completo, el oído de
+  oro). Solo **añade lo que falta**: reprocesar dos veces, o sobre una base en la que los ganchos en vivo ya
+  escribieron, no cambia nada; nunca resta ni retira (eso es del re-sellado, §2.8). Cada movimiento y cada logro
+  llevan el **instante de su hecho**, así que lo pasado no cuenta como de hoy y no saca `game.progress`; y **no se
+  anuncia**: sus logros entran ya vistos. El nivel visto no cambia: la subida de nivel sale una vez, con el nivel
+  alcanzado (`RF-GAME-09`). Lo que la base ya no guarda no vuelve: los votos a entradas retiradas y los quitados,
+  `share_card` y lo de las cuentas borradas.
 
 **Niveles y rangos.** 20 niveles con curva `150 · (n − 1)^1,6` (Anexo B). Cada pocos niveles cambia
 el **rango** (título visible en la carta): *Excavador de cajones* → *Loopero* → *Sampleador* →
@@ -730,7 +739,7 @@ batalla ciega, justo lo que §2.15 evita en el sitemap y en la imagen OG. Por es
 
 | Id | Requisito | Aceptación |
 |---|---|---|
-| `RF-GAME-01` | Libro de XP idempotente | Reprocesar el sellado de una semana no cambia el XP de nadie |
+| `RF-GAME-01` | Libro de XP idempotente | Reprocesar el sellado de una semana no cambia el XP de nadie; reprocesar la historia (§4.11) dos veces, o sobre una base en la que los ganchos en vivo ya escribieron, no cambia nada |
 | `RF-GAME-02` | Nivel y rango como función pura del XP | Tabla del Anexo B testeada en sus fronteras |
 | `RF-GAME-03` | Reglas de XP del Anexo B, incluidos topes semanales | 50 votos en una semana dan como máximo 40 × 5 XP |
 | `RF-GAME-04` | Rachas con bonus y comodín de temporada | Escenario: 4 semanas, falla la 5.ª (gasta el comodín), falla la 6.ª (se rompe) |
@@ -2458,7 +2467,7 @@ tests de propiedades.
 | `season` | `seasonPoints(posicion, clasificada)`; `seasonStandings(resultados)` (puntos, victorias, podios, media y posición con ex aequo) y `seasonChampions(tabla)`; `isSeasonClosed(temporada, semanas, now)` (acabado el trimestre y todas sus semanas selladas, §2.9) |
 | `levels` | `xpForLevel(n)`; `levelOf(xp)`; `levelProgress(xp)` (barra del HUD); `rankTitle(nivel)` → **id de rango** (`crateDigger` … `otherPeople`; el texto sale de i18n con `rank.<id>`); `streakBonus` y `streakBonusPercent` |
 | `xp` | `xpFor(evento, contexto)`; `streakOf(historial)` (Fase 7) |
-| `replay` | `replaySealedWeeks(semanas)` → por cada semana sellada de una cuenta, en orden de número: el XP de resultado (con la racha en juego) y de oído de oro, la racha tras ella y los logros de resultado que se cumplen (una semana sin sellar en medio se salta). Lo usan el sellado y el re-sellado (§2.8) y el reprocesado |
+| `replay` | `replaySealedWeeks(semanas)` → por cada semana sellada de una cuenta, en orden de número: el XP de resultado (con la racha en juego) y de oído de oro, la racha tras ella y los logros de resultado que se cumplen (una semana sin sellar en medio se salta). Lo usan el sellado y el re-sellado (§2.8) y el reprocesado. `replayAccount(historia)` → lo que la capa de juego habría dado a una cuenta desde el principio (descargas, entradas, votos, semanas selladas, temporadas ganadas y perfil, en orden de calendario): el libro ideal, con el instante de cada hecho, y el primer hecho de cada logro; la base del reprocesado (§4.11) |
 | `prng` | `hashOf(...partes)`, `sfc32`, `createRng(semilla)` con `next`, `int`, `pick`, `shuffle`; `rngFor(...partes)` para flujos con nombre |
 | `loudness` | `playbackGainDb(lufs)` (solo atenúa) |
 | `achievements` | Catálogo (Anexo C) como datos (id, rareza, oculto, clave de la pista, eventos que lo miran y fase de su disparador) + `evaluate(evento, contexto) → logros nuevos`; `nightOwlWindow(instante)` y `isRevetllaNight(instante)` en hora de Madrid |
@@ -3087,6 +3096,29 @@ calculado (`xpFor` de `packages/rules`):
   franja de `night_owl`, por su `created_at` (votos nuevos, no cambios); el jurado completo, las entradas activas
   ajenas de la semana y las que ha votado. La **racha en juego** de subir sale de las semanas selladas anteriores
   (`streakOf` sobre su revisión vigente), no de la caché `streak_state`.
+- **El reprocesado** (§2.10; `modules/game/reprocess.ts`, tarea 7.16) reparte lo que ya pasó: el script
+  `pnpm --filter @beatbattle/server game:reprocess` (sin `--apply` solo dice lo que haría; contra una base remota pide
+  además `--remote`) y, opcional, un paso del `tick` (§4.12). Re-juega la historia de cada cuenta con `replayAccount`
+  —las entradas que llegaron a `active` (con onda y fuera de `processing`, también las retiradas o descalificadas
+  después, con su `submitted_at` como instante), sus votos (con los anulados), la primera descarga de cada semana, el
+  snapshot vigente de las semanas selladas, las temporadas cerradas de las que es campeona (cerradas al acabar el
+  trimestre o al sellarse la última semana que faltaba, lo que llegue después) y su perfil (con la fecha de alta, que
+  no se sabe cuándo lo completó)— y escribe, en un `batch` por cuenta y con `INSERT … ON CONFLICT DO NOTHING`, solo
+  lo que falta en el libro: nunca resta ni retira.
+  - **El corte.** Lo anterior a un instante es del reprocesado y lo de después, de los ganchos en vivo: el primer
+    movimiento o logro del libro la primera vez que se reprocesa (desde ahí la capa de juego ya escribía) o, con el
+    libro vacío, el instante de esa primera vez. Se guarda en `job_state` (`gameReprocess`) **antes** de escribir nada
+    y las pasadas siguientes usan el mismo. Del corte en adelante no reparte movimientos (el XP de los votos, de subir,
+    del jurado completo, del resultado y del oído de oro de las semanas selladas después ya lo escribió el sellado en
+    vivo; para la racha y los logros de resultado, su oído de oro es el del libro); antes, el oído de oro de cada semana
+    se calcula con sus votos válidos de ahora (`computeSnapshot`), como al sellarla. La primera entrada de una semana
+    es la del libro si ya la hay o la que antes llegó a `active` antes del corte.
+  - **Lo que escribe.** Los movimientos de hechos anteriores al corte que no están (el tope semanal de votos cuenta
+    también lo escrito en vivo, dentro del propio `INSERT`), los logros que la cuenta no tiene con su XP (`jury_full`,
+    solo si el voto que completa el jurado es anterior al corte), `level_20` si el libro con lo nuevo cruza el nivel
+    20 (en el instante en que lo cruza), la racha si cambia (`current`, `best` o la temporada del comodín) y la caché.
+    Cada fila con el instante de su hecho; los logros, ya vistos (`seen_at` = ese instante). Todo con la condición de
+    que la cuenta exista; antes, sella lo que ya cerró (el sellado perezoso), y con la *lease* `gameReprocess`.
 
 ### 4.12 Tiempo, calendario y tareas programadas
 
@@ -3099,6 +3131,7 @@ calculado (`xpFor` de `packages/rules`):
 
 | Tarea | Cuándo hace algo |
 |---|---|
+| `gameReprocess` | Solo con `BB_GAME_REPROCESS=1` (apagada por defecto) y una vez: el reprocesado de la capa de juego (§4.11) hasta que `job_state` `gameReprocess` dice que ha terminado; va antes de `sealWeeks` para que lo que ya pasó (el campeón de una temporada que cierra el `tick`) lleve el instante de su hecho |
 | `sealWeeks` | Semanas con `vote_ends_at` pasado y sin `sealed_at` (también se dispara de forma perezosa en las lecturas); después, las temporadas cuyo trimestre ha acabado con todas sus semanas selladas y sin la semana de su último lunes (§2.9, su campeón) |
 | `finishProcessing` | Entradas en `processing` |
 | `emailSchedule` | Encola los avisos programados del catálogo (§2.12): lunes 08:00, sábado 18:00, domingo 17:00, resumen diario de progreso a las 19:00, resumen de temporada al sellar, reactivación, campañas programadas |
@@ -3213,7 +3246,7 @@ Referencias: OWASP ASVS nivel 2 y las chuletas de autenticación, sesiones y sub
 - **Variables**: `BB_PUBLIC_URL`, `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `BETTER_AUTH_SECRET`,
   `GOOGLE_CLIENT_ID/SECRET`, `DISCORD_CLIENT_ID/SECRET`, `CLOUDINARY_*`, `BB_CLOUDINARY_PREFIX`,
   `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `EMAIL_FROM_NAME`, `EMAIL_FROM_ADDRESS` (mismos nombres que
-  el sello), `MAIL_REPLY_TO`, `MAIL_DAILY_LIMIT`, `UNSUBSCRIBE_SECRET`, `SMTP_URL` (solo local, Mailpit), `OTP_NEWSLETTER_API`, `CRON_SECRET`, `BB_FAKE_STORAGE` (solo E2E y desarrollo), `FFMPEG_PATH`,
+  el sello), `MAIL_REPLY_TO`, `MAIL_DAILY_LIMIT`, `UNSUBSCRIBE_SECRET`, `SMTP_URL` (solo local, Mailpit), `OTP_NEWSLETTER_API`, `CRON_SECRET`, `BB_GAME_REPROCESS` (apagada; el paso opcional del `tick`, §4.12, solo para el despliegue de la Fase 7 y con la confirmación del usuario), `BB_FAKE_STORAGE` (solo E2E y desarrollo), `FFMPEG_PATH`,
   `IP_HASH_SALT`, `OTP_ORIGINS`, `SENTRY_DSN` (opcional).
 - **Orígenes**: fuera de producción, `ALLOWED_ORIGINS` vale por defecto `http://localhost:5173`. En
   producción `BB_PUBLIC_URL` es obligatoria y su origen siempre se permite; en las previews de Vercel
@@ -3232,7 +3265,7 @@ Referencias: OWASP ASVS nivel 2 y las chuletas de autenticación, sesiones y sub
 | Audio | Batería del sello (BPM y tonalidad con pistas sintéticas), forma de onda, sonoridad contra referencias, efectos renderizados *offline* (no saturan, duran lo previsto) | Vitest + `OfflineAudioContext` (o equivalente en Node) |
 | Servidor | Flujos de Better Auth, permisos por rol, voto (todas las reglas `RF-VOTE-*`), subida con almacenamiento falso, sellado concurrente, rate limits, contrato de voto ciego, emails idempotentes | Vitest + libSQL en memoria |
 | Componentes | Estrellas, forma de onda, cuenta atrás, reproductor, formularios | Vitest + Testing Library |
-| E2E | Registro → verificación → descarga → subida → otro usuario escucha y vota → reloj al cierre → sellado → resultados y ceremonia; Modo Jurado solo con teclado; moderación; borrado de cuenta | Playwright (almacenamiento falso, reloj de prueba, `Mailer` en memoria; con `NODE_ENV=test`, `GET /api/test/mailbox?to=` da el último email a una dirección para seguir sus enlaces y `GET /api/test/unsubscribe-link?to=&kind=` el enlace de baja de un aviso; fuera de test esas rutas no existen. La API de los E2E confía en el proxy (`TRUST_PROXY=1`) y cada prueba que registra cuentas manda su propia IP en `X-Forwarded-For`, porque el registro admite 3 altas por hora y por IP; nombres y emails llevan un sufijo por repetición e intento) |
+| E2E | Registro → verificación → descarga → subida → otro usuario escucha y vota → reloj al cierre → sellado → resultados y ceremonia; Modo Jurado solo con teclado; moderación; borrado de cuenta | Playwright (almacenamiento falso, reloj de prueba, `Mailer` en memoria; con `NODE_ENV=test`, `GET /api/test/mailbox?to=` da el último email a una dirección para seguir sus enlaces y `GET /api/test/unsubscribe-link?to=&kind=` el enlace de baja de un aviso; `POST /api/test/game/reprocess` reprocesa la capa de juego (§4.11) con el reloj de la petición; fuera de test esas rutas no existen. La API de los E2E confía en el proxy (`TRUST_PROXY=1`) y cada prueba que registra cuentas manda su propia IP en `X-Forwarded-For`, porque el registro admite 3 altas por hora y por IP; nombres y emails llevan un sufijo por repetición e intento) |
 | Visual | Capturas de referencia de cada pantalla en 1440 y 390 px, con calidad alta y apagada; paleta y negro (`RD-VIS-02`), texto ≥ 12 px y nunca sobre trama (`RD-VIS-05`), firma en cada ruta (`RF-OTP-01`); comparadas con las maquetas de `docs/planning/evidence/f0/arena/` | Playwright + `tools/shot` |
 | Accesibilidad | axe en cada pantalla | Playwright + axe |
 | Email | Cada plantilla renderiza HTML y texto plano con sus *fixtures*; reglas de familia, preferencias, horas de silencio, tope, presupuesto diario e idempotencia; lectura de rebotes; contrato de voto ciego sobre el contenido; capturas de la galería de emails | Vitest + `Mailer` en memoria + Playwright sobre el visor |
@@ -3995,6 +4028,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.125 | **Tarea 7.16** (el reprocesado de la capa de juego). §2.10: lo que pasó antes de la capa de juego lo reparte el reprocesado, re-jugado en orden de calendario con las reglas de siempre; solo añade lo que falta (dos pasadas, o sobre lo que ya escribieron los ganchos en vivo, no cambian nada), cada fila lleva el instante de su hecho (no saca `game.progress`) y sus logros entran ya vistos; el nivel visto no cambia. `RF-GAME-01` amplía su aceptación con el reprocesado. §4.5: `replayAccount` en `replay`. §4.11: el reprocesado (script `game:reprocess`, con `--apply` y `--remote`; el corte guardado en `job_state` `gameReprocess` antes de escribir; qué re-juega, qué escribe y qué no puede recuperar). §4.12: el paso opcional `gameReprocess` del `tick` (`BB_GAME_REPROCESS`, una vez, antes de `sealWeeks`). §4.15: `BB_GAME_REPROCESS`. §4.16: `POST /api/test/game/reprocess` en los E2E. |
 | 2026-10-29 | 0.6.107 | **Tarea 7.13** (huecos G1 y G13 del plan 07, resueltos). §2.10, «Lo público y lo propio»: **lo público solo cuenta semanas selladas** (el perfil público con su XP, nivel, teselas, historial, logros y vitrina, su OG, la temporada y el salón: los movimientos y logros con `week_id` sellado o nulo; nulo solo lo llevan hechos que no dependen de jugar una semana, como `profile_done`, `share_card` y el `level_20` que cruzan) y **`GET /api/me` es de su dueño y va en vivo** (XP, nivel y nivel visto, racha con comodín, temporada, logros sin ver y ceremonia de temporada pendiente); lo ya visto sale una vez (`RF-GAME-09`). §2.3: el perfil público con su capa de juego y la vitrina en `PUT /api/me/profile`. §2.15: la OG del perfil, con la misma regla. §4.10: `GET /api/me` y `POST /api/me/seen` (`level`, `achievement`, `season_champion`) con su forma; `GET /api/profiles/:username` en vez de `/api/producers/:username` (G13) y `GET · PUT /api/me/profile` en vez de `PATCH`, que nunca existieron. §4.11: la condición de lo público sobre `week_id`. |
 | 2026-10-29 | 0.6.106 | **Tarea 7.12.** §2.9, salón de la fama: todo sale de los snapshots vigentes de las semanas selladas (los ganadores en 1.ª posición, ex aequo incluidos; los campeones de cada temporada cerrada; más victorias; la racha más larga con el comodín; la mejor puntuación de una entrada clasificada; más votos emitidos, los válidos que contó cada snapshot); con la misma cifra, el récord es de quien llegó antes; un productor eliminado sigue como «Productor eliminado». §4.10: `GET /api/hall-of-fame` con su forma. |
 | 2026-10-29 | 0.6.105 | **Tarea 7.11** (hueco G7 del plan 07, resuelto: el cierre de la temporada). §2.9: una temporada se cierra cuando ha acabado su trimestre (00:00 del día 1 del siguiente, hora de Madrid) y todas sus semanas están selladas: la cierra el sellado de la semana de su último lunes, que siempre acaba después del trimestre, en su `batch`; sin semana ese lunes, el primer `tick` tras el fin del trimestre; sin semanas, nunca. Sus campeones (la primera fila, también ex aequo) ganan `season_champ` y su ceremonia queda pendiente hasta la marca `season_champion` (`RF-ARC-05` lo dice así); los campeones salen de los snapshots, así que re-sellar una semana de una temporada cerrada puede cambiarlos (gana el nuevo, pierde con su XP quien deja de serlo de toda temporada cerrada). §4.5: `seasonEndsAt` e `isSeasonClosed`. §4.10: `GET /api/seasons/:id/standings` con su forma. §4.11: el cierre en el `batch` del sellado y en el `tick` (`job_state` `seasonClose`). §4.12: `sealWeeks` cierra las temporadas sin semana el último lunes. |

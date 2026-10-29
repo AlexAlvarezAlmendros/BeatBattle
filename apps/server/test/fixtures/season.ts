@@ -1,4 +1,5 @@
 import { addDays, type LocalDate, scheduleWeek, seasonOf, weekSlug } from '@beatbattle/rules'
+import type { AppConfig } from '../../src/config/env'
 import { entry, sample, vote, week } from '../../src/db/schema'
 import { createAccount } from '../helpers'
 import { entryValues } from './battle'
@@ -38,13 +39,16 @@ export async function simSeason({
   count,
   producers = 3,
   stars,
+  config = {},
 }: {
   first?: LocalDate
   count: number
   producers?: number
   stars: (week: number, producer: number) => number[] | null
+  /** Configuración extra de la app (p. ej. `gameReprocess`, el paso opcional del `tick`). */
+  config?: Partial<AppConfig>
 }): Promise<SimSeason> {
-  const t = await makeWeeksApp({ cronSecret: CRON })
+  const t = await makeWeeksApp({ cronSecret: CRON, ...config })
   await createSample(t)
   const [s] = await t.db.select({ id: sample.id }).from(sample)
   const people: SimSeason['producers'] = []

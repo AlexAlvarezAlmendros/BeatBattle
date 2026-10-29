@@ -87,6 +87,8 @@ export interface Unlock {
   ref: string | null
   weekId: string | null
   now: number
+  /** Ya visto (el reprocesado no anuncia lo pasado, §2.10): `seen_at`; por defecto, sin ver. */
+  seenAt?: number | null
 }
 
 /** ¿Tiene la cuenta el logro? (dentro del `batch`, con lo ya escrito en él). */
@@ -108,8 +110,8 @@ export function unlockStatements(
 ): BatchStatement[] {
   return [
     db.run(sql`
-      INSERT INTO achievement_unlock (user_id, achievement_id, ref, week_id, unlocked_at)
-      SELECT ${u.userId}, ${u.achievementId}, ${u.ref}, ${u.weekId}, ${u.now}
+      INSERT INTO achievement_unlock (user_id, achievement_id, ref, week_id, unlocked_at, seen_at)
+      SELECT ${u.userId}, ${u.achievementId}, ${u.ref}, ${u.weekId}, ${u.now}, ${u.seenAt ?? null}
       ${whereAll([guard])}
       ON CONFLICT DO NOTHING`),
     xpMovementStatement(
