@@ -130,6 +130,41 @@ describe('balance: niveles, rangos y temporadas (Anexo B)', () => {
   })
 })
 
+describe('balance: logros (Anexo C)', () => {
+  it('RF-GAME-05: los umbrales del catálogo', () => {
+    expect(balance.PROFILE_DONE_MIN_LINKS).toBe(1)
+    expect([balance.ENTRIES_10_MIN_ENTRIES, balance.ENTRIES_50_MIN_ENTRIES]).toEqual([10, 50])
+    expect([balance.VOTES_100_MIN_VOTES, balance.VOTES_1000_MIN_VOTES]).toEqual([100, 1000])
+    expect([balance.STREAK_3_MIN_WEEKS, balance.STREAK_8_MIN_WEEKS, balance.STREAK_26_MIN_WEEKS]).toEqual([
+      3, 8, 26,
+    ])
+    expect(balance.WIN_3_MIN_WINS).toBe(3)
+    expect([balance.UNANIMOUS_MIN_VOTES, balance.UNANIMOUS_MIN_MEAN_MILLI]).toEqual([10, 4800])
+    expect(balance.CHALLENGE_MAX_POSITION).toBe(balance.TOP_TEN_LAST_POSITION)
+    expect(balance.ORACLE_MIN_WEEKS).toBe(3)
+    expect(balance.DETECTIVE_MIN_GUESSES).toBe(5)
+  })
+
+  it('RF-GAME-05: las franjas horarias, en hora de Madrid', () => {
+    expect(balance.LAST_MINUTE_WINDOW_MS).toBe(10 * 60 * 1000)
+    expect(balance.NIGHT_OWL_MIN_VOTES).toBe(10)
+    expect(balance.NIGHT_OWL_FROM).toEqual({ hour: 3, minute: 0, second: 0 })
+    expect(balance.NIGHT_OWL_UNTIL).toEqual({ hour: 5, minute: 0, second: 0 })
+    expect(balance.REVETLLA_FROM).toEqual({ month: 6, day: 23, hour: 21, minute: 0, second: 0 })
+    expect(balance.REVETLLA_UNTIL).toEqual({ month: 6, day: 24, hour: 6, minute: 0, second: 0 })
+  })
+
+  it('RF-GAME-05: los secretos de la Fase 8 (Anexo F)', () => {
+    expect([balance.SCRATCH_CLICKS, balance.SCRATCH_WINDOW_MS]).toEqual([7, 3000])
+    expect(balance.KONAMI_SEQUENCE.join(' ')).toBe(
+      'ArrowUp ArrowUp ArrowDown ArrowDown ArrowLeft ArrowRight ArrowLeft ArrowRight b a',
+    )
+    expect(balance.PAD_404_MIN_HITS).toBe(1)
+    expect(balance.SCREWED_HOLD_MS).toBe(5000)
+    expect([balance.TAP_TEMPO_TAPS, balance.TAP_TEMPO_TOLERANCE_BPM]).toEqual([8, 1])
+  })
+})
+
 describe('balance: inmutabilidad', () => {
   it('todas las tablas y horas están congeladas, también por dentro', () => {
     const frozen = [
@@ -144,6 +179,11 @@ describe('balance: inmutabilidad', () => {
       ...balance.RANK_LADDER,
       balance.SEASON_POINTS_BY_POSITION,
       balance.ENTRY_FORMATS,
+      balance.NIGHT_OWL_FROM,
+      balance.NIGHT_OWL_UNTIL,
+      balance.REVETLLA_FROM,
+      balance.REVETLLA_UNTIL,
+      balance.KONAMI_SEQUENCE,
     ]
     for (const value of frozen) expect(Object.isFrozen(value)).toBe(true)
   })

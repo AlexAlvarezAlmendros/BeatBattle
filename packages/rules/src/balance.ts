@@ -193,7 +193,7 @@ export const XP_ACHIEVEMENT_BY_RARITY = Object.freeze({
   legendary: 300,
 } as const satisfies Record<AchievementRarity, number>)
 
-/** Semana dorada: multiplica todo el XP de esa semana. */
+/** Semana dorada: multiplica el XP de los eventos de esa semana (no el de los logros, guía §2.10). */
 export const GOLDEN_WEEK_XP_MULTIPLIER = 2
 
 /** La racha da bonus a partir de esta semana consecutiva (Anexo G: `racha ≥ 2`). */
@@ -204,6 +204,99 @@ export const STREAK_BONUS_STEP_PERCENT = 10
 export const STREAK_BONUS_MAX_PERCENT = 50
 /** Comodines de racha por temporada (se gasta solo la primera semana que fallas). */
 export const STREAK_JOKERS_PER_SEASON = 1
+
+// ─── Umbrales de los logros (Anexo C, «Cómo se evalúan») ────────────────────────────────────────
+
+/** Hora de pared en `WEEK_TIME_ZONE` (sin día de la semana): las franjas de los logros. */
+export interface WallTime {
+  readonly hour: number
+  readonly minute: number
+  readonly second: number
+}
+
+/** Fecha y hora de pared en `WEEK_TIME_ZONE`, sin año (se repite cada año). */
+export interface YearlyWallTime extends WallTime {
+  readonly month: number
+  readonly day: number
+}
+
+/** `profile_done`: avatar, bio y al menos estos enlaces. */
+export const PROFILE_DONE_MIN_LINKS = 1
+/** `entries_10` («Diez de diez»): semanas con una entrada que llegó a `active`. */
+export const ENTRIES_10_MIN_ENTRIES = 10
+/** `entries_50` («Catálogo»). */
+export const ENTRIES_50_MIN_ENTRIES = 50
+/** `votes_100` («Oído fino»): votos que tiene la cuenta, uno por entrada. */
+export const VOTES_100_MIN_VOTES = 100
+/** `votes_1000` («Juez supremo»). */
+export const VOTES_1000_MIN_VOTES = 1000
+/** `streak_3` («En racha»): semanas de racha (guía §2.10). */
+export const STREAK_3_MIN_WEEKS = 3
+/** `streak_8` («Imparable»). */
+export const STREAK_8_MIN_WEEKS = 8
+/** `streak_26` («Medio año sin fallar»). */
+export const STREAK_26_MIN_WEEKS = 26
+/** `win_3` («Platino»): victorias en total. */
+export const WIN_3_MIN_WINS = 3
+/** `unanimous`: votos válidos mínimos de la entrada. */
+export const UNANIMOUS_MIN_VOTES = 10
+/** `unanimous`: media aritmética mínima × 1000 (4,8). */
+export const UNANIMOUS_MIN_MEAN_MILLI = 4800
+/** `challenge`: peor posición con la que cuenta el reto extra (el top 10). */
+export const CHALLENGE_MAX_POSITION = TOP_TEN_LAST_POSITION
+/** `oracle`: semanas de número consecutivo con oído de oro. */
+export const ORACLE_MIN_WEEKS = 3
+/** `last_minute`: la entrada se crea en estos últimos ms antes del cierre de envíos (10 min). */
+export const LAST_MINUTE_WINDOW_MS = 600_000
+/** `night_owl`: votos a entradas distintas en la franja de una misma noche. */
+export const NIGHT_OWL_MIN_VOTES = 10
+/** `night_owl`: la franja empieza a las 03:00 (incluida), en hora de Madrid. */
+export const NIGHT_OWL_FROM = Object.freeze({ hour: 3, minute: 0, second: 0 } as const satisfies WallTime)
+/** `night_owl`: la franja acaba a las 05:00 (excluida). */
+export const NIGHT_OWL_UNTIL = Object.freeze({ hour: 5, minute: 0, second: 0 } as const satisfies WallTime)
+/** `revetlla`: la noche de Sant Joan empieza el 23 de junio a las 21:00 (incluida), en hora de Madrid. */
+export const REVETLLA_FROM = Object.freeze({
+  month: 6,
+  day: 23,
+  hour: 21,
+  minute: 0,
+  second: 0,
+} as const satisfies YearlyWallTime)
+/** `revetlla`: y acaba el 24 de junio a las 06:00 (excluida). */
+export const REVETLLA_UNTIL = Object.freeze({
+  month: 6,
+  day: 24,
+  hour: 6,
+  minute: 0,
+  second: 0,
+} as const satisfies YearlyWallTime)
+/** `scratch`: clics seguidos en el logo… */
+export const SCRATCH_CLICKS = 7
+/** …dentro de esta ventana (Anexo F: 7 clics en 3 s). */
+export const SCRATCH_WINDOW_MS = 3000
+/** `konami`: la secuencia ↑↑↓↓←→←→BA, con los nombres de `KeyboardEvent.key` (las letras, sin mayúsculas). */
+export const KONAMI_SEQUENCE = Object.freeze([
+  'ArrowUp',
+  'ArrowUp',
+  'ArrowDown',
+  'ArrowDown',
+  'ArrowLeft',
+  'ArrowRight',
+  'ArrowLeft',
+  'ArrowRight',
+  'b',
+  'a',
+] as const)
+/** `pad_404`: golpes mínimos del bucle grabado en el beat pad. */
+export const PAD_404_MIN_HITS = 1
+/** `screwed`: Espacio mantenido sobre el vinilo del sample. */
+export const SCREWED_HOLD_MS = 5000
+/** `human_metronome`: pulsos del *tap tempo* (Anexo F). */
+export const TAP_TEMPO_TAPS = 8
+/** `human_metronome`: tolerancia frente al BPM del sample (±1). */
+export const TAP_TEMPO_TOLERANCE_BPM = 1
+/** `detective`: aciertos en total en «Adivina el productor». */
+export const DETECTIVE_MIN_GUESSES = 5
 
 // ─── Niveles y rangos (Anexo B; Anexo G) ────────────────────────────────────────────────────────
 

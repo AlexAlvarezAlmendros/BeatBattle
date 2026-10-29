@@ -260,3 +260,11 @@ export function seasonOf(monday: LocalDate): string {
   assertMonday(monday)
   return `${pad(monday.year, 4)}-T${Math.floor((monday.month - 1) / 3) + 1}`
 }
+
+/**
+ * ¿Es la última semana de su temporada (guía §2.9)? La del último lunes del trimestre: el lunes siguiente ya es de
+ * otra temporada (la del 2026-12-28 cierra la 2026-T4). Al sellarla se proclama el campeón (`RF-ARC-05`).
+ */
+export function isLastWeekOfSeason(monday: LocalDate): boolean {
+  return seasonOf(addDays(monday, 7)) !== seasonOf(monday)
+}
