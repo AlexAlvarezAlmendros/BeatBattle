@@ -217,11 +217,12 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'temporada/:id',
-              handle: handle('public', interior('season', 'pages.season.title')),
-              lazy: page(
-                () => import('../features/game/SeasonPage'),
-                (m) => m.SeasonPage,
-              ),
+              // ↑ ↓ recorren la clasificación (§3.8.14, tarea 7.26).
+              handle: handle('public', interior('season', 'pages.season.title', ['choose', 'back', 'sound'])),
+              lazy: async () => {
+                const m = await import('../features/game/SeasonPage')
+                return { Component: m.SeasonPage, loader: m.seasonLoader }
+              },
             },
             {
               path: 'como-funciona',

@@ -1,0 +1,346 @@
+/*
+ * Temporada (§2.9, §3.8.14; tarea 7.26): clasificación de torneo con los puntos tipo F1. En la cuña, el top 3 en peanas
+ * pequeñas (las placas con el texto, opacas; las peanas sin texto que importe: `RD-VIS-05`); en el panel, la tabla y
+ * cómo se puntúa.
+ */
+
+.section {
+  display: grid;
+  align-content: start;
+  gap: var(--bb-space-3);
+  min-width: 0;
+}
+
+.sectionTitle,
+.podiumTitle {
+  padding-left: var(--bb-space-3);
+  border-left: var(--bb-space-1) solid var(--bb-red-cta);
+  color: var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-md);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: var(--bb-leading-label);
+  text-transform: uppercase;
+}
+
+.empty {
+  padding: var(--bb-space-4);
+  border: var(--bb-stroke-hair) dashed var(--bb-line-strong);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+/* La anterior y la siguiente. */
+.seasons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--bb-space-2);
+}
+
+.seasonLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--bb-target);
+  padding-inline: var(--bb-space-3);
+  border: var(--bb-stroke-hair) solid var(--bb-line-strong);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.seasonLink:hover {
+  border-color: var(--bb-white);
+  color: var(--bb-white);
+}
+
+.seasonNext {
+  margin-left: auto;
+}
+
+/* ── La tabla ─────────────────────────────────────────────────────────────────────────────── */
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 var(--bb-space-1);
+  font-size: var(--bb-fs-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--bb-space-2) var(--bb-space-3);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.table thead th {
+  padding-block: 0;
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.table tbody tr {
+  background: var(--bb-panel);
+}
+
+/* El podio de la temporada, con el filete rojo a la izquierda. */
+.table tbody td:first-child {
+  border-left: var(--bb-space-1) solid transparent;
+}
+
+.table tbody tr[data-podium] td:first-child {
+  border-left-color: var(--bb-red);
+}
+
+.num {
+  text-align: right;
+}
+
+.table .num {
+  text-align: right;
+  font-family: var(--bb-font-num);
+  font-weight: var(--bb-weight-bold);
+}
+
+.position {
+  width: var(--bb-space-14);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-lg);
+  font-stretch: var(--bb-stretch-plate);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+}
+
+.producer {
+  min-width: 0;
+}
+
+.producer a,
+.producer > span:first-child {
+  color: var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-md);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  overflow-wrap: anywhere;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.producer a:hover {
+  text-decoration: underline;
+}
+
+.table .pointsCell {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-lg);
+  font-weight: var(--bb-weight-extrabold);
+}
+
+/* La línea compacta solo en estrecho (donde no caben las columnas): una sola versión para el lector. */
+.compact {
+  display: none;
+}
+
+/* ── Cómo se puntúa ───────────────────────────────────────────────────────────────────────── */
+
+.points {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--bb-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.points li {
+  display: grid;
+  gap: var(--bb-space-1);
+  padding: var(--bb-space-2);
+  border: var(--bb-stroke-hair) solid var(--bb-line);
+  background: var(--bb-panel);
+  text-align: center;
+}
+
+.pointsPlace {
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-md);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+}
+
+.pointsValue {
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+}
+
+.rule {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+/* ── La pieza: el top 3 en peanas pequeñas ───────────────────────────────────────────────── */
+
+.podium {
+  display: grid;
+  gap: var(--bb-space-4);
+  width: min(100%, calc(var(--bb-space-16) * 7));
+}
+
+.podiumTitle {
+  justify-self: start;
+  padding: var(--bb-space-2) var(--bb-space-3);
+  background: var(--bb-black);
+}
+
+.steps {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  align-items: end;
+  gap: var(--bb-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: grid;
+  gap: var(--bb-space-2);
+  min-width: 0;
+}
+
+.stepPlate {
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-1);
+  padding: var(--bb-space-2);
+  background: var(--bb-black);
+  text-align: center;
+}
+
+.champion {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bb-space-1);
+  color: var(--bb-red);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.crown {
+  width: var(--bb-space-5);
+  fill: var(--bb-red);
+}
+
+.stepName {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-md);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  line-height: var(--bb-leading-label);
+  text-transform: uppercase;
+}
+
+.stepPoints {
+  color: var(--bb-text-2);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+}
+
+/* La peana: el 1.º, más alta y roja; el 2.º y el 3.º, negras con el filete. */
+.block {
+  display: grid;
+  place-items: center;
+  height: var(--bb-space-16);
+  border-top: var(--bb-stroke-cursor) solid var(--bb-white);
+  background: linear-gradient(to bottom, var(--bb-panel-2), var(--bb-black));
+}
+
+.step[data-place="1"] .block {
+  height: calc(var(--bb-space-16) * 1.6);
+  border-top-color: var(--bb-red);
+  background: var(--bb-red-cta);
+}
+
+.step[data-place="3"] .block {
+  height: calc(var(--bb-space-16) * 0.75);
+}
+
+.blockNumber {
+  color: var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-3xl);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  text-shadow: var(--bb-shadow-hard);
+}
+
+.step[data-place="1"] .blockNumber {
+  text-shadow: none;
+}
+
+.emptyPlate {
+  display: grid;
+  gap: var(--bb-space-2);
+  width: min(100%, calc(var(--bb-space-16) * 6));
+  padding: var(--bb-space-5) var(--bb-space-6);
+  --frame-border: var(--bb-red);
+  --frame-fill: var(--bb-black);
+}
+
+.emptySeason {
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-2xl);
+  font-stretch: var(--bb-stretch-plate);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  text-transform: uppercase;
+}
+
+.emptyNote {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+@media (max-width: 720px) {
+  .extra {
+    display: none;
+  }
+
+  .compact {
+    display: block;
+    margin-top: var(--bb-space-1);
+    color: var(--bb-text-3);
+    font-size: var(--bb-fs-xs);
+    font-weight: var(--bb-weight-semibold);
+  }
+
+  .points {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (forced-colors: active) {
+  .block {
+    border: var(--bb-stroke) solid CanvasText;
+  }
+}
