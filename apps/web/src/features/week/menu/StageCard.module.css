@@ -327,6 +327,30 @@
 }
 
 /*
+ * ── Composición intermedia baja (de 721 a 1199 px de ancho y hasta 859 de alto; `MainMenu`) ─────────
+ * El reloj de ronda deja el HUD y entra aquí, en línea y en el sitio de la onda y del «0:00 / 1:12», que
+ * repiten el play y la duración (como en la tableta vertical y el móvil): la tarjeta mide lo mismo y el HUD
+ * queda en una fila (§3.8.3 v0.6.91; jurado de la 3.21, J1). El vinilo y todo lo que informa se quedan. Si el
+ * sample no carga, lo dice el texto junto al play, como en el móvil (sin la onda no hay otro sitio).
+ */
+@media (min-width: 721px) and (max-width: 1199px) and (max-height: 859px) {
+  .wave,
+  .time {
+    display: none;
+  }
+
+  .audioError {
+    display: inline;
+  }
+
+  .mobileClock {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+/*
  * ── Móvil: compacta, con el reloj en línea en lugar de la onda ────────────────────────────
  * Por ancho solo cambia la composición y se van las piezas que repiten algo (el vinilo, la onda, el
  * «0:00 / 1:12»). Lo que **informa** (créditos, género, semana, reto, entradas, aviso) solo se pliega en

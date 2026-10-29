@@ -1406,7 +1406,8 @@ function underControls(page: Page): Promise<string[]> {
  * esconder nada (con teclado y ratón no hay pliegues que escondan). Con la barra más alta que la de la
  * maqueta (con teclado, las teclas en su fila a 1280 × 720; y por debajo de 1200 px, también la crónica),
  * el menú cuenta con su alto real: a 1024 × 900 y 1100 × 900 la barra mide 127 px y /dev/menu se
- * desplazaba 86 y 103 px.
+ * desplazaba 86 y 103 px. A 1024 × 768 y 1180 × 720 (la composición intermedia baja, §3.8.3 v0.6.91), con el
+ * reloj en la tarjeta y la barra en dos filas (jurado de la 3.21, J1: se desplazaba 122 y 156 px).
  */
 for (const viewport of [
   { width: 1440, height: 789 },
@@ -1416,6 +1417,8 @@ for (const viewport of [
   { width: 1920, height: 955 },
   { width: 1024, height: 900 },
   { width: 1100, height: 900 },
+  { width: 1024, height: 768 },
+  { width: 1180, height: 720 },
 ]) {
   test.describe(`menú con la ventana baja a ${viewport.width} × ${viewport.height}`, () => {
     test.use({ viewport })
@@ -1449,13 +1452,16 @@ for (const viewport of [
  * Con la ventana baja, la tarjeta de la semana y el panel de ayuda acaban por encima de la línea discontinua
  * de la barra (§3.8.3 v0.6.7; jurado de la 0.28, cierre, K5): a 1440 × 789, 1366 × 657 y 1280 × 720 acababan
  * en el borde de la barra (731 = 731) y la línea, pintada 8 px por encima de su caja, cruzaba el pie del
- * panel de ayuda, que es translúcido. Y el menú sigue cabiendo sin desplazar.
+ * panel de ayuda, que es translúcido. Y el menú sigue cabiendo sin desplazar. También en la composición
+ * intermedia baja (jurado de la 3.21, J1: a 1024 × 768 la tarjeta y la ayuda acababan bajo la línea).
  */
 for (const viewport of [
   { width: 1440, height: 789 },
   { width: 1366, height: 657 },
   { width: 1280, height: 720 },
   { width: 1536, height: 730 },
+  { width: 1024, height: 768 },
+  { width: 1180, height: 720 },
 ]) {
   test.describe(`pie del menú con la ventana baja a ${viewport.width} × ${viewport.height}`, () => {
     test.use({ viewport })
@@ -1482,6 +1488,79 @@ for (const viewport of [
         expect(box.card, 'pie de la tarjeta').toBeLessThanOrEqual(box.line + 0.5)
         expect(box.help, 'pie del panel de ayuda').toBeLessThanOrEqual(box.line + 0.5)
         expect(box.scroll).toBeLessThanOrEqual(0)
+      })
+    }
+  })
+}
+
+/**
+ * Composición intermedia baja (§3.8.3 y §3.4.1 v0.6.91; jurado de la 3.21, J1): a 1024 × 768 el menú no cabía
+ * y la barra, con tres filas (127 px, el 16,5 %), se despegaba: al abrir solo se veía la firma, y las teclas,
+ * «Inserta tu beat · Crédito» y la pausa quedaban fuera de la primera vista. Ahora, de 721 a 1199 px y hasta
+ * 859 de alto, el reloj de ronda va en la tarjeta (el HUD queda en una fila) y, desde 62 em, la crónica va al
+ * lado de la firma: la barra tiene dos filas (84 px) y va pegada entera. Con los datos de la maqueta, con el
+ * título largo y la tonalidad larga (`?largo`) y con la semana del seed: la barra entera a la vista, el reloj
+ * en la tarjeta y no en el HUD, y recorriendo las seis placas, cada una entera por encima de la barra.
+ */
+for (const viewport of [
+  { width: 1024, height: 768 },
+  { width: 1180, height: 720 },
+]) {
+  test.describe(`composición intermedia baja a ${viewport.width} × ${viewport.height} con teclado`, () => {
+    test.use({ viewport })
+
+    for (const path of ['/dev/menu', '/dev/menu?largo', '/']) {
+      test(`RD-VIS-02 e / §3.8.3 / §3.4.1: en ${path} la barra va pegada entera (teclas, firma, crédito y pausa), el reloj va en la tarjeta y cada placa enfocada queda sobre la barra`, async ({
+        page,
+      }) => {
+        await open(page, path, 'Beat Battle')
+        await settle(page)
+        const bar = await page.evaluate(() => {
+          const footer = document.querySelector('footer')!
+          const inside = (selector: string) => {
+            const element = footer.querySelector(selector)
+            if (!element || !element.checkVisibility({ visibilityProperty: true })) return false
+            const box = element.getBoundingClientRect()
+            return box.width > 0 && box.top >= -0.5 && box.bottom <= innerHeight + 0.5
+          }
+          return {
+            unpinned: footer.hasAttribute('data-unpinned'),
+            share: footer.getBoundingClientRect().height / innerHeight,
+            keys: inside('ul'),
+            signature: inside('[data-otp-signature]'),
+            chronicle: inside('[data-chronicle]'),
+            pause: inside('[data-frame-slot="controlsRight"] button'),
+          }
+        })
+        expect(bar.unpinned, 'la barra, pegada').toBe(false)
+        expect(bar.share, 'la barra, ≤ 15 % de la ventana').toBeLessThanOrEqual(0.15)
+        expect(bar, 'las piezas de la barra, a la vista').toMatchObject({
+          keys: true,
+          signature: true,
+          chronicle: true,
+          pause: true,
+        })
+        // El reloj de ronda, en la tarjeta (en línea, en el sitio de la onda) y no en el HUD. En «/» la semana
+        // depende de lo que hayan programado otros E2E (la BD es compartida): sin semana no hay reloj.
+        await expect(page.getByRole('banner').getByRole('timer')).toBeHidden()
+        if (path !== '/')
+          await expect(page.getByRole('main').locator('article').getByRole('timer')).toBeVisible()
+        // Recorriendo las seis placas con ↓, cada una queda entera (con su anillo) por encima de la barra.
+        for (let step = 0; step < 12; step++) {
+          await page.keyboard.press('Tab')
+          if (await page.evaluate(() => document.activeElement?.getAttribute('role') === 'menuitem')) break
+        }
+        const problems: string[] = []
+        for (let step = 0; step < 6; step++) {
+          if (step > 0) await page.keyboard.press('ArrowDown')
+          const plate = await focusedPlate(page)
+          expect(plate.item, 'el foco está en una opción del menú').toBe(true)
+          if (plate.ringTop < -0.5 || plate.ringBottom > plate.limit + 0.5)
+            problems.push(
+              `${plate.label}: anillo ${plate.ringTop.toFixed(1)}–${plate.ringBottom.toFixed(1)}, barra en ${plate.limit.toFixed(1)}`,
+            )
+        }
+        expect(problems).toEqual([])
       })
     }
   })
