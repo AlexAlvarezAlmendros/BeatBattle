@@ -121,8 +121,17 @@ export const SeasonSummarySchema = z
 export type SeasonSummary = z.infer<typeof SeasonSummarySchema>
 
 /**
- * La capa de juego en `GET /api/me` (tarea 7.13): XP y nivel (el visto, para la subida de nivel una sola vez,
- * `RF-GAME-09`), racha, temporada y los logros cuyo aviso aún no ha visto.
+ * La ceremonia del campeón de temporada pendiente (§2.9, `RF-ARC-05`): la de la última temporada cerrada con campeón,
+ * mientras la cuenta no la marque vista (`POST /api/me/seen` con `season_champion`); `champion` dice si es uno de sus
+ * campeones.
+ */
+export const SeasonCeremonySchema = z.object({ seasonId: SeasonIdSchema, champion: z.boolean() }).strict()
+export type SeasonCeremony = z.infer<typeof SeasonCeremonySchema>
+
+/**
+ * La capa de juego en `GET /api/me` (tarea 7.13): lo de la propia cuenta, en vivo (también lo de la semana en juego, que
+ * lo público aún no cuenta, hueco G1): XP y nivel (el visto, para la subida de nivel una sola vez, `RF-GAME-09`),
+ * racha, temporada, los logros cuyo aviso aún no ha visto y la ceremonia de temporada pendiente.
  */
 export const MeGameSchema = z
   .object({
@@ -132,6 +141,7 @@ export const MeGameSchema = z
     streak: StreakSchema,
     season: SeasonSummarySchema.nullable(),
     unseenAchievements: z.array(AchievementIdSchema),
+    seasonCeremony: SeasonCeremonySchema.nullable(),
   })
   .strict()
 export type MeGame = z.infer<typeof MeGameSchema>
@@ -153,7 +163,7 @@ export const ProfileStatsSchema = z
   .strict()
 export type ProfileStats = z.infer<typeof ProfileStatsSchema>
 
-/** Una fila del historial de combates (§3.8.10): solo semanas selladas. */
+/** Una fila del historial de combates (§3.8.10): solo semanas selladas, de la más reciente a la más antigua. */
 export const ProfileHistoryRowSchema = z
   .object({
     weekSlug: WeekSlugSchema,
@@ -169,7 +179,11 @@ export const ProfileHistoryRowSchema = z
   .strict()
 export type ProfileHistoryRow = z.infer<typeof ProfileHistoryRowSchema>
 
-/** La capa de juego del perfil público (§2.3, §3.8.10; tarea 7.13). */
+/**
+ * La capa de juego del perfil público (§2.3, §3.8.10; tarea 7.13): solo semanas selladas (hueco G1). Los logros son los
+ * conseguidos, en el orden del catálogo (los que faltan y los ocultos, «???» con su pista, los pinta la web con el
+ * catálogo de `@beatbattle/rules`).
+ */
 export const ProfileGameSchema = z
   .object({
     level: levelSchema,
@@ -210,7 +224,10 @@ export const SeasonStandingsSchema = z
         id: SeasonIdSchema,
         /** Semanas selladas que cuentan. */
         sealedWeeks: countSchema,
-        /** Cerrada: su última semana está sellada y la primera fila es la de los campeones. */
+        /**
+         * Cerrada (§2.9, hueco G7): ha acabado su trimestre y todas sus semanas están selladas; la primera fila es la de
+         * los campeones.
+         */
         closed: z.boolean(),
       })
       .strict(),

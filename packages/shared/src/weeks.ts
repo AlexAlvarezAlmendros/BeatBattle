@@ -269,16 +269,6 @@ export type Download = z.infer<typeof DownloadSchema>
 /** `POST /api/weeks/:slug/rules`: aceptar las bases de la semana. */
 export const RulesAcceptSchema = z.object({ rulesVersion: z.literal(RULES_VERSION) }).strict()
 
-/**
- * `POST /api/me/seen`: marcar algo como visto una vez. En la Fase 3, la revelación del drop de una semana
- * (`RF-DROP-11`); desde la Fase 6, la ceremonia de resultados de una semana sellada (`RF-RES-09`); los logros
- * se suman en la suya.
- */
-export const SeenRequestSchema = z
-  .object({ kind: z.enum(['drop', 'ceremony']), ref: WeekSlugSchema })
-  .strict()
-export type SeenRequest = z.infer<typeof SeenRequestSchema>
-
 /** `POST /api/subscribe`: alerta de drop sin cuenta (§2.12.3). */
 export const AlertSubscribeSchema = z.object({ email: z.email().max(254) }).strict()
 /** `POST /api/subscribe/confirm`: el token del email `alert.confirm`. */

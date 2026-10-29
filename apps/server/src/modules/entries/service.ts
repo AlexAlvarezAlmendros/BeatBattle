@@ -20,6 +20,7 @@ import {
 import {
   ENTRY_CHUNK_BYTES,
   type EntryAudioReplace,
+  type EntryCover,
   type EntryCoverSignRequest,
   type EntryCreate,
   type EntryCreated,
@@ -747,6 +748,16 @@ export function createEntriesService(deps: EntriesDeps) {
 
     /** Fichas públicas de entradas de una misma semana, con la autoría solo si la semana deja verla. */
     presentAll,
+
+    /**
+     * La portada de una entrada de una semana ya sellada (el historial del perfil, el salón de la fama; tareas 7.12 y
+     * 7.13): la propia si la tiene, y si no (o sin almacenamiento), la generativa con su semilla.
+     */
+    sealedCover(row: Pick<EntryRow, 'coverPublicId' | 'coverSeed'>): EntryCover {
+      return row.coverPublicId && deps.storage
+        ? { kind: 'own', url: deps.storage.coverUrl(row.coverPublicId, 512) }
+        : { kind: 'generative', seed: row.coverSeed }
+    },
 
     /** `GET /api/weeks/:slug/entries/mine`: la entrada propia de la semana (`/subir` en edición), o `null`. */
     async mineBySlug(userId: string, slug: string, now: number): Promise<OwnEntry | null> {

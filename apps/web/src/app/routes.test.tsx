@@ -5,6 +5,7 @@ import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, matchRoutes, type RouteObject, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { type SimpleMessageKey, t } from '../i18n'
+import { EMPTY_PROFILE_GAME } from '../test/game'
 import { documentTitle } from './DocumentTitle'
 import { testQueryClient } from './layout/testing'
 import { LEGAL_DOCS, paths } from './paths'
@@ -94,6 +95,7 @@ describe('router (0.10, guía §2.18)', () => {
       links: {},
       accent: 'red',
       avatarUrl: null,
+      game: EMPTY_PROFILE_GAME,
     }
     vi.stubGlobal(
       'fetch',

@@ -3,6 +3,7 @@ import { screen } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { renderInRouter } from '../../app/layout/testing'
 import { t } from '../../i18n'
+import { EMPTY_ME_GAME } from '../../test/game'
 import { useSession } from '../account/session'
 import { AdminPage, ScheduleForm } from './AdminPage'
 
@@ -37,6 +38,7 @@ const ME = {
   cardNumber: 1,
   xp: 0,
   avatarUrl: null,
+  game: EMPTY_ME_GAME,
 }
 
 afterEach(() => useSession.setState({ status: 'loading', me: null }))

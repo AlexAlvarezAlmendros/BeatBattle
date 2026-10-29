@@ -26,6 +26,8 @@ import { createEntriesService } from './modules/entries/service'
 import { waveformRoutes } from './modules/entries/waveformRoute'
 import { gameRoutes } from './modules/game/routes'
 import { createGameService } from './modules/game/service'
+import { hallOfFameRoutes } from './modules/hallOfFame/routes'
+import { createHallOfFameService } from './modules/hallOfFame/service'
 import { healthRoutes } from './modules/health/routes'
 import { createHealthService } from './modules/health/service'
 import { meRoutes } from './modules/me/routes'
@@ -36,6 +38,8 @@ import { resultsRoutes } from './modules/results/routes'
 import { createResultsService } from './modules/results/service'
 import { samplesRoutes } from './modules/samples/routes'
 import { createSamplesService } from './modules/samples/service'
+import { seasonsRoutes } from './modules/seasons/routes'
+import { createSeasonsService } from './modules/seasons/service'
 import { ogRoutes } from './modules/share/ogRoutes'
 import { indexHtmlLoader, shareRoutes } from './modules/share/routes'
 import { seoRoutes } from './modules/share/seo'
@@ -166,9 +170,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   const images = deps.images === undefined ? storage : deps.images
   // La capa de juego (Fase 7): cada hecho mete su XP y sus logros en su propio `batch`.
   const game = createGameService({ db, newId })
-  meRoutes(app, { db, images })
   gameRoutes(app, { db, game, rateLimiter })
-  profileRoutes(app, { db, images, rateLimiter, game })
   accountRoutes(app, { db, images, emails, rateLimiter })
 
   const samples =
@@ -210,6 +212,8 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   })
   uploadsRoutes(app, { images, entries: entryStorage ? entries : null, rateLimiter, newId })
   entriesRoutes(app, entries)
+  // El perfil, con la portada de las entradas selladas de su historial (7.13).
+  profileRoutes(app, { db, images, rateLimiter, game, cover: entries.sealedCover })
   votesRoutes(
     app,
     createVotesService({
@@ -223,12 +227,15 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     }),
   )
   resultsRoutes(app, createResultsService({ db, entries, samples, newId }))
+  seasonsRoutes(app, createSeasonsService({ db, images, newId }))
+  hallOfFameRoutes(app, createHallOfFameService({ db, images, entries, newId }))
   resultCardRoutes(app, { db, secret: config.auth.secret })
   ogRoutes(app, { db })
   shareRoutes(app, { db, publicUrl: config.publicUrl, indexHtml: deps.indexHtml ?? indexHtmlLoader() })
   seoRoutes(app, { db, publicUrl: config.publicUrl, indexable: config.indexable })
   const weeks = createWeeksService({ db, storage: samples, newId, game })
   weeksRoutes(app, weeks)
+  meRoutes(app, { db, images, weeks })
   countdownRoutes(app, { db })
   waveformRoutes(app, { db, secret: config.auth.secret })
   qrRoutes(app, { publicUrl: config.publicUrl, secret: config.auth.secret })
