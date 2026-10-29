@@ -11,14 +11,15 @@ import { renderEmail, TEMPLATES, type TemplateKind } from '../src'
 import { battleMonday } from '../src/templates/battleMonday'
 import { battleResults } from '../src/templates/battleResults'
 import { ENTRY_WITHDRAWN_FIXTURE, entryChanged } from '../src/templates/entryChanged'
+import { GAME_PROGRESS_LEGENDARY_FIXTURE, gameProgress } from '../src/templates/gameProgress'
 
 const [out = 'galeria-emails', publicUrl = 'http://localhost:5173'] = process.argv.slice(2)
 await mkdir(out, { recursive: true })
 const kinds = Object.keys(TEMPLATES) as TemplateKind[]
 for (const kind of kinds) {
   const template = TEMPLATES[kind]
+  const family = /^(battle|game|season)\./.test(kind) ? 'battle' : 'service'
   // biome-ignore lint/suspicious/noExplicitAny: cada plantilla con su propio fixture
-  const family = kind.startsWith('battle.') ? 'battle' : 'service'
   const email = await renderEmail(template as any, template.fixture, { publicUrl, family })
   await writeFile(path.join(out, `${kind}.html`), email.html)
   await writeFile(
@@ -43,6 +44,12 @@ const variants = [
       results: { ...battleMonday.fixture.results, mine: null },
       drop: { ...battleMonday.fixture.drop, subscriber: true },
     },
+    family: 'battle',
+  },
+  {
+    name: 'game.progress.legendary',
+    template: gameProgress,
+    payload: GAME_PROGRESS_LEGENDARY_FIXTURE,
     family: 'battle',
   },
   {

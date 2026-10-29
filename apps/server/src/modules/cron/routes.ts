@@ -11,6 +11,7 @@ import { withLease } from '../../lib/lease'
 import type { AlertsService } from '../alerts/service'
 import { type EntriesTickResult, entriesTick } from '../entries/cleanup'
 import type { EntriesService } from '../entries/service'
+import { scheduleProgressEmails } from '../game/progress'
 import { type MondayResult, scheduleMondayEmails } from '../results/monday'
 import type { EntryStorage } from '../storage/entries'
 import { type NoticeResult, scheduleBattleNotices } from '../votes/notices'
@@ -27,6 +28,8 @@ export interface TickResult {
   mondayEmails: MondayResult
   /** Recordatorios y llamadas al jurado encolados (tarea 5.12). */
   battleNotices: NoticeResult
+  /** Cuentas con progreso del día (`game.progress`, tarea 7.29), contadas cada vez que se mira el tramo. */
+  progressEmails: number
   calendarGaps: string[]
   cleaned: { unconfirmedAlerts: number; usernameRedirects: number; ipSignals: number }
   /** Intents caducados, entradas en `processing` y huérfanos (tarea 4.9); `null` sin almacenamiento. */
@@ -72,6 +75,7 @@ export function cronRoutes(app: FastifyInstance, deps: CronDeps): void {
         sealed: [],
         mondayEmails: { monday: 0, drop: 0, results: 0 },
         battleNotices: { reminders: 0, juryCalls: 0 },
+        progressEmails: 0,
         calendarGaps: [],
         cleaned: { unconfirmedAlerts: 0, usernameRedirects: 0, ipSignals: 0 },
         entries: null,
@@ -92,6 +96,7 @@ export function cronRoutes(app: FastifyInstance, deps: CronDeps): void {
       await step('emailSchedule', async () => {
         out.mondayEmails = await scheduleMondayEmails(deps, now)
         out.battleNotices = await scheduleBattleNotices(deps, now)
+        out.progressEmails = await scheduleProgressEmails(deps, now)
       })
       await step('adminAlerts', async () => {
         out.calendarGaps = await scheduleGapAlerts({ ...deps, gapsWithin: deps.weeks.gapsWithin }, now)
