@@ -31,6 +31,7 @@ import type { Db } from '../../db/client'
 import { entry, rulesAcceptance, sample, sampleDownload, seenFlag, week } from '../../db/schema'
 import { auditStatement } from '../../lib/audit'
 import { appError } from '../../lib/errors'
+import type { GameService } from '../game/service'
 import type { SampleStorage } from '../storage/samples'
 import { sealDueWeeks } from './seal'
 
@@ -49,6 +50,8 @@ export interface WeeksDeps {
   db: Db
   storage: SampleStorage | null
   newId: () => string
+  /** La capa de juego: `first_drop` en el `batch` de la descarga (tarea 7.9). */
+  game: GameService
 }
 
 type WeekRow = typeof week.$inferSelect
@@ -439,13 +442,18 @@ export function createWeeksService(deps: WeeksDeps) {
       if (!publicId) throw appError('NOT_FOUND', 'Este sample no tiene stems.')
       const expiresAt = now + DOWNLOAD_TTL_MS
       const downloadUrl = files.downloadUrl(publicId, kind, { format: s.format, expiresAtMs: expiresAt })
-      await db
-        .insert(sampleDownload)
-        .values({ userId, weekId: row.id, kind, count: 1, firstAt: now, lastAt: now })
-        .onConflictDoUpdate({
-          target: [sampleDownload.userId, sampleDownload.weekId, sampleDownload.kind],
-          set: { count: sql`${sampleDownload.count} + 1`, lastAt: now },
-        })
+      // La descarga y su logro (`first_drop`, 7.9) en un `batch`.
+      const game = await deps.game.sampleDownloaded(userId, { weekId: row.id, now })
+      await runBatch(db, [
+        db
+          .insert(sampleDownload)
+          .values({ userId, weekId: row.id, kind, count: 1, firstAt: now, lastAt: now })
+          .onConflictDoUpdate({
+            target: [sampleDownload.userId, sampleDownload.weekId, sampleDownload.kind],
+            set: { count: sql`${sampleDownload.count} + 1`, lastAt: now },
+          }),
+        ...game.statements,
+      ])
       return { downloadUrl, expiresAt }
     },
 

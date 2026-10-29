@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { EntryCoverSchema, EntryProducerSchema } from './entries'
+import { EntryCoverSchema, EntryProducerSchema, OwnEntrySchema } from './entries'
+import { VoteSchema } from './votes'
 import { WeekSlugSchema } from './weeks'
 
 /**
@@ -73,6 +74,17 @@ export const GameDeltaSchema = z
   })
   .strict()
 export type GameDelta = z.infer<typeof GameDeltaSchema>
+
+/** `PUT /api/entries/:id/vote` (tarea 7.9): el voto guardado y lo que ha ganado (`RF-GAME-08`, el «+5 XP»). */
+export const VoteCastSchema = VoteSchema.extend({ game: GameDeltaSchema }).strict()
+export type VoteCast = z.infer<typeof VoteCastSchema>
+
+/**
+ * `POST /api/weeks/:slug/entries` y `PUT /api/entries/:id/audio` (tarea 7.9): la entrada propia y lo que ha ganado al
+ * pasar a `active`; si queda en `processing`, nada (`xp: 0`): lo da el `tick` cuando la complete.
+ */
+export const EntryCreatedSchema = OwnEntrySchema.extend({ game: GameDeltaSchema }).strict()
+export type EntryCreated = z.infer<typeof EntryCreatedSchema>
 
 /** Un logro conseguido (en el perfil público y en la vitrina): el id y cuándo. */
 export const AchievementUnlockSchema = z

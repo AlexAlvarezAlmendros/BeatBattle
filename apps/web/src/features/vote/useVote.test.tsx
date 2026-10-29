@@ -66,7 +66,17 @@ describe('voto optimista (§3.8.4, §4.7.2)', () => {
       done = result.current.vote(5)
     })
     await vi.waitFor(() => expect(myVote()).toBe(5))
-    resolve(respond({ data: { entryId: 'e-1', stars: 5, createdAt: 1, updatedAt: 2 } }))
+    resolve(
+      respond({
+        data: {
+          entryId: 'e-1',
+          stars: 5,
+          createdAt: 1,
+          updatedAt: 2,
+          game: { xp: 5, achievements: [], level: 1 },
+        },
+      }),
+    )
     await act(() => done)
     expect(myVote()).toBe(5)
     expect(fetchMock.mock.calls[0]?.[0]).toBe('/api/entries/e-1/vote')

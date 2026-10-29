@@ -14,8 +14,8 @@ import type { EntriesService } from './service'
  * (500 peticiones por hora en el plan gratuito).
  *
  * - **Intents caducados**: se borra su recurso, si llegó a subirse, y quedan `expired`.
- * - **Entradas en `processing`**: se miden y pasan a `active` con su recibo; si lo medido no vale, se
- *   retiran, se borra el audio y sale `entry.failed`.
+ * - **Entradas en `processing`**: se miden y pasan a `active` con su recibo y lo que ganan (XP y logros, 7.9); si
+ *   lo medido no vale, se retiran, se borra el audio y sale `entry.failed`.
  * - **Huérfanos**: el barrido por prefijo (`listByPrefix`) borra los recursos de más de 24 h sin fila viva
  *   que los use (retiradas cuyo borrado falló, cuentas borradas, subidas canceladas, `RF-STO-05`). Guarda por
  *   dónde va en `job_state` y vuelve a empezar al día siguiente.
@@ -152,6 +152,8 @@ async function completeProcessing(
       updatedAt: now,
     }
     const next = { ...row, ...changes }
+    // El XP y los logros de subir (7.9), condicionados a que la entrada quede activa en este `batch`.
+    const game = await deps.entries.activationGame(next, w, now)
     await runBatch(db, [
       ...(twin
         ? [
@@ -177,6 +179,7 @@ async function completeProcessing(
         payload: deps.entries.receiptPayload(next, w),
         now,
       }),
+      ...game.statements,
     ])
     completed += 1
   }

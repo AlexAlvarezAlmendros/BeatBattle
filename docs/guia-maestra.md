@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.101 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.102 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -596,6 +596,20 @@ pura del XP total.
 - **Semana dorada:** duplica el XP de los eventos de esa semana (Anexo B), no el de los logros, que es siempre
   el de su rareza (sin racha ni semana dorada). Cada importe con bonus se redondea al entero antes de duplicarlo
   (Anexo G).
+- **Dónde se gana en vivo**, en el mismo `batch` que el hecho y solo si el hecho ocurre (§4.11):
+  - **La entrada que pasa a `active`** (al registrarla si la medición cabe, al sustituir el audio o cuando el `tick`
+    completa una en `processing`): subir, la primera entrada de la semana (con `early_bird`, que va con ella: si dos
+    llegan a la vez, los dos solo son de quien se queda la primera), `first_entry`, `entries_10`, `entries_50`,
+    `last_minute` y `golden_week`. La racha en juego se calcula con las semanas selladas en su revisión vigente; si
+    la anterior ya cerró y nadie la había sellado, se sella antes (perezoso, como al leer).
+  - **El voto**: los 5 XP con el tope, `first_vote`, `votes_100`, `votes_1000`, `night_owl` y, al votar la última de
+    las entradas activas ajenas (5 o más), el **jurado completo** (50 XP, una vez por semana) con `jury_full`.
+    Cambiar la nota no da nada nuevo.
+  - **La descarga del sample** (`first_drop`), **el perfil guardado** con avatar, bio y un enlace (`profile_done`, al
+    guardar los datos o el avatar) y `level_20` al cruzar el nivel 20 con cualquiera de ellos.
+  - La respuesta del voto y la de la entrada (registrarla y sustituir el audio) dicen lo ganado,
+    `game: { xp, achievements, level }`, para el «+5 XP» flotante, el aviso de logro y la subida de nivel; una entrada
+    que queda en `processing` no gana nada hasta que el `tick` la activa (`game.xp = 0`).
 
 **Niveles y rangos.** 20 niveles con curva `150 · (n − 1)^1,6` (Anexo B). Cada pocos niveles cambia
 el **rango** (título visible en la carta): *Excavador de cajones* → *Loopero* → *Sampleador* →
@@ -2555,8 +2569,9 @@ Al registrar la entrada:
    (`node_modules/ffmpeg-static/ffmpeg`), y el script de instalación de `ffmpeg-static`, que lo descarga,
    tiene que estar permitido en el gestor de paquetes (`onlyBuiltDependencies` desde pnpm 10); la CI
    comprueba que el binario existe.
-4. Entrada, XP y logros se escriben en un único `batch` (XP y logros, desde la Fase 7: hasta entonces, la
-   entrada y su email en la cola).
+4. Entrada, email en la cola, XP y logros se escriben en un único `batch` (la capa de juego, §2.10 y §4.11,
+   condicionada a que la entrada quede activa); la respuesta lleva lo ganado (`game`). La entrada que el `tick`
+   completa hace lo mismo en su `batch`.
 5. Si cualquier paso falla, se borra el recurso, el *intent* queda `failed`, sale `entry.failed` y se devuelve
    el motivo: el código de `validateEntryAudio` (`DURATION_OUT_OF_RANGE`…) o `ENTRY_ASSET_INVALID` con
    `details.reason` (`missing`: no está; `mismatch`: no es el firmado o es anterior al *intent*;
@@ -2711,17 +2726,17 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | POST | `/api/weeks/:slug/rules` | Verif. | Aceptar las bases de la semana |
 | POST | `/api/weeks/:slug/sample/download` | Verif. | URL firmada de descarga (`kind: original\|stems`), solo en `open` y con las bases aceptadas |
 | POST | `/api/uploads/sign` | Verif. | Parámetros firmados (`kind: entry\|entryCover\|avatar`); los del sample, en `/api/admin/samples/sign` |
-| POST | `/api/weeks/:slug/entries` | Verif. | Registrar la entrada tras la subida (con la casilla del reto, `challengeClaimed`, si la semana tiene reto: `RF-ENT-13`) |
+| POST | `/api/weeks/:slug/entries` | Verif. | Registrar la entrada tras la subida (con la casilla del reto, `challengeClaimed`, si la semana tiene reto: `RF-ENT-13`); responde la entrada propia y lo ganado al pasar a `active` (`game: { xp, achievements, level }`, §2.10) |
 | GET | `/api/weeks/:slug/entries/mine` | Sesión | La entrada propia de la semana, con su estado, recibo, medición y si se puede sustituir el audio (`/subir` en edición) |
 | GET | `/api/entries/:id` | Pública | Ficha (respeta el voto ciego); sellada, con su resultado y la casilla del reto (`result.challengeClaimed`) |
 | PATCH | `/api/entries/:id` | Dueño | Editar la ficha y la casilla del reto (hasta el cierre de envíos) |
-| PUT | `/api/entries/:id/audio` | Dueño | Sustituir el audio (sin votos) |
+| PUT | `/api/entries/:id/audio` | Dueño | Sustituir el audio (sin votos); como registrar, con `game` |
 | DELETE | `/api/entries/:id` | Dueño | Retirar |
 | GET | `/api/entries/:id/stats` | Dueño | Votos y escuchas propios (sin media) |
 | POST | `/api/entries/:id/listen` | Verif. | Inicio de escucha → `{ listenId, thresholdMs, startedAt }`; un recibo por usuario y entrada (volver a empezar no reinicia el reloj); solo en `open` y `voting` y nunca de la propia |
 | POST | `/api/entries/:id/listen/qualify` | Verif. | Cumplir el umbral `{ listenId }`; antes de tiempo, 409 `LISTEN_REQUIRED` con `details.remainingMs` |
 | POST | `/api/entries/:id/play` | Pública | Contar una escucha (≥ 10 s) `{ playId }`, una por sesión de escucha y como mucho 3 por hora por IP y entrada; responde 202 cuente o no |
-| PUT · DELETE | `/api/entries/:id/vote` | Verif. | Votar `{ stars }` o quitar el voto |
+| PUT · DELETE | `/api/entries/:id/vote` | Verif. | Votar `{ stars }` (responde el voto y lo ganado, `game`: el «+5 XP» de `RF-GAME-08`) o quitar el voto |
 | POST | `/api/entries/:id/report` | Verif. | Denunciar |
 | POST | `/api/entries/:id/guess` | Verif. | «Adivina el productor» (Fase 8) |
 | GET | `/api/jury/queue?week=` | Verif. | Siguientes entradas del Modo Jurado (`juryQueue`) y la ronda `{ done, total }`; fuera de `open` y `voting`, vacía |
@@ -2960,6 +2975,17 @@ calculado (`xpFor` de `packages/rules`):
   además lo que gana la cuenta (`game: { xp, achievements, level }` de las respuestas): una vista previa con lo que
   ya hay en el libro; la verdad es el `batch`. `voteGrant` calcula el XP de un voto con el libro (primer voto a
   la entrada, tope de la semana).
+- **Condición del hecho** (`guard`): cada sentencia de la capa de juego repite en su `WHERE` una condición sobre lo
+  que el propio `batch` acaba de escribir, así que nada se gana si el hecho no ocurre, aunque el hecho sea un
+  `INSERT … SELECT` condicionado que puede no escribir nada: el XP de un voto, si el voto quedó guardado con ese
+  instante; el de una entrada, si quedó `active`. El XP de un logro solo entra si el logro está, y `early_bird`, si
+  la fila `first_entry_of_week` de esa semana es de la cuenta.
+- Los ganchos en vivo (`entryActivated`, `voteCast`, `sampleDownloaded`, `profileUpdated`) cuentan lo que piden los
+  eventos de `evaluate`: las **entradas** son las filas `entry` del libro (una por semana con entrada que llegó a
+  `active`); los **votos**, las filas de `vote` de la cuenta (con los anulados; los quitados ya no están); los de la
+  franja de `night_owl`, por su `created_at` (votos nuevos, no cambios); el jurado completo, las entradas activas
+  ajenas de la semana y las que ha votado. La **racha en juego** de subir sale de las semanas selladas anteriores
+  (`streakOf` sobre su revisión vigente), no de la caché `streak_state`.
 
 ### 4.12 Tiempo, calendario y tareas programadas
 
@@ -3862,6 +3888,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.102 | **Tarea 7.9** (ganchos en vivo de la capa de juego). §2.10: dónde se gana en vivo, en el `batch` del hecho y solo si ocurre: la entrada que pasa a `active` (al registrar, al sustituir el audio o en el `tick`; `early_bird` va con la fila de la primera entrada), el voto (con el jurado completo al votar la última de las activas ajenas), la descarga del sample y el perfil guardado (datos o avatar); la racha en juego sale de las semanas selladas y, si la anterior cerró sin sellar, se sella antes. §4.8.4 paso 4 al día. §4.10: el voto, registrar la entrada y sustituir el audio responden lo ganado (`game: { xp, achievements, level }`). §4.11: la condición del hecho (`guard`) en cada sentencia, el XP de un logro solo si el logro está y qué cuenta cada gancho para `evaluate`. |
 | 2026-10-29 | 0.6.101 | **Tarea 7.15.** §4.14, registro de datos de la cuenta: la lista de módulos al día (semanas, entradas y votos, y la capa de juego con su libro de XP, logros y racha); entradas, votos y capa de juego comparten la sección `game` de la exportación, cuyas claves se juntan (`xpEvents`, `achievements` y `streak`, con la semana por su slug; el formato sigue en `beatbattle-export/1`, solo se añade `streak`); borrar la cuenta quita su XP, sus logros y su racha en el mismo `batch`, y lo que otras cuentas ganaron votando sus entradas se queda. |
 | 2026-10-29 | 0.6.100 | **Tarea 7.8.** §4.11, libro de XP: el módulo `game` del servidor prepara las sentencias para el `batch` del hecho (`plan` con los movimientos, los logros de sus eventos con su XP, `level_20` y la caché) y devuelve lo que gana la cuenta como vista previa; `level_20` se decide en SQL dentro del mismo `batch` con la suma del libro, así que también lo cruza el XP de otro logro; `voteGrant`, el XP de un voto contado en el libro. |
 | 2026-10-29 | 0.6.99 | **Tarea 7.7** (hueco G4 del plan 07, resuelto). §2.5: la ficha lleva la casilla «Cumplo el reto extra» solo si la semana tiene reto, editable hasta el cierre de envíos como el resto; la marca solo la ve su dueño hasta el sellado y después va con el resultado (`RF-ENT-13`, nuevo). §4.10: registrar y editar aceptan `challengeClaimed` y la ficha sellada lo lleva en `result`. §4.11: `entry.challenge_claimed`; `xp_event` con `week_id` (para el tope de votos y para lo público), el índice único por cuenta, tipo y referencia y uno parcial que deja una sola «primera entrada» por semana; `achievement_unlock` con `week_id`; la tabla de tipos y referencias del **libro de XP**, escrito con `ON CONFLICT DO NOTHING` en el `batch` del hecho, sin filas a 0, con `producer_profile.xp` recalculada como la suma del libro en el mismo `batch` y el tope semanal contado dentro del `INSERT`. Anexo C: `challenge` apunta a la columna. Migración `0008_capa_de_juego`, solo aditiva. |

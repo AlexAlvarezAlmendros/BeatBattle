@@ -13,10 +13,11 @@ import {
 } from '@beatbattle/shared'
 import { and, eq, gt, type SQL } from 'drizzle-orm'
 import type { z } from 'zod'
-import { runBatch } from '../../db/batch'
+import { type BatchStatement, runBatch } from '../../db/batch'
 import type { Db } from '../../db/client'
 import { producerProfile, user, usernameRedirect } from '../../db/schema'
 import { appError } from '../../lib/errors'
+import type { GameService } from '../game/service'
 import type { ImageStorage } from '../storage/cloudinary'
 
 /**
@@ -25,10 +26,14 @@ import type { ImageStorage } from '../storage/cloudinary'
  * anterior durante otros 30 (`RF-PRF-03`). El instante entra como argumento (`req.now`).
  */
 
-/** La BD y, si hay Cloudinary configurado, las imágenes (sin él, ningún perfil tiene avatar). */
+/**
+ * La BD y, si hay Cloudinary configurado, las imágenes (sin él, ningún perfil tiene avatar); y la capa de juego, para
+ * `profile_done` en el `batch` que guarda el perfil (tarea 7.9).
+ */
 export interface ProfileStore {
   db: Db
   images: ImageStorage | null
+  game?: GameService
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -139,6 +144,39 @@ export async function getOwnProfile(store: ProfileStore, userId: string, now: nu
   }
 }
 
+/**
+ * La capa de juego del perfil guardado (`profile_done`: avatar, bio y un enlace, Anexo C; tarea 7.9), con lo que queda
+ * en él tras el cambio. Sin capa de juego (scripts), nada.
+ */
+async function profileGame(
+  store: ProfileStore,
+  userId: string,
+  after: { avatarPublicId: string | null; bio: string | null; links: string },
+  now: number,
+): Promise<BatchStatement[]> {
+  if (!store.game) return []
+  const plan = await store.game.profileUpdated(userId, {
+    hasAvatar: after.avatarPublicId !== null,
+    hasBio: (after.bio ?? '').trim().length > 0,
+    links: Object.keys(parseLinks(after.links)).length,
+    now,
+  })
+  return plan.statements
+}
+
+/** Lo que el perfil tiene ahora de lo que mira `profile_done`. */
+async function profileParts(db: Db, userId: string) {
+  const [current] = await db
+    .select({
+      avatarPublicId: producerProfile.avatarPublicId,
+      bio: producerProfile.bio,
+      links: producerProfile.links,
+    })
+    .from(producerProfile)
+    .where(eq(producerProfile.userId, userId))
+  return current ?? { avatarPublicId: null, bio: null, links: '{}' }
+}
+
 /** Aplica los cambios del perfil (solo lo que llega). Un enlace que no es de su sitio se rechaza entero. */
 export async function updateProfile(
   store: ProfileStore,
@@ -151,12 +189,9 @@ export async function updateProfile(
   if (patch.bio !== undefined) set.bio = patch.bio
   if (patch.city !== undefined) set.city = patch.city
   if (patch.accent !== undefined) set.accent = patch.accent
+  const current = await profileParts(db, userId)
   if (patch.links !== undefined) {
-    const [current] = await db
-      .select({ links: producerProfile.links })
-      .from(producerProfile)
-      .where(eq(producerProfile.userId, userId))
-    const links = parseLinks(current?.links ?? '{}')
+    const links = parseLinks(current.links)
     for (const [kind, value] of Object.entries(patch.links) as [ProfileLinkKind, string | null][]) {
       if (value === null || value.trim() === '') {
         delete links[kind]
@@ -169,7 +204,10 @@ export async function updateProfile(
     set.links = JSON.stringify(links)
   }
   if (Object.keys(set).length > 0)
-    await db.update(producerProfile).set(set).where(eq(producerProfile.userId, userId))
+    await runBatch(db, [
+      db.update(producerProfile).set(set).where(eq(producerProfile.userId, userId)),
+      ...(await profileGame(store, userId, { ...current, ...set }, now)),
+    ])
   return getOwnProfile(store, userId, now)
 }
 
@@ -260,12 +298,12 @@ export async function setAvatar(
   if (!info) throw appError('NOT_FOUND', 'La imagen no ha llegado a Cloudinary.')
   if (!AVATAR_FORMATS.has(info.format.toLowerCase()))
     throw appError('VALIDATION_FAILED', 'Formato de imagen no admitido.')
-  const [current] = await db
-    .select({ avatarPublicId: producerProfile.avatarPublicId })
-    .from(producerProfile)
-    .where(eq(producerProfile.userId, userId))
-  await db.update(producerProfile).set({ avatarPublicId: publicId }).where(eq(producerProfile.userId, userId))
-  const previous = current?.avatarPublicId
+  const current = await profileParts(db, userId)
+  await runBatch(db, [
+    db.update(producerProfile).set({ avatarPublicId: publicId }).where(eq(producerProfile.userId, userId)),
+    ...(await profileGame(store, userId, { ...current, avatarPublicId: publicId }, now)),
+  ])
+  const previous = current.avatarPublicId
   if (previous && previous !== publicId)
     await images.removeImage(previous).catch((error) => onOrphan(previous, error))
   return getOwnProfile(store, userId, now)
