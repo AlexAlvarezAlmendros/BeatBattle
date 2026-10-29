@@ -57,6 +57,13 @@
       "when": 1791920003089,
       "tag": "0007_resultados",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1793279944140,
+      "tag": "0008_capa_de_juego",
+      "breakpoints": true
     }
   ]
 }

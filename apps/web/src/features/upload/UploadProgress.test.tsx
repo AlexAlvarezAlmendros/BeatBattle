@@ -35,6 +35,7 @@ const ENTRY: OwnEntry = {
   loudnessLufs: -10,
   truePeakDb: -1,
   ownCoverUrl: null,
+  challengeClaimed: false,
   canReplaceAudio: true,
   submittedAt: 1,
   updatedAt: 1,

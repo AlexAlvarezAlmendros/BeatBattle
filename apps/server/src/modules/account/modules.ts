@@ -23,6 +23,7 @@ import {
   vote,
   week,
 } from '../../db/schema'
+import { gameAccountData } from '../game/account'
 import type { AccountDataModule } from './registry'
 
 /**
@@ -258,6 +259,7 @@ const entries: AccountDataModule = {
         loudnessLufs: entry.loudnessLufs,
         truePeakDb: entry.truePeakDb,
         receiptNumber: entry.receiptNumber,
+        challengeClaimed: entry.challengeClaimed,
         status: entry.status,
         submittedAt: entry.submittedAt,
         updatedAt: entry.updatedAt,
@@ -293,9 +295,7 @@ const entries: AccountDataModule = {
       listens,
       reports,
       ipSignals,
-      // La capa de juego (logros y XP) llega con la Fase 7.
-      achievements: [],
-      xpEvents: [],
+      // La capa de juego (libro de XP, logros y racha) la pone el módulo `game` en esta misma sección.
     }
   },
   async cleanup({ db, userId }) {
@@ -324,5 +324,12 @@ const entries: AccountDataModule = {
   },
 }
 
-/** En el orden del borrado: la cuenta, la última. */
-export const ACCOUNT_DATA: readonly AccountDataModule[] = [entries, weeks, profile, email, auth]
+/** En el orden del borrado: la cuenta, la última. `entries` y `game` comparten la sección `game` de la exportación. */
+export const ACCOUNT_DATA: readonly AccountDataModule[] = [
+  entries,
+  gameAccountData,
+  weeks,
+  profile,
+  email,
+  auth,
+]
