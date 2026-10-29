@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.99 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.100 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2952,6 +2952,14 @@ calculado (`xpFor` de `packages/rules`):
 - `achievement_unlock` es una fila por cuenta y logro, para siempre (ningún logro se retira); `seen_at` dice si ya
   vio su aviso. `streak_state` guarda lo de `advanceStreak` (la racha, la mejor, la última semana aplicada y la
   temporada del comodín).
+- Las sentencias las prepara el módulo **`game`** del servidor (`modules/game`) para el `batch` de quien provoca el
+  hecho: `plan(cuenta, { xp, events, achievements, now })` da los movimientos (los de 0 XP fuera), los logros que
+  desbloquean sus eventos (`evaluate`, contra los que ya tiene) con el XP de su rareza, `level_20` y, la última, la
+  caché. `level_20` se decide **en SQL dentro del propio `batch`**: entra si la suma del libro, con lo ya escrito en
+  él, llega al nivel 20 (también si la empuja el XP de otro logro), y su XP solo si el logro está. El plan devuelve
+  además lo que gana la cuenta (`game: { xp, achievements, level }` de las respuestas): una vista previa con lo que
+  ya hay en el libro; la verdad es el `batch`. `voteGrant` calcula el XP de un voto con el libro (primer voto a
+  la entrada, tope de la semana).
 
 ### 4.12 Tiempo, calendario y tareas programadas
 
@@ -3849,6 +3857,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.100 | **Tarea 7.8.** §4.11, libro de XP: el módulo `game` del servidor prepara las sentencias para el `batch` del hecho (`plan` con los movimientos, los logros de sus eventos con su XP, `level_20` y la caché) y devuelve lo que gana la cuenta como vista previa; `level_20` se decide en SQL dentro del mismo `batch` con la suma del libro, así que también lo cruza el XP de otro logro; `voteGrant`, el XP de un voto contado en el libro. |
 | 2026-10-29 | 0.6.99 | **Tarea 7.7** (hueco G4 del plan 07, resuelto). §2.5: la ficha lleva la casilla «Cumplo el reto extra» solo si la semana tiene reto, editable hasta el cierre de envíos como el resto; la marca solo la ve su dueño hasta el sellado y después va con el resultado (`RF-ENT-13`, nuevo). §4.10: registrar y editar aceptan `challengeClaimed` y la ficha sellada lo lleva en `result`. §4.11: `entry.challenge_claimed`; `xp_event` con `week_id` (para el tope de votos y para lo público), el índice único por cuenta, tipo y referencia y uno parcial que deja una sola «primera entrada» por semana; `achievement_unlock` con `week_id`; la tabla de tipos y referencias del **libro de XP**, escrito con `ON CONFLICT DO NOTHING` en el `batch` del hecho, sin filas a 0, con `producer_profile.xp` recalculada como la suma del libro en el mismo `batch` y el tope semanal contado dentro del `INSERT`. Anexo C: `challenge` apunta a la columna. Migración `0008_capa_de_juego`, solo aditiva. |
 | 2026-10-29 | 0.6.97 | **Tarea 7.5** (huecos G8 y G4, la parte de la regla, del plan 07). Anexo C, «Cómo se evalúan»: por eventos, sin repetir ni retirar ningún logro; qué cuentan «entradas» y «votos»; la ventana de `last_minute` con `submitted_at`; `comeback` por debajo de la mediana de las clasificadas; `double` y `oracle` por semanas de número consecutivo; `challenge`, marcar el reto extra en la ficha y quedar en el top 10, con la marca oculta hasta el sellado (§1.3). **Las franjas horarias de los logros van en hora de Madrid y con el reloj del servidor** (`night_owl`: 10 votos a entradas distintas entre las 03:00 y las 05:00 de una misma noche; `revetlla`: de las 21:00 del 23 de junio a las 06:00 del 24). Los umbrales de los secretos de la Fase 8. §4.5: qué lleva el catálogo y `nightOwlWindow` e `isRevetllaNight`. |
 | 2026-10-29 | 0.6.96 | **Tarea 7.4** (hueco G10 del plan 07). §2.9: entra en la clasificación de la temporada quien tiene al menos una entrada clasificada en una semana sellada (quien solo tiene semanas sin clasificar, no); victorias y podios cuentan los ex aequo; la puntuación media es la de la puntuación del snapshot de sus entradas clasificadas, comparada exacta; con todo empatado comparten posición y en la primera son campeones ex aequo. La última semana de una temporada es la de su último lunes. §4.5: `seasonStandings`, `seasonChampions` e `isLastWeekOfSeason`. |
