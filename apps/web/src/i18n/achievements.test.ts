@@ -11,7 +11,7 @@ describe('textos de los logros', () => {
   it('RF-GAME-05: cada logro del catálogo tiene nombre y descripción; los ocultos, además, su pista (`hintKey`)', () => {
     for (const achievement of ACHIEVEMENTS) {
       expect(t(`achievement.${achievement.id}.name`).trim(), achievement.id).not.toBe('')
-      expect(t(`achievement.${achievement.id}.desc`).trim(), achievement.id).not.toBe('')
+      expect(t(`achievement.${achievement.id}.description`).trim(), achievement.id).not.toBe('')
       if (achievement.hintKey) expect(t.has(achievement.hintKey), achievement.hintKey).toBe(true)
     }
   })

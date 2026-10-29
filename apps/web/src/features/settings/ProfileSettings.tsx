@@ -1,4 +1,4 @@
-import { levelProgress, rankTitle } from '@beatbattle/rules'
+import { ACHIEVEMENTS, type AchievementId, levelProgress, rankTitle } from '@beatbattle/rules'
 import {
   ACCENTS,
   type Accent,
@@ -10,6 +10,7 @@ import {
   PROFILE_LINK_KINDS,
   type ProfileLinkKind,
   type ProfileUpdate,
+  SHOWCASE_MAX,
   USERNAME_MAX,
 } from '@beatbattle/shared'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -17,12 +18,16 @@ import { type ChangeEvent, type FormEvent, useRef, useState } from 'react'
 import { paths } from '../../app/paths'
 import { DATE_FORMATS, formatDate, t } from '../../i18n'
 import { ApiClientError, apiFetch } from '../../net/api'
+import { profileQuery } from '../../net/game'
+import { queryKeys } from '../../net/queryKeys'
+import { AchievementBadge, achievementName } from '../../ui/AchievementBadge'
 import { Button } from '../../ui/Button'
 import { TextAreaField, TextField } from '../../ui/Field'
-import { ProducerCard } from '../../ui/ProducerCard'
+import { cardSince, ProducerCard } from '../../ui/ProducerCard'
 import { Done, PaperNotice } from '../account/FormBits'
 import { RequireSession } from '../account/RequireSession'
 import { initialsOf, useSession } from '../account/session'
+import { profileCardProps } from '../profile/ProfileCard'
 import { avatarProblem, deleteAvatar, uploadAvatar } from './avatarUpload'
 import { SettingsGroup, SettingsSection, SettingsStatus } from './SettingsSection'
 import styles from './SettingsSection.module.css'
@@ -101,7 +106,113 @@ function ProfileEditor() {
       <AvatarForm profile={profile.data} />
       <UsernameForm profile={profile.data} />
       <CardForm profile={profile.data} />
+      <ShowcaseForm profile={profile.data} />
     </>
+  )
+}
+
+/**
+ * La vitrina (§2.3, §3.8.10; tarea 7.24): hasta tres logros conseguidos, en el orden en que se eligen, que la carta
+ * enseña en su anverso. Se eligen entre los que ya enseña el perfil público (los de semanas selladas o sin semana,
+ * hueco G1) y los que ya estaban en la vitrina; `PUT /api/me/profile { showcase }`.
+ */
+function ShowcaseForm({ profile }: { profile: OwnProfile }) {
+  const client = useQueryClient()
+  const pub = useQuery(profileQuery(profile.username))
+  const [chosen, setChosen] = useState<AchievementId[]>(profile.showcase)
+  const [state, setState] = useState<'idle' | 'busy' | 'saved'>('idle')
+  const [notice, setNotice] = useState<string | null>(null)
+  const owned = new Set<string>([
+    ...(pub.data?.game.achievements.map((a) => a.id) ?? []),
+    ...profile.showcase,
+  ])
+  const options = ACHIEVEMENTS.filter((a) => owned.has(a.id)).map((a) => a.id)
+  const changed = chosen.join() !== profile.showcase.join()
+
+  const toggle = (id: AchievementId) => {
+    setNotice(null)
+    setState((value) => (value === 'saved' ? 'idle' : value))
+    if (chosen.includes(id)) return setChosen(chosen.filter((value) => value !== id))
+    if (chosen.length >= SHOWCASE_MAX)
+      return setNotice(t('settings.profile.showcase.full', { max: SHOWCASE_MAX }))
+    setChosen([...chosen, id])
+  }
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault()
+    if (!changed) return setState('saved')
+    setState('busy')
+    try {
+      const data = await apiFetch('/api/me/profile', {
+        method: 'PUT',
+        body: { showcase: chosen },
+        schema: OwnProfileSchema,
+      })
+      client.setQueryData(PROFILE_KEY, data)
+      await client.invalidateQueries({ queryKey: queryKeys.profile(profile.username) })
+      setChosen(data.showcase)
+      setState('saved')
+    } catch (caught) {
+      setNotice(
+        caught instanceof ApiClientError && caught.status === 422
+          ? t('settings.profile.showcase.invalid')
+          : errorText(caught),
+      )
+      setState('idle')
+    }
+  }
+
+  return (
+    <form className={styles.form} onSubmit={submit} noValidate>
+      <SettingsGroup
+        title={t('settings.profile.showcase.title')}
+        help={t('settings.profile.showcase.help', { max: SHOWCASE_MAX })}
+        layout="stack"
+      >
+        {pub.isPending ? (
+          <SettingsStatus busy>{t('settings.profile.showcase.loading')}</SettingsStatus>
+        ) : options.length === 0 ? (
+          <p className={styles.help}>{t('settings.profile.showcase.empty')}</p>
+        ) : (
+          <ul className={styles.showcase} aria-label={t('settings.profile.showcase.list')}>
+            {options.map((id) => {
+              const place = chosen.indexOf(id)
+              return (
+                <li key={id}>
+                  <button
+                    type="button"
+                    className={styles.showcaseOption}
+                    aria-pressed={place >= 0}
+                    onClick={() => toggle(id)}
+                  >
+                    <AchievementBadge id={id} unlocked className={styles.showcaseBadge} />
+                    <span className={styles.showcaseName}>{achievementName(id, true)}</span>
+                    {place >= 0 && (
+                      <span className={styles.showcasePlace}>
+                        {t('settings.profile.showcase.place', { place: place + 1 })}
+                      </span>
+                    )}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+        {notice && <PaperNotice>{notice}</PaperNotice>}
+        <div className={styles.actionsRow}>
+          <Button
+            type="submit"
+            variant="outline"
+            loading={state === 'busy'}
+            disabled={!changed}
+            disabledReason={t('settings.profile.showcase.unchanged')}
+          >
+            {t('settings.profile.showcase.save')}
+          </Button>
+        </div>
+        <SettingsStatus>{state === 'saved' ? t('settings.profile.saved') : ''}</SettingsStatus>
+      </SettingsGroup>
+    </form>
   )
 }
 
@@ -403,23 +514,27 @@ function CardPiece() {
     queryFn: ({ signal }) => apiFetch('/api/me/profile', { schema: OwnProfileSchema, signal }),
     enabled: me !== null,
   })
+  // Lo público (victorias, variante, vitrina): la carta como la ven los demás (tarea 7.24).
+  const pub = useQuery({ ...profileQuery(me?.username ?? ''), enabled: me !== null })
   if (!me || !profile.data) return null
   const data = profile.data
   const progress = levelProgress(data.xp)
-  const joined = new Date(data.joinedAt)
+  const { unlocked: _unlocked, ...card } = pub.data
+    ? profileCardProps(pub.data)
+    : {
+        unlocked: [],
+        name: data.displayUsername,
+        initials: initialsOf(data.displayUsername),
+        cardNumber: data.cardNumber,
+        level: progress.level,
+        levelFraction: progress.fraction,
+        rank: t(`rank.${rankTitle(progress.level)}`),
+        stats: { wins: 0, podiums: 0, weeks: 0 },
+        since: cardSince(data.joinedAt),
+      }
   return (
     <div className={styles.cardPiece} aria-hidden="true">
-      <ProducerCard
-        name={data.displayUsername}
-        initials={initialsOf(data.displayUsername)}
-        cardNumber={data.cardNumber}
-        level={progress.level}
-        levelFraction={progress.fraction}
-        rank={t(`rank.${rankTitle(progress.level)}`)}
-        stats={{ wins: 0, podiums: 0, weeks: 0 }}
-        since={`${String(joined.getMonth() + 1).padStart(2, '0')}/${joined.getFullYear()}`}
-        avatarUrl={data.avatarUrl}
-      />
+      <ProducerCard {...card} name={data.displayUsername} avatarUrl={data.avatarUrl} />
     </div>
   )
 }

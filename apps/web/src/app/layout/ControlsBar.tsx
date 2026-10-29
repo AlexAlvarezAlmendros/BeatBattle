@@ -57,6 +57,8 @@ export const CONTROL_KEYS: Readonly<
   standings: { keys: [{ glyph: 'frame.keys.glyph.t' }], verb: 'frame.keys.standings' },
   share: { keys: [{ glyph: 'frame.keys.glyph.x' }], verb: 'frame.keys.share' },
   replay: { keys: [{ glyph: 'frame.keys.glyph.r' }], verb: 'frame.keys.replay' },
+  flip: { keys: [{ glyph: 'frame.keys.glyph.c' }], verb: 'frame.keys.flip' },
+  winners: { keys: [ARROW_LEFT, ARROW_RIGHT], verb: 'frame.keys.winners' },
 }
 
 /**

@@ -51,7 +51,7 @@ export function AchievementBadge({
           <span className={styles.rarity}>{t(`game.rarity.${rarity}`)}</span>
         </p>
         <p className={styles.name}>{t(`achievement.${id}.name`)}</p>
-        <p className={styles.desc}>{t(`achievement.${id}.desc`)}</p>
+        <p className={styles.desc}>{t(`achievement.${id}.description`)}</p>
       </div>
       <p className={styles.xp}>
         {t('game.notice.xp', { xp: formatNumber(XP_ACHIEVEMENT_BY_RARITY[rarity]) })}

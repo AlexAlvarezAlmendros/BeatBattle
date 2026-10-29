@@ -1,0 +1,343 @@
+/*
+ * Salón de la fama (§2.9, §3.8.14; tarea 7.25): la tabla de récords de una recreativa. En la cuña, los campeones de
+ * temporada en placas grandes (opacas: la cuña tiene trama, `RD-VIS-05`); en el panel, los récords y la tira de
+ * campeones semana a semana, que se recorre en horizontal (en móvil, en lista).
+ */
+
+.section {
+  display: grid;
+  align-content: start;
+  gap: var(--bb-space-3);
+  min-width: 0;
+}
+
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--bb-space-2);
+}
+
+.sectionTitle,
+.pieceTitle {
+  padding-left: var(--bb-space-3);
+  border-left: var(--bb-space-1) solid var(--bb-red-cta);
+  color: var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-md);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: var(--bb-leading-label);
+  text-transform: uppercase;
+}
+
+.empty {
+  padding: var(--bb-space-4);
+  border: var(--bb-stroke-hair) dashed var(--bb-line-strong);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+/* ── Récords: puesto en display, rótulo, quién y la cifra en Oxanium ─────────────────────── */
+
+.records {
+  display: grid;
+  gap: var(--bb-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.record {
+  display: grid;
+  grid-template-columns: var(--bb-space-10) minmax(0, 1.1fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--bb-space-2) var(--bb-space-4);
+  min-height: var(--bb-space-14);
+  padding: var(--bb-space-2) var(--bb-space-4) var(--bb-space-2) var(--bb-space-3);
+  --frame-fill: var(--bb-panel);
+  --frame-border: var(--bb-line);
+}
+
+.recordRank {
+  color: var(--bb-red);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-xl);
+  font-stretch: var(--bb-stretch-plate);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  line-height: 1;
+}
+
+.recordLabel {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.recordHolder {
+  overflow: hidden;
+  color: var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-lg);
+  font-stretch: var(--bb-stretch-plate);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  text-decoration: none;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+a.recordHolder:hover {
+  text-decoration: underline;
+}
+
+.recordValue {
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xl);
+  font-weight: var(--bb-weight-extrabold);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.recordLink {
+  grid-column: 3 / 5;
+  justify-self: end;
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.recordEmpty {
+  grid-column: 3 / 5;
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-sm);
+}
+
+/* ── Campeones semana a semana: una tira de portadas con su disco de oro ─────────────────── */
+
+.strip {
+  min-width: 0;
+  overflow-x: auto;
+  /* Sitio para el cursor (4 + 3 px fuera de la casilla): la tira recorta lo que se sale. */
+  padding: calc(var(--bb-cursor-gap) + var(--bb-stroke-cursor)) var(--bb-space-3) var(--bb-space-3);
+  margin-inline: calc(var(--bb-space-3) * -1);
+  scroll-padding-inline: var(--bb-space-3);
+  scrollbar-color: var(--bb-ink-4) transparent;
+}
+
+.winners {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc(var(--bb-space-16) * 2.6);
+  gap: var(--bb-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.winner {
+  position: relative;
+  display: grid;
+  gap: var(--bb-space-1);
+  padding: var(--bb-space-2) var(--bb-space-2) var(--bb-space-3);
+  color: var(--bb-white);
+  text-decoration: none;
+  --frame-fill: var(--bb-panel);
+  --frame-border: var(--bb-line);
+}
+
+.winner:hover {
+  --frame-border: var(--bb-line-strong);
+  --frame-fill: var(--bb-panel-2);
+}
+
+.winnerCover {
+  display: grid;
+  aspect-ratio: 1;
+  overflow: hidden;
+  margin-bottom: var(--bb-space-1);
+  background: var(--bb-wine-2);
+}
+
+.winnerCover canvas,
+.winnerCover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* El disco de oro, sobre la esquina de la portada (el puesto lo dice su nombre accesible). */
+.winnerMedal {
+  position: absolute;
+  top: var(--bb-space-1);
+  right: var(--bb-space-1);
+  width: var(--bb-space-10);
+}
+
+.winnerWeek {
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-extrabold);
+  letter-spacing: calc(var(--bb-tracking-label) / 2);
+}
+
+.winnerTitle {
+  overflow: hidden;
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-bold);
+  line-height: var(--bb-leading-label);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.winnerProducer {
+  overflow: hidden;
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-md);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── La pieza: las placas de los campeones de temporada ──────────────────────────────────── */
+
+.piece {
+  display: grid;
+  align-content: start;
+  gap: var(--bb-space-3);
+  width: min(100%, calc(var(--bb-space-16) * 6));
+}
+
+/* El título de la pieza, en su propia placa sobre la cuña. */
+.pieceTitle {
+  justify-self: start;
+  padding: var(--bb-space-2) var(--bb-space-3);
+  background: var(--bb-black);
+}
+
+.plates {
+  display: grid;
+  gap: var(--bb-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plate {
+  position: relative;
+  display: grid;
+  gap: var(--bb-space-1);
+  padding: var(--bb-space-5) var(--bb-space-6);
+  color: var(--bb-white);
+  text-decoration: none;
+  --frame-border: var(--bb-red);
+  --frame-fill: var(--bb-black);
+}
+
+.plate:hover {
+  --frame-border: var(--bb-white);
+}
+
+.crown {
+  position: absolute;
+  top: var(--bb-space-3);
+  right: var(--bb-space-4);
+  width: var(--bb-space-10);
+  fill: var(--bb-red);
+}
+
+.plateSeason {
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-2xl);
+  font-stretch: var(--bb-stretch-plate);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  line-height: var(--bb-leading-display);
+  text-transform: uppercase;
+}
+
+.plateNames {
+  overflow-wrap: anywhere;
+  color: var(--bb-white);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-2xl);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  text-shadow: var(--bb-shadow-hard-sm);
+  text-transform: uppercase;
+}
+
+.plateEmpty {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+/* En móvil, la tira pasa a lista (↑ ↓) y cada campeón, a una fila con su portada a la izquierda. */
+@media (max-width: 720px) {
+  .strip {
+    overflow: visible;
+    padding: 0;
+    margin: 0;
+  }
+
+  .winners[data-orientation="vertical"] {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+    gap: var(--bb-space-2);
+  }
+
+  .winner {
+    grid-template-columns: var(--bb-space-14) minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    column-gap: var(--bb-space-3);
+    align-items: center;
+    padding: var(--bb-space-2);
+  }
+
+  .winnerCover {
+    grid-row: 1 / 4;
+    margin: 0;
+  }
+
+  .winnerMedal {
+    top: auto;
+    right: var(--bb-space-2);
+    bottom: var(--bb-space-2);
+    width: var(--bb-space-8);
+  }
+
+  .record {
+    grid-template-columns: var(--bb-space-8) minmax(0, 1fr) auto;
+  }
+
+  .recordLabel {
+    grid-column: 2 / 4;
+  }
+
+  /* El nombre puede partir antes que cortarse («KAIRO.…» a 390 px). */
+  .recordHolder {
+    grid-column: 2;
+    font-size: var(--bb-fs-md);
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .recordLink,
+  .recordEmpty {
+    grid-column: 2 / 4;
+    justify-self: start;
+  }
+}

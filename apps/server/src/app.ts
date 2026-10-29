@@ -213,7 +213,14 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   uploadsRoutes(app, { images, entries: entryStorage ? entries : null, rateLimiter, newId })
   entriesRoutes(app, entries)
   // El perfil, con la portada de las entradas selladas de su historial (7.13).
-  profileRoutes(app, { db, images, rateLimiter, game, cover: entries.sealedCover })
+  profileRoutes(app, {
+    db,
+    images,
+    rateLimiter,
+    game,
+    cover: entries.sealedCover,
+    publicUrl: config.publicUrl,
+  })
   votesRoutes(
     app,
     createVotesService({

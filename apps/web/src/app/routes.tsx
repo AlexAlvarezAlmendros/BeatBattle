@@ -196,7 +196,8 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'p/:username',
-              handle: handle('public', interior('profile', 'pages.profile.title')),
+              // La tecla C gira la carta (§3.4.4, tarea 7.22).
+              handle: handle('public', interior('profile', 'pages.profile.title', ['flip', 'back', 'sound'])),
               lazy: async () => {
                 const m = await import('../features/profile/ProfilePage')
                 return { Component: m.ProfilePage, loader: m.profileLoader }
@@ -204,19 +205,24 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'salon-de-la-fama',
-              handle: handle('public', interior('hallOfFame', 'pages.hallOfFame.title')),
-              lazy: page(
-                () => import('../features/archive/HallOfFamePage'),
-                (m) => m.HallOfFamePage,
+              // ← → recorren los campeones semana a semana (§3.8.14, tarea 7.25).
+              handle: handle(
+                'public',
+                interior('hallOfFame', 'pages.hallOfFame.title', ['winners', 'back', 'sound']),
               ),
+              lazy: async () => {
+                const m = await import('../features/archive/HallOfFamePage')
+                return { Component: m.HallOfFamePage, loader: m.hallOfFameLoader }
+              },
             },
             {
               path: 'temporada/:id',
-              handle: handle('public', interior('season', 'pages.season.title')),
-              lazy: page(
-                () => import('../features/game/SeasonPage'),
-                (m) => m.SeasonPage,
-              ),
+              // ↑ ↓ recorren la clasificación (§3.8.14, tarea 7.26).
+              handle: handle('public', interior('season', 'pages.season.title', ['choose', 'back', 'sound'])),
+              lazy: async () => {
+                const m = await import('../features/game/SeasonPage')
+                return { Component: m.SeasonPage, loader: m.seasonLoader }
+              },
             },
             {
               path: 'como-funciona',
