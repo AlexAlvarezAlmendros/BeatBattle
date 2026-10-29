@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.90 · 2026-10-16 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.91 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1349,15 +1349,17 @@ con su propia firma, §3.1) y las de autenticación, admin y legales, que usan u
   «Legal» va a su lado, separado por un filete (`--bb-stroke-hair`, `--bb-line`), si cabe, y si no,
   debajo y centrado. **Las teclas nunca se cortan ni se esconden con teclado**: entre la última tecla y
   la firma queda siempre `--bar-gap`; si no caben, primero se aprietan sus huecos y después van en su
-  propia fila (de 721 a 1199 px la crónica va además en otra fila, centrada bajo la firma, y nunca pasa
-  de su columna). Va pegada al pie de la ventana también en móvil (firma de 24 px): la firma se ve al
+  propia fila (por debajo de 62 em, unos 992 px con la letra por defecto, la crónica va además en otra fila,
+  centrada bajo la firma; desde 62 em, en la columna de la derecha, como a partir de 1200 px, y nunca pasa de
+  su columna). Va pegada al pie de la ventana también en móvil (firma de 24 px): la firma se ve al
   abrir cualquier pantalla, aunque sea más alta que la ventana. Si la barra pasa del **15 % del alto de
   la ventana** (con teclado en una ventana baja o estrecha: móvil apaisado, escritorio ampliado), se
   despega y va al final de la pantalla **salvo la fila de la firma, que sigue pegada al pie** (el marco mide como poco el alto de la
   ventana más lo que se despega, para que al abrir solo se vea esa fila, entera): la firma se ve siempre
   al abrir (`RF-OTP-01`) y el contenido no queda tapado (WCAG 1.4.10 y 2.4.11). El 15 % vale
-  en cualquier ventana y con cualquier entrada (a 1024×768 con teclado la barra tiene tres filas y se
-  despega; en táctil, en una ventana baja, «Legal» se va al final y la firma se queda). Pegada o no, ningún
+  en cualquier ventana y con cualquier entrada (a 900×700 con teclado la del menú tiene tres filas y se
+  despega; a 1024×768 y 1180×720 tiene dos, 84 px, y va pegada entera; en táctil, en una ventana baja,
+  «Legal» se va al final y la firma se queda). Pegada o no, ningún
   control enfocado queda debajo de ella (su alto real es el margen del foco), el anillo del cursor de sus
   piezas cabe entero en la ventana y, con la barra despegada, al llegar con el foco a sus piezas la
   pantalla va al final. En móvil se centra el contenido de las piezas (pegatina, rótulos y filete), no sus
@@ -1754,7 +1756,8 @@ hasta 968 px, porque ahí la barra lleva más filas). La misma composición apre
 esconder nada**: placas de `--bb-plate-h-low` (de 44 a 70 px, nunca por debajo de `--bb-target`) que
 descuentan lo que la barra mide de más, tarjeta apretada, márgenes de 8 px y el logo ocupando el alto
 que queda, con el lockup a su tamaño. Cabe sin desplazar a 1440×789 (la ventana real de una pantalla de
-1440×900), 1366×657, 1536×730, 1280×720 y 1920×955; a 1440×900 no cambia nada.
+1440×900), 1366×657, 1536×730, 1280×720 y 1920×955, y en la composición intermedia, a 1024×768 y 1180×720
+(con el reloj en la tarjeta, más abajo); a 1440×900 no cambia nada.
 
 **Ventana grande** (≥ 1600 px de ancho o ≥ 1000 px de alto). La composición escala con
 `min(100vw / 1440, 100dvh / 900)`, acotado entre 1 y 1,33 (logo, placas, cuerpos en display, columnas y
@@ -1768,9 +1771,16 @@ discontinua de la barra.
 **Composición intermedia** (de 721 a ~1199 px en horizontal: tabletas apaisadas y escritorio ampliado;
 tamaños de prueba 1024×768, 900×700 y 823×514, que es 1440×900 al 175 %). Dos columnas con la lista
 estrecha de §3.3 (dato y tecla en una segunda línea), el HUD apilado si no cabe, la crónica bajo la firma
-y el lockup estrecho; todas las placas en reposo con el mismo alto y el mismo cuerpo de rótulo. Mover el
-cursor trae a la vista también el panel de ayuda. **Tableta vertical** (de 721 a 1199 px en vertical,
-como 768×1024 y 820×1180): la composición apilada de móvil **escalada con el ancho** (el logo ocupa el
+(al lado desde 62 em, §3.4.1) y el lockup estrecho; todas las placas en reposo con el mismo alto y el mismo
+cuerpo de rótulo. Mover el cursor trae a la vista también el panel de ayuda. **Con la ventana baja (hasta
+859 px de alto)**, el reloj de ronda pasa a la tarjeta, en línea y en el sitio de la onda y del «0:00 /
+1:12», que repiten el play y la duración (como en la tableta vertical): el HUD queda en una fila. La columna
+de modos va a `--bb-space-1` (lo que la separa del HUD, el relleno de la franja de «ELIGE MODO», la
+separación entre placas y la de la ayuda). Así cabe sin desplazar a 1024×768 y 1180×720, también con un
+título largo y la tonalidad larga, con la tarjeta y la ayuda por encima de la línea discontinua y la barra
+entera a la vista (teclas, firma, crédito y pausa). Por encima de 859 px el reloj sigue en el HUD (es el
+alto por debajo del cual, con el reloj en el HUD, el menú ya no cabe a 992 px de ancho). **Tableta
+vertical** (de 721 a 1199 px en vertical, como 768×1024 y 820×1180): la composición apilada de móvil **escalada con el ancho** (el logo ocupa el
 ancho útil, en dos líneas si le da el alto y si no en una; placas de `--bb-plate-h`, que en táctil ceden
 hasta `--bb-target` para caber; lo que sobra de alto, a partes iguales entre el lockup y la tarjeta y entre
 la tarjeta y «ELIGE MODO», nunca arriba), que cabe sin desplazar en táctil; con teclado y ratón, como no
@@ -3711,6 +3721,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.91 | **Tarea 3.21 (jurado visual de la Fase 3, J1).** §3.8.3, composición intermedia: con la ventana baja (de 721 a 1199 px y hasta 859 de alto), el reloj de ronda pasa a la tarjeta en el sitio de la onda y del tiempo (el HUD queda en una fila) y la columna de modos va a `--bb-space-1`. §3.4.1: la crónica va al lado de la firma desde 62 em (antes, siempre en su fila por debajo de 1200 px): la barra del menú tiene dos filas (84 px) y no se despega a 1024×768 ni a 1180×720. El menú cabe sin desplazar a esos dos tamaños con los datos normales y con `?largo`; lo demás (desde 1200 px, la tableta vertical y el móvil) no cambia. Acta en `docs/planning/evidence/f3/jurado/`. |
 | 2026-10-16 | 0.6.90 | §2.14 (arreglo, `RF-ADM-01`): en un sample nuevo, las subidas que empiezan mientras se firma la primera esperan su id. Elegir la portada antes de que volviera la firma del audio daba dos ids y «Crear el sample» decía «La parte «original» no está subida» (lo destapó la CI en `weeks.spec.ts`). |
 | 2026-10-16 | 0.6.89 | §4.19.1, §7: los emails salen de `justsomeotherpeople@gmail.com`, el Gmail del sello (decisión del usuario), con `MAIL_DAILY_LIMIT` de 450: `otherpeople.es` no tiene Workspace. |
 | 2026-10-15 | 0.6.88 | §2.14: el selector de la semana dorada del calendario lleva una línea que explica qué es y que, sin la capa de juego (Fase 7), de momento solo se guarda (petición del usuario). |

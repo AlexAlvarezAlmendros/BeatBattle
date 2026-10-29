@@ -311,10 +311,17 @@ for (const { width, height } of [
  * Lo que no cambia: mientras la barra no pase del 15 % de la ventana va pegada entera (la firma se ve al
  * abrir). En táctil, la del menú es solo la firma; a 390 × 844, la de las interiores (firma y «Legal»
  * debajo) mide el 11,6 %; a 1280 × 720 con teclado, la del menú (teclas en su fila) mide 84 px, el 11,7 %.
+ * Desde la v0.6.91, también de 992 a 1199 px: con la crónica al lado de la firma, la del menú mide 84 px
+ * (el 10,9 % a 1024 × 768, el 11,7 % a 1180 × 720, el 10 % a 1199 × 840; jurado de la 3.21, J1).
  */
 for (const { width, height, touch, paths } of [
   { width: 360, height: 640, touch: true, paths: ['/dev/menu'] },
   { width: 390, height: 844, touch: true, paths: ['/como-funciona', '/dev/menu'] },
+  { width: 1024, height: 768, touch: false, paths: ['/como-funciona', '/dev/menu'] },
+  { width: 1024, height: 820, touch: false, paths: ['/dev/menu'] },
+  { width: 1100, height: 800, touch: false, paths: ['/dev/menu'] },
+  { width: 1180, height: 720, touch: false, paths: ['/como-funciona', '/dev/menu'] },
+  { width: 1199, height: 840, touch: false, paths: ['/dev/menu'] },
   { width: 1280, height: 720, touch: false, paths: ['/como-funciona', '/dev/menu'] },
   { width: 1440, height: 900, touch: false, paths: ['/como-funciona', '/dev/menu'] },
 ]) {
@@ -388,12 +395,16 @@ function unpinnedLayout(page: Page) {
  * «Legal» debajo) mide 98 px, el 15,3 % a 360 × 640 y el 17,3 % a 320 × 568, y tampoco se despegaba.
  * §3.4.1 v0.6.7: el 15 % vale en cualquier ventana y con cualquier entrada; despegada, la fila de la
  * firma sigue pegada al pie y lo demás («Legal», las teclas, la crónica) va al final de la pantalla.
+ *
+ * Desde la v0.6.91 la crónica va al lado de la firma desde 62 em (992 px) y de 992 a 1199 px la barra del
+ * menú tiene dos filas (84 px): a 1024 × 768, 1024 × 820, 1100 × 800 y 1199 × 840 ya no pasa del 15 % y va
+ * pegada entera (más abajo, «barra pegada»; jurado de la 3.21, J1). Por debajo de 62 em sigue con tres filas
+ * (127 px) y se despega en una ventana de menos de 847 px de alto.
  */
 for (const { width, height } of [
-  { width: 1024, height: 768 },
-  { width: 1024, height: 820 },
-  { width: 1100, height: 800 },
-  { width: 1199, height: 840 },
+  { width: 900, height: 700 },
+  { width: 960, height: 768 },
+  { width: 991, height: 800 },
 ]) {
   test.describe(`barra despegada a ${width} × ${height} con teclado`, () => {
     test.use({ viewport: { width, height } })
@@ -551,13 +562,16 @@ for (const { width, height, touch, routes } of [
  * la letra por defecto a 24 px iba en la columna de la derecha y acababa en «Inserta tu beat · Crédit…»
  * (WCAG 1.4.4). Ahora, si un mensaje no cabe en una línea, parte en dos; dos líneas caben en el alto del
  * botón de pausa, así que la barra no cambia de alto al rotar. Se recorren los cuatro mensajes con el reloj
- * de la página falso.
+ * de la página falso. También con la letra por defecto donde la crónica va al lado de la firma más estrecha
+ * (desde 62 em, §3.4.1 v0.6.91: a 992 y 1024 px le quedan 13 rem; jurado de la 3.21, J1).
  */
 for (const { width, height, fontSize } of [
   { width: 1440, height: 900, fontSize: 24 },
   { width: 1440, height: 900, fontSize: 20 },
   { width: 1024, height: 768, fontSize: 24 },
   { width: 390, height: 844, fontSize: 24 },
+  { width: 1024, height: 768, fontSize: 16 },
+  { width: 992, height: 720, fontSize: 16 },
 ]) {
   test.describe(`crónica con letra de ${fontSize} px a ${width} × ${height}`, () => {
     test.use({ viewport: { width, height } })
