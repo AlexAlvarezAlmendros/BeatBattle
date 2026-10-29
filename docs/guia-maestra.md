@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.105 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.106 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -582,6 +582,14 @@ ofrece la ceremonia de revelación. Dura unos 25 s y se puede saltar.
 - **Salón de la fama** (`/salon-de-la-fama`): ganadores semana a semana (vinilo de oro con la
   portada), campeones de temporada y récords (más victorias, racha más larga, mejor puntuación de la
   historia, más votos emitidos).
+  - Todo sale de los **snapshots vigentes de las semanas selladas** (un re-sellado lo cambia; nada de una semana sin
+    sellar): los ganadores son las entradas en 1.ª posición (ex aequo, todas); los campeones, los de cada temporada
+    cerrada; **más victorias**, las semanas en 1.ª posición; **racha más larga**, la mejor racha de cada productor con
+    las semanas selladas (con el comodín, como §2.10); **mejor puntuación**, la de una entrada clasificada, exacta; y
+    **más votos emitidos**, los votos válidos que contó el snapshot de cada semana (sin anulados, sin los de cuentas
+    bloqueadas y solo a entradas que están en él).
+  - Con la misma cifra, el récord es de **quien llegó antes** a ella (la semana de número más bajo en la que la
+    alcanzó). Un productor eliminado sigue en sus filas y récords como «Productor eliminado» (`RF-PRF-04`).
 - **Temporadas**: una por **trimestre natural** (T1–T4). Cada semana pertenece a la temporada de su
   lunes. Puntos por posición semanal al estilo F1 (25, 18, 15, 12, 10, 8, 6, 4, 2, 1 del 1.º al 10.º)
   y 1 punto por cada entrada clasificada fuera del top 10. Desempate: más victorias, después más
@@ -2794,7 +2802,7 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | GET | `/api/me/export` | Sesión | Exportación RGPD |
 | DELETE | `/api/me` | Sesión | Borrar la cuenta (pide contraseña o reautenticación reciente) |
 | GET | `/api/producers/:username` | Pública | Perfil público, carta, estadísticas, historial |
-| GET | `/api/hall-of-fame` | Pública | Ganadores, campeones, récords |
+| GET | `/api/hall-of-fame` | Pública | Salón de la fama (§2.9): `weeklyWinners` (de la semana más reciente a la más antigua, con `weekSlug`, `weekNumber`, `entryId`, alias, título, portada y `producer`), `seasonChampions` (`{ seasonId, producers }` de cada temporada cerrada, de la más reciente a la más antigua) y `records` (`mostWins`, `longestStreak` y `mostVotesCast` como `{ producer, value }`; `bestScore` con `scoreMilli`, `weekSlug` y `entryId`; `null` si nadie tiene ninguno). `producer` `null` = «Productor eliminado». Sella de forma perezosa lo que haya cerrado |
 | GET | `/api/seasons/:id/standings` | Pública | Clasificación de una temporada («2026-T4») con solo sus semanas selladas, también la que está en curso: `season { id, sealedWeeks, closed }` y por fila `position` (ex aequo compartida), `producer` (`null` = «Productor eliminado»), `points`, `wins`, `podiums`, `weeks` y `meanScoreMilli` (redondeada para mostrar; el desempate la compara exacta). Cerrada (§2.9), la primera fila es la de los campeones. Sella de forma perezosa lo que haya cerrado. 404 si ninguna semana suya ha empezado o el id no es una temporada |
 | GET | `/api/public/otp/summary` | Pública + CORS sello | Resumen para el widget del sello |
 | POST | `/api/subscribe` | Pública | Alerta de drop sin cuenta (doble confirmación; 3/h por IP); responde 202 igual para cualquier dirección |
@@ -3955,6 +3963,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.106 | **Tarea 7.12.** §2.9, salón de la fama: todo sale de los snapshots vigentes de las semanas selladas (los ganadores en 1.ª posición, ex aequo incluidos; los campeones de cada temporada cerrada; más victorias; la racha más larga con el comodín; la mejor puntuación de una entrada clasificada; más votos emitidos, los válidos que contó cada snapshot); con la misma cifra, el récord es de quien llegó antes; un productor eliminado sigue como «Productor eliminado». §4.10: `GET /api/hall-of-fame` con su forma. |
 | 2026-10-29 | 0.6.105 | **Tarea 7.11** (hueco G7 del plan 07, resuelto: el cierre de la temporada). §2.9: una temporada se cierra cuando ha acabado su trimestre (00:00 del día 1 del siguiente, hora de Madrid) y todas sus semanas están selladas: la cierra el sellado de la semana de su último lunes, que siempre acaba después del trimestre, en su `batch`; sin semana ese lunes, el primer `tick` tras el fin del trimestre; sin semanas, nunca. Sus campeones (la primera fila, también ex aequo) ganan `season_champ` y su ceremonia queda pendiente hasta la marca `season_champion`; los campeones salen de los snapshots, así que re-sellar una semana de una temporada cerrada puede cambiarlos (gana el nuevo, pierde con su XP quien deja de serlo de toda temporada cerrada). §4.5: `seasonEndsAt` e `isSeasonClosed`. §4.10: `GET /api/seasons/:id/standings` con su forma. §4.11: el cierre en el `batch` del sellado y en el `tick` (`job_state` `seasonClose`). §4.12: `sealWeeks` cierra las temporadas sin semana el último lunes. |
 | 2026-10-29 | 0.6.104 | **Tarea 7.14** (hueco G5 del plan 07, resuelto: los logros que ocurren en el navegador). §4.10: `POST /api/me/achievements { achievement }`, con sesión, solo con los logros de la lista blanca `BROWSER_ACHIEVEMENTS` (en la Fase 7, `share_card`; la Fase 8 suma sus secretos con su prueba), cualquier otro → 422, 10 por hora y cuenta, sin más XP que el del logro (y `level_20` si lo cruza) y repetirlo no suma; responde lo ganado. §2.10, §4.13 y Anexo C al día. |
 | 2026-10-29 | 0.6.103 | **Tarea 7.10** (hueco G2 del plan 07, resuelto: el re-sellado y la capa de juego). §2.8: el sellado da, en su `batch` y a partir de la clasificación ya calculada, el XP de resultado, el oído de oro, la racha y los logros de resultado; todo es una función de las semanas selladas en su revisión vigente y **el libro la sigue**: cada (re-)sellado re-juega desde la semana corregida hasta la última y escribe la diferencia, con **ajustes que pueden restar** referidos a la revisión, los logros de resultado que ya no se cumplen en ninguna semana sellada **se retiran con su XP** y los que ahora se cumplen se ganan; lo ganado en vivo y `level_20` no cambian; sin cambios en el snapshot, nada cambia. `RF-RES-08` con `myGame`. §2.10: la racha la aplica el sellado (también a quien no participa y tenía racha); `streak_state` es caché. Anexo C: la excepción a «ningún logro se retira». §4.5: `replaySealedWeeks`. §4.10: `myGame` en los resultados. §4.11: la referencia de los ajustes, el módulo `sealing` y el sellado perezoso en orden de número. |

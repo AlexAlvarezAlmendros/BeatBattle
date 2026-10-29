@@ -26,6 +26,8 @@ import { createEntriesService } from './modules/entries/service'
 import { waveformRoutes } from './modules/entries/waveformRoute'
 import { gameRoutes } from './modules/game/routes'
 import { createGameService } from './modules/game/service'
+import { hallOfFameRoutes } from './modules/hallOfFame/routes'
+import { createHallOfFameService } from './modules/hallOfFame/service'
 import { healthRoutes } from './modules/health/routes'
 import { createHealthService } from './modules/health/service'
 import { meRoutes } from './modules/me/routes'
@@ -226,6 +228,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   )
   resultsRoutes(app, createResultsService({ db, entries, samples, newId }))
   seasonsRoutes(app, createSeasonsService({ db, images, newId }))
+  hallOfFameRoutes(app, createHallOfFameService({ db, images, entries, newId }))
   resultCardRoutes(app, { db, secret: config.auth.secret })
   ogRoutes(app, { db })
   shareRoutes(app, { db, publicUrl: config.publicUrl, indexHtml: deps.indexHtml ?? indexHtmlLoader() })
