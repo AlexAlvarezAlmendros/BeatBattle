@@ -36,6 +36,8 @@ import { resultsRoutes } from './modules/results/routes'
 import { createResultsService } from './modules/results/service'
 import { samplesRoutes } from './modules/samples/routes'
 import { createSamplesService } from './modules/samples/service'
+import { seasonsRoutes } from './modules/seasons/routes'
+import { createSeasonsService } from './modules/seasons/service'
 import { ogRoutes } from './modules/share/ogRoutes'
 import { indexHtmlLoader, shareRoutes } from './modules/share/routes'
 import { seoRoutes } from './modules/share/seo'
@@ -223,6 +225,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
     }),
   )
   resultsRoutes(app, createResultsService({ db, entries, samples, newId }))
+  seasonsRoutes(app, createSeasonsService({ db, images, newId }))
   resultCardRoutes(app, { db, secret: config.auth.secret })
   ogRoutes(app, { db })
   shareRoutes(app, { db, publicUrl: config.publicUrl, indexHtml: deps.indexHtml ?? indexHtmlLoader() })

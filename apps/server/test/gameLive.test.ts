@@ -88,7 +88,8 @@ async function sealedBefore(sampleId: string) {
         id: row.id,
         number: row.number,
         slug: row.slug,
-        seasonId: '2026-T4',
+        // La temporada de su lunes (`RF-ARC-04`): la 40 (28 de septiembre) es de la 2026-T3.
+        seasonId: row.id === 'w40' ? '2026-T3' : '2026-T4',
         sampleId,
         rulesVersion: 1,
         ...row.bounds,

@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.104 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.105 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -595,6 +595,19 @@ ofrece la ceremonia de revelación. Dura unos 25 s y se puede saltar.
   - Si todo empata, comparten posición (1, 1, 3), y en la primera son **campeones ex aequo**.
   - **La última semana de una temporada** es la de su último lunes: la semana cuyo lunes siguiente ya cae en
     otro trimestre (la del 2026-12-28 cierra la 2026-T4).
+  - **Cierre** (hueco G7 del plan 07): una temporada se cierra cuando **ha acabado su trimestre** (las 00:00 del día 1
+    del trimestre siguiente, hora de Madrid) **y todas sus semanas están selladas**; desde ahí ya no puede empezar
+    ninguna semana suya. La semana de su último lunes cierra siempre después de que acabe el trimestre, así que la
+    cierra **su sellado**, en el mismo `batch`. Si ese lunes no tiene semana programada, la cierra el **primer `tick`
+    tras el fin del trimestre** (o el sellado tardío de la última semana que faltaba, si llega después). Una
+    temporada sin semanas no se cierra ni tiene campeón.
+  - **Campeón** (`RF-ARC-05`): al cerrarse, la primera fila de su clasificación (uno o varios ex aequo) gana el logro
+    `season_champ` con su XP (el logro es uno por cuenta: quien repite título no lo cobra dos veces) y su
+    **ceremonia corta** queda pendiente para cada cuenta hasta que la marca vista (`seen_flag` `season_champion`; la
+    falta de la marca es lo pendiente, como la ceremonia de la semana). Los campeones no se guardan aparte: son la
+    primera fila de la clasificación de una temporada cerrada, sacada de los snapshots. Por eso **re-sellar** una
+    semana de una temporada cerrada (§2.8) puede cambiarlos: quien pasa a ser campeón gana `season_champ` y quien deja
+    de serlo de toda temporada cerrada lo pierde con su XP, como los logros de resultado.
 
 | Id | Requisito | Aceptación |
 |---|---|---|
@@ -2400,14 +2413,14 @@ tests de propiedades.
 
 | Módulo | Funciones principales |
 |---|---|
-| `calendar` | `scheduleWeek(lunesLocal, tz)` → instantes UTC de las fronteras; `mondayOf(instante)`, `nextMonday`; `isoWeekLabel` («2026-W41»), `weekSlug` («2026-w41») y `mondayOfSlug`; `seasonOf(lunes)` («2026-T4») e `isLastWeekOfSeason(lunes)` |
+| `calendar` | `scheduleWeek(lunesLocal, tz)` → instantes UTC de las fronteras; `mondayOf(instante)`, `nextMonday`; `isoWeekLabel` («2026-W41»), `weekSlug` («2026-w41») y `mondayOfSlug`; `seasonOf(lunes)` («2026-T4»), `isLastWeekOfSeason(lunes)` y `seasonEndsAt(temporada)` (las 00:00 del día 1 del trimestre siguiente) |
 | `phase` | `phaseOf(semana, now)`; `canSubmit`, `canVote`, `canDownload` (solo en `open`); `countdownOf(semana, now)` → cierre, lo que falta y «hora loca» |
 | `listen` | `listenThresholdMs(duracionMs)` |
 | `scoring` | `bayes(votos, m, C)`; `mean`; `median`; `histogram` |
 | `ranking` | `rank(entradas, votos) → Result[]` con desempates, ex aequo y elegibilidad de podio: una fila por entrada con posición (o `null` sin clasificar), puntuación × 1000, votos, media × 1000, mediana × 2, histograma y puntos de temporada; compara las puntuaciones con productos cruzados enteros (sin redondeo) |
 | `fair` | `fairOrder(entradas, votosPorEntrada, votadasPorUsuario, semilla)` con `fairSeed(semana, usuario \| instante)` (visitantes: el día en Madrid); `newestOrder`; `randomOrder(entradas, semilla)`; `juryQueue(entradas, votos, votadas, semilla, { excluded, skipped })` (sin votadas ni la propia; las saltadas, al final) |
 | `alias` | `battleAlias(entryId, ocupados)` con listas de adjetivos y sustantivos (Anexo I) |
-| `season` | `seasonPoints(posicion, clasificada)`; `seasonStandings(resultados)` (puntos, victorias, podios, media y posición con ex aequo) y `seasonChampions(tabla)` |
+| `season` | `seasonPoints(posicion, clasificada)`; `seasonStandings(resultados)` (puntos, victorias, podios, media y posición con ex aequo) y `seasonChampions(tabla)`; `isSeasonClosed(temporada, semanas, now)` (acabado el trimestre y todas sus semanas selladas, §2.9) |
 | `levels` | `xpForLevel(n)`; `levelOf(xp)`; `levelProgress(xp)` (barra del HUD); `rankTitle(nivel)` → **id de rango** (`crateDigger` … `otherPeople`; el texto sale de i18n con `rank.<id>`); `streakBonus` y `streakBonusPercent` |
 | `xp` | `xpFor(evento, contexto)`; `streakOf(historial)` (Fase 7) |
 | `replay` | `replaySealedWeeks(semanas)` → por cada semana sellada de una cuenta, en orden de número: el XP de resultado (con la racha en juego) y de oído de oro, la racha tras ella y los logros de resultado que se cumplen (una semana sin sellar en medio se salta). Lo usan el sellado y el re-sellado (§2.8) y el reprocesado |
@@ -2782,7 +2795,7 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | DELETE | `/api/me` | Sesión | Borrar la cuenta (pide contraseña o reautenticación reciente) |
 | GET | `/api/producers/:username` | Pública | Perfil público, carta, estadísticas, historial |
 | GET | `/api/hall-of-fame` | Pública | Ganadores, campeones, récords |
-| GET | `/api/seasons/:id/standings` | Pública | Clasificación de temporada |
+| GET | `/api/seasons/:id/standings` | Pública | Clasificación de una temporada («2026-T4») con solo sus semanas selladas, también la que está en curso: `season { id, sealedWeeks, closed }` y por fila `position` (ex aequo compartida), `producer` (`null` = «Productor eliminado»), `points`, `wins`, `podiums`, `weeks` y `meanScoreMilli` (redondeada para mostrar; el desempate la compara exacta). Cerrada (§2.9), la primera fila es la de los campeones. Sella de forma perezosa lo que haya cerrado. 404 si ninguna semana suya ha empezado o el id no es una temporada |
 | GET | `/api/public/otp/summary` | Pública + CORS sello | Resumen para el widget del sello |
 | POST | `/api/subscribe` | Pública | Alerta de drop sin cuenta (doble confirmación; 3/h por IP); responde 202 igual para cualquier dirección |
 | POST | `/api/subscribe/confirm` | Pública | Confirmar la alerta con `{ token }` desde la página `/alerta?token=` de la web: un `POST` y no un `GET`, porque los escáneres de enlaces del correo abren los `GET` y confirmarían solos |
@@ -3011,6 +3024,13 @@ calculado (`xpFor` de `packages/rules`):
   semana sale de sus votos válidos (los del snapshot) y solo de jurados con cuenta. Para las semanas que no se
   re-juegan, el oído de oro es el que dice el libro. El sellado perezoso sella en orden de número y no hace nada con
   una semana ya sellada.
+- **El cierre de la temporada** (§2.9, `modules/seasons/closing.ts`): si con la semana que se sella (o se re-sella) su
+  temporada queda cerrada, el mismo `batch` da `season_champ` a sus campeones con cuenta que no lo tienen (el
+  movimiento `achievement` con la temporada como `ref` del desbloqueo y su última semana como `week_id`) y, en un
+  re-sellado, se lo retira a quien deja de ser campeón de toda temporada cerrada; con la misma condición que el resto
+  del sellado. Si su último lunes no tiene semana, lo hace el `tick` (`closeDueSeasons`): recorre en orden las
+  temporadas que aún no había mirado, se para en la primera que no está cerrada y apunta hasta dónde ha llegado en
+  `job_state` (`seasonClose`), en el mismo `batch` que los logros.
 - Las sentencias las prepara el módulo **`game`** del servidor (`modules/game`) para el `batch` de quien provoca el
   hecho: `plan(cuenta, { xp, events, achievements, now })` da los movimientos (los de 0 XP fuera), los logros que
   desbloquean sus eventos (`evaluate`, contra los que ya tiene) con el XP de su rareza, `level_20` y, la última, la
@@ -3042,7 +3062,7 @@ calculado (`xpFor` de `packages/rules`):
 
 | Tarea | Cuándo hace algo |
 |---|---|
-| `sealWeeks` | Semanas con `vote_ends_at` pasado y sin `sealed_at` (también se dispara de forma perezosa en las lecturas) |
+| `sealWeeks` | Semanas con `vote_ends_at` pasado y sin `sealed_at` (también se dispara de forma perezosa en las lecturas); después, las temporadas cuyo trimestre ha acabado con todas sus semanas selladas y sin la semana de su último lunes (§2.9, su campeón) |
 | `finishProcessing` | Entradas en `processing` |
 | `emailSchedule` | Encola los avisos programados del catálogo (§2.12): lunes 08:00, sábado 18:00, domingo 17:00, resumen diario de progreso a las 19:00, resumen de temporada al sellar, reactivación, campañas programadas |
 | `emailDrain` | Envía lo pendiente de `email_outbox` (hasta 40 por ejecución, a 1 por segundo) dentro del cupo diario, con horas de silencio, tope semanal, preferencias, supresiones y reintentos |
@@ -3935,6 +3955,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.105 | **Tarea 7.11** (hueco G7 del plan 07, resuelto: el cierre de la temporada). §2.9: una temporada se cierra cuando ha acabado su trimestre (00:00 del día 1 del siguiente, hora de Madrid) y todas sus semanas están selladas: la cierra el sellado de la semana de su último lunes, que siempre acaba después del trimestre, en su `batch`; sin semana ese lunes, el primer `tick` tras el fin del trimestre; sin semanas, nunca. Sus campeones (la primera fila, también ex aequo) ganan `season_champ` y su ceremonia queda pendiente hasta la marca `season_champion`; los campeones salen de los snapshots, así que re-sellar una semana de una temporada cerrada puede cambiarlos (gana el nuevo, pierde con su XP quien deja de serlo de toda temporada cerrada). §4.5: `seasonEndsAt` e `isSeasonClosed`. §4.10: `GET /api/seasons/:id/standings` con su forma. §4.11: el cierre en el `batch` del sellado y en el `tick` (`job_state` `seasonClose`). §4.12: `sealWeeks` cierra las temporadas sin semana el último lunes. |
 | 2026-10-29 | 0.6.104 | **Tarea 7.14** (hueco G5 del plan 07, resuelto: los logros que ocurren en el navegador). §4.10: `POST /api/me/achievements { achievement }`, con sesión, solo con los logros de la lista blanca `BROWSER_ACHIEVEMENTS` (en la Fase 7, `share_card`; la Fase 8 suma sus secretos con su prueba), cualquier otro → 422, 10 por hora y cuenta, sin más XP que el del logro (y `level_20` si lo cruza) y repetirlo no suma; responde lo ganado. §2.10, §4.13 y Anexo C al día. |
 | 2026-10-29 | 0.6.103 | **Tarea 7.10** (hueco G2 del plan 07, resuelto: el re-sellado y la capa de juego). §2.8: el sellado da, en su `batch` y a partir de la clasificación ya calculada, el XP de resultado, el oído de oro, la racha y los logros de resultado; todo es una función de las semanas selladas en su revisión vigente y **el libro la sigue**: cada (re-)sellado re-juega desde la semana corregida hasta la última y escribe la diferencia, con **ajustes que pueden restar** referidos a la revisión, los logros de resultado que ya no se cumplen en ninguna semana sellada **se retiran con su XP** y los que ahora se cumplen se ganan; lo ganado en vivo y `level_20` no cambian; sin cambios en el snapshot, nada cambia. `RF-RES-08` con `myGame`. §2.10: la racha la aplica el sellado (también a quien no participa y tenía racha); `streak_state` es caché. Anexo C: la excepción a «ningún logro se retira». §4.5: `replaySealedWeeks`. §4.10: `myGame` en los resultados. §4.11: la referencia de los ajustes, el módulo `sealing` y el sellado perezoso en orden de número. |
 | 2026-10-29 | 0.6.102 | **Tarea 7.9** (ganchos en vivo de la capa de juego). §2.10: dónde se gana en vivo, en el `batch` del hecho y solo si ocurre: la entrada que pasa a `active` (al registrar, al sustituir el audio o en el `tick`; `early_bird` va con la fila de la primera entrada), el voto (con el jurado completo al votar la última de las activas ajenas), la descarga del sample y el perfil guardado (datos o avatar); la racha en juego sale de las semanas selladas y, si la anterior cerró sin sellar, se sella antes. §4.8.4 paso 4 al día. §4.10: el voto, registrar la entrada y sustituir el audio responden lo ganado (`game: { xp, achievements, level }`). §4.11: la condición del hecho (`guard`) en cada sentencia, el XP de un logro solo si el logro está y qué cuenta cada gancho para `evaluate`. |

@@ -12,6 +12,7 @@ import type { AlertsService } from '../alerts/service'
 import { type EntriesTickResult, entriesTick } from '../entries/cleanup'
 import type { EntriesService } from '../entries/service'
 import { type MondayResult, scheduleMondayEmails } from '../results/monday'
+import { closeDueSeasons } from '../seasons/closing'
 import type { EntryStorage } from '../storage/entries'
 import { type NoticeResult, scheduleBattleNotices } from '../votes/notices'
 import { type ScheduleDeps, scheduleGapAlerts } from '../weeks/schedule'
@@ -23,6 +24,8 @@ const TICK_LEASE_MS = 5 * 60 * 1000
 
 export interface TickResult {
   sealed: string[]
+  /** Temporadas que el `tick` ha dado por cerradas, con sus campeones (tarea 7.11, hueco G7). */
+  closedSeasons: string[]
   /** Lunes de batalla: combinados, drops y resultados encolados (tarea 6.9). */
   mondayEmails: MondayResult
   /** Recordatorios y llamadas al jurado encolados (tarea 5.12). */
@@ -70,6 +73,7 @@ export function cronRoutes(app: FastifyInstance, deps: CronDeps): void {
     const result = await withLease(deps.db, { name: 'tick', holder, ttlMs: TICK_LEASE_MS, now }, async () => {
       const out: TickResult = {
         sealed: [],
+        closedSeasons: [],
         mondayEmails: { monday: 0, drop: 0, results: 0 },
         battleNotices: { reminders: 0, juryCalls: 0 },
         calendarGaps: [],
@@ -88,6 +92,8 @@ export function cronRoutes(app: FastifyInstance, deps: CronDeps): void {
       }
       await step('sealWeeks', async () => {
         out.sealed = await sealDueWeeks(deps.db, { now, holder })
+        // Con todo sellado, las temporadas cuyo trimestre ha acabado (sin semana el último lunes, §2.9).
+        out.closedSeasons = await closeDueSeasons(deps.db, { now, newId: deps.newId })
       })
       await step('emailSchedule', async () => {
         out.mondayEmails = await scheduleMondayEmails(deps, now)

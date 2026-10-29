@@ -285,7 +285,8 @@ describe('la racha al sellar (7.10, §2.10)', () => {
         id,
         number,
         slug: `2026-${id}`,
-        seasonId: '2026-T4',
+        // La temporada de su lunes (`RF-ARC-04`): la 40 (28 de septiembre) es de la 2026-T3.
+        seasonId: number === 1 ? '2026-T3' : '2026-T4',
         sampleId: s?.id as string,
         rulesVersion: 1,
         ...bounds,
@@ -429,7 +430,7 @@ describe('el re-sellado y la capa de juego (7.10, §2.8, hueco G2)', () => {
           id,
           number,
           slug: `2026-${id}`,
-          seasonId: '2026-T4',
+          seasonId: month === 9 ? '2026-T3' : '2026-T4',
           sampleId: s?.id as string,
           rulesVersion: 1,
           ...bounds,
@@ -461,10 +462,11 @@ describe('el re-sellado y la capa de juego (7.10, §2.8, hueco G2)', () => {
     expect((await disqualify(made.w41 as string)).statusCode).toBe(204)
     expect((await reseal('2026-w41')).json().data).toEqual({ revision: 2 })
     // La 41 ya no le da nada (−550 de su 1.º con racha 2), y la racha queda 1, comodín, 2: la 42 se paga con +10 %
-    // (550). double (41), streak_3 y win_3 (42) ya no se cumplen en ninguna semana: fuera con su XP; los de la 40, no.
+    // (550). double (41), streak_3 y win_3 (42) ya no se cumplen en ninguna semana: fuera con su XP; los de la 40, no
+    // (tampoco season_champ: la 40 es la última de la 2026-T3, y su sellado le hizo campeón).
     expect(await sumOf(me.id, 'result', 'w41')).toBe(0)
     expect(await sumOf(me.id, 'result', b.weekId)).toBe(550)
-    expect(await unlocks(me.id)).toEqual(['podium', 'win'])
+    expect(await unlocks(me.id)).toEqual(['podium', 'season_champ', 'win'])
     const [streak] = await b.t.db.select().from(streakState).where(eq(streakState.userId, me.id))
     expect(streak).toMatchObject({ current: 2, best: 2, lastWeekNumber: 3, jokerSeason: '2026-T4' })
     // El rival pasa a ganar la 41 (con racha en juego 2: 550) y se lleva win y comeback (2.º de 2 en la 40, la mitad

@@ -210,7 +210,10 @@ export const SeasonStandingsSchema = z
         id: SeasonIdSchema,
         /** Semanas selladas que cuentan. */
         sealedWeeks: countSchema,
-        /** Cerrada: su última semana está sellada y la primera fila es la de los campeones. */
+        /**
+         * Cerrada (§2.9, hueco G7): ha acabado su trimestre y todas sus semanas están selladas; la primera fila es la de
+         * los campeones.
+         */
         closed: z.boolean(),
       })
       .strict(),

@@ -1,12 +1,14 @@
 // Temporadas (guía §2.9, Anexo B): los puntos de cada entrada en su semana (25, 18, 15, 12, 10, 8, 6, 4, 2, 1 del 1.º
 // al 10.º y 1 por cada entrada clasificada fuera del top 10) y la clasificación de la temporada con sus desempates
 // (más victorias → más podios → mejor puntuación media), el ex aequo y el campeón. La temporada de una semana
-// (`seasonOf`) y si es la última (`isLastWeekOfSeason`) están en `calendar`.
+// (`seasonOf`), si es la última (`isLastWeekOfSeason`) y el fin de su trimestre (`seasonEndsAt`) están en `calendar`;
+// aquí, si la temporada ya está cerrada (`isSeasonClosed`, hueco G7).
 //
 // Solo entran semanas selladas: la clasificación sale de los snapshots (`result`), no de votos vivos (`RF-ARC-03`).
 
 import { PODIUM_SIZE, SEASON_POINTS_BY_POSITION, SEASON_POINTS_QUALIFIED_OUTSIDE_TOP } from './balance'
-import { assertIntegerInRange } from './internal/guards'
+import { formatLocalDate, type LocalDate, seasonEndsAt, seasonOf } from './calendar'
+import { assertFinite, assertIntegerInRange } from './internal/guards'
 
 /**
  * Puntos de temporada de una entrada en su semana.
@@ -120,4 +122,27 @@ export function seasonStandings(results: readonly SeasonResult[]): SeasonStandin
 /** Campeones de la temporada: la 1.ª posición, uno o varios ex aequo; ninguno si nadie clasificó (`RF-ARC-05`). */
 export function seasonChampions(standings: readonly SeasonStanding[]): string[] {
   return standings.filter((row) => row.position === 1).map((row) => row.userId)
+}
+
+/** Una semana programada de la temporada: su lunes y si ya está sellada. */
+export interface SeasonWeek {
+  readonly monday: LocalDate
+  readonly sealed: boolean
+}
+
+/**
+ * ¿Está cerrada la temporada en `now` (guía §2.9, hueco G7)? Cuando ya no puede tener más semanas y todas las suyas
+ * están selladas: ha acabado su trimestre (`seasonEndsAt`) y no le queda ninguna semana sin sellar. La semana de su
+ * último lunes cierra siempre después de que acabe el trimestre, así que la cierra su sellado; si ese lunes no tiene
+ * semana, la cierra lo primero que llegue tras el fin del trimestre (el `tick`, o el sellado tardío de la última que
+ * faltaba). Una temporada sin semanas no se cierra nunca (no tiene campeón).
+ *
+ * Cada semana tiene que ser de la temporada (`seasonOf` de su lunes); si no, `RangeError`.
+ */
+export function isSeasonClosed(seasonId: string, weeks: readonly SeasonWeek[], now: number): boolean {
+  assertFinite(now, 'now')
+  for (const week of weeks)
+    if (seasonOf(week.monday) !== seasonId)
+      throw new RangeError(`La semana del ${formatLocalDate(week.monday)} no es de la temporada ${seasonId}`)
+  return weeks.length > 0 && weeks.every((week) => week.sealed) && now >= seasonEndsAt(seasonId)
 }

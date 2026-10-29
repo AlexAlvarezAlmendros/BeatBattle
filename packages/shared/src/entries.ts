@@ -200,6 +200,7 @@ export const EntryProducerSchema = z.object({
   displayName: z.string(),
   avatarUrl: z.string().nullable(),
 })
+export type EntryProducer = z.infer<typeof EntryProducerSchema>
 
 /**
  * `GET /api/entries/:id` (pública, §4.10). En voto ciego antes del sellado (`RF-ENT-10`, `RNF-SEC-04`):
