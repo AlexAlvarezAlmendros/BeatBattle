@@ -1,7 +1,22 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
-import { addDays, isLastWeekOfSeason, isoWeekLabel, type LocalDate, seasonOf } from '../src/calendar'
-import { type SeasonResult, seasonChampions, seasonPoints, seasonStandings } from '../src/season'
+import {
+  addDays,
+  isLastWeekOfSeason,
+  isoWeekLabel,
+  type LocalDate,
+  scheduleWeek,
+  seasonEndsAt,
+  seasonOf,
+} from '../src/calendar'
+import {
+  isSeasonClosed,
+  type SeasonResult,
+  type SeasonWeek,
+  seasonChampions,
+  seasonPoints,
+  seasonStandings,
+} from '../src/season'
 
 describe('seasonPoints', () => {
   it('RF-ARC-03: 25, 18, 15, 12, 10, 8, 6, 4, 2, 1 del 1.º al 10.º (Anexo B)', () => {
@@ -240,5 +255,88 @@ describe('temporada de una semana', () => {
     expect(finales.get('2026-T3')).toEqual(['2026-W40'])
     expect(finales.get('2026-T4')).toEqual(['2026-W53'])
     expect(isLastWeekOfSeason({ year: 2026, month: 12, day: 21 })).toBe(false)
+  })
+})
+
+describe('cierre de la temporada (hueco G7)', () => {
+  /** Las semanas de la 2026-T4 (lunes del 5 de octubre al 28 de diciembre), selladas o no. */
+  const t4 = (count: number, sealed = true): SeasonWeek[] =>
+    Array.from({ length: count }, (_, i) => ({
+      monday: addDays({ year: 2026, month: 10, day: 5 }, 7 * i),
+      sealed,
+    }))
+
+  it('RF-ARC-05: el trimestre acaba a las 00:00 (hora de Madrid) del día 1 del siguiente', () => {
+    expect(seasonEndsAt('2026-T4')).toBe(Date.UTC(2026, 11, 31, 23)) // CET, UTC+1
+    expect(seasonEndsAt('2026-T2')).toBe(Date.UTC(2026, 5, 30, 22)) // CEST, UTC+2
+    expect(seasonEndsAt('2027-T1')).toBe(Date.UTC(2027, 2, 31, 22))
+    expect(() => seasonEndsAt('2026-T5')).toThrow(RangeError)
+    expect(() => seasonEndsAt('2026-4')).toThrow(RangeError)
+  })
+
+  it('RF-ARC-05: la semana de su último lunes cierra siempre después de que acabe el trimestre', () => {
+    const first: LocalDate = { year: 2024, month: 1, day: 1 }
+    for (let week = 0; week < 52 * 12; week++) {
+      const monday = addDays(first, 7 * week)
+      if (!isLastWeekOfSeason(monday)) continue
+      const season = seasonOf(monday)
+      expect(scheduleWeek(monday).voteEndsAt, season).toBeGreaterThanOrEqual(seasonEndsAt(season))
+      // Y la anterior cierra antes: su sellado nunca cierra la temporada a tiempo.
+      expect(scheduleWeek(addDays(monday, -7)).voteEndsAt, season).toBeLessThanOrEqual(seasonEndsAt(season))
+    }
+  })
+
+  it('RF-ARC-05: sellada la semana de su último lunes (las 13), la temporada queda cerrada al sellarla', () => {
+    const weeks = t4(13)
+    expect(isLastWeekOfSeason((weeks.at(-1) as SeasonWeek).monday)).toBe(true)
+    const sealing = scheduleWeek({ year: 2026, month: 12, day: 28 }).voteEndsAt
+    expect(isSeasonClosed('2026-T4', weeks, sealing)).toBe(true)
+    // Con la última aún sin sellar, no.
+    expect(
+      isSeasonClosed(
+        '2026-T4',
+        [...t4(12), { monday: { year: 2026, month: 12, day: 28 }, sealed: false }],
+        sealing,
+      ),
+    ).toBe(false)
+  })
+
+  it('G7: sin semana el último lunes, cierra en cuanto acaba el trimestre con todas sus semanas selladas', () => {
+    const weeks = t4(12) // hasta la del 21 de diciembre
+    const end = seasonEndsAt('2026-T4')
+    expect(isSeasonClosed('2026-T4', weeks, end - 1)).toBe(false)
+    expect(isSeasonClosed('2026-T4', weeks, end)).toBe(true)
+    // Una sin sellar la deja abierta aunque haya acabado el trimestre (la sellará el tick, y entonces cierra).
+    expect(
+      isSeasonClosed(
+        '2026-T4',
+        [...t4(11), { monday: { year: 2026, month: 12, day: 21 }, sealed: false }],
+        end + 1,
+      ),
+    ).toBe(false)
+  })
+
+  it('G7: una temporada sin semanas no se cierra nunca; una semana de otra temporada no vale', () => {
+    expect(isSeasonClosed('2026-T4', [], seasonEndsAt('2026-T4') + 1)).toBe(false)
+    expect(() =>
+      isSeasonClosed('2026-T4', [{ monday: { year: 2027, month: 1, day: 4 }, sealed: true }], 0),
+    ).toThrow(RangeError)
+  })
+
+  it('G7: cerrada no depende del orden de las semanas y, una vez cerrada, sigue cerrada', () => {
+    fc.assert(
+      fc.property(
+        fc.shuffledSubarray(t4(13), { minLength: 1 }),
+        fc.integer({ min: 0, max: 30 * 86_400_000 }),
+        fc.integer({ min: 0, max: 30 * 86_400_000 }),
+        (weeks, a, b) => {
+          const at = seasonEndsAt('2026-T4') - 15 * 86_400_000
+          const reversed = [...weeks].reverse()
+          expect(isSeasonClosed('2026-T4', weeks, at + a)).toBe(isSeasonClosed('2026-T4', reversed, at + a))
+          if (isSeasonClosed('2026-T4', weeks, at + Math.min(a, b)))
+            expect(isSeasonClosed('2026-T4', weeks, at + Math.max(a, b))).toBe(true)
+        },
+      ),
+    )
   })
 })

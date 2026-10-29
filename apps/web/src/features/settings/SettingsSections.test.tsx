@@ -5,6 +5,7 @@ import type { ReactElement } from 'react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
+import { EMPTY_ME_GAME } from '../../test/game'
 import { authClient } from '../account/authClient'
 import { useSession } from '../account/session'
 import { AccountSettingsPage } from './AccountSettings'
@@ -35,6 +36,7 @@ const ME = {
   cardNumber: 7,
   xp: 0,
   avatarUrl: null,
+  game: EMPTY_ME_GAME,
 }
 
 const PREFS = {

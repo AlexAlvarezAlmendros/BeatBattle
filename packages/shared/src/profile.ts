@@ -1,10 +1,13 @@
 import { z } from 'zod'
+import { AchievementIdSchema, ProfileGameSchema } from './game'
 import { USERNAME_MAX, USERNAME_MIN } from './username'
+
+export { AVATAR_MAX_BYTES, AVATAR_MIMES, AVATAR_SIZE } from './avatar'
 
 /**
  * Perfil de productor (guía §2.3, §3.8.10, tarea 2.18): lo que enseña `/p/:username` y lo que se edita en
- * Ajustes → Perfil. Las estadísticas, el historial y los logros llegan con sus fases (5, 6 y 7): de
- * momento la API los da vacíos y la página enseña su estado vacío.
+ * Ajustes → Perfil. Desde la tarea 7.13, el público lleva la capa de juego (`game`: nivel, estadísticas, historial,
+ * logros y vitrina), que solo cuenta semanas selladas (hueco G1).
  */
 
 /** Colores de acento de la carta: solo la paleta (§3.2). */
@@ -68,13 +71,24 @@ export const ProfileLinksSchema = z
   .strict()
 export type ProfileLinks = Partial<Record<ProfileLinkKind, string>>
 
-/** `PUT /api/me/profile`: solo lo que cambia. Un texto vacío borra el campo. */
+/** La vitrina: hasta tres logros distintos, en el orden en que se enseñan (§2.10, §3.8.10). */
+export const SHOWCASE_MAX = 3
+export const ShowcaseSchema = z
+  .array(AchievementIdSchema)
+  .max(SHOWCASE_MAX)
+  .refine((ids) => new Set(ids).size === ids.length, { message: 'logros repetidos' })
+
+/**
+ * `PUT /api/me/profile`: solo lo que cambia. Un texto vacío borra el campo. La vitrina (tarea 7.13) solo admite logros
+ * conseguidos (si no, 422).
+ */
 export const ProfileUpdateSchema = z
   .object({
     bio: text(BIO_MAX).nullable(),
     city: text(CITY_MAX).nullable(),
     links: ProfileLinksSchema,
     accent: z.enum(ACCENTS),
+    showcase: ShowcaseSchema,
   })
   .partial()
   .strict()
@@ -85,8 +99,8 @@ export const UsernameChangeSchema = z
   .object({ username: z.string().trim().min(USERNAME_MIN).max(USERNAME_MAX) })
   .strict()
 
-/** `GET /api/profiles/:username` (público) y `GET /api/me/profile` (con lo editable). */
-export const PublicProfileSchema = z.object({
+/** Lo común del perfil público (`GET /api/profiles/:username`) y del propio (`GET /api/me/profile`). */
+export const ProfileBaseSchema = z.object({
   username: z.string(),
   displayUsername: z.string(),
   cardNumber: z.number().int(),
@@ -99,19 +113,22 @@ export const PublicProfileSchema = z.object({
   accent: z.enum(ACCENTS),
   avatarUrl: z.string().nullable(),
 })
+
+/**
+ * `GET /api/profiles/:username` (público): `xp` y `game` solo cuentan lo de semanas selladas (y lo que no es de ninguna
+ * semana), así que nada dice quién participa en una semana ciega (hueco G1, §1.3).
+ */
+export const PublicProfileSchema = ProfileBaseSchema.extend({ game: ProfileGameSchema })
 export type PublicProfile = z.infer<typeof PublicProfileSchema>
 
-export const OwnProfileSchema = PublicProfileSchema.extend({
+/** `GET /api/me/profile`: lo editable, con el XP de verdad de la cuenta y la vitrina tal como la eligió. */
+export const OwnProfileSchema = ProfileBaseSchema.extend({
   /** Cuándo puede volver a cambiar el nombre (ms UTC), o `null` si ya puede. */
   usernameChangeAvailableAt: z.number().int().nullable(),
+  /** La vitrina elegida (logros que tiene); el perfil público enseña de ella solo los que ya son públicos. */
+  showcase: z.array(AchievementIdSchema).max(SHOWCASE_MAX),
 })
 export type OwnProfile = z.infer<typeof OwnProfileSchema>
-
-/** Avatar (tarea 2.19, `RF-PRF-02`): formatos y tamaño que se aceptan antes de firmar la subida. */
-export const AVATAR_MIMES = ['image/png', 'image/jpeg', 'image/webp'] as const
-export const AVATAR_MAX_BYTES = 10 * 1024 * 1024
-/** Lado del avatar entregado (§4.8.3). */
-export const AVATAR_SIZE = 256
 
 /** `PUT /api/me/avatar`: el `public_id` que devolvió la firma, una vez subida la imagen. */
 export const AvatarConfirmSchema = z.object({ publicId: z.string().min(1).max(200) }).strict()

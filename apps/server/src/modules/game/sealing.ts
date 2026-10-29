@@ -14,6 +14,7 @@ import type { BatchStatement } from '../../db/batch'
 import type { Db } from '../../db/client'
 import { achievementUnlock, entry, result, streakState, user, week, xpEvent } from '../../db/schema'
 import type { WeekSnapshot } from '../results/snapshot'
+import { championUnlock, seasonChampionChange } from '../seasons/closing'
 import {
   achievementXp,
   type Guard,
@@ -37,7 +38,9 @@ import {
  *   (`<semana>#<semana corregida>:<revisión>`), que puede restar;
  * - un logro de resultado que se cumple en alguna de esas semanas y la cuenta no tiene, se gana en la primera; uno que
  *   se ganó en una de ellas y ya no se cumple en ninguna semana sellada, se retira con su XP;
- * - la racha guardada (`streak_state`) queda la que dan las semanas selladas.
+ * - la racha guardada (`streak_state`) queda la que dan las semanas selladas;
+ * - si con esta semana su temporada queda cerrada (o ya lo estaba y se re-sella), sus campeones ganan `season_champ`
+ *   y quien deja de serlo de toda temporada cerrada lo pierde con su XP (tarea 7.11, `seasonChampionChange`).
  *
  * Todo condicionado a que la semana quede sellada con esa revisión en el mismo `batch`. Re-ejecutarlo no cambia nada
  * (`RF-GAME-01`): lo escrito ya es lo que da la revisión vigente. La clasificación llega calculada (`WeekSnapshot`, sin
@@ -190,10 +193,15 @@ export async function sealingStatements(db: Db, input: SealingInput): Promise<Ba
       jokerSeason: row.jokerSeason,
     })
 
+  // Los campeones de la temporada, si con esta semana queda cerrada (o se re-sella una semana de una cerrada).
+  const champions = await seasonChampionChange(db, { weekId, snapshot, now })
+  const grantChamp = new Set(champions?.grant ?? [])
+  const withdrawChamp = new Set(champions?.withdraw ?? [])
+
   // A quién puede cambiar: quien tiene entrada, XP del sellado o un logro de resultado en las semanas que se re-juegan,
-  // quien gana el oído de oro y quien tiene racha (si no participa, la pierde o gasta el comodín). Solo cuentas que
-  // existen: lo de una cuenta borrada no vuelve.
-  const scope = new Set<string>(earWinners)
+  // quien gana el oído de oro, quien tiene racha (si no participa, la pierde o gasta el comodín) y quien gana o pierde
+  // `season_champ`. Solo cuentas que existen: lo de una cuenta borrada no vuelve.
+  const scope = new Set<string>([...earWinners, ...grantChamp, ...withdrawChamp])
   for (const wId of touched) for (const userId of entries.get(wId)?.keys() ?? []) scope.add(userId)
   for (const k of ledger.keys()) {
     const [userId, , wId] = k.split('|') as [string, string, string]
@@ -286,6 +294,18 @@ export async function sealingStatements(db: Db, input: SealingInput): Promise<Ba
       if (has.has(id) && !anywhere.has(id) && from != null && touched.has(from))
         mine.push(...withdrawStatements(db, { userId, achievementId: id }, guard))
     }
+
+    // Campeón de la temporada que cierra (o que deja de serlo al re-sellar).
+    if (champions && grantChamp.has(userId))
+      mine.push(
+        ...championUnlock(
+          db,
+          { userId, seasonId: champions.seasonId, lastWeekId: champions.lastWeekId, now, newId },
+          guard,
+        ),
+      )
+    if (withdrawChamp.has(userId))
+      mine.push(...withdrawStatements(db, { userId, achievementId: 'season_champ' }, guard))
 
     if (mine.length > 0)
       statements.push(

@@ -268,3 +268,23 @@ export function seasonOf(monday: LocalDate): string {
 export function isLastWeekOfSeason(monday: LocalDate): boolean {
   return seasonOf(addDays(monday, 7)) !== seasonOf(monday)
 }
+
+/** Lee una temporada («2026-T4»): su año y su trimestre; lanza `RangeError` si no lo es. */
+function parseSeasonId(seasonId: string): { year: number; quarter: number } {
+  const match = /^(\d{4})-T([1-4])$/.exec(seasonId)
+  if (!match) throw new RangeError(`Temporada con formato inválido (se espera aaaa-TN): ${seasonId}`)
+  const year = Number(match[1])
+  assertIntegerInRange(year, 1970, 9999, 'year')
+  return { year, quarter: Number(match[2]) }
+}
+
+/**
+ * Fin del trimestre de una temporada (guía §2.9, hueco G7): las 00:00 del día 1 del trimestre siguiente, en hora de
+ * pared de `timeZone` (la 2026-T4 acaba el 2027-01-01 a las 00:00 de Madrid). Desde ahí ya no puede empezar ninguna
+ * semana suya: su último lunes ya ha pasado, y una semana solo se programa antes de su drop.
+ */
+export function seasonEndsAt(seasonId: string, timeZone: string = WEEK_TIME_ZONE): number {
+  const { year, quarter } = parseSeasonId(seasonId)
+  const next = quarter === 4 ? { year: year + 1, month: 1, day: 1 } : { year, month: quarter * 3 + 1, day: 1 }
+  return zonedInstant(next, { hour: 0, minute: 0, second: 0 }, timeZone)
+}

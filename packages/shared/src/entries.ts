@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { AVATAR_MAX_BYTES, AVATAR_MIMES } from './profile'
+import { AVATAR_MAX_BYTES, AVATAR_MIMES } from './avatar'
 import { MusicalKeySchema, PeaksSchema, WeekSlugSchema } from './weeks'
 
 /**
@@ -200,6 +200,7 @@ export const EntryProducerSchema = z.object({
   displayName: z.string(),
   avatarUrl: z.string().nullable(),
 })
+export type EntryProducer = z.infer<typeof EntryProducerSchema>
 
 /**
  * `GET /api/entries/:id` (pública, §4.10). En voto ciego antes del sellado (`RF-ENT-10`, `RNF-SEC-04`):

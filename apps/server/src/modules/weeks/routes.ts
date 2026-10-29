@@ -7,13 +7,12 @@ import {
   DownloadRequestSchema,
   type PublicWeek,
   RulesAcceptSchema,
-  SeenRequestSchema,
   WeekCreateSchema,
   WeekSlugSchema,
   WeekUpdateSchema,
 } from '@beatbattle/shared'
 import type { FastifyInstance, FastifyRequest } from 'fastify'
-import { requireSession, requireVerified } from '../../auth/guards'
+import { requireVerified } from '../../auth/guards'
 import { appError } from '../../lib/errors'
 import type { WeeksService } from './service'
 
@@ -96,10 +95,6 @@ export function weeksRoutes(app: FastifyInstance, service: WeeksService): void {
     },
   )
 
-  // ── Lo ya visto (3.11) ─────────────────────────────────────────────────────────────────────────
-  app.post('/api/me/seen', { preHandler: requireSession }, async (req, reply) => {
-    const { kind, ref } = SeenRequestSchema.parse(req.body)
-    await service.markSeen(actorOf(req), kind, ref, req.now)
-    reply.code(204)
-  })
+  // `POST /api/me/seen` (lo ya visto, 3.11) vive con `GET /api/me` (`modules/me`), que también marca lo de la capa de
+  // juego (7.13).
 }

@@ -11,6 +11,8 @@ import {
   ProfileGameSchema,
   SeasonIdSchema,
   SeasonStandingsSchema,
+  SeenRequestSchema,
+  ShowcaseSchema,
   VoteCastSchema,
   VoteSchema,
 } from '../src'
@@ -76,7 +78,7 @@ describe('esquemas de la capa de juego (§2.9, §2.10, §4.10; tarea 7.7)', () =
       expect(SeasonIdSchema.safeParse(id).success, id).toBe(false)
   })
 
-  it('RF-GAME-09 (contrato): me lleva el nivel visto, la racha con el comodín, la temporada y los logros sin ver', () => {
+  it('RF-GAME-09 (contrato): me lleva el nivel visto, la racha con el comodín, la temporada, los logros sin ver y la ceremonia de temporada', () => {
     const game = {
       xp: 3400,
       level: 8,
@@ -84,9 +86,41 @@ describe('esquemas de la capa de juego (§2.9, §2.10, §4.10; tarea 7.7)', () =
       streak: { current: 3, best: 5, jokerAvailable: true },
       season: { id: '2026-T4', points: 12, position: 9 },
       unseenAchievements: ['streak_3'],
+      seasonCeremony: { seasonId: '2026-T3', champion: false },
     }
     expect(MeGameSchema.parse(game)).toEqual(game)
-    expect(MeGameSchema.safeParse({ ...game, season: null }).success).toBe(true)
+    expect(MeGameSchema.safeParse({ ...game, season: null, seasonCeremony: null }).success).toBe(true)
+    expect(
+      MeGameSchema.safeParse({ ...game, seasonCeremony: { seasonId: 'T3', champion: true } }).success,
+    ).toBe(false)
+  })
+
+  it('RF-GAME-09, RF-ARC-05 (contrato): lo ya visto admite el nivel, un logro y la ceremonia de una temporada', () => {
+    for (const ok of [
+      { kind: 'drop', ref: '2026-w42' },
+      { kind: 'ceremony', ref: '2026-w42' },
+      { kind: 'level', ref: 8 },
+      { kind: 'achievement', ref: 'win' },
+      { kind: 'season_champion', ref: '2026-T4' },
+    ])
+      expect(SeenRequestSchema.safeParse(ok).success, JSON.stringify(ok)).toBe(true)
+    for (const bad of [
+      { kind: 'level', ref: 0 },
+      { kind: 'level', ref: 21 },
+      { kind: 'level', ref: '8' },
+      { kind: 'achievement', ref: 'nope' },
+      { kind: 'season_champion', ref: '2026-w42' },
+      { kind: 'ceremony', ref: '2026-T4' },
+      { kind: 'level', ref: 3, extra: true },
+    ])
+      expect(SeenRequestSchema.safeParse(bad).success, JSON.stringify(bad)).toBe(false)
+  })
+
+  it('RF-PRF-01 (contrato): la vitrina admite hasta tres logros distintos del catálogo', () => {
+    expect(ShowcaseSchema.safeParse(['win', 'podium', 'first_vote']).success).toBe(true)
+    expect(ShowcaseSchema.safeParse([]).success).toBe(true)
+    for (const bad of [['win', 'podium', 'first_vote', 'oracle'], ['win', 'win'], ['nope']])
+      expect(ShowcaseSchema.safeParse(bad).success, JSON.stringify(bad)).toBe(false)
   })
 
   it('RNF-PRIV-04: el perfil, la temporada y el salón de la fama no tienen sitio para votos individuales', () => {

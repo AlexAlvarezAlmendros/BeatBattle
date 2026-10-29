@@ -14,6 +14,7 @@ const PROFILE = {
   avatarUrl:
     'https://res.cloudinary.com/demo/image/upload/c_fill,g_auto,w_256,h_256/f_auto,q_auto/bb/avatars/u1/a',
   usernameChangeAvailableAt: null,
+  showcase: [],
 }
 
 const json = (body: unknown, status = 200) =>
