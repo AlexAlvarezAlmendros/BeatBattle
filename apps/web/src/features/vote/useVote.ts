@@ -1,16 +1,17 @@
-import type { EntryList } from '@beatbattle/shared'
+import type { EntryList, VoteCast } from '@beatbattle/shared'
 import { type QueryClient, useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { audio } from '../../audio/engine'
 import { queryKeys } from '../../net/queryKeys'
 import { deleteVote, putVote } from '../../net/votes'
+import { applyGameDelta } from '../game/rewards'
 import { type ListenReceipt, useListenReceipt } from '../player/listen'
 
 /**
  * El voto optimista (guía §3.8.4, §4.7.2; tarea 5.15): la lista dice ya la nota nueva (`myVote`) y, si el
  * servidor no la guarda, vuelve la anterior, suena `ui.error` y el error llega a las estrellas, que lo dicen
- * («No se ha guardado tu voto»). Al guardarse, la cola del Modo Jurado se vuelve a pedir. Quitar el voto
- * (`RF-VOTE-13`) hace lo mismo al revés.
+ * («No se ha guardado tu voto»). Al guardarse, lo ganado va al HUD (el «+5 XP», sus logros, el nivel; tarea 7.19) y la
+ * cola del Modo Jurado se vuelve a pedir. Quitar el voto (`RF-VOTE-13`) hace lo mismo al revés.
  */
 
 type Snapshot = [readonly unknown[], EntryList | undefined][]
@@ -33,20 +34,33 @@ function restore(client: QueryClient, snapshot: Snapshot): void {
   for (const [key, data] of snapshot) client.setQueryData(key, data)
 }
 
+/**
+ * Dónde nace el «+XP» del voto y el combo del Modo Jurado (§3.4.2, tarea 7.19): lo que lo provoca (el medidor del combo,
+ * el grupo de estrellas).
+ */
+export interface VoteRewardOptions {
+  anchor?: Element | null
+  combo?: number
+}
+
 export function useVote(entry: { id: string; weekSlug: string }) {
   const client = useQueryClient()
   const vote = useCallback(
-    async (stars: number) => {
+    async (stars: number, reward: VoteRewardOptions = {}): Promise<VoteCast> => {
       await client.cancelQueries({ queryKey: ['entries', 'list', entry.weekSlug] })
       const snapshot = setMyVote(client, entry.weekSlug, entry.id, stars)
+      let cast: VoteCast
       try {
-        await putVote(entry.id, stars)
+        cast = await putVote(entry.id, stars)
       } catch (error) {
         restore(client, snapshot)
         audio.play('ui.error')
         throw error
       }
+      // Lo ganado (`RF-GAME-08`): a la sesión, al «+5 XP» que vuela al medidor y a los avisos.
+      applyGameDelta(cast.game, reward)
       void client.invalidateQueries({ queryKey: queryKeys.jury.all })
+      return cast
     },
     [client, entry.id, entry.weekSlug],
   )

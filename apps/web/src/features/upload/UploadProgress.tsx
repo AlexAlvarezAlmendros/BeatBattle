@@ -1,4 +1,4 @@
-import type { OwnEntry } from '@beatbattle/shared'
+import type { GameDelta, OwnEntry } from '@beatbattle/shared'
 import { type RefObject, useEffect, useRef, useState } from 'react'
 import { useControlKeys } from '../../app/layout/screen'
 import { paths } from '../../app/paths'
@@ -13,6 +13,7 @@ import { Frame } from '../../ui/Frame'
 import { cx } from '../../ui/forceState'
 import { useReducedMotion } from '../../ui/hooks/useReducedMotion'
 import { Meter } from '../../ui/Meter'
+import { achievementXp, applyGameDelta } from '../game/rewards'
 import styles from './UploadProgress.module.css'
 
 const MB = 1024 * 1024
@@ -134,6 +135,9 @@ export function UploadMeter({
   )
 }
 
+/** Lo ganado que ya ha lanzado una celebración (el modo estricto de React monta dos veces en desarrollo). */
+const celebrated = new WeakSet<GameDelta>()
+
 /** Cuánto tarda el anunciador en estampar tras el final de la subida (Anexo E: `ann.newbeat` a 1,5 s). */
 export const NEW_BEAT_IMPACT_MS = 1500
 
@@ -149,21 +153,44 @@ export const NEW_BEAT_IMPACT_MS = 1500
  * anuncia). La única acción es «Ver mi entrada»: el pie del panel ya lleva «Volver al menú [Esc]» (jurado
  * de la 4.20: J1, J6, J7, A1).
  */
-export function UploadCelebration({ entry, weekNumber }: { entry: OwnEntry; weekNumber: number }) {
+export function UploadCelebration({
+  entry,
+  weekNumber,
+  game,
+}: {
+  entry: OwnEntry
+  weekNumber: number
+  /** Lo que ha dado la subida (§2.10, tarea 7.21): «+125 XP» y, en el impacto, el «+XP» flotante y los avisos. */
+  game?: GameDelta
+}) {
   const reduced = useReducedMotion()
   const [impact, setImpact] = useState(reduced)
   const aliasRef = useRef<HTMLHeadingElement>(null)
+  const xpRef = useRef<HTMLParagraphElement>(null)
   useArrive(aliasRef)
+  // El XP de subir, sin el de los logros (que salen en su aviso, §3.8.8).
+  const eventXp = game
+    ? Math.max(0, game.xp - game.achievements.reduce((sum, id) => sum + achievementXp(id), 0))
+    : 0
+  // biome-ignore lint/correctness/useExhaustiveDependencies: la celebración se monta una vez por subida
   useEffect(() => {
     ensureAnnouncer()
+    const reward = () => {
+      if (game && !celebrated.has(game)) {
+        celebrated.add(game)
+        applyGameDelta(game, { anchor: xpRef.current })
+      }
+    }
     if (reduced) {
       announce(t('pages.upload.done.announcer'))
+      reward()
       return
     }
     const timer = window.setTimeout(() => {
       setImpact(true)
       audio.play('ann.newbeat')
       announce(t('pages.upload.done.announcer'))
+      reward()
     }, NEW_BEAT_IMPACT_MS)
     return () => window.clearTimeout(timer)
   }, [reduced])
@@ -203,6 +230,11 @@ export function UploadCelebration({ entry, weekNumber }: { entry: OwnEntry; week
               values={{ number: <span className={styles.insideNumber}>{weekNumber}</span> }}
             />
           </p>
+          {eventXp > 0 && (
+            <p ref={xpRef} className={styles.xp}>
+              {t('game.float', { amount: formatNumber(eventXp) })}
+            </p>
+          )}
           <p className={cx(styles.text, styles.receiptNote)}>
             {entry.status === 'processing'
               ? t('pages.upload.done.processing')

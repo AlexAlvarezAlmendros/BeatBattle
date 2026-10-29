@@ -1,0 +1,112 @@
+/*
+ * La insignia de un logro (§3.8.8): un chaflán (`Frame`, cuyo `::before` es el borde y `::after` el relleno) con la
+ * estrella dentro y el marco de su rareza. Es dibujo: la rareza va en palabra al lado.
+ */
+.insignia {
+  --frame-border: var(--bb-line-strong);
+  --frame-fill: var(--bb-black);
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: calc(var(--bb-target) + var(--bb-space-2));
+  aspect-ratio: 1;
+}
+
+.star {
+  position: relative;
+  z-index: 1;
+  width: 70%;
+  fill: var(--bb-white);
+}
+
+.insignia[data-rarity="rare"] {
+  --frame-border: var(--bb-red);
+}
+
+.insignia[data-rarity="rare"] .star {
+  fill: var(--bb-red);
+}
+
+/* Épico: borde holo, la lámina acotada a la paleta (rojo, blanco y granate, §3.4.4). */
+.insignia[data-rarity="epic"] {
+  --frame-border: linear-gradient(
+    135deg,
+    var(--bb-red),
+    var(--bb-white) 45%,
+    var(--bb-wine) 70%,
+    var(--bb-red)
+  );
+  --frame-fill: var(--bb-wine-3);
+}
+
+/* Legendario: relleno rojo con trama y borde blanco; la estrella, blanca sobre el rojo. */
+.insignia[data-rarity="legendary"] {
+  --frame-border: var(--bb-white);
+  --frame-fill:
+    radial-gradient(circle, var(--bb-red-shade) 0 var(--bb-tex-fill-dot), transparent var(--bb-tex-fill-dot))
+    0 0 / var(--bb-tex-fill-cell) var(--bb-tex-fill-cell),
+    var(--bb-red-cta);
+}
+
+.badge {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--bb-space-3);
+}
+
+.text {
+  display: grid;
+  gap: var(--bb-space-1);
+  min-width: 0;
+}
+
+.kicker {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.rarity {
+  color: var(--bb-white);
+}
+
+.badge[data-rarity="rare"] .rarity,
+.badge[data-rarity="legendary"] .rarity {
+  color: var(--bb-red);
+}
+
+.name {
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-md);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-button);
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.desc {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+.xp {
+  align-self: start;
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-bold);
+  white-space: nowrap;
+}
+
+/* Contraste alto: el marco de la insignia y la estrella con los colores del sistema (la rareza ya va en palabra). */
+@media (forced-colors: active) {
+  .star {
+    fill: CanvasText;
+  }
+}

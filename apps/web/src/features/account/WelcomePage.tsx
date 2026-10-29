@@ -1,12 +1,19 @@
-import { levelProgress } from '@beatbattle/rules'
+import { ACHIEVEMENTS, levelProgress } from '@beatbattle/rules'
 import { Navigate } from 'react-router'
 import { paths } from '../../app/paths'
 import { ScreenPage } from '../../app/ScreenPage'
 import { t } from '../../i18n'
 import { Button } from '../../ui/Button'
 import { ProducerCard } from '../../ui/ProducerCard'
+import { AchievementBadge } from '../game/AchievementBadge'
 import { initialsOf, playerOf, useSession } from './session'
 import styles from './WelcomePage.module.css'
+
+/**
+ * «El primer logro» de la bienvenida (§3.8.9): ninguno se gana al registrarse, así que es el primero por ganar del
+ * catálogo que se ve (no oculto): Primer sample.
+ */
+const FIRST_ACHIEVEMENT = (ACHIEVEMENTS.find((achievement) => !achievement.hidden) ?? ACHIEVEMENTS[0])!.id
 
 /** «10/2026» a partir del número de mes y año de alta (la carta solo dice desde cuándo). */
 function sinceOf(date: Date): string {
@@ -55,7 +62,8 @@ export function WelcomePage() {
           <h2 id="welcome-goal" className="bb-label">
             {t('account.welcome.goalTitle')}
           </h2>
-          <p className={styles.goalName}>{t('account.welcome.goalName')}</p>
+          {/* El primero por ganar del catálogo (Anexo C), con su insignia, como en el aviso de logro (§3.8.9). */}
+          <AchievementBadge id={FIRST_ACHIEVEMENT} className={styles.goalBadge} />
           <p className={styles.goalHow}>{t('account.welcome.goalHow')}</p>
         </section>
         <Button to="/" fullWidth keyHint={t('frame.keys.glyph.enter')}>

@@ -428,6 +428,11 @@
   white-space: nowrap;
 }
 
+/* El XP del sellado, en el rojo de las recompensas (§3.4.2). */
+.tile[data-tone="xp"] b {
+  color: var(--bb-red);
+}
+
 .tile b span {
   color: var(--bb-text-3);
   font-family: var(--bb-font-ui);

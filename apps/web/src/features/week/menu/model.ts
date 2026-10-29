@@ -54,7 +54,9 @@ export interface MenuPlayer {
   xp: { value: number; min: number; max: number }
   /** Foto del avatar (64 px); sin ella, el monograma. */
   avatarUrl?: string | null
-  season?: { label: string; value: string }
+  /** Tesela de la temporada (§3.4.1): «Temporada T4» · «12 PTS · 9.º» y lo que oye el lector. */
+  season?: { label: string; value: string; spoken?: string }
+  /** Racha en semanas (la tesela «×3»). */
   streak?: number
   /** Ya ha subido su entrada esta semana (Jugar pasa a «Editar mi entrada» y el cursor, a Jurado). */
   uploaded: boolean

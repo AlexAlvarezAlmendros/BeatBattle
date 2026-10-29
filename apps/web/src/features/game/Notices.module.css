@@ -1,0 +1,209 @@
+/*
+ * Avisos de logro y de subida de nivel (§3.8.8): arriba a la izquierda, bajo la ficha del HUD (`--notices-top`, que
+ * mide la pieza), apilados hacia abajo; en móvil, a todo el ancho. Por encima del marco y por debajo de la ceremonia.
+ * No se pulsan: lo que dicen ya está en la región viva.
+ */
+.column {
+  position: fixed;
+  top: calc(var(--notices-top, 0px) + var(--bb-space-3));
+  left: var(--bb-gutter);
+  z-index: var(--bb-z-toast);
+  display: grid;
+  gap: var(--bb-space-3);
+  width: min(26rem, calc(100vw - 2 * var(--bb-gutter)));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+
+.item {
+  display: grid;
+  gap: var(--bb-space-2);
+}
+
+/* Panel opaco: ningún texto va sobre la trama ni los rayos de la arena (`RD-VIS-05`). */
+.plate {
+  --frame-fill: var(--bb-panel);
+  padding: var(--bb-space-3) var(--bb-space-4);
+}
+
+.plate[data-rarity="rare"] {
+  --frame-border: var(--bb-red);
+}
+
+.plate[data-rarity="legendary"] {
+  --frame-border: var(--bb-white);
+  padding: var(--bb-space-5) var(--bb-space-6);
+}
+
+/* ── Subida de nivel ─────────────────────────────────────────────────────────────────────────── */
+
+.levelAnnouncer {
+  justify-self: start;
+}
+
+.plate[data-level] {
+  --frame-border: var(--bb-red);
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-4);
+}
+
+/* El sello del nivel nuevo: un círculo con el número en display; entra estampado (escala 1,3 → 1 con el giro final). */
+.seal {
+  display: grid;
+  flex: none;
+  place-items: center;
+  align-content: center;
+  width: calc(var(--bb-target) * 1.5);
+  aspect-ratio: 1;
+  border: var(--bb-stroke-stamp) solid var(--bb-red);
+  border-radius: 50%;
+  background: var(--bb-black);
+  line-height: 1;
+}
+
+.seal small {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+.seal b {
+  color: var(--bb-white);
+  font-size: var(--bb-fs-2xl);
+}
+
+.seal[data-stamp] {
+  animation: bb-notice-stamp var(--bb-dur-reward) var(--bb-ease-back) 1;
+}
+
+@keyframes bb-notice-stamp {
+  from {
+    scale: 1.3;
+    rotate: var(--bb-tilt-stamp);
+  }
+}
+
+:global(:root[data-serious]) .seal[data-stamp] {
+  animation: none;
+}
+
+.levelText {
+  display: grid;
+  gap: var(--bb-space-1);
+}
+
+.levelTitle {
+  font-family: var(--bb-font-display);
+  text-transform: uppercase;
+  font-size: var(--bb-fs-lg);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-button);
+  line-height: 1.1;
+}
+
+.levelKicker {
+  color: var(--bb-red);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+/* ── Logro legendario, al centro ─────────────────────────────────────────────────────────────── */
+
+/* Velo oscuro detrás (no se pulsa ni para nada: solo apaga lo de detrás para que se lea el aviso). */
+.center {
+  position: fixed;
+  inset: 0;
+  z-index: var(--bb-z-toast);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  padding: var(--bb-gutter);
+  background: var(--bb-scrim);
+  pointer-events: none;
+}
+
+.legendary {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-3);
+  width: 100%;
+  max-width: 32rem;
+}
+
+.legendaryAnnouncer {
+  width: 100%;
+  min-width: 0;
+}
+
+.legendary > .plate {
+  width: 100%;
+}
+
+.skip {
+  padding: var(--bb-space-1) var(--bb-space-3);
+  background: var(--bb-black);
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+}
+
+/*
+ * Chispas: rombos rojos y blancos que salen del centro hasta `--spark-reach` (el área que autoriza el limitador) con su
+ * opacidad (`--spark-opacity`). Es espectáculo (`data-fx`): el modo serio lo quita; sin movimiento no se piden.
+ */
+.sparks {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+}
+
+.sparks span {
+  position: absolute;
+  width: var(--bb-space-2);
+  aspect-ratio: 1;
+  background: var(--bb-red);
+  opacity: 0;
+  transform: rotate(calc(var(--i) / var(--n) * 1turn)) translateX(0);
+  animation: bb-spark var(--bb-dur-reward) var(--bb-ease-out) 1;
+}
+
+.sparks span[data-tone="1"] {
+  background: var(--bb-white);
+}
+
+@keyframes bb-spark {
+  from {
+    opacity: var(--spark-opacity);
+  }
+
+  to {
+    opacity: 0;
+    transform: rotate(calc(var(--i) / var(--n) * 1turn))
+      translateX(calc(var(--spark-reach) * var(--bb-motion)));
+  }
+}
+
+@media (max-width: 720px) {
+  .column {
+    right: var(--bb-gutter);
+    width: auto;
+  }
+}
+
+@media (forced-colors: active) {
+  .seal {
+    border-color: CanvasText;
+  }
+}

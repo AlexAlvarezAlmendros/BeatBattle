@@ -11,6 +11,7 @@ import {
 } from 'react'
 import { MOBILE_QUERY } from '../../../app/layout/ArenaBackdrop'
 import { Chronicle, CreditLine } from '../../../app/layout/Chronicle'
+import { StreakStat } from '../../../app/layout/Hud'
 import { HudStat, PlayerCard } from '../../../app/layout/PlayerCard'
 import { FrameSlot } from '../../../app/layout/slots'
 import { paths } from '../../../app/paths'
@@ -298,15 +299,12 @@ export function MainMenu({
           </div>
         </FrameSlot>
       )}
-      {player && (player.season || player.streak) && (
+      {player && (player.season || player.streak !== undefined) && (
         <FrameSlot name="hudRight">
-          {player.season && <HudStat label={player.season.label} value={player.season.value} />}
-          {player.streak !== undefined && (
-            <HudStat
-              label={t('home.hud.streak')}
-              value={t('home.hud.streakValue', { count: player.streak })}
-            />
+          {player.season && (
+            <HudStat label={player.season.label} value={player.season.value} spoken={player.season.spoken} />
           )}
+          {player.streak !== undefined && <StreakStat weeks={player.streak} />}
         </FrameSlot>
       )}
       <FrameSlot name="controlsRight">
