@@ -31,7 +31,7 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 | 0 | Fundaciones | ✅ Cerrada (2026-10-04, con la dirección «Arena»; PR nueva pendiente de revisión) | [00-fundaciones.md](plans/00-fundaciones.md) | CI verde; la galería muestra tokens y componentes de la arena (guía v0.6 §3); marco de juego y menú principal navegables con teclado; prueba de marca y de juego (`RD-VIS-02`) |
 | 1 | Spike de sensación y audio | ✅ Cerrada con **GO** (2026-10-08) | [01-spike-sensacion-audio.md](plans/01-spike-sensacion-audio.md) | 60 fps escritorio / ≥ 45 Android medio (emulado); efectos con la parte de la app < 10 ms; analizador sobre Cloudinary; ffmpeg < 8 s (**GO/NO-GO**) |
 | 2 | Cuentas y base de email | 🔄 En curso (todo hecho salvo IMAP real 2.11, que llega con el Gmail de producción, y el cierre 2.26) | [02-cuentas-email.md](plans/02-cuentas-email.md) | E2E: registro → verificación → Google → perfil → borrar cuenta; cola de email, presupuesto diario, preferencias, consentimientos y bajas |
-| 3 | Semanas y samples | 🔄 En curso (hito cumplido: E2E del hito, jurado ✅ y prueba real en Cloudinary ✅; solo falta la conformidad del usuario con la excepción n.º 1 del acta, 3.21) | [03-semanas-samples.md](plans/03-semanas-samples.md) | 3 semanas programadas; cambio de semana en la frontera con reloj simulado; email del drop (también sin cuenta) |
+| 3 | Semanas y samples | ✅ Cerrada (2026-10-29) | [03-semanas-samples.md](plans/03-semanas-samples.md) | 3 semanas programadas; cambio de semana en la frontera con reloj simulado; email del drop (también sin cuenta) |
 | 4 | Participar | ✅ Cerrada (2026-10-13) | [04-participar.md](plans/04-participar.md) | WAV de 60 MB por trozos con BPM, tonalidad y sonoridad medida; recibo por email |
 | 5 | Escuchar y votar | ✅ Cerrada (2026-10-13) | [05-escuchar-votar.md](plans/05-escuchar-votar.md) | Todas las reglas `RF-VOTE-*` en verde; Modo Jurado con teclado; recordatorio y llamada al jurado |
 | 6 | Cierre, resultados y ceremonia | ✅ Cerrada (2026-10-15) | [06-resultados.md](plans/06-resultados.md) | Sellado determinista, ceremonia, re-sellado idéntico; Lunes de batalla por email |
@@ -52,10 +52,8 @@ la fecha anterior, el 19 de octubre, pasó sin semanas programadas). El calendar
 En paralelo a la preparación de la beta, el desarrollo sigue con la **Fase 7** (capa de juego,
 [plan 07](plans/07-capa-de-juego.md)): el usuario abrió F7–F10 el 2026-10-29 y desplegar sigue siendo decisión suya.
 
-La **Fase 2** y la **Fase 3** tienen su hito cumplido y solo esperan al usuario:
-
-- **F2:** IMAP real (2.11, con el Gmail de producción) y el cierre (2.26).
-- **F3:** la conformidad con la excepción n.º 1 del acta del jurado (3.21).
+La **Fase 2** tiene su hito cumplido y solo le falta el IMAP real (2.11, con el Gmail de producción) para su cierre (2.26).
+La **Fase 3** se cerró el 2026-10-29.
 
 ## Grafo de dependencias
 
@@ -215,6 +213,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-10-29 | F3 | **Fase 3 cerrada** (3.22): J1, el menú a 1024 × 768, corregida en la 3.21 (PR #107); los seis criterios. |
 | 2026-10-29 | F7 | **F7–F10 abiertas antes de que acabe la beta** (decisión del usuario, «todo hasta el lanzamiento»): `main` puede ir por delante de producción y desplegar sigue siendo suyo. Plan 07 creado (36 tareas); la planificación destapa 14 huecos de la guía (G1–G14 del plan) que se resuelven al empezar su tarea. La F9 ya no espera a la beta. |
 | 2026-10-28 | Beta | **Nueva fecha** (decisión del usuario): online y anuncio el domingo 15 de noviembre, primera ronda el lunes 16 y tres semanas hasta el 6 de diciembre; el 19 de octubre pasó sin semanas. Calendario hacia atrás en el plan. Gmail en Vercel (el usuario); faltan el cupo a 450 y desplegar `main` (producción sirve la #99). 2.22 hecha (Discord real en producción). |
 | 2026-10-15 | Beta | Plan de la beta creado (10 tareas): textos legales y guía de despliegue, ya; recursos, despliegue, calendario e invitaciones, con el usuario. |
