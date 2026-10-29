@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.93 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.94 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -594,6 +594,14 @@ el **rango** (título visible en la carta): *Excavador de cajones* → *Loopero*
 segunda suma un +10 % al XP de subir y de resultado, hasta +50 %. Saltarse una semana la rompe. Hay
 un **comodín de racha** por temporada (se gasta solo la primera semana que fallas), para que una
 semana mala no destroce meses.
+
+- Cuentan las semanas **selladas**, en el orden de su número (`week.number`, correlativo entre las semanas
+  programadas): un hueco del calendario no rompe nada. **Fallar** es sellar una semana sin una entrada clasificada
+  (sin entrada, sin clasificar, retirada o descalificada).
+- El comodín es el de la temporada de la semana fallada y solo se gasta si hay racha que salvar. La semana
+  salvada **no suma**: la racha se queda como estaba, también para el bonus y para `streak_3`, `streak_8` y
+  `streak_26`. Con el comodín de esa temporada ya gastado, fallar la rompe (vuelve a 0).
+- La **mejor racha** es la más larga que ha tenido la cuenta (el récord del salón de la fama).
 
 **Logros.** Unos 35, en cuatro rarezas (común, raro, épico, legendario), algunos **ocultos** («???»
 con una pista críptica). Catálogo completo en el Anexo C. Desbloquear uno lanza el aviso de logro
@@ -3665,7 +3673,10 @@ fórmula de Pearson sobre rangos. Casos de prueba: sin empates, `[1,2,3,4,5]` fr
 **Niveles.** `xpNivel(n) = 50 · round(150 · (n − 1)^1,6 / 50)`; `nivel(xp)` = mayor `n ≤ 20` con
 `xpNivel(n) ≤ xp`.
 
-**Racha.** `bonus = min(0,5, 0,1 · (racha − 1))` para `racha ≥ 2`.
+**Racha.** `bonus = min(0,5, 0,1 · (racha − 1))` para `racha ≥ 2`. Escenario de `RF-GAME-04`: clasifica las
+semanas 1–4 de una temporada (racha 4, bonus 30 %), falla la 5.ª (gasta el comodín: sigue en 4), falla la 6.ª (se
+rompe: 0; la mejor sigue en 4) y, si clasifica la 7.ª, empieza otra vez en 1. Si en vez de fallar la 6.ª la
+clasifica, la racha pasa a 5: la semana salvada no cuenta.
 
 **XP de un evento.** `xp = dorada · ⌊(base · (100 + b) + 50) / 100⌋`, con `b` el bonus de racha en puntos
 porcentuales (solo en subir y en el resultado; 0 en el resto) y `dorada` = 2 en semana dorada y 1 si no: el bonus
@@ -3736,6 +3747,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.94 | **Tarea 7.2.** §2.10 y Anexo G: la racha cuenta las semanas selladas por su número (`week.number`), así que un hueco del calendario no la rompe; fallar es sellar una semana sin entrada clasificada. El comodín es el de la temporada de la semana fallada, solo se gasta si hay racha que salvar y la semana salvada no suma (ni al bonus ni a `streak_3/8/26`). La mejor racha es la más larga. El escenario de `RF-GAME-04`, paso a paso. |
 | 2026-10-29 | 0.6.93 | **Tarea 7.1** (huecos G3, G11 y G12 del plan 07). §2.10, Anexo B y Anexo G: subir da su XP al pasar a `active`, una vez por semana, con la **racha en juego** (la de las semanas selladas más esta, la misma con la que se paga el resultado); la primera entrada de la semana es la primera en pasar a `active`. **El XP en vivo no se retira**: ni al retirar la entrada o no clasificar, ni al quitar un voto (volver a votar no suma), ni cuando un voto queda anulado (sigue contando para el tope). La semana dorada duplica los eventos del Anexo B de esa semana, no los logros, que no llevan racha ni dorada. Redondeo: el bonus, al entero con las mitades hacia arriba, y la dorada duplica el entero. El jurado completo cuenta las entradas activas ajenas (5 o más). |
 | 2026-10-29 | 0.6.92 | §5 (hueco G14 del plan 07): el texto y el grafo ya no ponen la F7 y la F9 tras la beta. Desde el 2026-10-29 (decisión del usuario, «todo hasta el lanzamiento») cuelgan de la F6 y avanzan en paralelo con la beta; la F8 sigue tras la F7 y la F10, tras la F7–F9. |
 | 2026-10-16 | 0.6.90 | §2.14 (arreglo, `RF-ADM-01`): en un sample nuevo, las subidas que empiezan mientras se firma la primera esperan su id. Elegir la portada antes de que volviera la firma del audio daba dos ids y «Crear el sample» decía «La parte «original» no está subida» (lo destapó la CI en `weeks.spec.ts`). |

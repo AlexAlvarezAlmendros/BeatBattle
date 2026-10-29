@@ -10,6 +10,9 @@
 //   se retira (guía §2.10): quien llama cuenta los votos con XP de la semana en el libro, también los quitados o
 //   anulados.
 //
+// La racha (`streakOf`, `advanceStreak`) también vive aquí (guía §4.5): semanas selladas consecutivas por su número
+// con entrada clasificada, con un comodín por temporada que salva sin sumar (guía §2.10).
+//
 // El XP nunca entra en la clasificación ni en el peso de un voto (`RF-GAME-10`): `ranking` y `scoring` no importan
 // este módulo (test estático en `gameIsolation.test.ts`).
 
@@ -17,6 +20,7 @@ import {
   type AchievementRarity,
   GOLDEN_WEEK_XP_MULTIPLIER,
   JURY_COMPLETE_MIN_ENTRIES,
+  STREAK_JOKERS_PER_SEASON,
   TOP_TEN_LAST_POSITION,
   XP_ACHIEVEMENT_BY_RARITY,
   XP_ENTRY_SUBMITTED,
@@ -135,4 +139,106 @@ export function xpFor(event: XpEvent, context: XpContext): number {
   const amount = baseAmount(event, context.streakWeeks)
   if (event.kind === 'achievement' || !context.goldenWeek) return amount
   return GOLDEN_WEEK_XP_MULTIPLIER * amount
+}
+
+// ─── Racha (guía §2.10, Anexo G; `RF-GAME-04`) ─────────────────────────────────────────────────────────────────────
+
+/** Una semana sellada, vista por una cuenta. */
+export interface StreakWeek {
+  /** `week.number`: correlativo entre las semanas programadas (un hueco del calendario no salta números). */
+  readonly number: number
+  /** Temporada de la semana (`week.season_id`, «2026-T4»): la del comodín. */
+  readonly seasonId: string
+  /** Tuvo una entrada clasificada (activa y con ≥ `PODIUM_MIN_VOTES` votos válidos) en esa semana. */
+  readonly qualified: boolean
+}
+
+/** El estado de la racha de una cuenta (`streak_state`). */
+export interface StreakState {
+  /** Racha actual: semanas consecutivas con entrada clasificada (la salvada por el comodín no suma). */
+  readonly current: number
+  /** La racha más larga que ha tenido. */
+  readonly best: number
+  /** Última semana sellada aplicada a este estado (`last_week_number`), o `null` si ninguna. */
+  readonly lastWeekNumber: number | null
+  /** Temporada en la que gastó el comodín (`joker_season`), o `null` si nunca. */
+  readonly jokerSeason: string | null
+}
+
+/** Estado de una cuenta sin semanas selladas. */
+export const STREAK_START: StreakState = Object.freeze({
+  current: 0,
+  best: 0,
+  lastWeekNumber: null,
+  jokerSeason: null,
+})
+
+// `streak_state` solo guarda la temporada del comodín gastado: cabe un comodín por temporada, o ninguno.
+const JOKERS_PER_SEASON: 0 | 1 = STREAK_JOKERS_PER_SEASON
+
+/** ¿Le queda el comodín de la temporada `seasonId`? */
+export function jokerAvailable(state: StreakState, seasonId: string): boolean {
+  return JOKERS_PER_SEASON > 0 && state.jokerSeason !== seasonId
+}
+
+function assertStreakWeek(week: StreakWeek): void {
+  assertIntegerInRange(week.number, 1, Number.MAX_SAFE_INTEGER, 'week.number')
+  if (week.seasonId.length === 0) throw new RangeError('week.seasonId no puede estar vacío')
+}
+
+/**
+ * Aplica una semana sellada a la racha (al sellar, guía §2.10):
+ *
+ * - clasificada → la racha sube 1 (y la mejor, si la pasa);
+ * - fallada con racha y el comodín de su temporada → lo gasta y la racha se queda igual (la semana no suma);
+ * - fallada sin comodín → la racha vuelve a 0; sin racha que salvar no se gasta nada.
+ *
+ * Idempotente: una semana ya aplicada (`number ≤ lastWeekNumber`) no cambia nada, así que re-sellar no la cuenta dos
+ * veces. Saltarse semanas solo vale sin racha (no hay nada que perder); con racha lanza `RangeError`, porque las
+ * semanas que faltan podían gastar el comodín o romperla: hay que aplicarlas antes, en orden.
+ */
+export function advanceStreak(state: StreakState, week: StreakWeek): StreakState {
+  assertStreakWeek(week)
+  const last = state.lastWeekNumber
+  if (last !== null && week.number <= last) return state
+  if (last !== null && week.number > last + 1 && state.current > 0) {
+    throw new RangeError(
+      `Faltan las semanas ${last + 1}–${week.number - 1} para aplicar la ${week.number} a una racha de ${state.current}`,
+    )
+  }
+  const lastWeekNumber = week.number
+  if (week.qualified) {
+    const current = state.current + 1
+    return { ...state, current, best: Math.max(state.best, current), lastWeekNumber }
+  }
+  if (state.current === 0) return { ...state, lastWeekNumber }
+  if (jokerAvailable(state, week.seasonId)) return { ...state, lastWeekNumber, jokerSeason: week.seasonId }
+  return { ...state, current: 0, lastWeekNumber }
+}
+
+/**
+ * La racha tras una historia de semanas selladas, en orden estricto de número (`RF-GAME-04`). Las semanas que no
+ * aparecen solo pueden faltar mientras no hay racha (ver `advanceStreak`).
+ */
+export function streakOf(history: readonly StreakWeek[]): StreakState {
+  let state = STREAK_START
+  let previous: number | null = null
+  for (const week of history) {
+    if (previous !== null && week.number <= previous) {
+      throw new RangeError(
+        `La historia de la racha va en orden de número (la ${week.number} tras la ${previous})`,
+      )
+    }
+    previous = week.number
+    state = advanceStreak(state, week)
+  }
+  return state
+}
+
+/**
+ * Racha en juego para una semana aún sin sellar: la que dejan las semanas selladas más esta, como si clasificara
+ * (guía §2.10). Es la `streakWeeks` de `xpFor` para subir y, si clasifica, la del resultado.
+ */
+export function streakInPlay(state: StreakState): number {
+  return state.current + 1
 }

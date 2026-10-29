@@ -1,7 +1,7 @@
 // Niveles, rangos y bonus de racha (guía §2.10, Anexo B, Anexo G). El nivel es una función pura
 // del XP total (`RF-GAME-02`); el XP nunca influye en la clasificación (`RF-GAME-10`).
 //
-// El libro de XP (`xpFor`) y el cálculo de la racha con comodín (`streakOf`) llegan en la Fase 7.
+// El XP de cada evento (`xpFor`) y la racha con comodín (`streakOf`, `advanceStreak`) están en `xp.ts` (Fase 7).
 
 import {
   LEVEL_CURVE_BASE_XP,

@@ -25,7 +25,8 @@
 //   ranking    la clasificación de la semana: bayesiana, desempates, ex aequo y podio
 //
 // De la Fase 7 (tareas 7.1–7.6, la capa de juego):
-//   xp         `xpFor` con la tabla del Anexo B (racha en juego, topes, semana dorada)
+//   xp         `xpFor` con la tabla del Anexo B (racha en juego, topes, semana dorada); `streakOf` y
+//              `advanceStreak`, la racha con el comodín de temporada
 
 export * from './alias'
 export * from './balance'
