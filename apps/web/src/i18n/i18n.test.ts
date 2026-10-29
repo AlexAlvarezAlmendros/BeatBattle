@@ -1,3 +1,4 @@
+import { isAchievementId } from '@beatbattle/rules'
 import { describe, expect, it } from 'vitest'
 import es from './es.json'
 import { formatDuration } from './format'
@@ -112,7 +113,10 @@ describe('i18n: es.json', () => {
 
   it('las claves van en camelCase y el guion bajo solo marca plurales con su _other', () => {
     for (const [key] of leaves) {
-      for (const segment of key.split('.')) {
+      for (const [index, segment] of key.split('.').entries()) {
+        // Salvo el id de un logro del Anexo C (`achievement.<id>.name`, tarea 7.22): es el dato del catálogo de
+        // `@beatbattle/rules`, cuyo `hintKey` ya lleva esa forma.
+        if (index === 1 && key.startsWith('achievement.') && isAchievementId(segment)) continue
         expect(segment, key).toMatch(/^[a-z][a-zA-Z0-9]*(?:_(?:zero|one|two|few|many|other))?$/)
       }
     }

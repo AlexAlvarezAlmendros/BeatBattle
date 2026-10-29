@@ -1,0 +1,32 @@
+/* Banco de la carta (§3.4.4, tarea 7.22): las cuatro variantes en fila, anverso y reverso, sobre negro. */
+.page {
+  display: grid;
+  gap: var(--bb-space-5);
+  padding-block: var(--bb-space-4);
+  justify-items: start;
+}
+
+.intro {
+  max-width: 70ch;
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+}
+
+.row {
+  display: grid;
+  gap: var(--bb-space-4);
+  width: 100%;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--bb-space-16) * 4.5), 1fr));
+  gap: var(--bb-space-8);
+}
+
+.cell {
+  display: grid;
+  justify-items: center;
+  gap: var(--bb-space-4);
+  margin: 0;
+}

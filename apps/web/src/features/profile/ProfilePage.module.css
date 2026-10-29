@@ -5,8 +5,62 @@
  */
 .piece {
   display: grid;
-  place-items: center;
+  justify-items: center;
+  gap: var(--bb-space-5);
   width: 100%;
+}
+
+/* «[C] Girar carta» y las variantes, en placas opacas (la cuña tiene trama, `RD-VIS-05`), como `05-perfil`. */
+.cardControls {
+  display: grid;
+  justify-items: start;
+  gap: var(--bb-space-2);
+  width: min(100%, calc(var(--bb-space-16) * 5.5));
+}
+
+.variants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--bb-space-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.variant {
+  min-height: var(--bb-target);
+  padding: var(--bb-space-2) var(--bb-space-3);
+  border: var(--bb-stroke-hair) solid var(--bb-line-strong);
+  background: var(--bb-black);
+  color: var(--bb-text-2);
+  font: inherit;
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.variant[aria-pressed="true"] {
+  border-color: var(--bb-white);
+  background: var(--bb-white);
+  color: var(--bb-black);
+}
+
+/* Sin ganar: tachada a medias (apagada) y sin acción; su pista va debajo. */
+.variant[data-locked] {
+  border-style: dashed;
+  color: var(--bb-text-4);
+  cursor: default;
+}
+
+.variantHow {
+  padding: var(--bb-space-1) var(--bb-space-2);
+  background: var(--bb-black);
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-semibold);
 }
 
 .body {
@@ -217,5 +271,15 @@
 
   .achievements {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Contraste alto: la variante que se ve, en el color de la selección del sistema. */
+@media (forced-colors: active) {
+  .variant[aria-pressed="true"] {
+    forced-color-adjust: none;
+    border-color: Highlight;
+    background: Highlight;
+    color: HighlightText;
   }
 }

@@ -45,6 +45,7 @@ export type ControlKey =
   | 'standings'
   | 'share'
   | 'replay'
+  | 'flip'
 
 /** Placa de título del HUD en las pantallas interiores (§3.3 «Placa de título»). */
 export interface TitlePlateConfig {

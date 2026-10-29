@@ -157,8 +157,8 @@
         "sample": "{bpm} BPM · {key}",
         "closes": "Envíos hasta el {when}",
         "entry": "Nueva entrada: {alias}",
-        "daysLeft_one": "Queda 1\u00a0día",
-        "daysLeft_other": "Quedan {count}\u00a0días",
+        "daysLeft_one": "Queda 1 día",
+        "daysLeft_other": "Quedan {count} días",
         "lastDaySubmit": "Último día para subir",
         "lastDayVote": "Último día para votar",
         "votes_one": "{count} voto esta semana",
@@ -417,7 +417,18 @@
         "empty": "Los logros llegan con la capa de juego: los no conseguidos se ven en silueta.",
         "hidden": "???"
       },
-      "newTab": "(se abre en otra pestaña)"
+      "newTab": "(se abre en otra pestaña)",
+      "card": {
+        "flip": "Girar carta",
+        "variants": "Variantes de carta",
+        "variantLocked": ", todavía no",
+        "variantHow": {
+          "standard": "la de todos",
+          "red": "con el rango Productor",
+          "holo": "al ganar una semana",
+          "champion": "al ganar una temporada"
+        }
+      }
     },
     "hallOfFame": {
       "title": "Salón de la fama",
@@ -936,15 +947,51 @@
     "producerCard": {
       "label": "Carta de luchador de {name}, número {number}",
       "level": "Nivel {level}",
+      "levelShort": "Nv",
       "stats": {
         "wins": "Victorias",
         "podiums": "Podios",
         "weeks": "Semanas"
       },
       "showcase": "Vitrina de logros",
+      "showcaseShort": "Vitrina",
+      "showcaseCount": "{shown} de {total}",
       "emptySlot": "Hueco vacío",
       "since": "Beat Battle · desde {since}",
-      "levelShort": "Nv"
+      "joined": "En la batalla desde {since}",
+      "variants": {
+        "standard": {
+          "name": "Estándar",
+          "label": "estándar"
+        },
+        "red": {
+          "name": "Roja",
+          "tag": "Carta roja",
+          "label": "roja: rango Productor o más"
+        },
+        "holo": {
+          "name": "Holo",
+          "tag": "Holo · ganador ×{wins}",
+          "label": "holográfica: ha ganado alguna semana"
+        },
+        "champion": {
+          "name": "Campeón",
+          "tag": "Campeón de temporada",
+          "label": "de campeón de temporada"
+        }
+      }
+    },
+    "achievement": {
+      "hidden": "???",
+      "hiddenName": "Logro oculto",
+      "label": "{name}, {rarity}",
+      "lockedLabel": "{name}, {rarity}, sin conseguir: {detail}",
+      "rarity": {
+        "common": "común",
+        "rare": "raro",
+        "epic": "épico",
+        "legendary": "legendario"
+      }
     }
   },
   "dev": {
@@ -969,9 +1016,9 @@
     },
     "covers": {
       "title": "Portadas (banco)",
-      "intro": "{count} portadas generativas pintadas por CPU y calibradas por medida (§3.4.5). Cada una tiene que quedar a ±5\u00a0% de la media en rojo y en luminancia (RD-VIS-04).",
+      "intro": "{count} portadas generativas pintadas por CPU y calibradas por medida (§3.4.5). Cada una tiene que quedar a ±5 % de la media en rojo y en luminancia (RD-VIS-04).",
       "painting": "Pintando: {done} de {count}…",
-      "summary": "Rojo medio {red} · luminancia media {lum} · peor desviación: rojo {worstRed}, luminancia {worstLum} · {ms}\u00a0ms por portada · {verdict}",
+      "summary": "Rojo medio {red} · luminancia media {lum} · peor desviación: rojo {worstRed}, luminancia {worstLum} · {ms} ms por portada · {verdict}",
       "pass": "pasa",
       "fail": "no pasa"
     },
@@ -1511,6 +1558,12 @@
         "days": "Quedan 4 días",
         "votes": "340 votos esta semana"
       }
+    },
+    "card": {
+      "title": "Banco de la carta",
+      "intro": "La carta de productor en sus cuatro variantes (estándar, roja, holo y campeón), anverso y reverso. La primera fila gira con C.",
+      "front": "Anverso",
+      "back": "Reverso"
     }
   },
   "rank": {
@@ -1556,6 +1609,7 @@
       "standings": "Clasificación",
       "share": "Compartir",
       "replay": "Ceremonia",
+      "flip": "Girar carta",
       "glyph": {
         "up": "↑",
         "upLabel": "Flecha arriba",
@@ -1576,6 +1630,7 @@
         "r": "R",
         "t": "T",
         "x": "X",
+        "c": "C",
         "one": "1",
         "five": "5",
         "space": "Espacio"
@@ -2115,7 +2170,7 @@
   "jury": {
     "loading": "Preparando la cola…",
     "gate": {
-      "signIn": "El jurado puntúa cada beat de la semana, de 1 a 5, tras escuchar 30\u00a0s. Entra con tu cuenta para jugar.",
+      "signIn": "El jurado puntúa cada beat de la semana, de 1 a 5, tras escuchar 30 s. Entra con tu cuenta para jugar.",
       "signInAction": "Entrar",
       "verify": "Verifica tu email para puntuar: te enviamos el enlace al registrarte.",
       "verifyAction": "Verificar el email"
@@ -2125,12 +2180,12 @@
     "you": "Tú",
     "juror": "Jurado",
     "listenMeter": "Escucha mínima",
-    "listenText": "{heard} / {total}\u00a0s",
-    "listenDone": "✓ {total} / {total}\u00a0s",
+    "listenText": "{heard} / {total} s",
+    "listenDone": "✓ {total} / {total} s",
     "round": "Ronda {round} / {total}",
     "counterText": "s para puntuar",
     "counterReady": "YA",
-    "mobileCounter": "{left}\u00a0s para puntuar",
+    "mobileCounter": "{left} s para puntuar",
     "counterReadyText": "puedes puntuar",
     "blind": "Voto ciego",
     "hidden": "Autoría oculta · se revela al sellar",
@@ -2140,7 +2195,7 @@
     "youPlate": "{name} · {votes} votos esta semana",
     "vs": "VS",
     "alone": "Puntúas este beat por sí solo, de 1 a 5. No compite contra otro.",
-    "thresholdMark": "{s}\u00a0s",
+    "thresholdMark": "{s} s",
     "combo": "Combo",
     "comboText": "Combo ×{count}",
     "play": "Escuchar",
@@ -2159,5 +2214,164 @@
     "emptyTitle": "Aún no hay entradas",
     "emptyText": "En cuanto alguien suba su flip, aquí estará para que lo puntúes.",
     "backToMenu": "Volver al menú"
+  },
+  "achievement": {
+    "first_drop": {
+      "name": "Primer sample",
+      "description": "Descarga tu primer sample."
+    },
+    "first_entry": {
+      "name": "Primera piedra",
+      "description": "Sube tu primera entrada."
+    },
+    "profile_done": {
+      "name": "Carta de presentación",
+      "description": "Completa tu perfil: avatar, bio y un enlace."
+    },
+    "first_vote": {
+      "name": "Primer veredicto",
+      "description": "Emite tu primer voto."
+    },
+    "share_card": {
+      "name": "Altavoz",
+      "description": "Comparte una tarjeta."
+    },
+    "early_bird": {
+      "name": "Madrugador",
+      "description": "Sé la primera entrada de una semana."
+    },
+    "streak_3": {
+      "name": "En racha",
+      "description": "Clasifica 3 semanas seguidas."
+    },
+    "entries_10": {
+      "name": "Diez de diez",
+      "description": "Sube 10 entradas."
+    },
+    "jury_full": {
+      "name": "Jurado completo",
+      "description": "Vota todas las entradas de una semana (5 como poco)."
+    },
+    "votes_100": {
+      "name": "Oído fino",
+      "description": "Emite 100 votos."
+    },
+    "podium": {
+      "name": "Al podio",
+      "description": "Entra por primera vez en el top 3."
+    },
+    "challenge": {
+      "name": "Reto aceptado",
+      "description": "Cumple el reto extra de una semana y queda en el top 10."
+    },
+    "streak_8": {
+      "name": "Imparable",
+      "description": "Clasifica 8 semanas seguidas."
+    },
+    "entries_50": {
+      "name": "Catálogo",
+      "description": "Sube 50 entradas."
+    },
+    "win": {
+      "name": "Disco de oro",
+      "description": "Gana una semana."
+    },
+    "unanimous": {
+      "name": "Unanimidad",
+      "description": "Saca una media de 4,8 o más con 10 votos o más."
+    },
+    "votes_1000": {
+      "name": "Juez supremo",
+      "description": "Emite 1000 votos."
+    },
+    "golden_ear": {
+      "name": "Oído de oro",
+      "description": "Anticipa al jurado: ρ ≥ 0,6 en una semana."
+    },
+    "label_pick": {
+      "name": "Elegido por el sello",
+      "description": "Recibe la Elección del sello."
+    },
+    "streak_26": {
+      "name": "Medio año sin fallar",
+      "description": "Clasifica 26 semanas seguidas."
+    },
+    "win_3": {
+      "name": "Platino",
+      "description": "Gana 3 semanas."
+    },
+    "season_champ": {
+      "name": "Campeón de temporada",
+      "description": "Gana una temporada."
+    },
+    "level_20": {
+      "name": "De la familia",
+      "description": "Llega al nivel 20."
+    },
+    "last_minute": {
+      "name": "Al límite",
+      "description": "Sube en los últimos 10 minutos antes del cierre de envíos.",
+      "hint": "Hay quien sube con el reloj ya en rojo."
+    },
+    "night_owl": {
+      "name": "Búho",
+      "description": "Vota 10 entradas entre las 03:00 y las 05:00.",
+      "hint": "La pista no duerme a las cuatro de la mañana."
+    },
+    "scratch": {
+      "name": "Scratcher",
+      "description": "Haz siete clics seguidos en el logo.",
+      "hint": "El logo también es un disco."
+    },
+    "konami": {
+      "name": "Rebobinado",
+      "description": "Activa el modo cassette.",
+      "hint": "Arriba, arriba, abajo, abajo… la cinta se acuerda."
+    },
+    "pad_404": {
+      "name": "Perdido con flow",
+      "description": "Graba un bucle en el beat pad del 404.",
+      "hint": "Perderse también suena."
+    },
+    "screwed": {
+      "name": "Chopped & screwed",
+      "description": "Mantén Espacio sobre el vinilo del sample 5 segundos.",
+      "hint": "Despacio. Más despacio. Aguanta."
+    },
+    "human_metronome": {
+      "name": "Metrónomo humano",
+      "description": "Acierta el BPM del sample (±1) con tap tempo.",
+      "hint": "Lleva el pulso en la punta de los dedos."
+    },
+    "detective": {
+      "name": "Detective",
+      "description": "Acierta 5 productores en «Adivina el productor».",
+      "hint": "Detrás de cada alias hay alguien."
+    },
+    "comeback": {
+      "name": "Remontada",
+      "description": "Pasa de la mitad baja al top 3 en semanas seguidas.",
+      "hint": "Del fondo de la tabla al podio en siete días."
+    },
+    "golden_week": {
+      "name": "Cajón dorado",
+      "description": "Participa en una semana dorada.",
+      "hint": "Hay semanas que brillan más que otras."
+    },
+    "double": {
+      "name": "Doblete",
+      "description": "Gana dos semanas seguidas.",
+      "hint": "Una corona no basta."
+    },
+    "oracle": {
+      "name": "Oráculo",
+      "description": "Gana el oído de oro 3 semanas seguidas.",
+      "hint": "Ves venir el veredicto, una y otra vez."
+    },
+    "revetlla": {
+      "name": "Revetlla",
+      "description": "Visita la web la noche del 23 de junio.",
+      "hint": "La noche más corta del año."
+    }
   }
 }

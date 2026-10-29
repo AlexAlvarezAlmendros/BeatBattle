@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.107 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.120 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1535,6 +1535,30 @@ física propios; no es el `Lanyard` del sello).
   **campeón** (campeón de temporada: lámina roja con corona; dorada si se aprueba la excepción, §7).
 - Tecla C gira la carta; D la exporta para *stories*. Sin WebGL o con «reducir movimiento», carta plana
   (`RF-GAME-07`).
+- **La carta en 2D** (tarea 7.22, `ProducerCard`): es la carta de la bienvenida, de Ajustes → Perfil y del perfil, y
+  la **carta plana** de `RF-GAME-07` (la 3D de la 7.23 la deja tal cual sin WebGL, con «reducir movimiento» o con la
+  calidad apagada). Es HTML, no una imagen: su texto se lee, se amplía y pasa al contraste alto. Todo sale de lo
+  público del perfil (solo semanas selladas, §2.10): victorias, podios y semanas, del historial; la vitrina, de
+  `showcase`; «Vitrina · 2 de 14», de los logros públicos.
+  - **Variante**: la carta sale con la más alta que tiene ganada: **roja** desde el nivel 9 (el rango *Productor*,
+    Anexo B), **holo** con una victoria sellada (ex aequo incluidos; es `egg.holo`, Anexo F) y **campeón** con
+    `season_champ`. En el perfil, bajo la carta, las cuatro variantes en placas («ESTÁNDAR · ROJA · HOLO · CAMPEÓN»): las
+    ganadas se pueden ver y las demás dicen cómo se ganan («Holo · al ganar una semana»). Etiqueta de la variante, en el
+    pie del retrato: «CARTA ROJA», «HOLO · GANADOR ×2», «CAMPEÓN DE TEMPORADA» (la estándar no lleva).
+  - **Ningún texto sobre la trama** (`RD-VIS-05`): el número, el sello de nivel y la etiqueta van en su placa opaca, y
+    el monograma del retrato es un dibujo (SVG con extrusión roja en capas, como el logo).
+  - **Reverso**: número, logo del juego, el QR del perfil (módulos negros sobre blanco, con su margen de silencio), la
+    dirección del perfil escrita debajo y el pie «EN LA BATALLA DESDE 03/2026» con la pegatina OTP. La matriz la
+    calcula `qrcode` (§4.1) en un trozo diferido que se pide la primera vez que se gira una carta.
+  - **Movimiento** (Anexo E): en el perfil, la carta se inclina hacia el puntero (hasta el doble de su giro de −3°) y
+    la lámina brilla hacia él; C la gira media vuelta con el muelle (`--bb-dur-slow`, `--bb-ease-back`) y la cara que no
+    se ve sale del árbol accesible y del foco (`inert`). **Sin movimiento, carta plana**: sin inclinación ni giro de −3°,
+    la lámina quieta, y C cambia de cara con un fundido. En contraste alto, sin lámina ni trama, con el marco del
+    sistema. El giroscopio llega con la 3D (7.23).
+  - C gira la carta desde cualquier parte del perfil con los atajos de una tecla encendidos y, apagados, con el foco en
+    la pieza (WCAG 2.1.4); la barra de controles dice `[C] GIRAR CARTA`. D (*stories*) llega con la 7.28.
+  - El lienzo 2D por CPU que servirá de textura a la 3D (7.23) y de tarjeta para *stories* (7.28) se pinta allí, a
+    partir del mismo modelo (`cardModel`: variante, cifras, fecha), no de la carta HTML.
 
 #### 3.4.5 Portadas generativas
 
@@ -2342,7 +2366,7 @@ con el DOM. Las versiones se fijan en la tarea 0.1, alineadas con las de Orchard
 | Medición de audio en servidor | **ffmpeg** (`ffmpeg-static`) con `ebur128` | Sonoridad y forma de onda autoritativas; validado en Vercel en la Fase 1 (*spike* 1.8: ~80 MB de función, 3,7 s en frío para 52 MB) |
 | Email | **nodemailer** + **Gmail** (SMTP con contraseña de aplicación) + **React Email**; **Mailpit** en local | Decisión del usuario: el mismo sistema que el sello y sin coste. Sus límites se gestionan con presupuesto diario y cola (§4.19) |
 | Imágenes OG | **satori + resvg** (`@vercel/og`) | Imágenes con la dirección de arte del juego en servidor |
-| Códigos QR | **qrcode** (solo en el servidor) | Decisión del usuario (2026-10-13, tarea 4.13): la matriz (modo byte, Reed-Solomon, máscaras) la calcula `qrcode`; el PNG lo pinta el codificador propio de la onda (§4.19.5) |
+| Códigos QR | **qrcode** (servidor; en la web, solo en un trozo diferido) | Decisión del usuario (2026-10-13, tarea 4.13): la matriz (modo byte, Reed-Solomon, máscaras) la calcula `qrcode`; el PNG lo pinta el codificador propio de la onda (§4.19.5). Desde la tarea 7.22, la misma librería da en el navegador la matriz del QR del reverso de la carta (§3.4.4), en su trozo, que se pide al girar la carta: nunca con la primera pintura |
 | Tests | **Vitest**, **fast-check**, **Testing Library**, **Playwright** | Unitarios, propiedades, componentes y E2E |
 | Lint y formato | **Biome** | Estándar del usuario |
 | CI | GitHub Actions | Lint, tipos, tests, build, E2E y preview |
@@ -3741,6 +3765,27 @@ con la pista).
 | `oracle` 🔒 | Oráculo | Oído de oro 3 semanas seguidas | L |
 | `revetlla` 🔒 | Revetlla | Visitar la web la noche del 23 de junio | R |
 
+**Textos** (tarea 7.22): cada logro tiene en i18n `achievement.<id>.name` (el nombre de la tabla), `.description` (la
+condición en segunda persona: «Gana una semana.») y, si es oculto, `.hint`: su **pista críptica**, lo único que se ve de
+él mientras no se tiene («???» y la pista). El nombre accesible de una insignia dice el nombre, la rareza y, si falta,
+cómo se gana o la pista («Logro oculto, raro, sin conseguir: La pista no duerme a las cuatro de la mañana»).
+
+| Oculto | Pista |
+|---|---|
+| `last_minute` | Hay quien sube con el reloj ya en rojo. |
+| `night_owl` | La pista no duerme a las cuatro de la mañana. |
+| `scratch` | El logo también es un disco. |
+| `konami` | Arriba, arriba, abajo, abajo… la cinta se acuerda. |
+| `pad_404` | Perderse también suena. |
+| `screwed` | Despacio. Más despacio. Aguanta. |
+| `human_metronome` | Lleva el pulso en la punta de los dedos. |
+| `detective` | Detrás de cada alias hay alguien. |
+| `comeback` | Del fondo de la tabla al podio en siete días. |
+| `golden_week` | Hay semanas que brillan más que otras. |
+| `double` | Una corona no basta. |
+| `oracle` | Ves venir el veredicto, una y otra vez. |
+| `revetlla` | La noche más corta del año. |
+
 **Cómo se evalúan** (`evaluate(evento, contexto)` de `packages/rules`; los umbrales, en `balance.ts`):
 
 - **Por eventos.** Cada logro dice qué eventos lo miran: descargar el sample, la entrada que pasa a `active`, el
@@ -3995,6 +4040,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.120 | **Tarea 7.22.** §3.4.4: la carta en 2D (`ProducerCard`) es la carta plana de `RF-GAME-07`, en HTML (su texto se lee, se amplía y pasa al contraste alto) y con todo sacado de lo público del perfil (§2.10); la variante es la más alta ganada (roja desde el nivel 9, el rango *Productor*; holo con una victoria sellada, `egg.holo`; campeón con `season_champ`) y en el perfil se ven las ganadas y se dice cómo se ganan las demás; etiquetas de variante; ningún texto sobre la trama (número, sello y etiqueta en placa; el monograma, un dibujo); el reverso con número, logo, QR del perfil, su dirección escrita y la fecha de alta; inclinación hacia el puntero y giro de media vuelta con muelle (la cara oculta, `inert`) y, sin movimiento, carta plana con fundido; C desde cualquier parte con los atajos encendidos (WCAG 2.1.4); D, con la 7.28; el lienzo para la textura 3D y para *stories* se pinta en la 7.23 y la 7.28 desde el mismo modelo. §4.1: `qrcode` también en la web, solo en un trozo diferido (el QR del reverso). Anexo C: los textos de cada logro (`achievement.<id>.name`, `.description` y `.hint`) y las pistas de los ocultos. |
 | 2026-10-29 | 0.6.107 | **Tarea 7.13** (huecos G1 y G13 del plan 07, resueltos). §2.10, «Lo público y lo propio»: **lo público solo cuenta semanas selladas** (el perfil público con su XP, nivel, teselas, historial, logros y vitrina, su OG, la temporada y el salón: los movimientos y logros con `week_id` sellado o nulo; nulo solo lo llevan hechos que no dependen de jugar una semana, como `profile_done`, `share_card` y el `level_20` que cruzan) y **`GET /api/me` es de su dueño y va en vivo** (XP, nivel y nivel visto, racha con comodín, temporada, logros sin ver y ceremonia de temporada pendiente); lo ya visto sale una vez (`RF-GAME-09`). §2.3: el perfil público con su capa de juego y la vitrina en `PUT /api/me/profile`. §2.15: la OG del perfil, con la misma regla. §4.10: `GET /api/me` y `POST /api/me/seen` (`level`, `achievement`, `season_champion`) con su forma; `GET /api/profiles/:username` en vez de `/api/producers/:username` (G13) y `GET · PUT /api/me/profile` en vez de `PATCH`, que nunca existieron. §4.11: la condición de lo público sobre `week_id`. |
 | 2026-10-29 | 0.6.106 | **Tarea 7.12.** §2.9, salón de la fama: todo sale de los snapshots vigentes de las semanas selladas (los ganadores en 1.ª posición, ex aequo incluidos; los campeones de cada temporada cerrada; más victorias; la racha más larga con el comodín; la mejor puntuación de una entrada clasificada; más votos emitidos, los válidos que contó cada snapshot); con la misma cifra, el récord es de quien llegó antes; un productor eliminado sigue como «Productor eliminado». §4.10: `GET /api/hall-of-fame` con su forma. |
 | 2026-10-29 | 0.6.105 | **Tarea 7.11** (hueco G7 del plan 07, resuelto: el cierre de la temporada). §2.9: una temporada se cierra cuando ha acabado su trimestre (00:00 del día 1 del siguiente, hora de Madrid) y todas sus semanas están selladas: la cierra el sellado de la semana de su último lunes, que siempre acaba después del trimestre, en su `batch`; sin semana ese lunes, el primer `tick` tras el fin del trimestre; sin semanas, nunca. Sus campeones (la primera fila, también ex aequo) ganan `season_champ` y su ceremonia queda pendiente hasta la marca `season_champion` (`RF-ARC-05` lo dice así); los campeones salen de los snapshots, así que re-sellar una semana de una temporada cerrada puede cambiarlos (gana el nuevo, pierde con su XP quien deja de serlo de toda temporada cerrada). §4.5: `seasonEndsAt` e `isSeasonClosed`. §4.10: `GET /api/seasons/:id/standings` con su forma. §4.11: el cierre en el `batch` del sellado y en el `tick` (`job_state` `seasonClose`). §4.12: `sealWeeks` cierra las temporadas sin semana el último lunes. |

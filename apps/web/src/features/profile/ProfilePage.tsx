@@ -10,8 +10,8 @@ import { ApiClientError, apiFetch } from '../../net/api'
 import { Button } from '../../ui/Button'
 import { DataTile, DataTileList } from '../../ui/DataTile'
 import { useFitText } from '../../ui/hooks/useFitText'
-import { ProducerCard } from '../../ui/ProducerCard'
-import { initialsOf, useSession } from '../account/session'
+import { useSession } from '../account/session'
+import { ProfileCard } from './ProfileCard'
 import styles from './ProfilePage.module.css'
 
 /**
@@ -52,7 +52,6 @@ export function ProfilePage() {
   const progress = levelProgress(profile.xp)
   const rank = t(`rank.${rankTitle(progress.level)}`)
   const name = profile.displayUsername
-  const joined = new Date(profile.joinedAt)
   const own = me?.username === profile.username
   const nameRef = useRef<HTMLParagraphElement>(null)
   // El nombre en una línea: baja la anchura y el cuerpo antes que partir a mitad (un nombre de 20 caracteres).
@@ -64,21 +63,7 @@ export function ProfilePage() {
       documentTitle={t('pages.profile.documentTitle', { name })}
       // El nombre es una palabra: en la cabeza de móvil, más pequeño antes que partido a mitad.
       titleMinFontPx={18}
-      piece={
-        <div className={styles.piece}>
-          <ProducerCard
-            name={name}
-            initials={initialsOf(name)}
-            cardNumber={profile.cardNumber}
-            level={progress.level}
-            levelFraction={progress.fraction}
-            rank={rank}
-            stats={{ wins: 0, podiums: 0, weeks: 0 }}
-            since={`${String(joined.getMonth() + 1).padStart(2, '0')}/${joined.getFullYear()}`}
-            avatarUrl={profile.avatarUrl}
-          />
-        </div>
-      }
+      piece={<ProfileCard profile={profile} />}
     >
       <div className={styles.body} data-accent={profile.accent}>
         <header className={styles.head}>

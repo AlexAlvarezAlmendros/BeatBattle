@@ -26,7 +26,7 @@ describe('bienvenida (§3.8.9)', () => {
     renderInRouter(<WelcomePage />, '/bienvenida')
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Bienvenido a la batalla')
     expect(
-      screen.getByRole('article', { name: 'Carta de luchador de Kairo.wav, número 42' }),
+      screen.getByRole('article', { name: 'Carta de luchador de Kairo.wav, número 42, estándar' }),
     ).toHaveTextContent('#0042')
     expect(screen.getByText('Primer sample')).toBeInTheDocument()
   })

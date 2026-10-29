@@ -196,7 +196,8 @@ export function createRoutes({ devRoutes = defaultDevRoutes }: CreateRoutesOptio
             },
             {
               path: 'p/:username',
-              handle: handle('public', interior('profile', 'pages.profile.title')),
+              // La tecla C gira la carta (§3.4.4, tarea 7.22).
+              handle: handle('public', interior('profile', 'pages.profile.title', ['flip', 'back', 'sound'])),
               lazy: async () => {
                 const m = await import('../features/profile/ProfilePage')
                 return { Component: m.ProfilePage, loader: m.profileLoader }
