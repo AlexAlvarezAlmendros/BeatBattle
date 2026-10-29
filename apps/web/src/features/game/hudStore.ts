@@ -1,4 +1,5 @@
 import type { AchievementId, AchievementRarity } from '@beatbattle/rules'
+import { useEffect } from 'react'
 import { create } from 'zustand'
 
 /**
@@ -153,7 +154,12 @@ export const useHud = create<HudState>((set, get) => {
       shown = pumped.shown
       return { ...next, ...pumped.next }
     })
-    for (const notice of shown) hudEffects.onShow(notice)
+    for (const notice of shown) {
+      // Cada aviso dura `NOTICE_MS` y se va solo (antes, si se salta); el almacén lleva la cuenta, así también se van
+      // si la parte animada no ha llegado.
+      setTimeout(() => get().dismiss(notice.key), NOTICE_MS)
+      hudEffects.onShow(notice)
+    }
   }
 
   return {
@@ -231,3 +237,11 @@ export const useHud = create<HudState>((set, get) => {
     },
   }
 })
+
+/**
+ * Retiene los avisos mientras `active` (§3.8.8): una capa a pantalla completa que tapa el marco (la pantalla de título,
+ * la revelación del drop, la ceremonia). Al cerrarse, salen en su orden.
+ */
+export function useRewardsHold(active = true): void {
+  useEffect(() => (active ? useHud.getState().hold() : undefined), [active])
+}

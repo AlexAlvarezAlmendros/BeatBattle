@@ -21,6 +21,7 @@ import { useMediaQuery } from '../../ui/hooks/useMediaQuery'
 import { useReducedMotion } from '../../ui/hooks/useReducedMotion'
 import { Medal, type MedalPlace } from '../../ui/Medal'
 import { OtpSlapImage } from '../../ui/OtpSlap'
+import { useRewardsHold } from '../game/hudStore'
 import { usePlayer } from '../player/store'
 import { entryTrack } from '../player/tracks'
 import { decodePeaks } from '../week/weekModel'
@@ -70,6 +71,8 @@ type Reveal = 'spot' | 'tear' | 'name'
  * (el confeti) piden permiso al limitador (`RD-MOT-04`); nada suena sin un gesto antes (§3.7.1).
  */
 export function ResultsCeremony({ results, onDone }: { results: WeekResults; onDone: () => void }) {
+  // Los avisos de la capa de juego esperan a que acabe: la subida de nivel del sellado se encadena (§3.8.6, §3.8.8).
+  useRewardsHold()
   const [data] = useState(results)
   const reduced = useReducedMotion()
   const [elapsed, setElapsed] = useState<string[]>([])

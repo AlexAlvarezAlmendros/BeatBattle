@@ -2362,9 +2362,9 @@
       "legendary": "¡LOGRO LEGENDARIO!",
       "level": "¡NIVEL {level}!",
       "levelPlate": "Nivel",
+      "levelUp": "Subes al nivel {level}",
       "rank": "¡AHORA ERES {rank}!",
-      "rankSame": "Sigues como {rank}",
-      "skip": "Pulsa cualquier tecla para seguir"
+      "skip": "Pulsa una tecla o toca para seguir"
     }
   }
 }

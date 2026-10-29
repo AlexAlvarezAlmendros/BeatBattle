@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.116 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.117 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2145,6 +2145,33 @@ estrella», estrellas de 62 px y Pausa · Saltar · Denunciar de 48 px.
 - **Nivel**: el sello de nivel del HUD se estampa con el número nuevo, «¡NIVEL 8!» y, si cambia, el
   rango («¡AHORA ERES BEATMAKER!»); `level.up`. Sin movimiento: fundido del número.
 
+Cómo salen (tarea 7.20):
+
+- **Dónde**: lo que gana el jugador sale junto a él, arriba a la izquierda bajo su ficha del HUD (en móvil, a todo el
+  ancho bajo el HUD), apilado hacia abajo: primero la subida de nivel y debajo las placas de logro, **tres a la vez**;
+  las demás esperan su turno. El legendario, al centro de la ventana. Nada se pulsa ni para el ratón: ninguna placa
+  tapa un control más de lo que dura.
+- **La placa de logro**: la insignia (un chaflán con la estrella dentro y el marco de su rareza), «LOGRO DESBLOQUEADO ·
+  RARO» (la rareza también en palabra, nunca solo color), el nombre, la descripción del Anexo C y «+75 XP» en Oxanium
+  rojo; los ocultos, ya conseguidos, con su nombre y su descripción. Panel opaco. Dura 4 s.
+- **La subida de nivel**: el número de la ficha del HUD se estampa (§3.4.1) y bajo ella sale «¡NIVEL 8!» en el
+  anunciador (la etiqueta girada) y la placa con el sello circular del nivel nuevo, «Subes al nivel 8» y el rango:
+  «¡AHORA ERES BEATMAKER!» si cambia, o el de siempre. Si un hecho sube varios niveles, un solo aviso con el último.
+  Dura 4 s.
+- **Sonido e imagen a la vez**: `ach.<rareza>` y `level.up` suenan en el fotograma en que entra su placa; su
+  equivalente visual es la placa y la región viva (`RNF-A11Y-05`, `RNF-A11Y-07`). Las chispas del legendario piden
+  permiso al limitador (`flash.request`, `RD-MOT-04`): un destello, en un círculo de como mucho su área y su opacidad.
+- **Saltables y sin bloquear** (`RD-MOT-01`): el legendario y la subida de nivel se quitan con cualquier tecla, toque o
+  clic, y esa tecla sigue su camino (votar la siguiente, volver con Esc). Las placas se van solas.
+- **Una sola vez** (`RF-GAME-09`): al salir un aviso se marca visto (`POST /api/me/seen`, `level` o `achievement`) y
+  recargar no lo repite; lo que `me` trae sin ver al cargar (un logro del sellado, el nivel que subió el resultado)
+  sale igual, una vez.
+- **Cuándo**: después de que el medidor trague el «+XP» del mismo hecho (§3.4.2); y nunca con una capa a pantalla
+  completa encima (la pantalla de título, la revelación del drop, la ceremonia): esperan y salen al cerrarse, en su
+  orden, así la subida de nivel del sellado se encadena con la ceremonia (§3.8.6).
+- **Sin movimiento**, fundidos de 150 ms, sin chispas ni estampado. **Modo serio**: sin anunciador, chispas ni
+  estampado; la placa con todo su texto se queda (se pierde espectáculo, nunca información).
+
 #### 3.8.9 Bienvenida
 
 Tras verificar el email: «NUEVO JUGADOR» y la carta de luchador se **imprime** saliendo de una ranura
@@ -3881,6 +3908,7 @@ efectos al 100 %; variación = desafinación aleatoria por disparo.
 | Medidor de XP | Brillo que lo recorre una vez | 900 ms | — | Relleno |
 | Sello de goma | Se estampa (escala 1,3 → 1, giro final) | `--bb-dur-slam`, `--bb-ease-back` | `vote.locked` | Aparece |
 | Aviso de logro | Entra desde la diagonal con muelle | 420 ms | `ach.*` | Fundido |
+| Logro legendario | Entra al centro con muelle, «¡LOGRO LEGENDARIO!» estampado y chispas por el limitador | 420 ms + 900 ms | `ach.legendary` | Fundido, sin chispas ni estampa |
 | Subir de nivel | El sello de nivel se estampa con el número nuevo | 900 ms | `level.up` | Fundido del número |
 | Modal | Entra con la diagonal y escala 0,96 → 1 | 240 ms | `ui.open` / `ui.close` | Fundido |
 | Aviso de error | Sacudida de 4 px | 240 ms | `ui.error` | Sin sacudida |
@@ -4023,6 +4051,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.117 | **Tarea 7.20.** §3.8.8, «Cómo salen»: los avisos van arriba a la izquierda bajo la ficha del HUD (en móvil, a todo el ancho), la subida de nivel primero y debajo las placas de logro, tres a la vez, y el legendario al centro; la placa de logro (insignia con el marco de su rareza, la rareza en palabra, nombre, descripción y XP) y la de nivel (sello circular, «¡NIVEL 8!» y el rango si cambia; varios niveles, un aviso); `ach.*` y `level.up` en el fotograma en que entra su placa; chispas del legendario por el limitador; el legendario y el nivel se quitan con cualquier tecla, toque o clic sin bloquearla; una sola vez (`POST /api/me/seen`), también lo pendiente de `me`; esperan al «+XP» del mismo hecho y a que se cierre una capa a pantalla completa (título, drop, ceremonia: el nivel del sellado se encadena con la ceremonia); sin movimiento, fundidos; modo serio sin anunciador, chispas ni estampado. Anexo E: fila del logro legendario. |
 | 2026-10-29 | 0.6.116 | **Tarea 7.19.** §3.4.2, «Cómo vuela»: el «+XP» lleva el XP del hecho sin el de sus logros (van en su aviso) y no sale sin XP; nace a la derecha de lo que lo provoca si cabe y si no encima (el medidor del combo, el grupo de estrellas, la línea «+XP» de la subida), nunca sobre una tecla ni una estrella; sube 24 px con el muelle de recompensa y vuela al medidor del HUD, que lo traga con su brillo y `xp.gain` (más agudo con el combo); sin medidor a la vista (el Modo Jurado) se funde donde nació; va sobre una placa negra (`RD-VIS-05`); sin movimiento, aparece y se funde en su sitio; el modo serio lo deja. |
 | 2026-10-29 | 0.6.115 | **Tarea 7.18.** §3.4.1, «La capa de juego del HUD»: nivel, rango y medidor desde `GET /api/me` (`game`), en vivo; las teselas de temporada («TEMPORADA T4 · 12 PTS · 9.º», sin puesto solo los puntos) y racha («×3», también «×0») en todas las pantallas del marco de juego con sesión salvo donde la pantalla ocupa ese lado; lo ganado en vivo se suma a la sesión al responder el servidor, pero el medidor lo enseña cuando lo traga el «+XP» o sale el aviso de su logro; en el nivel 20, «NV 20 · MÁX»; región viva educada para el XP, los logros y el nivel. §4.7.2: lo que guarda el almacén `hud` (el XP aún sin tragar, los avisos en cola, la región viva y la retención mientras una capa a pantalla completa tapa el marco). |
 | 2026-10-29 | 0.6.107 | **Tarea 7.13** (huecos G1 y G13 del plan 07, resueltos). §2.10, «Lo público y lo propio»: **lo público solo cuenta semanas selladas** (el perfil público con su XP, nivel, teselas, historial, logros y vitrina, su OG, la temporada y el salón: los movimientos y logros con `week_id` sellado o nulo; nulo solo lo llevan hechos que no dependen de jugar una semana, como `profile_done`, `share_card` y el `level_20` que cruzan) y **`GET /api/me` es de su dueño y va en vivo** (XP, nivel y nivel visto, racha con comodín, temporada, logros sin ver y ceremonia de temporada pendiente); lo ya visto sale una vez (`RF-GAME-09`). §2.3: el perfil público con su capa de juego y la vitrina en `PUT /api/me/profile`. §2.15: la OG del perfil, con la misma regla. §4.10: `GET /api/me` y `POST /api/me/seen` (`level`, `achievement`, `season_champion`) con su forma; `GET /api/profiles/:username` en vez de `/api/producers/:username` (G13) y `GET · PUT /api/me/profile` en vez de `PATCH`, que nunca existieron. §4.11: la condición de lo público sobre `week_id`. |
