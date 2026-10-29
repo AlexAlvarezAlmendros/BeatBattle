@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.95 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.96 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -556,6 +556,14 @@ ofrece la ceremonia de revelación. Dura unos 25 s y se puede saltar.
   y 1 punto por cada entrada clasificada fuera del top 10. Desempate: más victorias, después más
   podios, después mejor puntuación media. La clasificación de la temporada en curso es pública
   (solo con semanas selladas).
+  - **Quién entra:** quien tiene al menos una entrada clasificada en una semana sellada de la temporada (cada una
+    da como poco 1 punto). Quien solo tiene semanas sin clasificar no aparece.
+  - **Victorias y podios:** semanas en 1.ª posición y en el top 3, ex aequo incluidos.
+  - **Puntuación media:** la media de la puntuación del snapshot (`result`) de sus entradas clasificadas en la
+    temporada, comparada exacta.
+  - Si todo empata, comparten posición (1, 1, 3), y en la primera son **campeones ex aequo**.
+  - **La última semana de una temporada** es la de su último lunes: la semana cuyo lunes siguiente ya cae en
+    otro trimestre (la del 2026-12-28 cierra la 2026-T4).
 
 | Id | Requisito | Aceptación |
 |---|---|---|
@@ -2333,14 +2341,14 @@ tests de propiedades.
 
 | Módulo | Funciones principales |
 |---|---|
-| `calendar` | `scheduleWeek(lunesLocal, tz)` → instantes UTC de las fronteras; `mondayOf(instante)`, `nextMonday`; `isoWeekLabel` («2026-W41»), `weekSlug` («2026-w41») y `mondayOfSlug`; `seasonOf(lunes)` («2026-T4») |
+| `calendar` | `scheduleWeek(lunesLocal, tz)` → instantes UTC de las fronteras; `mondayOf(instante)`, `nextMonday`; `isoWeekLabel` («2026-W41»), `weekSlug` («2026-w41») y `mondayOfSlug`; `seasonOf(lunes)` («2026-T4») e `isLastWeekOfSeason(lunes)` |
 | `phase` | `phaseOf(semana, now)`; `canSubmit`, `canVote`, `canDownload` (solo en `open`); `countdownOf(semana, now)` → cierre, lo que falta y «hora loca» |
 | `listen` | `listenThresholdMs(duracionMs)` |
 | `scoring` | `bayes(votos, m, C)`; `mean`; `median`; `histogram` |
 | `ranking` | `rank(entradas, votos) → Result[]` con desempates, ex aequo y elegibilidad de podio: una fila por entrada con posición (o `null` sin clasificar), puntuación × 1000, votos, media × 1000, mediana × 2, histograma y puntos de temporada; compara las puntuaciones con productos cruzados enteros (sin redondeo) |
 | `fair` | `fairOrder(entradas, votosPorEntrada, votadasPorUsuario, semilla)` con `fairSeed(semana, usuario \| instante)` (visitantes: el día en Madrid); `newestOrder`; `randomOrder(entradas, semilla)`; `juryQueue(entradas, votos, votadas, semilla, { excluded, skipped })` (sin votadas ni la propia; las saltadas, al final) |
 | `alias` | `battleAlias(entryId, ocupados)` con listas de adjetivos y sustantivos (Anexo I) |
-| `season` | `seasonPoints(posicion, clasificada)`; `seasonStandings(resultados)` |
+| `season` | `seasonPoints(posicion, clasificada)`; `seasonStandings(resultados)` (puntos, victorias, podios, media y posición con ex aequo) y `seasonChampions(tabla)` |
 | `levels` | `xpForLevel(n)`; `levelOf(xp)`; `levelProgress(xp)` (barra del HUD); `rankTitle(nivel)` → **id de rango** (`crateDigger` … `otherPeople`; el texto sale de i18n con `rank.<id>`); `streakBonus` y `streakBonusPercent` |
 | `xp` | `xpFor(evento, contexto)`; `streakOf(historial)` (Fase 7) |
 | `prng` | `hashOf(...partes)`, `sfc32`, `createRng(semilla)` con `next`, `int`, `pick`, `shuffle`; `rngFor(...partes)` para flujos con nombre |
@@ -3756,6 +3764,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.96 | **Tarea 7.4** (hueco G10 del plan 07). §2.9: entra en la clasificación de la temporada quien tiene al menos una entrada clasificada en una semana sellada (quien solo tiene semanas sin clasificar, no); victorias y podios cuentan los ex aequo; la puntuación media es la de la puntuación del snapshot de sus entradas clasificadas, comparada exacta; con todo empatado comparten posición y en la primera son campeones ex aequo. La última semana de una temporada es la de su último lunes. §4.5: `seasonStandings`, `seasonChampions` e `isLastWeekOfSeason`. |
 | 2026-10-29 | 0.6.95 | **Tarea 7.3** (hueco G9 del plan 07). §2.10: el oído de oro correlaciona con la **puntuación** de las entradas que votó (no con la posición, que las sin clasificar no tienen), con ≥ 8 votos válidos, y recalcula la semana **como si no hubiera votado**: sin sus votos tampoco en la media `m`. Puntuaciones exactas, sin redondear; sin ρ definida no hay oído de oro. §4.5: `goldenEar(jurado, votosDeLaSemana)`. Anexo G: el caso de `RF-GAME-06` (no gana con ρ = 22/√1501, habría ganado con sus votos; gana cambiando una estrella). |
 | 2026-10-29 | 0.6.94 | **Tarea 7.2.** §2.10 y Anexo G: la racha cuenta las semanas selladas por su número (`week.number`), así que un hueco del calendario no la rompe; fallar es sellar una semana sin entrada clasificada. El comodín es el de la temporada de la semana fallada, solo se gasta si hay racha que salvar y la semana salvada no suma (ni al bonus ni a `streak_3/8/26`). La mejor racha es la más larga. El escenario de `RF-GAME-04`, paso a paso. |
 | 2026-10-29 | 0.6.93 | **Tarea 7.1** (huecos G3, G11 y G12 del plan 07). §2.10, Anexo B y Anexo G: subir da su XP al pasar a `active`, una vez por semana, con la **racha en juego** (la de las semanas selladas más esta, la misma con la que se paga el resultado); la primera entrada de la semana es la primera en pasar a `active`. **El XP en vivo no se retira**: ni al retirar la entrada o no clasificar, ni al quitar un voto (volver a votar no suma), ni cuando un voto queda anulado (sigue contando para el tope). La semana dorada duplica los eventos del Anexo B de esa semana, no los logros, que no llevan racha ni dorada. Redondeo: el bonus, al entero con las mitades hacia arriba, y la dorada duplica el entero. El jurado completo cuenta las entradas activas ajenas (5 o más). |

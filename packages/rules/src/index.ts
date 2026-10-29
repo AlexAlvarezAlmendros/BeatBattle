@@ -28,6 +28,7 @@
 //   xp         `xpFor` con la tabla del Anexo B (racha en juego, topes, semana dorada); `streakOf` y
 //              `advanceStreak`, la racha con el comodín de temporada
 //   goldenEar  `goldenEar(jurado, votos)`, con la semana recalculada sin sus votos
+//   season     `seasonStandings` (desempates y ex aequo) y `seasonChampions`; `isLastWeekOfSeason` en `calendar`
 
 export * from './alias'
 export * from './balance'
