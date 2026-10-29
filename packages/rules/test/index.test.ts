@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import * as achievements from '../src/achievements'
 import * as alias from '../src/alias'
 import * as balance from '../src/balance'
 import * as calendar from '../src/calendar'
@@ -17,6 +18,7 @@ import * as season from '../src/season'
 import * as xp from '../src/xp'
 
 const modules = {
+  achievements,
   alias,
   balance,
   calendar,

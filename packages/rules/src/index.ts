@@ -29,7 +29,9 @@
 //              `advanceStreak`, la racha con el comodín de temporada
 //   goldenEar  `goldenEar(jurado, votos)`, con la semana recalculada sin sus votos
 //   season     `seasonStandings` (desempates y ex aequo) y `seasonChampions`; `isLastWeekOfSeason` en `calendar`
+//   achievements  el catálogo del Anexo C como datos y `evaluate(evento, contexto)`
 
+export * from './achievements'
 export * from './alias'
 export * from './balance'
 export * from './calendar'

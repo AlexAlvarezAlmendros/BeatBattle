@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.96 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.97 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2353,7 +2353,7 @@ tests de propiedades.
 | `xp` | `xpFor(evento, contexto)`; `streakOf(historial)` (Fase 7) |
 | `prng` | `hashOf(...partes)`, `sfc32`, `createRng(semilla)` con `next`, `int`, `pick`, `shuffle`; `rngFor(...partes)` para flujos con nombre |
 | `loudness` | `playbackGainDb(lufs)` (solo atenúa) |
-| `achievements` | Catálogo (Anexo C) como datos + `evaluate(evento, contexto) → logros nuevos` |
+| `achievements` | Catálogo (Anexo C) como datos (id, rareza, oculto, clave de la pista, eventos que lo miran y fase de su disparador) + `evaluate(evento, contexto) → logros nuevos`; `nightOwlWindow(instante)` y `isRevetllaNight(instante)` en hora de Madrid |
 | `goldenEar` | `spearman(a, b)`; `goldenEar(jurado, votosDeLaSemana)` → votos, ρ y si gana (recalcula la semana sin los votos del jurado, también la media `m`) |
 | `balance` | **Todas** las constantes del Anexo B. Ningún número mágico fuera de este fichero. |
 
@@ -3550,6 +3550,40 @@ con la pista).
 | `oracle` 🔒 | Oráculo | Oído de oro 3 semanas seguidas | L |
 | `revetlla` 🔒 | Revetlla | Visitar la web la noche del 23 de junio | R |
 
+**Cómo se evalúan** (`evaluate(evento, contexto)` de `packages/rules`; los umbrales, en `balance.ts`):
+
+- **Por eventos.** Cada logro dice qué eventos lo miran: descargar el sample, la entrada que pasa a `active`, el
+  perfil guardado, el voto, compartir una tarjeta, el sellado, el cierre de la temporada, el cambio de XP y, desde la
+  Fase 8 y la 9, los secretos, «Adivina el productor» y la Elección del sello. Uno ya conseguido no se repite y
+  **ningún logro se retira** (como el XP en vivo, §2.10).
+- **Recuentos.** «Entradas» son las semanas con una entrada que llegó a `active` (retirarla después no la
+  descuenta). «Votos» son los que tiene la cuenta, uno por entrada (también los anulados; los quitados, no).
+- **Al subir.** `early_bird` es la primera entrada de la semana (§2.10). `last_minute`, una entrada creada en los 10
+  min anteriores al cierre de envíos: `submit_ends_at − 10 min ≤ submitted_at < submit_ends_at`. `golden_week`, subir
+  en una semana dorada.
+- **Al votar.** `jury_full` sigue la regla del jurado completo del Anexo B: todas las entradas activas ajenas, si
+  son 5 o más.
+- **Al sellar**, con la revisión del snapshot:
+  - `podium` y `win`: top 3 y 1.ª posición, ex aequo incluidos. `win_3`: 3 victorias en total. `double`: 1.º en
+    dos semanas de número consecutivo.
+  - `unanimous`: media aritmética de los votos válidos de su entrada ≥ 4,8, con 10 o más.
+  - `comeback`: por debajo de la mediana de las clasificadas en una semana (`2 · posición > clasificadas + 1`) y top 3
+    en la siguiente por número.
+  - `streak_3`, `streak_8` y `streak_26`: la racha de §2.10 (la semana salvada por el comodín no suma).
+  - `golden_ear`: el oído de oro de esa semana. `oracle`: oído de oro en 3 semanas de número consecutivo.
+  - `challenge`: la entrada marcó en su ficha que cumple el reto extra de la semana (solo se puede si la semana
+    tiene reto) y queda en el top 10. La marca no se enseña a nadie hasta el sellado: distinguiría a una entrada en
+    pleno voto ciego (§1.3).
+- **Franjas horarias, en hora de Madrid** (la de la semana) y con el reloj del servidor, que es quien las comprueba:
+  el del navegador se puede adelantar. `night_owl` cuenta los votos a 10 entradas distintas emitidos (no cambiados)
+  entre las 03:00 y las 05:00 de una misma noche. `revetlla`, una visita entre las 21:00 del 23 de junio y las 06:00
+  del 24.
+- **El resto.** `profile_done`: avatar, bio y al menos un enlace. `level_20`: el XP total llega al nivel 20, también
+  si lo empuja el XP de otro logro. `season_champ`: campeón o campeón ex aequo (§2.9). Los secretos (Fase 8): `scratch`,
+  7 clics en el logo en 3 s; `konami`, la secuencia ↑↑↓↓←→←→BA; `pad_404`, grabar un bucle con al menos un golpe;
+  `screwed`, mantener Espacio 5 s; `human_metronome`, un tempo marcado con 8 pulsos a ±1 BPM del del sample (sin BPM
+  del sample, no hay logro); `detective`, 5 aciertos en total. `label_pick` (Fase 9): recibir la Elección del sello.
+
 ### Anexo D — Catálogo de efectos de sonido
 
 Todos sintetizados (salvo los que usan el kit de la semana). Niveles en dBFS de pico en el bus de
@@ -3764,6 +3798,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.97 | **Tarea 7.5** (huecos G8 y G4, la parte de la regla, del plan 07). Anexo C, «Cómo se evalúan»: por eventos, sin repetir ni retirar ningún logro; qué cuentan «entradas» y «votos»; la ventana de `last_minute` con `submitted_at`; `comeback` por debajo de la mediana de las clasificadas; `double` y `oracle` por semanas de número consecutivo; `challenge`, marcar el reto extra en la ficha y quedar en el top 10, con la marca oculta hasta el sellado (§1.3). **Las franjas horarias de los logros van en hora de Madrid y con el reloj del servidor** (`night_owl`: 10 votos a entradas distintas entre las 03:00 y las 05:00 de una misma noche; `revetlla`: de las 21:00 del 23 de junio a las 06:00 del 24). Los umbrales de los secretos de la Fase 8. §4.5: qué lleva el catálogo y `nightOwlWindow` e `isRevetllaNight`. |
 | 2026-10-29 | 0.6.96 | **Tarea 7.4** (hueco G10 del plan 07). §2.9: entra en la clasificación de la temporada quien tiene al menos una entrada clasificada en una semana sellada (quien solo tiene semanas sin clasificar, no); victorias y podios cuentan los ex aequo; la puntuación media es la de la puntuación del snapshot de sus entradas clasificadas, comparada exacta; con todo empatado comparten posición y en la primera son campeones ex aequo. La última semana de una temporada es la de su último lunes. §4.5: `seasonStandings`, `seasonChampions` e `isLastWeekOfSeason`. |
 | 2026-10-29 | 0.6.95 | **Tarea 7.3** (hueco G9 del plan 07). §2.10: el oído de oro correlaciona con la **puntuación** de las entradas que votó (no con la posición, que las sin clasificar no tienen), con ≥ 8 votos válidos, y recalcula la semana **como si no hubiera votado**: sin sus votos tampoco en la media `m`. Puntuaciones exactas, sin redondear; sin ρ definida no hay oído de oro. §4.5: `goldenEar(jurado, votosDeLaSemana)`. Anexo G: el caso de `RF-GAME-06` (no gana con ρ = 22/√1501, habría ganado con sus votos; gana cambiando una estrella). |
 | 2026-10-29 | 0.6.94 | **Tarea 7.2.** §2.10 y Anexo G: la racha cuenta las semanas selladas por su número (`week.number`), así que un hueco del calendario no la rompe; fallar es sellar una semana sin entrada clasificada. El comodín es el de la temporada de la semana fallada, solo se gasta si hay racha que salvar y la semana salvada no suma (ni al bonus ni a `streak_3/8/26`). La mejor racha es la más larga. El escenario de `RF-GAME-04`, paso a paso. |
