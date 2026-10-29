@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { AVATAR_MAX_BYTES, AVATAR_MIMES } from './profile'
+import { AVATAR_MAX_BYTES, AVATAR_MIMES } from './avatar'
 import { MusicalKeySchema, PeaksSchema, WeekSlugSchema } from './weeks'
 
 /**

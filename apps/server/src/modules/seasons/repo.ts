@@ -5,7 +5,7 @@ import {
   seasonChampions,
   seasonStandings,
 } from '@beatbattle/rules'
-import { and, asc, eq, isNotNull } from 'drizzle-orm'
+import { and, asc, desc, eq, isNotNull } from 'drizzle-orm'
 import type { Db } from '../../db/client'
 import { achievementUnlock, entry, result, week } from '../../db/schema'
 
@@ -124,4 +124,20 @@ export async function seasonChampHolders(db: Db): Promise<Set<string>> {
     .from(achievementUnlock)
     .where(eq(achievementUnlock.achievementId, 'season_champ'))
   return new Set(rows.map((row) => row.userId))
+}
+
+/**
+ * La última temporada cerrada en `now` y sus campeones (para la ceremonia pendiente de `GET /api/me`): recorre las
+ * temporadas de la más reciente a la más antigua y se queda con la primera cerrada; `null` si ninguna lo está.
+ */
+export async function lastClosedSeason(
+  db: Db,
+  now: number,
+): Promise<{ seasonId: string; champions: string[] } | null> {
+  const seasons = await db.selectDistinct({ seasonId: week.seasonId }).from(week).orderBy(desc(week.seasonId))
+  for (const { seasonId } of seasons) {
+    if (!closedAt(seasonId, await weeksOfSeason(db, seasonId), now)) continue
+    return { seasonId, champions: championsOf(await sealedSeasonResults(db, seasonId)) }
+  }
+  return null
 }

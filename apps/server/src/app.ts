@@ -170,9 +170,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   const images = deps.images === undefined ? storage : deps.images
   // La capa de juego (Fase 7): cada hecho mete su XP y sus logros en su propio `batch`.
   const game = createGameService({ db, newId })
-  meRoutes(app, { db, images })
   gameRoutes(app, { db, game, rateLimiter })
-  profileRoutes(app, { db, images, rateLimiter, game })
   accountRoutes(app, { db, images, emails, rateLimiter })
 
   const samples =
@@ -214,6 +212,8 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   })
   uploadsRoutes(app, { images, entries: entryStorage ? entries : null, rateLimiter, newId })
   entriesRoutes(app, entries)
+  // El perfil, con la portada de las entradas selladas de su historial (7.13).
+  profileRoutes(app, { db, images, rateLimiter, game, cover: entries.sealedCover })
   votesRoutes(
     app,
     createVotesService({
@@ -235,6 +235,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   seoRoutes(app, { db, publicUrl: config.publicUrl, indexable: config.indexable })
   const weeks = createWeeksService({ db, storage: samples, newId, game })
   weeksRoutes(app, weeks)
+  meRoutes(app, { db, images, weeks })
   countdownRoutes(app, { db })
   waveformRoutes(app, { db, secret: config.auth.secret })
   qrRoutes(app, { publicUrl: config.publicUrl, secret: config.auth.secret })

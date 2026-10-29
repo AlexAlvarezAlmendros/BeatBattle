@@ -90,8 +90,13 @@ describe('el cierre de la temporada (7.11, §2.9, hueco G7)', () => {
     expect(await champXp(a.id)).toEqual([{ amount: 300, weekId: last.id }])
     expect(await cachedXp(a.id)).toBe(await ledgerSum(a.id))
     for (const other of [b, c]) expect(await unlocksOf(other.id)).not.toContain('season_champ')
-    // La ceremonia queda pendiente: nadie la ha marcado vista.
+    // La ceremonia queda pendiente: nadie la ha marcado vista, y `me` la ofrece (al campeón, como suya).
     expect(await s.t.db.select().from(seenFlag).where(eq(seenFlag.kind, 'season_champion'))).toEqual([])
+    const ceremonyOf = async (cookie: string) =>
+      (await s.t.app.inject({ method: 'GET', url: '/api/me', headers: { cookie } })).json().data.game
+        .seasonCeremony
+    expect(await ceremonyOf(a.cookie)).toEqual({ seasonId: '2026-T4', champion: true })
+    expect(await ceremonyOf(c.cookie)).toEqual({ seasonId: '2026-T4', champion: false })
 
     const table = SeasonStandingsSchema.parse((await standings()).json().data)
     expect(table.season).toEqual({ id: '2026-T4', sealedWeeks: 13, closed: true })

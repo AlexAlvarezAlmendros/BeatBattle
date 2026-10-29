@@ -1,6 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { renderInRouter } from '../../app/layout/testing'
+import { EMPTY_ME_GAME } from '../../test/game'
 import { useSession } from './session'
 import { WelcomePage } from './WelcomePage'
 
@@ -14,6 +15,7 @@ const ME = {
   cardNumber: 42,
   xp: 0,
   avatarUrl: null,
+  game: EMPTY_ME_GAME,
 }
 
 afterEach(() => useSession.setState({ status: 'loading', me: null }))

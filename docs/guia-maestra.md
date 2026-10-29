@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.106 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.107 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -275,13 +275,17 @@ enlaces (Instagram, SoundCloud, YouTube, Spotify, BeatStars), color de acento (r
 granate: solo la paleta, §3.2), la **carta de productor** en 3D, estadísticas, vitrina de logros y el
 historial de entradas con su posición.
 
-- **API.** `GET /api/profiles/:username` (público, sin distinguir mayúsculas) da nombre, número de carta,
-  alta, XP, bio, ciudad, enlaces, acento y avatar; nunca el email ni el id. Un nombre que no existe (o una
-  cuenta suspendida) es 404 y la web pinta su 404. Lo que aún no existe (estadísticas, historial,
-  posiciones y logros, Fases 5–7) se enseña con su estado vacío, y la semana en curso nunca aparece antes
-  del sellado (§1.3). Ajustes → Perfil edita con `GET`/`PUT /api/me/profile` (solo lo que cambia; un texto
-  vacío borra) y cambia el nombre con `PUT /api/me/username`; los dos cuentan para el límite de **30
-  cambios por hora** (§4.13). Errores: `USERNAME_TAKEN`, `USERNAME_RESERVED`, `USERNAME_INVALID`,
+- **API.** `GET /api/profiles/:username` (público, sin distinguir mayúsculas; la ruta es esta, no
+  `/api/producers/…`, hueco G13) da nombre, número de carta, alta, XP, bio, ciudad, enlaces, acento y avatar, y
+  su **capa de juego** (`game`, tarea 7.13): nivel, las seis teselas (mejor puesto, racha, media final, semanas con
+  oído de oro, votos dados y la temporada en curso), el historial de combates, los logros conseguidos y la vitrina;
+  nunca el email ni el id, ni votos individuales (`RNF-PRIV-04`). Un nombre que no existe (o una cuenta
+  suspendida) es 404 y la web pinta su 404. **Todo lo público del perfil solo cuenta semanas selladas** (§2.10,
+  «Lo público y lo propio»): la semana en curso nunca aparece antes del sellado (§1.3), ni en el historial ni en el
+  XP, el nivel o los logros. Ajustes → Perfil edita con `GET`/`PUT /api/me/profile` (solo lo que cambia; un texto
+  vacío borra; la **vitrina**, `showcase`, hasta tres logros conseguidos y distintos, si no 422, de la que el perfil
+  público enseña solo los que ya son públicos) y cambia el nombre con `PUT /api/me/username`; los dos cuentan para
+  el límite de **30 cambios por hora** (§4.13). Errores: `USERNAME_TAKEN`, `USERNAME_RESERVED`, `USERNAME_INVALID`,
   `USERNAME_CHANGE_TOO_SOON` (con `availableAt`) e `INVALID_LINK` (con el tipo).
 - **Enlaces.** Cada uno, `https://` de su sitio (`instagram.com`, `soundcloud.com`, `youtube.com` o
   `youtu.be`, `open.spotify.com`, `beatstars.com`; sin esquema se le pone `https://`), y se abren en otra
@@ -702,6 +706,28 @@ tienen la carta **holográfica**.
 **HUD.** Con sesión, el HUD de jugador (§3.4.1) muestra avatar, nivel y medidor de XP. Cada ganancia
 de XP sube como «+5 XP» desde el punto de la acción hasta el medidor.
 
+**Lo público y lo propio** (hueco G1 del plan 07). El XP de subir se gana al subir y el de votar, al votar: un perfil
+público cuyo XP sube 125 puntos o que estrena `first_entry` o `early_bird` un martes diría quién participa en una
+batalla ciega, justo lo que §2.15 evita en el sitemap y en la imagen OG. Por eso:
+
+- **Lo público solo cuenta semanas selladas**: el perfil público (XP, nivel, teselas, historial, logros y vitrina), su
+  imagen OG, la clasificación de la temporada y el salón de la fama cuentan solo los movimientos del libro y los logros
+  cuya semana (`week_id`) está sellada, y los que **no son de ninguna semana** (`week_id` nulo). Estos no dicen nada
+  de una batalla: el perfil completo (`profile_done`, con un avatar, una bio y un enlace que ya son públicos),
+  compartir una tarjeta (`share_card`, que la persona hace pública ella misma, y que también vale con la carta o con
+  un resultado ya sellado) y `level_20` cuando lo cruza uno de ellos. Todo hecho que dependa de jugar una semana
+  (subir, votar, descargar el sample, adivinar el productor, la Elección del sello) lleva su `week_id`; también
+  `share_card` cuando sale de la tarjeta «Estoy en la batalla» de una entrada sin sellar (la 7.28, al conectarla, dice
+  al servidor de qué tarjeta se trata). Un logro de la Fase 8 o 9 sin semana tiene que poder justificarlo igual. Las teselas y el historial salen de los snapshots (`result`) de semanas
+  selladas, y la racha, de `streak_state`, que solo cambia al sellar.
+- **`GET /api/me` es de su dueño y va en vivo**: su XP de verdad (la caché de todo el libro), el nivel y el nivel ya
+  celebrado (`levelSeen`), la racha con el comodín de la temporada en curso, la temporada (puntos y puesto), los logros
+  cuyo aviso no ha visto y la ceremonia de temporada pendiente (§2.9). Lo ya visto se marca con `POST /api/me/seen`
+  (`level`, `achievement`, `season_champion`), así cada animación sale una vez (`RF-GAME-09`). El nivel visto solo
+  sube, y nunca por encima del que tiene la cuenta.
+- La **temporada** del HUD y de las teselas es la del lunes de hoy (la semana del 28 de diciembre sigue siendo de la
+  T4 aunque ya sea 1 de enero).
+
 | Id | Requisito | Aceptación |
 |---|---|---|
 | `RF-GAME-01` | Libro de XP idempotente | Reprocesar el sellado de una semana no cambia el XP de nadie |
@@ -997,7 +1023,8 @@ queda en `audit_log` (`user.grant_admin`, sin el email) como cualquier otra acci
   §3.4.5. La cuenta atrás congelada es la fecha de fin de la fase («Envíos hasta el dom 18 oct · 20:00»).
   `v` es el hash de lo que se ve: con la vigente, caché inmutable de un año; sin ella o con una vieja, cinco
   minutos. Antes del drop, una semana da 404; unos resultados sin sellar o una entrada no activa, también. El
-  perfil solo cuenta semanas selladas: si contara las abiertas, diría quién está en una batalla ciega.
+  perfil solo cuenta semanas selladas: si contara las abiertas, diría quién está en una batalla ciega (la misma regla
+  que el perfil público y su capa de juego, §2.10, «Lo público y lo propio»).
 - **Tarjetas para stories** (1080×1920), generadas en el navegador: «Estoy en la batalla #41»,
   «He quedado 2.º», «Mi carta de productor». Se comparten con la Web Share API (con ficheros) o se
   descargan. Se pintan en un contexto 2D por CPU con la portada generativa de la entrada, el título, el alias
@@ -2793,15 +2820,15 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | POST | `/api/entries/:id/report` | Verif. | Denunciar |
 | POST | `/api/entries/:id/guess` | Verif. | «Adivina el productor» (Fase 8) |
 | GET | `/api/jury/queue?week=` | Verif. | Siguientes entradas del Modo Jurado (`juryQueue`) y la ronda `{ done, total }`; fuera de `open` y `voting`, vacía |
-| GET | `/api/me` | Sesión | Perfil, XP, nivel, racha, logros nuevos, flags de ceremonias vistas |
-| PATCH | `/api/me/profile` | Sesión | Editar perfil |
-| POST | `/api/me/seen` | Sesión | Marcar vistos `{ kind, ref }` (`drop` desde la Fase 3 y `ceremony` desde la 6, 404 si la semana no está sellada; logros y nivel en sus fases) |
+| GET | `/api/me` | Sesión | La cuenta (nombre, carta, avatar del HUD, XP) y su capa de juego **en vivo** (`game`, §2.10): `xp`, `level`, `levelSeen`, `streak { current, best, jokerAvailable }`, `season { id, points, position }`, `unseenAchievements` (en el orden del catálogo) y `seasonCeremony` (`{ seasonId, champion }` de la última temporada cerrada con campeón mientras no la marque vista, o `null`). Sin sesión, `null` |
+| GET · PUT | `/api/me/profile` | Sesión | El perfil propio (con su XP de verdad y la vitrina elegida, `showcase`) y su edición (§2.3): solo lo que cambia; la vitrina, hasta tres logros conseguidos y distintos (si no, 422) |
+| POST | `/api/me/seen` | Sesión | Marcar vistos `{ kind, ref }`: `drop` (Fase 3) y `ceremony` (Fase 6, 404 si la semana no está sellada) con el slug; `level` con el nivel (sube `level_seen` hasta él, nunca por encima del de la cuenta ni hacia abajo, `RF-GAME-09`); `achievement` con su id (el aviso, `seen_at`; 404 si no lo tiene); `season_champion` con la temporada (la ceremonia del campeón, 404 si no está cerrada). 204; repetirlo no cambia nada |
 | POST | `/api/me/achievements` | Sesión | Un logro que ocurre en el navegador `{ achievement }` (hueco G5): solo los de la lista blanca `BROWSER_ACHIEVEMENTS` (en la Fase 7, `share_card`, al compartir o descargar una tarjeta; la Fase 8 suma sus secretos, cada uno con la prueba que comprueba `evaluate` y el reloj del servidor); cualquier otro → 422 `VALIDATION_FAILED`. 10 por hora y cuenta (429 después). Da el logro y su XP (y `level_20` si ese XP cruza el nivel, como cualquier hecho), nada de los eventos del Anexo B; repetirlo no suma. Responde lo ganado (`game`) |
 | GET · PUT | `/api/me/notifications` | Sesión | Preferencias de aviso |
 | GET | `/api/me/votes?week=` | Sesión | Mis votos |
 | GET | `/api/me/export` | Sesión | Exportación RGPD |
 | DELETE | `/api/me` | Sesión | Borrar la cuenta (pide contraseña o reautenticación reciente) |
-| GET | `/api/producers/:username` | Pública | Perfil público, carta, estadísticas, historial |
+| GET | `/api/profiles/:username` | Pública | Perfil público (§2.3; hueco G13: la ruta es esta, la que existe desde la Fase 2): los datos de la carta, `xp` y `game` (`level`, `stats` con las seis teselas, `history`, `achievements` y `showcase`), todo de semanas selladas (§2.10, «Lo público y lo propio»). Un nombre anterior responde 301 al nuevo (`RF-PRF-03`) |
 | GET | `/api/hall-of-fame` | Pública | Salón de la fama (§2.9): `weeklyWinners` (de la semana más reciente a la más antigua, con `weekSlug`, `weekNumber`, `entryId`, alias, título, portada y `producer`), `seasonChampions` (`{ seasonId, producers }` de cada temporada cerrada, de la más reciente a la más antigua) y `records` (`mostWins`, `longestStreak` y `mostVotesCast` como `{ producer, value }`; `bestScore` con `scoreMilli`, `weekSlug` y `entryId`; `null` si nadie tiene ninguno). `producer` `null` = «Productor eliminado». Sella de forma perezosa lo que haya cerrado |
 | GET | `/api/seasons/:id/standings` | Pública | Clasificación de una temporada («2026-T4») con solo sus semanas selladas, también la que está en curso: `season { id, sealedWeeks, closed }` y por fila `position` (ex aequo compartida), `producer` (`null` = «Productor eliminado»), `points`, `wins`, `podiums`, `weeks` y `meanScoreMilli` (redondeada para mostrar; el desempate la compara exacta). Cerrada (§2.9), la primera fila es la de los campeones. Sella de forma perezosa lo que haya cerrado. 404 si ninguna semana suya ha empezado o el id no es una temporada |
 | GET | `/api/public/otp/summary` | Pública + CORS sello | Resumen para el widget del sello |
@@ -3016,8 +3043,10 @@ calculado (`xpFor` de `packages/rules`):
   existiera.
 - El **tope semanal** de votos con XP (40) se cuenta en el libro, dentro del propio `INSERT` (solo entra si la
   cuenta tiene menos de 40 movimientos `vote` en esa semana): dos votos a la vez no lo pasan.
-- `week_id` sirve para el tope y para que lo público pueda contar solo lo de semanas selladas; el XP de un logro se
-  refiere al logro (`kind = 'achievement'`, `ref` = su id), así que también se gana una sola vez.
+- `week_id` sirve para el tope y para que lo público cuente solo lo de semanas selladas (§2.10, «Lo público y lo
+  propio»: `week_id IS NULL OR week_id IN (semanas con sealed_at)`, en el libro y en `achievement_unlock`); por eso
+  todo hecho que dependa de jugar una semana lleva la suya, y el XP de un logro, la del hecho que lo desbloquea. El XP
+  de un logro se refiere al logro (`kind = 'achievement'`, `ref` = su id), así que también se gana una sola vez.
 - `achievement_unlock` es una fila por cuenta y logro (ningún logro se retira, salvo los de resultado en un
   re-sellado, §2.8); `seen_at` dice si ya vio su aviso. `streak_state` guarda lo de `advanceStreak` (la racha, la
   mejor, la última semana aplicada y la temporada del comodín); es una caché de lo que dan las semanas selladas.
@@ -3963,6 +3992,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.107 | **Tarea 7.13** (huecos G1 y G13 del plan 07, resueltos). §2.10, «Lo público y lo propio»: **lo público solo cuenta semanas selladas** (el perfil público con su XP, nivel, teselas, historial, logros y vitrina, su OG, la temporada y el salón: los movimientos y logros con `week_id` sellado o nulo; nulo solo lo llevan hechos que no dependen de jugar una semana, como `profile_done`, `share_card` y el `level_20` que cruzan) y **`GET /api/me` es de su dueño y va en vivo** (XP, nivel y nivel visto, racha con comodín, temporada, logros sin ver y ceremonia de temporada pendiente); lo ya visto sale una vez (`RF-GAME-09`). §2.3: el perfil público con su capa de juego y la vitrina en `PUT /api/me/profile`. §2.15: la OG del perfil, con la misma regla. §4.10: `GET /api/me` y `POST /api/me/seen` (`level`, `achievement`, `season_champion`) con su forma; `GET /api/profiles/:username` en vez de `/api/producers/:username` (G13) y `GET · PUT /api/me/profile` en vez de `PATCH`, que nunca existieron. §4.11: la condición de lo público sobre `week_id`. |
 | 2026-10-29 | 0.6.106 | **Tarea 7.12.** §2.9, salón de la fama: todo sale de los snapshots vigentes de las semanas selladas (los ganadores en 1.ª posición, ex aequo incluidos; los campeones de cada temporada cerrada; más victorias; la racha más larga con el comodín; la mejor puntuación de una entrada clasificada; más votos emitidos, los válidos que contó cada snapshot); con la misma cifra, el récord es de quien llegó antes; un productor eliminado sigue como «Productor eliminado». §4.10: `GET /api/hall-of-fame` con su forma. |
 | 2026-10-29 | 0.6.105 | **Tarea 7.11** (hueco G7 del plan 07, resuelto: el cierre de la temporada). §2.9: una temporada se cierra cuando ha acabado su trimestre (00:00 del día 1 del siguiente, hora de Madrid) y todas sus semanas están selladas: la cierra el sellado de la semana de su último lunes, que siempre acaba después del trimestre, en su `batch`; sin semana ese lunes, el primer `tick` tras el fin del trimestre; sin semanas, nunca. Sus campeones (la primera fila, también ex aequo) ganan `season_champ` y su ceremonia queda pendiente hasta la marca `season_champion`; los campeones salen de los snapshots, así que re-sellar una semana de una temporada cerrada puede cambiarlos (gana el nuevo, pierde con su XP quien deja de serlo de toda temporada cerrada). §4.5: `seasonEndsAt` e `isSeasonClosed`. §4.10: `GET /api/seasons/:id/standings` con su forma. §4.11: el cierre en el `batch` del sellado y en el `tick` (`job_state` `seasonClose`). §4.12: `sealWeeks` cierra las temporadas sin semana el último lunes. |
 | 2026-10-29 | 0.6.104 | **Tarea 7.14** (hueco G5 del plan 07, resuelto: los logros que ocurren en el navegador). §4.10: `POST /api/me/achievements { achievement }`, con sesión, solo con los logros de la lista blanca `BROWSER_ACHIEVEMENTS` (en la Fase 7, `share_card`; la Fase 8 suma sus secretos con su prueba), cualquier otro → 422, 10 por hora y cuenta, sin más XP que el del logro (y `level_20` si lo cruza) y repetirlo no suma; responde lo ganado. §2.10, §4.13 y Anexo C al día. |

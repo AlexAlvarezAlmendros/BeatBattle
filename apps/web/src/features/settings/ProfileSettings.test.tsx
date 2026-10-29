@@ -19,6 +19,7 @@ const PROFILE = {
   accent: 'red',
   avatarUrl: null,
   usernameChangeAvailableAt: null,
+  showcase: [],
 }
 
 type Call = { method: string; path: string; body: unknown }
