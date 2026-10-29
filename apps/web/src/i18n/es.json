@@ -397,7 +397,16 @@
         "finalAverage": "Media final",
         "goldenEar": "Oído de oro",
         "votesGiven": "Votos dados",
-        "season": "Temporada"
+        "season": "Temporada",
+        "times_one": "×{count}",
+        "times_other": "×{count}",
+        "weeks": "sem.",
+        "streakBest": "sem. · mejor {best}",
+        "goldenEars_one": "vez",
+        "goldenEars_other": "veces",
+        "points_one": "{count} pt",
+        "points_other": "{count} pts",
+        "seasonLink": "(clasificación de la temporada {season})"
       },
       "noValue": "—",
       "noValueLabel": "Sin datos todavía",
@@ -405,17 +414,33 @@
         "title": "Historial de combates",
         "note": "Solo semanas selladas",
         "empty": "Todavía no ha combatido en ninguna semana sellada.",
-        "pending": "La semana en curso no aparece aquí hasta el sellado: el voto es ciego."
+        "pending": "La semana en curso no aparece aquí hasta el sellado: el voto es ciego.",
+        "week": "S{number}",
+        "meta": "{week} · era {alias} · {votes}",
+        "votes_one": "{count} voto",
+        "votes_other": "{count} votos",
+        "place": "{place}.º",
+        "unranked": "Sin clasificar",
+        "scoreLabel": "Puntuación",
+        "more": "Ver los {count} combates",
+        "less": "Ver menos combates"
       },
       "chart": {
         "title": "Posiciones",
         "empty": "Aquí saldrá su puesto en cada semana sellada.",
-        "place": "{place}.º"
+        "place": "{place}.º",
+        "range": "S{from}–S{to}",
+        "caption": "Puesto en cada semana sellada",
+        "weekHead": "Semana",
+        "placeHead": "Puesto"
       },
       "achievements": {
         "title": "Logros",
-        "empty": "Los logros llegan con la capa de juego: los no conseguidos se ven en silueta.",
-        "hidden": "???"
+        "count": "{unlocked} de {total}",
+        "more": "Ver los {total} logros",
+        "less": "Ver menos logros",
+        "locked": "Sin conseguir",
+        "unlockedOn": "Conseguido el {date}"
       },
       "newTab": "(se abre en otra pestaña)",
       "card": {
@@ -617,6 +642,18 @@
           "unavailable": "Ahora mismo no se pueden subir fotos. Vuelve a probar más tarde.",
           "failed": "No se ha podido subir la foto. Vuelve a probar."
         }
+      },
+      "showcase": {
+        "title": "Vitrina",
+        "help": "Hasta {max} logros conseguidos, en el orden en que los marques: los enseña tu carta.",
+        "list": "Tus logros",
+        "loading": "Cargando tus logros…",
+        "empty": "Todavía no tienes logros que enseñar. Llegan al jugar, y los de una semana se ven cuando se sella.",
+        "place": "{place}.º",
+        "full": "La vitrina admite {max}: quita uno antes de marcar otro.",
+        "invalid": "Ese logro aún no es tuyo (o su semana sigue sin sellar).",
+        "save": "Guardar la vitrina",
+        "unchanged": "No has cambiado la vitrina."
       }
     },
     "emails": {
@@ -1625,6 +1662,7 @@
         "escape": "Esc",
         "m": "M",
         "j": "J",
+        "l": "L",
         "f": "F",
         "s": "S",
         "r": "R",

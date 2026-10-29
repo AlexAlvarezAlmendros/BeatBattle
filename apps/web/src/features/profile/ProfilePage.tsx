@@ -1,25 +1,34 @@
 import { levelProgress, rankTitle } from '@beatbattle/rules'
-import { PROFILE_LINK_KINDS, type PublicProfile, PublicProfileSchema } from '@beatbattle/shared'
-import { useRef } from 'react'
-import { type LoaderFunctionArgs, redirect, useLoaderData } from 'react-router'
+import {
+  PROFILE_LINK_KINDS,
+  type ProfileGame,
+  type PublicProfile,
+  PublicProfileSchema,
+} from '@beatbattle/shared'
+import { type ReactNode, useRef } from 'react'
+import { Link, type LoaderFunctionArgs, redirect, useLoaderData } from 'react-router'
 import { paths } from '../../app/paths'
 import { notFound } from '../../app/routes'
 import { ScreenPage } from '../../app/ScreenPage'
-import { formatDate, t } from '../../i18n'
+import { formatDate, formatNumber, t } from '../../i18n'
 import { ApiClientError, apiFetch } from '../../net/api'
 import { Button } from '../../ui/Button'
 import { DataTile, DataTileList } from '../../ui/DataTile'
 import { useFitText } from '../../ui/hooks/useFitText'
 import { useSession } from '../account/session'
+import { scoreOf } from '../results/score'
+import { AchievementGrid } from './AchievementGrid'
+import { BattleHistory } from './BattleHistory'
+import { PositionsChart } from './PositionsChart'
 import { ProfileCard } from './ProfileCard'
 import styles from './ProfilePage.module.css'
 
 /**
- * `/p/:username` (guía §2.3, §3.8.10, tarea 2.18; `RF-PRF-01`, `-03`): la carta de productor plana en la
- * cuña y, en el panel, número y antigüedad, nombre, rango, nivel y ciudad, bio, enlaces, las seis teselas,
- * el historial, las posiciones y los logros. Lo que aún no existe (Fases 5–7) enseña su estado vacío, y
- * la semana en curso nunca aparece antes del sellado (§1.3). Un nombre que no existe pinta la 404 del
- * juego; el anterior de alguien lleva a su nombre nuevo (la API responde 301 y aquí se cambia la URL).
+ * `/p/:username` (guía §2.3, §3.8.10; tareas 2.18, 7.22 y 7.24; `RF-PRF-01`, `-03`): la carta de productor en la cuña
+ * y, en el panel, número y antigüedad, nombre, rango, nivel y ciudad, bio, enlaces, las seis teselas, el historial de
+ * combates, la gráfica de posiciones y los logros. Todo lo de la capa de juego es lo público (solo semanas selladas,
+ * hueco G1): la semana en curso nunca aparece antes del sellado (§1.3). Un nombre que no existe pinta la 404 del juego;
+ * el anterior de alguien lleva a su nombre nuevo (la API responde 301 y aquí se cambia la URL).
  */
 
 export async function profileLoader({ params, request }: LoaderFunctionArgs): Promise<PublicProfile> {
@@ -38,13 +47,65 @@ export async function profileLoader({ params, request }: LoaderFunctionArgs): Pr
   return profile
 }
 
-const TILES = ['bestPlace', 'streak', 'finalAverage', 'goldenEar', 'votesGiven', 'season'] as const
+/** «—» con su lectura («Sin datos todavía»): una tesela sin semanas selladas que contar. */
+function NoValue() {
+  return (
+    <>
+      <span aria-hidden="true">{t('pages.profile.noValue')}</span>
+      <span className="sr-only">{t('pages.profile.noValueLabel')}</span>
+    </>
+  )
+}
 
-/** Las marcas del eje de posiciones (§3.8.10: 1.º arriba). */
-const CHART_AXIS = [1, 8, 15] as const
-
-/** Huecos de la vitrina vacía: dos filas de seis, como `05-perfil`. */
-const ACHIEVEMENT_SLOTS = 12
+/** Las seis teselas (§3.8.10): valor y unidad de cada una, con su estado vacío. */
+export function profileTiles(game: ProfileGame): { key: string; value: ReactNode; unit?: ReactNode }[] {
+  const { stats, history } = game
+  const best = stats.bestPosition
+  const timesBest = best === null ? 0 : history.filter((row) => row.position === best).length
+  const season = stats.season
+  return [
+    {
+      key: 'bestPlace',
+      value: best === null ? <NoValue /> : t('pages.profile.history.place', { place: best }),
+      unit: timesBest > 1 ? t('pages.profile.tiles.times', { count: timesBest }) : undefined,
+    },
+    {
+      key: 'streak',
+      value: formatNumber(stats.streak.current),
+      unit:
+        stats.streak.best > stats.streak.current
+          ? t('pages.profile.tiles.streakBest', { best: stats.streak.best })
+          : t('pages.profile.tiles.weeks'),
+    },
+    {
+      key: 'finalAverage',
+      value: stats.meanScoreMilli === null ? <NoValue /> : scoreOf(stats.meanScoreMilli),
+    },
+    {
+      key: 'goldenEar',
+      value: formatNumber(stats.goldenEars),
+      unit: t('pages.profile.tiles.goldenEars', { count: stats.goldenEars }),
+    },
+    { key: 'votesGiven', value: formatNumber(stats.votesCast) },
+    {
+      key: 'season',
+      value:
+        season === null ? (
+          <NoValue />
+        ) : (
+          <Link to={paths.season(season.id)} className={styles.tileLink}>
+            {season.position === null ? (
+              <NoValue />
+            ) : (
+              t('pages.profile.history.place', { place: season.position })
+            )}
+            <span className="sr-only"> {t('pages.profile.tiles.seasonLink', { season: season.id })}</span>
+          </Link>
+        ),
+      unit: season === null ? undefined : t('pages.profile.tiles.points', { count: season.points }),
+    },
+  ]
+}
 
 export function ProfilePage() {
   const profile = useLoaderData() as PublicProfile
@@ -63,6 +124,7 @@ export function ProfilePage() {
       documentTitle={t('pages.profile.documentTitle', { name })}
       // El nombre es una palabra: en la cabeza de móvil, más pequeño antes que partido a mitad.
       titleMinFontPx={18}
+      fill
       piece={<ProfileCard profile={profile} />}
     >
       <div className={styles.body} data-accent={profile.accent}>
@@ -113,16 +175,13 @@ export function ProfilePage() {
             {t('pages.profile.tilesLabel')}
           </h2>
           <DataTileList className={styles.tiles}>
-            {TILES.map((tile) => (
+            {profileTiles(profile.game).map((tile) => (
               <DataTile
-                key={tile}
-                label={t(`pages.profile.tiles.${tile}`)}
-                value={
-                  <>
-                    <span aria-hidden="true">{t('pages.profile.noValue')}</span>
-                    <span className="sr-only">{t('pages.profile.noValueLabel')}</span>
-                  </>
-                }
+                key={tile.key}
+                label={t(`pages.profile.tiles.${tile.key as 'bestPlace'}`)}
+                value={tile.value}
+                unit={tile.unit}
+                hot={tile.key === 'bestPlace' && profile.game.stats.bestPosition === 1}
               />
             ))}
           </DataTileList>
@@ -130,45 +189,11 @@ export function ProfilePage() {
 
         <div className={styles.columns}>
           <div className={styles.side}>
-            <section className={styles.section} aria-labelledby="profile-history">
-              <div className={styles.sectionHead}>
-                <h2 id="profile-history" className={styles.sectionTitle}>
-                  {t('pages.profile.history.title')}
-                </h2>
-                <span className="bb-label">{t('pages.profile.history.note')}</span>
-              </div>
-              <p className={styles.empty}>{t('pages.profile.history.empty')}</p>
-              <p className={styles.note}>{t('pages.profile.history.pending')}</p>
-            </section>
-            <section className={styles.section} aria-labelledby="profile-achievements">
-              <h2 id="profile-achievements" className={styles.sectionTitle}>
-                {t('pages.profile.achievements.title')}
-              </h2>
-              {/* La vitrina en silueta (§3.8.10: los no conseguidos, en silueta; los ocultos, «???»). */}
-              <ul className={styles.achievements} aria-hidden="true">
-                {Array.from({ length: ACHIEVEMENT_SLOTS }, (_, i) => (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: huecos fijos
-                  <li key={i}>{t('pages.profile.achievements.hidden')}</li>
-                ))}
-              </ul>
-              <p className={styles.note}>{t('pages.profile.achievements.empty')}</p>
-            </section>
+            <BattleHistory history={profile.game.history} />
           </div>
           <div className={styles.side}>
-            <section className={styles.section} aria-labelledby="profile-chart">
-              <h2 id="profile-chart" className={styles.sectionTitle}>
-                {t('pages.profile.chart.title')}
-              </h2>
-              {/* La rejilla de la gráfica, vacía, con sus ejes (1.º arriba), y lo que saldrá en ella. */}
-              <div className={styles.chart}>
-                <ul className={styles.chartAxis} aria-hidden="true">
-                  {CHART_AXIS.map((place) => (
-                    <li key={place}>{t('pages.profile.chart.place', { place })}</li>
-                  ))}
-                </ul>
-                <p className={styles.chartEmpty}>{t('pages.profile.chart.empty')}</p>
-              </div>
-            </section>
+            <PositionsChart history={profile.game.history} />
+            <AchievementGrid unlocks={profile.game.achievements} />
           </div>
         </div>
       </div>

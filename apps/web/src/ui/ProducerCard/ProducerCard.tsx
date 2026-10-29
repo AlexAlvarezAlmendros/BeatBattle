@@ -203,7 +203,7 @@ export function ProducerCard({
               </ul>
               <p className={styles.caseLabel} aria-hidden="true">
                 <span>{t('ui.producerCard.showcaseShort')}</span>
-                {achievements !== undefined && (
+                {achievements !== undefined && achievements > 0 && (
                   <span>
                     {t('ui.producerCard.showcaseCount', {
                       shown: slots.filter(Boolean).length,

@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.120 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.121 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -2165,6 +2165,28 @@ votos», posición, puntuación y medalla; con la nota «La semana en curso no a
 sellado»), la **gráfica de posiciones** (línea roja sobre rejilla, 1.º arriba, victorias en rombo
 blanco) y los **logros** (no conseguidos en silueta, ocultos como «???», cada uno con nombre accesible).
 
+**El perfil completo** (tarea 7.24). Es pantalla de contenido (§3.8.14: llena el alto y, si no cabe, se desplaza). Todo
+lo de la capa de juego es lo público (`GET /api/profiles/:username`: solo semanas selladas, §2.10):
+
+- **Teselas**: *mejor puesto* («1.º ×2»: cuántas veces lo ha logrado), *racha* («2 sem.», y «· mejor 3» si su mejor
+  racha es otra), *media final* (la de sus entradas clasificadas, con dos decimales), *oído de oro* («1 vez», «4
+  veces»), *votos dados* y *temporada* (su puesto y sus puntos en la temporada en curso, enlazada a `/temporada/:id`).
+  Sin nada sellado que contar, «—» («Sin datos todavía» para el lector). Seis por fila desde 1600 px y tres por debajo.
+- **Historial**: las cinco semanas más recientes y «Ver los 14 combates» para el resto. Cada fila lleva a la ficha de la
+  entrada (`/e/:id`, sellada, con su resultado); sin clasificar, «—» («Sin clasificar»); en el podio, su medalla de
+  vinilo. En móvil, el título y su línea parten y el puesto va sobre la puntuación (la medalla sobra: el puesto ya lo
+  dice).
+- **Gráfica**: las últimas 12 semanas selladas en las que combatió, de la más antigua a la más reciente; el eje va del
+  1.º al peor puesto de la gráfica (como poco el 3.º) y una semana sin clasificar corta la línea. Es un dibujo con su
+  tabla para el lector (semana y puesto); los rótulos del eje y de las semanas son texto sobre el panel.
+- **Logros**: los 36 del Anexo C, primero los conseguidos (por el catálogo), después los que faltan y al final los
+  ocultos que faltan; dos filas de seis a la vista y «Ver los 36 logros» (tecla L) para el resto. La rejilla se recorre
+  como un menú de juego (`listbox`: el foco es el cursor) y debajo va la ficha de la elegida: nombre y rareza, su
+  condición (o, si es un oculto que falta, su pista) y cuándo se consiguió.
+- **Vitrina** (Ajustes → Perfil): placas con los logros que ya enseña el perfil público (y los que ya estaban en la
+  vitrina), que se marcan en orden (1.º, 2.º, 3.º); con tres marcadas, otra no entra («La vitrina admite 3: quita uno
+  antes de marcar otro»). La carta de la cuña de Ajustes es la del perfil público, con su variante y sus cifras.
+
 #### 3.8.11 Página 404: «BONUS STAGE»
 
 Titular «BONUS STAGE» (el `<h1>`; la pestaña dice «Página no encontrada») y de subtítulo «Te has
@@ -4040,6 +4062,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.121 | **Tarea 7.24.** §3.8.10, el perfil completo: pantalla de contenido; las seis teselas con sus valores (mejor puesto con cuántas veces, racha con la mejor, media final, oído de oro, votos dados y la temporada en curso enlazada a su clasificación) y su «—»; el historial con cinco filas a la vista y el resto a un clic, cada una a la ficha de la entrada, con su medalla en el podio; la gráfica de las últimas 12 semanas selladas (eje del 1.º al peor puesto, como poco el 3.º; sin clasificar corta la línea) con su tabla para el lector; los logros en su orden (conseguidos, los que faltan, los ocultos que faltan), dos filas a la vista y L para los 36, recorridos como un menú con la ficha de la elegida; y la vitrina de Ajustes → Perfil, que se elige en orden entre los logros públicos y como mucho tres. |
 | 2026-10-29 | 0.6.120 | **Tarea 7.22.** §3.4.4: la carta en 2D (`ProducerCard`) es la carta plana de `RF-GAME-07`, en HTML (su texto se lee, se amplía y pasa al contraste alto) y con todo sacado de lo público del perfil (§2.10); la variante es la más alta ganada (roja desde el nivel 9, el rango *Productor*; holo con una victoria sellada, `egg.holo`; campeón con `season_champ`) y en el perfil se ven las ganadas y se dice cómo se ganan las demás; etiquetas de variante; ningún texto sobre la trama (número, sello y etiqueta en placa; el monograma, un dibujo); el reverso con número, logo, QR del perfil, su dirección escrita y la fecha de alta; inclinación hacia el puntero y giro de media vuelta con muelle (la cara oculta, `inert`) y, sin movimiento, carta plana con fundido; C desde cualquier parte con los atajos encendidos (WCAG 2.1.4); D, con la 7.28; el lienzo para la textura 3D y para *stories* se pinta en la 7.23 y la 7.28 desde el mismo modelo. §4.1: `qrcode` también en la web, solo en un trozo diferido (el QR del reverso). Anexo C: los textos de cada logro (`achievement.<id>.name`, `.description` y `.hint`) y las pistas de los ocultos. |
 | 2026-10-29 | 0.6.107 | **Tarea 7.13** (huecos G1 y G13 del plan 07, resueltos). §2.10, «Lo público y lo propio»: **lo público solo cuenta semanas selladas** (el perfil público con su XP, nivel, teselas, historial, logros y vitrina, su OG, la temporada y el salón: los movimientos y logros con `week_id` sellado o nulo; nulo solo lo llevan hechos que no dependen de jugar una semana, como `profile_done`, `share_card` y el `level_20` que cruzan) y **`GET /api/me` es de su dueño y va en vivo** (XP, nivel y nivel visto, racha con comodín, temporada, logros sin ver y ceremonia de temporada pendiente); lo ya visto sale una vez (`RF-GAME-09`). §2.3: el perfil público con su capa de juego y la vitrina en `PUT /api/me/profile`. §2.15: la OG del perfil, con la misma regla. §4.10: `GET /api/me` y `POST /api/me/seen` (`level`, `achievement`, `season_champion`) con su forma; `GET /api/profiles/:username` en vez de `/api/producers/:username` (G13) y `GET · PUT /api/me/profile` en vez de `PATCH`, que nunca existieron. §4.11: la condición de lo público sobre `week_id`. |
 | 2026-10-29 | 0.6.106 | **Tarea 7.12.** §2.9, salón de la fama: todo sale de los snapshots vigentes de las semanas selladas (los ganadores en 1.ª posición, ex aequo incluidos; los campeones de cada temporada cerrada; más victorias; la racha más larga con el comodín; la mejor puntuación de una entrada clasificada; más votos emitidos, los válidos que contó cada snapshot); con la misma cifra, el récord es de quien llegó antes; un productor eliminado sigue como «Productor eliminado». §4.10: `GET /api/hall-of-fame` con su forma. |

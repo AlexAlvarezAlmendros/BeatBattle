@@ -235,6 +235,62 @@
   gap: var(--bb-space-3);
 }
 
+/* La vitrina (§2.3, tarea 7.24): los logros conseguidos como placas que se marcan, con su orden (1, 2, 3). */
+.showcase {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--bb-space-16) * 3), 1fr));
+  gap: var(--bb-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.showcaseOption {
+  display: grid;
+  grid-template-columns: var(--bb-space-10) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--bb-space-3);
+  width: 100%;
+  min-height: var(--bb-space-14);
+  padding: var(--bb-space-2);
+  border: var(--bb-stroke-hair) solid var(--bb-line-strong);
+  background: var(--bb-panel);
+  color: var(--bb-white);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.showcaseOption[aria-pressed="true"] {
+  border: var(--bb-stroke) solid var(--bb-white);
+  background: var(--bb-panel-2);
+}
+
+.showcaseBadge {
+  width: 100%;
+}
+
+.showcaseName {
+  font-size: var(--bb-fs-sm);
+  font-weight: var(--bb-weight-bold);
+  line-height: var(--bb-leading-label);
+}
+
+.showcasePlace {
+  padding: var(--bb-space-1) var(--bb-space-2);
+  background: var(--bb-white);
+  color: var(--bb-black);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-extrabold);
+}
+
+@media (forced-colors: active) {
+  .showcaseOption[aria-pressed="true"] {
+    border-color: Highlight;
+  }
+}
+
 /* La carta en la cuña de Perfil: arriba y a la vista al desplazar, como el emblema; en móvil no va. */
 .cardPiece {
   position: sticky;

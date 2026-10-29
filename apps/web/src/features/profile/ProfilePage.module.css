@@ -223,10 +223,177 @@
   text-align: center;
 }
 
-/* La vitrina vacía: seis huecos por fila en silueta, con «???». */
-.achievements {
+/* La gráfica con semanas: el dibujo, su eje a la derecha y las semanas debajo, en un panel (`05-perfil`). */
+.chartFilled {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--bb-space-1);
+  padding: var(--bb-space-3) var(--bb-space-3) var(--bb-space-2);
+  border: var(--bb-stroke-hair) solid var(--bb-line-strong);
+  background: var(--bb-panel);
+}
+
+.chartPlot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--bb-space-2);
+}
+
+.chartBox {
+  min-width: 0;
+  min-height: calc(var(--bb-space-16) * 1.85);
+}
+
+.chartSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.chartGrid {
+  stroke: var(--bb-line);
+  stroke-width: 1;
+}
+
+.chartLine {
+  fill: none;
+  stroke: var(--bb-red);
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+}
+
+.chartDot {
+  fill: var(--bb-black);
+  stroke: var(--bb-white);
+  stroke-width: 1.5;
+}
+
+/* Las victorias, en rombo blanco con el filete rojo. */
+.chartWin {
+  fill: var(--bb-white);
+  stroke: var(--bb-red);
+  stroke-width: 2.5;
+}
+
+.chartWeeks {
+  display: flex;
+  justify-content: space-between;
+  color: var(--bb-text-3);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+}
+
+/* ── Historial de combates (§3.8.10) ──────────────────────────────────────────────────────── */
+
+.history {
+  display: grid;
+  gap: var(--bb-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Una fila de marcador: portada, título y su línea, puesto en display, puntuación y medalla. */
+.fight {
+  display: grid;
+  grid-template-columns: var(--bb-space-11) minmax(0, 1fr) auto auto var(--bb-space-9);
+  align-items: center;
+  gap: var(--bb-space-3);
+  min-height: var(--bb-space-14);
+  padding: var(--bb-space-1) var(--bb-space-3) var(--bb-space-1) var(--bb-space-1);
+  color: var(--bb-white);
+  text-decoration: none;
+  --frame-fill: var(--bb-panel);
+  --frame-border: var(--bb-line);
+}
+
+.fight:hover {
+  --frame-border: var(--bb-line-strong);
+  --frame-fill: var(--bb-panel-2);
+}
+
+.fightCover {
+  display: grid;
+  width: var(--bb-space-11);
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--bb-wine-2);
+}
+
+.fightCover canvas,
+.fightCover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fightText {
+  display: grid;
+  gap: var(--bb-space-1);
+  min-width: 0;
+}
+
+.fightTitle {
+  overflow: hidden;
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-bold);
+  line-height: var(--bb-leading-label);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fightMeta {
+  overflow: hidden;
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-semibold);
+  letter-spacing: calc(var(--bb-tracking-label) / 2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fightMeta s {
+  color: var(--bb-text-3);
+}
+
+.fightPlace {
+  min-width: var(--bb-space-10);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-xl);
+  font-stretch: var(--bb-stretch-plate);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  text-align: right;
+}
+
+.fightPlace[data-first] {
+  text-shadow: var(--bb-shadow-hard-sm);
+}
+
+.fightScore {
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-bold);
+  text-align: right;
+}
+
+.fightMedal {
+  display: grid;
+  width: var(--bb-space-9);
+}
+
+.more {
+  justify-self: start;
+}
+
+/* ── Logros (§3.8.10): la rejilla que se recorre y la ficha de la elegida ───────────────── */
+
+/* Las insignias, de 72 px como mucho (en una columna ancha, a 1024, salían de 90). */
+.achievements {
+  --badge-max: calc(var(--bb-space-16) + var(--bb-space-2));
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, var(--badge-max)));
   gap: var(--bb-space-2);
   margin: 0;
   padding: 0;
@@ -235,13 +402,58 @@
 
 .achievements li {
   display: grid;
-  place-items: center;
-  height: var(--bb-space-12);
-  border: var(--bb-stroke) dashed var(--bb-line-strong);
+  min-width: 0;
+  cursor: default;
+}
+
+.achievementBadge {
+  width: 100%;
+}
+
+.achievementCard {
+  display: grid;
+  gap: var(--bb-space-1);
+  min-height: calc(var(--bb-space-16) + var(--bb-space-4));
+  padding: var(--bb-space-2) var(--bb-space-3);
+  border-left: var(--bb-space-1) solid var(--accent);
+  background: var(--bb-panel);
+}
+
+.achievementName {
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-md);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  text-transform: uppercase;
+}
+
+.achievementRarity {
   color: var(--bb-text-3);
-  font-family: var(--bb-font-num);
+  font-family: var(--bb-font-ui);
   font-size: var(--bb-fs-xs);
-  font-weight: var(--bb-weight-extrabold);
+  font-style: normal;
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+}
+
+.achievementDetail {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+.achievementWhen {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-semibold);
+}
+
+/* El puesto de la temporada lleva a su clasificación. */
+.tileLink {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: var(--bb-stroke-hair);
+  text-underline-offset: var(--bb-space-1);
 }
 
 @media (min-width: 721px) {
@@ -270,7 +482,45 @@
   }
 
   .achievements {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, var(--badge-max)));
+  }
+
+  /*
+   * La fila del historial, en estrecho: el título y su línea pueden partir, y el puesto y la puntuación van uno
+   * encima del otro; la medalla sobra (el puesto ya lo dice).
+   */
+  .fight {
+    grid-template-columns: var(--bb-space-11) minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    row-gap: 0;
+  }
+
+  .fightCover {
+    grid-row: 1 / 3;
+  }
+
+  .fightText {
+    grid-row: 1 / 3;
+    padding-block: var(--bb-space-1);
+  }
+
+  .fightTitle,
+  .fightMeta {
+    white-space: normal;
+  }
+
+  .fightPlace {
+    align-self: end;
+  }
+
+  .fightScore {
+    grid-column: 3;
+    align-self: start;
+    font-size: var(--bb-fs-sm);
+  }
+
+  .fightMedal {
+    display: none;
   }
 }
 
