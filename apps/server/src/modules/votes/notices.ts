@@ -4,6 +4,7 @@ import { type BatchStatement, runBatch } from '../../db/batch'
 import type { Db } from '../../db/client'
 import { entry, sample, sampleDownload, user, vote, week } from '../../db/schema'
 import { enqueueEmail } from '../../email/outbox'
+import { streaksAtRisk } from '../game/notices'
 import { madridLongDateTime } from '../weeks/schedule'
 
 /**
@@ -12,7 +13,8 @@ import { madridLongDateTime } from '../weeks/schedule'
  * duplicar. Preferencias, horas de silencio y tope semanal se aplican al enviar (`RF-NOTIF-08`).
  *
  * - **Recordatorio** (`battle.reminder`): el sábado a las 18:00, a quien descargó el sample y no tiene
- *   entrada viva. La versión «racha en peligro» llega con las rachas (Fase 7).
+ *   entrada viva; con racha de 3 semanas o más (la de las semanas selladas), en su versión «racha en peligro»
+ *   (§2.12.7; tarea 7.31).
  * - **Llamada al jurado** (`battle.jury_call`): el domingo a las 17:00, a quien ha votado esta semana y le
  *   quedan al menos `JURY_CALL_MIN_REMAINING` entradas por puntuar.
  */
@@ -81,18 +83,18 @@ export async function scheduleBattleNotices(deps: NoticeDeps, now: number): Prom
       hoursLeft: Math.max(1, Math.round((w.submitEndsAt - now) / HOUR_MS)),
       closesText: madridLongDateTime(w.submitEndsAt),
     }
-    const statements = downloaders
-      .filter((row) => !inside.has(row.userId))
-      .map((row) =>
-        enqueueEmail(db, {
-          id: deps.newId(),
-          kind: 'battle.reminder',
-          target: { userId: row.userId },
-          idempotencyKey: `battle.reminder:${row.userId}:${w.slug}`,
-          payload,
-          now,
-        }),
-      )
+    const waiting = downloaders.filter((row) => !inside.has(row.userId)).map((row) => row.userId)
+    const atRisk = await streaksAtRisk(db, waiting, w)
+    const statements = waiting.map((userId) =>
+      enqueueEmail(db, {
+        id: deps.newId(),
+        kind: 'battle.reminder',
+        target: { userId },
+        idempotencyKey: `battle.reminder:${userId}:${w.slug}`,
+        payload: { ...payload, streak: atRisk.get(userId) ?? null },
+        now,
+      }),
+    )
     await enqueueAll(db, statements)
     result.reminders = statements.length
   }

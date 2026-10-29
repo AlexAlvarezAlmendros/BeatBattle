@@ -15,6 +15,7 @@ import { battleResults } from './battleResults'
 import { entryChanged } from './entryChanged'
 import { entryFailed } from './entryFailed'
 import { entryReceipt } from './entryReceipt'
+import { gameProgress } from './gameProgress'
 
 export type { AccountDeletedPayload } from './accountDeleted'
 export type { AdminCalendarGapPayload } from './adminCalendarGap'
@@ -33,7 +34,8 @@ export type { BattleResultsPayload } from './battleResults'
 export type { EntryChangedPayload, EntryReplacedPayload, EntryWithdrawnPayload } from './entryChanged'
 export type { EntryFailedPayload } from './entryFailed'
 export type { EntryReceiptPayload } from './entryReceipt'
-export type { ResultsBlock } from './results'
+export type { GameProgressPayload } from './gameProgress'
+export type { ResultsBlock, ResultsGame } from './results'
 
 /** Plantillas por id del catálogo (§2.12). Cada fase añade las suyas. */
 export const TEMPLATES = {
@@ -54,6 +56,7 @@ export const TEMPLATES = {
   'entry.receipt': entryReceipt,
   'entry.failed': entryFailed,
   'entry.changed': entryChanged,
+  'game.progress': gameProgress,
 } as const
 
 export type TemplateKind = keyof typeof TEMPLATES

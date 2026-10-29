@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { emailOutbox, entry, sampleDownload, vote } from '../src/db/schema'
+import { emailOutbox, entry, sampleDownload, streakState, vote } from '../src/db/schema'
 import type { MemoryMailer } from '../src/email/mailer'
 import { type Battle, battle, HOUR, listener, W42 } from './fixtures/battle'
 
@@ -134,12 +134,20 @@ describe('battle.reminder y battle.jury_call (§2.12, §4.12)', () => {
         firstAt: W42.startsAt,
         lastAt: W42.startsAt,
       })
+    // Uno con racha de 3 hasta la semana anterior: su recordatorio sale en la versión «racha en peligro» (7.31).
+    const streaker = b.voters[1] as Battle['voters'][0]
+    await b.t.db
+      .insert(streakState)
+      .values({ userId: streaker.id, current: 3, best: 3, lastWeekNumber: 0, jokerSeason: null })
     b.t.clock.set(SATURDAY_18)
     await tick()
     b.t.clock.set(SUNDAY_17)
     await tick()
-    const sent = mailer().sent.filter((mail) => /votos|beats|flip/.test(mail.subject))
+    const sent = mailer().sent.filter((mail) => /votos|beats|flip|racha/.test(mail.subject))
     expect(sent.length).toBeGreaterThanOrEqual(3)
+    expect(sent.filter((mail) => mail.to === 'voter1@example.com').map((mail) => mail.subject)).toContain(
+      'Tu racha de 3 semanas está en juego',
+    )
     const others = b.producers.slice(1).flatMap((p, i) => [p.id, `prod${i + 1}`, `prod${i + 1}@example.com`])
     for (const mail of sent) {
       const content = `${mail.subject}\n${mail.html}\n${mail.text}`
