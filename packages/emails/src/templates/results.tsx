@@ -4,7 +4,26 @@ import { Img } from '@react-email/components'
 import { Button } from '../components/Button'
 import { Card } from '../components/Card'
 import { Heading, Kicker, Paragraph } from '../components/Text'
+import { Ticket } from '../components/Ticket'
 import { useEmail } from '../context'
+import { xpText } from '../game'
+
+/**
+ * «Tu partida» (§2.12.7; tarea 7.31): lo que el sellado de esta semana le da a quien recibe el email. Solo de la semana
+ * sellada: ni el XP en vivo de la que abre ni el total de la cuenta (`RF-NOTIF-13`).
+ */
+export interface ResultsGame {
+  /** XP del sellado de la semana (resultado y oído de oro), el de la revisión vigente al encolar. */
+  xp: number
+  /** El del oído de oro, dentro de `xp` (0 si no lo ganó). */
+  goldenEarXp: number
+  /** Racha tras el sellado (semanas selladas con entrada clasificada). */
+  streak: number
+  /** El comodín de la temporada la salvó esta semana. */
+  jokerSaved: boolean
+  /** Bonus de XP de la semana siguiente si clasifica (puntos porcentuales, §2.10). */
+  nextBonusPercent: number
+}
 
 /**
  * Los resultados de una semana sellada en un email (§2.12.2, §3.8.12; tarea 6.9): arriba del Lunes de batalla
@@ -29,6 +48,11 @@ export interface ResultsBlock {
   } | null
   /** Semana desierta: nadie subió nada (`RF-RES-10`). */
   empty: boolean
+  /**
+   * «Tu partida» (tarea 7.31): `null` a quien no gana nada ni tiene racha y a los suscriptores; sin el campo, los
+   * encolados antes de la Fase 7.
+   */
+  game?: ResultsGame | null
 }
 
 /** «2.º». */
@@ -42,6 +66,33 @@ export function resultsHeadline(r: ResultsBlock): string {
 }
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`
+
+/** «Tu partida»: la tira troquelada del ticket con el XP del sellado, el oído de oro y la racha. */
+export function GameStrip({ g }: { g: ResultsGame }) {
+  const resultXp = g.xp - g.goldenEarXp
+  const rows: [string, string][] = []
+  if (resultXp > 0) rows.push(['Resultado', `+${xpText(resultXp)}`])
+  if (g.goldenEarXp > 0) rows.push(['Oído de oro', `+${xpText(g.goldenEarXp)}`])
+  if (g.streak > 0)
+    rows.push([
+      'Racha',
+      `${plural(g.streak, 'semana', 'semanas')}${g.jokerSaved ? ' · salvada por el comodín' : ''}`,
+    ])
+  return (
+    <>
+      <Ticket code={g.xp > 0 ? `TU PARTIDA · +${xpText(g.xp)}` : 'TU PARTIDA'} rows={rows} labelWidth={136} />
+      {g.goldenEarXp > 0 ? (
+        <Paragraph>Oído de oro: tus estrellas anticiparon el criterio del resto del jurado.</Paragraph>
+      ) : null}
+      {g.streak > 0 && g.nextBonusPercent > 0 ? (
+        <Paragraph muted>
+          Si clasificas la semana que viene, la racha sube a {g.streak + 1} y tu XP de subir y de resultado
+          lleva un +{g.nextBonusPercent} %.
+        </Paragraph>
+      ) : null}
+    </>
+  )
+}
 
 export function ResultsCard({ r }: { r: ResultsBlock }) {
   const { publicUrl } = useEmail()
@@ -92,6 +143,7 @@ export function ResultsCard({ r }: { r: ResultsBlock }) {
       ) : (
         <Paragraph>Ninguna entrada llegó a 3 votos: esta semana no hay podio.</Paragraph>
       )}
+      {r.game ? <GameStrip g={r.game} /> : null}
       {r.corrected ? (
         <Paragraph muted>La clasificación se corrigió tras el sellado: esta es la buena.</Paragraph>
       ) : null}

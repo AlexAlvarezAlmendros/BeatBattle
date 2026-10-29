@@ -9,16 +9,18 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { renderEmail, TEMPLATES, type TemplateKind } from '../src'
 import { battleMonday } from '../src/templates/battleMonday'
+import { BATTLE_REMINDER_STREAK_FIXTURE, battleReminder } from '../src/templates/battleReminder'
 import { battleResults } from '../src/templates/battleResults'
 import { ENTRY_WITHDRAWN_FIXTURE, entryChanged } from '../src/templates/entryChanged'
+import { GAME_PROGRESS_LEGENDARY_FIXTURE, gameProgress } from '../src/templates/gameProgress'
 
 const [out = 'galeria-emails', publicUrl = 'http://localhost:5173'] = process.argv.slice(2)
 await mkdir(out, { recursive: true })
 const kinds = Object.keys(TEMPLATES) as TemplateKind[]
 for (const kind of kinds) {
   const template = TEMPLATES[kind]
+  const family = /^(battle|game|season)\./.test(kind) ? 'battle' : 'service'
   // biome-ignore lint/suspicious/noExplicitAny: cada plantilla con su propio fixture
-  const family = kind.startsWith('battle.') ? 'battle' : 'service'
   const email = await renderEmail(template as any, template.fixture, { publicUrl, family })
   await writeFile(path.join(out, `${kind}.html`), email.html)
   await writeFile(
@@ -28,7 +30,8 @@ for (const kind of kinds) {
   console.log(`${kind}: «${email.subject}» (${email.subject.length} caracteres)`)
 }
 // Variantes que no son el ejemplo de su plantilla: la retirada de `entry.changed`; el Lunes de batalla de una
-// alerta sin cuenta (el podio, sin parte personal) y los resultados de una semana desierta.
+// alerta sin cuenta (el podio, sin parte personal ni «tu partida»); el recordatorio con racha en peligro; el progreso
+// del día con un solo logro legendario, y los resultados de una semana desierta.
 const variants = [
   {
     name: 'entry.changed.withdrawn',
@@ -40,15 +43,27 @@ const variants = [
     name: 'battle.monday.subscriber',
     template: battleMonday,
     payload: {
-      results: { ...battleMonday.fixture.results, mine: null },
+      results: { ...battleMonday.fixture.results, mine: null, game: null },
       drop: { ...battleMonday.fixture.drop, subscriber: true },
     },
     family: 'battle',
   },
   {
+    name: 'battle.reminder.streak',
+    template: battleReminder,
+    payload: BATTLE_REMINDER_STREAK_FIXTURE,
+    family: 'battle',
+  },
+  {
+    name: 'game.progress.legendary',
+    template: gameProgress,
+    payload: GAME_PROGRESS_LEGENDARY_FIXTURE,
+    family: 'battle',
+  },
+  {
     name: 'battle.results.empty',
     template: battleResults,
-    payload: { ...battleResults.fixture, podium: [], mine: null, empty: true },
+    payload: { ...battleResults.fixture, podium: [], mine: null, empty: true, game: null },
     family: 'battle',
   },
 ] as const
