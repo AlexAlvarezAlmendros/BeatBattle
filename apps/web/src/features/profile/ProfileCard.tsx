@@ -3,6 +3,7 @@ import type { PublicProfile } from '@beatbattle/shared'
 import { useEffect, useId, useRef, useState } from 'react'
 import { paths } from '../../app/paths'
 import { t } from '../../i18n'
+import { profileQrPath } from '../../net/game'
 import { Button } from '../../ui/Button'
 import {
   CARD_VARIANTS,
@@ -86,7 +87,10 @@ export function ProfileCard({ profile }: { profile: PublicProfile }) {
         {...card}
         variant={shown}
         side={side}
-        profileUrl={`${window.location.origin}${paths.profile(profile.username)}`}
+        back={{
+          profileUrl: `${window.location.origin}${paths.profile(profile.username)}`,
+          qrSrc: profileQrPath(profile.username),
+        }}
         interactive
       />
       <div className={styles.cardControls}>

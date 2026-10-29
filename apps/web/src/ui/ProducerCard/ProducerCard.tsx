@@ -37,8 +37,11 @@ export interface ProducerCardProps {
   variant?: CardVariant
   /** Cara que se ve (la controla quien la usa: la tecla C del perfil). Por defecto, el anverso. */
   side?: CardSide
-  /** Dirección del perfil: el QR del reverso. Sin ella, la carta no tiene reverso. */
-  profileUrl?: string
+  /**
+   * El reverso: la dirección del perfil (escrita) y su QR (el PNG del servidor, `GET /api/profiles/:username/qr.png`).
+   * Sin ella, la carta no tiene reverso (la bienvenida, Ajustes → Perfil).
+   */
+  back?: { profileUrl: string; qrSrc: string }
   /**
    * La carta sigue al puntero: se inclina y la lámina holo brilla hacia él (Anexo E, «Carta de luchador»). Con
    * «reducir movimiento», la carta plana (`RF-GAME-07`): ni inclinación, ni giro, ni brillo que se mueva.
@@ -79,7 +82,7 @@ export function ProducerCard({
   avatarUrl,
   variant = 'standard',
   side = 'front',
-  profileUrl,
+  back,
   interactive = false,
   className,
 }: ProducerCardProps) {
@@ -88,7 +91,7 @@ export function ProducerCard({
   // El nombre en una línea (§3.4.4): baja la anchura y después el cuerpo antes que partir a mitad de palabra.
   useFitText(nameRef, name, { minFontPx: 14 })
   const flat = useReducedMotion()
-  const showing: CardSide = profileUrl ? side : 'front'
+  const showing: CardSide = back ? side : 'front'
   // El reverso, una vez visto, se queda con su QR (para girar de vuelta sin que desaparezca a medio giro).
   const [backSeen, setBackSeen] = useState(showing === 'back')
   useEffect(() => {
@@ -219,7 +222,7 @@ export function ProducerCard({
             </footer>
           </div>
         </section>
-        {profileUrl && (
+        {back && (
           <section
             {...frameAttributes({ cut: 'lg' })}
             className={cx(styles.face, styles.back)}
@@ -230,10 +233,14 @@ export function ProducerCard({
             <span className={styles.backNumber}>{cardNumberLabel(cardNumber)}</span>
             <GameLogo compact className={styles.backLogo} />
             <div className={styles.qrBox}>
-              {/* El QR solo se calcula la primera vez que se gira la carta (su trozo va aparte). */}
-              {backSeen ? <ProfileQr url={profileUrl} /> : <span className={styles.qrPending} />}
+              {/* El QR solo se pide la primera vez que se gira la carta. */}
+              {backSeen ? (
+                <ProfileQr src={back.qrSrc} name={name} />
+              ) : (
+                <span className={styles.qr} data-qr="pending" />
+              )}
             </div>
-            <p className={styles.backUrl}>{profileUrl.replace(/^https?:\/\//, '')}</p>
+            <p className={styles.backUrl}>{back.profileUrl.replace(/^https?:\/\//, '')}</p>
             <footer className={styles.backFooter}>
               <span>{t('ui.producerCard.joined', { since })}</span>
               <OtpSlapImage size="bar" />

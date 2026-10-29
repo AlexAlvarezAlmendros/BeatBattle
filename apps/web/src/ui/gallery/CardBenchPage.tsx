@@ -2,6 +2,7 @@ import type { AchievementId } from '@beatbattle/rules'
 import { useState } from 'react'
 import { DocumentTitle } from '../../app/DocumentTitle'
 import { t } from '../../i18n'
+import { profileQrPath } from '../../net/game'
 import { Button } from '../Button'
 import { CARD_VARIANTS, type CardSide, type CardVariant, ProducerCard } from '../ProducerCard'
 import styles from './CardBenchPage.module.css'
@@ -71,7 +72,10 @@ export function CardBenchPage() {
                     since="03/2026"
                     variant={variant}
                     side={row === 'back' ? 'back' : side}
-                    profileUrl={`${window.location.origin}/p/${sample.name}`}
+                    back={{
+                      profileUrl: `${window.location.origin}/p/${sample.name}`,
+                      qrSrc: profileQrPath(sample.name),
+                    }}
                     interactive
                   />
                   <figcaption className="bb-label">

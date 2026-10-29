@@ -137,8 +137,11 @@ test.describe('la carta plana (RF-GAME-07)', () => {
       await expect(card).toHaveAttribute('data-side', 'back')
       await expect(card.locator('[data-face="back"]')).toBeVisible()
       await expect(card.locator('[data-face="front"]')).toBeHidden()
-      // El QR del perfil, con su trozo diferido.
-      await expect(card.locator('svg[data-qr="ready"]')).toBeAttached()
+      // El QR del perfil: el PNG que pinta el servidor (`GET /api/profiles/aina/qr.png`), cargado y con su nombre.
+      const qr = card.getByRole('img', { name: 'Código QR del perfil de aina' })
+      await expect(qr).toHaveAttribute('src', '/api/profiles/aina/qr.png')
+      await expect(card.locator('[data-qr="ready"]')).toBeVisible()
+      expect(await qr.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0)
       expect(errors).toEqual([])
     })
   })

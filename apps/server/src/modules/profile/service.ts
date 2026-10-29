@@ -152,6 +152,31 @@ export async function findPublicProfile(
   return { redirectTo: redirect.username }
 }
 
+/**
+ * El nombre vigente de un perfil público, sin calcular el perfil (el QR de la carta, tarea 7.22): `{ username }` si la
+ * cuenta existe y no está suspendida; `{ redirectTo }` si es un nombre anterior que aún lleva al nuevo (`RF-PRF-03`);
+ * `null` si no hay perfil (no existe, borrada o suspendida).
+ */
+export async function findPublicUsername(
+  db: Db,
+  raw: string,
+  now: number,
+): Promise<{ username: string } | { redirectTo: string } | null> {
+  const name = raw.toLowerCase()
+  const [row] = await db
+    .select({ username: user.username, banned: user.banned })
+    .from(user)
+    .where(eq(user.username, name))
+  if (row?.username) return row.banned ? null : { username: row.username }
+  const [redirect] = await db
+    .select({ username: user.username, banned: user.banned })
+    .from(usernameRedirect)
+    .innerJoin(user, eq(user.id, usernameRedirect.userId))
+    .where(and(eq(usernameRedirect.old, name), gt(usernameRedirect.expiresAt, now)))
+  if (!redirect?.username || redirect.banned) return null
+  return { redirectTo: redirect.username }
+}
+
 export async function getOwnProfile(store: ProfileStore, userId: string, now: number): Promise<OwnProfile> {
   const row = await findBy(store.db, eq(user.id, userId))
   if (!row) throw appError('NOT_FOUND', 'No hay perfil para esta cuenta.')

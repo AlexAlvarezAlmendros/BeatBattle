@@ -1088,7 +1088,9 @@
           "tag": "Campeón de temporada",
           "label": "de campeón de temporada"
         }
-      }
+      },
+      "qrAlt": "Código QR del perfil de {name}",
+      "qrUnavailable": "QR no disponible"
     },
     "achievement": {
       "hidden": "???",

@@ -1,9 +1,8 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 import { t } from '../../i18n'
 import { mockMatchMedia } from '../hooks/mockMatchMedia'
 import { ProducerCard, type ProducerCardProps } from './ProducerCard'
-import { qrMatrix, qrPath } from './ProfileQr'
 
 const CARD: ProducerCardProps = {
   name: 'Kairo.wav',
@@ -17,7 +16,7 @@ const CARD: ProducerCardProps = {
   achievements: 14,
   since: '03/2026',
   variant: 'holo',
-  profileUrl: 'https://beatbattle.example/p/kairo.wav',
+  back: { profileUrl: 'https://beatbattle.example/p/kairo.wav', qrSrc: '/api/profiles/kairo.wav/qr.png' },
 }
 
 let media: ReturnType<typeof mockMatchMedia> | null = null
@@ -68,21 +67,33 @@ describe('carta de productor (§3.4.4, tarea 7.22)', () => {
     expect(back).not.toHaveAttribute('inert')
   })
 
-  it('§3.4.4: el reverso lleva el QR del perfil (la matriz de `qrcode`, nivel M) y su dirección escrita', async () => {
+  it('RF-GAME-07 / §3.4.4: el reverso lleva el QR del perfil (el PNG del servidor, con su nombre) y su dirección escrita', () => {
     render(<ProducerCard {...CARD} side="back" />)
     const back = screen.getByRole('article').querySelector('[data-face="back"]') as HTMLElement
     expect(within(back).getByText('beatbattle.example/p/kairo.wav')).toBeInTheDocument()
-    await waitFor(() => expect(back.querySelector('svg[data-qr="ready"]')).not.toBeNull())
-    const matrix = await qrMatrix(CARD.profileUrl as string)
-    // La versión que cabe y sus tres buscadores: el módulo de arriba a la izquierda es oscuro, el de fuera no.
-    expect(matrix.size).toBeGreaterThanOrEqual(21)
-    expect(matrix.dark(0, 0)).toBe(true)
-    expect(matrix.dark(7, 0)).toBe(false)
-    expect(back.querySelector('svg[data-qr] path')?.getAttribute('d')).toBe(qrPath(matrix))
+    const qr = within(back).getByRole('img', { name: t('ui.producerCard.qrAlt', { name: 'Kairo.wav' }) })
+    expect(qr).toHaveAttribute('src', '/api/profiles/kairo.wav/qr.png')
+    expect(qr).toHaveAttribute('loading', 'lazy')
+    // Mientras llega, el papel blanco; si no llega, «QR no disponible».
+    expect(qr.parentElement).toHaveAttribute('data-qr', 'loading')
+    fireEvent.load(qr)
+    expect(qr.parentElement).toHaveAttribute('data-qr', 'ready')
+    fireEvent.error(qr)
+    expect(within(back).getByText(t('ui.producerCard.qrUnavailable'))).toBeInTheDocument()
+  })
+
+  it('§3.4.4: el QR solo se pide al girar la carta por primera vez', () => {
+    const { rerender } = render(<ProducerCard {...CARD} />)
+    const card = screen.getByRole('article')
+    expect(card.querySelector('[data-face="back"] [data-qr] img')).toBeNull()
+    rerender(<ProducerCard {...CARD} side="back" />)
+    expect(card.querySelector('[data-face="back"] [data-qr] img')).not.toBeNull()
+    rerender(<ProducerCard {...CARD} side="front" />)
+    expect(card.querySelector('[data-face="back"] [data-qr] img')).not.toBeNull()
   })
 
   it('§3.4.4: sin dirección del perfil no hay reverso (la bienvenida, Ajustes → Perfil)', () => {
-    render(<ProducerCard {...CARD} profileUrl={undefined} side="back" />)
+    render(<ProducerCard {...CARD} back={undefined} side="back" />)
     const card = screen.getByRole('article')
     expect(card).toHaveAttribute('data-side', 'front')
     expect(card.querySelector('[data-face="back"]')).toBeNull()

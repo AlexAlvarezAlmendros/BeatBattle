@@ -16,6 +16,9 @@ export function profileQuery(username: string) {
   }
 }
 
+/** `GET /api/profiles/:username/qr.png`: el QR del reverso de la carta, que pinta el servidor (§3.4.4, §4.10). */
+export const profileQrPath = (username: string) => `/api/profiles/${encodeURIComponent(username)}/qr.png`
+
 /** `GET /api/hall-of-fame` (`RF-ARC-02`). */
 export function hallOfFameQuery() {
   return {
