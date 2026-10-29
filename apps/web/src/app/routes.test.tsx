@@ -240,6 +240,7 @@ describe('router (0.10, guía §2.18)', () => {
       },
       rows,
       mine: rows[1],
+      myGame: { xp: 385, goldenEar: false, seasonPoints: 18 },
     }
     vi.stubGlobal(
       'fetch',

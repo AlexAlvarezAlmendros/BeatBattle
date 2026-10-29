@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.102 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.103 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -527,6 +527,33 @@ mediana, histograma, puntos de temporada) y marca la semana `sealed_at`. El snap
 explícito que crea una revisión nueva y queda registrado (auditoría y aviso en la página de
 resultados: «Clasificación corregida el …»).
 
+**El sellado y la capa de juego.** En el mismo `batch` que el snapshot, y calculado **después** de la clasificación
+y a partir de ella (`RF-GAME-10`), el sellado da lo que depende del resultado (§2.10): el XP de resultado (clasificar,
+top 10 o podio, con la racha en juego y la semana dorada), el **oído de oro** de cada jurado, la **racha**
+(`streak_state`, con el comodín) y los **logros de resultado** (`podium`, `win`, `win_3`, `double`, `comeback`,
+`unanimous`, `challenge`, `streak_3`, `streak_8`, `streak_26`, `golden_ear` y `oracle`). Todo eso es una función de las
+semanas selladas en su revisión vigente, y el libro la sigue también cuando se corrige una (hueco G2 del plan 07):
+
+- El sellado y cada re-sellado **vuelven a jugar** las semanas selladas desde la que se sella o se corrige hasta la
+  última, porque las posteriores dependen de ella (la racha, `double`, `comeback`, `oracle`, `win_3`), y escriben solo
+  la diferencia.
+- El XP de resultado y el de oído de oro de cada una de esas semanas queda **igual al que da la revisión vigente**: la
+  primera vez, con su movimiento; después, con un **ajuste** referido a la semana y a la revisión que lo provoca, que
+  puede restar (§4.11). Quien baja por la corrección devuelve la diferencia; quien sube, la cobra.
+- Un logro de resultado que ahora se cumple en una de esas semanas y la cuenta no tenía, se gana en la primera en que
+  se cumple. Uno que se ganó en una de ellas y **ya no se cumple en ninguna semana sellada** se **retira con su XP**
+  (si se vuelve a ganar más adelante, se cobra otra vez, una sola). Los ganados en semanas anteriores a la corregida no
+  se tocan.
+- La racha guardada queda la que dan las semanas selladas.
+- No cambia lo ganado en vivo (§2.10: subir, la primera entrada, los votos y el jurado completo, con sus logros),
+  aunque la racha con la que se pagó subir ya no sea la misma, ni `level_20`, que se gana al cruzar el nivel.
+- Si el re-sellado no cambia el snapshot, no cambia nada para nadie; repetir un sellado o un re-sellado tampoco
+  (`RF-GAME-01`).
+
+Es lo que pide el juego limpio (§1.3): nadie se queda con el XP ni con el logro de un puesto que era de otra entrada,
+y la entrada que sube con la corrección cobra lo que le toca. Congelar lo ganado sería más simple, pero dejaría el
+libro diciendo una clasificación que ya no existe.
+
 **Página de resultados** (`/semana/:slug/resultados`): podio con los tres primeros (vinilos de
 oro, platino y diamante, §3.4.3), tabla completa con posición, alias revelado → productor,
 puntuación, votos e histograma en miniatura, «Tu resultado» destacado si participaste, el reparto de
@@ -544,7 +571,7 @@ ofrece la ceremonia de revelación. Dura unos 25 s y se puede saltar.
 | `RF-RES-05` | El sellado excluye votos no válidos | Bloquear a un votante antes del sellado elimina su efecto |
 | `RF-RES-06` | Re-sellado explícito con revisión, auditoría y aviso público | Descalificar tras sellar y re-sellar → `result_revision = 2` y aviso visible |
 | `RF-RES-07` | Revelación de identidades en voto ciego al sellar | Tras el sellado, la API pública devuelve el productor de cada entrada |
-| `RF-RES-08` | Página de resultados con podio, tabla, «Tu resultado» y reparto de XP | E2E con dos semanas simuladas |
+| `RF-RES-08` | Página de resultados con podio, tabla, «Tu resultado» y reparto de XP | E2E con dos semanas simuladas; servidor: `myGame` dice el XP del sellado de quien mira (con los ajustes de un re-sellado), su oído de oro y sus puntos de temporada |
 | `RF-RES-09` | Ceremonia ofrecida una vez por usuario y semana, saltable y repetible | `seen_flag` `ceremony` por usuario y semana; Esc la salta; «Ver la ceremonia» la repite |
 | `RF-RES-10` | Semana sin entradas: «Semana desierta», sin podio ni ceremonia | Sellar una semana vacía da un snapshot vacío y la página lo explica |
 
@@ -628,6 +655,8 @@ semana mala no destroce meses.
   salvada **no suma**: la racha se queda como estaba, también para el bonus y para `streak_3`, `streak_8` y
   `streak_26`. Con el comodín de esa temporada ya gastado, fallar la rompe (vuelve a 0).
 - La **mejor racha** es la más larga que ha tenido la cuenta (el récord del salón de la fama).
+- La racha la aplica el sellado a quien tiene entrada en la semana y a quien tenía racha (si no participa, gasta el
+  comodín o la pierde); `streak_state` es su caché, y la verdad, las semanas selladas en su revisión vigente (§2.8).
 
 **Logros.** Unos 35, en cuatro rarezas (común, raro, épico, legendario), algunos **ocultos** («???»
 con una pista críptica). Catálogo completo en el Anexo C. Desbloquear uno lanza el aviso de logro
@@ -2379,6 +2408,7 @@ tests de propiedades.
 | `season` | `seasonPoints(posicion, clasificada)`; `seasonStandings(resultados)` (puntos, victorias, podios, media y posición con ex aequo) y `seasonChampions(tabla)` |
 | `levels` | `xpForLevel(n)`; `levelOf(xp)`; `levelProgress(xp)` (barra del HUD); `rankTitle(nivel)` → **id de rango** (`crateDigger` … `otherPeople`; el texto sale de i18n con `rank.<id>`); `streakBonus` y `streakBonusPercent` |
 | `xp` | `xpFor(evento, contexto)`; `streakOf(historial)` (Fase 7) |
+| `replay` | `replaySealedWeeks(semanas)` → por cada semana sellada de una cuenta, en orden de número: el XP de resultado (con la racha en juego) y de oído de oro, la racha tras ella y los logros de resultado que se cumplen (una semana sin sellar en medio se salta). Lo usan el sellado y el re-sellado (§2.8) y el reprocesado |
 | `prng` | `hashOf(...partes)`, `sfc32`, `createRng(semilla)` con `next`, `int`, `pick`, `shuffle`; `rngFor(...partes)` para flujos con nombre |
 | `loudness` | `playbackGainDb(lufs)` (solo atenúa) |
 | `achievements` | Catálogo (Anexo C) como datos (id, rareza, oculto, clave de la pista, eventos que lo miran y fase de su disparador) + `evaluate(evento, contexto) → logros nuevos`; `nightOwlWindow(instante)` y `isRevetllaNight(instante)` en hora de Madrid |
@@ -2722,7 +2752,7 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | GET | `/api/weeks?cursor=` | Pública | Archivo de semanas selladas, de la más reciente a la más antigua, 20 por página (`next` es el cursor), con su sample, número de entradas y podio |
 | GET | `/api/weeks/:slug/entries?order=fair\|new\|random&genre=&bpm=&key=&unvoted=&seed=` | Pública | Entradas (sin autoría ni notas si no está sellada); con sesión incluye `myVote` y `mine`. `bpm` es un rango `90-110`; `seed` vuelve a barajar «Aleatorio» |
 | GET | `/api/weeks/:slug/ticker?since=` | Pública | Eventos de la crónica de la arena (§3.8.3): las 5 últimas entradas por su alias, los días que quedan hasta el cierre de la fase (enteros, hacia abajo) y los votos de toda la semana |
-| GET | `/api/weeks/:slug/results` | Pública | Snapshot vigente de resultados con la autoría revelada (las clasificadas primero), la revisión y `correctedAt` del último re-sellado, y con sesión «tu resultado» (`mine`). 404 si no está sellada |
+| GET | `/api/weeks/:slug/results` | Pública | Snapshot vigente de resultados con la autoría revelada (las clasificadas primero), la revisión y `correctedAt` del último re-sellado, y con sesión «tu resultado» (`mine`) y lo que el sellado le dio (`myGame`: XP de resultado y de oído de oro de la revisión vigente, si ganó el oído de oro y sus puntos de temporada; sin sesión, `null`). 404 si no está sellada |
 | POST | `/api/weeks/:slug/rules` | Verif. | Aceptar las bases de la semana |
 | POST | `/api/weeks/:slug/sample/download` | Verif. | URL firmada de descarga (`kind: original\|stems`), solo en `open` y con las bases aceptadas |
 | POST | `/api/uploads/sign` | Verif. | Parámetros firmados (`kind: entry\|entryCover\|avatar`); los del sample, en `/api/admin/samples/sign` |
@@ -2949,8 +2979,8 @@ calculado (`xpFor` de `packages/rules`):
 | `first_entry_of_week` | Primera entrada de la semana (una para toda la batalla) | la semana | la semana |
 | `vote` | Primer voto a cada entrada | la entrada | la semana |
 | `jury_complete` | Jurado completo | la semana | la semana |
-| `result` | Clasificar, top 10 o podio, al sellar | la semana | la semana |
-| `golden_ear` | Oído de oro, al sellar | la semana | la semana |
+| `result` | Clasificar, top 10 o podio, al sellar | la semana; un ajuste del re-sellado, `<semana>#<semana corregida>:<revisión>` | la semana |
+| `golden_ear` | Oído de oro, al sellar | la semana; un ajuste, como en `result` | la semana |
 | `producer_guess` | Acertar el productor (Fase 8) | la entrada | la semana |
 | `achievement` | Un logro (su rareza) | el id del logro | la del hecho que lo desbloquea, o `NULL` |
 
@@ -2964,9 +2994,20 @@ calculado (`xpFor` de `packages/rules`):
   cuenta tiene menos de 40 movimientos `vote` en esa semana): dos votos a la vez no lo pasan.
 - `week_id` sirve para el tope y para que lo público pueda contar solo lo de semanas selladas; el XP de un logro se
   refiere al logro (`kind = 'achievement'`, `ref` = su id), así que también se gana una sola vez.
-- `achievement_unlock` es una fila por cuenta y logro, para siempre (ningún logro se retira); `seen_at` dice si ya
-  vio su aviso. `streak_state` guarda lo de `advanceStreak` (la racha, la mejor, la última semana aplicada y la
-  temporada del comodín).
+- `achievement_unlock` es una fila por cuenta y logro (ningún logro se retira, salvo los de resultado en un
+  re-sellado, §2.8); `seen_at` dice si ya vio su aviso. `streak_state` guarda lo de `advanceStreak` (la racha, la
+  mejor, la última semana aplicada y la temporada del comodín); es una caché de lo que dan las semanas selladas.
+- **El sellado** (`modules/game/sealing.ts`, `sealingStatements`) recibe la clasificación ya calculada
+  (`computeSnapshot`, que no importa nada de la capa de juego) y prepara, para el `batch` del sellado o del re-sellado,
+  lo de §2.8: re-juega con `replaySealedWeeks` las semanas selladas de cada cuenta afectada (quien tiene entrada, XP
+  del sellado o un logro de resultado en las semanas re-jugadas, quien gana el oído de oro y quien tenía racha; solo
+  cuentas que existen) y escribe la diferencia con lo que dice el libro: un movimiento `result` o `golden_ear` por
+  semana (el primero con `ref` = la semana, los ajustes con la revisión), los logros nuevos, la retirada de los que ya
+  no se cumplen (su fila y su movimiento, las únicas sentencias que borran del libro), la racha y, por cuenta tocada,
+  `level_20` y la caché. Todo con la condición de que la semana quede sellada con esa revisión. El oído de oro de la
+  semana sale de sus votos válidos (los del snapshot) y solo de jurados con cuenta. Para las semanas que no se
+  re-juegan, el oído de oro es el que dice el libro. El sellado perezoso sella en orden de número y no hace nada con
+  una semana ya sellada.
 - Las sentencias las prepara el módulo **`game`** del servidor (`modules/game`) para el `batch` de quien provoca el
   hecho: `plan(cuenta, { xp, events, achievements, now })` da los movimientos (los de 0 XP fuera), los logros que
   desbloquean sus eventos (`evaluate`, contra los que ya tiene) con el XP de su rareza, `level_20` y, la última, la
@@ -3645,7 +3686,8 @@ con la pista).
 - **Por eventos.** Cada logro dice qué eventos lo miran: descargar el sample, la entrada que pasa a `active`, el
   perfil guardado, el voto, compartir una tarjeta, el sellado, el cierre de la temporada, el cambio de XP y, desde la
   Fase 8 y la 9, los secretos, «Adivina el productor» y la Elección del sello. Uno ya conseguido no se repite y
-  **ningún logro se retira** (como el XP en vivo, §2.10).
+  **ningún logro se retira** (como el XP en vivo, §2.10), salvo un logro de resultado cuando un re-sellado corrige la
+  semana que lo dio y ya no se cumple en ninguna semana sellada (§2.8): se retira con su XP.
 - **Recuentos.** «Entradas» son las semanas con una entrada que llegó a `active` (retirarla después no la
   descuenta). «Votos» son los que tiene la cuenta, uno por entrada (también los anulados; los quitados, no).
 - **Al subir.** `early_bird` es la primera entrada de la semana (§2.10). `last_minute`, una entrada creada en los 10
@@ -3653,7 +3695,7 @@ con la pista).
   en una semana dorada.
 - **Al votar.** `jury_full` sigue la regla del jurado completo del Anexo B: todas las entradas activas ajenas, si
   son 5 o más.
-- **Al sellar**, con la revisión del snapshot:
+- **Al sellar**, con la revisión vigente del snapshot (y otra vez en cada re-sellado, §2.8):
   - `podium` y `win`: top 3 y 1.ª posición, ex aequo incluidos. `win_3`: 3 victorias en total. `double`: 1.º en
     dos semanas de número consecutivo.
   - `unanimous`: media aritmética de los votos válidos de su entrada ≥ 4,8, con 10 o más.
@@ -3888,6 +3930,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.103 | **Tarea 7.10** (hueco G2 del plan 07, resuelto: el re-sellado y la capa de juego). §2.8: el sellado da, en su `batch` y a partir de la clasificación ya calculada, el XP de resultado, el oído de oro, la racha y los logros de resultado; todo es una función de las semanas selladas en su revisión vigente y **el libro la sigue**: cada (re-)sellado re-juega desde la semana corregida hasta la última y escribe la diferencia, con **ajustes que pueden restar** referidos a la revisión, los logros de resultado que ya no se cumplen en ninguna semana sellada **se retiran con su XP** y los que ahora se cumplen se ganan; lo ganado en vivo y `level_20` no cambian; sin cambios en el snapshot, nada cambia. `RF-RES-08` con `myGame`. §2.10: la racha la aplica el sellado (también a quien no participa y tenía racha); `streak_state` es caché. Anexo C: la excepción a «ningún logro se retira». §4.5: `replaySealedWeeks`. §4.10: `myGame` en los resultados. §4.11: la referencia de los ajustes, el módulo `sealing` y el sellado perezoso en orden de número. |
 | 2026-10-29 | 0.6.102 | **Tarea 7.9** (ganchos en vivo de la capa de juego). §2.10: dónde se gana en vivo, en el `batch` del hecho y solo si ocurre: la entrada que pasa a `active` (al registrar, al sustituir el audio o en el `tick`; `early_bird` va con la fila de la primera entrada), el voto (con el jurado completo al votar la última de las activas ajenas), la descarga del sample y el perfil guardado (datos o avatar); la racha en juego sale de las semanas selladas y, si la anterior cerró sin sellar, se sella antes. §4.8.4 paso 4 al día. §4.10: el voto, registrar la entrada y sustituir el audio responden lo ganado (`game: { xp, achievements, level }`). §4.11: la condición del hecho (`guard`) en cada sentencia, el XP de un logro solo si el logro está y qué cuenta cada gancho para `evaluate`. |
 | 2026-10-29 | 0.6.101 | **Tarea 7.15.** §4.14, registro de datos de la cuenta: la lista de módulos al día (semanas, entradas y votos, y la capa de juego con su libro de XP, logros y racha); entradas, votos y capa de juego comparten la sección `game` de la exportación, cuyas claves se juntan (`xpEvents`, `achievements` y `streak`, con la semana por su slug; el formato sigue en `beatbattle-export/1`, solo se añade `streak`); borrar la cuenta quita su XP, sus logros y su racha en el mismo `batch`, y lo que otras cuentas ganaron votando sus entradas se queda. |
 | 2026-10-29 | 0.6.100 | **Tarea 7.8.** §4.11, libro de XP: el módulo `game` del servidor prepara las sentencias para el `batch` del hecho (`plan` con los movimientos, los logros de sus eventos con su XP, `level_20` y la caché) y devuelve lo que gana la cuenta como vista previa; `level_20` se decide en SQL dentro del mismo `batch` con la suma del libro, así que también lo cruza el XP de otro logro; `voteGrant`, el XP de un voto contado en el libro. |

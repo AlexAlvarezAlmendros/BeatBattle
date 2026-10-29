@@ -28,6 +28,8 @@
 //   xp         `xpFor` con la tabla del Anexo B (racha en juego, topes, semana dorada); `streakOf` y
 //              `advanceStreak`, la racha con el comodín de temporada
 //   goldenEar  `goldenEar(jurado, votos)`, con la semana recalculada sin sus votos
+//   replay     `replaySealedWeeks`: lo que da el sellado (XP de resultado, oído de oro, racha y logros de resultado)
+//              re-jugado sobre las semanas selladas de una cuenta (tarea 7.10)
 //   season     `seasonStandings` (desempates y ex aequo) y `seasonChampions`; `isLastWeekOfSeason` en `calendar`
 //   achievements  el catálogo del Anexo C como datos y `evaluate(evento, contexto)`
 
@@ -44,6 +46,7 @@ export * from './loudness'
 export * from './phase'
 export * from './prng'
 export * from './ranking'
+export * from './replay'
 export * from './scoring'
 export * from './season'
 export * from './xp'

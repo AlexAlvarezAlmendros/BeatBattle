@@ -2,7 +2,6 @@ import {
   ACHIEVEMENT_IDS,
   type AchievementEvent,
   type AchievementId,
-  achievementById,
   evaluate,
   isAchievementId,
   isJuryComplete,
@@ -21,6 +20,7 @@ import type { Db } from '../../db/client'
 import { entry, vote, week, type XpEventKind } from '../../db/schema'
 import { sealDueWeeks } from '../weeks/seal'
 import {
+  achievementXp,
   existingRefs,
   type Guard,
   kindCount,
@@ -111,10 +111,6 @@ const GLOBAL_KINDS: ReadonlySet<XpEventKind> = new Set(['first_entry_of_week'])
 
 const catalogOrder = (a: AchievementId, b: AchievementId) =>
   ACHIEVEMENT_IDS.indexOf(a) - ACHIEVEMENT_IDS.indexOf(b)
-
-/** XP de un logro: el de su rareza, sin racha ni semana dorada (Anexo B). */
-export const achievementXp = (id: AchievementId) =>
-  xpFor({ kind: 'achievement', rarity: achievementById(id).rarity }, { goldenWeek: false, streakWeeks: 0 })
 
 const and2 = (a: Guard, b: Guard): Guard => (a && b ? sql`(${a}) AND (${b})` : (a ?? b))
 
@@ -251,7 +247,7 @@ export function createGameService(deps: GameDeps) {
    * semana anterior a una en juego siempre ha cerrado ya, y tiene que contar.
    */
   async function streakBefore(userId: string, number: number, now: number): Promise<StreakState> {
-    await sealDueWeeks(db, { now, holder: deps.newId() })
+    await sealDueWeeks(db, { now, holder: deps.newId(), newId: deps.newId })
     // Con los nombres de las tablas escritos: dentro de la subconsulta, Drizzle no cualifica las columnas de `week`.
     const qualified = sql<number>`EXISTS (
       SELECT 1 FROM result INNER JOIN entry ON entry.id = result.entry_id

@@ -1,14 +1,15 @@
 import { isoWeekLabel, localDateOf } from '@beatbattle/rules'
-import type { Archive, DisqualifyRequest, WeekResults } from '@beatbattle/shared'
-import { and, desc, eq, inArray, isNotNull, lt, lte } from 'drizzle-orm'
+import type { Archive, DisqualifyRequest, MyWeekGame, WeekResults } from '@beatbattle/shared'
+import { and, desc, eq, inArray, isNotNull, lt, lte, sum } from 'drizzle-orm'
 import type { Db } from '../../db/client'
-import { auditLog, entry, sample, week } from '../../db/schema'
+import { auditLog, entry, sample, week, xpEvent } from '../../db/schema'
 import { auditStatement } from '../../lib/audit'
 import { appError } from '../../lib/errors'
 import type { EntriesService } from '../entries/service'
+import { sealingStatements } from '../game/sealing'
 import type { SampleStorage } from '../storage/samples'
 import { sealDueWeeks } from '../weeks/seal'
-import { snapshotOf, snapshotStatements } from './snapshot'
+import { computeSnapshot, snapshotInserts, snapshotOf } from './snapshot'
 
 /** Semanas por página del archivo (`RF-ARC-01`: con 60, la página 2 empieza en la 21.ª). */
 export const ARCHIVE_PAGE_SIZE = 20
@@ -48,6 +49,26 @@ export function createResultsService(deps: ResultsDeps) {
       .orderBy(desc(auditLog.createdAt))
       .limit(1)
     return last?.at ?? null
+  }
+
+  /**
+   * Lo que el sellado le ha dado a quien mira en la semana (tarea 7.10): el XP de resultado y de oído de oro del libro
+   * (con los ajustes de los re-sellados, es el de la revisión vigente) y sus puntos de temporada.
+   */
+  async function myGame(userId: string, weekId: string, seasonPoints: number): Promise<MyWeekGame> {
+    const rows = await db
+      .select({ kind: xpEvent.kind, amount: sum(xpEvent.amount) })
+      .from(xpEvent)
+      .where(
+        and(
+          eq(xpEvent.userId, userId),
+          eq(xpEvent.weekId, weekId),
+          inArray(xpEvent.kind, ['result', 'golden_ear']),
+        ),
+      )
+      .groupBy(xpEvent.kind)
+    const of = (kind: string) => Number(rows.find((row) => row.kind === kind)?.amount ?? 0)
+    return { xp: of('result') + of('golden_ear'), goldenEar: of('golden_ear') > 0, seasonPoints }
   }
 
   return {
@@ -90,6 +111,7 @@ export function createResultsService(deps: ResultsDeps) {
           if (pa !== pb) return pa - pb
           return (byId.get(a.entry.id)?.submittedAt ?? 0) - (byId.get(b.entry.id)?.submittedAt ?? 0)
         })
+      const mine = viewerId ? (list.find((row) => byId.get(row.entry.id)?.userId === viewerId) ?? null) : null
       const [s] = await db.select({ title: sample.title }).from(sample).where(eq(sample.id, w.sampleId))
       return {
         week: {
@@ -101,7 +123,8 @@ export function createResultsService(deps: ResultsDeps) {
           correctedAt: await correctedAt(w),
         },
         rows: list,
-        mine: viewerId ? (list.find((row) => byId.get(row.entry.id)?.userId === viewerId) ?? null) : null,
+        mine,
+        myGame: viewerId ? await myGame(viewerId, w.id, mine?.result.seasonPoints ?? 0) : null,
       }
     },
 
@@ -202,20 +225,24 @@ export function createResultsService(deps: ResultsDeps) {
 
     /**
      * `POST /api/admin/weeks/:slug/reseal` (`RF-RES-06`): una revisión nueva del snapshot con los votos válidos
-     * de ahora, su auditoría y el aviso público («Clasificación corregida el …»). La anterior se conserva.
+     * de ahora, su auditoría y el aviso público («Clasificación corregida el …»). La anterior se conserva. La capa
+     * de juego del sellado (tarea 7.10, hueco G2) se re-juega desde esta semana y el libro queda igual a lo que da
+     * la revisión nueva, en el mismo `batch`.
      */
     async reseal(adminId: string, slug: string, now: number): Promise<{ revision: number }> {
       const [w] = await db.select().from(week).where(eq(week.slug, slug))
       if (!w || w.sealedAt === null) throw appError('NOT_FOUND', 'Esa semana aún no está sellada.')
       const revision = w.resultRevision + 1
-      const rows = await snapshotStatements(db, w.id, revision)
+      const snapshot = await computeSnapshot(db, w.id)
+      const game = await sealingStatements(db, { weekId: w.id, revision, snapshot, now, newId: deps.newId })
       const [updated] = await db.batch([
         db
           .update(week)
           .set({ resultRevision: revision })
           .where(and(eq(week.id, w.id), eq(week.resultRevision, w.resultRevision)))
           .returning({ id: week.id }),
-        ...rows,
+        ...snapshotInserts(db, w.id, revision, snapshot.rows),
+        ...game,
         auditStatement(db, {
           id: deps.newId(),
           actorId: adminId,

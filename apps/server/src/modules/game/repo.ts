@@ -1,4 +1,12 @@
-import { LEVEL_MAX, STREAK_START, type StreakState, xpForLevel } from '@beatbattle/rules'
+import {
+  type AchievementId,
+  achievementById,
+  LEVEL_MAX,
+  STREAK_START,
+  type StreakState,
+  xpFor,
+  xpForLevel,
+} from '@beatbattle/rules'
 import { and, count, eq, inArray, type SQL, sql } from 'drizzle-orm'
 import type { BatchStatement } from '../../db/batch'
 import type { Db } from '../../db/client'
@@ -18,6 +26,10 @@ import { achievementUnlock, producerProfile, streakState, type XpEventKind, xpEv
  * restar y la retirada de un logro de resultado con su XP (§2.8, `withdrawStatements`). El borrado de la cuenta es del
  * registro de datos (`modules/account`).
  */
+
+/** XP de un logro: el de su rareza, sin racha ni semana dorada (Anexo B). */
+export const achievementXp = (id: AchievementId) =>
+  xpFor({ kind: 'achievement', rarity: achievementById(id).rarity }, { goldenWeek: false, streakWeeks: 0 })
 
 /** Condición del hecho (ver arriba), o ninguna. */
 export type Guard = SQL | undefined
