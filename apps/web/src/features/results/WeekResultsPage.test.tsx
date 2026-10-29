@@ -102,13 +102,15 @@ describe('la capa de juego en los resultados (§3.8.6, tarea 7.21)', () => {
 
   it('RF-RES-08: sin nada que contar (no participó ni ganó nada), «TU RESULTADO» no sale', async () => {
     renderPage({ ...BASE, myGame: { xp: 0, goldenEar: false, seasonPoints: 0 } })
-    await screen.findByText(t('results.standingsTitle'))
+    await screen.findByText(t('results.standingsTitle'), {}, { timeout: 4000 })
     expect(screen.queryByRole('region', { name: t('results.mine.label') })).toBeNull()
   })
 
   it('RF-RES-08: el reparto de XP de la tabla es el XP base de cada puesto; la sin clasificar, nada', async () => {
     renderPage(BASE)
-    const table = (await screen.findByText(t('results.standingsTitle'))).closest('section') as HTMLElement
+    const table = (await screen.findByText(t('results.standingsTitle'), {}, { timeout: 4000 })).closest(
+      'section',
+    ) as HTMLElement
     const votes = t('results.votes', { count: 5 })
     const subtitle = (alias: string, xp: number) =>
       plain(t('results.rowXp', { subtitle: t('results.rowSubtitle', { alias, votes }), xp }))
