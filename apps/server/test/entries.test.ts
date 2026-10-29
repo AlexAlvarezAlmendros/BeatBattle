@@ -406,6 +406,40 @@ describe('la entrada: ficha pública, editar, sustituir y retirar (4.7)', () => 
     expect((await patch(cookie, own.id, { title: 'Tarde' })).json().error.code).toBe('SUBMISSIONS_CLOSED')
   })
 
+  it('RF-ENT-13: la casilla del reto extra, solo si la semana tiene reto; la ve su dueño y se edita hasta el cierre', async () => {
+    const { cookie } = await openWeek()
+    const { intentId } = await upload(cookie)
+    // Sin reto, marcarla → 422 y no se crea nada.
+    await t.db.update(week).set({ challenge: null })
+    const refused = await create(cookie, intentId, { challengeClaimed: true })
+    expect(refused.statusCode).toBe(422)
+    expect(refused.json().error).toMatchObject({
+      code: 'VALIDATION_FAILED',
+      details: [{ path: 'body.challengeClaimed' }],
+    })
+    expect(await t.db.select().from(entry)).toHaveLength(0)
+    // Con reto, sí; por defecto, desmarcada.
+    await t.db.update(week).set({ challenge: 'Usa solo el primer compás' })
+    const own = (await create(cookie, intentId, { challengeClaimed: true })).json().data
+    expect(own.challengeClaimed).toBe(true)
+    expect((await get(own.id, cookie)).body).not.toContain('challengeClaimed')
+    expect((await patch(cookie, own.id, { challengeClaimed: false })).json().data.challengeClaimed).toBe(
+      false,
+    )
+    // Si la semana se queda sin reto, desmarcar vale y marcar no.
+    await t.db.update(week).set({ challenge: null })
+    expect((await patch(cookie, own.id, { challengeClaimed: true })).statusCode).toBe(422)
+    expect((await patch(cookie, own.id, { challengeClaimed: false })).statusCode).toBe(200)
+    await t.db.update(week).set({ challenge: 'Usa solo el primer compás' })
+    expect((await patch(cookie, own.id, { challengeClaimed: true })).json().data.challengeClaimed).toBe(true)
+    const [row] = await t.db.select({ claimed: entry.challengeClaimed }).from(entry)
+    expect(row?.claimed).toBe(true)
+    t.clock.set(W42.submitEndsAt)
+    expect((await patch(cookie, own.id, { challengeClaimed: false })).json().error.code).toBe(
+      'SUBMISSIONS_CLOSED',
+    )
+  })
+
   it('RF-ENT-08: sin votos se sustituye el audio (mismo alias y recibo, entry.changed y el anterior borrado)', async () => {
     const { cookie } = await openWeek()
     const first = await upload(cookie)

@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.97 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.99 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -361,7 +361,10 @@ extra y 8 *chops* (marcas de inicio y fin) para el kit sonoro de la semana (§3.
    DAW (lista + «otro»), etiquetas de género (hasta 3, de la misma lista que la web del sello: Trap,
    Jerk, Hoodtrap, Drill, Boom Bap, Crank, Reggaetón, Electronic, Afrobeats, Club, Dancehall, Jersey,
    Amapiano…), descripción (280 caracteres) y portada propia opcional. Sin portada propia se usa la
-   **portada generativa** (§3.4.5). Casilla de declaración: «He usado el sample de la semana y el
+   **portada generativa** (§3.4.5). Si la semana tiene **reto extra**, una casilla desmarcada «Cumplo el reto
+   extra» (el logro `challenge`, Anexo C): la marca es del productor y **nadie más la ve hasta el sellado**, ni en
+   la ficha pública ni en la lista, porque distinguiría a una entrada en pleno voto ciego (§1.3); sellada la
+   semana, sale con el resultado de la entrada. Casilla de declaración: «He usado el sample de la semana y el
    resto del material es mío o libre de derechos».
 5. **Subida directa a Cloudinary** con parámetros firmados por el servidor (§4.8), con barra de
    progreso real (bytes enviados), velocidad, tiempo restante y opción de cancelar. El progreso suena
@@ -372,8 +375,8 @@ extra y 8 *chops* (marcas de inicio y fin) para el kit sonoro de la semana (§3.
 7. **Celebración.** Animación de «entrada en la batalla» (§3.8.5), +XP y el posible logro (desde la
    Fase 7, con la capa de juego) y el **recibo por email** con el informe técnico de la medición (§2.12.1).
 
-**Después de subir** el productor puede editar título, descripción, etiquetas, BPM, tonalidad y
-portada hasta el cierre de envíos. Puede **sustituir el audio** solo mientras la entrada no tenga
+**Después de subir** el productor puede editar título, descripción, etiquetas, BPM, tonalidad,
+portada y la casilla del reto hasta el cierre de envíos. Puede **sustituir el audio** solo mientras la entrada no tenga
 votos, y **retirarla** en cualquier momento hasta el cierre (se borra el audio; si tenía votos,
 se pierden).
 
@@ -394,6 +397,7 @@ las bases) y la portada propia queda oculta hasta el sellado: se muestra la gene
 | `RF-ENT-10` | En voto ciego, la portada propia y la identidad no se exponen antes del sellado, ni en la UI ni en la API pública | La respuesta pública de una entrada en una semana sin sellar no contiene `userId`, `username`, `avatar` ni `coverUrl` propio |
 | `RF-ENT-11` | Detección de audio duplicado por su huella (MD5 que calcula el servidor al medir, §4.8.4) | Dos cuentas que suben el mismo fichero → la segunda se crea, pero queda marcada para revisión del admin |
 | `RF-ENT-12` | La subida reintenta automáticamente ante cortes de red (3 intentos con espera exponencial) y conserva la ficha rellenada | Cortar la red al 50 % y recuperarla → la subida continúa o se reintenta sin perder el formulario |
+| `RF-ENT-13` | La casilla del reto extra solo se marca si la semana tiene reto y, hasta el sellado, solo la ve su dueño | Marcarla en una semana sin reto → 422 `VALIDATION_FAILED` (`body.challengeClaimed`); desmarcarla, siempre. Antes del sellado, ninguna respuesta lleva `challengeClaimed` salvo la entrada propia (`GET /api/weeks/:slug/entries/mine` y lo que devuelven registrar y editar); sellada, la ficha la lleva en `result` |
 
 ### 2.6 Escuchar: reproductor, lista y ficha de entrada
 
@@ -2707,10 +2711,10 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | POST | `/api/weeks/:slug/rules` | Verif. | Aceptar las bases de la semana |
 | POST | `/api/weeks/:slug/sample/download` | Verif. | URL firmada de descarga (`kind: original\|stems`), solo en `open` y con las bases aceptadas |
 | POST | `/api/uploads/sign` | Verif. | Parámetros firmados (`kind: entry\|entryCover\|avatar`); los del sample, en `/api/admin/samples/sign` |
-| POST | `/api/weeks/:slug/entries` | Verif. | Registrar la entrada tras la subida |
+| POST | `/api/weeks/:slug/entries` | Verif. | Registrar la entrada tras la subida (con la casilla del reto, `challengeClaimed`, si la semana tiene reto: `RF-ENT-13`) |
 | GET | `/api/weeks/:slug/entries/mine` | Sesión | La entrada propia de la semana, con su estado, recibo, medición y si se puede sustituir el audio (`/subir` en edición) |
-| GET | `/api/entries/:id` | Pública | Ficha (respeta el voto ciego) |
-| PATCH | `/api/entries/:id` | Dueño | Editar la ficha (hasta el cierre de envíos) |
+| GET | `/api/entries/:id` | Pública | Ficha (respeta el voto ciego); sellada, con su resultado y la casilla del reto (`result.challengeClaimed`) |
+| PATCH | `/api/entries/:id` | Dueño | Editar la ficha y la casilla del reto (hasta el cierre de envíos) |
 | PUT | `/api/entries/:id/audio` | Dueño | Sustituir el audio (sin votos) |
 | DELETE | `/api/entries/:id` | Dueño | Retirar |
 | GET | `/api/entries/:id/stats` | Dueño | Votos y escuchas propios (sin media) |
@@ -2834,6 +2838,7 @@ CREATE TABLE entry (
   status_reason TEXT,
   play_count INTEGER NOT NULL DEFAULT 0,
   duplicate_of TEXT,                                   -- marcado por etag
+  challenge_claimed INTEGER NOT NULL DEFAULT 0,        -- «Cumplo el reto extra»; oculta hasta el sellado (RF-ENT-13)
   submitted_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
 );
 CREATE UNIQUE INDEX entry_one_per_week ON entry(week_id, user_id)
@@ -2871,16 +2876,24 @@ CREATE TABLE label_pick (week_id TEXT PRIMARY KEY, entry_id TEXT NOT NULL, note 
   picked_by TEXT NOT NULL, picked_at INTEGER NOT NULL);
 
 CREATE TABLE xp_event (
-  id TEXT PRIMARY KEY, user_id TEXT NOT NULL, kind TEXT NOT NULL, ref TEXT NOT NULL,
-  amount INTEGER NOT NULL, created_at INTEGER NOT NULL,
-  UNIQUE (user_id, kind, ref)
+  id TEXT PRIMARY KEY, user_id TEXT NOT NULL,
+  kind TEXT NOT NULL, ref TEXT NOT NULL,               -- tipo y referencia: tabla del libro de XP, abajo
+  week_id TEXT,                                        -- semana del hecho (NULL si no tiene)
+  amount INTEGER NOT NULL, created_at INTEGER NOT NULL
 );
+CREATE UNIQUE INDEX xp_event_once ON xp_event(user_id, kind, ref);
+CREATE UNIQUE INDEX xp_event_first_entry_of_week ON xp_event(ref)
+  WHERE kind = 'first_entry_of_week';                 -- una por semana para toda la batalla
+CREATE INDEX xp_event_user_week ON xp_event(user_id, week_id, kind);
 
-CREATE TABLE achievement_unlock (user_id TEXT, achievement_id TEXT, ref TEXT,
-  unlocked_at INTEGER NOT NULL, seen_at INTEGER, PRIMARY KEY (user_id, achievement_id));
+CREATE TABLE achievement_unlock (user_id TEXT NOT NULL, achievement_id TEXT NOT NULL,
+  ref TEXT, week_id TEXT,                              -- lo que lo desbloqueó y su semana (NULL si no tiene)
+  unlocked_at INTEGER NOT NULL, seen_at INTEGER,       -- seen_at: el aviso ya visto (§3.8.8)
+  PRIMARY KEY (user_id, achievement_id));
 
 CREATE TABLE streak_state (user_id TEXT PRIMARY KEY, current INTEGER NOT NULL, best INTEGER NOT NULL,
-  last_week_number INTEGER, joker_season TEXT);       -- temporada en la que gastó el comodín
+  last_week_number INTEGER,                            -- última semana sellada aplicada (advanceStreak)
+  joker_season TEXT);                                  -- temporada en la que gastó el comodín
 
 CREATE TABLE guess (user_id TEXT, entry_id TEXT, guessed_user_id TEXT NOT NULL,
   created_at INTEGER NOT NULL, correct INTEGER, PRIMARY KEY (user_id, entry_id));
@@ -2911,6 +2924,34 @@ CREATE TABLE audit_log (id TEXT PRIMARY KEY, actor_id TEXT NOT NULL, action TEXT
 
 **Voto** (`PUT /vote`) en un solo `batch` condicionado: comprueba fase, entrada activa y ajena, y
 recibo cualificado; después hace un `INSERT … ON CONFLICT(user_id, entry_id) DO UPDATE`.
+
+**Libro de XP** (`xp_event`, §2.10, `RF-GAME-01`). Un movimiento por cuenta, tipo y referencia, con el importe ya
+calculado (`xpFor` de `packages/rules`):
+
+| `kind` | Evento (Anexo B) | `ref` | `week_id` |
+|---|---|---|---|
+| `entry` | Subir (la entrada pasa a `active`) | la semana | la semana |
+| `first_entry_of_week` | Primera entrada de la semana (una para toda la batalla) | la semana | la semana |
+| `vote` | Primer voto a cada entrada | la entrada | la semana |
+| `jury_complete` | Jurado completo | la semana | la semana |
+| `result` | Clasificar, top 10 o podio, al sellar | la semana | la semana |
+| `golden_ear` | Oído de oro, al sellar | la semana | la semana |
+| `producer_guess` | Acertar el productor (Fase 8) | la entrada | la semana |
+| `achievement` | Un logro (su rareza) | el id del logro | la del hecho que lo desbloquea, o `NULL` |
+
+- Todo se escribe con `INSERT … ON CONFLICT DO NOTHING` en el **mismo `batch` que el hecho** que lo provoca (como la
+  cola de email, §4.19.3): repetir un evento, re-ejecutar un sellado o reprocesar no suma nada. No se guardan
+  movimientos de 0 XP (un voto repetido o pasado el tope no deja fila).
+- `producer_profile.xp` es una **caché**: el mismo `batch` la recalcula como la suma del libro de la cuenta
+  (`UPDATE … SET xp = (SELECT coalesce(sum(amount), 0) …)`), así que nunca se desvía aunque un movimiento ya
+  existiera.
+- El **tope semanal** de votos con XP (40) se cuenta en el libro, dentro del propio `INSERT` (solo entra si la
+  cuenta tiene menos de 40 movimientos `vote` en esa semana): dos votos a la vez no lo pasan.
+- `week_id` sirve para el tope y para que lo público pueda contar solo lo de semanas selladas; el XP de un logro se
+  refiere al logro (`kind = 'achievement'`, `ref` = su id), así que también se gana una sola vez.
+- `achievement_unlock` es una fila por cuenta y logro, para siempre (ningún logro se retira); `seen_at` dice si ya
+  vio su aviso. `streak_state` guarda lo de `advanceStreak` (la racha, la mejor, la última semana aplicada y la
+  temporada del comodín).
 
 ### 4.12 Tiempo, calendario y tareas programadas
 
@@ -3581,9 +3622,9 @@ con la pista).
     en la siguiente por número.
   - `streak_3`, `streak_8` y `streak_26`: la racha de §2.10 (la semana salvada por el comodín no suma).
   - `golden_ear`: el oído de oro de esa semana. `oracle`: oído de oro en 3 semanas de número consecutivo.
-  - `challenge`: la entrada marcó en su ficha que cumple el reto extra de la semana (solo se puede si la semana
-    tiene reto) y queda en el top 10. La marca no se enseña a nadie hasta el sellado: distinguiría a una entrada en
-    pleno voto ciego (§1.3).
+  - `challenge`: la entrada marcó en su ficha que cumple el reto extra de la semana (`entry.challenge_claimed`; solo
+    se puede si la semana tiene reto, §2.5) y queda en el top 10. La marca no se enseña a nadie más que a su dueño
+    hasta el sellado: distinguiría a una entrada en pleno voto ciego (§1.3, `RF-ENT-13`).
 - **Franjas horarias, en hora de Madrid** (la de la semana) y con el reloj del servidor, que es quien las comprueba:
   el del navegador se puede adelantar. `night_owl` pide votar 10 entradas distintas (votos nuevos, no cambios)
   entre las 03:00 y las 05:00 de una misma noche. `revetlla`, una visita entre las 21:00 del 23 de junio y las 06:00
@@ -3808,6 +3849,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.99 | **Tarea 7.7** (hueco G4 del plan 07, resuelto). §2.5: la ficha lleva la casilla «Cumplo el reto extra» solo si la semana tiene reto, editable hasta el cierre de envíos como el resto; la marca solo la ve su dueño hasta el sellado y después va con el resultado (`RF-ENT-13`, nuevo). §4.10: registrar y editar aceptan `challengeClaimed` y la ficha sellada lo lleva en `result`. §4.11: `entry.challenge_claimed`; `xp_event` con `week_id` (para el tope de votos y para lo público), el índice único por cuenta, tipo y referencia y uno parcial que deja una sola «primera entrada» por semana; `achievement_unlock` con `week_id`; la tabla de tipos y referencias del **libro de XP**, escrito con `ON CONFLICT DO NOTHING` en el `batch` del hecho, sin filas a 0, con `producer_profile.xp` recalculada como la suma del libro en el mismo `batch` y el tope semanal contado dentro del `INSERT`. Anexo C: `challenge` apunta a la columna. Migración `0008_capa_de_juego`, solo aditiva. |
 | 2026-10-29 | 0.6.97 | **Tarea 7.5** (huecos G8 y G4, la parte de la regla, del plan 07). Anexo C, «Cómo se evalúan»: por eventos, sin repetir ni retirar ningún logro; qué cuentan «entradas» y «votos»; la ventana de `last_minute` con `submitted_at`; `comeback` por debajo de la mediana de las clasificadas; `double` y `oracle` por semanas de número consecutivo; `challenge`, marcar el reto extra en la ficha y quedar en el top 10, con la marca oculta hasta el sellado (§1.3). **Las franjas horarias de los logros van en hora de Madrid y con el reloj del servidor** (`night_owl`: 10 votos a entradas distintas entre las 03:00 y las 05:00 de una misma noche; `revetlla`: de las 21:00 del 23 de junio a las 06:00 del 24). Los umbrales de los secretos de la Fase 8. §4.5: qué lleva el catálogo y `nightOwlWindow` e `isRevetllaNight`. |
 | 2026-10-29 | 0.6.96 | **Tarea 7.4** (hueco G10 del plan 07). §2.9: entra en la clasificación de la temporada quien tiene al menos una entrada clasificada en una semana sellada (quien solo tiene semanas sin clasificar, no); victorias y podios cuentan los ex aequo; la puntuación media es la de la puntuación del snapshot de sus entradas clasificadas, comparada exacta; con todo empatado comparten posición y en la primera son campeones ex aequo. La última semana de una temporada es la de su último lunes. §4.5: `seasonStandings`, `seasonChampions` e `isLastWeekOfSeason`. |
 | 2026-10-29 | 0.6.95 | **Tarea 7.3** (hueco G9 del plan 07). §2.10: el oído de oro correlaciona con la **puntuación** de las entradas que votó (no con la posición, que las sin clasificar no tienen), con ≥ 8 votos válidos, y recalcula la semana **como si no hubiera votado**: sin sus votos tampoco en la media `m`. Puntuaciones exactas, sin redondear; sin ρ definida no hay oído de oro. §4.5: `goldenEar(jurado, votosDeLaSemana)`. Anexo G: el caso de `RF-GAME-06` (no gana con ρ = 22/√1501, habría ganado con sus votos; gana cambiando una estrella). |

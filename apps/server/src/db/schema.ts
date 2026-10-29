@@ -404,6 +404,11 @@ export const entry = sqliteTable(
     playCount: integer('play_count').notNull().default(0),
     /** Marcada por `etag` igual al de otra entrada (`RF-ENT-11`). */
     duplicateOf: text('duplicate_of'),
+    /**
+     * Marcó en su ficha que cumple el reto extra de la semana (solo si la semana tiene reto; logro `challenge`).
+     * Nadie más que su dueño lo ve hasta el sellado (§1.3, `RF-ENT-13`).
+     */
+    challengeClaimed: integer('challenge_claimed', { mode: 'boolean' }).notNull().default(false),
     submittedAt: integer('submitted_at').notNull(),
     updatedAt: integer('updated_at').notNull(),
   },
@@ -536,4 +541,76 @@ export const jobState = sqliteTable('job_state', {
   /** JSON con lo que la tarea necesite. */
   value: text('value').notNull(),
   updatedAt: integer('updated_at').notNull(),
+})
+
+// ── Capa de juego (guía §2.10, §4.11; tarea 7.7) ────────────────────────────────────────────────
+
+/** Tipos de movimiento del libro de XP (Anexo B), cada uno con su referencia (§4.11). */
+export const XP_EVENT_KINDS = [
+  'entry',
+  'first_entry_of_week',
+  'vote',
+  'jury_complete',
+  'result',
+  'golden_ear',
+  'producer_guess',
+  'achievement',
+] as const
+export type XpEventKind = (typeof XP_EVENT_KINDS)[number]
+
+/**
+ * Libro de XP (§2.10, §4.11; `RF-GAME-01`): un movimiento por cuenta, tipo y referencia, así que repetir un evento
+ * (`INSERT … ON CONFLICT DO NOTHING`) nunca suma dos veces. `producer_profile.xp` es la caché de su suma y se
+ * recalcula en el mismo `batch` (módulo `game`). La primera entrada de la semana es una por semana para toda la
+ * batalla (índice parcial). `week_id`: la semana del hecho (`null` en lo que no tiene semana), para el tope de
+ * votos con XP y para lo que se enseña en público.
+ */
+export const xpEvent = sqliteTable(
+  'xp_event',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull(),
+    kind: text('kind', { enum: XP_EVENT_KINDS }).notNull(),
+    ref: text('ref').notNull(),
+    weekId: text('week_id'),
+    amount: integer('amount').notNull(),
+    createdAt: integer('created_at').notNull(),
+  },
+  (table) => [
+    uniqueIndex('xp_event_once').on(table.userId, table.kind, table.ref),
+    uniqueIndex('xp_event_first_entry_of_week')
+      .on(table.ref)
+      .where(sql`${table.kind} = 'first_entry_of_week'`),
+    index('xp_event_user_week').on(table.userId, table.weekId, table.kind),
+  ],
+)
+
+/**
+ * Logros desbloqueados (§2.10, Anexo C; `RF-GAME-05`): uno por cuenta y logro, para siempre (ningún logro se
+ * retira). `ref`: lo que lo desbloqueó (la entrada, la semana…); `week_id`, su semana si la tiene; `seen_at`, cuándo
+ * vio el aviso (una sola vez, §3.8.8).
+ */
+export const achievementUnlock = sqliteTable(
+  'achievement_unlock',
+  {
+    userId: text('user_id').notNull(),
+    achievementId: text('achievement_id').notNull(),
+    ref: text('ref'),
+    weekId: text('week_id'),
+    unlockedAt: integer('unlocked_at').notNull(),
+    seenAt: integer('seen_at'),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.achievementId] })],
+)
+
+/**
+ * Racha de una cuenta (§2.10, `RF-GAME-04`): la de `advanceStreak` de `@beatbattle/rules`, con la última semana
+ * sellada aplicada (`last_week_number`, para no contarla dos veces) y la temporada en la que gastó el comodín.
+ */
+export const streakState = sqliteTable('streak_state', {
+  userId: text('user_id').primaryKey(),
+  current: integer('current').notNull(),
+  best: integer('best').notNull(),
+  lastWeekNumber: integer('last_week_number'),
+  jokerSeason: text('joker_season'),
 })

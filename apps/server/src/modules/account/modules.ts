@@ -258,6 +258,7 @@ const entries: AccountDataModule = {
         loudnessLufs: entry.loudnessLufs,
         truePeakDb: entry.truePeakDb,
         receiptNumber: entry.receiptNumber,
+        challengeClaimed: entry.challengeClaimed,
         status: entry.status,
         submittedAt: entry.submittedAt,
         updatedAt: entry.updatedAt,

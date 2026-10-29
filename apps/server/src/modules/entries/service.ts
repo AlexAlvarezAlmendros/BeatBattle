@@ -293,6 +293,16 @@ export function createEntriesService(deps: EntriesDeps) {
     return twin
   }
 
+  /**
+   * La casilla del reto extra (§2.5, `RF-ENT-13`) solo se puede marcar si la semana tiene reto; desmarcarla, siempre.
+   */
+  function assertChallengeClaim(w: WeekRow, claimed: boolean | undefined): void {
+    if (claimed === true && w.challenge === null)
+      throw appError('VALIDATION_FAILED', 'Esta semana no tiene reto extra.', {
+        details: [{ path: 'body.challengeClaimed', message: 'la semana no tiene reto' }],
+      })
+  }
+
   function receiptOf(row: Pick<WeekRow, 'startsAt'>, receiptNumber: number): string {
     return receiptCode(isoWeekLabel(localDateOf(row.startsAt)), receiptNumber)
   }
@@ -344,6 +354,8 @@ export function createEntriesService(deps: EntriesDeps) {
               scoreMilli: found.scoreMilli,
               votes: found.votes,
               histogram: JSON.parse(found.histogram) as [number, number, number, number, number],
+              // La casilla del reto, solo con la semana sellada (`RF-ENT-13`).
+              challengeClaimed: row.challengeClaimed,
             },
           }
         : base
@@ -391,6 +403,7 @@ export function createEntriesService(deps: EntriesDeps) {
       loudnessLufs: row.loudnessLufs,
       truePeakDb: row.truePeakDb,
       ownCoverUrl: row.coverPublicId ? storage().coverUrl(row.coverPublicId, 512) : null,
+      challengeClaimed: row.challengeClaimed,
       canReplaceAudio: votes === 0 && canSubmit(w, now),
       submittedAt: row.submittedAt,
       updatedAt: row.updatedAt,
@@ -525,6 +538,7 @@ export function createEntriesService(deps: EntriesDeps) {
      */
     async create(userId: string, slug: string, input: EntryCreate, now: number): Promise<OwnEntry> {
       const w = await submittableWeek(userId, slug, now)
+      assertChallengeClaim(w, input.challengeClaimed)
       const intent = await usableIntent(userId, input.intentId, 'entry', w.id, now)
       if (intent.entryId !== null)
         throw appError('UPLOAD_INTENT_INVALID', 'Esta subida era para sustituir el audio de tu entrada.')
@@ -585,6 +599,7 @@ export function createEntriesService(deps: EntriesDeps) {
         statusReason: null,
         playCount: 0,
         duplicateOf: twin?.id ?? null,
+        challengeClaimed: input.challengeClaimed ?? false,
         submittedAt: now,
         updatedAt: now,
       }
@@ -736,6 +751,7 @@ export function createEntriesService(deps: EntriesDeps) {
      */
     async update(userId: string, id: string, input: EntryUpdate, now: number): Promise<OwnEntry> {
       const { row, w } = await ownedLive(userId, id, now)
+      assertChallengeClaim(w, input.challengeClaimed)
       let coverPublicId = row.coverPublicId
       let coverIntent: IntentRow | null = null
       if (input.coverIntentId !== undefined) {
@@ -756,6 +772,7 @@ export function createEntriesService(deps: EntriesDeps) {
         ...(input.daw !== undefined ? { daw: input.daw } : {}),
         ...(input.genres !== undefined ? { tags: JSON.stringify(input.genres) } : {}),
         ...(input.description !== undefined ? { description: input.description } : {}),
+        ...(input.challengeClaimed !== undefined ? { challengeClaimed: input.challengeClaimed } : {}),
         coverPublicId,
         updatedAt: now,
       }
