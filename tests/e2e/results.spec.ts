@@ -84,6 +84,9 @@ test('hito de la Fase 6: se vota, se sella, Lunes de batalla, resultados, ceremo
     const mail = await tickUntilMail(first.page.request, clock.api, first.email, 'Nuevo drop')
     expect(mail?.subject).toMatch(/^1\.º en la #\d+ · Nuevo drop: /)
     expect(mail?.text).toContain('Ver la ceremonia')
+    // «Tu partida» (7.31): el XP que le ha dado el sellado y su racha.
+    expect(mail?.text).toMatch(/TU PARTIDA · \+[\d.]+ XP/)
+    expect(mail?.text).toMatch(/Racha 1 semana/)
     const other = await tickUntilMail(second.page.request, clock.api, second.email, 'Nuevo drop')
     expect(other?.subject).toMatch(/^2\.º en la #\d+ · Nuevo drop: /)
   })

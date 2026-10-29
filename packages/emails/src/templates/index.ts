@@ -35,7 +35,7 @@ export type { EntryChangedPayload, EntryReplacedPayload, EntryWithdrawnPayload }
 export type { EntryFailedPayload } from './entryFailed'
 export type { EntryReceiptPayload } from './entryReceipt'
 export type { GameProgressPayload } from './gameProgress'
-export type { ResultsBlock } from './results'
+export type { ResultsBlock, ResultsGame } from './results'
 
 /** Plantillas por id del catálogo (§2.12). Cada fase añade las suyas. */
 export const TEMPLATES = {

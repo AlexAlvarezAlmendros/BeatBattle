@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.110 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.111 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -793,8 +793,8 @@ con las mismas palabras que la interfaz (§2.19) y enlaza a `/subir` con la fich
 #### 2.12.2 Lunes de batalla
 
 Los resultados y el drop coinciden el lunes, así que por defecto van **en un solo email** para no
-saturar: arriba, el resultado personal (posición, puntuación, XP, tarjeta de resultado) o el podio
-para quien solo votó; abajo, el nuevo sample con su portada, chips, reto y una **cuenta atrás
+saturar: arriba, el resultado personal (posición, puntuación, tarjeta de resultado) o el podio
+para quien solo votó, con «tu partida» debajo (XP, racha y oído de oro de la semana sellada, §2.12.7); abajo, el nuevo sample con su portada, chips, reto y una **cuenta atrás
 animada**. Quien lo prefiera puede recibirlos por separado (Ajustes → Emails). Si el sellado se
 retrasa más allá de las 08:00, el email espera hasta 2 h; si sigue sin sellar, sale solo el drop y
 los resultados llegan después (en `battle.results`, al sellar). Si el cupo diario de Gmail no alcanza para
@@ -897,6 +897,17 @@ ciego quién ha subido ni cuánto le ha dado su entrada (§1.3, `RF-NOTIF-13`).
   - **Contenido**: la tarjeta del rango (el nuevo, el que deja atrás, el nivel y el siguiente rango) y una tarjeta
     por logro (nombre, condición, rareza y XP), y el botón a su carta (`/p/:username`). Nada de medias, votos ni
     posiciones de una semana sin sellar. Preferencia (`progress_on`), horas de silencio y tope semanal, al enviar.
+- **Tu partida en el Lunes de batalla y en los resultados** (`battle.monday`, `battle.results`). Debajo del
+  resultado o del podio, en la tira troquelada del ticket: el XP que le ha dado el sellado de esa semana (resultado y
+  oído de oro, con los ajustes de los re-sellados: el de la revisión vigente al encolar), si ha ganado el oído de oro,
+  la racha tras el sellado (y si el comodín la salvó esa semana) y el bonus que lleva la semana siguiente si clasifica
+  (§2.10). Solo de la semana sellada: ni el XP en vivo de la que abre ni el total de la cuenta. Sin bloque a quien no
+  gana nada ni tiene racha, ni a los suscriptores sin cuenta.
+- **Racha en peligro** (`battle.reminder`). Si quien lo recibe tiene una racha de 3 semanas o más (la de
+  `streak_state`, que dan las semanas selladas, y que llega hasta la anterior a la que está en juego), el recordatorio
+  del sábado sale en su versión de racha: «Tu racha de 5 semanas está en juego», lo que pasa si la semana se sella sin
+  una entrada suya clasificada (gasta el comodín de la temporada y la racha no sube o, con el comodín ya gastado,
+  vuelve a 0) y el bonus de la racha en juego. Mismos destinatarios, clave y prioridad que el recordatorio.
 
 | Id | Requisito | Aceptación |
 |---|---|---|
@@ -2155,7 +2166,8 @@ primera como de Beat Battle, con la firma del sello:
   el primer fotograma se entiende solo, porque Outlook de escritorio no anima), **cuenta atrás en
   vivo** (GIF que genera el servidor al abrir el email, con 60 fotogramas que corren de segundo en
   segundo), tarjeta de resultado personal con la medalla de vinilo en la paleta (§3.4.3), el recibo
-  de entrada con aspecto de ticket y las tarjetas de `game.progress`: la del rango con su nombre como título y
+  de entrada con aspecto de ticket (también «tu partida» del lunes: el XP en rojo y las filas de resultado, oído de
+  oro y racha) y las tarjetas de `game.progress`: la del rango con su nombre como título y
   la de cada logro con su rareza en una placa, como el aviso de §3.8.8 llevado a la paleta del email (épico: granate
   con borde rojo; legendario: rojo de botón con borde blanco).
 - **Accesibilidad**: `lang="es"`, tablas con `role="presentation"`, `alt` en todas las imágenes
@@ -3917,10 +3929,10 @@ racha 6 → 500 · 1,5 = **750**; 50 votos en una semana → 40 · 5 = **200** c
 | `mod.action` | «Sobre tu entrada en la semana #41» | Acción, motivo, regla de las bases, cómo reclamar |
 | `rules.changed` | «Cambian las bases de Beat Battle» | Resumen de cambios, desde qué semana aplican, enlace a las bases |
 | `account.deleted` | «Tu cuenta se ha borrado» | Qué se ha borrado y qué se conserva anonimizado |
-| `battle.monday` | «2.º en la #40 · Nuevo drop: <sample>» / «Ya hay campeón · Nuevo drop: <sample>» | Resultado personal o podio, XP y racha; nuevo sample con portada, chips, reto y cuenta atrás en vivo |
+| `battle.monday` | «2.º en la #40 · Nuevo drop: <sample>» / «Ya hay campeón · Nuevo drop: <sample>» | Resultado personal o podio y «tu partida» (XP del sellado, racha y oído de oro, §2.12.7); nuevo sample con portada, chips, reto y cuenta atrás en vivo |
 | `battle.drop` | «Nuevo drop: <sample> · <BPM> BPM · <tonalidad>» | Portada, chips, reto, cuenta atrás en vivo, botón «Pillar el sample» |
-| `battle.results` | «Semana #40: has quedado 2.º» / «Ya hay campeón de la semana #40» | Podio, tu posición y puntuación, XP, oído de oro, botón a la ceremonia |
-| `battle.reminder` | «Te quedan ~26 h para subir tu flip» · versión racha: «Tu racha de 5 semanas está en juego» | Cuenta atrás, botón a `/subir`, comodín de racha si lo tiene |
+| `battle.results` | «Semana #40: has quedado 2.º» / «Ya hay campeón de la semana #40» | Podio, tu posición y puntuación, «tu partida» (XP del sellado, racha y oído de oro), botón a la ceremonia |
+| `battle.reminder` | «Te quedan ~26 h para subir tu flip» · versión racha (racha ≥ 3): «Tu racha de 5 semanas está en juego» | Cuenta atrás, botón a `/subir`; en la de racha, qué pasa sin entrada clasificada (con el comodín de la temporada o ya gastado) y el bonus de la racha en juego (§2.12.7) |
 | `battle.jury_call` | «Te quedan 12 beats por escuchar» | Cuenta atrás de votos, botón «Al jurado» |
 | `battle.first_votes` | «Tu beat ya suena: 5 votos» | Número de votos y de escuchas (sin media), botón para compartir |
 | `battle.label_pick` | «El sello ha elegido tu beat» | Frase del sello, enlace a la página de resultados y al widget del sello |
@@ -3961,6 +3973,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.111 | **Tarea 7.31** (la capa de juego en los avisos que ya salen). §2.12.7: «tu partida» en `battle.monday` y `battle.results`, debajo del resultado o del podio: el XP que da el sellado de esa semana (resultado y oído de oro, el de la revisión vigente al encolar), si ganó el oído de oro, la racha tras el sellado (y si el comodín la salvó) y el bonus de la semana siguiente si clasifica; solo de la semana sellada (ni el XP en vivo de la que abre ni el total) y sin bloque a quien no gana nada ni tiene racha ni a los suscriptores. La versión «racha en peligro» de `battle.reminder` a quien tiene racha ≥ 3 (la de `streak_state`, hasta la semana anterior): qué pasa sin entrada clasificada, con el comodín de la temporada o ya gastado, y el bonus de la racha en juego; mismos destinatarios y clave. §2.12.2, §3.8.12 y Anexo H, al día. |
 | 2026-10-29 | 0.6.110 | **Tarea 7.29** (`game.progress`). §2.12.7, nueva: los avisos de la capa de juego solo llevan lo que no tiene semana y lo de las semanas selladas. El progreso del día: desde las 19:00 (Madrid), `emailSchedule` mira el tramo de las 19:00 del día anterior (exclusivo) a las 19:00 (incluido) y encola un solo email (`game.progress:<cuenta>:<AAAA-MM-DD>`) a cada cuenta verificada que sube de rango o desbloquea un logro épico o legendario; cada movimiento del libro y cada logro cuentan en su instante si no tienen semana y, si la tienen, en el del sellado de su semana (o en el suyo, si es posterior), así que lo ganado en una semana ciega llega junto el día que se sella; el rango es el del XP que cuenta y solo avisa al subir; los logros comunes y raros no lo disparan ni van en él; con el `tick` tarde vale el último tramo cerrado; el reprocesado no lo dispara (fecha con el instante del hecho). Contenido: tarjeta del rango y una por logro, botón a la carta. §2.12 (catálogo), §3.8.12 (tarjetas: la rareza en una placa, épico granate con borde rojo y legendario rojo con borde blanco), §4.12 (`emailSchedule`) y Anexo H, al día. |
 | 2026-10-29 | 0.6.104 | **Tarea 7.14** (hueco G5 del plan 07, resuelto: los logros que ocurren en el navegador). §4.10: `POST /api/me/achievements { achievement }`, con sesión, solo con los logros de la lista blanca `BROWSER_ACHIEVEMENTS` (en la Fase 7, `share_card`; la Fase 8 suma sus secretos con su prueba), cualquier otro → 422, 10 por hora y cuenta, sin más XP que el del logro (y `level_20` si lo cruza) y repetirlo no suma; responde lo ganado. §2.10, §4.13 y Anexo C al día. |
 | 2026-10-29 | 0.6.103 | **Tarea 7.10** (hueco G2 del plan 07, resuelto: el re-sellado y la capa de juego). §2.8: el sellado da, en su `batch` y a partir de la clasificación ya calculada, el XP de resultado, el oído de oro, la racha y los logros de resultado; todo es una función de las semanas selladas en su revisión vigente y **el libro la sigue**: cada (re-)sellado re-juega desde la semana corregida hasta la última y escribe la diferencia, con **ajustes que pueden restar** referidos a la revisión, los logros de resultado que ya no se cumplen en ninguna semana sellada **se retiran con su XP** y los que ahora se cumplen se ganan; lo ganado en vivo y `level_20` no cambian; sin cambios en el snapshot, nada cambia. `RF-RES-08` con `myGame`. §2.10: la racha la aplica el sellado (también a quien no participa y tenía racha); `streak_state` es caché. Anexo C: la excepción a «ningún logro se retira». §4.5: `replaySealedWeeks`. §4.10: `myGame` en los resultados. §4.11: la referencia de los ajustes, el módulo `sealing` y el sellado perezoso en orden de número. |
