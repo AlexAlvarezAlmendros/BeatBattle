@@ -1,5 +1,15 @@
+import { readFileSync } from 'node:fs'
 import { expect, type Page, test } from '@playwright/test'
-import { collectErrors, expectCursor, expectNoAxeViolations, open, settle } from './support'
+import { battleContext, signUp } from './battle'
+import {
+  collectErrors,
+  expectCursor,
+  expectNoAxeViolations,
+  open,
+  runSuffix,
+  settle,
+  testIp,
+} from './support'
 
 /**
  * Las páginas de la capa de juego (Fase 7, tareas 7.22 y 7.24–7.26): la carta de productor (la plana de
@@ -154,6 +164,47 @@ test.describe('la carta plana (RF-GAME-07)', () => {
     await page.getByRole('button', { name: 'Girar carta' }).click()
     await expect(card).toHaveAttribute('data-side', 'back')
     await expect(page.getByRole('button', { name: 'Girar carta' })).toHaveAttribute('aria-pressed', 'true')
+  })
+})
+
+test.describe('«Mi carta de productor» para stories (7.28)', () => {
+  test('RF-SHARE-03 / RF-GAME-05: en el perfil propio, D descarga la carta como PNG de 1080 × 1920 y da «Altavoz»', async ({
+    browser,
+    baseURL,
+  }) => {
+    const run = runSuffix()
+    const clock = { api: Date.now() }
+    const context = await battleContext(browser, baseURL as string, testIp(90), clock)
+    const username = `carta${run}x${Date.now().toString(36).slice(-4)}`
+    const { page } = await signUp(
+      context,
+      baseURL as string,
+      `${username}@example.com`,
+      username,
+      testIp(90),
+      clock.api,
+    )
+    await page.goto(`/p/${username}`)
+    const share = page.getByRole('button', { name: /Compartir mi carta/ })
+    await expect(share).toBeVisible()
+    // La barra lo dice; en el Chrome de escritorio no hay Web Share con ficheros: se descarga.
+    await expect(page.locator('[data-control="story"]')).toBeVisible()
+    const [download] = await Promise.all([page.waitForEvent('download'), page.keyboard.press('d')])
+    expect(download.suggestedFilename()).toBe(`beatbattle-carta-${username}.png`)
+    const png = readFileSync(await download.path())
+    expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([1080, 1920])
+    // `share_card` (declarado por el navegador): su aviso, y `me` con su XP.
+    await expect(page.getByText('Altavoz').first()).toBeVisible()
+    const me = await (await page.request.get('/api/me')).json()
+    expect(me.data.game.xp).toBe(25)
+    await context.close()
+  })
+
+  test('§3.4.4: en el perfil de otro no hay «Compartir mi carta» ni D en la barra', async ({ page }) => {
+    await open(page, '/p/aina', 'aina')
+    await expect(page.getByRole('button', { name: 'Girar carta' })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Compartir mi carta/ })).toHaveCount(0)
+    await expect(page.locator('[data-control="story"]')).toHaveCount(0)
   })
 })
 

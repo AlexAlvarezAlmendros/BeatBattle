@@ -441,6 +441,7 @@
       "newTab": "(se abre en otra pestaña)",
       "card": {
         "flip": "Girar carta",
+        "share": "Compartir mi carta",
         "variants": "Variantes de carta",
         "variantLocked": ", todavía no",
         "variantHow": {
@@ -1668,9 +1669,11 @@
     },
     "card": {
       "title": "Banco de la carta",
-      "intro": "La carta de productor en sus cuatro variantes (estándar, roja, holo y campeón), anverso y reverso. La primera fila gira con C.",
+      "intro": "La carta de productor en sus cuatro variantes (estándar, roja, holo y campeón), anverso y reverso, y la tarjeta «Mi carta de productor» para stories pintada en un lienzo 2D por CPU. La primera fila gira con C.",
       "front": "Anverso",
-      "back": "Reverso"
+      "back": "Reverso",
+      "stories": "Para stories (lienzo por CPU, 1080 × 1920)",
+      "storyAlt": "Tarjeta para stories con la carta {variant}"
     },
     "rewards": {
       "title": "Recompensas (banco)",
@@ -1729,6 +1732,7 @@
       "share": "Compartir",
       "replay": "Ceremonia",
       "flip": "Girar carta",
+      "story": "Para stories",
       "winners": "Ganadores",
       "glyph": {
         "up": "↑",
@@ -1752,6 +1756,7 @@
         "t": "T",
         "x": "X",
         "c": "C",
+        "d": "D",
         "one": "1",
         "five": "5",
         "space": "Espacio"
@@ -2169,7 +2174,8 @@
   },
   "stories": {
     "button": "Tarjeta para stories",
-    "shareTitle": "Beat Battle"
+    "shareTitle": "Beat Battle",
+    "producerFile": "beatbattle-carta-{username}.png"
   },
   "ceremony": {
     "label": "Ceremonia de resultados de la semana {number}",

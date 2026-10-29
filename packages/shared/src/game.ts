@@ -93,8 +93,26 @@ export type EntryCreated = z.infer<typeof EntryCreatedSchema>
 export const BROWSER_ACHIEVEMENTS = ['share_card'] as const
 export type BrowserAchievement = (typeof BROWSER_ACHIEVEMENTS)[number]
 
-/** `POST /api/me/achievements`: un logro de la lista blanca; cualquier otro → 422. */
-export const DeclaredAchievementSchema = z.object({ achievement: z.enum(BROWSER_ACHIEVEMENTS) }).strict()
+/**
+ * La tarjeta que se ha compartido o descargado (§2.15, §2.10; tarea 7.28): «Estoy en la batalla» de una entrada propia
+ * (`battle`, con su id: el servidor apunta el logro con la semana de la entrada, así un `share_card` ganado en una
+ * semana ciega no sale en el perfil público hasta el sellado), «He quedado N.º» (`result`, de una semana sellada) o «Mi
+ * carta de productor» (`producer`). Estas dos no son de ninguna semana.
+ */
+export const SharedCardSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('battle'), entryId: z.string().min(1).max(64) }).strict(),
+  z.object({ kind: z.literal('result') }).strict(),
+  z.object({ kind: z.literal('producer') }).strict(),
+])
+export type SharedCard = z.infer<typeof SharedCardSchema>
+
+/**
+ * `POST /api/me/achievements`: un logro de la lista blanca, con lo que lo prueba; cualquier otro → 422. `share_card`
+ * dice qué tarjeta (`card`).
+ */
+export const DeclaredAchievementSchema = z.discriminatedUnion('achievement', [
+  z.object({ achievement: z.literal('share_card'), card: SharedCardSchema }).strict(),
+])
 export type DeclaredAchievement = z.infer<typeof DeclaredAchievementSchema>
 
 /** Un logro conseguido (en el perfil público y en la vitrina): el id y cuándo. */

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { user, vote } from '../src/db/schema'
 import { ogData, ogImagePath } from '../src/modules/share/og'
 import { type Battle, battle, HOUR, W42 } from './fixtures/battle'
+import { ORIGIN } from './helpers'
 
 // Pintar portadas y tarjetas en la CI pasa de los 5 s.
 vi.setConfig({ testTimeout: 60_000 })
@@ -76,7 +77,7 @@ describe('imágenes OG (6.11)', () => {
     expect((await get('/api/og/raro/2026-w42.png')).statusCode).toBe(404)
   })
 
-  it('RF-SHARE-04: el perfil solo cuenta semanas selladas (una abierta y ciega no dice quién participa)', async () => {
+  it('RF-SHARE-04: el perfil (su carta, 7.28) solo cuenta semanas selladas (una abierta y ciega no dice quién participa)', async () => {
     b = await battle({ producers: 1, voters: 0 })
     const own = b.producers[0] as Battle['producers'][0]
     for (const [i, stars] of [3, 3, 3].entries())
@@ -88,18 +89,37 @@ describe('imágenes OG (6.11)', () => {
         createdAt: 1,
         updatedAt: 1,
       })
-    expect(await ogData(b.t.db, 'profile', 'prod0', b.t.clock.now())).toMatchObject({
+    const blind = await ogData(b.t.db, 'profile', 'prod0', b.t.clock.now())
+    expect(blind).toMatchObject({
       weeks: 0,
       podiums: 0,
       best: null,
+      card: { number: expect.any(Number), level: 1, wins: 0, variant: 'standard', achievements: 0 },
     })
+    // Compartir la tarjeta de la batalla en voto ciego no cambia la carta pública (§2.10, 7.28).
+    const shared = await b.t.app.inject({
+      method: 'POST',
+      url: '/api/me/achievements',
+      headers: { cookie: own.cookie, origin: ORIGIN, 'content-type': 'application/json' },
+      payload: { achievement: 'share_card', card: { kind: 'battle', entryId: own.entryId } },
+    })
+    expect(shared.statusCode, shared.body).toBe(200)
+    expect(await ogData(b.t.db, 'profile', 'prod0', b.t.clock.now())).toEqual(blind)
+
     b.t.clock.set(W42.voteEndsAt)
     await get('/api/weeks/2026-w42/results')
-    expect(await ogData(b.t.db, 'profile', 'PROD0', b.t.clock.now())).toMatchObject({
+    const sealed = await ogData(b.t.db, 'profile', 'PROD0', b.t.clock.now())
+    expect(sealed).toMatchObject({
       weeks: 1,
       podiums: 1,
       best: 1,
+      // La victoria sellada da la holo y su XP; el share_card de la semana ya es público.
+      card: { wins: 1, variant: 'holo', achievements: expect.any(Number) },
     })
+    if (sealed?.kind !== 'profile') throw new Error('perfil')
+    expect(sealed.card.level).toBeGreaterThanOrEqual(1)
+    expect(sealed.card.achievements).toBeGreaterThan(0)
+    expect(ogImagePath(sealed)).not.toBe(ogImagePath(blind as NonNullable<typeof blind>))
     const results = await get('/api/og/results/2026-w42.png')
     expect(results.statusCode).toBe(200)
     expect((await get('/api/og/profile/prod0.png')).statusCode).toBe(200)

@@ -245,7 +245,7 @@ export async function playSeason(
   // Compartir la carta (lo declara el navegador).
   const shared = await (players[0] as Account).page.request.post('/api/me/achievements', {
     headers: headers(),
-    data: { achievement: 'share_card' },
+    data: { achievement: 'share_card', card: { kind: 'producer' } },
   })
   expect(shared.ok(), await shared.text()).toBe(true)
   const [ly, lm] = (mondays.at(-1) as string).split('-').map(Number) as [number, number]

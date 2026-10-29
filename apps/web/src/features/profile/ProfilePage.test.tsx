@@ -6,7 +6,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
 import { EMPTY_ME_GAME, EMPTY_PROFILE_GAME } from '../../test/game'
 import { useSession } from '../account/session'
+import { shareStory } from '../share/shareStory'
 import { ProfilePage, profileLoader } from './ProfilePage'
+
+// La tarjeta para stories se pinta en un lienzo (jsdom no tiene) y carga imágenes: aquí solo se mira quién la pide.
+vi.mock('../share/shareStory', () => ({ shareStory: vi.fn(async () => 'downloaded') }))
+vi.mock('../../ui/ProducerCard/cardCanvas', () => ({
+  loadCardAssets: vi.fn(async () => ({ photo: null, slap: null })),
+}))
 
 const PROFILE = {
   username: 'kairo.wav',
@@ -114,8 +121,22 @@ function renderProfile(path: string) {
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  vi.mocked(shareStory).mockClear()
   useSession.setState({ status: 'loading', me: null })
 })
+
+const KAIRO_ME = {
+  id: 'u1',
+  email: 'k@example.com',
+  emailVerified: true,
+  username: 'kairo.wav',
+  displayUsername: 'Kairo.wav',
+  role: 'user' as const,
+  cardNumber: 42,
+  xp: 0,
+  avatarUrl: null,
+  game: EMPTY_ME_GAME,
+}
 
 describe('perfil público (§3.8.10)', () => {
   it('RF-PRF-01: enseña número y antigüedad, nombre, rango y nivel, ciudad, bio, enlaces y las seis teselas', async () => {
@@ -271,5 +292,48 @@ describe('perfil público (§3.8.10)', () => {
     expect(card).toHaveAttribute('data-variant', 'holo')
     await userEvent.click(within(variants).getByRole('button', { name: 'Roja' }))
     await waitFor(() => expect(card).toHaveAttribute('data-variant', 'red'))
+  })
+
+  it('RF-SHARE-03 / §3.4.4 (7.28): en el perfil propio, D (o «Compartir mi carta») exporta la carta que se ve para stories', async () => {
+    mockProfiles({ 'kairo.wav': { ...PROFILE, xp: 20_000, game: PLAYED } })
+    useSession.setState({ status: 'signedIn', me: KAIRO_ME })
+    renderProfile('/p/kairo.wav')
+    const button = await screen.findByRole('button', { name: new RegExp(t('pages.profile.card.share')) })
+    expect(button).toHaveTextContent(t('frame.keys.glyph.d'))
+    await userEvent.keyboard('d')
+    await waitFor(() => expect(shareStory).toHaveBeenCalledTimes(1))
+    expect(vi.mocked(shareStory).mock.calls[0]?.[0]).toMatchObject({
+      fileName: t('stories.producerFile', { username: 'kairo.wav' }),
+      shared: { kind: 'producer' },
+      card: {
+        kind: 'producer',
+        url: expect.stringMatching(/\/p\/kairo\.wav$/),
+        card: {
+          name: 'Kairo.wav',
+          cardNumber: 42,
+          variant: 'holo',
+          stats: { wins: 2, podiums: 3, weeks: 4 },
+        },
+      },
+    })
+    // Con la variante roja a la vista, sale roja.
+    const variants = screen.getByRole('group', { name: t('pages.profile.card.variants') })
+    await userEvent.click(within(variants).getByRole('button', { name: 'Roja' }))
+    await userEvent.click(button)
+    await waitFor(() => expect(shareStory).toHaveBeenCalledTimes(2))
+    expect(vi.mocked(shareStory).mock.calls[1]?.[0]).toMatchObject({ card: { card: { variant: 'red' } } })
+  })
+
+  it('§3.4.4 (7.28): en el perfil de otro no hay «Compartir mi carta» y D no hace nada', async () => {
+    mockProfiles({ 'kairo.wav': PROFILE })
+    useSession.setState({
+      status: 'signedIn',
+      me: { ...KAIRO_ME, username: 'otra', displayUsername: 'Otra' },
+    })
+    renderProfile('/p/kairo.wav')
+    await screen.findByRole('article', { name: /Kairo\.wav, número 42/ })
+    expect(screen.queryByRole('button', { name: new RegExp(t('pages.profile.card.share')) })).toBeNull()
+    await userEvent.keyboard('d')
+    expect(shareStory).not.toHaveBeenCalled()
   })
 })

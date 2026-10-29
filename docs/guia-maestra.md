@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.126 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.132 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -726,8 +726,10 @@ batalla ciega, justo lo que §2.15 evita en el sitemap y en la imagen OG. Por es
   compartir una tarjeta (`share_card`, que la persona hace pública ella misma, y que también vale con la carta o con
   un resultado ya sellado) y `level_20` cuando lo cruza uno de ellos. Todo hecho que dependa de jugar una semana
   (subir, votar, descargar el sample, adivinar el productor, la Elección del sello) lleva su `week_id`; también
-  `share_card` cuando sale de la tarjeta «Estoy en la batalla» de una entrada sin sellar (la 7.28, al conectarla, dice
-  al servidor de qué tarjeta se trata). Un logro de la Fase 8 o 9 sin semana tiene que poder justificarlo igual. Las teselas y el historial salen de los snapshots (`result`) de semanas
+  `share_card` cuando sale de la tarjeta «Estoy en la batalla» de una entrada sin sellar: el navegador dice qué tarjeta
+  ha compartido (`card` en `POST /api/me/achievements`, §4.10) y la de la batalla lleva su entrada, que tiene que ser
+  suya (si no, 404); el logro y su XP se apuntan con la semana de esa entrada, así que el perfil público no los enseña
+  hasta el sellado (tarea 7.28). La del puesto y la carta no son de ninguna semana. Un logro de la Fase 8 o 9 sin semana tiene que poder justificarlo igual. Las teselas y el historial salen de los snapshots (`result`) de semanas
   selladas, y la racha, de `streak_state`, que solo cambia al sellar.
 - **`GET /api/me` es de su dueño y va en vivo**: su XP de verdad (la caché de todo el libro), el nivel y el nivel ya
   celebrado (`levelSeen`), la racha con el comodín de la temporada en curso, la temporada (puntos y puesto), los logros
@@ -1068,13 +1070,25 @@ queda en `audit_log` (`user.grant_admin`, sin el email) como cualquier otra acci
   `v` es el hash de lo que se ve: con la vigente, caché inmutable de un año; sin ella o con una vieja, cinco
   minutos. Antes del drop, una semana da 404; unos resultados sin sellar o una entrada no activa, también. El
   perfil solo cuenta semanas selladas: si contara las abiertas, diría quién está en una batalla ciega (la misma regla
-  que el perfil público y su capa de juego, §2.10, «Lo público y lo propio»).
+  que el perfil público y su capa de juego, §2.10, «Lo público y lo propio»). **La imagen del perfil es su carta**
+  (tarea 7.28): el anverso de la carta de §3.4.4 inclinado −3° y en su variante (número, sello de nivel con su arco,
+  retrato con trama y monograma, etiqueta de variante, nombre, rango, victorias · podios · semanas, «Vitrina · 2 de 14»
+  y el pie con la firma) y, al lado y en grande, nombre, `@usuario`, rango y nivel y las tres cifras. El nivel, la
+  variante y los logros salen de lo público (el XP y los logros de semanas selladas o sin semana): subir, votar o
+  compartir la tarjeta de la batalla en una semana ciega no cambia ni la imagen ni su versión. Lo dibujado (marco,
+  trama, lámina, sello y corona) es un SVG que rasteriza resvg y el texto lo pone satori; la letra pequeña de la carta
+  no baja de 14 px, porque lo que importa va repetido en grande al lado.
 - **Tarjetas para stories** (1080×1920), generadas en el navegador: «Estoy en la batalla #41»,
   «He quedado 2.º», «Mi carta de productor». Se comparten con la Web Share API (con ficheros) o se
   descargan. Se pintan en un contexto 2D por CPU con la portada generativa de la entrada, el título, el alias
   (o el productor, tras el sellado), el sample, el enlace a la ficha y la firma. La de la batalla está en la
-  ficha de la propia entrada sin sellar y dice «Escúchala y vota»; la del puesto, en «TU RESULTADO». La carta
-  de productor llega con la Fase 7.
+  ficha de la propia entrada sin sellar y dice «Escúchala y vota»; la del puesto, en «TU RESULTADO». **«Mi carta de
+  productor»** (tarea 7.28) está en el perfil propio («[D] Compartir mi carta», y D desde cualquier parte del perfil con
+  los atajos de una tecla, §3.4.4): «BEAT BATTLE · CARTA DE PRODUCTOR», «MI CARTA DE PRODUCTOR», la carta pintada por CPU
+  desde `cardModel` (`cardCanvas`, §3.4.4) a 640 px e inclinada −3° en la variante que se está viendo, la placa «ENTRA
+  EN LA BATALLA», la firma y la dirección del perfil; todo de lo público (solo semanas selladas, §2.10). Compartida o
+  descargada cualquiera de las tres, con sesión, el navegador declara `share_card` diciendo qué tarjeta era (§2.10,
+  §4.10) y lo ganado sale en el HUD; cancelar la hoja de compartir no es compartir (ni logro).
 - **SEO**: `sitemap.xml` con las páginas fijas públicas (`/`, `/semanas`, `/como-funciona`), las semanas
   selladas (la semana y sus resultados, con `lastmod` del sellado) y los perfiles de quien ha participado en
   alguna sellada (sin cuentas bloqueadas). Nada de una semana abierta: en voto ciego, un perfil listado al
@@ -1628,9 +1642,16 @@ física propios; no es el `Lanyard` del sello).
     la lámina quieta, y C cambia de cara con un fundido. En contraste alto, sin lámina ni trama, con el marco del
     sistema. El giroscopio llega con la 3D (7.23).
   - C gira la carta desde cualquier parte del perfil con los atajos de una tecla encendidos y, apagados, con el foco en
-    la pieza (WCAG 2.1.4); la barra de controles dice `[C] GIRAR CARTA`. D (*stories*) llega con la 7.28.
-  - El lienzo 2D por CPU que servirá de textura a la 3D (7.23) y de tarjeta para *stories* (7.28) se pinta allí, a
-    partir del mismo modelo (`cardModel`: variante, cifras, fecha), no de la carta HTML.
+    la pieza (WCAG 2.1.4); la barra de controles dice `[C] GIRAR CARTA`. En el perfil propio, D exporta la carta para
+    *stories* con las mismas reglas («[D] Compartir mi carta» bajo la carta y `[D] PARA STORIES` en la barra; §2.15,
+    tarea 7.28); en el de otro, D no hace nada.
+  - **La carta en un lienzo 2D por CPU** (`cardCanvas`, tarea 7.28): el mismo anverso vuelto a dibujar desde
+    `cardModel` (no copiado de la carta HTML) a cualquier ancho, con las medidas de la carta de 352 px escaladas, en un
+    contexto 2D con `willReadFrequently: true` (§3.4.5: el PNG sale igual en cualquier máquina). La foto, si carga con
+    CORS (si no, el monograma con su extrusión y contorno); la trama del retrato, la de `podiumFloor`; la lámina de la
+    holo y la de campeón, quieta en su posición de reposo; la vitrina con el marco de rareza y el glifo de cada logro.
+    Es la carta de la tarjeta para *stories* (§2.15) y será la textura de la 3D (7.23). Las variantes son una regla
+    compartida con la imagen OG del perfil: viven en `@beatbattle/rules` (`card`, §4.5).
 
 #### 3.4.5 Portadas generativas
 
@@ -2271,7 +2292,7 @@ nombre, su descripción y su XP, como en el aviso de logro (§3.8.8), y debajo c
 #### 3.8.10 Perfil (carta de luchador)
 
 Placa de título «CARTA DE PRODUCTOR · PERFIL». A la izquierda, sobre la cuña con trama, la **carta
-colgada de su pase** (§3.4.4), con «[C] Girar carta · [D] Para stories» y las variantes. A la
+colgada de su pase** (§3.4.4), con «[C] Girar carta · [D] Para stories» (D, solo en el propio) y las variantes. A la
 derecha: número y antigüedad, nombre en display con sombra dura, rango, nivel y ciudad, bio, enlaces (44
 px), **seis teselas** (mejor puesto, racha, media final, oído de oro, votos dados, temporada), el
 **historial de combates** (solo semanas selladas: portada, título, «S40 · era ~~Faro Errante~~ · 41
@@ -2629,6 +2650,7 @@ tests de propiedades.
 | `prng` | `hashOf(...partes)`, `sfc32`, `createRng(semilla)` con `next`, `int`, `pick`, `shuffle`; `rngFor(...partes)` para flujos con nombre |
 | `loudness` | `playbackGainDb(lufs)` (solo atenúa) |
 | `achievements` | Catálogo (Anexo C) como datos (id, rareza, oculto, clave de la pista, eventos que lo miran y fase de su disparador) + `evaluate(evento, contexto) → logros nuevos`; `nightOwlWindow(instante)` y `isRevetllaNight(instante)` en hora de Madrid |
+| `card` | Variantes de la carta de productor (§3.4.4): `unlockedVariants(hechos)` y `cardVariant(hechos)` (roja desde el nivel del rango *Productor*, holo con una victoria sellada, campeón con `season_champ`); las comparten la carta de la web y la imagen OG del perfil |
 | `goldenEar` | `spearman(a, b)`; `goldenEar(jurado, votosDeLaSemana)` → votos, ρ y si gana (recalcula la semana sin los votos del jurado, también la media `m`) |
 | `balance` | **Todas** las constantes del Anexo B. Ningún número mágico fuera de este fichero. |
 
@@ -2992,7 +3014,7 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | GET | `/api/me` | Sesión | La cuenta (nombre, carta, avatar del HUD, XP) y su capa de juego **en vivo** (`game`, §2.10): `xp`, `level`, `levelSeen`, `streak { current, best, jokerAvailable }`, `season { id, points, position }`, `unseenAchievements` (en el orden del catálogo) y `seasonCeremony` (`{ seasonId, champion }` de la última temporada cerrada con campeón mientras no la marque vista, o `null`). Sin sesión, `null` |
 | GET · PUT | `/api/me/profile` | Sesión | El perfil propio (con su XP de verdad y la vitrina elegida, `showcase`) y su edición (§2.3): solo lo que cambia; la vitrina, hasta tres logros conseguidos y distintos (si no, 422) |
 | POST | `/api/me/seen` | Sesión | Marcar vistos `{ kind, ref }`: `drop` (Fase 3) y `ceremony` (Fase 6, 404 si la semana no está sellada) con el slug; `level` con el nivel (sube `level_seen` hasta él, nunca por encima del de la cuenta ni hacia abajo, `RF-GAME-09`); `achievement` con su id (el aviso, `seen_at`; 404 si no lo tiene); `season_champion` con la temporada (la ceremonia del campeón, 404 si no está cerrada). 204; repetirlo no cambia nada |
-| POST | `/api/me/achievements` | Sesión | Un logro que ocurre en el navegador `{ achievement }` (hueco G5): solo los de la lista blanca `BROWSER_ACHIEVEMENTS` (en la Fase 7, `share_card`, al compartir o descargar una tarjeta; la Fase 8 suma sus secretos, cada uno con la prueba que comprueba `evaluate` y el reloj del servidor); cualquier otro → 422 `VALIDATION_FAILED`. 10 por hora y cuenta (429 después). Da el logro y su XP (y `level_20` si ese XP cruza el nivel, como cualquier hecho), nada de los eventos del Anexo B; repetirlo no suma. Responde lo ganado (`game`) |
+| POST | `/api/me/achievements` | Sesión | Un logro que ocurre en el navegador `{ achievement, … }` (hueco G5): solo los de la lista blanca `BROWSER_ACHIEVEMENTS` (en la Fase 7, `share_card`, al compartir o descargar una tarjeta, con `card`: `{ kind: 'battle', entryId }` para «Estoy en la batalla», que tiene que ser una entrada suya —si no, 404— y apunta el logro con su semana, §2.10; `{ kind: 'result' }` o `{ kind: 'producer' }`, sin semana; tarea 7.28; la Fase 8 suma sus secretos, cada uno con la prueba que comprueba `evaluate` y el reloj del servidor); cualquier otro → 422 `VALIDATION_FAILED`. 10 por hora y cuenta (429 después). Da el logro y su XP (y `level_20` si ese XP cruza el nivel, como cualquier hecho), nada de los eventos del Anexo B; repetirlo no suma. Responde lo ganado (`game`) |
 | GET · PUT | `/api/me/notifications` | Sesión | Preferencias de aviso |
 | GET | `/api/me/votes?week=` | Sesión | Mis votos |
 | GET | `/api/me/export` | Sesión | Exportación RGPD |
@@ -4211,6 +4233,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.132 | **Tarea 7.28** (compartir la carta). §2.15: «Mi carta de productor» para *stories* en el perfil propio (D y «Compartir mi carta»: la carta pintada por CPU, inclinada −3° en la variante que se ve, «ENTRA EN LA BATALLA» y la dirección del perfil); compartida o descargada cualquiera de las tres tarjetas, con sesión, se declara `share_card` con la tarjeta, y cancelar la hoja de compartir no cuenta; **la imagen OG del perfil es su carta** (el anverso en su variante y, al lado, nombre, rango, nivel y cifras), con nivel, variante y logros de lo público. §2.10 y §4.10: `POST /api/me/achievements` lleva `card` y la de la batalla, su entrada (suya, si no 404): el logro va con la semana de la entrada (hueco G1, cerrado). §3.4.4: D en el perfil propio y la carta en un lienzo 2D por CPU (`cardCanvas`, la de *stories* y la textura de la 7.23). §3.8.10: D solo en el propio. §4.5: módulo `card` (las variantes, compartidas con el servidor). |
 | 2026-10-29 | 0.6.126 | **Tarea 7.32** (datos de prueba de la capa de juego). §4.4: el modo `season` de `seedBattle` (`seedSeason.ts`: la temporada anterior entera y cerrada con su campeón, las semanas selladas de la actual y esta abierta, jugadas por la API, con niveles de varios rangos, logros de cada rareza, rachas con el comodín gastado y récords del salón de la fama; al final, el reprocesado no tiene nada que añadir) y `playSeason` en los E2E (`tests/e2e/game.ts`). |
 | 2026-10-29 | 0.6.125 | **Tarea 7.16** (el reprocesado de la capa de juego). §2.10: lo que pasó antes de la capa de juego lo reparte el reprocesado, re-jugado en orden de calendario con las reglas de siempre; solo añade lo que falta (dos pasadas, o sobre lo que ya escribieron los ganchos en vivo, no cambian nada), cada fila lleva el instante de su hecho (no saca `game.progress`) y sus logros entran ya vistos; el nivel visto no cambia. `RF-GAME-01` amplía su aceptación con el reprocesado. §4.5: `replayAccount` en `replay`. §4.11: el reprocesado (script `game:reprocess`, con `--apply` y `--remote`; el corte guardado en `job_state` `gameReprocess` antes de escribir; qué re-juega, qué escribe y qué no puede recuperar). §4.12: el paso opcional `gameReprocess` del `tick` (`BB_GAME_REPROCESS`, una vez, antes de `sealWeeks`). §4.15: `BB_GAME_REPROCESS`. §4.16: `POST /api/test/game/reprocess` en los E2E. |
 | 2026-10-29 | 0.6.124 | **Tarea 7.22** (revisión de la PR #117). El QR del reverso de la carta lo pinta el **servidor**: §4.10, `GET /api/profiles/:username/qr.png` (pública: el PNG de `BB_PUBLIC_URL` + `/p/:username` y nada más, con `qrcode` y el codificador propio; 404 sin perfil público; 301 desde un nombre anterior; caché de 30 días). §4.1: `qrcode` sigue **solo en el servidor** (la decisión del usuario del 2026-10-13); la web solo pide el PNG. §3.4.4: el reverso con esa imagen, su nombre accesible, el papel blanco mientras llega y «QR NO DISPONIBLE» si falla. |
