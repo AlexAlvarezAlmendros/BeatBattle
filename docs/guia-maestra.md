@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.103 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.104 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -634,6 +634,8 @@ pura del XP total.
     Cambiar la nota no da nada nuevo.
   - **La descarga del sample** (`first_drop`), **el perfil guardado** con avatar, bio y un enlace (`profile_done`, al
     guardar los datos o el avatar) y `level_20` al cruzar el nivel 20 con cualquiera de ellos.
+  - **Lo que solo ocurre en el navegador** (compartir una tarjeta, `share_card`; los secretos de la Fase 8) llega por
+    `POST /api/me/achievements` (§4.10): una lista blanca, un límite por hora y nada más que el logro y su XP.
   - La respuesta del voto y la de la entrada (registrarla y sustituir el audio) dicen lo ganado,
     `game: { xp, achievements, level }`, para el «+5 XP» flotante, el aviso de logro y la subida de nivel; una entrada
     que queda en `processing` no gana nada hasta que el `tick` la activa (`game.xp = 0`).
@@ -2773,6 +2775,7 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | GET | `/api/me` | Sesión | Perfil, XP, nivel, racha, logros nuevos, flags de ceremonias vistas |
 | PATCH | `/api/me/profile` | Sesión | Editar perfil |
 | POST | `/api/me/seen` | Sesión | Marcar vistos `{ kind, ref }` (`drop` desde la Fase 3 y `ceremony` desde la 6, 404 si la semana no está sellada; logros y nivel en sus fases) |
+| POST | `/api/me/achievements` | Sesión | Un logro que ocurre en el navegador `{ achievement }` (hueco G5): solo los de la lista blanca `BROWSER_ACHIEVEMENTS` (en la Fase 7, `share_card`, al compartir o descargar una tarjeta; la Fase 8 suma sus secretos, cada uno con la prueba que comprueba `evaluate` y el reloj del servidor); cualquier otro → 422 `VALIDATION_FAILED`. 10 por hora y cuenta (429 después). Da el logro y su XP (y `level_20` si ese XP cruza el nivel, como cualquier hecho), nada de los eventos del Anexo B; repetirlo no suma. Responde lo ganado (`game`) |
 | GET · PUT | `/api/me/notifications` | Sesión | Preferencias de aviso |
 | GET | `/api/me/votes?week=` | Sesión | Mis votos |
 | GET | `/api/me/export` | Sesión | Exportación RGPD |
@@ -3064,7 +3067,7 @@ Referencias: OWASP ASVS nivel 2 y las chuletas de autenticación, sesiones y sub
 | Contraseñas | Las gestiona Better Auth (hash *scrypt* por defecto). Mínimo 12, máximo 128, comprobación de filtradas (`haveIBeenPwned`), medidor `zxcvbn-ts` en el cliente. |
 | Sesiones | Cookie `__Secure-bb.session_token`, `HttpOnly`, `Secure`, `SameSite=Lax`, solo del host. 30 días deslizantes. Revocación al cambiar o restablecer la contraseña y al bloquear. |
 | CSRF | `SameSite=Lax` + comprobación de origen de Better Auth (`trustedOrigins`) + comprobación de `Origin` propia en `/api/*` + solo JSON. |
-| Fuerza bruta y abuso | Better Auth: entrar 5/min por IP, registrarse 3/h por IP, recuperación 3/h. App: votos 120/h, inicio de escucha 300/h, firmas de subida 10/h, denuncias 20/día, cambios de perfil 30/h, escuchas públicas 1 por IP y entrada cada 10 min. Contadores en BD (en serverless no hay memoria compartida). |
+| Fuerza bruta y abuso | Better Auth: entrar 5/min por IP, registrarse 3/h por IP, recuperación 3/h. App: votos 120/h, inicio de escucha 300/h, firmas de subida 10/h, denuncias 20/día, cambios de perfil 30/h, logros declarados por el navegador 10/h, escuchas públicas 1 por IP y entrada cada 10 min. Contadores en BD (en serverless no hay memoria compartida). |
 | Bots y cuentas falsas | Verificación de email obligatoria, dominios desechables bloqueados, informe de votos anómalos (§2.13). Plugin de captcha (Turnstile) preparado y **desactivado**; se activa si aparecen registros masivos. |
 | Autorización | Toda consulta de recursos propios se filtra por el `user.id` de la sesión; nunca se acepta un id de usuario del cliente. Test E2E: A no puede editar, retirar ni ver las estadísticas de la entrada de B. |
 | Subidas | El servidor fija `public_id`, carpeta, tipo y formatos permitidos en la firma; verifica el recurso con la Admin API antes de aceptarlo; el audio nunca atraviesa la API. |
@@ -3710,7 +3713,9 @@ con la pista).
   el del navegador se puede adelantar. `night_owl` pide votar 10 entradas distintas (votos nuevos, no cambios)
   entre las 03:00 y las 05:00 de una misma noche. `revetlla`, una visita entre las 21:00 del 23 de junio y las 06:00
   del 24.
-- **El resto.** `profile_done`: avatar, bio y al menos un enlace. `level_20`: el XP total llega al nivel 20, también
+- **El resto.** `share_card`: compartir o descargar una tarjeta; lo declara el navegador (`POST /api/me/achievements`,
+  §4.10), que es quien sabe que se ha compartido, y por eso solo da su XP (25), con lista blanca y límite.
+  `profile_done`: avatar, bio y al menos un enlace. `level_20`: el XP total llega al nivel 20, también
   si lo empuja el XP de otro logro. `season_champ`: campeón o campeón ex aequo (§2.9). Los secretos (Fase 8): `scratch`,
   7 clics en el logo en 3 s; `konami`, la secuencia ↑↑↓↓←→←→BA; `pad_404`, grabar un bucle con al menos un golpe;
   `screwed`, mantener Espacio 5 s; `human_metronome`, un tempo marcado con 8 pulsos a ±1 BPM del del sample (sin BPM
@@ -3930,6 +3935,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-10-29 | 0.6.104 | **Tarea 7.14** (hueco G5 del plan 07, resuelto: los logros que ocurren en el navegador). §4.10: `POST /api/me/achievements { achievement }`, con sesión, solo con los logros de la lista blanca `BROWSER_ACHIEVEMENTS` (en la Fase 7, `share_card`; la Fase 8 suma sus secretos con su prueba), cualquier otro → 422, 10 por hora y cuenta, sin más XP que el del logro (y `level_20` si lo cruza) y repetirlo no suma; responde lo ganado. §2.10, §4.13 y Anexo C al día. |
 | 2026-10-29 | 0.6.103 | **Tarea 7.10** (hueco G2 del plan 07, resuelto: el re-sellado y la capa de juego). §2.8: el sellado da, en su `batch` y a partir de la clasificación ya calculada, el XP de resultado, el oído de oro, la racha y los logros de resultado; todo es una función de las semanas selladas en su revisión vigente y **el libro la sigue**: cada (re-)sellado re-juega desde la semana corregida hasta la última y escribe la diferencia, con **ajustes que pueden restar** referidos a la revisión, los logros de resultado que ya no se cumplen en ninguna semana sellada **se retiran con su XP** y los que ahora se cumplen se ganan; lo ganado en vivo y `level_20` no cambian; sin cambios en el snapshot, nada cambia. `RF-RES-08` con `myGame`. §2.10: la racha la aplica el sellado (también a quien no participa y tenía racha); `streak_state` es caché. Anexo C: la excepción a «ningún logro se retira». §4.5: `replaySealedWeeks`. §4.10: `myGame` en los resultados. §4.11: la referencia de los ajustes, el módulo `sealing` y el sellado perezoso en orden de número. |
 | 2026-10-29 | 0.6.102 | **Tarea 7.9** (ganchos en vivo de la capa de juego). §2.10: dónde se gana en vivo, en el `batch` del hecho y solo si ocurre: la entrada que pasa a `active` (al registrar, al sustituir el audio o en el `tick`; `early_bird` va con la fila de la primera entrada), el voto (con el jurado completo al votar la última de las activas ajenas), la descarga del sample y el perfil guardado (datos o avatar); la racha en juego sale de las semanas selladas y, si la anterior cerró sin sellar, se sella antes. §4.8.4 paso 4 al día. §4.10: el voto, registrar la entrada y sustituir el audio responden lo ganado (`game: { xp, achievements, level }`). §4.11: la condición del hecho (`guard`) en cada sentencia, el XP de un logro solo si el logro está y qué cuenta cada gancho para `evaluate`. |
 | 2026-10-29 | 0.6.101 | **Tarea 7.15.** §4.14, registro de datos de la cuenta: la lista de módulos al día (semanas, entradas y votos, y la capa de juego con su libro de XP, logros y racha); entradas, votos y capa de juego comparten la sección `game` de la exportación, cuyas claves se juntan (`xpEvents`, `achievements` y `streak`, con la semana por su slug; el formato sigue en `beatbattle-export/1`, solo se añade `streak`); borrar la cuenta quita su XP, sus logros y su racha en el mismo `batch`, y lo que otras cuentas ganaron votando sus entradas se queda. |

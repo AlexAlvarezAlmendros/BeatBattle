@@ -13,7 +13,7 @@ import {
   XP_VOTE_MAX_VOTES_PER_WEEK,
   xpFor,
 } from '@beatbattle/rules'
-import type { GameDelta } from '@beatbattle/shared'
+import type { BrowserAchievement, GameDelta } from '@beatbattle/shared'
 import { and, count, eq, gte, lt, ne, sql } from 'drizzle-orm'
 import type { BatchStatement } from '../../db/batch'
 import type { Db } from '../../db/client'
@@ -414,6 +414,18 @@ export function createGameService(deps: GameDeps) {
     sampleDownloaded(userId: string, input: { weekId: string; now: number }): Promise<GamePlan> {
       return plan(userId, {
         events: [{ event: { kind: 'sampleDownloaded' }, ref: input.weekId, weekId: input.weekId }],
+        now: input.now,
+      })
+    },
+
+    /**
+     * Un logro que declara el navegador (tarea 7.14): solo los de la lista blanca, y solo su logro (sin XP de ningún
+     * evento del Anexo B). `share_card` es «compartir una tarjeta» (`cardShared`).
+     */
+    declared(userId: string, input: { achievement: BrowserAchievement; now: number }): Promise<GamePlan> {
+      const events: Record<BrowserAchievement, AchievementEvent> = { share_card: { kind: 'cardShared' } }
+      return plan(userId, {
+        events: [{ event: events[input.achievement], ref: null, weekId: null }],
         now: input.now,
       })
     },

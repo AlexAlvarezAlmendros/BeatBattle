@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import type { z } from 'zod'
 import {
   AchievementIdSchema,
+  BROWSER_ACHIEVEMENTS,
+  DeclaredAchievementSchema,
   EntryCreatedSchema,
   GameDeltaSchema,
   HallOfFameSchema,
@@ -49,6 +51,16 @@ describe('esquemas de la capa de juego (§2.9, §2.10, §4.10; tarea 7.7)', () =
     expect(VoteSchema.safeParse({ ...vote, game }).success).toBe(false)
     expect(Object.keys(EntryCreatedSchema.shape)).toContain('game')
     expect(EntryCreatedSchema.shape.game).toBe(GameDeltaSchema)
+  })
+
+  it('RF-GAME-05 (contrato): el navegador solo declara los logros de su lista blanca (en la Fase 7, share_card)', () => {
+    expect([...BROWSER_ACHIEVEMENTS]).toEqual(['share_card'])
+    for (const id of BROWSER_ACHIEVEMENTS) expect(AchievementIdSchema.options).toContain(id)
+    expect(DeclaredAchievementSchema.parse({ achievement: 'share_card' })).toEqual({
+      achievement: 'share_card',
+    })
+    for (const bad of [{ achievement: 'win' }, { achievement: 'share_card', xp: 25 }, {}])
+      expect(DeclaredAchievementSchema.safeParse(bad).success, JSON.stringify(bad)).toBe(false)
   })
 
   it('RF-GAME-05: los 36 logros del Anexo C, sin repetir', () => {

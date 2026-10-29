@@ -86,6 +86,17 @@ export type VoteCast = z.infer<typeof VoteCastSchema>
 export const EntryCreatedSchema = OwnEntrySchema.extend({ game: GameDeltaSchema }).strict()
 export type EntryCreated = z.infer<typeof EntryCreatedSchema>
 
+/**
+ * Los logros que declara el navegador (§4.10, tarea 7.14; hueco G5): solo los de esta lista blanca. En la Fase 7,
+ * `share_card` (compartir o descargar una tarjeta); la Fase 8 suma sus secretos, cada uno con su prueba.
+ */
+export const BROWSER_ACHIEVEMENTS = ['share_card'] as const
+export type BrowserAchievement = (typeof BROWSER_ACHIEVEMENTS)[number]
+
+/** `POST /api/me/achievements`: un logro de la lista blanca; cualquier otro → 422. */
+export const DeclaredAchievementSchema = z.object({ achievement: z.enum(BROWSER_ACHIEVEMENTS) }).strict()
+export type DeclaredAchievement = z.infer<typeof DeclaredAchievementSchema>
+
 /** Un logro conseguido (en el perfil público y en la vitrina): el id y cuándo. */
 export const AchievementUnlockSchema = z
   .object({ id: AchievementIdSchema, unlockedAt: z.number().int() })

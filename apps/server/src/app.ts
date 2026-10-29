@@ -24,6 +24,7 @@ import { qrRoutes } from './modules/entries/qrRoute'
 import { entriesRoutes } from './modules/entries/routes'
 import { createEntriesService } from './modules/entries/service'
 import { waveformRoutes } from './modules/entries/waveformRoute'
+import { gameRoutes } from './modules/game/routes'
 import { createGameService } from './modules/game/service'
 import { healthRoutes } from './modules/health/routes'
 import { createHealthService } from './modules/health/service'
@@ -166,6 +167,7 @@ export function buildApp(deps: AppDeps): FastifyInstance {
   // La capa de juego (Fase 7): cada hecho mete su XP y sus logros en su propio `batch`.
   const game = createGameService({ db, newId })
   meRoutes(app, { db, images })
+  gameRoutes(app, { db, game, rateLimiter })
   profileRoutes(app, { db, images, rateLimiter, game })
   accountRoutes(app, { db, images, emails, rateLimiter })
 
