@@ -193,7 +193,14 @@ for (const [index, info] of SAMPLES.entries()) {
     bytes: synthLoop(info.bpm, info.root, info.key.endsWith('m')),
     format: 'wav',
   })
-  await storage.put({ publicId: storage.publicIdFor(sampleId, 'cover'), bytes: cover(index), format: 'png' })
+  // La portada es opcional (§2.4): el último sample va sin ella, para ver el vinilo-sol en su lugar.
+  const hasCover = index < SAMPLES.length - 1
+  if (hasCover)
+    await storage.put({
+      publicId: storage.publicIdFor(sampleId, 'cover'),
+      bytes: cover(index),
+      format: 'png',
+    })
   const created = await samples.create(
     'seed',
     {
@@ -205,6 +212,7 @@ for (const [index, info] of SAMPLES.entries()) {
       musicalKey: info.key,
       genreHint: info.genre,
       hasStems: false,
+      hasCover,
     },
     systemClock.now(),
   )

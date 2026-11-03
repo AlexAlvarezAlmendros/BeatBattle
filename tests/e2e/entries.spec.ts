@@ -158,6 +158,7 @@ test('hito de la Fase 4: un WAV de 60 MB por trozos, BPM y tonalidad sugeridos, 
       licenseText: 'Uso libre.',
       bpm: 92,
       musicalKey: 'Dm',
+      hasCover: true,
     },
   })
   expect(sample.ok(), await sample.text()).toBe(true)

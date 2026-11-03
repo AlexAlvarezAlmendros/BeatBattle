@@ -70,7 +70,10 @@ const sampleFields = {
   genreHint: optionalText(40),
 }
 
-/** `POST /api/admin/samples`: el original y la portada ya están subidos; el servidor los verifica y mide. */
+/**
+ * `POST /api/admin/samples`: el original ya está subido (y la portada y los stems, si se dicen); el servidor
+ * los verifica y mide. La portada es opcional (§2.4): sin ella, `coverUrl` es `null`.
+ */
 export const SampleCreateSchema = z
   .object({
     sampleId: z.uuid(),
@@ -79,13 +82,14 @@ export const SampleCreateSchema = z
     bpm: z.number().min(40).max(250),
     musicalKey: MusicalKeySchema,
     hasStems: z.boolean().default(false),
+    hasCover: z.boolean().default(false),
   })
   .strict()
 export type SampleCreate = z.infer<typeof SampleCreateSchema>
 
 /**
  * `PATCH /api/admin/samples/:id`: solo lo que cambia. `chops`: los 8 o ninguno. `remeasure`: tras volver a
- * subir el original, se mide de nuevo. `hasStems`: tras subir o quitar el zip.
+ * subir el original, se mide de nuevo. `hasStems` y `hasCover`: tras subir o quitar el zip o la portada.
  */
 export const SampleUpdateSchema = z
   .object({
@@ -98,6 +102,7 @@ export const SampleUpdateSchema = z
     genreHint: sampleFields.genreHint,
     chops: z.array(ChopSchema).length(CHOPS_COUNT).optional(),
     hasStems: z.boolean().optional(),
+    hasCover: z.boolean().optional(),
     remeasure: z.boolean().optional(),
   })
   .strict()
@@ -122,7 +127,8 @@ export const AdminSampleSchema = z.object({
   peaks: PeaksSchema,
   chops: z.array(ChopSchema),
   hasStems: z.boolean(),
-  coverUrl: z.string(),
+  /** Opcional (§2.4): `null` sin portada. */
+  coverUrl: z.string().nullable(),
   streamUrl: z.string(),
   /** Slugs de las semanas que lo usan (con alguna, no se borra). */
   weeks: z.array(z.string()),
@@ -215,7 +221,8 @@ export const PublicWeekSchema = z.object({
     peaks: PeaksSchema,
     chops: z.array(ChopSchema),
     hasStems: z.boolean(),
-    coverUrl: z.string(),
+    /** Opcional (§2.4): sin ella, `null` (la ficha es el vinilo-sol de la semana). */
+    coverUrl: z.string().nullable(),
     streamUrl: z.string(),
   }),
   /** Entradas en la batalla: un dato de la semana, nunca de una entrada (§3.8.3, `RNF-SEC-04`). */

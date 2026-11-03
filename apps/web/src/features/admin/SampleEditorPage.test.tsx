@@ -1,18 +1,52 @@
-import type { SampleUploadPart } from '@beatbattle/shared'
+import type { AdminSample, SampleUploadPart } from '@beatbattle/shared'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { renderInRouter } from '../../app/layout/testing'
 import { t } from '../../i18n'
-import { signSampleUpload, uploadSigned } from '../../net/admin'
+import { createSample, signSampleUpload, updateSample, uploadSigned } from '../../net/admin'
 import { SampleForm } from './SampleEditorPage'
 
 vi.mock('../../net/admin', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../net/admin')>()),
   signSampleUpload: vi.fn(),
   uploadSigned: vi.fn(async () => undefined),
+  createSample: vi.fn(async () => ({ id: 's_uno' })),
+  updateSample: vi.fn(async () => ({})),
 }))
 
 const sign = vi.mocked(signSampleUpload)
+
+/** Un sample ya creado, como lo da `GET /api/admin/samples/:id`. */
+const existing = (patch: Partial<AdminSample> = {}): AdminSample => ({
+  id: 's_uno',
+  title: 'Lluvia en Gràcia',
+  credits: 'Other People Records',
+  origin: null,
+  licenseText: 'Uso libre para la batalla.',
+  bpm: 92,
+  musicalKey: 'Dm',
+  genreHint: null,
+  durationMs: 6000,
+  bytes: 1000,
+  format: 'wav',
+  loudnessLufs: -10,
+  peaks: btoa(String.fromCharCode(...new Uint8Array(2000))),
+  chops: [],
+  hasStems: false,
+  coverUrl: null,
+  streamUrl: '/stream',
+  weeks: [],
+  createdAt: 0,
+  ...patch,
+})
+
+function fillSheet() {
+  fireEvent.change(screen.getByLabelText(t('admin.sample.titleField')), { target: { value: 'Lluvia' } })
+  fireEvent.change(screen.getByLabelText(t('admin.sample.credits')), { target: { value: 'OTP' } })
+  fireEvent.change(screen.getByLabelText(t('admin.sample.license')), { target: { value: 'Libre' } })
+  fireEvent.change(screen.getByLabelText(t('admin.sample.bpm')), { target: { value: '92' } })
+  fireEvent.change(screen.getByLabelText(t('admin.sample.key')), { target: { value: 'Dm' } })
+}
 
 /** Una firma que el test resuelve cuando quiere, para cruzar dos subidas. */
 function deferredSign() {
@@ -70,5 +104,65 @@ describe('SampleForm (§2.14)', () => {
 
     await waitFor(() => expect(uploadSigned).toHaveBeenCalledTimes(1))
     expect(sign).toHaveBeenNthCalledWith(2, 'original')
+  })
+
+  it('RF-ADM-01: un sample se crea solo con el original; la portada es opcional', async () => {
+    sign.mockImplementation(async (part, sampleId) => signed(part, sampleId ?? 's_uno'))
+    const { container } = renderInRouter(<SampleForm sample={null} />, '/admin/samples/nuevo')
+    expect(screen.getByText(/^Portada .*opcional\)$/)).toBeInTheDocument()
+    const original = container.querySelector('input[data-part="original"]') as HTMLInputElement
+    fireEvent.change(original, { target: { files: [new File(['x'], 'drop.wav')] } })
+    await screen.findAllByText(t('admin.sample.uploaded'))
+    fillSheet()
+    fireEvent.click(screen.getByRole('button', { name: t('admin.sample.create') }))
+    await waitFor(() => expect(createSample).toHaveBeenCalledTimes(1))
+    expect(vi.mocked(createSample).mock.calls[0]?.[0]).toMatchObject({
+      sampleId: 's_uno',
+      hasCover: false,
+      hasStems: false,
+    })
+  })
+
+  it('RF-ADM-01: con la portada aún subiendo, «Crear el sample» espera en vez de dejarla fuera', async () => {
+    sign.mockImplementation(async (part, sampleId) => signed(part, sampleId ?? 's_uno'))
+    let finish: () => void = () => {}
+    vi.mocked(uploadSigned)
+      .mockImplementationOnce(async () => undefined)
+      .mockImplementationOnce(
+        () =>
+          new Promise<void>((done) => {
+            finish = done
+          }),
+      )
+    const { container } = renderInRouter(<SampleForm sample={null} />, '/admin/samples/nuevo')
+    const input = (part: SampleUploadPart) =>
+      container.querySelector(`input[data-part="${part}"]`) as HTMLInputElement
+    fireEvent.change(input('original'), { target: { files: [new File(['x'], 'drop.wav')] } })
+    await screen.findAllByText(t('admin.sample.uploaded'))
+    fireEvent.change(input('cover'), { target: { files: [new File(['x'], 'cover.png')] } })
+    await waitFor(() => expect(uploadSigned).toHaveBeenCalledTimes(2))
+    fillSheet()
+    fireEvent.click(screen.getByRole('button', { name: t('admin.sample.create') }))
+    expect(await screen.findByText(t('admin.sample.waitUploads'))).toBeInTheDocument()
+    expect(createSample).not.toHaveBeenCalled()
+    finish()
+    await waitFor(() => expect(screen.getAllByText(t('admin.sample.uploaded'))).toHaveLength(4))
+    fireEvent.click(screen.getByRole('button', { name: t('admin.sample.create') }))
+    await waitFor(() => expect(createSample).toHaveBeenCalledTimes(1))
+    expect(vi.mocked(createSample).mock.calls[0]?.[0]).toMatchObject({ hasCover: true })
+  })
+
+  it('RF-ADM-01: en un sample sin portada, subirla la añade; con portada, «Quitar la portada» la quita', async () => {
+    sign.mockImplementation(async (part, sampleId) => signed(part, sampleId ?? 's_uno'))
+    const bare = renderInRouter(<SampleForm sample={existing()} />, '/admin/samples/s_uno')
+    expect(screen.queryByRole('button', { name: t('admin.sample.removeCover') })).toBeNull()
+    const cover = bare.container.querySelector('input[data-part="cover"]') as HTMLInputElement
+    fireEvent.change(cover, { target: { files: [new File(['x'], 'cover.png')] } })
+    await waitFor(() => expect(updateSample).toHaveBeenCalledWith('s_uno', { hasCover: true }))
+    bare.unmount()
+
+    renderInRouter(<SampleForm sample={existing({ coverUrl: '/cover.png' })} />, '/admin/samples/s_uno')
+    fireEvent.click(screen.getByRole('button', { name: t('admin.sample.removeCover') }))
+    await waitFor(() => expect(updateSample).toHaveBeenCalledWith('s_uno', { hasCover: false }))
   })
 })

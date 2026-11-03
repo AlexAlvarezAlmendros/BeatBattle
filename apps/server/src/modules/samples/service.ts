@@ -24,10 +24,11 @@ import {
 } from '../storage/samples'
 
 /**
- * Samples del panel de admin (§2.4, §2.14; tarea 3.6, `RF-ADM-01`). El navegador sube el original, la
- * portada y los stems directamente al almacenamiento con la firma; aquí se verifica cada parte con la Admin
+ * Samples del panel de admin (§2.4, §2.14; tareas 3.6 y 3.23, `RF-ADM-01`). El navegador sube el original,
+ * la portada y los stems directamente al almacenamiento con la firma; aquí se verifica cada parte con la Admin
  * API y se **mide** el original en servidor (duración, sonoridad y forma de onda, §4.8.4): nada de eso lo
- * dice el navegador. Cada cambio queda en `audit_log` en el mismo `batch` (`RF-ADM-05`).
+ * dice el navegador. La portada y los stems son opcionales: se suben al crear o después, y se quitan. Cada
+ * cambio queda en `audit_log` en el mismo `batch` (`RF-ADM-05`).
  */
 
 export interface SamplesDeps {
@@ -104,7 +105,7 @@ export function createSamplesService(deps: SamplesDeps) {
       peaks: Buffer.from(row.peaks).toString('base64'),
       chops: JSON.parse(row.chops) as Chop[],
       hasStems: row.stemsPublicId !== null,
-      coverUrl: storage.coverUrl(row.coverPublicId, 512),
+      coverUrl: row.coverPublicId === null ? null : storage.coverUrl(row.coverPublicId, 512),
       streamUrl: storage.streamUrl(row.audioPublicId),
       weeks,
       createdAt: row.createdAt,
@@ -159,7 +160,7 @@ export function createSamplesService(deps: SamplesDeps) {
       const [existing] = await db.select({ id: sample.id }).from(sample).where(eq(sample.id, input.sampleId))
       if (existing) throw appError('CONFLICT', 'Ese sample ya existe: edítalo.')
       const original = await checkedAsset(storage, input.sampleId, 'original')
-      const cover = await checkedAsset(storage, input.sampleId, 'cover')
+      const cover = input.hasCover ? await checkedAsset(storage, input.sampleId, 'cover') : null
       const stems = input.hasStems ? await checkedAsset(storage, input.sampleId, 'stems') : null
       const measured = await measureOriginal(storage, original)
       const row: SampleRow = {
@@ -176,7 +177,7 @@ export function createSamplesService(deps: SamplesDeps) {
         format: original.format.toLowerCase(),
         audioPublicId: original.publicId,
         stemsPublicId: stems?.publicId ?? null,
-        coverPublicId: cover.publicId,
+        coverPublicId: cover?.publicId ?? null,
         peaks: Buffer.from(measured.peaks.buffer, measured.peaks.byteOffset, measured.peaks.byteLength),
         loudnessLufs: measured.integratedLufs,
         chops: '[]',
@@ -220,6 +221,8 @@ export function createSamplesService(deps: SamplesDeps) {
       }
       if (patch.hasStems === true) next.stemsPublicId = (await checkedAsset(storage, id, 'stems')).publicId
       if (patch.hasStems === false) next.stemsPublicId = null
+      if (patch.hasCover === true) next.coverPublicId = (await checkedAsset(storage, id, 'cover')).publicId
+      if (patch.hasCover === false) next.coverPublicId = null
       const durationMs = next.durationMs ?? row.durationMs
       if (patch.chops) {
         checkChops(patch.chops, durationMs)
@@ -230,6 +233,7 @@ export function createSamplesService(deps: SamplesDeps) {
         if (chops.some((chop) => chop.endMs > durationMs)) next.chops = '[]'
       }
       const removedStems = patch.hasStems === false ? row.stemsPublicId : null
+      const removedCover = patch.hasCover === false ? row.coverPublicId : null
       await runBatch(db, [
         db.update(sample).set(next).where(eq(sample.id, id)),
         auditStatement(db, {
@@ -242,6 +246,7 @@ export function createSamplesService(deps: SamplesDeps) {
         }),
       ])
       if (removedStems) await storage.remove(removedStems, 'stems').catch(() => undefined)
+      if (removedCover) await storage.remove(removedCover, 'cover').catch(() => undefined)
       return toAdmin({ ...row, ...next }, await weeksOf(id))
     },
 
@@ -267,7 +272,7 @@ export function createSamplesService(deps: SamplesDeps) {
       return {
         external: async () => {
           await storage.remove(row.audioPublicId, 'original')
-          await storage.remove(row.coverPublicId, 'cover')
+          if (row.coverPublicId) await storage.remove(row.coverPublicId, 'cover')
           if (row.stemsPublicId) await storage.remove(row.stemsPublicId, 'stems')
         },
       }
