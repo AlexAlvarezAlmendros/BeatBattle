@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.142 · 2026-11-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.147 · 2026-11-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1590,7 +1590,9 @@ también «×0»). Sin temporada, sin su tesela. El lector las oye enteras («Te
 servidor, pero **el medidor lo enseña cuando lo traga** (§3.4.2) o cuando sale el aviso de su logro (§3.8.8): hasta
 entonces sigue en lo de antes, con su nivel, y al subir lo recorre el brillo (Anexo E). En el nivel 20, el máximo, el
 medidor va lleno con «NV 20 · MÁX». Lo ganado se repite en una **región viva** educada (`RNF-A11Y-07`): «+5 XP», el
-logro y el nivel.
+logro y el nivel. Es un registro (`role="log"`, solo lo que se añade): cada mensaje es un nodo nuevo que el lector lee
+una vez y en su orden, también los que salen a la vez (dos placas y la subida de nivel; con un solo nodo que se
+cambiaba, solo se oía el último), y guarda los cuatro últimos.
 
 Los enlaces legales (bases, términos, privacidad, cookies) están en Opciones → Privacidad, en «Cómo
 se juega» y, en las pantallas interiores, en el hueco derecho de la barra de controles («Legal»).
@@ -2344,7 +2346,9 @@ Cómo salen (tarea 7.20):
   completa encima (la pantalla de título, la revelación del drop, las ceremonias): esperan y salen al cerrarse, en su
   orden, así la subida de nivel del sellado se encadena con la ceremonia (§3.8.6) y el «¡LOGRO LEGENDARIO!» de
   `season_champ`, con la del campeón de temporada (§3.8.15), que además los retiene mientras está pendiente en su
-  pantalla.
+  pantalla. Si la capa llega con avisos ya a la vista (lo que `me` trae sin ver sale en cuanto llega la sesión, antes
+  de que la pantalla sepa que va a enseñar su capa), vuelven a la cola, delante, y salen otra vez al cerrarse, sin
+  volver a decirse en la región viva ni a marcarse vistos: debajo de la capa no los vería nadie (tarea 7.34).
 - **Sin movimiento**, fundidos de 150 ms, sin chispas ni estampado. **Modo serio**: sin anunciador, chispas ni
   estampado; la placa con todo su texto se queda (se pierde espectáculo, nunca información).
 
@@ -2845,8 +2849,11 @@ worker y no bloquea la subida.
 
 #### 4.7.5 Escenario
 
-Un `<Canvas>` de R3F fijo detrás del contenido, con `eventSource` en el `body` y `View` de drei para
-las escenas ancladas. Bucle de render propio: el fondo a 30 fps, las vistas a 60 cuando hay algo
+Un lienzo de R3F fijo detrás del contenido, con los eventos del `body` y `View` de drei para las escenas
+ancladas. Desde la tarea 7.34 no es el `<Canvas>` de R3F sino `StageCanvas` (`createRoot` con lo mismo que hace
+`Canvas`), que registra solo las piezas de three que el Escenario pinta en JSX (`stage/catalogue.ts`, con un test que
+lo compara con el código): el `Canvas` registra el espacio de nombres entero de three (`extend(THREE)`) y ningún
+empaquetador podía quitar nada (§4.17). Bucle de render propio: el fondo a 30 fps, las vistas a 60 cuando hay algo
 animándose y nada cuando no. Pausa con `visibilitychange`. Shaders en `apps/web/src/stage/shaders/`,
 un fichero por material o pase.
 
@@ -3593,11 +3600,11 @@ negocio en el panel de admin (participantes, votos, escuchas por semana) y Verce
 | LCP (home, 4G, móvil medio) | < 2,5 s |
 | INP | < 200 ms |
 | CLS | < 0,05 |
-| JS inicial (sin Escenario) | < 200 kB gz, contando la entrada con sus importaciones estáticas y también la primera pintura de la home (175 y 185 kB gz al cerrar la Fase 0; con la arena, 179 y 193 kB gz con Motion por el pulsado del botón y 159 y 172 kB gz sin él, 2026-10-03) |
-| Escenario (trozo diferido) | < 250 kB gz (243,8 kB gz con three + R3F y la capa 0, tarea 1.1; 249,1 kB gz con `View` de drei, las vistas y las partículas, tarea 1.3; **249,8 kB gz** con la reactividad, tarea 1.6: sin margen, lo próximo que entre en el trozo obliga a partirlo. Medido el 2026-11-03: **252,6 kB gz** en `main` con la 7.28, y **253,5** con la 7.23, que solo le añade el `lazy` del pase y `suspend` de `suspend-react`, compartido por R3F y Rapier: por encima del presupuesto, partirlo queda para la 7.34) |
+| JS inicial (sin Escenario) | < 200 kB gz, contando la entrada con sus importaciones estáticas y también la primera pintura de la home (175 y 185 kB gz al cerrar la Fase 0; con la arena, 179 y 193 kB gz con Motion por el pulsado del botón y 159 y 172 kB gz sin él, 2026-10-03). **Medido el 2026-11-03 (tarea 7.34, `pnpm budget`, gzip de Node): 211,8 y 289,6 kB gz (211,7 y 289,5 en `main`)**: por encima del presupuesto desde antes de la Fase 7 (201,4 y 278,0 kB gz al empezarla; la F7 les suma ~10 y ~12). Pesan sobre todo los textos de `es.json` (28 kB gz, en el JS inicial) y Motion (41 kB gz, en la 1.ª pintura de la home: entra por la `Modal` que la home importa). `pnpm budget` lo avisa sin fallar; el arreglo es de la auditoría de rendimiento de la Fase 10 (Lighthouse CI), y entonces pasa a fallar. Se nota en el LCP: el proyecto `perf` da en local 3,0 s (> 2,5; igual en `main`), que la CI no exige |
+| Escenario (trozo diferido) | < 250 kB gz (243,8 kB gz con three + R3F y la capa 0, tarea 1.1; 249,1 kB gz con `View` de drei, las vistas y las partículas, tarea 1.3; **249,8 kB gz** con la reactividad, tarea 1.6: sin margen, lo próximo que entre en el trozo obliga a partirlo. Medido el 2026-11-03: **252,6 kB gz** en `main` con la 7.28, y **253,5** con la 7.23, que solo le añade el `lazy` del pase y `suspend` de `suspend-react`, compartido por R3F y Rapier. Tarea 7.34: **208,2 kB gz** (767,8 kB) con `StageCanvas`, que registra solo el catálogo de three que se usa (§4.7.5): three pasa de 150 a 111 kB gz y salen `react-use-measure` y casi todo `its-fine`, con el mismo lienzo único y las mismas vistas. `pnpm budget` (`tools/lint/check-bundle.mjs`) lo comprueba en la CI tras cada build, con el gzip de Node (≈ 1 % por debajo de la cifra de `vite build`) |
 | Pase de la carta (trozo diferido propio, tarea 7.23) | Sin presupuesto propio: **856,4 kB gz** (Rapier con su WASM, 2,2 MB sin comprimir; `@react-three/rapier`, 22 kB; el pase, 17 kB). Solo se pide en el perfil a dos columnas con el pase (§3.4.4), después de la primera pintura (`RNF-PERF-04`), nunca en la home ni en la ficha |
 | Fuentes (subconjunto latino) | ≈ 127 KB: Anybody cursiva 62, Chakra Petch 5 × ~10, Oxanium 14; precarga solo de Chakra Petch 700 (§3.2). Medido el 2026-10-03 (perfil de `RNF-PERF-02`, cinco cargas intercaladas): con Anybody y Chakra 600 precargadas, LCP 2,00 s y CLS 0,0002; sin precargas, 1,60 s y 0,0036; solo Chakra 700, 1,64 s y 0,0034 |
-| FPS | 60 en escritorio con GPU integrada; ≥ 45 en un Android de gama media con calidad automática (tarea 1.11: 60 en escritorio a dpr 1 y 2 con la arena, el vinilo y 4.000 partículas; 60 en un Android **emulado** con CPU ×4, a falta de un dispositivo real; `docs/planning/evidence/f1/banco/`) |
+| FPS | 60 en escritorio con GPU integrada; ≥ 45 en un Android de gama media con calidad automática (tarea 1.11: 60 en escritorio a dpr 1 y 2 con la arena, el vinilo y 4.000 partículas; 60 en un Android **emulado** con CPU ×4, a falta de un dispositivo real; `docs/planning/evidence/f1/banco/`). El perfil con la carta colgada de su pase y girándose sin parar, 60 fps con el peor fotograma de 16,8 ms a dpr 1 y 2 (tareas 7.23 y 7.34); el primer giro, sin tareas largas desde la 7.34 (`docs/planning/evidence/f7/accesibilidad-rendimiento/`) |
 | Inicio de reproducción tras el clic | < 600 ms en 4G |
 | Latencia de efectos | La parte de la app < 10 ms de mediana; la del sistema, medida aparte (`RD-SND-05`). 2026-10-08 en Linux con PipeWire: app 3,3–3,5 ms, salida 24–40 ms (la elige PipeWire), total 27–43 ms |
 | Partículas simultáneas | ≤ 4.000 (alta), ≤ 1.500 (media) |
@@ -4367,6 +4374,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-11-03 | 0.6.147 | **Tarea 7.34** (accesibilidad y rendimiento de la capa de juego). §4.7.5 y §4.17: el lienzo del Escenario es `StageCanvas` (`createRoot` de R3F con el catálogo justo de three, `stage/catalogue.ts`) en vez del `<Canvas>`, que registraba el espacio de nombres entero: el trozo baja de 253,5 a **208,2 kB gz** (< 250) con el mismo lienzo único y la primera pintura igual, y `pnpm budget` lo comprueba en la CI. §4.17, JS inicial: medido 211,8 kB gz (289,6 la 1.ª pintura de la home), por encima de los 200 desde antes de la Fase 7 (201,4 y 278,0 al empezarla); queda escrito (con él, el LCP local del proyecto `perf`, 3,0 s, también en `main`) y su arreglo, para la auditoría de la Fase 10. §4.17, FPS: el perfil con la carta, 60 fps; el primer giro de la carta ya no tropieza (la caja de la carta, con `aspect-ratio`, unidades `cqi` y una fila `auto`, costaba ~60 ms en cada maquetación de la página; con una celda `minmax(0, 1fr)`, ~1 ms). §3.4.1: la región viva de las recompensas es un registro (`role="log"`): cada mensaje se lee una vez y en su orden, también los que salen a la vez (antes solo se oía el último). §3.8.8, «Cuándo»: una capa a pantalla completa que llega con avisos ya a la vista (lo pendiente de `me` salía antes de que la ceremonia del campeón retuviera los avisos, y se quedaba debajo, visto y sin verse) los devuelve a la cola y salen al cerrarse, sin volver a decirse. |
 | 2026-11-03 | 0.6.142 | §4.13 y §4.15 (variables): los E2E ya no consultan Have I Been Pwned. `BB_SKIP_HIBP=1` apaga la comprobación (el plugin `haveIBeenPwned` con `enabled: false`; el esquema no cambia) y, con `NODE_ENV=production`, impide arrancar. La API iba lenta o caída a ratos y cualquier E2E que registra una cuenta fallaba con «Failed to check password». `RF-AUTH-07` sigue cubierto por los tests del servidor con una respuesta local. |
 | 2026-11-03 | 0.6.141 | **Tarea 7.23, cierre** (decisión del usuario). §3.4.4 y §7: la decisión «Pase de la carta» se cierra con la cinta propia con física (el valor por defecto), mirando las capturas de `docs/planning/evidence/f7/pase/`. El expositor giratorio queda descartado. |
 | 2026-11-03 | 0.6.140 | **Tarea 7.23** (el pase de torneo; la decisión abierta «Pase de la carta» sigue abierta: se ha hecho su valor por defecto y la cierra el usuario con las capturas de `docs/planning/evidence/f7/pase/`). §3.4.4, «El pase de torneo», nueva: la carta 3D cuelga en una vista anclada del Escenario donde está la plana (mismo ancho y −3°), de un remache hexagonal por una cinta roja corta en Λ con «OTP.» impreso y una pinza ancha que muerde el canto, todo plano y en la paleta, dentro de la columna de la pieza (lo que la separa del `Lanyard` del sello); física de péndulo de cadena en el plano con Rapier (la carta cuelga a −3° por el ojal descentrado), se arrastra con el puntero hasta donde da la cinta, C la gira con `spring.interaction` y un vaivén, la cara se inclina con la velocidad y el giroscopio, y quieta no pide fotogramas. **Sin pase, la carta plana**, también con la calidad baja, en modo serio, en contraste alto y **en una columna** (la diagonal de la arena va por encima del lienzo y cruzaría la carta; el arrastre le quitaría a la página el desplazamiento con el dedo); `bb:pass` = `on` lo enseña en una columna para mirarlo. La plana se queda debajo, transparente, en el árbol accesible y en el foco. §3.4.4, lienzo por CPU: un solo pintor para las *stories* y la 3D; `paintCardFace` pinta por capas (`'art'`, `'marks'`) y `paintFoilSheet` da la lámina sola para moverla con la inclinación (en `screen`, las tres juntas son la carta entera); el reverso, `paintCardBack` desde `CardBack` (`cardModel`). `RF-GAME-07`: el criterio cuenta los demás casos sin pase y el pase con WebGL. §4.1: `@react-three/rapier` 2.2.0 y `@dimforge/rapier3d-compat` 0.19.2, fijadas. §4.17: el trozo del pase (856,4 kB gz, solo en el perfil a dos columnas tras la primera pintura) y el del Escenario medido: 252,6 kB gz ya en `main`, 253,5 con la 7.23 (partirlo, en la 7.34). |

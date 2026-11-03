@@ -72,7 +72,7 @@ describe('lo ganado, de la API al HUD (tareas 7.18–7.20)', () => {
 
   it('RNF-A11Y-07: la región viva dice el XP ganado', () => {
     applyGameDelta({ xp: 5, achievements: [], level: 1 })
-    expect(useHud.getState().live?.text).toBe(t('game.live.xp', { amount: 5 }))
+    expect(useHud.getState().live.at(-1)?.text).toBe(t('game.live.xp', { amount: 5 }))
   })
 
   it('RF-GAME-09: lo pendiente de `me` va a la cola: los logros sin ver y el nivel sin celebrar', () => {
@@ -115,7 +115,9 @@ describe('lo ganado, de la API al HUD (tareas 7.18–7.20)', () => {
     expect(useSession.getState().me?.game.levelSeen).toBe(3)
     expect(useSession.getState().me?.game.unseenAchievements).toEqual([])
     // RNF-A11Y-07: el último aviso, en la región viva.
-    expect(useHud.getState().live?.text).toBe(t('game.live.levelRank', { level: 3, rank: t('rank.looper') }))
+    expect(useHud.getState().live.at(-1)?.text).toBe(
+      t('game.live.levelRank', { level: 3, rank: t('rank.looper') }),
+    )
     // Otra lectura de `me` con lo mismo pendiente (el servidor aún no lo había apuntado) no lo repite.
     act(() =>
       useSession.setState({

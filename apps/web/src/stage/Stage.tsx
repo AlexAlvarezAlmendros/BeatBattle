@@ -1,5 +1,5 @@
 import { color } from '@beatbattle/shared/tokens'
-import { advance, Canvas, useFrame, useThree } from '@react-three/fiber'
+import { advance, useFrame, useThree } from '@react-three/fiber'
 import { lazy, Suspense, useEffect, useMemo, useRef } from 'react'
 import { type Mesh, PlaneGeometry, RawShaderMaterial } from 'three'
 import { neededFps, useStageActivity } from './activity'
@@ -9,6 +9,7 @@ import { medianFps, PROBE_MS, qualityFromFps, stageDpr, useStageQuality } from '
 import { useReactiveDots } from './reactivity'
 import { setStageRunning, useStageRuntime } from './runtime'
 import styles from './Stage.module.css'
+import { StageCanvas } from './StageCanvas'
 import fragmentShader from './shaders/arenaHalftone.frag.glsl?raw'
 import vertexShader from './shaders/fullscreen.vert.glsl?raw'
 import { CeremonyView } from './views/CeremonyView'
@@ -326,8 +327,8 @@ function StageViews() {
 }
 
 /**
- * El Escenario (guía §3.5): un único lienzo de React Three Fiber detrás del contenido, a pantalla
- * completa. En la tarea 1.1 pinta la capa 0, la trama de la cuña; la 1.3 le añade las vistas ancladas y
+ * El Escenario (guía §3.5): un único lienzo de React Three Fiber (`StageCanvas`, con el catálogo justo de three) detrás
+ * del contenido, a pantalla completa. En la tarea 1.1 pinta la capa 0, la trama de la cuña; la 1.3 le añade las vistas ancladas y
  * las partículas. Dibuja bajo demanda: solo cuando cambia algo de lo que depende.
  */
 export function Stage(props: StageProps) {
@@ -337,17 +338,13 @@ export function Stage(props: StageProps) {
     return () => setStageRunning(false)
   }, [])
   return (
-    <Canvas
+    <StageCanvas
       className={styles.stage}
       dpr={stageDpr(quality)}
       frameloop="demand"
       flat
       linear
-      eventSource={document.body}
-      eventPrefix="client"
-      data-stage=""
       gl={{ alpha: true, antialias: false, premultipliedAlpha: true, powerPreference: 'low-power' }}
-      aria-hidden="true"
       // Las llamadas de dibujo se cuentan por fotograma (pase principal y vistas), no por `render`.
       onCreated={({ gl }) => {
         gl.info.autoReset = false
@@ -358,7 +355,7 @@ export function Stage(props: StageProps) {
       <StageViews />
       <RenderPass />
       <Loop />
-    </Canvas>
+    </StageCanvas>
   )
 }
 

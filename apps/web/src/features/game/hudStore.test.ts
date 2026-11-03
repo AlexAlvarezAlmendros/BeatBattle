@@ -115,6 +115,42 @@ describe('almacén hud (§4.7.2, tarea 7.18)', () => {
     expect(useHud.getState().pendingXp).toBe(0)
   })
 
+  it('§3.10 / §3.8.8: una capa a pantalla completa que llega con avisos a la vista los devuelve a la cola, delante, y salen al cerrarse sin volver a decirse', () => {
+    vi.useFakeTimers()
+    const ids = () =>
+      useHud.getState().plates.map((notice) => (notice.kind === 'achievement' ? notice.id : notice.level))
+    // Lo pendiente de `me` sale en cuanto llega la sesión… y la ceremonia del campeón lo tapa un momento después.
+    useHud
+      .getState()
+      .notify([
+        achievement('first_vote', 'common'),
+        achievement('early_bird', 'rare'),
+        { kind: 'level', level: 3, from: 2 },
+        achievement('jury_full', 'rare'),
+        achievement('votes_100', 'common'),
+      ])
+    expect(ids()).toEqual(['first_vote', 'early_bird', 'jury_full'])
+    expect(useHud.getState().big).toMatchObject({ kind: 'level', level: 3 })
+    expect(shown).toHaveLength(4)
+    const release = useHud.getState().hold()
+    // Nada a la vista bajo la capa: lo que se veía vuelve a la cola en su orden, delante de lo que esperaba.
+    expect(useHud.getState().plates).toEqual([])
+    expect(useHud.getState().big).toBeNull()
+    expect(
+      useHud.getState().queue.map((notice) => (notice.kind === 'achievement' ? notice.id : notice.level)),
+    ).toEqual(['first_vote', 'early_bird', 3, 'jury_full', 'votes_100'])
+    // Los relojes de cuando salieron la primera vez no se llevan los que vuelven.
+    vi.advanceTimersByTime(10_000)
+    release()
+    expect(ids()).toEqual(['first_vote', 'early_bird', 'jury_full'])
+    expect(useHud.getState().big).toMatchObject({ kind: 'level', level: 3 })
+    // Ya se dijeron y se marcaron vistos: al volver, solo se enseñan. El que esperaba sale después, con lo suyo.
+    expect(shown).toHaveLength(4)
+    vi.advanceTimersByTime(4_000)
+    expect(ids()).toEqual(['votes_100'])
+    expect(shown).toHaveLength(5)
+  })
+
   it('RF-GAME-09: un logro ya avisado en la pestaña no se repite, y dos subidas en cola son un solo aviso con el nivel nuevo', () => {
     const release = useHud.getState().hold()
     useHud.getState().notify([achievement('first_vote', 'common'), { kind: 'level', level: 3, from: 2 }])

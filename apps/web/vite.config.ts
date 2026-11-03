@@ -52,6 +52,10 @@ function vendor(name: string, packages: readonly string[]) {
  * importa three entero) y el *shader* de la arena. 916,16 kB (243,81 kB gz), dentro del presupuesto de
  * §4.17 (< 250 kB gz), y se pide después de la primera pintura (`RNF-PERF-04`). Por él el aviso pasa de
  * 500 a 950 kB: ningún otro trozo pasa de 315 kB, y si alguno se acerca a 500, hay que mirarlo igual.
+ * Con la Fase 7 llegó a 941,61 kB (253,47 kB gz): el `Canvas` de R3F registra el espacio de nombres entero de three y
+ * así no se quitaba nada. Desde la 7.34 el lienzo es `StageCanvas`, con el catálogo justo (`stage/catalogue.ts`):
+ * 767,83 kB (208,20 kB gz). `pnpm budget` lo comprueba en cada build de la CI. El pase de la carta (`PassView`, con
+ * Rapier y su WASM: 2,3 MB, 856 kB gz) es otro trozo diferido y pasa del aviso, como debe.
  */
 export default defineConfig({
   plugins: [react(), fontPreload(), routePreload()],

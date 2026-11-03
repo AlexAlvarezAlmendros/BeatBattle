@@ -52,9 +52,10 @@ function useRewardsLayer(signedIn: boolean, needed: boolean): ComponentType | nu
  * Las recompensas del marco (guía §3.4.1, §3.4.2, §3.8.8; tareas 7.18–7.20), una sola vez en `RootLayout`.
  *
  * La **región viva** (`RNF-A11Y-07`) se pinta vacía desde el principio para que el lector anuncie lo que entra
- * («+5 XP», el logro, el nivel): una región que se monta llena no siempre se anuncia. Cada mensaje entra como un nodo
- * nuevo (su clave), así se anuncia también si repite el texto del anterior. Lo que se ve (el «+XP» que vuela, los
- * avisos) llega en diferido con `RewardsLayer`.
+ * («+5 XP», el logro, el nivel): una región que se monta llena no siempre se anuncia. Es un registro (`role="log"`,
+ * educado, solo lo que se añade): cada mensaje entra como un nodo nuevo (su clave) y se lee una vez, aunque repita el
+ * texto del anterior o salgan varios a la vez (dos placas y la subida de nivel; con un solo nodo que se cambiaba, el
+ * lector solo oía el último). Lo que se ve (el «+XP» que vuela, los avisos) llega en diferido con `RewardsLayer`.
  */
 export function RewardsViewport() {
   const live = useHud((state) => state.live)
@@ -63,8 +64,17 @@ export function RewardsViewport() {
   const Layer = useRewardsLayer(signedIn, needed)
   return (
     <>
-      <div className="sr-only" role="status" aria-live="polite" aria-label={t('game.live.region')}>
-        {live && <span key={live.key}>{live.text}</span>}
+      <div
+        className="sr-only"
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions"
+        aria-atomic="false"
+        aria-label={t('game.live.region')}
+      >
+        {live.map((message) => (
+          <p key={message.key}>{message.text}</p>
+        ))}
       </div>
       {Layer && <Layer />}
     </>

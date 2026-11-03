@@ -15,6 +15,7 @@
 //   --reduced-motion        emula «reducir movimiento»
 //   --eval="expr"           evalúa una expresión (puede ser asíncrona) antes de medir: p. ej. pulsar
 //                           play o abrir una ceremonia para medir el peor caso
+//   --init="js"             ejecuta código antes de que cargue la página (p. ej. `bb:title` = `off`)
 //   --shot=salida.png       captura al terminar
 //   --headed                con ventana visible
 // Salida: una línea JSON con { frames, fps, p99ms, worstMs, longFrames, slow, drawCallsMax, drawCallsAvg,
@@ -62,6 +63,7 @@ const page = await browser.newPage({
 })
 
 if (opt.quality) await page.addInitScript((q) => localStorage.setItem('bb:quality', q), String(opt.quality))
+if (opt.init) await page.addInitScript(String(opt.init))
 
 // Contador de llamadas de dibujo: se instala antes que cualquier script de la página.
 await page.addInitScript(() => {

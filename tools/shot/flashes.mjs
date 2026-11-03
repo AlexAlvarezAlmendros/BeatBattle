@@ -1,13 +1,18 @@
-// Medición de destellos con píxeles reales (guía §3.5, `RNF-A11Y-04`, WCAG 2.3.1; tarea 1.6). Abre el banco
-// del Escenario sin el vinilo, enciende el ritmo de prueba (160 BPM) y captura la cuña tan deprisa como
-// puede durante `segundos`: de cada captura, la luminancia relativa media (sRGB → lineal → Y de WCAG). Cuenta
-// los destellos (pares de cambios opuestos de ≥ 0,1 con el más oscuro por debajo de 0,80, en la peor
-// ventana de 1 s) y saca la oscilación de la luminancia.
+// Medición de destellos con píxeles reales (guía §3.5, `RNF-A11Y-04`, WCAG 2.3.1; tareas 1.6 y 7.34). Abre una página
+// (por defecto, el banco del Escenario sin el vinilo con el ritmo de prueba a 160 BPM) y captura una zona tan deprisa
+// como puede durante `segundos`: de cada captura, la luminancia relativa media (sRGB → lineal → Y de WCAG). Cuenta los
+// destellos (pares de cambios opuestos de ≥ 0,1 con el más oscuro por debajo de 0,80, en la peor ventana de 1 s) y saca
+// la oscilación de la luminancia.
 //
 // Uso: node tools/shot/flashes.mjs [url=http://localhost:5173/dev/escenario?vinilo=no] [segundos=6]
 //   --dpr=2                 densidad de píxeles
 //   --out=medicion.json     guarda las muestras
 //   --sin-ritmo             sin encender el ritmo (la referencia: la trama quieta)
+//   --clip=x,y,ancho,alto   la zona que se mide (por defecto, la cuña del banco)
+//   --eval="expr"           lo que destella, lanzado al empezar a medir (p. ej. `__bbRewards.legendary()` en
+//                           `/dev/recompensas`); con él no se enciende el ritmo
+//   --repetir=ms            vuelve a lanzar `--eval` cada tanto mientras mide (el peor caso: avisos seguidos)
+//   --sin-escenario         no espera a que el Escenario pinte (páginas sin cuña o con la calidad apagada)
 // Salida: una línea JSON con { samples, rateHz, min, max, swing, flashesPerSecond, renderer }.
 import { writeFileSync } from 'node:fs'
 import { chromium } from '@playwright/test'
@@ -36,22 +41,34 @@ const context = await browser.newContext({
 })
 await context.addInitScript(() => localStorage.setItem('bb:quality', 'alta'))
 const page = await context.newPage()
+await page.addInitScript(() => localStorage.setItem('bb:title', 'off'))
 await page.goto(url)
-await page.waitForFunction(() => document.querySelector('[data-stage-live]') !== null, null, {
-  timeout: 30_000,
-})
-// `--sin-ritmo`: la misma medición sin música, para comparar (la trama, quieta).
-if (!opt['sin-ritmo']) await page.getByRole('button', { name: /Ritmo de prueba/ }).click()
-// Que el paso bajo llegue a su régimen.
+if (!opt['sin-escenario'])
+  await page.waitForFunction(() => document.querySelector('[data-stage-live]') !== null, null, {
+    timeout: 30_000,
+  })
+// `--sin-ritmo`: la misma medición sin música, para comparar (la trama, quieta). Con `--eval`, lo que se mide es otra cosa.
+if (!opt['sin-ritmo'] && !opt.eval) await page.getByRole('button', { name: /Ritmo de prueba/ }).click()
+// Que el paso bajo llegue a su régimen (y la página, a su reposo).
 await page.waitForTimeout(1500)
 
-// La cuña del banco: la mitad derecha de la ventana, sin el HUD ni la barra.
-const clip = { x: 760, y: 140, width: 640, height: 520 }
+// Por defecto, la cuña del banco: la mitad derecha de la ventana, sin el HUD ni la barra.
+const [cx, cy, cw, ch] = String(opt.clip ?? '760,140,640,520')
+  .split(',')
+  .map(Number)
+const clip = { x: cx, y: cy, width: cw, height: ch }
+const trigger = () => (opt.eval ? page.evaluate(String(opt.eval)) : Promise.resolve())
 const shots = []
 const start = Date.now()
+await trigger()
+let fired = Date.now()
 while (Date.now() - start < secs * 1000) {
   const t = (Date.now() - start) / 1000
   shots.push({ t, png: (await page.screenshot({ clip })).toString('base64') })
+  if (opt.repetir && Date.now() - fired >= Number(opt.repetir)) {
+    fired = Date.now()
+    await trigger()
+  }
 }
 
 const luminances = await page.evaluate(
@@ -138,5 +155,9 @@ const result = {
   flashesPerSecond: maxFlashesPerSecond(samples),
   renderer,
 }
-if (opt.out) writeFileSync(opt.out, `${JSON.stringify({ ...result, url, samples }, null, 2)}\n`)
+if (opt.out)
+  writeFileSync(
+    opt.out,
+    `${JSON.stringify({ ...result, url, clip, eval: opt.eval ?? null, samples }, null, 2)}\n`,
+  )
 console.log(JSON.stringify(result))
