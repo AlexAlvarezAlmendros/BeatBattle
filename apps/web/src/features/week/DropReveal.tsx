@@ -10,6 +10,7 @@ import { useFitText } from '../../ui/hooks/useFitText'
 import { useReducedMotion } from '../../ui/hooks/useReducedMotion'
 import { OtpSlapImage } from '../../ui/OtpSlap'
 import { VinylSun } from '../../ui/VinylSun'
+import { useRewardsHold } from '../game/hudStore'
 import styles from './DropReveal.module.css'
 import { musicalKeyName } from './weekModel'
 
@@ -60,6 +61,8 @@ const reached = (stage: Stage, target: Stage) => ORDER.indexOf(stage) >= ORDER.i
  * ceremonia, §3.1), porque el velo tapa la barra.
  */
 export function DropReveal({ week: initial, onDone }: { week: DropRevealWeek; onDone: () => void }) {
+  // Los avisos de la capa de juego esperan a que acabe (§3.8.8).
+  useRewardsHold()
   // Los datos se fijan al empezar: la home vuelve a pedir la semana (al montar, al cambiar de sesión) y cada
   // respuesta trae otra URL firmada del sample; si la línea de tiempo dependiera de ella, volvería a empezar
   // a mitad (jurado de la 3.21, quinto pase).

@@ -1,6 +1,6 @@
 import { z } from 'zod'
+import { AVATAR_MAX_BYTES, AVATAR_MIMES } from './avatar'
 import { EntryCoverSignRequestSchema, EntrySignRequestSchema } from './entries'
-import { AVATAR_MAX_BYTES, AVATAR_MIMES } from './profile'
 
 /**
  * Subidas firmadas (guía §4.8.2): el navegador sube directo a Cloudinary con los parámetros que firma el

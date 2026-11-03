@@ -54,6 +54,39 @@ export async function renderSfxSamples(
   return Array.from(await renderDef(def))
 }
 
+/** Energía de `data` en la frecuencia `hz` (algoritmo de Goertzel). */
+function energyAt(data: Float32Array, hz: number): number {
+  const coefficient = 2 * Math.cos((2 * Math.PI * hz) / SAMPLE_RATE)
+  let previous = 0
+  let beforePrevious = 0
+  for (let i = 0; i < data.length; i++) {
+    const current = (data[i] ?? 0) + coefficient * previous - beforePrevious
+    beforePrevious = previous
+    previous = current
+  }
+  return previous ** 2 + beforePrevious ** 2 - coefficient * previous * beforePrevious
+}
+
+/** Energía en ±30 cents de `hz` (en pasos de 5 cents): una nota, aunque sea de ruido filtrado. */
+function noteEnergy(data: Float32Array, hz: number): number {
+  let sum = 0
+  for (let cents = -30; cents <= 30; cents += 5) sum += energyAt(data, hz * 2 ** (cents / 1200))
+  return sum
+}
+
+/**
+ * La afinación de un efecto medida en lo que suena (§3.7.1; tarea 7.17): para cada nota de `notesHz`, cuántos
+ * dB más energía hay en ella que en el más fuerte de sus dos semitonos vecinos (render solo, sin variación).
+ */
+export async function renderSfxPitch(id: SfxId, key: Key, notesHz: readonly number[]): Promise<number[]> {
+  const data = await renderDef(sfxCatalog(key)[id])
+  const semitone = 2 ** (1 / 12)
+  return notesHz.map((hz) => {
+    const neighbour = Math.max(noteEnergy(data, hz / semitone), noteEnergy(data, hz * semitone))
+    return 10 * Math.log10(noteEnergy(data, hz) / neighbour)
+  })
+}
+
 /** Renderiza un efecto solo (sin variación de tono) y mide su pico y cuánto dura. */
 export async function renderSfx(id: SfxId, key: Key = DEFAULT_KEY): Promise<SfxMetrics> {
   const def = sfxCatalog(key)[id]

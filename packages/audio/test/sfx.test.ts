@@ -2,12 +2,13 @@ import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
 import {
   SFX_IDS,
+  type SfxLayer,
   sfxCatalog,
   UPLOAD_PROGRESS_STEP,
   uploadProgressDegree,
   uploadProgressSfx,
 } from '../src/sfx'
-import { type Key, pentatonicHz } from '../src/theory'
+import { type Key, pentatonicHz, tonicMidi } from '../src/theory'
 
 /** Duración nominal del Anexo D de cada efecto de la tarea 1.4 (s). */
 const ANNEX_D: Record<string, { duration: number; levelDb: number; jitter: number }> = {
@@ -40,7 +41,37 @@ const ANNEX_D: Record<string, { duration: number; levelDb: number; jitter: numbe
   'cer.heartbeat': { duration: 2, levelDb: -14, jitter: 0 },
   'cer.airhorn': { duration: 1.4, levelDb: -8, jitter: 0 },
   'cer.confetti': { duration: 1, levelDb: -20, jitter: 0 },
+  // Logros (7.17): la fila del anexo da de 0,5 a 2 s y de −14 a −8 dB; cada rareza, un tramo.
+  'ach.common': { duration: 0.5, levelDb: -14, jitter: 0 },
+  'ach.rare': { duration: 0.8, levelDb: -12, jitter: 0 },
+  'ach.epic': { duration: 1.2, levelDb: -10, jitter: 0 },
+  'ach.legendary': { duration: 2, levelDb: -8, jitter: 0 },
 }
+
+const ACH_IDS = ['ach.common', 'ach.rare', 'ach.epic', 'ach.legendary'] as const
+
+/** Nota MIDI (con decimales) de una frecuencia: La4 = 69. */
+const midiOf = (hz: number) => 69 + 12 * Math.log2(hz / 440)
+
+/** Clases de altura de la pentatónica de una tonalidad (las de `theory.ts`, escritas a mano). */
+function pentatonicClasses({ tonic, mode }: Key): number[] {
+  const steps = mode === 'minor' ? [0, 3, 5, 7, 10] : [0, 2, 4, 7, 9]
+  return steps.map((step) => (tonic + step) % 12)
+}
+
+/** Las frecuencias con nota de un efecto: la de cada tono o FM y el centro de cada paso banda. */
+function pitchesOf(def: { layers: readonly SfxLayer[] }): number[] {
+  return def.layers.flatMap((layer) => {
+    if (layer.freq) return [layer.freq[0], layer.freq[1]]
+    if (layer.filter?.type === 'bandpass') return [layer.filter.freq[0], layer.filter.freq[1]]
+    return []
+  })
+}
+
+const anyKey = fc.record({
+  tonic: fc.integer({ min: 0, max: 11 }),
+  mode: fc.constantFrom('minor', 'major'),
+}) as fc.Arbitrary<Key>
 
 describe('catálogo de efectos (Anexo D, 1.4)', () => {
   const catalog = sfxCatalog()
@@ -154,5 +185,93 @@ describe('catálogo de efectos (Anexo D, 1.4)', () => {
     const riser = layers[0]
     expect(riser?.attack).toBeCloseTo(1.45)
     expect(layers.slice(1).every((layer) => layer.delay === 1.5)).toBe(true)
+  })
+})
+
+describe('efectos de logro (Anexo D, 7.17)', () => {
+  it('RD-SND-02: campanitas de 2, 3 y 4 notas, y el legendario, un acorde con coro de ruido filtrado', () => {
+    const catalog = sfxCatalog()
+    const notes = (id: (typeof ACH_IDS)[number]) => catalog[id].layers.filter((layer) => layer.kind === 'fm')
+    expect(notes('ach.common')).toHaveLength(2)
+    expect(notes('ach.rare')).toHaveLength(3)
+    expect(notes('ach.epic')).toHaveLength(4)
+    for (const id of ['ach.common', 'ach.rare', 'ach.epic'] as const) {
+      // Solo campanitas, una detrás de otra, que suben.
+      expect(
+        catalog[id].layers.every((layer) => layer.kind === 'fm'),
+        id,
+      ).toBe(true)
+      const starts = notes(id).map((layer) => layer.delay ?? 0)
+      const hz = notes(id).map((layer) => layer.freq?.[0] ?? 0)
+      for (let i = 1; i < hz.length; i++) {
+        expect(starts[i], id).toBeGreaterThan(starts[i - 1] as number)
+        expect(hz[i], id).toBeGreaterThan(hz[i - 1] as number)
+      }
+    }
+    // El legendario: el acorde a la vez (rasgueado en menos de 0,1 s) y el coro, ruido por pasos banda estrechos.
+    const legendary = catalog['ach.legendary']
+    const chord = notes('ach.legendary')
+    expect(chord.length).toBeGreaterThanOrEqual(3)
+    expect(Math.max(...chord.map((layer) => layer.delay ?? 0))).toBeLessThan(0.1)
+    const choir = legendary.layers.filter((layer) => layer.kind === 'noise')
+    expect(choir.length).toBeGreaterThanOrEqual(3)
+    for (const voice of choir) {
+      expect(voice.filter?.type).toBe('bandpass')
+      expect(voice.filter?.q).toBeGreaterThanOrEqual(20)
+    }
+  })
+
+  it('Anexo D / 7.17: cuanto más raro, más largo y más fuerte, de −14 a −8 dB y de 0,5 a 2 s', () => {
+    const catalog = sfxCatalog()
+    const defs = ACH_IDS.map((id) => catalog[id])
+    expect(defs[0]?.levelDb).toBe(-14)
+    expect(defs[3]?.levelDb).toBe(-8)
+    expect(defs[0]?.duration).toBe(0.5)
+    expect(defs[3]?.duration).toBe(2)
+    for (let i = 1; i < defs.length; i++) {
+      expect(defs[i]?.levelDb).toBeGreaterThan(defs[i - 1]?.levelDb as number)
+      expect(defs[i]?.duration).toBeGreaterThan(defs[i - 1]?.duration as number)
+    }
+  })
+
+  it('§3.7.1 / 7.17: los logros suenan en la tonalidad de la semana: cada nota, de su pentatónica, y las campanitas acaban en la tónica', () => {
+    fc.assert(
+      fc.property(anyKey, (key) => {
+        const catalog = sfxCatalog(key)
+        const scale = pentatonicClasses(key)
+        for (const id of ACH_IDS) {
+          const pitches = pitchesOf(catalog[id])
+          expect(pitches.length, id).toBeGreaterThan(0)
+          for (const hz of pitches) {
+            const midi = midiOf(hz)
+            // Una nota temperada exacta (sin desafinar) y de la escala.
+            expect(Math.abs(midi - Math.round(midi)), `${id} ${hz} Hz`).toBeLessThan(1e-6)
+            expect(scale, `${id} ${hz} Hz`).toContain(((Math.round(midi) % 12) + 12) % 12)
+          }
+        }
+        // Las tres campanitas terminan en la octava de la tónica.
+        for (const id of ['ach.common', 'ach.rare', 'ach.epic'] as const) {
+          const last = catalog[id].layers.at(-1)?.freq?.[0] ?? 0
+          expect(midiOf(last), id).toBeCloseTo(tonicMidi(key, 6))
+        }
+      }),
+    )
+    // Y cambian con la tonalidad.
+    const a = sfxCatalog({ tonic: 9, mode: 'minor' })
+    const d = sfxCatalog({ tonic: 2, mode: 'major' })
+    for (const id of ACH_IDS) expect(pitchesOf(a[id]), id).not.toEqual(pitchesOf(d[id]))
+  })
+
+  it('RD-SND-02 / 7.17: los logros son deterministas: sin variación por disparo y la misma definición en cada llamada', () => {
+    fc.assert(
+      fc.property(anyKey, (key) => {
+        const first = sfxCatalog(key)
+        const second = sfxCatalog(key)
+        for (const id of ACH_IDS) {
+          expect(first[id].jitter, id).toBe(0)
+          expect(second[id], id).toEqual(first[id])
+        }
+      }),
+    )
   })
 })

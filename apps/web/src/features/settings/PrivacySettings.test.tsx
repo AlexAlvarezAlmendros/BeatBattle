@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
+import { EMPTY_ME_GAME } from '../../test/game'
 import { useSession } from '../account/session'
 import { PrivacySettingsPage } from './PrivacySettings'
 
@@ -17,6 +18,7 @@ const ME = {
   cardNumber: 7,
   xp: 0,
   avatarUrl: null,
+  game: EMPTY_ME_GAME,
 }
 
 function renderPage() {

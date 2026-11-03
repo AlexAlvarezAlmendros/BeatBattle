@@ -4,12 +4,13 @@ import { t } from '../../../i18n'
 import { Button } from '../../Button'
 import { GalleryBlock, GalleryRow, GallerySection } from '../kit'
 
-/** Los efectos por familia (Anexo D): los de la tarea 1.4 y los de la subida (4.17). */
-const FAMILIES: readonly { key: 'ui' | 'stars' | 'game' | 'upload'; ids: readonly SfxId[] }[] = [
+/** Los efectos por familia (Anexo D): los de la tarea 1.4, los de la subida (4.17) y los de los logros (7.17). */
+const FAMILIES: readonly { key: 'ui' | 'stars' | 'game' | 'upload' | 'ach'; ids: readonly SfxId[] }[] = [
   { key: 'ui', ids: ['ui.enter', 'ui.hover', 'ui.press'] },
   { key: 'stars', ids: SFX_IDS.filter((id) => id.startsWith('star.')) },
   { key: 'game', ids: ['vote.locked', 'xp.gain', 'level.up'] },
   { key: 'upload', ids: ['upload.hover', 'upload.drop', 'upload.progress', 'upload.done', 'ann.newbeat'] },
+  { key: 'ach', ids: SFX_IDS.filter((id) => id.startsWith('ach.')) },
 ]
 
 /**

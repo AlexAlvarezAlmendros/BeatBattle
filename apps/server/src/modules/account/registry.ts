@@ -26,7 +26,7 @@ export interface ExternalCleanup {
 }
 
 export interface AccountDataModule {
-  /** Nombre de la sección en la exportación. */
+  /** Nombre de la sección en la exportación; si dos módulos la comparten, sus claves se juntan. */
   name: string
   /** Lo que exporta (`RF-PRF-05`). */
   exportData(ctx: AccountContext): Promise<unknown>

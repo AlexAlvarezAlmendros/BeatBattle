@@ -27,6 +27,9 @@ export const mail = {
   button: color.redCta,
   buttonText: color.white,
   red: color.red,
+  /** Placas de rareza de los logros (§3.8.12): épico en granate, legendario en el rojo del botón. */
+  wine: color.wine,
+  white: color.white,
   text: color.text,
   text2: color.text2,
   text3: color.text3,

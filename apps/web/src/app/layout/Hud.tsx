@@ -8,7 +8,7 @@ import { useShortcuts } from '../../ui/shortcuts'
 import { TitlePlate } from '../../ui/TitlePlate'
 import { paths } from '../paths'
 import styles from './Hud.module.css'
-import { PlayerCard } from './PlayerCard'
+import { HudStat, PlayerCard } from './PlayerCard'
 import type { ScreenConfig } from './screen'
 import { FrameSlotTarget } from './slots'
 import { useSound } from './soundStore'
@@ -21,8 +21,9 @@ import { useSound } from './soundStore'
  *   pone la suya con lo que sabe de la semana.
  * - **Centro, el contexto** (hueco `hudCenter`): la placa de título de las pantallas interiores (de la
  *   configuración de la ruta) o lo que ponga la pantalla (el reloj de ronda en el menú).
- * - **Derecha** (hueco `hudRight`, temporada y racha) y el **botón de sonido** (44 px, `aria-pressed`,
- *   tecla M).
+ * - **Derecha** (hueco `hudRight`): con sesión, la temporada y la racha de la capa de juego (tarea 7.18), salvo
+ *   que la pantalla ponga lo suyo (el Modo Jurado, la entrada a ciegas); y el **botón de sonido** (44 px,
+ *   `aria-pressed`, tecla M).
  *
  * En el marco simple (§3.8.14) no hay capa de juego: ni jugador ni temporada; quedan el título y el
  * sonido.
@@ -48,7 +49,11 @@ export function Hud({ screen }: { screen: ScreenConfig }) {
         }
       />
       <div className={styles.right}>
-        <FrameSlotTarget name="hudRight" className={styles.extras} />
+        <FrameSlotTarget
+          name="hudRight"
+          className={styles.extras}
+          fallback={screen.simple ? null : <SessionStats />}
+        />
         <SoundButton />
       </div>
     </header>
@@ -163,6 +168,33 @@ export function useHudPlayerBox(ref: RefObject<HTMLElement | null>): void {
 function SessionPlayer() {
   const me = useSession((state) => state.me)
   return me ? <PlayerCard {...playerOf(me)} /> : <JoinPrompt />
+}
+
+/**
+ * Las teselas de la derecha con sesión (§3.4.1, tarea 7.18): la temporada del lunes de hoy y la racha, de la capa de
+ * juego de `GET /api/me`. Sin sesión, nada; sin temporada, solo la racha.
+ */
+function SessionStats() {
+  const me = useSession((state) => state.me)
+  if (!me) return null
+  const { season, streak } = playerOf(me)
+  return (
+    <>
+      {season && <HudStat label={season.label} value={season.value} spoken={season.spoken} />}
+      <StreakStat weeks={streak ?? 0} />
+    </>
+  )
+}
+
+/** La tesela de la racha: «RACHA · ×3» (el lector oye «Racha: 3 semanas»). */
+export function StreakStat({ weeks }: { weeks: number }) {
+  return (
+    <HudStat
+      label={t('game.hud.streak')}
+      value={t('game.hud.streakValue', { count: weeks })}
+      spoken={t('game.hud.streakSr', { count: weeks })}
+    />
+  )
 }
 
 /** «1P · PULSA PARA UNIRTE» (§3.4.1, sin sesión): lleva a entrar. */

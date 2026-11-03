@@ -1,4 +1,5 @@
-import type { ResultRow, WeekResults } from '@beatbattle/shared'
+import { resultBaseXp } from '@beatbattle/rules'
+import type { MyWeekGame, ResultRow, WeekResults } from '@beatbattle/shared'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { Link, type LoaderFunctionArgs, useLoaderData, useSearchParams } from 'react-router'
@@ -55,13 +56,14 @@ const producerOf = (row: ResultRow) => row.entry.producer?.displayName ?? t('res
  * (suelo de trama, focos y peanas de alturas distintas: 1.º en el centro, 2.º a la izquierda y 3.º a la
  * derecha), con la portada y los restos del sello «AUTORÍA OCULTA», el alias tachado y el productor en
  * display; la barra **TU RESULTADO** con «Play al campeón» y «Clasificación»; y la tabla completa en filas de
- * marcador con histograma. El XP, los puntos de temporada y el oído de oro llegan con la Fase 7; la Elección
- * del sello, con la 9. Nunca «K.O.» ni «gana a…». Sin movimiento, el podio aparece quieto.
+ * marcador con histograma, con el reparto de XP de cada puesto; en «TU RESULTADO», el XP, los puntos de temporada y el
+ * oído de oro de quien mira (tarea 7.21). La Elección del sello llega con la 9. Nunca «K.O.» ni «gana a…». Sin
+ * movimiento, el podio aparece quieto.
  */
 export function WeekResultsPage() {
   const initial = useLoaderData() as WeekResults
   const { data = initial } = useQuery({ ...resultsQuery(initial.week.slug), initialData: initial })
-  const { week, rows, mine } = data
+  const { week, rows, mine, myGame } = data
   const podium = rows.filter((row) => isMedal(row.result.position))
   const ranked = rows.filter((row) => row.result.position !== null).length
   const totalVotes = rows.reduce((sum, row) => sum + row.result.votes, 0)
@@ -74,6 +76,11 @@ export function WeekResultsPage() {
   const [ceremony, setCeremony] = useState(() => params.has('ceremonia') && podium.length > 0)
   const signedIn = useSession((state) => state.me !== null)
   const queryClient = useQueryClient()
+  // Lo que dio el sellado (logros, subida de nivel) sale una vez: se vuelve a leer `me` (§3.8.6, §3.8.8; tarea 7.21).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: una vez por semana abierta
+  useEffect(() => {
+    if (useSession.getState().me) void useSession.getState().refresh()
+  }, [week.slug])
   useControlKeys(ceremony ? null : KEYS)
   const endCeremony = () => {
     setCeremony(false)
@@ -209,6 +216,7 @@ export function WeekResultsPage() {
           )}
           <MineBar
             mine={mine}
+            game={myGame}
             ranked={ranked}
             onPlayChampion={champion ? () => play(champion) : null}
             onStandings={showStandings}
@@ -325,34 +333,60 @@ function Podium({ rows, onPlay }: { rows: ResultRow[]; onPlay: (row: ResultRow) 
 
 const visualOrder = (row: ResultRow) => ({ 2: 0, 1: 1, 3: 2 })[row.result.position as MedalPlace] ?? 3
 
-/** La barra «TU RESULTADO» (`RF-RES-08`): posición, puntuación y votos; sin participar, solo los botones. */
+/**
+ * La barra «TU RESULTADO» (`RF-RES-08`): posición, puntuación y votos y, de la capa de juego (`myGame`, tarea 7.21), el
+ * XP del sellado, los puntos de temporada y el oído de oro. Un jurado sin entrada ve el XP y el oído de oro; sin nada,
+ * solo los botones.
+ */
 function MineBar({
   mine,
+  game,
   ranked,
   onPlayChampion,
   onStandings,
 }: {
   mine: ResultRow | null
+  game: MyWeekGame | null
   ranked: number
   onPlayChampion: (() => void) | null
   onStandings: () => void
 }) {
+  const juror = !mine && game !== null && (game.xp > 0 || game.goldenEar)
   return (
     <Frame cut="base" className={styles.mine}>
-      {mine && (
+      {(mine || juror) && (
         <section className={styles.mineStats} aria-label={t('results.mine.label')}>
           <span className={styles.mineTag}>{t('results.mine.label')}</span>
-          <Tile label={t('results.mine.position')}>
-            {mine.result.position ? (
-              <>
-                {mine.result.position}.º <span>{t('results.mine.of', { total: ranked })}</span>
-              </>
-            ) : (
-              t('results.mine.unranked')
-            )}
-          </Tile>
-          <Tile label={t('results.mine.score')}>{scoreOf(mine.result.scoreMilli)}</Tile>
-          <Tile label={t('results.mine.votes')}>{formatNumber(mine.result.votes)}</Tile>
+          {mine && (
+            <>
+              <Tile label={t('results.mine.position')}>
+                {mine.result.position ? (
+                  <>
+                    {mine.result.position}.º <span>{t('results.mine.of', { total: ranked })}</span>
+                  </>
+                ) : (
+                  t('results.mine.unranked')
+                )}
+              </Tile>
+              <Tile label={t('results.mine.score')}>{scoreOf(mine.result.scoreMilli)}</Tile>
+              <Tile label={t('results.mine.votes')}>{formatNumber(mine.result.votes)}</Tile>
+            </>
+          )}
+          {game && (
+            <>
+              <Tile label={t('results.mine.xp')} tone="xp">
+                {t('results.mine.xpValue', { xp: formatNumber(game.xp) })}
+              </Tile>
+              {mine && (
+                <Tile label={t('results.mine.seasonPoints')}>
+                  {t('results.mine.seasonPointsValue', { points: game.seasonPoints })}
+                </Tile>
+              )}
+              <Tile label={t('results.mine.goldenEar')}>
+                {game.goldenEar ? t('results.mine.goldenEarYes') : t('results.mine.goldenEarNo')}
+              </Tile>
+            </>
+          )}
         </section>
       )}
       <div className={styles.mineActions}>
@@ -372,9 +406,9 @@ function MineBar({
   )
 }
 
-function Tile({ label, children }: { label: string; children: React.ReactNode }) {
+function Tile({ label, tone, children }: { label: string; tone?: 'xp'; children: React.ReactNode }) {
   return (
-    <div className={styles.tile}>
+    <div className={styles.tile} data-tone={tone}>
       <small>{label}</small>
       <b>{children}</b>
     </div>
@@ -388,14 +422,18 @@ function StandingRow({ row, onPlay }: { row: ResultRow; onPlay: () => void }) {
   const playing = current && (status === 'playing' || status === 'loading')
   const { position, scoreMilli, votes, histogram } = row.result
   const votesText = t('results.votes', { count: votes })
+  // El reparto de XP (`RF-RES-08`): el XP base del puesto (Anexo B), sin la racha ni la dorada de nadie.
+  const subtitle =
+    position === null
+      ? t('results.unrankedRow', { alias: row.entry.alias, votes: votesText })
+      : t('results.rowXp', {
+          subtitle: t('results.rowSubtitle', { alias: row.entry.alias, votes: votesText }),
+          xp: formatNumber(resultBaseXp(position)),
+        })
   return (
     <EntryRow
       title={`${producerOf(row)} · ${row.entry.title}`}
-      subtitle={
-        position === null
-          ? t('results.unrankedRow', { alias: row.entry.alias, votes: votesText })
-          : t('results.rowSubtitle', { alias: row.entry.alias, votes: votesText })
-      }
+      subtitle={subtitle}
       to={paths.entry(row.entry.id)}
       playing={playing}
       onPlayToggle={() => (current ? usePlayer.getState().toggle() : onPlay())}

@@ -6,9 +6,18 @@ import { mail } from '../theme'
 
 /**
  * El ticket del recibo (§3.8.12, §2.12.1): filas «dato · valor» entre dos líneas troqueladas (borde
- * discontinuo), con el número de recibo arriba.
+ * discontinuo), con el número de recibo arriba. También «tu partida» del lunes (§2.12.7), con rótulos más largos
+ * («OÍDO DE ORO»): `labelWidth` es el ancho mínimo de la columna de rótulos.
  */
-export function Ticket({ code, rows }: { code: string; rows: readonly [string, ReactNode][] }) {
+export function Ticket({
+  code,
+  rows,
+  labelWidth = 112,
+}: {
+  code: string
+  rows: readonly [string, ReactNode][]
+  labelWidth?: number
+}) {
   return (
     <Section
       style={{
@@ -53,7 +62,7 @@ export function Ticket({ code, rows }: { code: string; rows: readonly [string, R
               color: mail.text2,
               display: 'inline-block',
               letterSpacing: '0.12em',
-              minWidth: '112px',
+              minWidth: `${labelWidth}px`,
               textTransform: 'uppercase',
               verticalAlign: 'top',
             }}

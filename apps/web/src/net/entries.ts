@@ -1,6 +1,8 @@
 import {
   type EntryCoverSignRequest,
   type EntryCreate,
+  type EntryCreated,
+  EntryCreatedSchema,
   type EntrySignedUpload,
   EntrySignedUploadSchema,
   type EntrySignRequest,
@@ -30,12 +32,15 @@ export function signEntryUpload(
   })
 }
 
-/** `POST /api/weeks/:slug/entries`: la entrada ya subida, verificada y medida en el servidor. */
-export function createEntry(slug: string, body: EntryCreate, signal?: AbortSignal): Promise<OwnEntry> {
+/**
+ * `POST /api/weeks/:slug/entries`: la entrada ya subida, verificada y medida en el servidor, y lo que ha ganado al
+ * pasar a `active` (`game`, tarea 7.9).
+ */
+export function createEntry(slug: string, body: EntryCreate, signal?: AbortSignal): Promise<EntryCreated> {
   return apiFetch(`/api/weeks/${encodeURIComponent(slug)}/entries`, {
     method: 'POST',
     body,
-    schema: OwnEntrySchema,
+    schema: EntryCreatedSchema,
     signal,
   })
 }
@@ -51,11 +56,11 @@ export function updateEntry(id: string, body: EntryUpdate): Promise<OwnEntry> {
 }
 
 /** `PUT /api/entries/:id/audio`: el audio nuevo, ya subido con una firma de sustitución. */
-export function replaceEntryAudio(id: string, intentId: string, signal?: AbortSignal): Promise<OwnEntry> {
+export function replaceEntryAudio(id: string, intentId: string, signal?: AbortSignal): Promise<EntryCreated> {
   return apiFetch(`/api/entries/${encodeURIComponent(id)}/audio`, {
     method: 'PUT',
     body: { intentId },
-    schema: OwnEntrySchema,
+    schema: EntryCreatedSchema,
     signal,
   })
 }

@@ -11,7 +11,7 @@ import {
   ReportRequestSchema,
   type Ticker,
   TickerQuerySchema,
-  type Vote,
+  type VoteCast,
   VoteRequestSchema,
   WeekSlugSchema,
 } from '@beatbattle/shared'
@@ -56,7 +56,7 @@ export function votesRoutes(app: FastifyInstance, service: VotesService): void {
   app.put<ById>(
     '/api/entries/:id/vote',
     { preHandler: requireVerified },
-    async (req): Promise<DataEnvelope<Vote>> => {
+    async (req): Promise<DataEnvelope<VoteCast>> => {
       const { stars } = VoteRequestSchema.parse(req.body)
       return { data: await service.vote(userOf(req), idOf(req), stars, req.ip, req.now) }
     },

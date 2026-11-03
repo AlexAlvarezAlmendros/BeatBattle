@@ -86,7 +86,7 @@ describe('MainMenu (0.24, §3.8.3)', () => {
     expect(within(hud).getByRole('timer', { name: t('home.clock.closes') })).toBeInTheDocument()
     expect(within(hud).getByText('LilBru')).toBeInTheDocument()
     expect(within(hud).getByRole('meter', { name: t('frame.player.xp') })).toBeInTheDocument()
-    expect(within(hud).getByText(t('home.hud.streakValue', { count: 3 }))).toBeInTheDocument()
+    expect(within(hud).getByText(t('game.hud.streakValue', { count: 3 }))).toBeInTheDocument()
     expect(document.querySelector('[data-frame-slot="arena"]')).toHaveTextContent('41')
     // La crónica, en la barra de controles, con el crédito delante: «Inserta tu beat» (que respira) y
     // el crédito en Oxanium rojo, en caja mixta (§3.8.3). Sus palabras van unidas por espacios de no

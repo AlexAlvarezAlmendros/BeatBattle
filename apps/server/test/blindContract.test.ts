@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { producerProfile, user, vote, week } from '../src/db/schema'
+import { entry, producerProfile, user, vote, week } from '../src/db/schema'
+import { sealWeek } from '../src/modules/weeks/seal'
 import { type Battle, battle, listener, W42 } from './fixtures/battle'
 
 // Cada prueba crea varias cuentas (alta, verificación) y vota por la API: en la CI pasa de los 5 s.
@@ -37,6 +38,8 @@ const BANNED_KEYS = new Set([
   'plays',
   'playCount',
   'stars',
+  // La casilla del reto extra (`RF-ENT-13`): distinguiría a una entrada en pleno voto ciego.
+  'challengeClaimed',
 ])
 
 function keysOf(value: unknown, out: string[] = []): string[] {
@@ -110,5 +113,39 @@ describe('contrato de voto ciego (5.10)', () => {
     expect((await get('/api/weeks/2026-w42/entries')).body).toContain('Productora0')
     // Las estrellas dadas solo las ve quien las dio.
     expect(await b.t.db.select().from(vote)).toHaveLength(3)
+  })
+
+  it('RF-ENT-13, RNF-SEC-04: la casilla del reto no sale antes del sellado más que a su dueño; sellada, va en el resultado', async () => {
+    b = await battle({ producers: 3, voters: 1 })
+    const [owner, rival] = b.producers as [Battle['producers'][0], Battle['producers'][0]]
+    await b.t.db.update(entry).set({ challengeClaimed: true }).where(eq(entry.id, owner.entryId))
+    const get = (url: string, cookie?: string) =>
+      b.t.app.inject({ method: 'GET', url, ...(cookie ? { headers: { cookie } } : {}) })
+    const urls = [
+      '/api/weeks/current',
+      '/api/weeks/2026-w42',
+      '/api/weeks/2026-w42/entries',
+      '/api/weeks/2026-w42/ticker',
+      ...b.producers.map((p) => `/api/entries/${p.entryId}`),
+    ]
+    const voter = (b.voters[0] as Battle['voters'][0]).cookie
+    // Ni sin sesión, ni a quien vota, ni a otro productor.
+    for (const cookie of [undefined, voter, rival.cookie])
+      for (const url of urls) {
+        const res = await get(url, cookie)
+        expect(res.statusCode, url).toBe(200)
+        expect(res.body.includes('challengeClaimed'), `${url} lleva la casilla`).toBe(false)
+      }
+    // Su dueño la ve en su entrada (`/subir` en edición), y en ningún sitio más.
+    expect((await get('/api/weeks/2026-w42/entries/mine', owner.cookie)).json().data.challengeClaimed).toBe(
+      true,
+    )
+    for (const url of urls)
+      expect((await get(url, owner.cookie)).body.includes('challengeClaimed'), url).toBe(false)
+    // Sellada, la ficha la enseña con su resultado.
+    b.t.clock.set(W42.voteEndsAt)
+    expect(await sealWeek(b.t.db, { weekId: b.weekId, now: W42.voteEndsAt, holder: 'test' })).toBe(true)
+    expect((await get(`/api/entries/${owner.entryId}`)).json().data.result.challengeClaimed).toBe(true)
+    expect((await get(`/api/entries/${rival.entryId}`)).json().data.result.challengeClaimed).toBe(false)
   })
 })

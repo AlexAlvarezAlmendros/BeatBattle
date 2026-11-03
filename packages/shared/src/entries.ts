@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { AVATAR_MAX_BYTES, AVATAR_MIMES } from './profile'
+import { AVATAR_MAX_BYTES, AVATAR_MIMES } from './avatar'
 import { MusicalKeySchema, PeaksSchema, WeekSlugSchema } from './weeks'
 
 /**
@@ -147,6 +147,11 @@ export const EntryCreateSchema = z
     intentId: z.string().min(1).max(64),
     coverIntentId: z.string().min(1).max(64).optional(),
     ...entryFields,
+    /**
+     * «Cumplo el reto extra» (§2.5, logro `challenge`): solo si la semana tiene reto; sin el campo, `false`. Nadie
+     * más que su dueño lo ve hasta el sellado (`RF-ENT-13`).
+     */
+    challengeClaimed: z.boolean().optional(),
     /** «He usado el sample de la semana y el resto del material es mío o libre de derechos». */
     declaration: z.literal(true),
   })
@@ -165,6 +170,7 @@ export const EntryUpdateSchema = z
     daw: entryFields.daw.optional(),
     genres: entryFields.genres.optional(),
     description: entryFields.description.optional(),
+    challengeClaimed: z.boolean().optional(),
     coverIntentId: z.string().min(1).max(64).nullable().optional(),
   })
   .strict()
@@ -194,6 +200,7 @@ export const EntryProducerSchema = z.object({
   displayName: z.string(),
   avatarUrl: z.string().nullable(),
 })
+export type EntryProducer = z.infer<typeof EntryProducerSchema>
 
 /**
  * `GET /api/entries/:id` (pública, §4.10). En voto ciego antes del sellado (`RF-ENT-10`, `RNF-SEC-04`):
@@ -235,6 +242,11 @@ export const PublicEntrySchema = z
           z.number().int().min(0),
           z.number().int().min(0),
         ]),
+        /**
+         * Marcó que cumple el reto extra (§2.5): solo aquí, con la semana sellada; antes no lo ve nadie más que su
+         * dueño (`RF-ENT-13`).
+         */
+        challengeClaimed: z.boolean().default(false),
       })
       .strict()
       .nullable()
@@ -257,6 +269,8 @@ export const OwnEntrySchema = PublicEntrySchema.extend({
   truePeakDb: z.number().nullable(),
   /** La portada propia, para su dueño aunque la semana sea ciega. */
   ownCoverUrl: z.string().nullable(),
+  /** Su casilla del reto extra: la ve su dueño; nadie más hasta el sellado (`RF-ENT-13`). */
+  challengeClaimed: z.boolean(),
   canReplaceAudio: z.boolean(),
   submittedAt: z.number().int(),
   updatedAt: z.number().int(),

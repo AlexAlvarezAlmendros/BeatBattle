@@ -188,6 +188,44 @@ describe('entrada pública y propia (§4.10)', () => {
   })
 })
 
+describe('la casilla del reto extra (§2.5, G4)', () => {
+  const own = {
+    ...publicEntry,
+    result: null,
+    status: 'active',
+    receiptCode: 'BB-2026W41-0007',
+    format: 'wav',
+    bytes: 60_000_000,
+    loudnessLufs: -9.2,
+    truePeakDb: -0.3,
+    ownCoverUrl: null,
+    challengeClaimed: true,
+    canReplaceAudio: true,
+    submittedAt: 1,
+    updatedAt: 1,
+  }
+
+  it('RF-ENT-13: se marca al registrar o al editar (sin el campo, desmarcada) y solo con un booleano', () => {
+    expect(EntryCreateSchema.parse(ficha).challengeClaimed).toBeUndefined()
+    expect(EntryCreateSchema.parse({ ...ficha, challengeClaimed: true }).challengeClaimed).toBe(true)
+    expect(EntryUpdateSchema.parse({ challengeClaimed: false })).toEqual({ challengeClaimed: false })
+    expect(EntryCreateSchema.safeParse({ ...ficha, challengeClaimed: 'sí' }).success).toBe(false)
+  })
+
+  it('RF-ENT-13: su dueño la ve en su entrada; la pública solo la lleva en el resultado (sellada)', () => {
+    expect(OwnEntrySchema.parse(own).challengeClaimed).toBe(true)
+    const { challengeClaimed: _, ...withoutClaim } = own
+    expect(OwnEntrySchema.safeParse(withoutClaim).success).toBe(false)
+    expect(PublicEntrySchema.safeParse({ ...publicEntry, challengeClaimed: true }).success).toBe(false)
+    const result = { position: 4, scoreMilli: 4100, votes: 12, histogram: [0, 0, 2, 4, 6] }
+    expect(PublicEntrySchema.parse({ ...publicEntry, result }).result?.challengeClaimed).toBe(false)
+    expect(
+      PublicEntrySchema.parse({ ...publicEntry, result: { ...result, challengeClaimed: true } }).result
+        ?.challengeClaimed,
+    ).toBe(true)
+  })
+})
+
 describe('códigos de error de la Fase 4 (§4.10)', () => {
   it('RF-ENT-01, RF-ENT-02, RF-ENT-08: 409 con su código propio', () => {
     expect(ERROR_STATUS.ENTRY_EXISTS).toBe(409)

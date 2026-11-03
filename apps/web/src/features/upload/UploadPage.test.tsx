@@ -102,6 +102,7 @@ describe('/subir: comprobaciones previas (§2.5, paso 1)', () => {
       loudnessLufs: -10,
       truePeakDb: -1,
       ownCoverUrl: null,
+      challengeClaimed: false,
       canReplaceAudio: false,
       submittedAt: 1,
       updatedAt: 1,

@@ -39,6 +39,8 @@ export const battleResults: EmailTemplate<BattleResultsPayload> = {
       cardUrl: 'https://battle.otherpeople.es/api/og/result/2026-w41/0192f0c4?sig=abc',
     },
     empty: false,
+    // 2.º con racha en juego 3: 350 · 1,2 = 420, y 75 del oído de oro.
+    game: { xp: 495, goldenEarXp: 75, streak: 3, jokerSaved: false, nextBonusPercent: 30 },
   },
   body: (p) => (
     <Layout preheader={battleResults.preheader(p)}>

@@ -141,6 +141,8 @@ describe('Lunes de batalla (6.9)', () => {
     for (const mail of mailer().sent) {
       expect(mail.text).not.toMatch(/Flip \d|Alias \d|resultados/i)
       expect(mail.html).not.toContain('/api/og/result/')
+      // Ni «tu partida» (7.31): el XP del sellado llega con los resultados.
+      expect(mail.text).not.toMatch(/TU PARTIDA|\bXP\b|racha/i)
     }
 
     await b.t.db.delete(jobLease).where(eq(jobLease.name, `seal:${b.weekId}`))

@@ -19,7 +19,7 @@ const SRC_DIR = join(import.meta.dirname, '..', 'src')
 /** Módulos de la clasificación (lo que congela el sellado). */
 const RANKING_MODULES = ['ranking', 'scoring'] as const
 /** Módulos de la capa de juego. */
-const GAME_MODULES = ['levels', 'xp', 'achievements', 'goldenEar'] as const
+const GAME_MODULES = ['levels', 'xp', 'achievements', 'goldenEar', 'replay'] as const
 
 /** Los módulos de src que importa (o reexporta) un módulo, por su nombre relativo a src y sin extensión. */
 function importsOf(module: string): string[] {

@@ -82,9 +82,47 @@
   font-family: var(--bb-font-num);
 }
 
+.meterBox {
+  display: grid;
+}
+
 .meter {
   width: 12rem;
   margin-top: var(--bb-space-1);
+}
+
+/*
+ * Subir de nivel (§3.8.8, Anexo E): el número nuevo se estampa (escala 1,3 → 1 con el giro final, en rojo que pasa a
+ * blanco). Sin movimiento o en modo serio (que quita las estampas), un fundido del número.
+ */
+.level[data-stamp] {
+  display: inline-block;
+  animation: bb-level-stamp var(--bb-dur-reward) var(--bb-ease-back) 1;
+}
+
+@keyframes bb-level-stamp {
+  from {
+    color: var(--bb-red);
+    scale: 1.3;
+    rotate: var(--bb-tilt-stamp);
+  }
+}
+
+@keyframes bb-level-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level[data-stamp] {
+    animation: bb-level-fade var(--bb-dur-fast) var(--bb-ease-out) 1;
+  }
+}
+
+:global(:root[data-motion="reduced"]) .level[data-stamp],
+:global(:root[data-serious]) .level[data-stamp] {
+  animation: bb-level-fade var(--bb-dur-fast) var(--bb-ease-out) 1;
 }
 
 .stat {

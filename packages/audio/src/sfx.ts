@@ -55,7 +55,8 @@ export interface SfxDef {
  * Los efectos de la tarea 1.4, `vote.unlocked` de la 1.5, los de la interfaz de la 2.27 (`ui.move`,
  * `ui.toggle`, `ui.open`/`ui.close`, `ui.error`, `ui.success`, `nav.page`), `drop.needle` de la 3.17 y los
  * de la subida de la 4.17 (`upload.*`, `ann.newbeat`), los del Modo Jurado de la 5.18 (`combo.up`, `jury.swap`) y
- * los de la ceremonia de resultados de la 6.17 (`cer.*`). El resto del Anexo D llega con sus pantallas.
+ * los de la ceremonia de resultados de la 6.17 (`cer.*`) y los de los logros de la 7.17 (`ach.*`). El resto del
+ * Anexo D llega con sus pantallas.
  */
 export const SFX_IDS = [
   'ui.enter',
@@ -96,6 +97,10 @@ export const SFX_IDS = [
   'cer.heartbeat',
   'cer.airhorn',
   'cer.confetti',
+  'ach.common',
+  'ach.rare',
+  'ach.epic',
+  'ach.legendary',
 ] as const
 
 export type SfxId = (typeof SFX_IDS)[number]
@@ -203,6 +208,32 @@ export function sfxCatalog(key: Key = DEFAULT_KEY, xpCombo = 0): Record<SfxId, S
     duration: 0.25,
     layers: starVote(star(degree)),
   })
+  // Logros (§3.8.8, tarea 7.17): campanitas FM (la de `ui.success`) que suben por la tríada de la tónica, que cae
+  // siempre en la pentatónica de la semana, y acaban en su octava. Cuanto más raro, más notas, más largo y más
+  // fuerte (Anexo D: de −14 a −8 dB y de 0,5 a 2 s). `gain` es el de cada nota, calibrado en el render offline.
+  const achChime = (
+    notes: readonly number[],
+    { levelDb, duration, step, gain }: { levelDb: number; duration: number; step: number; gain: number },
+  ): SfxDef => {
+    const ring = duration - (notes.length - 1) * step
+    return {
+      jitter: 0,
+      levelDb,
+      duration,
+      layers: notes.map((hz, index) =>
+        fm({
+          freq: at(hz),
+          harmonicity: 3.5,
+          modIndex: 0.7,
+          attack: 0.002,
+          decay: ring * 0.8,
+          dur: ring,
+          gain,
+          delay: index * step,
+        }),
+      ),
+    }
+  }
 
   return {
     'ui.enter': {
@@ -762,6 +793,49 @@ export function sfxCatalog(key: Key = DEFAULT_KEY, xpCombo = 0): Record<SfxId, S
           delay: index * 0.065,
         }),
       ),
+    },
+    // Logros (§3.8.8, tarea 7.17), según la rareza. Común: dos notas (quinta y octava).
+    'ach.common': achChime([fifth, root * 2], { levelDb: -14, duration: 0.5, step: 0.1, gain: 0.8 }),
+    // Raro: tres (tercera, quinta y octava).
+    'ach.rare': achChime([third, fifth, root * 2], { levelDb: -12, duration: 0.8, step: 0.1, gain: 0.63 }),
+    // Épico: cuatro (la tríada entera y la octava).
+    'ach.epic': achChime([root, third, fifth, root * 2], {
+      levelDb: -10,
+      duration: 1.2,
+      step: 0.09,
+      gain: 0.5,
+    }),
+    // Legendario: el acorde de campanas rasgueado y, detrás, un coro de ruido filtrado que se abre: ruido rosa por
+    // pasos banda estrechos en las notas del acorde una octava más abajo, con la tónica dos octavas más abajo de bajo.
+    // El pico lo marcan las campanas; el coro llega a −12 dB y es lo que se queda sonando (render offline).
+    'ach.legendary': {
+      jitter: 0,
+      levelDb: -8,
+      duration: 2,
+      layers: [
+        ...[root, third, fifth, root * 2].map((hz, index) =>
+          fm({
+            freq: at(hz),
+            harmonicity: 3.5,
+            modIndex: 0.5,
+            attack: 0.003,
+            decay: 1.5,
+            dur: 1.9,
+            gain: 0.307,
+            delay: index * 0.03,
+          }),
+        ),
+        ...[root / 4, root / 2, third / 2, fifth / 2].map((hz) =>
+          noise({
+            filter: { type: 'bandpass', freq: at(hz), q: 48 },
+            attack: 0.5,
+            decay: 1.4,
+            dur: 1.9,
+            gain: 11.6,
+            delay: 0.05,
+          }),
+        ),
+      ],
     },
   }
 }

@@ -22,6 +22,7 @@ import { singleKeyAllowed } from '../../../ui/shortcuts'
 import { Tag } from '../../../ui/Tag'
 import { TitleDisc } from '../../../ui/TitleDisc'
 import { TitleLockup } from '../../../ui/TitleLockup'
+import { useRewardsHold } from '../../game/hudStore'
 import type { MenuModel } from './model'
 import styles from './TitleGate.module.css'
 import { markTitleSeen } from './titleGate'
@@ -55,6 +56,8 @@ const KEYS_THAT_STAY = new Set(['Tab', 'Shift', 'Control', 'Alt', 'Meta', 'CapsL
  * entrar. Sin movimiento, el título aparece montado, nada respira y se entra sin la diagonal.
  */
 export function TitleGate({ model, onDone }: { model: MenuModel; onDone: () => void }) {
+  // Los avisos de la capa de juego esperan a que se cierre (§3.8.8).
+  useRewardsHold()
   const reduced = useReducedMotion()
   const [phase, setPhase] = useState<Phase>(reduced ? 'title' : 'boot')
   const root = useRef<HTMLDivElement>(null)

@@ -1,7 +1,7 @@
 import { listenThresholdMs } from '@beatbattle/rules'
 import { type PublicEntry, PublicEntrySchema } from '@beatbattle/shared'
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { type LoaderFunctionArgs, useLoaderData } from 'react-router'
 import { paths } from '../../app/paths'
 import { notFound } from '../../app/routes'
@@ -92,6 +92,7 @@ export function EntryPage() {
   const thresholdMs = listenThresholdMs(entry.durationMs)
   const listen = useStarsListen(entry.id, thresholdMs)
   const [reporting, setReporting] = useState(false)
+  const bodyRef = useRef<HTMLDivElement>(null)
   const [shared, setShared] = useState(false)
   const peaks = entry.peaks ? decodePeaks(entry.peaks) : []
   const seconds = entry.durationMs / 1000
@@ -139,7 +140,7 @@ export function EntryPage() {
         </Frame>
       }
     >
-      <div className={styles.body}>
+      <div ref={bodyRef} className={styles.body}>
         {/* El alias en display (el `<h1>` va en la cabeza de móvil y, en escritorio, para los lectores). */}
         <p className={`bb-display ${styles.alias}`} aria-hidden="true">
           {name}
@@ -195,7 +196,10 @@ export function EntryPage() {
             value={saved}
             listen={listen}
             onVote={async (stars) => {
-              await sendVote(stars)
+              // El «+5 XP» nace junto al grupo de estrellas, nunca encima de una (§3.4.2).
+              await sendVote(stars, {
+                anchor: bodyRef.current?.querySelector('[data-stars] [role="radiogroup"]'),
+              })
               setVote(stars)
             }}
           />

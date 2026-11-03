@@ -1,0 +1,27 @@
+Asunto: Logro desbloqueado: Doblete
+Preheader: Logro legendario · +300 XP: Ganar dos semanas seguidas.
+
+http://localhost:5173
+
+Logro legendario · +300 XP
+
+
+DOBLETE
+
+Ganar dos semanas seguidas.
+
+Tu progreso del lunes 26 de octubre
+
+Rango, nivel y vitrina de logros, en tu carta de productor.
+
+Ver mi carta http://localhost:5173/p/mar_beats
+
+Lo que ganas durante una semana en juego llega aquí el día que se sella: hasta entonces, el voto es ciego.
+
+----------------------------------------
+
+Un juego de Other People Records
+
+Recibes este aviso porque juegas en Beat Battle y lo tienes activado.
+
+Preferencias de email http://localhost:5173/ajustes/emails

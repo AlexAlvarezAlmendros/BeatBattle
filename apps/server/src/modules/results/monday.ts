@@ -5,6 +5,7 @@ import type { Db } from '../../db/client'
 import { emailPref, emailSubscriber, entry, result, sample, user, vote, week } from '../../db/schema'
 import { enqueueEmail } from '../../email/outbox'
 import { scoreText } from '../../media/ogKit'
+import { sealedWeekGame } from '../game/notices'
 import type { SampleStorage } from '../storage/samples'
 import { DROP_EMAIL_AT, dropMailAt, dropPayload, liveWeek } from '../weeks/schedule'
 import { resultCardUrl } from './cardRoute'
@@ -19,6 +20,9 @@ import { resultCardUrl } from './cardRoute'
  * - **Separado** (Ajustes → Emails): `battle.drop` a las 08:00 y `battle.results` a las 08:00 o al sellar.
  * - `battle.results` es para quien participó o votó esa semana; el combinado, para todas las cuentas
  *   verificadas y los suscriptores sin cuenta (estos, sin la parte personal, §2.12.3).
+ *
+ * Debajo del resultado o del podio, «tu partida» (§2.12.7; tarea 7.31): el XP que el sellado de esa semana le ha dado,
+ * el oído de oro y la racha; solo de la semana sellada y nunca a los suscriptores.
  *
  * Que el combinado salga o no se decide con `sealed_at`, que no cambia: un destinatario recibe el combinado
  * o el par drop + resultados, nunca los dos. Las claves de idempotencia son por destinatario y semana, así
@@ -103,7 +107,9 @@ async function resultsOf(db: Db, w: WeekRow) {
     : []
   const nameOf = new Map(people.map((p) => [p.id, p.displayUsername || p.username || p.name]))
   const voters = await db.selectDistinct({ userId: vote.userId }).from(vote).where(eq(vote.weekId, w.id))
+  const game = await sealedWeekGame(db, w)
   return {
+    game,
     byUser: new Map(rows.map((row) => [row.userId, row])),
     podium: podiumRows.map((row) => ({
       position: row.result.position as number,
@@ -160,6 +166,7 @@ export async function scheduleMondayEmails(deps: MondayDeps, now: number): Promi
             }
           : null,
       empty: results.empty,
+      game: userId ? results.game(userId, own?.result.position != null) : null,
     }
   }
 

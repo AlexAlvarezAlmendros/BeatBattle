@@ -2,6 +2,8 @@ import { lazy, type MouseEvent, Suspense, useEffect, useRef } from 'react'
 import { Outlet, ScrollRestoration, useLocation, useNavigation, useNavigationType } from 'react-router'
 import { audio } from '../../audio/engine'
 import { useSession } from '../../features/account/session'
+import { RewardsViewport } from '../../features/game/RewardsViewport'
+import { useGameRewards } from '../../features/game/rewards'
 import { usePlayer } from '../../features/player/store'
 import { t } from '../../i18n'
 import { keepsTabFocus } from '../../ui/Tabs'
@@ -42,7 +44,8 @@ export const MAIN_ID = 'contenido'
  *   el foco ahí la pantalla está «en reposo» (las flechas e Intro van a su menú, `isIdleFocus`). Salvo
  *   si se cambia de sección con Q/E desde las pestañas (`TabLinks`): entonces el foco se queda en ellas.
  * - `aria-busy` mientras se carga el trozo diferido de la pantalla siguiente.
- * - La zona de avisos (`ToastViewport`), una sola para toda la app (§3.3, §4.17).
+ * - La zona de avisos (`ToastViewport`), una sola para toda la app (§3.3, §4.17), y la de las recompensas de la
+ *   capa de juego (`RewardsViewport`: el «+XP», los logros y el nivel, con su región viva; §3.4, §3.8.8).
  */
 export function RootLayout() {
   return (
@@ -86,6 +89,8 @@ function GameFrame() {
   useFrameKeys()
   useGamepad()
   useAudioUnlock()
+  // Lo ganado (la capa de juego, tareas 7.18–7.20): lo pendiente de cada sesión que llega, a los avisos.
+  useGameRewards()
   // La sesión (§4.9): una vez al cargar; las pantallas de cuenta la vuelven a pedir al entrar o salir.
   useEffect(() => {
     void useSession.getState().refresh()
@@ -131,6 +136,7 @@ function GameFrame() {
       <PlayerSlot />
       <ControlsBar screen={screen} />
       <ToastViewport />
+      <RewardsViewport />
       <ScrollRestoration />
     </div>
   )

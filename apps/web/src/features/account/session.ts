@@ -1,7 +1,7 @@
 import { levelProgress, rankTitle } from '@beatbattle/rules'
-import { type Me, MeSchema } from '@beatbattle/shared'
+import { type Me, MeSchema, type SeasonSummary } from '@beatbattle/shared'
 import { create } from 'zustand'
-import { t } from '../../i18n'
+import { formatNumber, t } from '../../i18n'
 import { ApiClientError, apiFetch } from '../../net/api'
 import type { MenuPlayer } from '../week/menu/model'
 
@@ -51,16 +51,38 @@ export function initialsOf(name: string): string {
   return letters.filter(Boolean).join('').toUpperCase()
 }
 
-/** El jugador del HUD a partir de la sesión: nombre, nivel, rango y XP (la capa de juego llega en la Fase 7). */
+/** La tesela de la temporada del HUD (§3.4.1): «Temporada T4» · «12 PTS · 9.º» (sin puesto, solo los puntos). */
+export function seasonTileOf(season: SeasonSummary): NonNullable<MenuPlayer['season']> {
+  const short = season.id.split('-')[1] ?? season.id
+  const points = formatNumber(season.points)
+  return {
+    label: t('game.hud.season', { season: short }),
+    value:
+      season.position === null
+        ? t('game.hud.seasonValueUnranked', { points })
+        : t('game.hud.seasonValue', { points, position: season.position }),
+    spoken:
+      season.position === null
+        ? t('game.hud.seasonSrUnranked', { season: short, points })
+        : t('game.hud.seasonSr', { season: short, points, position: season.position }),
+  }
+}
+
+/**
+ * El jugador del HUD a partir de la sesión (§3.4.1, tarea 7.18): nombre, nivel, rango y XP de la capa de juego en
+ * vivo (`me.game`), y las teselas de la temporada y la racha.
+ */
 export function playerOf(me: Me): MenuPlayer {
-  const progress = levelProgress(me.xp)
+  const progress = levelProgress(me.game.xp)
   return {
     name: me.displayUsername,
     initials: initialsOf(me.displayUsername),
     level: progress.level,
     rank: t(`rank.${rankTitle(progress.level)}`),
-    xp: { value: me.xp, min: progress.levelXp, max: progress.nextLevelXp ?? progress.levelXp },
+    xp: { value: me.game.xp, min: progress.levelXp, max: progress.nextLevelXp ?? progress.levelXp },
     avatarUrl: me.avatarUrl,
+    ...(me.game.season ? { season: seasonTileOf(me.game.season) } : {}),
+    streak: me.game.streak.current,
     uploaded: false,
     unvoted: 0,
   }

@@ -5,6 +5,7 @@ import { renderInRouter } from '../../app/layout/testing'
 import { DROP_ALERT_ID, OTHER_PEOPLE_URL } from '../../app/paths'
 import { t } from '../../i18n'
 import { queryKeys } from '../../net/queryKeys'
+import { EMPTY_ME_GAME } from '../../test/game'
 import { useSession } from '../account/session'
 import { HomePage } from './HomePage'
 
@@ -87,6 +88,7 @@ describe('HomePage con la semana en juego y la entrada subida (4.8, §3.8.3)', (
         cardNumber: 1,
         xp: 0,
         avatarUrl: null,
+        game: EMPTY_ME_GAME,
         role: 'user',
       },
     })

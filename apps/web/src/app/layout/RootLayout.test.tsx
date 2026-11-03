@@ -4,6 +4,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useSession } from '../../features/account/session'
 import { t } from '../../i18n'
+import { EMPTY_ME_GAME } from '../../test/game'
 import { useLoops } from '../../ui/loops'
 import { useShortcuts } from '../../ui/shortcuts'
 import { toast, useToasts } from '../../ui/Toast/useToasts'
@@ -66,6 +67,7 @@ describe('RootLayout: marco de juego (0.23, §3.4.1)', () => {
       cardNumber: 7,
       xp: 0,
       avatarUrl: null,
+      game: EMPTY_ME_GAME,
     }
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
       new Response(JSON.stringify({ data: me }), { headers: { 'content-type': 'application/json' } }),

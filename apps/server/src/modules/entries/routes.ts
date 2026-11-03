@@ -1,6 +1,7 @@
 import {
   type DataEnvelope,
   EntryAudioReplaceSchema,
+  type EntryCreated,
   EntryCreateSchema,
   type EntryList,
   EntryListQuerySchema,
@@ -33,7 +34,7 @@ export function entriesRoutes(app: FastifyInstance, service: EntriesService): vo
   app.post<{ Params: { slug: string } }>(
     '/api/weeks/:slug/entries',
     { preHandler: requireVerified },
-    async (req, reply): Promise<DataEnvelope<OwnEntry>> => {
+    async (req, reply): Promise<DataEnvelope<EntryCreated>> => {
       const slug = WeekSlugSchema.safeParse(req.params.slug)
       if (!slug.success) throw appError('NOT_FOUND', 'No existe esa semana.')
       const created = await service.create(
@@ -86,7 +87,7 @@ export function entriesRoutes(app: FastifyInstance, service: EntriesService): vo
   app.put<{ Params: { id: string } }>(
     '/api/entries/:id/audio',
     { preHandler: requireVerified },
-    async (req): Promise<DataEnvelope<OwnEntry>> => {
+    async (req): Promise<DataEnvelope<EntryCreated>> => {
       return {
         data: await service.replaceAudio(
           userOf(req),

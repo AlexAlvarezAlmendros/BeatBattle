@@ -20,8 +20,10 @@ import {
 import {
   ENTRY_CHUNK_BYTES,
   type EntryAudioReplace,
+  type EntryCover,
   type EntryCoverSignRequest,
   type EntryCreate,
+  type EntryCreated,
   type EntryList,
   type EntryListQuery,
   type EntrySignedUpload,
@@ -49,6 +51,7 @@ import { enqueueEmail } from '../../email/outbox'
 import { auditStatement } from '../../lib/audit'
 import { appError } from '../../lib/errors'
 import type { AudioMeasurement } from '../../media/measure'
+import type { GamePlan, GameService } from '../game/service'
 import { snapshotOf } from '../results/snapshot'
 import type { ImageStorage } from '../storage/cloudinary'
 import type { EntryAsset, EntryStorage } from '../storage/entries'
@@ -89,6 +92,8 @@ const LIVE = ['processing', 'active', 'hidden'] as const
 export interface EntriesDeps {
   db: Db
   storage: EntryStorage | null
+  /** La capa de juego: el XP y los logros de la entrada que pasa a `active`, en su `batch` (tarea 7.9). */
+  game: GameService
   newId: () => string
   /** Origen público de la web, para los enlaces de los emails. */
   publicUrl: string
@@ -293,6 +298,16 @@ export function createEntriesService(deps: EntriesDeps) {
     return twin
   }
 
+  /**
+   * La casilla del reto extra (§2.5, `RF-ENT-13`) solo se puede marcar si la semana tiene reto; desmarcarla, siempre.
+   */
+  function assertChallengeClaim(w: WeekRow, claimed: boolean | undefined): void {
+    if (claimed === true && w.challenge === null)
+      throw appError('VALIDATION_FAILED', 'Esta semana no tiene reto extra.', {
+        details: [{ path: 'body.challengeClaimed', message: 'la semana no tiene reto' }],
+      })
+  }
+
   function receiptOf(row: Pick<WeekRow, 'startsAt'>, receiptNumber: number): string {
     return receiptCode(isoWeekLabel(localDateOf(row.startsAt)), receiptNumber)
   }
@@ -344,6 +359,8 @@ export function createEntriesService(deps: EntriesDeps) {
               scoreMilli: found.scoreMilli,
               votes: found.votes,
               histogram: JSON.parse(found.histogram) as [number, number, number, number, number],
+              // La casilla del reto, solo con la semana sellada (`RF-ENT-13`).
+              challengeClaimed: row.challengeClaimed,
             },
           }
         : base
@@ -391,10 +408,24 @@ export function createEntriesService(deps: EntriesDeps) {
       loudnessLufs: row.loudnessLufs,
       truePeakDb: row.truePeakDb,
       ownCoverUrl: row.coverPublicId ? storage().coverUrl(row.coverPublicId, 512) : null,
+      challengeClaimed: row.challengeClaimed,
       canReplaceAudio: votes === 0 && canSubmit(w, now),
       submittedAt: row.submittedAt,
       updatedAt: row.updatedAt,
     }
+  }
+
+  /**
+   * La capa de juego de una entrada que pasa a `active` (§4.8.4 paso 4, §2.10; tarea 7.9): sus sentencias van en el
+   * `batch` que la activa, condicionadas a que quede activa, y lo ganado va en la respuesta.
+   */
+  function activationGame(row: EntryRow, w: WeekRow, now: number): Promise<GamePlan> {
+    return deps.game.entryActivated(row.userId, {
+      entryId: row.id,
+      week: { id: w.id, number: w.number, golden: w.golden, submitEndsAt: w.submitEndsAt },
+      submittedAt: row.submittedAt,
+      now,
+    })
   }
 
   /** Lo que lleva el recibo (§2.12.1): número, alias, ficha, informe técnico, hora y huella. */
@@ -519,12 +550,13 @@ export function createEntriesService(deps: EntriesDeps) {
 
     /**
      * `POST /api/weeks/:slug/entries` (§4.8.4): verifica, valida lo medido, mide, pone alias, semilla y
-     * número de recibo, marca duplicados por `etag` (`RF-ENT-11`) y escribe la entrada y su recibo en un
-     * `batch`. Si la medición no cabe en el presupuesto, la entrada queda en `processing` y el recibo sale
-     * cuando el `tick` la complete.
+     * número de recibo, marca duplicados por `etag` (`RF-ENT-11`) y escribe la entrada, su recibo y lo que gana
+     * (XP y logros, 7.9) en un `batch`. Si la medición no cabe en el presupuesto, la entrada queda en `processing`
+     * y el recibo y el XP llegan cuando el `tick` la complete.
      */
-    async create(userId: string, slug: string, input: EntryCreate, now: number): Promise<OwnEntry> {
+    async create(userId: string, slug: string, input: EntryCreate, now: number): Promise<EntryCreated> {
       const w = await submittableWeek(userId, slug, now)
+      assertChallengeClaim(w, input.challengeClaimed)
       const intent = await usableIntent(userId, input.intentId, 'entry', w.id, now)
       if (intent.entryId !== null)
         throw appError('UPLOAD_INTENT_INVALID', 'Esta subida era para sustituir el audio de tu entrada.')
@@ -585,6 +617,7 @@ export function createEntriesService(deps: EntriesDeps) {
         statusReason: null,
         playCount: 0,
         duplicateOf: twin?.id ?? null,
+        challengeClaimed: input.challengeClaimed ?? false,
         submittedAt: now,
         updatedAt: now,
       }
@@ -617,6 +650,8 @@ export function createEntriesService(deps: EntriesDeps) {
             now,
           }),
         )
+      const game = row.status === 'active' ? await activationGame(row, w, now) : null
+      if (game) statements.push(...game.statements)
       try {
         await runBatch(db, statements)
       } catch (error) {
@@ -625,7 +660,7 @@ export function createEntriesService(deps: EntriesDeps) {
           throw appError('ENTRY_EXISTS', 'Ya estás en la batalla esta semana: edita tu entrada.')
         throw error
       }
-      return toOwn(row, w, now)
+      return { ...(await toOwn(row, w, now)), game: game?.delta ?? (await deps.game.idle(userId)) }
     },
 
     // ── 4.7: la entrada pública, editar, sustituir el audio y retirar ──────────────────────────
@@ -714,6 +749,16 @@ export function createEntriesService(deps: EntriesDeps) {
     /** Fichas públicas de entradas de una misma semana, con la autoría solo si la semana deja verla. */
     presentAll,
 
+    /**
+     * La portada de una entrada de una semana ya sellada (el historial del perfil, el salón de la fama; tareas 7.12 y
+     * 7.13): la propia si la tiene, y si no (o sin almacenamiento), la generativa con su semilla.
+     */
+    sealedCover(row: Pick<EntryRow, 'coverPublicId' | 'coverSeed'>): EntryCover {
+      return row.coverPublicId && deps.storage
+        ? { kind: 'own', url: deps.storage.coverUrl(row.coverPublicId, 512) }
+        : { kind: 'generative', seed: row.coverSeed }
+    },
+
     /** `GET /api/weeks/:slug/entries/mine`: la entrada propia de la semana (`/subir` en edición), o `null`. */
     async mineBySlug(userId: string, slug: string, now: number): Promise<OwnEntry | null> {
       const [w] = await db.select().from(week).where(eq(week.slug, slug))
@@ -736,6 +781,7 @@ export function createEntriesService(deps: EntriesDeps) {
      */
     async update(userId: string, id: string, input: EntryUpdate, now: number): Promise<OwnEntry> {
       const { row, w } = await ownedLive(userId, id, now)
+      assertChallengeClaim(w, input.challengeClaimed)
       let coverPublicId = row.coverPublicId
       let coverIntent: IntentRow | null = null
       if (input.coverIntentId !== undefined) {
@@ -756,6 +802,7 @@ export function createEntriesService(deps: EntriesDeps) {
         ...(input.daw !== undefined ? { daw: input.daw } : {}),
         ...(input.genres !== undefined ? { tags: JSON.stringify(input.genres) } : {}),
         ...(input.description !== undefined ? { description: input.description } : {}),
+        ...(input.challengeClaimed !== undefined ? { challengeClaimed: input.challengeClaimed } : {}),
         coverPublicId,
         updatedAt: now,
       }
@@ -777,7 +824,12 @@ export function createEntriesService(deps: EntriesDeps) {
      * verifica y mide como al registrar; la entrada conserva alias y número de recibo, y sale `entry.changed`
      * con el recibo actualizado. El audio anterior se borra.
      */
-    async replaceAudio(userId: string, id: string, input: EntryAudioReplace, now: number): Promise<OwnEntry> {
+    async replaceAudio(
+      userId: string,
+      id: string,
+      input: EntryAudioReplace,
+      now: number,
+    ): Promise<EntryCreated> {
       const { row, w } = await ownedLive(userId, id, now)
       if ((await voteCount(row.id)) > 0)
         throw appError('ENTRY_HAS_VOTES', 'Tu entrada ya tiene votos: el audio no se puede sustituir.')
@@ -811,6 +863,8 @@ export function createEntriesService(deps: EntriesDeps) {
         updatedAt: now,
       }
       const next = { ...row, ...changes }
+      // Subir paga una vez por semana: si ya estaba activa, el libro no suma nada (7.9).
+      const game = next.status === 'active' ? await activationGame(next, w, now) : null
       await runBatch(db, [
         db.update(entry).set(changes).where(eq(entry.id, row.id)),
         db.update(uploadIntent).set({ status: 'done' }).where(eq(uploadIntent.id, intent.id)),
@@ -840,11 +894,12 @@ export function createEntriesService(deps: EntriesDeps) {
               }),
             ]
           : []),
+        ...(game?.statements ?? []),
       ])
       await storage()
         .remove(row.audioPublicId, 'entry')
         .catch(() => {})
-      return toOwn(next, w, now)
+      return { ...(await toOwn(next, w, now)), game: game?.delta ?? (await deps.game.idle(userId)) }
     },
 
     /**
@@ -890,6 +945,8 @@ export function createEntriesService(deps: EntriesDeps) {
     toOwn,
     toPublic,
     receiptPayload,
+    /** Para el `tick` que completa una entrada en `processing` (7.9). */
+    activationGame,
   }
 }
 

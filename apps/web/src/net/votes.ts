@@ -13,8 +13,8 @@ import {
   type ReportRequest,
   type Ticker,
   TickerSchema,
-  type Vote,
-  VoteSchema,
+  type VoteCast,
+  VoteCastSchema,
 } from '@beatbattle/shared'
 import { z } from 'zod'
 import { apiFetch } from './api'
@@ -73,12 +73,12 @@ export function ticker(slug: string, since?: number, signal?: AbortSignal): Prom
   })
 }
 
-/** `PUT /api/entries/:id/vote` (`RF-VOTE-01..06`). */
-export function putVote(entryId: string, stars: number): Promise<Vote> {
+/** `PUT /api/entries/:id/vote` (`RF-VOTE-01..06`): el voto y lo que ha ganado (`game`, tarea 7.9). */
+export function putVote(entryId: string, stars: number): Promise<VoteCast> {
   return apiFetch(`/api/entries/${encodeURIComponent(entryId)}/vote`, {
     method: 'PUT',
     body: { stars },
-    schema: VoteSchema,
+    schema: VoteCastSchema,
   })
 }
 

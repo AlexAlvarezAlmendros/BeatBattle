@@ -193,8 +193,8 @@ paralelo con ella; la F8 sigue esperando a la F7 y la F10, a la F7–F9.
   la Fase 7 en [07-capa-de-juego.md](plans/07-capa-de-juego.md).
 - 2026-11-03 — **Portada del sample opcional** (decisión del usuario, para cargar los samples reales de la beta): como
   los stems, se sube al crear o después y se quita; sin ella, la web usa el vinilo-sol o la portada de referencia y la
-  tarjeta del drop del email va sin imagen. Tarea 3.23 del [plan 03](plans/03-semanas-samples.md), guía v0.6.98. La
-  migración `0008` reconstruye `sample` solo para admitir `NULL` en `cover_public_id`: no toca datos.
+  tarjeta del drop del email va sin imagen. Tarea 3.23 del [plan 03](plans/03-semanas-samples.md), guía v0.6.127. La
+  migración `0009` reconstruye `sample` solo para admitir `NULL` en `cover_public_id`: no toca datos.
 
 ## Decisiones abiertas
 
@@ -217,7 +217,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
-| 2026-11-03 | F3 | **3.23** (tras el cierre, decisión del usuario): la portada del sample pasa a ser opcional. Guía v0.6.98. La fase sigue cerrada. |
+| 2026-11-03 | F3 | **3.23** (tras el cierre, decisión del usuario): la portada del sample pasa a ser opcional. Guía v0.6.127. La fase sigue cerrada. |
 | 2026-10-29 | F3 | **Fase 3 cerrada** (3.22): J1, el menú a 1024 × 768, corregida en la 3.21 (PR #107); los seis criterios. |
 | 2026-10-29 | F7 | **F7–F10 abiertas antes de que acabe la beta** (decisión del usuario, «todo hasta el lanzamiento»): `main` puede ir por delante de producción y desplegar sigue siendo suyo. Plan 07 creado (36 tareas); la planificación destapa 14 huecos de la guía (G1–G14 del plan) que se resuelven al empezar su tarea. La F9 ya no espera a la beta. |
 | 2026-10-28 | Beta | **Nueva fecha** (decisión del usuario): online y anuncio el domingo 15 de noviembre, primera ronda el lunes 16 y tres semanas hasta el 6 de diciembre; el 19 de octubre pasó sin semanas. Calendario hacia atrás en el plan. Gmail en Vercel (el usuario); faltan el cupo a 450 y desplegar `main` (producción sirve la #99). 2.22 hecha (Discord real en producción). |

@@ -15,7 +15,7 @@ import type {
   ReportRequest,
   Ticker,
   TickerEvent,
-  Vote,
+  VoteCast,
 } from '@beatbattle/shared'
 import { and, asc, count, desc, eq, exists, gt, isNotNull, lte, ne, sql } from 'drizzle-orm'
 import type { BatchStatement } from '../../db/batch'
@@ -27,6 +27,7 @@ import { ipHash } from '../../lib/ipHash'
 import type { RateLimiter } from '../../lib/rateLimit'
 import { entryPageUrl } from '../entries/qrRoute'
 import type { EntriesService } from '../entries/service'
+import type { GameService } from '../game/service'
 
 /**
  * Escuchar y votar (guía §2.6, §2.7, §4.7.3, §4.11; tareas 5.4–5.8): el recibo de escucha, el voto, la
@@ -50,6 +51,8 @@ export const REPORTS_PER_HOUR = 20
 export interface VotesDeps {
   db: Db
   entries: EntriesService
+  /** La capa de juego: el XP y los logros del voto, en su `batch` (tarea 7.9). */
+  game: GameService
   rateLimiter: RateLimiter
   newId: () => string
   /** Origen público de la web, para los enlaces de los emails. */
@@ -187,7 +190,8 @@ export function createVotesService(deps: VotesDeps) {
      * cumplido (`RF-VOTE-04`), en `open` o `voting` (`RF-VOTE-05`) y 120 por hora (`RF-VOTE-11`). Las
      * comprobaciones dan el error que toca; el `INSERT … SELECT` condicionado las repite dentro del `batch`
      * para que una carrera (la semana que cierra, la entrada que se retira) no cuele un voto. El voto que hace
-     * el quinto encola `battle.first_votes` en el mismo `batch` (5.12).
+     * el quinto encola `battle.first_votes` en el mismo `batch` (5.12), y el XP y los logros del voto van también
+     * en él, condicionados a que el voto quede guardado (7.9); la respuesta dice lo ganado (`game`).
      */
     async vote(
       userId: string,
@@ -195,7 +199,7 @@ export function createVotesService(deps: VotesDeps) {
       stars: number,
       ip: string | null,
       now: number,
-    ): Promise<Vote> {
+    ): Promise<VoteCast> {
       await deps.rateLimiter.enforce({
         key: `vote:user:${userId}`,
         limit: VOTES_PER_HOUR_LIMIT,
@@ -271,13 +275,20 @@ export function createVotesService(deps: VotesDeps) {
           : []),
         ...(await firstVotesEmail(row, w, !previous, now, emailId)),
       ]
-      const [inserted] = await db.batch([guarded, ...rest])
+      const game = await deps.game.voteCast(userId, {
+        entryId,
+        weekId: w.id,
+        golden: w.golden,
+        isNew: !previous,
+        now,
+      })
+      const [inserted] = await db.batch([guarded, ...rest, ...game.statements])
       if (inserted.length === 0) {
         // Sin voto no hay aviso: lo que este intento haya encolado, fuera.
         await db.delete(emailOutbox).where(and(eq(emailOutbox.id, emailId), eq(emailOutbox.status, 'queued')))
         throw appError('CONFLICT', 'No se ha podido guardar el voto. Vuelve a intentarlo.')
       }
-      return { entryId, stars, createdAt: previous?.createdAt ?? now, updatedAt: now }
+      return { entryId, stars, createdAt: previous?.createdAt ?? now, updatedAt: now, game: game.delta }
     },
 
     /** `DELETE /api/entries/:id/vote` (`RF-VOTE-13`): quitar el voto hasta el cierre; la entrada vuelve a la cola. */

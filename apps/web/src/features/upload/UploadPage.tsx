@@ -162,7 +162,9 @@ export function UploadPage() {
       </div>
     )
   } else if (upload.state.stage === 'done') {
-    body = <UploadCelebration entry={upload.state.entry} weekNumber={week.number} />
+    body = (
+      <UploadCelebration entry={upload.state.entry} weekNumber={week.number} game={upload.state.entry.game} />
+    )
   } else if (upload.state.stage === 'uploading' || upload.state.stage === 'registering') {
     const current = upload.state
     body = (

@@ -1,4 +1,4 @@
-import { listenThresholdMs } from '@beatbattle/rules'
+import { type AchievementId, listenThresholdMs, XP_VOTE } from '@beatbattle/rules'
 import type { PublicEntry } from '@beatbattle/shared'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -23,6 +23,7 @@ import { Stamp } from '../../ui/Stamp'
 import { Stars } from '../../ui/Stars'
 import { Waveform } from '../../ui/Waveform'
 import { useSession } from '../account/session'
+import { AchievementBadge } from '../game/AchievementBadge'
 import { useListenReceipt } from '../player/listen'
 import { usePlayer } from '../player/store'
 import { entryTrack } from '../player/tracks'
@@ -172,6 +173,9 @@ function JuryArena() {
   }, [status])
 
   const starsRef = useRef<HTMLDivElement>(null)
+  const comboRef = useRef<HTMLDivElement>(null)
+  // Los logros de esta visita: «¡JURADO COMPLETO!» enseña el suyo si llega (§3.8.7).
+  const earned = useRef<AchievementId[]>([])
   // Las teclas del Modo Jurado, estén donde estén el foco y el cursor (§3.8.7).
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -214,7 +218,14 @@ function JuryArena() {
       </div>
     )
   if (!entry)
-    return <JuryComplete votes={done.map((item) => item.stars)} total={total} empty={done.length === 0} />
+    return (
+      <JuryComplete
+        votes={done.map((item) => item.stars)}
+        total={total}
+        empty={done.length === 0}
+        earned={earned.current}
+      />
+    )
 
   const seconds = entry.durationMs / 1000
   const left = Math.max(0, Math.ceil((thresholdMs - (receipt?.listenedMs ?? 0)) / 1000))
@@ -350,16 +361,22 @@ function JuryArena() {
           </p>
         </div>
         <div className={styles.combo}>
-          <p>
+          <p className={styles.comboHead}>
             <span className={`bb-display ${styles.comboCount}`}>×{combo}</span>{' '}
-            <span className="bb-label">{t('jury.combo')}</span>
+            <span className={styles.comboLabels}>
+              <span className="bb-label">{t('jury.combo')}</span>{' '}
+              <span className="bb-label">{t('jury.comboXp', { xp: XP_VOTE })}</span>
+            </span>
           </p>
-          <Meter
-            value={Math.min(combo, COMBO_MAX)}
-            max={COMBO_MAX}
-            label={t('jury.combo')}
-            valueText={t('jury.comboText', { count: combo })}
-          />
+          {/* El «+5 XP» de cada voto nace a su derecha (§3.4.2). */}
+          <div ref={comboRef}>
+            <Meter
+              value={Math.min(combo, COMBO_MAX)}
+              max={COMBO_MAX}
+              label={t('jury.combo')}
+              valueText={t('jury.comboText', { count: combo })}
+            />
+          </div>
         </div>
         {/* biome-ignore lint/a11y/noStaticElementInteractions: solo sigue si el cursor está en las estrellas (la barra dice «NOTA») */}
         <div
@@ -377,8 +394,9 @@ function JuryArena() {
             listen={listen}
             next
             onVote={async (stars) => {
-              await vote(stars)
               const nextCombo = Math.min(combo + 1, COMBO_MAX)
+              const cast = await vote(stars, { anchor: comboRef.current, combo: nextCombo })
+              earned.current = [...earned.current, ...cast.game.achievements]
               setCombo(nextCombo)
               audio.play('combo.up', { xpCombo: nextCombo })
               window.setTimeout(() => {
@@ -425,8 +443,21 @@ function JuryArena() {
   )
 }
 
-/** «¡JURADO COMPLETO!» (§3.8.7): cuántas ha puntuado en esta visita y su media dada (sus propios votos). */
-function JuryComplete({ votes, total, empty }: { votes: readonly number[]; total: number; empty: boolean }) {
+/**
+ * «¡JURADO COMPLETO!» (§3.8.7): cuántas ha puntuado en esta visita y su media dada (sus propios votos) y, si el último
+ * voto lo ha dado, el logro «Jurado completo» con su insignia (tarea 7.21; su aviso sale además en el HUD).
+ */
+function JuryComplete({
+  votes,
+  total,
+  empty,
+  earned,
+}: {
+  votes: readonly number[]
+  total: number
+  empty: boolean
+  earned: readonly AchievementId[]
+}) {
   const mean = votes.length ? votes.reduce((sum, stars) => sum + stars, 0) / votes.length : 0
   return (
     <div className={styles.complete}>
@@ -445,6 +476,11 @@ function JuryComplete({ votes, total, empty }: { votes: readonly number[]; total
             ? t('jury.emptyText')
             : t('jury.allVotedText')}
       </p>
+      {earned.includes('jury_full') && (
+        <Frame cut="base" className={styles.completeBadge}>
+          <AchievementBadge id="jury_full" kicker={t('game.notice.unlocked')} />
+        </Frame>
+      )}
       <Button to={paths.home()}>{t('jury.backToMenu')}</Button>
     </div>
   )

@@ -3,7 +3,8 @@ import { type EmailFamily, renderEmail, TEMPLATES, type TemplateKind } from '../
 
 const PUBLIC_URL = 'https://battle.otherpeople.es'
 const KINDS = Object.keys(TEMPLATES) as TemplateKind[]
-const family = (kind: TemplateKind): EmailFamily => (kind.startsWith('battle.') ? 'battle' : 'service')
+const family = (kind: TemplateKind): EmailFamily =>
+  /^(battle|game|season)\./.test(kind) ? 'battle' : 'service'
 
 async function renderFixture(
   kind: TemplateKind,

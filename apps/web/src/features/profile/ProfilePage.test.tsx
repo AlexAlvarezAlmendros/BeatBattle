@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
+import { EMPTY_ME_GAME, EMPTY_PROFILE_GAME } from '../../test/game'
 import { useSession } from '../account/session'
 import { ProfilePage, profileLoader } from './ProfilePage'
 
@@ -16,6 +17,7 @@ const PROFILE = {
   links: { instagram: 'https://instagram.com/kairo.wav', youtube: 'https://youtube.com/@kairo' },
   accent: 'red',
   avatarUrl: null,
+  game: EMPTY_PROFILE_GAME,
 }
 
 function mockProfiles(byName: Record<string, unknown>) {
@@ -105,6 +107,7 @@ describe('perfil público (§3.8.10)', () => {
         cardNumber: 42,
         xp: 0,
         avatarUrl: null,
+        game: EMPTY_ME_GAME,
       },
     })
     renderProfile('/p/kairo.wav')

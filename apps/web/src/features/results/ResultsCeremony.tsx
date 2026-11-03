@@ -1,9 +1,10 @@
 import { loudestWindowMs } from '@beatbattle/audio'
 import type { ResultRow, WeekResults } from '@beatbattle/shared'
+import { duration } from '@beatbattle/shared/tokens'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { audio } from '../../audio/engine'
-import { t } from '../../i18n'
+import { formatNumber, t } from '../../i18n'
 import {
   endCeremonyStage,
   setCeremonyChampion,
@@ -21,6 +22,7 @@ import { useMediaQuery } from '../../ui/hooks/useMediaQuery'
 import { useReducedMotion } from '../../ui/hooks/useReducedMotion'
 import { Medal, type MedalPlace } from '../../ui/Medal'
 import { OtpSlapImage } from '../../ui/OtpSlap'
+import { useRewardsHold } from '../game/hudStore'
 import { usePlayer } from '../player/store'
 import { entryTrack } from '../player/tracks'
 import { decodePeaks } from '../week/weekModel'
@@ -70,6 +72,8 @@ type Reveal = 'spot' | 'tear' | 'name'
  * (el confeti) piden permiso al limitador (`RD-MOT-04`); nada suena sin un gesto antes (§3.7.1).
  */
 export function ResultsCeremony({ results, onDone }: { results: WeekResults; onDone: () => void }) {
+  // Los avisos de la capa de juego esperan a que acabe: la subida de nivel del sellado se encadena (§3.8.6, §3.8.8).
+  useRewardsHold()
   const [data] = useState(results)
   const reduced = useReducedMotion()
   const [elapsed, setElapsed] = useState<string[]>([])
@@ -349,7 +353,7 @@ export function ResultsCeremony({ results, onDone }: { results: WeekResults; onD
         </div>
       )}
 
-      {showMine && data.mine && <MineCard row={data.mine} />}
+      {showMine && data.mine && <MineCard row={data.mine} xp={data.myGame?.xp ?? 0} reduced={reduced} />}
 
       <div className={styles.foot}>
         <span className={styles.signature} aria-hidden="true">
@@ -423,9 +427,37 @@ function Spotlight({ row, reveal, champion }: { row: ResultRow; reveal: Reveal; 
   )
 }
 
-/** Tu resultado, al final, si participaste. */
-function MineCard({ row }: { row: ResultRow }) {
+/**
+ * La cifra que rueda de 0 a `target` en `--bb-dur-reward` (§3.8.6, tarea 7.21); sin movimiento, fija. Entero en cada
+ * fotograma (es XP).
+ */
+export function useRollingNumber(target: number, reduced: boolean): number {
+  const [value, setValue] = useState(reduced ? target : 0)
+  useEffect(() => {
+    if (reduced || target <= 0) {
+      setValue(target)
+      return
+    }
+    let frame = 0
+    // El reloj de los fotogramas (el primero marca el inicio): el mismo que pinta.
+    let start: number | null = null
+    const step = (now: number) => {
+      start ??= now
+      const progress = Math.min(1, (now - start) / duration.reward)
+      // La curva por defecto (`--bb-ease-out`) a mano: rápido al principio y se posa.
+      setValue(Math.round(target * (1 - (1 - progress) ** 3)))
+      if (progress < 1) frame = requestAnimationFrame(step)
+    }
+    frame = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(frame)
+  }, [target, reduced])
+  return value
+}
+
+/** Tu resultado, al final, si participaste: la posición y el XP del sellado, que rueda (`myGame.xp`). */
+function MineCard({ row, xp, reduced }: { row: ResultRow; xp: number; reduced: boolean }) {
   const { position, scoreMilli, votes } = row.result
+  const rolled = useRollingNumber(xp, reduced)
   return (
     <div className={styles.mine} aria-hidden="true">
       <span className={styles.mineTag}>{t('results.mine.label')}</span>
@@ -435,6 +467,11 @@ function MineCard({ row }: { row: ResultRow }) {
       <p className={styles.mineScore}>
         {t('ceremony.mineScore', { score: scoreOf(scoreMilli), votes: t('results.votes', { count: votes }) })}
       </p>
+      {xp > 0 && (
+        <p className={styles.mineXp} data-mine-xp={xp}>
+          {t('results.mine.xpValue', { xp: formatNumber(rolled) })}
+        </p>
+      )}
     </div>
   )
 }

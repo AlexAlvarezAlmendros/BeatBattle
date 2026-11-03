@@ -31,6 +31,21 @@ describe('perfil público (§2.3, §3.8.10)', () => {
       links: { instagram: 'https://instagram.com/kairo.wav' },
       accent: 'wine',
       avatarUrl: null,
+      // La capa de juego (7.13), vacía sin semanas selladas.
+      game: {
+        level: 1,
+        stats: {
+          bestPosition: null,
+          streak: { current: 0, best: 0 },
+          meanScoreMilli: null,
+          goldenEars: 0,
+          votesCast: 0,
+          season: { id: '2026-T4', points: 0, position: null },
+        },
+        history: [],
+        achievements: [],
+        showcase: [],
+      },
     })
     expect(res.body).not.toMatch(/kairo@example\.com/)
     const missing = await get(t, '/api/profiles/nadie')

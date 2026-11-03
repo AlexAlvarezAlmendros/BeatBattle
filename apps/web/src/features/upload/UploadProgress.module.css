@@ -114,6 +114,16 @@
   font-weight: var(--bb-weight-extrabold);
 }
 
+/* «+125 XP» (§3.8.5, tarea 7.21): Oxanium rojo; de aquí nace el «+XP» que vuela al medidor del HUD. */
+.xp {
+  justify-self: start;
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-xl);
+  font-weight: var(--bb-weight-extrabold);
+  line-height: 1;
+}
+
 .text {
   color: var(--bb-text-2);
   font-size: var(--bb-fs-sm);

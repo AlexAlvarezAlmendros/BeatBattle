@@ -141,6 +141,8 @@ describe('la revelación y la ficha sellada (6.6)', () => {
       scoreMilli: expect.any(Number),
       votes: 3,
       histogram: [0, 0, 0, 1, 2],
+      // La casilla del reto, ya sellada (`RF-ENT-13`).
+      challengeClaimed: false,
     })
     const list = (await b.t.app.inject({ method: 'GET', url: '/api/weeks/2026-w42/entries' })).json().data
     expect(list.entries.find((e: { id: string }) => e.id === a).producer).toMatchObject({ username: 'prod0' })
