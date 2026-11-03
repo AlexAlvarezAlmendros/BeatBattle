@@ -10,7 +10,8 @@ import { admin, haveIBeenPwned, username } from 'better-auth/plugins'
 
 export const AUTH_BASE_PATH = '/api/auth'
 
-export function authPlugins() {
+/** `hibp: false` solo en los E2E (`BB_SKIP_HIBP`): el esquema no cambia, el plugin sigue y no consulta la red. */
+export function authPlugins({ hibp = true }: { hibp?: boolean } = {}) {
   return [
     // `RF-AUTH-06`: se guarda en minúsculas (único sin distinguir mayúsculas) y `displayUsername`
     // conserva cómo lo escribió. El plugin solo mira el formato: los reservados los rechaza un hook de la
@@ -24,16 +25,16 @@ export function authPlugins() {
       },
     }),
     admin(),
-    haveIBeenPwned(),
+    haveIBeenPwned({ enabled: hibp }),
   ]
 }
 
 /** Lo que cambia las tablas: email y contraseña, los plugins y el rate limit guardado en la BD (§4.13). */
-export function schemaOptions() {
+export function schemaOptions({ hibp = true }: { hibp?: boolean } = {}) {
   return {
     basePath: AUTH_BASE_PATH,
     emailAndPassword: { enabled: true },
     rateLimit: { enabled: true, storage: 'database' as const },
-    plugins: authPlugins(),
+    plugins: authPlugins({ hibp }),
   }
 }

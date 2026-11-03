@@ -41,6 +41,8 @@ const EnvSchema = z.object({
   MIGRATIONS_DIR: z.string().optional(),
   /** Reloj de prueba (`x-bb-test-now`, §4.12). Prohibido en producción. */
   BB_TEST_CLOCK: bool.default('0'),
+  /** Sin consulta a Have I Been Pwned (§4.13): solo para los E2E, que no deben depender de la red. Prohibido en producción. */
+  BB_SKIP_HIBP: bool.default('0'),
   LOG_LEVEL: z.enum(LOG_LEVELS, { error: `debe ser uno de: ${LOG_LEVELS.join(', ')}` }).default('info'),
   /** Detrás de un proxy (Vercel, Caddy) la IP real llega en `X-Forwarded-For`. */
   TRUST_PROXY: bool.default('0'),
@@ -119,6 +121,8 @@ export interface AppConfig {
   migrationsDir?: string
   /** Activa la cabecera `x-bb-test-now`. Nunca en producción (lo impide `loadEnv`). */
   testClock: boolean
+  /** Apaga la comprobación de contraseñas filtradas (`BB_SKIP_HIBP`, solo E2E). Nunca en producción (lo impide `loadEnv`). */
+  skipHibp: boolean
   logLevel: LogLevel
   trustProxy: boolean
   /** Cloudinary (§4.8.1); `null` sin credenciales (hasta que el entorno las tenga). */
@@ -268,6 +272,12 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
     for (const key of cloudinaryKeys.filter((k) => cleaned[k] === undefined))
       issues.push({ variable: key, message: 'las tres credenciales de Cloudinary van juntas' })
 
+  if (production && truthy(cleaned.BB_SKIP_HIBP ?? '0'))
+    issues.push({
+      variable: 'BB_SKIP_HIBP',
+      message: 'la comprobación de contraseñas filtradas solo se apaga en los E2E (guía §4.13)',
+    })
+
   if (production && cleaned.BB_FAKE_STORAGE !== undefined)
     issues.push({
       variable: 'BB_FAKE_STORAGE',
@@ -358,6 +368,7 @@ export function loadEnv(source: Readonly<Record<string, string | undefined>>): A
     databaseAuthToken: e.DATABASE_AUTH_TOKEN,
     migrationsDir: e.MIGRATIONS_DIR,
     testClock,
+    skipHibp: truthy(e.BB_SKIP_HIBP),
     logLevel: e.LOG_LEVEL,
     trustProxy: truthy(e.TRUST_PROXY),
     storage:

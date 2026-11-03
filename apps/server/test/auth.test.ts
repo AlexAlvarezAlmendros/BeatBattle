@@ -109,6 +109,24 @@ describe('cuentas con Better Auth (§2.3, §4.9)', () => {
     expect(code(await signUp(t, { password: 'a'.repeat(129) }, '203.0.113.3'))).toBe('PASSWORD_TOO_LONG')
   })
 
+  it('RF-AUTH-07: con BB_SKIP_HIBP (solo E2E) no se consulta HIBP; sin él, en cada registro', async () => {
+    const hibpCalls = () =>
+      vi
+        .mocked(globalThis.fetch)
+        .mock.calls.filter(([input]) =>
+          String(input instanceof Request ? input.url : input).includes('api.pwnedpasswords.com'),
+        ).length
+    vi.stubGlobal('fetch', vi.fn(globalThis.fetch))
+    const skipped = await makeApp({ config: { skipHibp: true } })
+    expect((await signUp(skipped, { password: 'password123456' })).statusCode).toBe(200)
+    expect(hibpCalls()).toBe(0)
+    const checked = await makeApp()
+    expect(code(await signUp(checked, { password: 'password123456' }, '203.0.113.4'))).toBe(
+      'PASSWORD_COMPROMISED',
+    )
+    expect(hibpCalls()).toBe(1)
+  })
+
   it('RF-AUTH-09: x@mailinator.com (y sus subdominios) → EMAIL_DISPOSABLE', async () => {
     const t = await makeApp()
     const res = await signUp(t, { email: 'x@mailinator.com' })

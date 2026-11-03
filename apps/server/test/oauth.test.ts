@@ -59,6 +59,9 @@ beforeEach(() => {
         avatar: null,
         discriminator: '0',
       })
+    // Este stub tapa el de `setup.ts`: HIBP también se responde aquí, sin red (si no, un HIBP lento agota el test).
+    if (url.includes('api.pwnedpasswords.com'))
+      return new Response('0000000000000000000000000000000000A:1', { status: 200 })
     return realFetch(input, init)
   })
 })

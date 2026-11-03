@@ -146,6 +146,9 @@ export default defineConfig({
         TRUST_PROXY: '1',
         LOG_LEVEL: 'warn',
         BB_FAKE_STORAGE: storage,
+        // Have I Been Pwned va lento o se cae a ratos y tumbaba cualquier E2E que registra una cuenta («Failed to
+        // check password»). Aquí no se consulta; `RF-AUTH-07` lo cubren los tests del servidor (guía §4.13).
+        BB_SKIP_HIBP: '1',
         CRON_SECRET: E2E_CRON_SECRET,
       },
     },
