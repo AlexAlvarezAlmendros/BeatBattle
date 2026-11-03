@@ -18,7 +18,7 @@ import type { EmailTemplate } from '../template'
 export interface SeasonWrapPayload {
   /** «2026-T4». */
   seasonId: string
-  /** Su nombre: la carta (la imagen OG del perfil, `/api/og/profile/:username.png`) y el botón a su perfil. */
+  /** Su nombre: la carta (la carta sola del perfil, `/api/og/profile/:username/card.png`) y el botón a su perfil. */
   username: string | null
   /** Su fila en la clasificación de la temporada, o `null` si no clasificó ninguna semana. */
   standing: { position: number; total: number; points: number; wins: number; podiums: number } | null
@@ -117,12 +117,21 @@ function WrapBody({ p }: { p: SeasonWrapPayload }) {
       {p.username ? (
         <Card>
           <Kicker>Tu carta del trimestre</Kicker>
+          {/* La carta sola, en vertical (`/api/og/profile/:username/card.png`, 608 × 828; jurado de la 7.35): la imagen OG
+              apaisada se leía a 3–6 px. A 376 px es la carta del perfil; en el móvil (≈ 306 px), su letra sigue en
+              11–13 px. */}
           <Img
-            src={`${publicUrl}/api/og/profile/${encodeURIComponent(p.username)}.png`}
-            width="512"
-            height="269"
+            src={`${publicUrl}/api/og/profile/${encodeURIComponent(p.username)}/card.png`}
+            width="376"
+            height="512"
             alt={`Carta de productor de ${p.username}${p.standing ? `, ${ordinal(p.standing.position)} de la temporada ${label}` : ''}`}
-            style={{ display: 'block', width: '100%', maxWidth: '512px', height: 'auto', margin: '0 0 16px' }}
+            style={{
+              display: 'block',
+              width: '100%',
+              maxWidth: '376px',
+              height: 'auto',
+              margin: '0 auto 16px',
+            }}
           />
           <Button href={profileUrl}>Ver mi carta</Button>
           <Paragraph muted>

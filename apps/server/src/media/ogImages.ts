@@ -268,22 +268,7 @@ function tree(data: OgData): Node {
             padding: '0 44px 0 52px',
             alignItems: 'center',
           },
-          cardNode(
-            {
-              name: data.displayName,
-              number: card.number,
-              initials: card.initials,
-              since: card.since,
-              level: card.level,
-              levelFraction: card.levelFraction,
-              rank: card.rank,
-              variant: card.variant,
-              stats: { wins, podiums: data.podiums, weeks: data.weeks },
-              showcase: card.showcase.length,
-              achievements: card.achievements,
-            },
-            PROFILE_CARD_WIDTH,
-          ),
+          cardNode(profileCard(data), PROFILE_CARD_WIDTH),
           h(
             'div',
             {
@@ -331,3 +316,52 @@ function tree(data: OgData): Node {
 
 export const ogSvg = (data: OgData) => renderSvg(tree(data), OG_WIDTH, OG_HEIGHT)
 export const ogPng = (data: OgData) => renderPng(tree(data), OG_WIDTH, OG_HEIGHT)
+
+type ProfileOg = Extract<OgData, { kind: 'profile' }>
+
+/** La carta de un perfil para `cardNode`: lo público (solo semanas selladas). */
+function profileCard(data: ProfileOg) {
+  const { card } = data
+  return {
+    name: data.displayName,
+    number: card.number,
+    initials: card.initials,
+    since: card.since,
+    level: card.level,
+    levelFraction: card.levelFraction,
+    rank: card.rank,
+    variant: card.variant,
+    stats: { wins: card.wins, podiums: data.podiums, weeks: data.weeks },
+    showcase: card.showcase.length,
+    achievements: card.achievements,
+  }
+}
+
+/**
+ * **La carta sola** (jurado de la 7.35, §4.19.5): el anverso, inclinado −3°, en vertical y sin nada al lado, para la
+ * «Carta del trimestre» de `season.wrap`. La imagen OG (1200 × 630) en el email se veía a 512 px y, en el móvil, a unos
+ * 306: la letra de la carta bajaba a 3–6 px. Aquí la carta ocupa casi todo el ancho de la imagen (con el margen justo
+ * para su giro), así que a 306 px de ancho su letra más pequeña (el «Nv» del sello) se queda en ~11 px, el resto en
+ * 12 o más; a 376, el tamaño del email en escritorio, es la carta del perfil (352 px). Fondo propio del panel del email.
+ */
+export const CARD_IMAGE_WIDTH = 608
+export const CARD_IMAGE_HEIGHT = 828
+const CARD_IMAGE_CARD_WIDTH = 560
+
+const cardImageTree = (data: ProfileOg): Node =>
+  h(
+    'div',
+    {
+      width: CARD_IMAGE_WIDTH,
+      height: CARD_IMAGE_HEIGHT,
+      backgroundColor: color.panel,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    cardNode(profileCard(data), CARD_IMAGE_CARD_WIDTH),
+  )
+
+export const cardImageSvg = (data: ProfileOg) =>
+  renderSvg(cardImageTree(data), CARD_IMAGE_WIDTH, CARD_IMAGE_HEIGHT)
+export const cardImagePng = (data: ProfileOg) =>
+  renderPng(cardImageTree(data), CARD_IMAGE_WIDTH, CARD_IMAGE_HEIGHT)

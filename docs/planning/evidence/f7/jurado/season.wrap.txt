@@ -1,0 +1,47 @@
+Asunto: Tu T4 de 2026 en cifras
+Preheader: 3.º de 12 con 182 puntos, 13 semanas en juego y 214 votos.
+
+http://localhost:5774
+
+Temporada T4 de 2026 · cerrada
+
+
+3.º DE 12
+
+182 puntos en la clasificación de la temporada, con 2 victorias y 7 podios.
+
+Campeón: kairo.wav.
+
+Ver la clasificación http://localhost:5774/temporada/2026-T4
+
+La temporada en cifras
+
+TEMPORADA 2026-T4
+
+Semanas jugadas 13
+
+Mejor puesto 1.º
+
+Votos emitidos 214
+
+Logros 3
+
+Imparable · logro épico · +150 XP
+
+Disco de oro · logro épico · +150 XP
+
+Oído de oro · logro épico · +150 XP
+
+Tu carta del trimestre
+
+Ver mi carta http://localhost:5774/p/mar_beats
+
+La temporada siguiente ya está en juego: lo que ganes en sus semanas sale en tu carta cuando se sellan.
+
+----------------------------------------
+
+Un juego de Other People Records
+
+Recibes este aviso porque juegas en Beat Battle y lo tienes activado.
+
+Preferencias de email http://localhost:5774/ajustes/emails

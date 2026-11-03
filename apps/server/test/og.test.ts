@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { user, vote } from '../src/db/schema'
+import { CARD_IMAGE_HEIGHT, CARD_IMAGE_WIDTH } from '../src/media/ogImages'
 import { ogData, ogImagePath } from '../src/modules/share/og'
 import { type Battle, battle, HOUR, W42 } from './fixtures/battle'
 import { ORIGIN } from './helpers'
@@ -123,5 +124,35 @@ describe('imágenes OG (6.11)', () => {
     const results = await get('/api/og/results/2026-w42.png')
     expect(results.statusCode).toBe(200)
     expect((await get('/api/og/profile/prod0.png')).statusCode).toBe(200)
+  })
+
+  it('RF-SHARE-02: un nombre con punto («kai.ro», RF-AUTH-06) tiene su imagen OG y la carta sola de season.wrap, en vertical', async () => {
+    b = await battle({ producers: 1, voters: 0 })
+    const own = b.producers[0] as Battle['producers'][0]
+    await b.t.db
+      .update(user)
+      .set({ username: 'kai.ro', displayUsername: 'Kai.Ro' })
+      .where(eq(user.id, own.id))
+    // Jurado de la 7.35: el id de la URL no admitía el punto y estas dos daban 404.
+    const og = await get('/api/og/profile/kai.ro.png')
+    expect(og.statusCode).toBe(200)
+    expect([...og.rawPayload.subarray(0, 4)]).toEqual(PNG)
+    const card = await get('/api/og/profile/kai.ro/card.png')
+    expect(card.statusCode).toBe(200)
+    expect(card.headers['content-type']).toBe('image/png')
+    expect([...card.rawPayload.subarray(0, 4)]).toEqual(PNG)
+    // La cabecera IHDR: la carta sola, más alta que ancha (la OG es apaisada, 1200 × 630).
+    expect(card.rawPayload.readUInt32BE(16)).toBe(CARD_IMAGE_WIDTH)
+    expect(card.rawPayload.readUInt32BE(20)).toBe(CARD_IMAGE_HEIGHT)
+    expect(CARD_IMAGE_HEIGHT).toBeGreaterThan(CARD_IMAGE_WIDTH)
+    // Con la versión de la OG, caché inmutable; sin ella, la corta. Lo que no existe, 404.
+    const data = await ogData(b.t.db, 'profile', 'kai.ro', b.t.clock.now())
+    const version = ogImagePath(data as NonNullable<typeof data>).split('?v=')[1]
+    expect((await get(`/api/og/profile/kai.ro/card.png?v=${version}`)).headers['cache-control']).toBe(
+      'public, max-age=31536000, immutable',
+    )
+    expect(card.headers['cache-control']).toBe('public, max-age=300')
+    expect((await get('/api/og/profile/nadie/card.png')).statusCode).toBe(404)
+    expect((await get('/api/og/profile/no%20vale/card.png')).statusCode).toBe(404)
   })
 })

@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.147 · 2026-11-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.148 · 2026-11-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -981,8 +981,8 @@ ciego quién ha subido ni cuánto le ha dado su entrada (§1.3, `RF-NOTIF-13`).
     clasificar», o «como jurado»), el campeón o los campeones ex aequo, las semanas jugadas, el mejor puesto de una
     semana, los votos emitidos (los que contaron en los snapshots), los logros de la temporada (los de sus semanas y los
     sin semana conseguidos en el trimestre, con los que da y quita ese mismo `batch`: `season_champ` incluido), la
-    **carta del trimestre** (la imagen OG del perfil, §2.15) y los botones a la clasificación (`/temporada/:id`) y a su
-    carta. Asunto «Tu T4 de 2026 en cifras» y, al campeón, «¡Campeón de la T4 de 2026!».
+    **carta del trimestre** (la carta sola del perfil, en vertical, con lo de su imagen OG, §2.15 y §4.19.5) y los
+    botones a la clasificación (`/temporada/:id`) y a su carta. Asunto «Tu T4 de 2026 en cifras» y, al campeón, «¡Campeón de la T4 de 2026!».
   - **Nada sin sellar** (`RF-NOTIF-13`): todo es de las semanas de la temporada, que están selladas o se sellan en ese
     `batch`. La temporada siguiente puede estar ya en juego: ni sus votos ni sus logros (los de una semana suya no
     entran, aunque se ganen antes de que salga el email). Preferencia (`season_on`), horas de silencio, tope semanal y
@@ -1001,7 +1001,7 @@ ciego quién ha subido ni cuánto le ha dado su entrada (§1.3, `RF-NOTIF-13`).
 | `RF-NOTIF-09` | Alerta de drop sin cuenta con doble confirmación, caducidad de 7 días y fusión al registrarse | E2E completo con el email capturado |
 | `RF-NOTIF-10` | Supresión por rebote duro, detectado en el buzón de envío por IMAP | Un aviso de rebote permanente en el buzón suprime la dirección; el siguiente envío a ella queda `suppressed` |
 | `RF-NOTIF-11` | Campañas con editor por bloques, segmentos con recuento, prueba, programación, cancelación, estimación de días y estadísticas agregadas | E2E de admin con el `Mailer` en memoria; con un segmento de 900 y un cupo libre de 300 al día, estima 3 días |
-| `RF-NOTIF-12` | Sin píxeles de seguimiento; clics contados solo en agregado | Ninguna plantilla incluye imágenes de 1×1 ni parámetros por usuario en las URL de imágenes. Única excepción, la imagen que **es** el contenido del email y solo tiene sentido para su destinatario (la onda del recibo, la tarjeta de resultado, §4.19.5): firmada, sin id de usuario en la URL, con caché larga y sin registrar la petición. La carta de `season.wrap` es la imagen OG pública del perfil (la misma que ve cualquiera que comparta el perfil): sin parámetros y sin registrar la petición |
+| `RF-NOTIF-12` | Sin píxeles de seguimiento; clics contados solo en agregado | Ninguna plantilla incluye imágenes de 1×1 ni parámetros por usuario en las URL de imágenes. Única excepción, la imagen que **es** el contenido del email y solo tiene sentido para su destinatario (la onda del recibo, la tarjeta de resultado, §4.19.5): firmada, sin id de usuario en la URL, con caché larga y sin registrar la petición. La carta de `season.wrap` es la carta pública del perfil (lo mismo que su imagen OG, que ve cualquiera que comparta el perfil): sin parámetros y sin registrar la petición |
 | `RF-NOTIF-13` | Ningún email filtra datos sellados antes de tiempo ni rompe el voto ciego | Test de contrato sobre el contenido renderizado de cada plantilla con una semana sin sellar |
 | `RF-NOTIF-14` | Cuenta atrás animada en vivo y tarjeta de resultado personal (URL firmada) | La imagen de la cuenta atrás cambia entre dos peticiones separadas un minuto; la tarjeta sin firma → 403 |
 | `RF-NOTIF-15` | «Tu temporada en cifras» al cerrar cada temporada, en su `batch`, a quien participó o votó | Test con una temporada simulada: al sellar la última semana (y, sin semana el último lunes, en el primer `tick` tras el trimestre) sale una vez a cada participante y jurado verificado, sin nada de la temporada siguiente |
@@ -1655,6 +1655,11 @@ física propios; no es el `Lanyard` del sello).
     pie del retrato: «CARTA ROJA», «HOLO · GANADOR ×2», «CAMPEÓN DE TEMPORADA» (la estándar no lleva).
   - **Ningún texto sobre la trama** (`RD-VIS-05`): el número, el sello de nivel y la etiqueta van en su placa opaca, y
     el monograma del retrato es un dibujo (SVG con extrusión roja en capas, como el logo).
+  - **Estrecha** (jurado de la 7.35): su texto no baja de 12 px, así que por debajo de ~300 px de ancho ya no cabe en la
+    mitad de abajo; entonces **cede el retrato** (hasta un cuarto de la carta) y el cuerpo nunca se sale de ella (en la
+    bienvenida y en Ajustes → Perfil a 1024 px el pie pisaba el marco). Por debajo de ~280 px, ni así: los rótulos se
+    cortan con puntos suspensivos y el pie no cabe. Ninguna pantalla debería pintarla más estrecha (hallazgo abierto de
+    la ceremonia del campeón en el móvil, §3.8.15).
   - **Reverso**: número, logo del juego, el QR del perfil (módulos negros sobre blanco, con su margen de silencio), la
     dirección del perfil escrita debajo y el pie «EN LA BATALLA DESDE 03/2026» con la pegatina OTP. El QR es el PNG que
     pinta el servidor (`GET /api/profiles/:username/qr.png`, §4.10: `qrcode` solo vive allí, §4.1), una imagen con su
@@ -2326,8 +2331,9 @@ Cómo salen (tarea 7.20):
   tapa un control más de lo que dura.
 - **La placa de logro**: la insignia del logro, la misma de la rejilla del perfil y la vitrina de la carta (§3.8.10: un
   chaflán con el marco de su rareza y el glifo de su familia, a la vista), «LOGRO DESBLOQUEADO · RARO» (la rareza también
-  en palabra, nunca solo color), el nombre, la descripción del Anexo C y «+75 XP» en Oxanium rojo; los ocultos, ya
-  conseguidos, con su nombre y su descripción. Panel opaco. Dura 4 s. Es la misma placa de «¡JURADO COMPLETO!» (§3.8.7)
+  en palabra, nunca solo color), el nombre, la descripción del Anexo C y «+75 XP» en Oxanium rojo (a la derecha; en el
+  móvil estrecho, hasta 360 px, debajo del texto); los ocultos, ya conseguidos, con su nombre y su descripción. Panel
+  opaco. Dura 4 s. Es la misma placa de «¡JURADO COMPLETO!» (§3.8.7)
   y del primer logro de la bienvenida (§3.8.9). En contraste alto, la insignia con los colores del sistema (el holo y el
   rojo de la rareza no se quedan: la rareza ya va en palabra).
 - **La subida de nivel**: el número de la ficha del HUD se estampa (§3.4.1) y bajo ella sale «¡NIVEL 8!» en el
@@ -2509,7 +2515,7 @@ las pantallas de texto sin pieza, como la galería, no los llevan.
 | Pantalla | Aspecto de juego |
 |---|---|
 | **Ficha de entrada** (`/e/:id`) | La ficha de luchador a pantalla completa con estrellas; tras el sellado, posición, puntuación, votos e histograma (`RF-PLAY-08`) |
-| **Salón de la fama** | Tabla de récords de recreativa: campeones semana a semana (portada y disco de oro), campeones de temporada en placas grandes y récords (más victorias, racha más larga, mejor puntuación, más votos emitidos) con cifras en Oxanium y posición en display. Flechas en horizontal; en móvil, lista. **Tarea 7.25** (`RF-ARC-02`): pantalla de contenido con un `loader` sobre `GET /api/hall-of-fame` (lo de semanas selladas, ya filtrado). La **pieza** son las placas de los campeones de temporada (de la más reciente a la más antigua; los ex aequo en la misma, «CAMPEONES EX AEQUO»), cada una a su clasificación; sin ninguna cerrada, una placa que lo dice y lleva a la temporada en juego. En el panel, los **récords** en cuatro filas («01»–«04» en display, rótulo, quién —enlazado a su perfil; «Productor eliminado» sin enlace— y la cifra con su unidad; la mejor puntuación, con «Ver la entrada»; sin récord, «Todavía sin récord.») y los **campeones semana a semana** como una tira de portadas (menú horizontal: una parada de tabulación y ← →; la barra dice `[←][→] GANADORES`) que lleva a los resultados de su semana; en móvil, lista con ↑ ↓. Al pie, «Volver al menú», «Ver el archivo» y «Temporada T4 de 2026» (la en curso, la del lunes de hoy) |
+| **Salón de la fama** | Tabla de récords de recreativa: campeones semana a semana (portada y disco de oro), campeones de temporada en placas grandes y récords (más victorias, racha más larga, mejor puntuación, más votos emitidos) con cifras en Oxanium y posición en display. Flechas en horizontal; en móvil, lista. **Tarea 7.25** (`RF-ARC-02`): pantalla de contenido con un `loader` sobre `GET /api/hall-of-fame` (lo de semanas selladas, ya filtrado). La **pieza** son las placas de los campeones de temporada (de la más reciente a la más antigua; los ex aequo en la misma, «CAMPEONES EX AEQUO»), cada una a su clasificación; sin ninguna cerrada, una placa que lo dice y lleva a la temporada en juego. En el panel, los **récords** en cuatro filas («01»–«04» en display, rótulo, quién —enlazado a su perfil; «Productor eliminado» sin enlace— y la cifra con su unidad; la mejor puntuación, con «Ver la entrada»; sin récord, «Todavía sin récord.»), en columnas alineadas de una fila a otra (en el móvil, el rótulo arriba y el nombre con su cifra debajo; hasta 360 px, la cifra en su propia línea, para que el nombre no parta) y los **campeones semana a semana** como una tira de portadas (menú horizontal: una parada de tabulación y ← →; la barra dice `[←][→] GANADORES`) que lleva a los resultados de su semana; en móvil, lista con ↑ ↓. Al pie, «Volver al menú», «Ver el archivo» y «Temporada T4 de 2026» (la en curso, la del lunes de hoy) |
 | **Archivo** (`/semanas`) | «Selección de escenario»: rejilla de semanas selladas (vinilo-sol en miniatura, número de entradas y podio), con flechas y Q/E |
 | **Temporada** | Clasificación de torneo con puntos tipo F1; el top 3 en peanas pequeñas. **Tarea 7.26** (`RF-ARC-03`, `RF-ARC-04`): `/temporada/2026-T4` (con «t» minúscula lleva al id canónico; un id que no es una temporada pinta la 404; una temporada sin semanas empezadas —la API da 404— enseña la pantalla con «Esta temporada no tiene ninguna semana en juego»). La placa del HUD dice «CLASIFICACIÓN · T4 DE 2026» y el estado va arriba del panel («En juego · 3 semanas selladas hasta ahora: la clasificación solo cuenta las selladas» o «Cerrada · 13 semanas selladas. La primera fila es la de los campeones»). La **pieza**, el top 3 en peanas pequeñas (2.º, 1.º, 3.º; el nombre y los puntos en su placa opaca; cerrada, «CAMPEÓN» con su corona en el 1.º). En el panel, la anterior y la siguiente temporada (la siguiente, hasta la en curso), la **tabla** (puesto en display, productor enlazado a su perfil o «Productor eliminado», puntos, victorias, podios, semanas y media; en móvil, las cuatro últimas van en una línea bajo el nombre) que se recorre con ↑ ↓ (la barra dice `[↑][↓] ELEGIR`), y **cómo se puntúa**: los puntos de cada puesto, el punto de fuera del top 10, el desempate y que solo cuentan las semanas selladas. Al pie, «Volver al menú» y «Salón de la fama» |
 | **Cómo se juega** | «Lista de movimientos», un menú de juego en la cuña (cursor con 1P, ↑↓, Intro): 1 Pilla el sample · 2 Flipea el sample · 3 Sube y vota, cada uno con sus teclas o su gesto como ayuda («[INTRO] Jugar», «En tu estudio», «[1]–[5] Votar») y «HECHO» para quien lo ha completado (con las cuentas, Fase 2), más «Bases de la competición [B]» y «Volver al menú [Esc]»; a la derecha, las reglas de juego limpio en 5 filas con índice (voto ciego, escucha mínima, Ronda justa, media bayesiana, el XP no puntúa), cada una con su nombre en display y una línea de explicación |
@@ -3166,7 +3172,8 @@ Todas bajo `/api`, JSON, sobre de respuesta uniforme. **Pública** = sin sesión
 | * | `/api/admin/samples` (`/sign`, CRUD), `/weeks` (`GET` con los huecos, `POST`, y `GET`/`PATCH`/`DELETE` de `/:slug` solo antes del drop), `/reports`, `/votes/anomalies`, `/entries/:id/{hide,disqualify,restore}`, `/weeks/:slug/{seal,reseal}`, `/label-pick`, `/usage`, `/audit`, `/campaigns` (CRUD, `/test`, `/schedule`, `/cancel`, `/segment-count`), `/email/{queue,suppressions,stats}` | Admin | Administración (§2.14) |
 | GET | `/api/cron/tick` | `CRON_SECRET` | Tareas programadas (§4.12) |
 | GET | `/api/health` | Pública | Salud: `{ data: { status: 'ok', db: 'up', time } }`; si la BD no responde, 503 `SERVICE_UNAVAILABLE` con `details.db = 'down'` (Cloudinary se añade en la Fase 4) |
-| GET | `/api/og/:kind/:id.png?v=` | Pública | Imagen OG (`week`, `entry`, `results`, `profile`; §2.15) |
+| GET | `/api/og/:kind/:id.png?v=` | Pública | Imagen OG (`week`, `entry`, `results`, `profile`; §2.15). El id puede llevar puntos: un nombre de productor como `kairo.wav` (`RF-AUTH-06`) |
+| GET | `/api/og/profile/:username/card.png?v=` | Pública | La carta sola del perfil, en vertical: la «Carta del trimestre» de `season.wrap` (§4.19.5) |
 
 Reglas comunes: Zod en la frontera, cuerpo máximo de 64 kB (el audio nunca pasa por la API),
 `Content-Type: application/json` obligatorio en las escrituras **con cuerpo** (sin cuerpo, como
@@ -3847,10 +3854,14 @@ CREATE TABLE entry_receipt_seq (week_id TEXT PRIMARY KEY, last INTEGER NOT NULL)
   del audio (`v`: los 12 primeros caracteres del `etag`, así un audio sustituido tiene otra URL); sin firma
   válida, 403. Sin onda (en `processing` o ya borrada), la línea plana. La petición no se registra
   (`RF-NOTIF-12`) y se cachea una semana.
-- **Carta del trimestre** (`season.wrap`, tarea 7.30): la imagen OG del perfil (`GET /api/og/profile/:username.png`,
-  §2.15), que es la carta de productor con lo público (solo semanas selladas). Es pública, así que no lleva firma; va
-  sin `v` (la de ahora, con caché de cinco minutos) y la ruta de las imágenes OG no registra las peticiones
-  (`RF-NOTIF-12`).
+- **Carta del trimestre** (`season.wrap`, tarea 7.30): la **carta sola** del perfil, en vertical
+  (`GET /api/og/profile/:username/card.png`, 608 × 828; jurado de la 7.35): el anverso de la imagen OG del perfil
+  (§2.15, la carta de productor con lo público, solo semanas selladas) inclinado −3°, sin nada al lado y sobre el panel
+  del email. En el email va a 376 px como mucho (la carta del perfil, 352 px) y al ancho de la tarjeta en el móvil
+  (≈ 306 px): su letra más pequeña se queda en ~11 px y el resto en 12 o más. La imagen OG apaisada (1200 × 630), que
+  iba antes, se veía a 512 px y en el móvil su letra bajaba a 3–6 px. Es pública, así que no lleva firma; va sin `v`
+  (la de ahora, con caché de cinco minutos; con la `v` de la OG del perfil, inmutable) y, como las imágenes OG, no se
+  registran las peticiones (`RF-NOTIF-12`).
 - **QR del recibo**: `GET /api/email/qr/:entryId.png?sig=`, la matriz de `qrcode` (nivel de corrección M)
   pintada con el mismo codificador PNG: módulos negros sobre blanco con el margen de silencio de 4 módulos y
   6 px por módulo (en el email, a 132 px). Codifica la ficha pública de la entrada (`/e/:id`), que en voto
@@ -4340,7 +4351,7 @@ racha 6 → 500 · 1,5 = **750**; 50 votos en una semana → 40 · 5 = **200** c
 | `battle.first_votes` | «Tu beat ya suena: 5 votos» | Número de votos y de escuchas (sin media), botón para compartir |
 | `battle.label_pick` | «El sello ha elegido tu beat» | Frase del sello, enlace a la página de resultados y al widget del sello |
 | `game.progress` | «Nuevo rango: Beatmaker» / «Logro desbloqueado: Disco de oro» / «Nuevo rango: Loopero y 1 logro» | Tarjeta del rango (el nuevo, el que deja atrás, el nivel y el siguiente) y una por logro épico o legendario (nombre, condición, rareza y XP), botón a la carta (§2.12.7) |
-| `season.wrap` | «Tu T4 de 2026 en cifras» / «¡Campeón de la T4 de 2026!» | Posición en la temporada (puntos, victorias y podios; «sin clasificar» o «como jurado»), campeón o campeones ex aequo, semanas jugadas, mejor puesto, votos emitidos, logros de la temporada, la carta del trimestre (la imagen OG del perfil), botones a la clasificación y a la carta (§2.12.7) |
+| `season.wrap` | «Tu T4 de 2026 en cifras» / «¡Campeón de la T4 de 2026!» | Posición en la temporada (puntos, victorias y podios; «sin clasificar» o «como jurado»), campeón o campeones ex aequo, semanas jugadas, mejor puesto, votos emitidos, logros de la temporada, la carta del trimestre (la carta sola del perfil, §4.19.5), botones a la clasificación y a la carta (§2.12.7) |
 | `mkt.campaign` | Lo define la campaña | Bloques del editor |
 | `mkt.reactivation` | «La batalla sigue sin ti» | Lo que se ha perdido (ganadores recientes, sample actual), botón para volver |
 
@@ -4376,6 +4387,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-11-03 | 0.6.148 | **Tarea 7.35** (jurado visual de la Fase 7; acta en `docs/planning/evidence/f7/jurado/`). §2.12.7, §4.10, §4.19.5, `RF-NOTIF-12` y Anexo H: la «Carta del trimestre» de `season.wrap` es la **carta sola** del perfil, en vertical (`GET /api/og/profile/:username/card.png`, 608 × 828, a 376 px como mucho): con la imagen OG apaisada, en el móvil su letra bajaba a 3–6 px. §4.10: el id de las imágenes OG y de las páginas compartibles admite el punto de los nombres de productor (`kairo.wav`, `RF-AUTH-06`): `/p/kairo.wav` salía con 404 y sin metadatos y su imagen OG, y la carta de su `season.wrap`, con 404. §3.4.4: en una carta estrecha cede el retrato y el cuerpo no se sale de ella; por debajo de ~280 px no cabe (la ceremonia del campeón en el móvil la pinta así: hallazgo abierto, A1 del acta). §3.8.14: los récords del salón, en columnas alineadas; en el móvil estrecho, la cifra bajo el nombre. §3.8.8: en el móvil estrecho el XP de la placa de logro va bajo el texto. |
 | 2026-11-03 | 0.6.147 | **Tarea 7.34** (accesibilidad y rendimiento de la capa de juego). §4.7.5 y §4.17: el lienzo del Escenario es `StageCanvas` (`createRoot` de R3F con el catálogo justo de three, `stage/catalogue.ts`) en vez del `<Canvas>`, que registraba el espacio de nombres entero: el trozo baja de 253,5 a **208,2 kB gz** (< 250) con el mismo lienzo único y la primera pintura igual, y `pnpm budget` lo comprueba en la CI. §4.17, JS inicial: medido 211,8 kB gz (289,6 la 1.ª pintura de la home), por encima de los 200 desde antes de la Fase 7 (201,4 y 278,0 al empezarla); queda escrito (con él, el LCP local del proyecto `perf`, 3,0 s, también en `main`) y su arreglo, para la auditoría de la Fase 10. §4.17, FPS: el perfil con la carta, 60 fps; el primer giro de la carta ya no tropieza (la caja de la carta, con `aspect-ratio`, unidades `cqi` y una fila `auto`, costaba ~60 ms en cada maquetación de la página; con una celda `minmax(0, 1fr)`, ~1 ms). §3.4.1: la región viva de las recompensas es un registro (`role="log"`): cada mensaje se lee una vez y en su orden, también los que salen a la vez (antes solo se oía el último). §3.8.8, «Cuándo»: una capa a pantalla completa que llega cuando ya hay avisos a la vista (la revelación del drop, una ceremonia que se abre mientras salen) los devuelve a la cola y salen al cerrarse, sin volver a decirse: se quedaban debajo de la capa, vistos sin verse (lo encontró el recorrido con la ceremonia del campeón, que la 0.6.143 arregla además desde el principio: su retención va antes que lo pendiente de `me`). |
 | 2026-11-03 | 0.6.143 | **Tarea 7.33** (E2E del hito de la Fase 7). §3.8.8 («Cuándo»): la retención de la ceremonia del campeón de temporada vale también para lo que trae la `me` que llega al cargar su pantalla. El E2E destapó que, al cargar el menú o los resultados con la ceremonia pendiente, los primeros logros sin ver (hasta tres placas y el legendario) salían a la vez que ella: la web ponía en cola lo pendiente de `me` al llegar, antes de que el marco pusiera la retención; ahora lo pone en cola después de pintar el marco con esa sesión. §4.16: el buzón de los E2E (`GET /api/test/mailbox`) filtra también por el texto plano (`&text=`) y da el HTML y cuántos emails cumplen el filtro (el hito cuenta su `season.wrap` y captura su `game.progress`). |
 | 2026-11-03 | 0.6.142 | §4.13 y §4.15 (variables): los E2E ya no consultan Have I Been Pwned. `BB_SKIP_HIBP=1` apaga la comprobación (el plugin `haveIBeenPwned` con `enabled: false`; el esquema no cambia) y, con `NODE_ENV=production`, impide arrancar. La API iba lenta o caída a ratos y cualquier E2E que registra una cuenta fallaba con «Failed to check password». `RF-AUTH-07` sigue cubierto por los tests del servidor con una respuesta local. |

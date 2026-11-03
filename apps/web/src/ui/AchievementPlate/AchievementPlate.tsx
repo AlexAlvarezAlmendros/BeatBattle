@@ -26,7 +26,8 @@ export function AchievementPlate({
       <AchievementBadge id={id} unlocked className={styles.insignia} />
       <div className={styles.text}>
         <p className={styles.kicker}>
-          {kicker ? `${kicker} · ` : ''}
+          {/* El punto va pegado al rótulo: si parte, la rareza baja entera y nunca empieza por «·». */}
+          {kicker ? `${kicker}\u00a0· ` : ''}
           <span className={styles.rarity}>{t(`game.rarity.${rarity}`)}</span>
         </p>
         <p className={styles.name}>{t(`achievement.${id}.name`)}</p>

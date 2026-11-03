@@ -107,6 +107,20 @@ describe('páginas compartibles (6.12)', () => {
     expect((await get('/p/antiguo')).statusCode).toBe(404)
   })
 
+  it('RF-SHARE-01: un perfil con punto en el nombre («kai.ro», RF-AUTH-06) tiene su página con metadatos e imagen', async () => {
+    b = await battle({ producers: 1, voters: 0 })
+    const own = b.producers[0] as Battle['producers'][0]
+    await b.t.db
+      .update(user)
+      .set({ username: 'kai.ro', displayUsername: 'Kai.Ro' })
+      .where(eq(user.id, own.id))
+    // Jurado de la 7.35: el id de la URL no admitía el punto y `/p/kai.ro` salía con 404 y sin metadatos.
+    const res = await get('/p/kai.ro')
+    expect(res.statusCode).toBe(200)
+    expect(meta(res.body, 'og:url')).toBe(`${b.t.config.publicUrl}/p/kai.ro`)
+    expect(meta(res.body, 'og:image')).toMatch(/\/api\/og\/profile\/kai\.ro\.png\?v=/)
+  })
+
   it('los metadatos se escapan: un título con comillas o etiquetas no rompe el HTML', async () => {
     b = await battle({ producers: 1, voters: 0 })
     const own = b.producers[0] as Battle['producers'][0]

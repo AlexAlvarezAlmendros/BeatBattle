@@ -95,10 +95,16 @@
 
 /* ── Anverso ─────────────────────────────────────────────────────────────────────────────── */
 
-/* El retrato: la mitad de arriba, recortada con el chaflán del marco, sobre granate y con trama. */
+/*
+ * El retrato: la mitad de arriba, recortada con el chaflán del marco, sobre granate y con trama. En una carta estrecha
+ * (por debajo de ~300 px, donde el texto se queda en sus 12 px y ya no cabe en la otra mitad) es el retrato el que cede
+ * alto, hasta un cuarto de la carta: el cuerpo nunca se sale de ella (jurado de la 7.35: en la bienvenida, en Ajustes y
+ * en la ceremonia del campeón en el móvil, el pie y la pegatina pisaban el marco o el texto de debajo).
+ */
 .art {
   position: relative;
-  flex: 0 0 50%;
+  flex: 0 1 50%;
+  min-height: 25%;
   margin: var(--bb-stroke-cursor) var(--bb-stroke-cursor) 0;
   overflow: hidden;
   background: linear-gradient(to bottom, var(--bb-wine-2), var(--bb-wine-3) 70%, var(--bb-black));
@@ -275,7 +281,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--bb-space-2);
-  min-height: 0;
+  /* Su alto es el de lo que lleva (no `0`): así, si falta sitio, cede el retrato y no se desborda el cuerpo. */
+  min-height: auto;
   padding: var(--bb-space-3) var(--bb-space-4) var(--bb-space-3);
 }
 
