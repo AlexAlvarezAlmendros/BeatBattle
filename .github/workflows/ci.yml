@@ -41,6 +41,8 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+      # Presupuestos de los trozos (guía §4.17): el Escenario < 250 kB gz y lo diferido, después de la primera pintura.
+      - run: pnpm budget
       # E2E con el Chromium de Playwright y sus dependencias del sistema. playwright.config.ts arranca la
       # web (Vite en desarrollo: la galería solo existe ahí) y la API con una BD temporal nueva.
       - run: pnpm exec playwright install --with-deps chromium

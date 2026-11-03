@@ -10,6 +10,12 @@
   container-type: inline-size;
   position: relative;
   display: grid;
+  /*
+   * Una celda que no depende de lo de dentro (tarea 7.34): con la fila `auto`, la caja con `aspect-ratio` y unidades
+   * `cqi` dentro tenía que medir las dos caras una y otra vez, y cada maquetación de la página costaba ~60 ms (el
+   * tropiezo del primer giro). Con `minmax(0, 1fr)`, la misma caja en ~1 ms.
+   */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   width: min(100%, calc(var(--bb-space-16) * 5.5));
   aspect-ratio: 63 / 88;
   color: var(--bb-white);

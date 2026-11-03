@@ -1,4 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
+import { recordAnimations, runningLoops } from './motion'
 import { installClockWithoutStage, open, openGallery, settle } from './support'
 
 /**
@@ -7,75 +8,6 @@ import { installClockWithoutStage, open, openGallery, settle } from './support'
  * vinilo-sol, la crónica, el cursor) y al cambiar de pantalla. Se registra cada animación que arranca
  * desde la carga (CSS y Web Animations) y se mira lo que sigue en marcha al asentarse la página.
  */
-
-interface RecordedAnimation {
-  source: 'css' | 'waapi'
-  name: string
-  duration: number
-  iterations: number
-  /** Cambia de valor alguna propiedad que mueve la pieza (transform, translate, scale, rotate…). */
-  moves: boolean
-}
-
-declare global {
-  interface Window {
-    __bbAnimations: RecordedAnimation[]
-  }
-}
-
-/**
- * Antes de cargar la app: registra cada animación CSS (`animationstart`) y cada `element.animate()`
- * (Motion usa Web Animations). Una animación «mueve» si alguna propiedad de posición, escala o giro
- * cambia de valor entre fotogramas: Motion repite `transform` aunque el valor no cambie (`y: 0` → `y: 0`).
- */
-function recordAnimations() {
-  const MOVING = /^(transform|translate|scale|rotate|top|left|right|bottom)$/i
-  const recorded: RecordedAnimation[] = []
-  window.__bbAnimations = recorded
-
-  const normalize = (property: string, value: unknown): string => {
-    const text = String(value)
-    if (property !== 'transform') return text
-    try {
-      return new DOMMatrix(text === 'none' ? undefined : text).toString()
-    } catch {
-      return text
-    }
-  }
-  const record = (source: RecordedAnimation['source'], name: string, animation: Animation | undefined) => {
-    const timing = animation?.effect?.getTiming()
-    const frames = (animation?.effect as KeyframeEffect | null)?.getKeyframes() ?? []
-    const properties = new Set(
-      frames.flatMap((frame) => Object.keys(frame).filter((key) => MOVING.test(key))),
-    )
-    recorded.push({
-      source,
-      name,
-      duration: Number(timing?.duration ?? 0),
-      iterations: Number(timing?.iterations ?? 1),
-      moves: [...properties].some(
-        (property) => new Set(frames.map((frame) => normalize(property, frame[property]))).size > 1,
-      ),
-    })
-  }
-
-  const nativeAnimate = Element.prototype.animate
-  Element.prototype.animate = function (this: Element, keyframes, options) {
-    const animation = nativeAnimate.call(this, keyframes, options)
-    record('waapi', this.className.toString() || this.tagName, animation)
-    return animation
-  }
-  document.addEventListener(
-    'animationstart',
-    (event) => {
-      const animation = (event.target as Element)
-        .getAnimations()
-        .find((a) => (a as CSSAnimation).animationName === event.animationName)
-      record('css', event.animationName, animation)
-    },
-    true,
-  )
-}
 
 /**
  * Espera a la última carga diferida de la página: la parte animada de la zona de avisos (`ToastList`), que
@@ -92,19 +24,6 @@ async function deferredLoaded(page: Page, loading: Promise<unknown>): Promise<vo
 /** Respuesta del trozo diferido de los avisos (en desarrollo, el módulo `ToastList.tsx`). */
 const toastListResponse = (page: Page) =>
   page.waitForResponse((response) => response.url().includes('ToastList'))
-
-/** Animaciones en marcha que no terminan nunca (bucles). */
-function runningLoops(page: Page) {
-  return page.evaluate(() =>
-    document
-      .getAnimations()
-      .filter((a) => a.playState === 'running' && a.effect?.getTiming().iterations === Infinity)
-      .map(
-        (a) =>
-          (a as CSSAnimation).animationName ?? String((a.effect as KeyframeEffect | null)?.target?.className),
-      ),
-  )
-}
 
 test.describe('con «reducir movimiento» del sistema', () => {
   test.use({ reducedMotion: 'reduce' })

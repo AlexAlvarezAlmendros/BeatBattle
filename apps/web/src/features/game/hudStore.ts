@@ -11,7 +11,8 @@ import { create } from 'zustand'
  *   tres; lo grande (el logro legendario, al centro, y el nivel) de uno en uno. Nada sale mientras un «+XP» vuela
  *   (primero lo traga el medidor) ni mientras una capa a pantalla completa tapa el marco (`hold`: la pantalla de
  *   título, la revelación del drop, la ceremonia), y sale después, en el orden en que llegó.
- * - **Región viva** (`RNF-A11Y-07`): lo que se dice en voz al lector de pantalla (`live`).
+ * - **Región viva** (`RNF-A11Y-07`): lo que se dice en voz al lector de pantalla (`live`), como un registro: cada
+ *   mensaje es un nodo nuevo y se lee una vez, también los que salen a la vez (dos placas y la subida de nivel).
  *
  * Es solo estado: lo que hay que hacer al enseñar un aviso (marcarlo visto en el servidor, decirlo en la región
  * viva) lo pone `rewards.ts` en `onShow`, y los sonidos y el movimiento, la capa que lo pinta.
@@ -34,7 +35,7 @@ export interface FloatXp {
   combo?: number
 }
 
-export type RewardNotice =
+export type RewardNotice = (
   | {
       key: number
       kind: 'achievement'
@@ -52,10 +53,17 @@ export type RewardNotice =
       /** Nivel desde el que sube (el último que vio): si cambia el rango, «¡AHORA ERES…!». */
       from: number
     }
+) & {
+  /**
+   * Ya salió una vez y una capa a pantalla completa lo tapó (`hold`): vuelve a enseñarse, pero ya se dijo en la región
+   * viva y se marcó visto (`onShow` no se repite).
+   */
+  replay?: true
+}
 
 export type NoticeInput =
-  | Omit<Extract<RewardNotice, { kind: 'achievement' }>, 'key'>
-  | Omit<Extract<RewardNotice, { kind: 'level' }>, 'key'>
+  | Omit<Extract<RewardNotice, { kind: 'achievement' }>, 'key' | 'replay'>
+  | Omit<Extract<RewardNotice, { kind: 'level' }>, 'key' | 'replay'>
 
 /** Placas de logro a la vez como mucho (§3.8.8: se apilan); las demás esperan. */
 export const MAX_PLATES = 3
@@ -66,6 +74,8 @@ export const NOTICE_MS = 4000
  * pasado este tiempo, en ms: nunca se queda enseñando menos XP del que hay.
  */
 export const FLOAT_TIMEOUT_MS = 2500
+/** Mensajes que guarda la región viva (los de antes ya se leyeron: quitarlos no se anuncia). */
+export const LIVE_MAX = 4
 
 /** ¿Va al centro o bajo el jugador, de uno en uno? El logro legendario y la subida de nivel. */
 export function isBig(notice: RewardNotice | NoticeInput): boolean {
@@ -82,7 +92,8 @@ interface HudState {
   plates: RewardNotice[]
   big: RewardNotice | null
   holds: number
-  live: { key: number; text: string } | null
+  /** Lo último dicho en la región viva, del más antiguo al más nuevo (como mucho `LIVE_MAX`). */
+  live: readonly { key: number; text: string }[]
   /** Logros ya avisados en esta pestaña (los de `me` y los de las respuestas no se repiten). */
   announced: readonly AchievementId[]
   /** El nivel más alto ya en cola o avisado en esta pestaña. */
@@ -111,7 +122,7 @@ const EMPTY = {
   plates: [],
   big: null,
   holds: 0,
-  live: null,
+  live: [],
   announced: [],
   levelAnnounced: 0,
 } satisfies Partial<HudState>
@@ -158,7 +169,7 @@ export const useHud = create<HudState>((set, get) => {
       // Cada aviso dura `NOTICE_MS` y se va solo (antes, si se salta); el almacén lleva la cuenta, así también se van
       // si la parte animada no ha llegado.
       setTimeout(() => get().dismiss(notice.key), NOTICE_MS)
-      hudEffects.onShow(notice)
+      if (!notice.replay) hudEffects.onShow(notice)
     }
   }
 
@@ -220,7 +231,20 @@ export const useHud = create<HudState>((set, get) => {
       }))
     },
     hold() {
-      commit((state) => ({ holds: state.holds + 1 }))
+      commit((state) => {
+        if (state.holds > 0) return { holds: state.holds + 1 }
+        // Lo que estaba a la vista quedaría debajo de la capa y nadie lo vería (§3.10: nunca se pierde información):
+        // vuelve a la cola, delante y en su orden, con otra clave (su reloj de antes no se lo lleva) y sin el XP que el
+        // medidor ya enseña. Al cerrarse la capa sale otra vez, sin volver a decirse ni a marcarse visto.
+        const visible = [...state.plates, ...(state.big ? [state.big] : [])].sort((a, b) => a.key - b.key)
+        const replayed = visible.map((notice): RewardNotice => {
+          sequence += 1
+          return notice.kind === 'achievement'
+            ? { ...notice, key: sequence, pending: 0, replay: true }
+            : { ...notice, key: sequence, replay: true }
+        })
+        return { holds: 1, plates: [], big: null, queue: [...replayed, ...state.queue] }
+      })
       let released = false
       return () => {
         if (released) return
@@ -230,7 +254,8 @@ export const useHud = create<HudState>((set, get) => {
     },
     say(text) {
       sequence += 1
-      set({ live: { key: sequence, text } })
+      const key = sequence
+      set((state) => ({ live: [...state.live, { key, text }].slice(-LIVE_MAX) }))
     },
     reset() {
       set((state) => ({ ...EMPTY, holds: state.holds }))
@@ -240,7 +265,8 @@ export const useHud = create<HudState>((set, get) => {
 
 /**
  * Retiene los avisos mientras `active` (§3.8.8): una capa a pantalla completa que tapa el marco (la pantalla de título,
- * la revelación del drop, la ceremonia). Al cerrarse, salen en su orden.
+ * la revelación del drop, la ceremonia). Si llega con avisos ya a la vista (lo pendiente de `me` sale en cuanto llega la
+ * sesión, antes de que la pantalla sepa que va a enseñar su capa), vuelven a la cola. Al cerrarse, salen en su orden.
  */
 export function useRewardsHold(active = true): void {
   useEffect(() => (active ? useHud.getState().hold() : undefined), [active])
