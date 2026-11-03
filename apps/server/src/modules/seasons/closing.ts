@@ -1,4 +1,4 @@
-import type { SeasonResult } from '@beatbattle/rules'
+import { type SeasonResult, seasonEndsAt } from '@beatbattle/rules'
 import { asc, eq, gt, inArray } from 'drizzle-orm'
 import type { BatchStatement } from '../../db/batch'
 import type { Db } from '../../db/client'
@@ -14,6 +14,7 @@ import {
   seasonChampHolders,
   weeksOfSeason,
 } from './repo'
+import { SEASON_WRAP_WINDOW_MS, seasonWrapStatements } from './wrap'
 
 /**
  * El cierre de una temporada (guía §2.9, hueco G7; tarea 7.11, `RF-ARC-05`): una temporada se cierra cuando ha acabado
@@ -29,7 +30,9 @@ import {
  *   sellado (hueco G2): quien pasa a serlo gana `season_champ` y quien deja de serlo de toda temporada cerrada lo
  *   pierde con su XP.
  *
- * `season.wrap` (tarea 7.30) se suma a estos mismos `batch`.
+ * `season.wrap` (tarea 7.30) va en estos mismos `batch` (`seasonWrapStatements`): en el del sellado que la cierra y en el
+ * del `tick` que la cierra sin semana el último lunes (o que la ve ya cerrada: la clave de idempotencia no duplica), si
+ * no hace más de una semana que se cerró.
  */
 
 /** Lo que cambia en los campeones de la temporada de una semana que se sella o se re-sella. */
@@ -171,6 +174,20 @@ export async function closeDueSeasons(
       }),
       refreshXpStatement(db, userId),
     ])
+    // El resumen de la temporada, si se cerró hace poco: el del sellado que la cerró ya está en la cola (misma clave) y
+    // una temporada vieja (el primer `tick` tras desplegar la capa de juego) no se resume.
+    const closedOn = Math.max(seasonEndsAt(seasonId), ...weeks.map((w) => w.sealedAt ?? 0))
+    const wrap =
+      now - closedOn <= SEASON_WRAP_WINDOW_MS
+        ? await seasonWrapStatements(db, {
+            seasonId,
+            granted: new Map(
+              accounts.map((userId) => [userId, [{ id: 'season_champ' as const, weekId: lastWeekId }]]),
+            ),
+            now,
+            newId,
+          })
+        : []
     const value = JSON.stringify({ lastClosed: seasonId })
     await db.batch([
       db
@@ -178,6 +195,7 @@ export async function closeDueSeasons(
         .values({ name: CLOSE_STATE, value, updatedAt: now })
         .onConflictDoUpdate({ target: jobState.name, set: { value, updatedAt: now } }),
       ...statements,
+      ...wrap,
     ])
     closed.push(seasonId)
   }

@@ -58,11 +58,33 @@ describe('esquemas de la capa de juego (§2.9, §2.10, §4.10; tarea 7.7)', () =
   it('RF-GAME-05 (contrato): el navegador solo declara los logros de su lista blanca (en la Fase 7, share_card)', () => {
     expect([...BROWSER_ACHIEVEMENTS]).toEqual(['share_card'])
     for (const id of BROWSER_ACHIEVEMENTS) expect(AchievementIdSchema.options).toContain(id)
-    expect(DeclaredAchievementSchema.parse({ achievement: 'share_card' })).toEqual({
+    expect(
+      DeclaredAchievementSchema.parse({ achievement: 'share_card', card: { kind: 'producer' } }),
+    ).toEqual({
       achievement: 'share_card',
+      card: { kind: 'producer' },
     })
-    for (const bad of [{ achievement: 'win' }, { achievement: 'share_card', xp: 25 }, {}])
+    for (const bad of [
+      { achievement: 'win' },
+      { achievement: 'share_card', card: { kind: 'producer' }, xp: 25 },
+      {},
+    ])
       expect(DeclaredAchievementSchema.safeParse(bad).success, JSON.stringify(bad)).toBe(false)
+  })
+
+  it('RF-GAME-05 / §2.10 (contrato, 7.28): share_card dice qué tarjeta; la de la batalla, con su entrada', () => {
+    for (const card of [{ kind: 'battle', entryId: 'e-1' }, { kind: 'result' }, { kind: 'producer' }])
+      expect(DeclaredAchievementSchema.safeParse({ achievement: 'share_card', card }).success).toBe(true)
+    for (const card of [
+      undefined,
+      { kind: 'battle' },
+      { kind: 'producer', entryId: 'e-1' },
+      { kind: 'otra' },
+    ])
+      expect(
+        DeclaredAchievementSchema.safeParse({ achievement: 'share_card', card }).success,
+        JSON.stringify(card),
+      ).toBe(false)
   })
 
   it('RF-GAME-05: los 36 logros del Anexo C, sin repetir', () => {

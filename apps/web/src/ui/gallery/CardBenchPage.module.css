@@ -30,3 +30,12 @@
   gap: var(--bb-space-4);
   margin: 0;
 }
+
+/* La tarjeta para stories, a escala: 9 × 16 en el ancho de la celda. */
+.story {
+  display: block;
+  width: min(100%, calc(var(--bb-space-16) * 4.5));
+  height: auto;
+  aspect-ratio: 9 / 16;
+  background: var(--bb-panel);
+}

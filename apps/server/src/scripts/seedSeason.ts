@@ -273,7 +273,10 @@ export async function seedSeason(kit: SeedKit): Promise<void> {
   }
   // Compartir la carta (lo declara el navegador, `share_card`).
   for (const p of [0, 8])
-    await call('POST', '/api/me/achievements', (producers[p] as Who).cookie, { achievement: 'share_card' })
+    await call('POST', '/api/me/achievements', (producers[p] as Who).cookie, {
+      achievement: 'share_card',
+      card: { kind: 'producer' },
+    })
 
   // Todo lo escribieron los ganchos en vivo: el reprocesado no tiene nada que añadir.
   const now = clock.now()

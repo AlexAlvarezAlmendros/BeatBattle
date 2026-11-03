@@ -98,3 +98,14 @@ export function usernameCandidate(raw: string): string | null {
     .replace(/[._]+$/g, '')
   return base.length >= USERNAME_MIN ? base : null
 }
+
+/**
+ * Las iniciales de un nombre para el monograma (el avatar sin foto y el retrato de la carta, §3.4.4): las de sus dos
+ * primeras partes («LilBru» → «LB», «kairo.wav» → «KW») o, si es una sola, sus dos primeras letras. Lo usan la web y
+ * la imagen OG del perfil (tarea 7.28), que tienen que pintar la misma carta.
+ */
+export function initialsOf(name: string): string {
+  const parts = name.match(/[A-Z][a-z0-9]*|[a-z0-9]+/g) ?? [name]
+  const letters = parts.length > 1 ? parts.slice(0, 2).map((part) => part[0]) : [name[0], name[1]]
+  return letters.filter(Boolean).join('').toUpperCase()
+}

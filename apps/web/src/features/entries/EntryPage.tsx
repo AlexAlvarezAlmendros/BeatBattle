@@ -214,6 +214,7 @@ export function EntryPage() {
           {own && !entry.result && week && (
             <StoryButton
               fileName={`beatbattle-semana-${week.number}.png`}
+              shared={{ kind: 'battle', entryId: entry.id }}
               card={{
                 kind: 'battle',
                 weekNumber: week.number,

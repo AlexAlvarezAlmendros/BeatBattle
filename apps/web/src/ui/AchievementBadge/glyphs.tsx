@@ -1,5 +1,5 @@
 import type { AchievementId } from '@beatbattle/rules'
-import type { ReactNode } from 'react'
+import { Children, isValidElement, type ReactNode } from 'react'
 import styles from './AchievementBadge.module.css'
 
 /**
@@ -162,4 +162,30 @@ export function Glyph({ name, className }: { name: GlyphName; className?: string
       {GLYPHS[name]}
     </svg>
   )
+}
+
+/** Una pieza de un glifo para pintarla en un lienzo 2D (`glyphShapes`): un trazado o un círculo, de trazo o macizo. */
+export type GlyphShape =
+  | { kind: 'path'; d: string; solid: boolean }
+  | { kind: 'circle'; cx: number; cy: number; r: number; solid: boolean }
+
+/**
+ * Las piezas de un glifo en unidades de 24 × 24, leídas del mismo dibujo de arriba: la carta pintada en un lienzo 2D por
+ * CPU (`cardCanvas`, la tarjeta para *stories* de la 7.28 y la textura 3D de la 7.23) pinta la vitrina con ellas.
+ */
+export function glyphShapes(name: GlyphName): GlyphShape[] {
+  const out: GlyphShape[] = []
+  const walk = (node: ReactNode) => {
+    for (const child of Children.toArray(node)) {
+      if (!isValidElement<Record<string, unknown>>(child)) continue
+      const props = child.props
+      const solid = props.className === styles.solid
+      if (child.type === 'path') out.push({ kind: 'path', d: String(props.d), solid })
+      else if (child.type === 'circle')
+        out.push({ kind: 'circle', cx: Number(props.cx), cy: Number(props.cy), r: Number(props.r), solid })
+      else walk(props.children as ReactNode)
+    }
+  }
+  walk(GLYPHS[name])
+  return out
 }

@@ -1,10 +1,13 @@
 import { coverContext, paintCover } from '@beatbattle/covers'
-import { color } from '@beatbattle/shared/tokens'
+import { angle, color } from '@beatbattle/shared/tokens'
+import { t } from '../../i18n'
+import { type CardFace, cardFaceCanvas, cardHeight, loadCardFonts } from '../../ui/ProducerCard/cardCanvas'
 
 /**
  * Tarjetas para stories (§2.15, `RF-SHARE-03`; tarea 6.14): un PNG de 1080 × 1920 que se pinta en el navegador
- * (contexto 2D por CPU, como las portadas) con las fuentes del juego. «Estoy en la batalla #N» (la propia
- * entrada, sin sellar: dice «Escúchala y vota», nunca «Vota a X», §2.15) y «He quedado N.º» (tras el sellado).
+ * (contexto 2D por CPU, como las portadas) con las fuentes del juego y los textos de `stories.*`. «Estoy en la batalla #N» (la propia
+ * entrada, sin sellar: dice «Escúchala y vota», nunca «Vota a X», §2.15), «He quedado N.º» (tras el sellado) y «Mi
+ * carta de productor» (tarea 7.28: la carta pintada por CPU desde `cardModel`, `cardCanvas`, con lo público del perfil).
  */
 
 export const STORY_WIDTH = 1080
@@ -34,6 +37,16 @@ export type StoryCard =
       cover: { seed: number | string; bpm: number | null; musicalKey: string | null }
       url: string
     }
+  | {
+      kind: 'producer'
+      /** La carta, con la foto y la pegatina ya cargadas (`loadCardAssets`). */
+      card: CardFace
+      /** La dirección del perfil. */
+      url: string
+    }
+
+/** Ancho de la carta en la tarjeta: con su giro de −3°, deja sitio al titular y al pie. */
+const CARD_WIDTH = 640
 
 const DISPLAY = (px: number) => `italic 900 ${px}px Anybody`
 const UI = (px: number, weight = 700) => `${weight} ${px}px "Chakra Petch"`
@@ -42,9 +55,10 @@ const NUM = (px: number) => `800 ${px}px Oxanium`
 /** Las fuentes del juego, cargadas antes de pintar (si no, el lienzo usa la de sistema). */
 async function loadFonts(): Promise<void> {
   if (!document.fonts) return
-  await Promise.all(
-    [DISPLAY(120), UI(44), UI(40, 600), NUM(64)].map((font) => document.fonts.load(font).catch(() => [])),
-  )
+  await Promise.all([
+    loadCardFonts(),
+    ...[DISPLAY(120), UI(44), UI(40, 600), NUM(64)].map((font) => document.fonts.load(font).catch(() => [])),
+  ])
 }
 
 /** Parte `text` en líneas que caben en `width`; como mucho `max`, la última con «…». */
@@ -77,7 +91,7 @@ function clip(ctx: CanvasRenderingContext2D, text: string, width: number): strin
   return `${cut}…`
 }
 
-function cover(card: StoryCard): HTMLCanvasElement {
+function cover(card: Exclude<StoryCard, { kind: 'producer' }>): HTMLCanvasElement {
   const canvas = document.createElement('canvas')
   canvas.width = COVER
   canvas.height = COVER
@@ -95,24 +109,28 @@ export async function drawStory(canvas: HTMLCanvasElement, card: StoryCard): Pro
   ctx.fillStyle = color.black
   ctx.fillRect(0, 0, STORY_WIDTH, STORY_HEIGHT)
   ctx.textBaseline = 'alphabetic'
+  if (card.kind === 'producer') {
+    drawProducer(ctx, card)
+    return
+  }
 
   // Arriba: el juego y la semana.
   ctx.fillStyle = color.red
   ctx.font = UI(44)
-  ctx.fillText(`BEAT BATTLE · SEMANA #${card.weekNumber}`, MARGIN, 190)
+  ctx.fillText(t('stories.week', { number: card.weekNumber }).toUpperCase(), MARGIN, 190)
 
   // El titular.
   ctx.fillStyle = color.white
   if (card.kind === 'battle') {
     ctx.font = DISPLAY(124)
-    ctx.fillText('ESTOY EN', MARGIN, 350)
-    ctx.fillText('LA BATALLA', MARGIN, 480)
+    ctx.fillText(t('stories.battle.line1').toUpperCase(), MARGIN, 350)
+    ctx.fillText(t('stories.battle.line2').toUpperCase(), MARGIN, 480)
   } else {
     ctx.font = DISPLAY(124)
-    ctx.fillText('HE QUEDADO', MARGIN, 350)
+    ctx.fillText(t('stories.result.line1').toUpperCase(), MARGIN, 350)
     ctx.fillStyle = card.position === 1 ? color.red : color.white
     ctx.font = DISPLAY(150)
-    ctx.fillText(`${card.position}.º`, MARGIN, 500)
+    ctx.fillText(t('stories.result.position', { position: card.position }), MARGIN, 500)
   }
 
   // La portada, con su marco.
@@ -135,13 +153,13 @@ export async function drawStory(canvas: HTMLCanvasElement, card: StoryCard): Pro
   ctx.fillText(card.kind === 'battle' ? card.alias : card.producer, MARGIN, ty + 10)
   ctx.fillStyle = color.text3
   ctx.font = UI(36, 600)
-  ctx.fillText(`Sample: ${card.sampleTitle}`, MARGIN, ty + 70)
+  ctx.fillText(t('stories.sample', { title: card.sampleTitle }), MARGIN, ty + 70)
 
   // Abajo: la llamada (o las cifras) y la firma.
   const foot = STORY_HEIGHT - 170
   if (card.kind === 'battle') {
     ctx.font = UI(48)
-    const label = 'ESCÚCHALA Y VOTA'
+    const label = t('stories.battle.call').toUpperCase()
     const w = ctx.measureText(label).width + 64
     ctx.fillStyle = color.redCta
     ctx.fillRect(MARGIN, foot - 66, w, 90)
@@ -168,6 +186,67 @@ export async function drawStory(canvas: HTMLCanvasElement, card: StoryCard): Pro
     MARGIN,
     STORY_HEIGHT - 80,
   )
+}
+
+/** El titular más grande (hasta `size`) que cabe en el ancho de la tarjeta. */
+function headline(ctx: CanvasRenderingContext2D, text: string, size: number): number {
+  let px = size
+  ctx.font = DISPLAY(px)
+  while (px > 48 && ctx.measureText(text).width > STORY_WIDTH - 2 * MARGIN) {
+    px -= 2
+    ctx.font = DISPLAY(px)
+  }
+  return px
+}
+
+/** El pie común: la llamada en su placa, la firma a la derecha y la dirección abajo. */
+function foot(ctx: CanvasRenderingContext2D, call: string, url: string) {
+  const y = STORY_HEIGHT - 170
+  ctx.font = UI(48)
+  const w = ctx.measureText(call).width + 64
+  ctx.fillStyle = color.redCta
+  ctx.fillRect(MARGIN, y - 66, w, 90)
+  ctx.fillStyle = color.white
+  ctx.fillText(call, MARGIN + 32, y - 4)
+  ctx.fillStyle = color.red
+  ctx.font = DISPLAY(64)
+  const sign = 'OTP.'
+  ctx.fillText(sign, STORY_WIDTH - MARGIN - ctx.measureText(sign).width, y)
+  ctx.fillStyle = color.text3
+  ctx.font = UI(34, 600)
+  ctx.fillText(
+    clip(ctx, url.replace(/^https?:\/\//, ''), STORY_WIDTH - 2 * MARGIN),
+    MARGIN,
+    STORY_HEIGHT - 80,
+  )
+}
+
+/** «Mi carta de productor»: el titular, la carta inclinada −3° (§3.4.4) y el pie con la dirección del perfil. */
+function drawProducer(ctx: CanvasRenderingContext2D, card: Extract<StoryCard, { kind: 'producer' }>) {
+  ctx.fillStyle = color.red
+  ctx.font = UI(44)
+  ctx.fillText(t('stories.producer.kicker').toUpperCase(), MARGIN, 190)
+  ctx.fillStyle = color.white
+  for (const [key, y] of [
+    ['stories.producer.line1', 340],
+    ['stories.producer.line2', 470],
+  ] as const) {
+    const line = t(key).toUpperCase()
+    headline(ctx, line, 124)
+    ctx.fillText(line, MARGIN, y)
+  }
+
+  const face = cardFaceCanvas(card.card, CARD_WIDTH)
+  const height = cardHeight(CARD_WIDTH)
+  const cx = STORY_WIDTH / 2
+  const cy = 560 + height / 2
+  ctx.save()
+  ctx.translate(cx, cy)
+  ctx.rotate((angle.tiltCard * Math.PI) / 180)
+  ctx.drawImage(face, -CARD_WIDTH / 2, -height / 2)
+  ctx.restore()
+
+  foot(ctx, t('stories.producer.call').toUpperCase(), card.url)
 }
 
 /** La tarjeta como PNG. */

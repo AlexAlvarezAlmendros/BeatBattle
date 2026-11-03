@@ -1,4 +1,3 @@
-import type { AchievementId } from '@beatbattle/rules'
 import { type CSSProperties, type PointerEvent, useEffect, useRef, useState } from 'react'
 import { t } from '../../i18n'
 import { AchievementBadge, achievementName } from '../AchievementBadge'
@@ -10,31 +9,22 @@ import { useFitText } from '../hooks/useFitText'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 import { OtpSlapImage } from '../OtpSlap'
 import { Tag } from '../Tag'
-import { type CardVariant, cardNumberLabel } from './cardModel'
+import { type CardFront, type CardVariant, cardNumberLabel } from './cardModel'
 import styles from './ProducerCard.module.css'
 import { ProfileQr } from './ProfileQr'
 
 export type CardSide = 'front' | 'back'
 
-export interface ProducerCardProps {
-  name: string
-  initials: string
-  cardNumber: number
-  level: number
-  /** Fracción del nivel actual, `[0, 1]` (el arco del sello). */
-  levelFraction: number
-  rank: string
-  stats: { wins: number; podiums: number; weeks: number }
-  /** Hasta tres logros de la vitrina (conseguidos); los huecos van en silueta. */
-  showcase?: readonly AchievementId[]
-  /** Logros conseguidos que enseña el perfil: «Vitrina · 3 de 14». Sin el dato, solo «Vitrina». */
-  achievements?: number
-  /** «10/2026»: mes y año de alta. */
-  since: string
+/**
+ * El anverso es el de `cardModel` (`CardFront`, el mismo que pinta el lienzo por CPU); sin vitrina, los tres huecos en
+ * silueta, y sin variante, la estándar.
+ */
+export interface ProducerCardProps extends Omit<CardFront, 'showcase' | 'variant'> {
+  showcase?: CardFront['showcase']
+  /** Por defecto, la estándar. */
+  variant?: CardVariant
   /** Foto del avatar (256 px, cuadrada); sin ella, el monograma. */
   avatarUrl?: string | null
-  /** Variante (§3.4.4): estándar, roja, holo o de campeón. Por defecto, la estándar. */
-  variant?: CardVariant
   /** Cara que se ve (la controla quien la usa: la tecla C del perfil). Por defecto, el anverso. */
   side?: CardSide
   /**

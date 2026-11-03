@@ -3,6 +3,7 @@ import * as achievements from '../src/achievements'
 import * as alias from '../src/alias'
 import * as balance from '../src/balance'
 import * as calendar from '../src/calendar'
+import * as card from '../src/card'
 import * as entryAudio from '../src/entryAudio'
 import * as fair from '../src/fair'
 import * as goldenEar from '../src/goldenEar'
@@ -23,6 +24,7 @@ const modules = {
   alias,
   balance,
   calendar,
+  card,
   entryAudio,
   fair,
   goldenEar,
