@@ -1,0 +1,1 @@
+export { AchievementPlate } from './AchievementPlate'

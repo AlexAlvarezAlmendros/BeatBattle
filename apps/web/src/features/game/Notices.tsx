@@ -3,12 +3,12 @@ import { AnimatePresence, domAnimation, LazyMotion, m, type Transition } from 'm
 import { type CSSProperties, useEffect, useLayoutEffect, useState } from 'react'
 import { audio } from '../../audio/engine'
 import { t } from '../../i18n'
+import { AchievementPlate } from '../../ui/AchievementPlate'
 import { Announcer } from '../../ui/Announcer'
 import { frameAttributes } from '../../ui/Frame'
 import { flash } from '../../ui/flash'
 import { useReducedMotion } from '../../ui/hooks/useReducedMotion'
 import { useSeriousMode } from '../../ui/hooks/useSeriousMode'
-import { AchievementBadge } from './AchievementBadge'
 import { type RewardNotice, useHud } from './hudStore'
 import styles from './Notices.module.css'
 import { rankChanges, rankName } from './rewards'
@@ -81,14 +81,14 @@ function useEnter(reduced: boolean) {
   }
 }
 
-/** Una placa de logro (común, raro o épico): suena su `ach.*` en el fotograma en que entra. */
-function AchievementPlate({ notice }: { notice: Extract<RewardNotice, { kind: 'achievement' }> }) {
+/** El aviso de un logro (común, raro o épico): su placa, y suena su `ach.*` en el fotograma en que entra. */
+function AchievementNotice({ notice }: { notice: Extract<RewardNotice, { kind: 'achievement' }> }) {
   const reduced = useReducedMotion()
   useLayoutEffect(() => audio.play(`ach.${notice.rarity}`), [notice.rarity])
   return (
     <m.li {...useEnter(reduced)} className={styles.item} data-notice="achievement">
       <div {...frameAttributes({ cut: 'base' })} className={styles.plate} data-rarity={notice.rarity}>
-        <AchievementBadge id={notice.id} kicker={t('game.notice.unlocked')} />
+        <AchievementPlate id={notice.id} kicker={t('game.notice.unlocked')} />
       </div>
     </m.li>
   )
@@ -172,7 +172,7 @@ function LegendaryNotice({ notice }: { notice: Extract<RewardNotice, { kind: 'ac
         )}
         <Announcer text={t('game.notice.legendary')} className={styles.legendaryAnnouncer} silent />
         <div {...frameAttributes({ cut: 'lg' })} className={styles.plate} data-rarity="legendary">
-          <AchievementBadge id={notice.id} kicker={t('game.notice.unlocked')} />
+          <AchievementPlate id={notice.id} kicker={t('game.notice.unlocked')} />
         </div>
         <p className={styles.skip}>{t('game.notice.skip')}</p>
       </div>
@@ -200,7 +200,7 @@ export function Notices() {
         <AnimatePresence initial={false}>
           {level && <LevelPlate key={level.key} notice={level} />}
           {plates.map((notice) =>
-            notice.kind === 'achievement' ? <AchievementPlate key={notice.key} notice={notice} /> : null,
+            notice.kind === 'achievement' ? <AchievementNotice key={notice.key} notice={notice} /> : null,
           )}
         </AnimatePresence>
       </ol>

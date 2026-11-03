@@ -195,6 +195,9 @@ paralelo con ella; la F8 sigue esperando a la F7 y la F10, a la F7–F9.
   los stems, se sube al crear o después y se quita; sin ella, la web usa el vinilo-sol o la portada de referencia y la
   tarjeta del drop del email va sin imagen. Tarea 3.23 del [plan 03](plans/03-semanas-samples.md), guía v0.6.127. La
   migración `0009` reconstruye `sample` solo para admitir `NULL` en `cover_public_id`: no toca datos.
+- 2026-11-03 — **Placas de logro con el glifo de su familia** (decisión del usuario): una sola insignia
+  (`ui/AchievementBadge`) en los avisos, «¡JURADO COMPLETO!», la bienvenida y el perfil, con el glifo de cada logro en
+  lugar de la estrella genérica de la 7.20. Guía v0.6.138 (§3.8.8).
 - 2026-11-03 — **Pase de la carta: la cinta propia con física** (decisión del usuario, mirando las capturas de la 7.23
   en `docs/planning/evidence/f7/pase/`): cinta roja corta con «OTP.», remache y pinza, Rapier en su trozo propio (856 kB gz,
   solo en el perfil a dos columnas y tras la primera pintura). Descartado el expositor giratorio. Guía v0.6.141.

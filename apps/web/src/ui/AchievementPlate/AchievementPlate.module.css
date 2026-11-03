@@ -1,0 +1,63 @@
+/*
+ * Placa de logro (§3.8.8): la insignia del logro (`AchievementBadge`, con el marco de su rareza y su glifo; es dibujo: la
+ * rareza va en palabra al lado) y, a su derecha, el texto y el XP.
+ */
+.insignia {
+  width: calc(var(--bb-target) + var(--bb-space-2));
+}
+
+.plate {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--bb-space-3);
+}
+
+.text {
+  display: grid;
+  gap: var(--bb-space-1);
+  min-width: 0;
+}
+
+.kicker {
+  color: var(--bb-text-3);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.rarity {
+  color: var(--bb-white);
+}
+
+.plate[data-rarity="rare"] .rarity,
+.plate[data-rarity="legendary"] .rarity {
+  color: var(--bb-red);
+}
+
+.name {
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-md);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  font-stretch: var(--bb-stretch-button);
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.desc {
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-sm);
+  line-height: var(--bb-leading-body);
+}
+
+.xp {
+  align-self: start;
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: var(--bb-fs-md);
+  font-weight: var(--bb-weight-bold);
+  white-space: nowrap;
+}

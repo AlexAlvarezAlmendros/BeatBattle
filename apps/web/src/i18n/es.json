@@ -1238,7 +1238,8 @@
           "stars": "Estrellas",
           "game": "Voto y progreso",
           "upload": "Subida",
-          "ach": "Logros"
+          "ach": "Logros",
+          "season": "Campeón de temporada"
         }
       },
       "base": {
@@ -2212,7 +2213,23 @@
     "place": "{position}.º puesto: {producer}, con {score}.",
     "mine": "Tu resultado: {position}",
     "mineUnranked": "Tu resultado: sin clasificar",
-    "mineScore": "{score} · {votes}"
+    "mineScore": "{score} · {votes}",
+    "season": {
+      "label": "Ceremonia del campeón de la temporada {season}",
+      "kicker": "Fin de temporada",
+      "announcer_one": "¡Campeón de temporada!",
+      "announcer_other": "¡Campeones de temporada!",
+      "headline": "Campeón de la temporada {season}",
+      "headlineTie": "Campeones ex aequo de la temporada {season}",
+      "headlineYou": "¡Eres el campeón de la temporada {season}!",
+      "headlineYouTie": "¡Eres campeón ex aequo de la temporada {season}!",
+      "stats": "{points} PTS · {wins} · {podiums}",
+      "wins_one": "{count} victoria",
+      "wins_other": "{count} victorias",
+      "podiums_one": "{count} podio",
+      "podiums_other": "{count} podios",
+      "live": "{headline}: {names}. {stats}."
+    }
   },
   "archive": {
     "kicker": "Archivo",

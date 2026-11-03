@@ -12,6 +12,7 @@ import { audio } from '../../audio/engine'
 import { formatDuration, t } from '../../i18n'
 import { queryKeys } from '../../net/queryKeys'
 import { juryQueue } from '../../net/votes'
+import { AchievementPlate } from '../../ui/AchievementPlate'
 import { Announcer } from '../../ui/Announcer'
 import { Button } from '../../ui/Button'
 import { DataChip } from '../../ui/Chip'
@@ -23,7 +24,6 @@ import { Stamp } from '../../ui/Stamp'
 import { Stars } from '../../ui/Stars'
 import { Waveform } from '../../ui/Waveform'
 import { useSession } from '../account/session'
-import { AchievementBadge } from '../game/AchievementBadge'
 import { useListenReceipt } from '../player/listen'
 import { usePlayer } from '../player/store'
 import { entryTrack } from '../player/tracks'
@@ -478,7 +478,7 @@ function JuryComplete({
       </p>
       {earned.includes('jury_full') && (
         <Frame cut="base" className={styles.completeBadge}>
-          <AchievementBadge id="jury_full" kicker={t('game.notice.unlocked')} />
+          <AchievementPlate id="jury_full" kicker={t('game.notice.unlocked')} />
         </Frame>
       )}
       <Button to={paths.home()}>{t('jury.backToMenu')}</Button>

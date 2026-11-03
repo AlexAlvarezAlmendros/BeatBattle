@@ -9,6 +9,7 @@ import { queryKeys } from '../../net/queryKeys'
 import { ticker } from '../../net/votes'
 import { useCurrentWeek } from '../../net/weeks'
 import { playerOf, useSession } from '../account/session'
+import { SeasonCeremonyCue } from '../game/seasonCeremony'
 import { CeremonyOffer } from '../results/CeremonyOffer'
 import { ceremonySeenLocally, rememberCeremonySeen } from '../results/ceremonySeen'
 import { DropReveal } from './DropReveal'
@@ -175,7 +176,9 @@ export function HomePage() {
   return (
     <>
       <DocumentTitle />
-      <MainMenu model={model} afterTitle={reveal ?? offer} />
+      {/* Tras la pantalla de título: la revelación del drop, la oferta de la ceremonia de la semana y, sin nada de eso
+          delante, el turno de la del campeón de temporada (§3.8.15). */}
+      <MainMenu model={model} afterTitle={reveal ?? offer ?? <SeasonCeremonyCue />} />
     </>
   )
 }
