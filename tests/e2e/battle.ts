@@ -188,6 +188,7 @@ export async function createBattleWeek(
       licenseText: 'Uso libre.',
       bpm: 92,
       musicalKey: 'Dm',
+      hasCover: true,
     },
   })
   expect(sample.ok(), await sample.text()).toBe(true)

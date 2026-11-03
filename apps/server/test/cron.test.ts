@@ -117,6 +117,18 @@ describe('alerta de drop sin cuenta y email del drop (3.13)', () => {
     ])
   })
 
+  it('RF-ADM-01: el drop de un sample sin portada sale igual, con la tarjeta sin imagen', async () => {
+    t = await makeWeeksApp({ cronSecret: SECRET })
+    const { id } = await createSample(t, { cover: false })
+    await scheduleWeek(t, '2026-10-12', id)
+    t.clock.set(DROP_MAIL_AT)
+    expect((await tick()).json().data.mondayEmails.drop).toBe(1)
+    const drop = mailer().lastTo('jefa@example.com')
+    expect(drop?.subject).toBe('Nuevo drop: Lluvia en Gràcia · 92 BPM · Re menor')
+    expect(drop?.html).not.toContain('Portada de «Lluvia en Gràcia»')
+    expect(drop?.html).toContain('/api/email/countdown/2026-w42.gif')
+  })
+
   it('RF-NOTIF-09: sin confirmar no llega el drop, y a los 7 días se borra; el enlace caduca', async () => {
     t = await makeWeeksApp({ cronSecret: SECRET })
     await subscribe('fan@example.com')

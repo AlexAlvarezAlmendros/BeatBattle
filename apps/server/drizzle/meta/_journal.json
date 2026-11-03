@@ -64,6 +64,13 @@
       "when": 1793279944140,
       "tag": "0008_capa_de_juego",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1793704750182,
+      "tag": "0009_portada_opcional",
+      "breakpoints": true
     }
   ]
 }

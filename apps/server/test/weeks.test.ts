@@ -57,7 +57,7 @@ describe('samples del admin (3.6)', () => {
     expect(seven.statusCode).toBe(422)
   })
 
-  it('RF-STO-03: sin portada, con una portada pequeña o con un original que no es audio, no se crea nada', async () => {
+  it('RF-STO-03: una portada dicha pero sin subir, una pequeña o un original que no es audio: no se crea nada', async () => {
     t = await makeWeeksApp()
     const sign = await t.app.inject({
       method: 'POST',
@@ -86,7 +86,7 @@ describe('samples del admin (3.6)', () => {
           ...payload,
         },
       })
-    const noCover = await create({})
+    const noCover = await create({ hasCover: true })
     expect(noCover.statusCode).toBe(422)
     expect(noCover.json().error).toMatchObject({ code: 'SAMPLE_ASSET_INVALID', details: { part: 'cover' } })
     const { pngHeader } = await import('./fixtures/weeks')
@@ -95,13 +95,13 @@ describe('samples del admin (3.6)', () => {
       bytes: pngHeader(800, 800),
       format: 'png',
     })
-    expect((await create({})).json().error.details.part).toBe('cover')
+    expect((await create({ hasCover: true })).json().error.details.part).toBe('cover')
     await t.storage.put({
       publicId: t.storage.publicIdFor(sampleId, 'cover'),
       bytes: pngHeader(1000, 1000),
       format: 'png',
     })
-    const notAudio = await create({})
+    const notAudio = await create({ hasCover: true })
     expect(notAudio.json().error).toMatchObject({
       code: 'SAMPLE_ASSET_INVALID',
       details: { part: 'original' },
@@ -112,6 +112,47 @@ describe('samples del admin (3.6)', () => {
       headers: { cookie: t.admin.cookie },
     })
     expect(list.json().data).toEqual([])
+  })
+
+  it('RF-ADM-01: un sample se crea sin portada (coverUrl null); la portada se añade y se quita después', async () => {
+    t = await makeWeeksApp()
+    const created = await createSample(t, { cover: false })
+    expect(created.coverUrl).toBeNull()
+    const patch = (payload: object) =>
+      t.app.inject({
+        method: 'PATCH',
+        url: `/api/admin/samples/${created.id}`,
+        headers: json(t.admin.cookie),
+        payload,
+      })
+    // Decir que hay portada sin subirla, o con una pequeña, no cambia nada.
+    const missing = await patch({ hasCover: true })
+    expect(missing.statusCode).toBe(422)
+    expect(missing.json().error).toMatchObject({ code: 'SAMPLE_ASSET_INVALID', details: { part: 'cover' } })
+    const { pngHeader } = await import('./fixtures/weeks')
+    const coverId = t.storage.publicIdFor(created.id, 'cover')
+    await t.storage.put({ publicId: coverId, bytes: pngHeader(800, 800), format: 'png' })
+    expect((await patch({ hasCover: true })).statusCode).toBe(422)
+    await t.storage.put({ publicId: coverId, bytes: pngHeader(1200, 1200), format: 'png' })
+    const added = await patch({ hasCover: true })
+    expect(added.statusCode).toBe(200)
+    expect(added.json().data.coverUrl).toEqual(expect.any(String))
+    const removed = await patch({ hasCover: false })
+    expect(removed.json().data.coverUrl).toBeNull()
+    expect(await t.storage.read(coverId)).toBeNull()
+    const updates = await audits('sample.update')
+    expect(updates.map((row) => JSON.parse(row.payload as string).fields)).toEqual([
+      ['coverPublicId'],
+      ['coverPublicId'],
+    ])
+    // Sin portada también se borra (no hay fichero de portada que quitar).
+    const del = await t.app.inject({
+      method: 'DELETE',
+      url: `/api/admin/samples/${created.id}`,
+      headers: { cookie: t.admin.cookie, origin: ORIGIN },
+    })
+    expect(del.statusCode).toBe(204)
+    expect(await t.storage.read(t.storage.publicIdFor(created.id, 'original'))).toBeNull()
   })
 
   it('un sample que usa una semana no se borra; si no, sí, con sus ficheros', async () => {
@@ -319,6 +360,20 @@ describe('semana pública (3.8, 3.9)', () => {
     })
     t.clock.set(W42.submitEndsAt)
     expect((await current()).week.phase).toBe('voting')
+  })
+
+  it('RF-ADM-01: la semana de un sample sin portada da coverUrl null; con ella, la URL de la portada', async () => {
+    t = await makeWeeksApp()
+    const bare = await createSample(t, { cover: false })
+    const covered = await createSample(t, { title: 'Neón en Lavapiés' })
+    await scheduleWeek(t, '2026-10-12', bare.id)
+    await scheduleWeek(t, '2026-10-19', covered.id)
+    t.clock.set(W42.startsAt + HOUR)
+    const week42 = (await t.app.inject({ method: 'GET', url: '/api/weeks/2026-w42' })).json().data
+    expect(week42.sample.coverUrl).toBeNull()
+    t.clock.set(W42.startsAt + 7 * 24 * HOUR + 2 * HOUR)
+    const week43 = (await t.app.inject({ method: 'GET', url: '/api/weeks/2026-w43' })).json().data
+    expect(week43.sample.coverUrl).toEqual(expect.any(String))
   })
 
   it('RF-DROP-09: el visitante oye el sample (MP3 de escucha firmado) sin cuenta', async () => {

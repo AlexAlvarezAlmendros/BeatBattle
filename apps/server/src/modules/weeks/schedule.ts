@@ -76,7 +76,9 @@ export function dropPayload(
   deps: Pick<ScheduleDeps, 'publicUrl'> & { storage: SampleStorage },
   live: NonNullable<Awaited<ReturnType<typeof liveWeek>>>,
 ) {
-  const cover = deps.storage.coverUrl(live.sample.coverPublicId, 512)
+  // La portada es opcional (§2.4): sin ella, la tarjeta del drop del email sale sin imagen.
+  const cover =
+    live.sample.coverPublicId === null ? null : deps.storage.coverUrl(live.sample.coverPublicId, 512)
   return {
     weekNumber: live.week.number,
     slug: live.week.slug,
@@ -86,7 +88,7 @@ export function dropPayload(
     musicalKey: live.sample.musicalKey,
     genre: live.sample.genreHint,
     challenge: live.week.challenge,
-    coverUrl: cover.startsWith('http') ? cover : `${deps.publicUrl}${cover}`,
+    coverUrl: cover === null || cover.startsWith('http') ? cover : `${deps.publicUrl}${cover}`,
     closesText: madridLongDateTime(live.week.submitEndsAt),
   }
 }

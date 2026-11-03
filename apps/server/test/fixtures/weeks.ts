@@ -38,11 +38,11 @@ export async function makeWeeksApp(
 
 export const json = (cookie: string) => ({ cookie, origin: ORIGIN, 'content-type': 'application/json' })
 
-/** Sube un sample como el panel: firma, «sube» al almacenamiento falso y lo crea. */
+/** Sube un sample como el panel: firma, «sube» al almacenamiento falso y lo crea (la portada es opcional). */
 export async function createSample(
   t: WeeksApp,
-  { title = 'Lluvia en Gràcia', seconds = 6, stems = false } = {},
-): Promise<{ id: string; durationMs: number }> {
+  { title = 'Lluvia en Gràcia', seconds = 6, stems = false, cover = true } = {},
+): Promise<{ id: string; durationMs: number; coverUrl: string | null }> {
   const sign = async (part: string, sampleId?: string) => {
     const res = await t.app.inject({
       method: 'POST',
@@ -56,8 +56,10 @@ export async function createSample(
   const original = await sign('original')
   const { sampleId } = original
   await t.storage.put({ publicId: original.upload.publicId, bytes: sineWav({ seconds }), format: 'wav' })
-  const cover = await sign('cover', sampleId)
-  await t.storage.put({ publicId: cover.upload.publicId, bytes: pngHeader(1200, 1200), format: 'png' })
+  if (cover) {
+    const image = await sign('cover', sampleId)
+    await t.storage.put({ publicId: image.upload.publicId, bytes: pngHeader(1200, 1200), format: 'png' })
+  }
   if (stems) {
     const zip = await sign('stems', sampleId)
     await t.storage.put({
@@ -78,6 +80,7 @@ export async function createSample(
       bpm: 92,
       musicalKey: 'Dm',
       hasStems: stems,
+      hasCover: cover,
     },
   })
   if (res.statusCode !== 201) throw new Error(`crear sample: ${res.statusCode} ${res.body}`)

@@ -218,7 +218,7 @@ export function createWeeksService(deps: WeeksDeps) {
         peaks: Buffer.from(s.peaks).toString('base64'),
         chops: JSON.parse(s.chops) as Chop[],
         hasStems: s.stemsPublicId !== null,
-        coverUrl: files.coverUrl(s.coverPublicId, 1024),
+        coverUrl: s.coverPublicId === null ? null : files.coverUrl(s.coverPublicId, 1024),
         streamUrl: files.streamUrl(s.audioPublicId),
       },
       viewer,
