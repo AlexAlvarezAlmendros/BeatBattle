@@ -195,6 +195,9 @@ paralelo con ella; la F8 sigue esperando a la F7 y la F10, a la F7–F9.
   los stems, se sube al crear o después y se quita; sin ella, la web usa el vinilo-sol o la portada de referencia y la
   tarjeta del drop del email va sin imagen. Tarea 3.23 del [plan 03](plans/03-semanas-samples.md), guía v0.6.127. La
   migración `0009` reconstruye `sample` solo para admitir `NULL` en `cover_public_id`: no toca datos.
+- 2026-11-03 — **Pase de la carta: la cinta propia con física** (decisión del usuario, mirando las capturas de la 7.23
+  en `docs/planning/evidence/f7/pase/`): cinta roja corta con «OTP.», remache y pinza, Rapier en su trozo propio (856 kB gz,
+  solo en el perfil a dos columnas y tras la primera pintura). Descartado el expositor giratorio. Guía v0.6.141.
 
 ## Decisiones abiertas
 
@@ -207,7 +210,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 | Origen y licencia de los samples | Del sello o de sus productores, con licencia escrita | Antes de F3 | — |
 | Nombre de marca | «Beat Battle · un juego de Other People» | F0 (0.24) | Logo, lockup «by [OTP.]» y textos |
 | Móviles de 781 a ~840 px de alto (360×800, 375×812, 393×786) | **Cerrada (2026-10-15):** se queda así para la beta (el menú se desplaza 35–94 px; la placa enfocada siempre se ve) | — | Opciones: subir el móvil bajo hasta ~840 px (cabe, con una franja vacía de ~180 px a 375×812) o un paso intermedio con el logo en una línea y la tarjeta sin plegar. Acta de la 0.28 |
-| Pase de la carta | Cinta propia con física | F7 (tarea 7.23) | Alternativa: expositor giratorio si se percibe como pieza del sello (guía §3.4.4). **2026-11-03:** la 7.23 hace el valor por defecto (guía v0.6.140); lo cierra el usuario mirando `docs/planning/evidence/f7/pase/` (`acta.md`): la carta colgada en reposo, arrastrada y plana, en 1440 × 900 y en 390 × 844 táctil (en una columna, plana; con `bb:pass` = `on`, cómo quedaría). El expositor se ahorraría Rapier (856 kB gz) |
+| Pase de la carta | **Cerrada (2026-11-03):** la cinta propia con física (decisión del usuario sobre las capturas de `docs/planning/evidence/f7/pase/`) | — | Descartado el expositor giratorio. Tarea 7.23, guía v0.6.141 |
 | Modelo de semana | Envíos y votos a la vez | Tras la beta | Revisar con datos de participación |
 | Fecha de lanzamiento | Primera semana completa tras F10 | F10 | — |
 | Primera semana de la beta | **Cerrada (2026-10-28):** online y anuncio el domingo 15 de noviembre de 2026; primera ronda el lunes 16 | — | Sustituye al lunes 19 de octubre (decisión del 2026-10-15), que pasó sin semanas programadas |
@@ -217,6 +220,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-11-03 | F7 | **7.23 hecha** (el pase de torneo): el usuario cierra «Pase de la carta» con la cinta con física. Guía v0.6.141. |
 | 2026-11-03 | F7 | **7.23** (el pase de torneo): hecho y verificado el valor por defecto de «Pase de la carta» (cinta con física en una vista anclada del Escenario, en su trozo propio); queda `🔄` hasta la conformidad del usuario. Guía v0.6.140. |
 | 2026-11-03 | F3 | **3.23** (tras el cierre, decisión del usuario): la portada del sample pasa a ser opcional. Guía v0.6.127. La fase sigue cerrada. |
 | 2026-10-29 | F3 | **Fase 3 cerrada** (3.22): J1, el menú a 1024 × 768, corregida en la 3.21 (PR #107); los seis criterios. |

@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.140 · 2026-11-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.141 · 2026-11-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1681,8 +1681,8 @@ física propios; no es el `Lanyard` del sello).
     vitrina y pie); en modo `screen`, las tres juntas dan la carta entera. El reverso, `paintCardBack` desde `CardBack`
     (`cardModel`: número, fecha de alta, variante y dirección del perfil) con el QR ya decodificado: número, logo,
     el QR en su papel blanco (o «QR NO DISPONIBLE»), la dirección y el pie con la pegatina, sobre granate oscuro.
-- **El pase de torneo** (tarea 7.23; es el valor por defecto de la decisión abierta «Pase de la carta», ROADMAP: la
-  alternativa es un expositor giratorio). En el perfil, la carta 3D cuelga en una **vista anclada del Escenario** (§3.5
+- **El pase de torneo** (tarea 7.23; decisión «Pase de la carta» cerrada por el usuario el 2026-11-03: la cinta propia
+  con física, no el expositor giratorio). En el perfil, la carta 3D cuelga en una **vista anclada del Escenario** (§3.5
   capa 1, en el lienzo único) justo donde está la plana, con su ancho y su giro de −3°: el relevo no salta. Arriba, un
   **remache** metálico (cabeza hexagonal con su arandela); de él baja una **cinta roja** corta en Λ, con un filete
   granate a cada lado y «OTP.» impreso en blanco a lo largo (display cursiva; es una sola cinta doblada en el remache,
@@ -3884,7 +3884,7 @@ Valores por defecto que la guía ya asume; se confirman o se cambian (y se regis
 | Modelo de semana | Envíos y votos a la vez (§2.1) | Revisable tras la beta |
 | Fecha de lanzamiento y primera temporada | Primera semana completa tras cerrar la Fase 10 | Fase 10 |
 | Dorado como excepción | **Cerrada (2026-10-13): sin dorado.** Medallas, carta de campeón y semana dorada en la paleta (§3.2, «Medallas») | Antes de la Fase 6 (podio y medallas) |
-| Pase de la carta | Cinta propia con física (§3.4.4); alternativa, un expositor giratorio si se percibe como pieza del sello | Fase 7 (carta) |
+| Pase de la carta | **Cerrada (2026-11-03): la cinta propia con física** (§3.4.4), no el expositor giratorio, mirando las capturas de `docs/planning/evidence/f7/pase/` | Fase 7 (carta) |
 
 Cerrada en la v0.6: «Ajustes visuales propuestos por el jurado de la prueba del sello» (tarea 1.12). Ya
 no aplica: BeatBattle deja de copiar la web del sello (§3.1).
@@ -4305,6 +4305,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-11-03 | 0.6.141 | **Tarea 7.23, cierre** (decisión del usuario). §3.4.4 y §7: la decisión «Pase de la carta» se cierra con la cinta propia con física (el valor por defecto), mirando las capturas de `docs/planning/evidence/f7/pase/`. El expositor giratorio queda descartado. |
 | 2026-11-03 | 0.6.140 | **Tarea 7.23** (el pase de torneo; la decisión abierta «Pase de la carta» sigue abierta: se ha hecho su valor por defecto y la cierra el usuario con las capturas de `docs/planning/evidence/f7/pase/`). §3.4.4, «El pase de torneo», nueva: la carta 3D cuelga en una vista anclada del Escenario donde está la plana (mismo ancho y −3°), de un remache hexagonal por una cinta roja corta en Λ con «OTP.» impreso y una pinza ancha que muerde el canto, todo plano y en la paleta, dentro de la columna de la pieza (lo que la separa del `Lanyard` del sello); física de péndulo de cadena en el plano con Rapier (la carta cuelga a −3° por el ojal descentrado), se arrastra con el puntero hasta donde da la cinta, C la gira con `spring.interaction` y un vaivén, la cara se inclina con la velocidad y el giroscopio, y quieta no pide fotogramas. **Sin pase, la carta plana**, también con la calidad baja, en modo serio, en contraste alto y **en una columna** (la diagonal de la arena va por encima del lienzo y cruzaría la carta; el arrastre le quitaría a la página el desplazamiento con el dedo); `bb:pass` = `on` lo enseña en una columna para mirarlo. La plana se queda debajo, transparente, en el árbol accesible y en el foco. §3.4.4, lienzo por CPU: un solo pintor para las *stories* y la 3D; `paintCardFace` pinta por capas (`'art'`, `'marks'`) y `paintFoilSheet` da la lámina sola para moverla con la inclinación (en `screen`, las tres juntas son la carta entera); el reverso, `paintCardBack` desde `CardBack` (`cardModel`). `RF-GAME-07`: el criterio cuenta los demás casos sin pase y el pase con WebGL. §4.1: `@react-three/rapier` 2.2.0 y `@dimforge/rapier3d-compat` 0.19.2, fijadas. §4.17: el trozo del pase (856,4 kB gz, solo en el perfil a dos columnas tras la primera pintura) y el del Escenario medido: 252,6 kB gz ya en `main`, 253,5 con la 7.23 (partirlo, en la 7.34). |
 | 2026-10-29 | 0.6.133 | **Tarea 7.30** (`season.wrap`). §2.12 y §2.12.7: «Tu temporada en cifras» se encola en el `batch` que cierra la temporada (el sellado de su última semana o el primer `tick` tras el trimestre sin semana el último lunes; el `tick` no resume una temporada cerrada hace más de una semana) a cada cuenta verificada que participó o votó, una por cuenta y temporada; puesto, campeones, semanas, mejor puesto, votos que contaron, logros de la temporada (con los del propio `batch`) y la carta del trimestre; nada de la temporada siguiente. §4.19.5 y `RF-NOTIF-12`: la carta es la imagen OG pública del perfil, sin parámetros y sin registrar la petición. `RF-NOTIF-15` concreta su aceptación. §4.11: `season.wrap` en los dos `batch` del cierre. Anexo H: el asunto del campeón y el contenido. |
 | 2026-10-29 | 0.6.132 | **Tarea 7.28** (compartir la carta). §2.15: «Mi carta de productor» para *stories* en el perfil propio (D y «Compartir mi carta»: la carta pintada por CPU, inclinada −3° en la variante que se ve, «ENTRA EN LA BATALLA» y la dirección del perfil); compartida o descargada cualquiera de las tres tarjetas, con sesión, se declara `share_card` con la tarjeta, y cancelar la hoja de compartir no cuenta; **la imagen OG del perfil es su carta** (el anverso en su variante y, al lado, nombre, rango, nivel y cifras), con nivel, variante y logros de lo público. §2.10 y §4.10: `POST /api/me/achievements` lleva `card` y la de la batalla, su entrada (suya, si no 404): el logro va con la semana de la entrada (hueco G1, cerrado). §3.4.4: D en el perfil propio y la carta en un lienzo 2D por CPU (`cardCanvas`, la de *stories* y la textura de la 7.23), con un solo modelo del anverso (`CardFront`) para la carta HTML, el lienzo y la 3D. §3.8.10: D solo en el propio. §4.5: módulo `card` (las variantes, compartidas con el servidor). |
