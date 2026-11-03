@@ -62,7 +62,7 @@ const displayName = (user: { name: string; displayUsername?: string | null }) =>
  */
 export function createAuth(deps: AuthDeps) {
   const { config, db } = deps
-  const options = schemaOptions()
+  const options = schemaOptions({ hibp: !config.skipHibp })
   return betterAuth({
     ...options,
     appName: 'Beat Battle',

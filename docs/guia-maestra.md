@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.141 · 2026-11-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.142 · 2026-11-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -3464,7 +3464,7 @@ Referencias: OWASP ASVS nivel 2 y las chuletas de autenticación, sesiones y sub
 
 | Área | Requisito |
 |---|---|
-| Contraseñas | Las gestiona Better Auth (hash *scrypt* por defecto). Mínimo 12, máximo 128, comprobación de filtradas (`haveIBeenPwned`), medidor `zxcvbn-ts` en el cliente. |
+| Contraseñas | Las gestiona Better Auth (hash *scrypt* por defecto). Mínimo 12, máximo 128, comprobación de filtradas (`haveIBeenPwned`), medidor `zxcvbn-ts` en el cliente. En los E2E la consulta a Have I Been Pwned se apaga (`BB_SKIP_HIBP=1`, que impide arrancar con `NODE_ENV=production`) para no depender de la red; `RF-AUTH-07` lo cubren los tests del servidor con una respuesta local. |
 | Sesiones | Cookie `__Secure-bb.session_token`, `HttpOnly`, `Secure`, `SameSite=Lax`, solo del host. 30 días deslizantes. Revocación al cambiar o restablecer la contraseña y al bloquear. |
 | CSRF | `SameSite=Lax` + comprobación de origen de Better Auth (`trustedOrigins`) + comprobación de `Origin` propia en `/api/*` + solo JSON. |
 | Fuerza bruta y abuso | Better Auth: entrar 5/min por IP, registrarse 3/h por IP, recuperación 3/h. App: votos 120/h, inicio de escucha 300/h, firmas de subida 10/h, denuncias 20/día, cambios de perfil 30/h, logros declarados por el navegador 10/h, escuchas públicas 1 por IP y entrada cada 10 min. Contadores en BD (en serverless no hay memoria compartida). |
@@ -3556,7 +3556,7 @@ Referencias: OWASP ASVS nivel 2 y las chuletas de autenticación, sesiones y sub
 - **Variables**: `BB_PUBLIC_URL`, `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `BETTER_AUTH_SECRET`,
   `GOOGLE_CLIENT_ID/SECRET`, `DISCORD_CLIENT_ID/SECRET`, `CLOUDINARY_*`, `BB_CLOUDINARY_PREFIX`,
   `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `EMAIL_FROM_NAME`, `EMAIL_FROM_ADDRESS` (mismos nombres que
-  el sello), `MAIL_REPLY_TO`, `MAIL_DAILY_LIMIT`, `UNSUBSCRIBE_SECRET`, `SMTP_URL` (solo local, Mailpit), `OTP_NEWSLETTER_API`, `CRON_SECRET`, `BB_GAME_REPROCESS` (apagada; el paso opcional del `tick`, §4.12, solo para el despliegue de la Fase 7 y con la confirmación del usuario), `BB_FAKE_STORAGE` (solo E2E y desarrollo), `FFMPEG_PATH`,
+  el sello), `MAIL_REPLY_TO`, `MAIL_DAILY_LIMIT`, `UNSUBSCRIBE_SECRET`, `SMTP_URL` (solo local, Mailpit), `OTP_NEWSLETTER_API`, `CRON_SECRET`, `BB_GAME_REPROCESS` (apagada; el paso opcional del `tick`, §4.12, solo para el despliegue de la Fase 7 y con la confirmación del usuario), `BB_FAKE_STORAGE` (solo E2E y desarrollo), `BB_SKIP_HIBP` (solo E2E, §4.13), `FFMPEG_PATH`,
   `IP_HASH_SALT`, `OTP_ORIGINS`, `SENTRY_DSN` (opcional).
 - **Orígenes**: fuera de producción, `ALLOWED_ORIGINS` vale por defecto `http://localhost:5173`. En
   producción `BB_PUBLIC_URL` es obligatoria y su origen siempre se permite; en las previews de Vercel
@@ -4367,6 +4367,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-11-03 | 0.6.142 | §4.13 y §4.15 (variables): los E2E ya no consultan Have I Been Pwned. `BB_SKIP_HIBP=1` apaga la comprobación (el plugin `haveIBeenPwned` con `enabled: false`; el esquema no cambia) y, con `NODE_ENV=production`, impide arrancar. La API iba lenta o caída a ratos y cualquier E2E que registra una cuenta fallaba con «Failed to check password». `RF-AUTH-07` sigue cubierto por los tests del servidor con una respuesta local. |
 | 2026-11-03 | 0.6.141 | **Tarea 7.23, cierre** (decisión del usuario). §3.4.4 y §7: la decisión «Pase de la carta» se cierra con la cinta propia con física (el valor por defecto), mirando las capturas de `docs/planning/evidence/f7/pase/`. El expositor giratorio queda descartado. |
 | 2026-11-03 | 0.6.140 | **Tarea 7.23** (el pase de torneo; la decisión abierta «Pase de la carta» sigue abierta: se ha hecho su valor por defecto y la cierra el usuario con las capturas de `docs/planning/evidence/f7/pase/`). §3.4.4, «El pase de torneo», nueva: la carta 3D cuelga en una vista anclada del Escenario donde está la plana (mismo ancho y −3°), de un remache hexagonal por una cinta roja corta en Λ con «OTP.» impreso y una pinza ancha que muerde el canto, todo plano y en la paleta, dentro de la columna de la pieza (lo que la separa del `Lanyard` del sello); física de péndulo de cadena en el plano con Rapier (la carta cuelga a −3° por el ojal descentrado), se arrastra con el puntero hasta donde da la cinta, C la gira con `spring.interaction` y un vaivén, la cara se inclina con la velocidad y el giroscopio, y quieta no pide fotogramas. **Sin pase, la carta plana**, también con la calidad baja, en modo serio, en contraste alto y **en una columna** (la diagonal de la arena va por encima del lienzo y cruzaría la carta; el arrastre le quitaría a la página el desplazamiento con el dedo); `bb:pass` = `on` lo enseña en una columna para mirarlo. La plana se queda debajo, transparente, en el árbol accesible y en el foco. §3.4.4, lienzo por CPU: un solo pintor para las *stories* y la 3D; `paintCardFace` pinta por capas (`'art'`, `'marks'`) y `paintFoilSheet` da la lámina sola para moverla con la inclinación (en `screen`, las tres juntas son la carta entera); el reverso, `paintCardBack` desde `CardBack` (`cardModel`). `RF-GAME-07`: el criterio cuenta los demás casos sin pase y el pase con WebGL. §4.1: `@react-three/rapier` 2.2.0 y `@dimforge/rapier3d-compat` 0.19.2, fijadas. §4.17: el trozo del pase (856,4 kB gz, solo en el perfil a dos columnas tras la primera pintura) y el del Escenario medido: 252,6 kB gz ya en `main`, 253,5 con la 7.23 (partirlo, en la 7.34). |
 | 2026-11-03 | 0.6.138 | **Tareas 7.20 y 7.22** (al cerrar la 7.27): había dos insignias de logro con el marco de su rareza, la de la placa de los avisos (7.20, con una estrella) y la de cada logro con su glifo (7.22, la del perfil y la vitrina), y dos componentes llamados `AchievementBadge`. §3.8.8: la placa de logro lleva **la insignia del logro** (la de §3.8.10, con el glifo de su familia, a la vista), la misma en los avisos, en «¡JURADO COMPLETO!» y en la bienvenida; en contraste alto, la insignia con los colores del sistema (el holo del épico y el rojo del legendario no se quedan; la rareza, en palabra). En el código, la placa es `ui/AchievementPlate` y compone `ui/AchievementBadge`. |

@@ -122,6 +122,20 @@ describe('loadEnv', () => {
     ])
   })
 
+  it('RF-AUTH-07: BB_SKIP_HIBP=1 con NODE_ENV=production impide arrancar; fuera, solo apaga la consulta', () => {
+    const prod = {
+      NODE_ENV: 'production',
+      BB_PUBLIC_URL: 'https://b.example',
+      BETTER_AUTH_SECRET: 'x'.repeat(40),
+    }
+    expect(envError({ ...prod, BB_SKIP_HIBP: '1' }).issues).toEqual([
+      { variable: 'BB_SKIP_HIBP', message: expect.stringContaining('E2E') },
+    ])
+    expect(loadEnv(prod).skipHibp).toBe(false)
+    expect(loadEnv({ NODE_ENV: 'test', BB_SKIP_HIBP: '1' }).skipHibp).toBe(true)
+    expect(loadEnv({}).skipHibp).toBe(false)
+  })
+
   it('en producción exige BB_PUBLIC_URL y el secreto de Better Auth, y permite el reloj apagado', () => {
     expect(envError({ NODE_ENV: 'production' }).issues).toEqual([
       { variable: 'BETTER_AUTH_SECRET', message: 'es obligatoria en producción' },
