@@ -63,14 +63,15 @@ test.describe('audio', () => {
     }, OFFLINE_MODULE)
     // Los 16 de la tarea 1.4, `vote.unlocked` de la 1.5, los 7 de la interfaz de la 2.27, `drop.needle` de la
     // 3.17, los 5 de la subida de la 4.17 (`upload.*`, `ann.newbeat`), los 2 del Modo Jurado de la 5.18, los 6 de la
-    // ceremonia de la 6.17 (`cer.*`) y los 4 de los logros de la 7.17 (`ach.*`).
+    // ceremonia de la 6.17 (`cer.*`), los 4 de los logros de la 7.17 (`ach.*`) y la fanfarria del campeón de temporada
+    // de la 7.27 (`cer.season`).
     test.info().annotations.push({
       type: 'medidas',
       description: Object.entries(metrics)
         .map(([id, m]) => `${id} ${m.peakDb.toFixed(1)}/${m.levelDb} dB ${m.activeSeconds.toFixed(3)} s`)
         .join(' · '),
     })
-    expect(Object.keys(metrics)).toHaveLength(42)
+    expect(Object.keys(metrics)).toHaveLength(43)
     for (const [id, m] of Object.entries(metrics)) {
       expect(
         Math.abs(m.peakDb - m.levelDb),
@@ -174,6 +175,64 @@ test.describe('audio', () => {
     expect(renderDiff).toBeLessThanOrEqual(1e-6)
   })
 
+  test('RD-SND-02 / 7.27: `cer.season`, renderizada offline en las 24 tonalidades, suena a su nivel (±2 dB), en las notas de la tríada y siempre igual', async ({
+    page,
+  }) => {
+    test.setTimeout(120_000)
+    await open(page, '/', 'Beat Battle')
+    const { rows, renderDiff } = await page.evaluate(async (url) => {
+      const offline = await import(/* @vite-ignore */ url)
+      const hz = (midi: number) => 440 * 2 ** ((midi - 69) / 12)
+      const out: { key: string; metrics: SfxMetrics; notesDb: number }[] = []
+      for (let tonic = 0; tonic < 12; tonic++)
+        for (const mode of ['minor', 'major'] as const) {
+          const third = mode === 'minor' ? 3 : 4
+          // El acorde, en la 4.ª octava (La menor: La4, Do5, Mi5 y La5).
+          const note = (step: number) => hz(12 * 5 + tonic + step)
+          const key = { tonic, mode }
+          const contrast: number[] = await offline.renderSfxPitch('cer.season', key, [
+            note(0),
+            note(third),
+            note(7),
+            note(12),
+          ])
+          out.push({
+            key: `${tonic}${mode === 'minor' ? 'm' : 'M'}`,
+            metrics: await offline.renderSfx('cer.season', key),
+            notesDb: Math.min(...contrast),
+          })
+        }
+      const first: number[] = await offline.renderSfxSamples('cer.season')
+      const second: number[] = await offline.renderSfxSamples('cer.season')
+      let renderDiff = first.length === second.length ? 0 : Number.POSITIVE_INFINITY
+      first.forEach((value, i) => {
+        renderDiff = Math.max(renderDiff, Math.abs(value - (second[i] ?? Number.POSITIVE_INFINITY)))
+      })
+      return { rows: out, renderDiff }
+    }, OFFLINE_MODULE)
+    const peaks = rows.map((row) => row.metrics.peakDb)
+    test.info().annotations.push({
+      type: 'medidas',
+      description: `cer.season pico ${Math.min(...peaks).toFixed(1)}…${Math.max(...peaks).toFixed(1)}/${rows[0]?.metrics.levelDb} dB (La menor ${rows.find((row) => row.key === '9m')?.metrics.peakDb.toFixed(2)}), notas ≥ ${Math.min(...rows.map((row) => row.notesDb)).toFixed(1)} dB, dura ≤ ${Math.max(...rows.map((row) => row.metrics.activeSeconds)).toFixed(3)} s`,
+    })
+    expect(rows).toHaveLength(24)
+    for (const { key, metrics, notesDb } of rows) {
+      const where = `cer.season en ${key}`
+      expect(
+        Math.abs(metrics.peakDb - metrics.levelDb),
+        `${where}: pico ${metrics.peakDb.toFixed(1)} dBFS frente a ${metrics.levelDb}`,
+      ).toBeLessThanOrEqual(2)
+      expect(metrics.activeSeconds, `${where}: suena`).toBeGreaterThan(0)
+      expect(
+        metrics.activeSeconds,
+        `${where}: dura ${metrics.activeSeconds.toFixed(3)} s`,
+      ).toBeLessThanOrEqual(metrics.duration + 0.03)
+      // Cada nota del acorde suena en su sitio, muy por encima del semitono de al lado.
+      expect(notesDb, `${where}: notas ${notesDb.toFixed(1)} dB sobre el semitono`).toBeGreaterThanOrEqual(12)
+    }
+    expect(renderDiff).toBeLessThanOrEqual(1e-6)
+  })
+
   test('RD-SND-03: con una entrada sonando, el bus de efectos baja 6 dB y el de ambiente 18 dB (render offline)', async ({
     page,
   }) => {
@@ -198,6 +257,10 @@ test.describe('audio', () => {
     const legendary = page.locator('#sonido-ach [data-sfx="ach.legendary"]')
     await legendary.scrollIntoViewIfNeeded()
     await legendary.click()
+    // La fanfarria del campeón de temporada (7.27), en el suyo.
+    const season = page.locator('#sonido-season [data-sfx="cer.season"]')
+    await season.scrollIntoViewIfNeeded()
+    await season.click()
     await expect.poll(() => page.evaluate(() => window.__bbAudioContexts[0]?.state)).toBe('running')
     await page.waitForTimeout(500)
     expect(errors).toEqual([])

@@ -4,6 +4,7 @@ import { audio } from '../../audio/engine'
 import { useSession } from '../../features/account/session'
 import { RewardsViewport } from '../../features/game/RewardsViewport'
 import { useGameRewards } from '../../features/game/rewards'
+import { SeasonCeremonyHost } from '../../features/game/SeasonCeremonyHost'
 import { usePlayer } from '../../features/player/store'
 import { t } from '../../i18n'
 import { keepsTabFocus } from '../../ui/Tabs'
@@ -46,6 +47,7 @@ export const MAIN_ID = 'contenido'
  * - `aria-busy` mientras se carga el trozo diferido de la pantalla siguiente.
  * - La zona de avisos (`ToastViewport`), una sola para toda la app (§3.3, §4.17), y la de las recompensas de la
  *   capa de juego (`RewardsViewport`: el «+XP», los logros y el nivel, con su región viva; §3.4, §3.8.8).
+ * - La ceremonia del campeón de temporada (`SeasonCeremonyHost`, §3.8.15): una vez, en el menú o en los resultados.
  */
 export function RootLayout() {
   return (
@@ -137,6 +139,7 @@ function GameFrame() {
       <ControlsBar screen={screen} />
       <ToastViewport />
       <RewardsViewport />
+      <SeasonCeremonyHost />
       <ScrollRestoration />
     </div>
   )

@@ -55,8 +55,8 @@ export interface SfxDef {
  * Los efectos de la tarea 1.4, `vote.unlocked` de la 1.5, los de la interfaz de la 2.27 (`ui.move`,
  * `ui.toggle`, `ui.open`/`ui.close`, `ui.error`, `ui.success`, `nav.page`), `drop.needle` de la 3.17 y los
  * de la subida de la 4.17 (`upload.*`, `ann.newbeat`), los del Modo Jurado de la 5.18 (`combo.up`, `jury.swap`) y
- * los de la ceremonia de resultados de la 6.17 (`cer.*`) y los de los logros de la 7.17 (`ach.*`). El resto del
- * Anexo D llega con sus pantallas.
+ * los de la ceremonia de resultados de la 6.17 (`cer.*`), los de los logros de la 7.17 (`ach.*`) y la fanfarria del
+ * campeón de temporada de la 7.27 (`cer.season`). El resto del Anexo D llega con sus pantallas.
  */
 export const SFX_IDS = [
   'ui.enter',
@@ -97,6 +97,7 @@ export const SFX_IDS = [
   'cer.heartbeat',
   'cer.airhorn',
   'cer.confetti',
+  'cer.season',
   'ach.common',
   'ach.rare',
   'ach.epic',
@@ -104,6 +105,12 @@ export const SFX_IDS = [
 ] as const
 
 export type SfxId = (typeof SFX_IDS)[number]
+
+/**
+ * Cuándo cae el acorde de `cer.season` (s desde el disparo): la carta de la ceremonia del campeón de temporada se
+ * estampa en ese instante (§3.8.15, `RD-MOT-02`).
+ */
+export const SEASON_FANFARE_HIT = 0.4
 
 const noise = (layer: Omit<SfxLayer, 'kind'>): SfxLayer => ({ kind: 'noise', noise: 'pink', ...layer })
 const tone = (layer: Omit<SfxLayer, 'kind'>): SfxLayer => ({ kind: 'tone', wave: 'sine', ...layer })
@@ -158,6 +165,8 @@ export function sfxCatalog(key: Key = DEFAULT_KEY, xpCombo = 0): Record<SfxId, S
   const star = (degree: number) => pentatonicHz(key, degree, 5)
   const triad = tonicTriadHz(key, 5)
   const [root = 440, third = 554, fifth = 659] = triad
+  // La fanfarria del campeón de temporada, una octava por debajo de las campanitas (la 4.ª: La4 en La menor).
+  const [brassRoot = 440, brassThird = 523, brassFifth = 659] = tonicTriadHz(key, 4)
   const xpDegree = 3 + Math.max(0, Math.min(xpCombo, 7))
   const fanfare = [1, 2, 3, 4, 5, 6].map((degree) => pentatonicHz(key, degree, 5))
   // Los de la interfaz que tienen nota van en la tonalidad (§3.7.1): la tónica en la 6.ª octava para los
@@ -793,6 +802,69 @@ export function sfxCatalog(key: Key = DEFAULT_KEY, xpCombo = 0): Record<SfxId, S
           delay: index * 0.065,
         }),
       ),
+    },
+    // Ceremonia del campeón de temporada (§3.8.15, tarea 7.27): fanfarria de metal sintético en la tríada de la tónica.
+    // Dos golpes cortos en la quinta («ta-ta») y, a los 0,4 s (`SEASON_FANFARE_HIT`, cuando cae la carta), el acorde de
+    // sierras (tónica, tercera, quinta y octava, en la 4.ª octava) rasgueado en 36 ms, con un paso bajo que se abre como
+    // un metal que sopla (de 1,6 a 8 veces su nota: el mismo timbre en cada tonalidad; en La menor, de ~700 a ~3.500 Hz);
+    // debajo, un bombo que cae dos octavas desde la tónica de la 3.ª, la tónica de la 2.ª de bajo y un platillo de ruido
+    // agudo. Todas las notas, de la tríada (que cae siempre en la pentatónica); sin desafinar, para que cada una se oiga
+    // en su sitio. `gain`, calibrado en el render offline (Anexo D: −8 dB).
+    'cer.season': {
+      jitter: 0,
+      levelDb: -8,
+      duration: 2.4,
+      layers: [
+        ...[0, 0.16].map((delay) =>
+          tone({
+            wave: 'sawtooth',
+            freq: at(brassFifth),
+            filter: { type: 'lowpass', freq: [brassFifth * 3, brassFifth * 2], q: 0.9 },
+            attack: 0.008,
+            decay: 0.1,
+            dur: 0.13,
+            gain: 0.473,
+            delay,
+          }),
+        ),
+        ...[brassRoot, brassThird, brassFifth, brassRoot * 2].map((hz, index) =>
+          tone({
+            wave: 'sawtooth',
+            freq: at(hz),
+            filter: { type: 'lowpass', freq: [hz * 1.6, hz * 8], q: 1.1 },
+            attack: 0.03,
+            decay: 1.6,
+            dur: 1.95,
+            gain: 0.2255,
+            delay: SEASON_FANFARE_HIT + index * 0.012,
+          }),
+        ),
+        tone({
+          freq: at(brassRoot / 4),
+          attack: 0.01,
+          decay: 1.2,
+          dur: 1.6,
+          gain: 0.293,
+          delay: SEASON_FANFARE_HIT,
+        }),
+        tone({
+          freq: [brassRoot / 2, brassRoot / 8],
+          attack: 0.002,
+          decay: 0.28,
+          dur: 0.4,
+          gain: 0.563,
+          delay: SEASON_FANFARE_HIT,
+        }),
+        noise({
+          noise: 'white',
+          filter: { type: 'highpass', freq: [6500, 4500], q: 0.6 },
+          attack: 0.004,
+          decay: 1.4,
+          dur: 1.9,
+          gain: 0.338,
+          delay: SEASON_FANFARE_HIT + 0.01,
+        }),
+      ],
     },
     // Logros (§3.8.8, tarea 7.17), según la rareza. Común: dos notas (quinta y octava).
     'ach.common': achChime([fifth, root * 2], { levelDb: -14, duration: 0.5, step: 0.1, gain: 0.8 }),

@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.133 · 2026-11-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.138 · 2026-11-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -619,8 +619,9 @@ ofrece la ceremonia de revelación. Dura unos 25 s y se puede saltar.
     temporada sin semanas no se cierra ni tiene campeón.
   - **Campeón** (`RF-ARC-05`): al cerrarse, la primera fila de su clasificación (uno o varios ex aequo) gana el logro
     `season_champ` con su XP (el logro es uno por cuenta: quien repite título no lo cobra dos veces) y su
-    **ceremonia corta** queda pendiente para cada cuenta hasta que la marca vista (`seen_flag` `season_champion`; la
-    falta de la marca es lo pendiente, como la ceremonia de la semana). Los campeones no se guardan aparte: son la
+    **ceremonia corta** (§3.8.15) queda pendiente para cada cuenta hasta que la marca vista (`seen_flag`
+    `season_champion`; la falta de la marca es lo pendiente, como la ceremonia de la semana): la ven todas las cuentas,
+    y quien es campeón la ve dicha a él. Los campeones no se guardan aparte: son la
     primera fila de la clasificación de una temporada cerrada, sacada de los snapshots. Por eso **re-sellar** una
     semana de una temporada cerrada (§2.8) puede cambiarlos: quien pasa a ser campeón gana `season_champ` y quien deja
     de serlo de toda temporada cerrada lo pierde con su XP, como los logros de resultado.
@@ -1810,7 +1811,7 @@ gana pega fuerte y dura poco.
 | `--bb-dur-slow` | 420 ms | Entrada del VS, despertar de las estrellas |
 | `--bb-dur-reward` | 900 ms | XP, logro, voto de 5 |
 | `--bb-dur-swap` | 1.200 ms | Cambio de entrada en el Modo Jurado (§2.7, §3.8.7) |
-| Ceremonias | 3–25 s | Coreografías propias (puerta, revelación del drop y ceremonia de resultados; §3.8). Sus tiempos internos (el sello arrancado y el foco del podio en 600 ms, el alias que pasa a productor en 400 ms…; Anexo E) son datos de la línea de tiempo de cada ceremonia, que corre con el reloj de audio (`RD-MOT-02`), y no tokens: es la única excepción a `RD-VIS-01` |
+| Ceremonias | 3–25 s | Coreografías propias (puerta, revelación del drop, ceremonia de resultados y la del campeón de temporada; §3.8). Sus tiempos internos (el sello arrancado y el foco del podio en 600 ms, el alias que pasa a productor en 400 ms…; Anexo E) son datos de la línea de tiempo de cada ceremonia, que corre con el reloj de audio (`RD-MOT-02`), y no tokens: es la única excepción a `RD-VIS-01` |
 
 **Curvas**: `--bb-ease-snap` `cubic-bezier(.2,1.4,.4,1)` (cursor, placas) · `--bb-ease-out`
 `cubic-bezier(.22,1,.36,1)` (por defecto) · `--bb-ease-in-out` `cubic-bezier(.65,0,.35,1)` (diagonal) ·
@@ -1881,7 +1882,8 @@ En el **Anexo D**: id, disparador, diseño, duración, nivel y variación. Famil
 anunciador (`ann.*`: una estampa por rótulo de la tabla de §3.9; los rótulos de logro y de nivel de
 §3.8.8 suenan con `ach.*` y `level.up`), voto (`star.*`, `vote.*`), subida (`upload.*`),
 drop (`drop.*`), cuenta atrás (`clock.*`), juego (`xp.*`, `level.*`, `ach.*`, `combo.*`, `jury.*`),
-ceremonia (`cer.*`, con el sello que se rasga, `cer.tear`) y secretos (`egg.*`).
+ceremonia (`cer.*`, con el sello que se rasga, `cer.tear`, y la fanfarria del campeón de temporada, `cer.season`) y
+secretos (`egg.*`).
 
 **Dónde suenan los de la interfaz** (tarea 2.27). Los dispara la pieza, no cada pantalla:
 
@@ -2279,9 +2281,12 @@ Cómo salen (tarea 7.20):
   ancho bajo el HUD), apilado hacia abajo: primero la subida de nivel y debajo las placas de logro, **tres a la vez**;
   las demás esperan su turno. El legendario, al centro de la ventana. Nada se pulsa ni para el ratón: ninguna placa
   tapa un control más de lo que dura.
-- **La placa de logro**: la insignia (un chaflán con la estrella dentro y el marco de su rareza), «LOGRO DESBLOQUEADO ·
-  RARO» (la rareza también en palabra, nunca solo color), el nombre, la descripción del Anexo C y «+75 XP» en Oxanium
-  rojo; los ocultos, ya conseguidos, con su nombre y su descripción. Panel opaco. Dura 4 s.
+- **La placa de logro**: la insignia del logro, la misma de la rejilla del perfil y la vitrina de la carta (§3.8.10: un
+  chaflán con el marco de su rareza y el glifo de su familia, a la vista), «LOGRO DESBLOQUEADO · RARO» (la rareza también
+  en palabra, nunca solo color), el nombre, la descripción del Anexo C y «+75 XP» en Oxanium rojo; los ocultos, ya
+  conseguidos, con su nombre y su descripción. Panel opaco. Dura 4 s. Es la misma placa de «¡JURADO COMPLETO!» (§3.8.7)
+  y del primer logro de la bienvenida (§3.8.9). En contraste alto, la insignia con los colores del sistema (el holo y el
+  rojo de la rareza no se quedan: la rareza ya va en palabra).
 - **La subida de nivel**: el número de la ficha del HUD se estampa (§3.4.1) y bajo ella sale «¡NIVEL 8!» en el
   anunciador (la etiqueta girada) y la placa con el sello circular del nivel nuevo, «Subes al nivel 8» y el rango:
   «¡AHORA ERES BEATMAKER!» si cambia, o el de siempre. Si un hecho sube varios niveles, un solo aviso con el último.
@@ -2295,8 +2300,10 @@ Cómo salen (tarea 7.20):
   recargar no lo repite; lo que `me` trae sin ver al cargar (un logro del sellado, el nivel que subió el resultado)
   sale igual, una vez.
 - **Cuándo**: después de que el medidor trague el «+XP» del mismo hecho (§3.4.2); y nunca con una capa a pantalla
-  completa encima (la pantalla de título, la revelación del drop, la ceremonia): esperan y salen al cerrarse, en su
-  orden, así la subida de nivel del sellado se encadena con la ceremonia (§3.8.6).
+  completa encima (la pantalla de título, la revelación del drop, las ceremonias): esperan y salen al cerrarse, en su
+  orden, así la subida de nivel del sellado se encadena con la ceremonia (§3.8.6) y el «¡LOGRO LEGENDARIO!» de
+  `season_champ`, con la del campeón de temporada (§3.8.15), que además los retiene mientras está pendiente en su
+  pantalla.
 - **Sin movimiento**, fundidos de 150 ms, sin chispas ni estampado. **Modo serio**: sin anunciador, chispas ni
   estampado; la placa con todo su texto se queda (se pierde espectáculo, nunca información).
 
@@ -2463,6 +2470,58 @@ las pantallas de texto sin pieza, como la galería, no los llevan.
 | **Autenticación** | Tarea 2.15: entrar con email **o** nombre de productor; el registro lleva el medidor `zxcvbn-ts` (cargado al escribir la contraseña, nunca con la página) con el medidor segmentado del juego, los avisos como chips «SÍ / NO» (marcados) y los dos consentimientos (desmarcados); los errores van en el campo al que pertenecen o, si no son de un campo, en un aviso de papel; `/verificar` (enviado, reenviar con espera de 60 s, enlace caducado o usado, verificado) y `/recuperar` (pedir el enlace; con `?token=`, la contraseña nueva avisando de que se cierran las sesiones). Lo que pide sesión lo dice dentro del panel («Entra para…», `RequireSession`), sin redirigir: la protección es la del servidor. **Con el formulario de verdad** (Fase 2) el panel es más alto que el logo: en escritorio el bloque sigue centrado entre el HUD y la barra, pero el pie del panel ya no va a la altura del lockup; en móvil el panel sigue al logo, el **primer campo se ve sin desplazar** (de 320 × 568 a 390 × 844) y la página se desplaza para el resto, con «Volver al menú» al pie (el formulario no cabe sobre la barra). El primer elemento de juego es el primer campo: en reposo, ↑↓ e Intro lo enfocan sin enviar nada (`useIdleFormKeys`). «CONTINUAR PARTIDA» (entrar) y «NUEVO JUGADOR» (registro) como pantalla de título (maqueta `00-titulo`): a la izquierda, sobre los rayos, el logo con el mismo lockup que el menú («TORNEO SEMANAL DE PRODUCTORES by [OTP.]», en una fila); el bloque del logo y el panel se centra en vertical entre el HUD y la barra, con el pie del panel alineado con el del lockup y un ancho de panel acotado, que nunca baja de 26 rem (en ventanas medianas cede el logo: a 1024 el panel se quedaba en 20 rem y no cabían los botones de Google y Discord; jurado de la 2.25); la página de baja de emails (§2.12.4), a la que se llega desde un email, usa esta misma composición con el logo como pieza; en móvil, el panel va anclado al pie y acaba sobre la barra (en el móvil bajo la cabeza se acerca al logo y el panel se aprieta; por debajo de 360 px el logo cede alto); campos normales y accesibles en paneles opacos; Google y Discord como botones neutros; abajo, la barra de controles con sus teclas y la firma |
 | **Admin y legales** | Marco simple: HUD sin capa de juego, paneles y tablas, y la barra de controles con sus teclas y la firma en el centro; sin anunciador ni puerta. Los legales usan la plantilla de las interiores como pantallas de contenido: el índice del documento y su versión en la columna de la pieza y el texto en el panel (`docs/legal/*.md`, la única fuente, con lo justo de Markdown y sin HTML); sus pestañas van en una fila de rótulos cortos («BASES · TÉRMINOS · PRIVACIDAD · COOKIES»; el nombre completo, en el título del panel), también en móvil a partir de 360 px |
 
+#### 3.8.15 Ceremonia del campeón de temporada (≈ 6 s, saltable)
+
+La **ceremonia corta** de `RF-ARC-05` (§2.9; hueco G6 del plan 07, tarea 7.27). Es la hermana pequeña de la de
+resultados (§3.8.6): una capa modal a pantalla completa con su línea de tiempo, saltable y con su variante sin
+movimiento; pero dura unos segundos y no tiene podio: la protagonista es **la carta de campeón** (§3.4.4).
+
+- **Cuándo y dónde.** Con sesión, mientras `GET /api/me` traiga `game.seasonCeremony` (la de la última temporada
+  cerrada con campeón, sin la marca `season_champion`). Sale en el **menú principal** cuando ya no queda delante ninguna
+  otra capa (la pantalla de título, la revelación del drop y la oferta de la ceremonia de la semana: la semana que
+  cierra la temporada se cuenta antes que la temporada) y en los **resultados de una semana de esa temporada**, al
+  abrirlos o, si se está viendo su ceremonia, al cerrarse esta (se encadenan). En ninguna otra pantalla: nunca corta
+  una subida, un voto ni el Modo Jurado. Sin sesión no hay ceremonia (la temporada se ve en `/temporada/:id`). Todas
+  las cuentas la ven; quien es campeón, dicha a él.
+- **Una sola vez** (`RF-ARC-05`): al acabar o al saltarla se marca vista (`POST /api/me/seen` con `season_champion` y
+  la temporada) y no vuelve a salir, ni al recargar ni en otro dispositivo. Si no se puede cargar (sin red), no sale
+  en esa pestaña y sigue pendiente; si ningún campeón tiene ya perfil («Productor eliminado»), se marca vista sin
+  enseñarla. Los datos son públicos: la clasificación de la temporada (`GET /api/seasons/:id/standings`, su primera
+  fila) y el perfil de cada campeón para su carta (solo semanas selladas, §2.10).
+- **Línea de tiempo** (`SEASON_CEREMONY_TIMELINE`, tiempos internos de la ceremonia, §3.6), con `cer.season` desde el
+  primer instante:
+  1. **Fin de temporada** (0 s): el velo apaga el marco y entra la placa «FIN DE TEMPORADA · T4 DE 2026»; suena la
+     entrada de la fanfarria («ta-ta»).
+  2. **La carta** (0,4 s): en el acorde de `cer.season`, la carta de campeón (`ProducerCard`, variante campeón, con su
+     corona) cae estampada (escala 1,25 → 1 con `--bb-ease-back` en `--bb-dur-slam`), el anunciador estampa
+     «¡CAMPEÓN DE TEMPORADA!» («¡CAMPEONES DE TEMPORADA!» si son ex aequo) y salta el confeti: **un** destello pedido
+     al limitador (`RD-MOT-04`). La región viva dice quién es y sus cifras.
+  3. **Las cifras** (1 s): bajo la carta, por fundido, «Campeón de la temporada T4 de 2026» (o «¡Eres el campeón de la
+     temporada T4 de 2026!» si es quien mira) y la línea de su clasificación: «312 PTS · 4 victorias · 9 podios».
+  4. **Cierre** (6 s): la capa se va sola y queda la pantalla de debajo.
+- **Ex aequo**: las cartas entran a la vez, una al lado de otra (en el móvil se encogen para caber en una fila); las
+  cifras son las mismas (empatan en todo, §2.9).
+- **Composición**: en una columna (placa, anunciador, carta, cifras y, abajo, la firma *OTP.* y «Saltar»), con la carta
+  tan grande como deje el alto (hasta la del perfil). Con poco alto y la ventana apaisada (1366 × 657, un móvil
+  tumbado), la carta a la izquierda con todo el alto y lo demás a su derecha: en una columna no cabría con su texto a
+  12 px (`RD-VIS-05`). El foco de luz va solo detrás de la carta, nunca detrás de un texto; el velo es opaco.
+- **Saltable sin bloquear** (`RD-MOT-01`): Esc, Intro, espacio, cualquier otra tecla (salvo Tab y las de
+  modificador), un toque, un clic o «Saltar» la cierran en cualquier momento, pasados los primeros 280 ms
+  (`--bb-dur-slam`: la tecla que cerró la capa anterior no se la lleva; «Saltar», que tiene el foco, vale desde el
+  principio). Mientras dura, lo de detrás queda `inert` y ninguna tecla le llega, salvo M, que además silencia; el foco
+  vuelve después a donde estaba. Si se sale de la pantalla a mitad (atrás del navegador), no cuenta como vista.
+- **Avisos** (§3.8.8): mientras está pendiente en una de sus dos pantallas, y mientras dura, los avisos de logro y de
+  nivel esperan; al cerrarse salen en su orden. Así el campeón ve después su «¡LOGRO LEGENDARIO!» de `season_champ` y
+  la subida de nivel que traiga, nunca antes de su ceremonia. Pasar de la oferta del menú a los resultados no los suelta
+  por el camino.
+- **Sonido e imagen** (`RNF-A11Y-05`): su único sonido es `cer.season` (Anexo D), afinado en la tonalidad de la
+  semana; su equivalente visual es la carta estampada con el anunciador, y la región viva lo dice. Nada suena sin un
+  gesto antes (§3.7.1).
+- **Sin movimiento** (Anexo E): los mismos pasos por fundidos de 150 ms y la carta plana (`RF-GAME-07`: sin el giro de
+  −3° ni lámina que se mueva), sin estampa ni confeti. **Modo serio**: sin anunciador, estampa ni confeti; se quedan la
+  placa, la carta y las cifras. Con la **calidad apagada** o **sin WebGL**, igual: es una capa del DOM con la carta en
+  2D (no la 3D del pase). En **contraste alto**, la carta con el marco del sistema (§3.4.4).
+
 ### 3.9 Tono del anunciador y copys
 
 - **Tú**, directo, con la jerga justa del estudio (sample, flip, beat, drop, 808, bounce). El juego
@@ -2481,6 +2540,7 @@ las pantallas de texto sin pieza, como la galería, no los llevan.
 | Cierre de envíos | «¡TIEMPO!» | «Envíos cerrados · votos hasta las 23:59» |
 | Sellado | «¡SELLADO!» | «Contando votos…» |
 | 1.º de la ceremonia | «¡CAMPEÓN!» | Nombre, puntuación y votos |
+| Campeón de temporada (ceremonia corta, §3.8.15) | «¡CAMPEÓN DE TEMPORADA!» («¡CAMPEONES DE TEMPORADA!» con ex aequo) | «Campeón de la temporada T4 de 2026» y «312 PTS · 4 victorias · 9 podios» |
 | Subida terminada | «¡NUEVO BEAT EN LA BATALLA!» | «Ya estás en la batalla #41» |
 | Nueva semana | «SEMANA 41» | Título del sample, BPM y tonalidad |
 
@@ -4091,6 +4151,7 @@ efectos al 100 %; variación = desafinación aleatoria por disparo.
 | `cer.heartbeat` | Suspense antes del 1.º | Latido grave | 2 s | −14 | 0 |
 | `cer.airhorn` | 1.º puesto | Bocina: tres sierras desafinadas con envolvente de tono, 3 ráfagas | 1,4 s | −8 | 0 |
 | `cer.confetti` | Confeti | Crujido brillante de ruido agudo con panorama | 1 s | −20 | 0 |
+| `cer.season` | Ceremonia del campeón de temporada (§3.8.15) | Fanfarria de metal sintético en la tríada de la tónica: dos golpes cortos en la quinta («ta-ta», 0 y 0,16 s) y a los 0,4 s, cuando cae la carta, el acorde (tónica, tercera, quinta y octava, en la 4.ª octava) de sierras rasgueado en 36 ms, con un paso bajo que se abre de 1,6 a 8 veces su nota (el mismo timbre en cada tonalidad; en La menor, de ~700 a ~3.500 Hz), sobre un bombo que cae dos octavas desde la tónica de la 3.ª, la tónica de la 2.ª de bajo y un platillo de ruido agudo. Todas las notas, de la tríada y sin desafinar | 2,4 s | −8 | 0 |
 | `egg.*` | Sorpresas | Ver Anexo F | — | — | — |
 
 ### Anexo E — Catálogo de microinteracciones
@@ -4122,6 +4183,7 @@ efectos al 100 %; variación = desafinación aleatoria por disparo.
 | Aviso de logro | Entra desde la diagonal con muelle | 420 ms | `ach.*` | Fundido |
 | Logro legendario | Entra al centro con muelle, «¡LOGRO LEGENDARIO!» estampado y chispas por el limitador | 420 ms + 900 ms | `ach.legendary` | Fundido, sin chispas ni estampa |
 | Subir de nivel | El sello de nivel se estampa con el número nuevo | 900 ms | `level.up` | Fundido del número |
+| Ceremonia del campeón de temporada (§3.8.15) | Entra el velo con la placa; a los 0,4 s la carta de campeón cae estampada (escala 1,25 → 1) con el anunciador y el confeti por el limitador; las cifras, por fundido; se va sola a los 6 s | 0,4 s + `--bb-dur-slam`, `--bb-ease-back` (línea de tiempo de la ceremonia, §3.6) | `cer.season` | Fundidos de 150 ms, carta plana, sin estampa ni confeti |
 | Modal | Entra con la diagonal y escala 0,96 → 1 | 240 ms | `ui.open` / `ui.close` | Fundido |
 | Aviso de error | Sacudida de 4 px | 240 ms | `ui.error` | Sin sacudida |
 | Esqueleto | Barrido diagonal de la trama | 1.500 ms en bucle | — | Trama fija |
@@ -4263,6 +4325,8 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-11-03 | 0.6.138 | **Tareas 7.20 y 7.22** (al cerrar la 7.27): había dos insignias de logro con el marco de su rareza, la de la placa de los avisos (7.20, con una estrella) y la de cada logro con su glifo (7.22, la del perfil y la vitrina), y dos componentes llamados `AchievementBadge`. §3.8.8: la placa de logro lleva **la insignia del logro** (la de §3.8.10, con el glifo de su familia, a la vista), la misma en los avisos, en «¡JURADO COMPLETO!» y en la bienvenida; en contraste alto, la insignia con los colores del sistema (el holo del épico y el rojo del legendario no se quedan; la rareza, en palabra). En el código, la placa es `ui/AchievementPlate` y compone `ui/AchievementBadge`. |
+| 2026-10-29 | 0.6.137 | **Tarea 7.27** (hueco G6 del plan 07, resuelto: la ceremonia corta del campeón de temporada). §3.8.15, nueva: una capa modal de ≈ 6 s con su línea de tiempo (`SEASON_CEREMONY_TIMELINE`): la placa «FIN DE TEMPORADA · T4 DE 2026», a los 0,4 s la carta de campeón (`ProducerCard`, variante campeón) estampada en el acorde de `cer.season` con «¡CAMPEÓN DE TEMPORADA!» (o «¡CAMPEONES…!» con ex aequo) y un destello de confeti por el limitador, a 1 s las cifras («¡Eres el campeón…!» a quien lo es; «312 PTS · 4 victorias · 9 podios») y se cierra sola a los 6 s. Sale **una vez** por cuenta (`me.game.seasonCeremony`; `POST /api/me/seen` con `season_champion` al acabar o al saltarla; sin red, sigue pendiente; sin campeón con perfil, vista sin enseñarla), con sesión, en el menú principal cuando no queda delante otra capa (tras la pantalla de título, la revelación del drop y la oferta de la ceremonia de la semana) y en los resultados de una semana de esa temporada (al abrirlos o encadenada tras su ceremonia); en ninguna otra pantalla. Saltable con cualquier tecla, toque o clic pasados 280 ms (M además silencia); lo de detrás, `inert`. Retiene los avisos de logro y de nivel mientras está pendiente en sus pantallas y mientras dura (también al pasar de la oferta del menú a los resultados): el «¡LOGRO LEGENDARIO!» de `season_champ` sale después. Sin movimiento, fundidos y carta plana, sin estampa ni confeti; en modo serio, sin anunciador, estampa ni confeti; con la calidad apagada o sin WebGL, igual (DOM y carta 2D); con poco alto y ventana apaisada, la carta a la izquierda y el texto a la derecha. §2.9 la enlaza (la ven todas las cuentas; el campeón, dicha a él); §3.6 la suma a las ceremonias; §3.7.3 y **Anexo D**: `cer.season`, fanfarria de metal sintético en la tríada de la tónica (2,4 s, −8 dB; «ta-ta» en la quinta y el acorde rasgueado a los 0,4 s con un paso bajo que sigue a cada nota, bombo, bajo y platillo); §3.8.8, los avisos esperan también a esta ceremonia; §3.9, su rótulo del anunciador; **Anexo E**, su fila |
 | 2026-10-29 | 0.6.133 | **Tarea 7.30** (`season.wrap`). §2.12 y §2.12.7: «Tu temporada en cifras» se encola en el `batch` que cierra la temporada (el sellado de su última semana o el primer `tick` tras el trimestre sin semana el último lunes; el `tick` no resume una temporada cerrada hace más de una semana) a cada cuenta verificada que participó o votó, una por cuenta y temporada; puesto, campeones, semanas, mejor puesto, votos que contaron, logros de la temporada (con los del propio `batch`) y la carta del trimestre; nada de la temporada siguiente. §4.19.5 y `RF-NOTIF-12`: la carta es la imagen OG pública del perfil, sin parámetros y sin registrar la petición. `RF-NOTIF-15` concreta su aceptación. §4.11: `season.wrap` en los dos `batch` del cierre. Anexo H: el asunto del campeón y el contenido. |
 | 2026-10-29 | 0.6.132 | **Tarea 7.28** (compartir la carta). §2.15: «Mi carta de productor» para *stories* en el perfil propio (D y «Compartir mi carta»: la carta pintada por CPU, inclinada −3° en la variante que se ve, «ENTRA EN LA BATALLA» y la dirección del perfil); compartida o descargada cualquiera de las tres tarjetas, con sesión, se declara `share_card` con la tarjeta, y cancelar la hoja de compartir no cuenta; **la imagen OG del perfil es su carta** (el anverso en su variante y, al lado, nombre, rango, nivel y cifras), con nivel, variante y logros de lo público. §2.10 y §4.10: `POST /api/me/achievements` lleva `card` y la de la batalla, su entrada (suya, si no 404): el logro va con la semana de la entrada (hueco G1, cerrado). §3.4.4: D en el perfil propio y la carta en un lienzo 2D por CPU (`cardCanvas`, la de *stories* y la textura de la 7.23), con un solo modelo del anverso (`CardFront`) para la carta HTML, el lienzo y la 3D. §3.8.10: D solo en el propio. §4.5: módulo `card` (las variantes, compartidas con el servidor). |
 | 2026-11-03 | 0.6.127 | **Tarea 3.23** (decisión del usuario, para cargar los samples reales de la beta, B.7). §2.4, §2.14, §4.8.1 y `RF-ADM-01`: la **portada del sample es opcional**, como los stems. Para crear un sample basta el original; la portada se sube después o se quita, y se verifica con la Admin API (≥ 1000 px). Sin ella, la API da `coverUrl: null` (también `sampleCoverUrl` del archivo, que antes podía ser una cadena vacía): el archivo enseña el vinilo-sol, la barra del reproductor la portada de referencia, la Media Session va sin imagen y la tarjeta del drop de `battle.drop` y `battle.monday` sale sin imagen (§2.12.2, Anexo H). `sample.cover_public_id` admite `NULL` (migración `0009`). |
