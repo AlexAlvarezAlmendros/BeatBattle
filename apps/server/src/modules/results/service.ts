@@ -145,7 +145,8 @@ export function createResultsService(deps: ResultsDeps) {
           const presented = new Map(
             (await deps.entries.presentAll(entryRows, w)).map((item) => [item.id, item]),
           )
-          const coverUrl = deps.samples ? deps.samples.coverUrl(cover, 512) : ''
+          // Sin portada (§2.4) o sin almacenamiento, `null`: el archivo enseña el vinilo-sol de la semana.
+          const coverUrl = deps.samples && cover !== null ? deps.samples.coverUrl(cover, 512) : null
           return {
             slug: w.slug,
             number: w.number,

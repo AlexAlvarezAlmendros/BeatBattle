@@ -209,7 +209,8 @@ export const sample = sqliteTable('sample', {
   format: text('format').notNull(),
   audioPublicId: text('audio_public_id').notNull(),
   stemsPublicId: text('stems_public_id'),
-  coverPublicId: text('cover_public_id').notNull(),
+  /** Opcional (§2.4): `null` sin portada. */
+  coverPublicId: text('cover_public_id'),
   /** 1000 bins mín/máx en `Int8` (2000 bytes). */
   peaks: blob('peaks', { mode: 'buffer' }).notNull(),
   loudnessLufs: real('loudness_lufs'),

@@ -47,10 +47,10 @@ type UploadState =
   | { status: 'error'; reason: string | null }
 
 /**
- * `/admin/samples/:id` (`nuevo` para uno nuevo) — el editor de samples del panel (§2.14; tarea 3.18,
- * `RF-ADM-01`): subir el original, la portada y los stems con la firma del servidor, directos al
- * almacenamiento; la ficha (título, créditos, licencia, BPM, tonalidad…); y los 8 *chops* sobre la onda
- * medida en el servidor.
+ * `/admin/samples/:id` (`nuevo` para uno nuevo) — el editor de samples del panel (§2.14; tareas 3.18 y
+ * 3.23, `RF-ADM-01`): subir el original, la portada y los stems con la firma del servidor, directos al
+ * almacenamiento (la portada y los stems son opcionales: se suben después o se quitan); la ficha (título,
+ * créditos, licencia, BPM, tonalidad…); y los 8 *chops* sobre la onda medida en el servidor.
  */
 export function SampleEditorPage() {
   const { id = 'nuevo' } = useParams()
@@ -156,7 +156,7 @@ export function SampleForm({ sample }: { sample: AdminSample | null }) {
   const pendingId = useRef<Promise<string> | null>(sample ? Promise.resolve(sample.id) : null)
   const [uploads, setUploads] = useState<Record<SampleUploadPart, UploadState>>({
     original: { status: sample ? 'done' : 'idle' },
-    cover: { status: sample ? 'done' : 'idle' },
+    cover: { status: sample?.coverUrl ? 'done' : 'idle' },
     stems: { status: sample?.hasStems ? 'done' : 'idle' },
   })
   const [fields, setFields] = useState({
@@ -200,13 +200,16 @@ export function SampleForm({ sample }: { sample: AdminSample | null }) {
         setUploads((current) => ({ ...current, [part]: { status: 'uploading', fraction } })),
       )
       setUploads((current) => ({ ...current, [part]: { status: 'done' } }))
-      // En un sample que ya existe, el cambio se aplica al momento: nueva medición o stems.
-      if (sample && part === 'original') {
-        await updateSample(sample.id, { remeasure: true })
-        refresh(sample.id)
-      }
-      if (sample && part === 'stems') {
-        await updateSample(sample.id, { hasStems: true })
+      // En un sample que ya existe, el cambio se aplica al momento: nueva medición, stems o portada.
+      if (sample) {
+        await updateSample(
+          sample.id,
+          part === 'original'
+            ? { remeasure: true }
+            : part === 'stems'
+              ? { hasStems: true }
+              : { hasCover: true },
+        )
         refresh(sample.id)
       }
     } catch (cause) {
@@ -217,6 +220,19 @@ export function SampleForm({ sample }: { sample: AdminSample | null }) {
             ? cause.message
             : null
       setUploads((current) => ({ ...current, [part]: { status: 'error', reason } }))
+    }
+  }
+
+  /** Quita los stems o la portada de un sample que ya existe (los dos son opcionales, §2.4). */
+  const removePart = async (part: 'stems' | 'cover') => {
+    if (!sample) return
+    setMessage(null)
+    try {
+      await updateSample(sample.id, part === 'stems' ? { hasStems: false } : { hasCover: false })
+      setUploads((current) => ({ ...current, [part]: { status: 'idle' } }))
+      refresh(sample.id)
+    } catch (cause) {
+      setMessage({ kind: 'error', text: cause instanceof ApiClientError ? cause.message : t('admin.error') })
     }
   }
 
@@ -233,7 +249,12 @@ export function SampleForm({ sample }: { sample: AdminSample | null }) {
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     setMessage(null)
-    if (!sample && (uploads.original.status !== 'done' || uploads.cover.status !== 'done' || !sampleId)) {
+    // Una subida a medias no se pierde en silencio: la portada o los stems entran al terminar.
+    if (Object.values(uploads).some((state) => state.status === 'uploading')) {
+      setMessage({ kind: 'error', text: t('admin.sample.waitUploads') })
+      return
+    }
+    if (!sample && (uploads.original.status !== 'done' || !sampleId)) {
       setMessage({ kind: 'error', text: t('admin.sample.needFiles') })
       return
     }
@@ -251,6 +272,7 @@ export function SampleForm({ sample }: { sample: AdminSample | null }) {
           bpm: body.bpm ?? 0,
           musicalKey: (body.musicalKey ?? 'Am') as MusicalKey,
           hasStems: uploads.stems.status === 'done',
+          hasCover: uploads.cover.status === 'done',
         })
         refresh(created.id)
         navigate(`/admin/samples/${created.id}`, { replace: true })
@@ -295,6 +317,16 @@ export function SampleForm({ sample }: { sample: AdminSample | null }) {
           state={uploads.cover}
           onFile={(file) => void upload('cover', file)}
         />
+        {sample?.coverUrl && (
+          <Button
+            size="sm"
+            variant="outline"
+            className={styles.inline}
+            onClick={() => void removePart('cover')}
+          >
+            {t('admin.sample.removeCover')}
+          </Button>
+        )}
         <UploadSlot
           label={t('admin.sample.stems')}
           part="stems"
@@ -306,7 +338,7 @@ export function SampleForm({ sample }: { sample: AdminSample | null }) {
             size="sm"
             variant="outline"
             className={styles.inline}
-            onClick={() => void updateSample(sample.id, { hasStems: false }).then(() => refresh(sample.id))}
+            onClick={() => void removePart('stems')}
           >
             {t('admin.sample.removeStems')}
           </Button>

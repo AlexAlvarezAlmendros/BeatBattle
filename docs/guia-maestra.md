@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.97 · 2026-10-29 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.98 · 2026-11-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -331,9 +331,13 @@ Se descarga mientras la semana está `open` (con los envíos abiertos; en `votin
 People) y empieza la descarga del WAV original; si hay stems, segundo botón para el zip.
 
 **Contenido del sample.** Lo carga el admin (§2.14) con: audio original (WAV o AIFF, ≤ 100 MB), zip
-de stems opcional (≤ 10 MB, límite de Cloudinary para ficheros `raw`), portada (≥ 1000 px), título,
-créditos y origen, **licencia de uso** (texto obligatorio), BPM, tonalidad, género sugerido, reto
-extra y 8 *chops* (marcas de inicio y fin) para el kit sonoro de la semana (§3.7.6).
+de stems opcional (≤ 10 MB, límite de Cloudinary para ficheros `raw`), portada opcional (≥ 1000 px),
+título, créditos y origen, **licencia de uso** (texto obligatorio), BPM, tonalidad, género sugerido, reto
+extra y 8 *chops* (marcas de inicio y fin) para el kit sonoro de la semana (§3.7.6). **Sin portada**, la API
+la da como `null` y nada se queda con un hueco: la ficha del drop y las imágenes OG ya son el vinilo-sol de la
+semana; el archivo enseña el vinilo-sol en miniatura; la barra del reproductor, la portada de referencia
+(§3.4.5), y la Media Session va sin imagen; y en `battle.drop` y `battle.monday` la tarjeta del drop sale sin
+imagen, empezando por el título.
 
 | Id | Requisito | Aceptación |
 |---|---|---|
@@ -745,7 +749,7 @@ con las mismas palabras que la interfaz (§2.19) y enlaza a `/subir` con la fich
 
 Los resultados y el drop coinciden el lunes, así que por defecto van **en un solo email** para no
 saturar: arriba, el resultado personal (posición, puntuación, XP, tarjeta de resultado) o el podio
-para quien solo votó; abajo, el nuevo sample con su portada, chips, reto y una **cuenta atrás
+para quien solo votó; abajo, el nuevo sample con su portada (si la tiene, §2.4), chips, reto y una **cuenta atrás
 animada**. Quien lo prefiera puede recibirlos por separado (Ajustes → Emails). Si el sellado se
 retrasa más allá de las 08:00, el email espera hasta 2 h; si sigue sin sellar, sale solo el drop y
 los resultados llegan después (en `battle.results`, al sellar). Si el cupo diario de Gmail no alcanza para
@@ -883,8 +887,9 @@ Panel en `/admin`, solo para el rol `admin`, con la misma estética pero en un m
 consola, `pnpm --filter @beatbattle/server admin:grant <email>`, sobre una cuenta que ya ha entrado una vez;
 queda en `audit_log` (`user.grant_admin`, sin el email) como cualquier otra acción de admin (`RF-ADM-05`).
 
-- **Samples**: subir y editar (audio, stems, portada, licencia, metadatos, *chops* con un editor de
-  onda para marcar los 8 trozos).
+- **Samples**: subir y editar (audio, stems y portada opcionales, licencia, metadatos, *chops* con un
+  editor de onda para marcar los 8 trozos). Para crear un sample basta el original; la portada, como los
+  stems, se puede subir después y quitar («Quitar la portada»), y cada cambio se verifica con la Admin API.
 - **Calendario de semanas**: programar semanas futuras con su sample, reto, voto ciego sí/no, semana
   dorada sí/no. Vista de calendario con huecos marcados en rojo. Bajo el selector de la semana dorada, una
   línea explica qué es (§2.11: sorpresa sin anunciar, XP doble, ascuas y logro, sin tocar la clasificación) y
@@ -907,7 +912,7 @@ queda en `audit_log` (`user.grant_admin`, sin el email) como cualquier otra acci
 
 | Id | Requisito | Aceptación |
 |---|---|---|
-| `RF-ADM-01` | CRUD de samples con subida firmada y editor de chops | E2E: subir sample, marcar 8 chops, guardar |
+| `RF-ADM-01` | CRUD de samples con subida firmada y editor de chops; la portada y los stems son opcionales | E2E: subir sample, marcar 8 chops, guardar; un sample se crea sin portada (`coverUrl: null`) y la portada se añade y se quita después |
 | `RF-ADM-02` | Programación de semanas sin solapes y con fronteras calculadas en Europe/Madrid | `RF-DROP-02` y `RF-DROP-05` |
 | `RF-ADM-03` | Panel de la semana en curso con métricas | Datos coherentes con fixtures |
 | `RF-ADM-04` | Panel de uso de Cloudinary con alerta al 80 % de cualquier cuota | Con un uso simulado del 85 %, banner rojo en el panel y email al admin |
@@ -2498,7 +2503,7 @@ y `beatbattle-preview-<pr>` fuera de ella, para no mezclar nunca entornos).
 |---|---|---|
 | Sample original | `video` / `authenticated` | `<prefijo>/samples/<sampleId>/original` |
 | Stems del sample | `raw` / `authenticated` | `<prefijo>/samples/<sampleId>/stems.zip` (≤ 10 MB; los `raw` llevan la extensión en el `public_id`) |
-| Portada del sample | `image` / `upload` | `<prefijo>/samples/<sampleId>/cover` |
+| Portada del sample (opcional) | `image` / `upload` | `<prefijo>/samples/<sampleId>/cover` (≥ 1000 px) |
 | Entrada | `video` / `authenticated` | `<prefijo>/entries/<semana>/<uuid>` (**sin id de usuario**, `RF-ENT-04`) |
 | Portada de entrada | `image` / `authenticated` | `<prefijo>/covers/<entryId>` (firmada para poder ocultarla en voto ciego) |
 | Avatar | `image` / `upload` | `<prefijo>/avatars/<userId>/<version>` |
@@ -3764,8 +3769,8 @@ racha 6 → 500 · 1,5 = **750**; 50 votos en una semana → 40 · 5 = **200** c
 | `mod.action` | «Sobre tu entrada en la semana #41» | Acción, motivo, regla de las bases, cómo reclamar |
 | `rules.changed` | «Cambian las bases de Beat Battle» | Resumen de cambios, desde qué semana aplican, enlace a las bases |
 | `account.deleted` | «Tu cuenta se ha borrado» | Qué se ha borrado y qué se conserva anonimizado |
-| `battle.monday` | «2.º en la #40 · Nuevo drop: <sample>» / «Ya hay campeón · Nuevo drop: <sample>» | Resultado personal o podio, XP y racha; nuevo sample con portada, chips, reto y cuenta atrás en vivo |
-| `battle.drop` | «Nuevo drop: <sample> · <BPM> BPM · <tonalidad>» | Portada, chips, reto, cuenta atrás en vivo, botón «Pillar el sample» |
+| `battle.monday` | «2.º en la #40 · Nuevo drop: <sample>» / «Ya hay campeón · Nuevo drop: <sample>» | Resultado personal o podio, XP y racha; nuevo sample con portada (si la tiene), chips, reto y cuenta atrás en vivo |
+| `battle.drop` | «Nuevo drop: <sample> · <BPM> BPM · <tonalidad>» | Portada (si la tiene, §2.4), chips, reto, cuenta atrás en vivo, botón «Pillar el sample» |
 | `battle.results` | «Semana #40: has quedado 2.º» / «Ya hay campeón de la semana #40» | Podio, tu posición y puntuación, XP, oído de oro, botón a la ceremonia |
 | `battle.reminder` | «Te quedan ~26 h para subir tu flip» · versión racha: «Tu racha de 5 semanas está en juego» | Cuenta atrás, botón a `/subir`, comodín de racha si lo tiene |
 | `battle.jury_call` | «Te quedan 12 beats por escuchar» | Cuenta atrás de votos, botón «Al jurado» |
@@ -3808,6 +3813,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-11-03 | 0.6.98 | **Tarea 3.23** (decisión del usuario, para cargar los samples reales de la beta, B.7). §2.4, §2.14, §4.8.1 y `RF-ADM-01`: la **portada del sample es opcional**, como los stems. Para crear un sample basta el original; la portada se sube después o se quita, y se verifica con la Admin API (≥ 1000 px). Sin ella, la API da `coverUrl: null` (también `sampleCoverUrl` del archivo, que antes podía ser una cadena vacía): el archivo enseña el vinilo-sol, la barra del reproductor la portada de referencia, la Media Session va sin imagen y la tarjeta del drop de `battle.drop` y `battle.monday` sale sin imagen (§2.12.2, Anexo H). `sample.cover_public_id` admite `NULL` (migración `0008`). |
 | 2026-10-29 | 0.6.97 | **Tarea 7.5** (huecos G8 y G4, la parte de la regla, del plan 07). Anexo C, «Cómo se evalúan»: por eventos, sin repetir ni retirar ningún logro; qué cuentan «entradas» y «votos»; la ventana de `last_minute` con `submitted_at`; `comeback` por debajo de la mediana de las clasificadas; `double` y `oracle` por semanas de número consecutivo; `challenge`, marcar el reto extra en la ficha y quedar en el top 10, con la marca oculta hasta el sellado (§1.3). **Las franjas horarias de los logros van en hora de Madrid y con el reloj del servidor** (`night_owl`: 10 votos a entradas distintas entre las 03:00 y las 05:00 de una misma noche; `revetlla`: de las 21:00 del 23 de junio a las 06:00 del 24). Los umbrales de los secretos de la Fase 8. §4.5: qué lleva el catálogo y `nightOwlWindow` e `isRevetllaNight`. |
 | 2026-10-29 | 0.6.96 | **Tarea 7.4** (hueco G10 del plan 07). §2.9: entra en la clasificación de la temporada quien tiene al menos una entrada clasificada en una semana sellada (quien solo tiene semanas sin clasificar, no); victorias y podios cuentan los ex aequo; la puntuación media es la de la puntuación del snapshot de sus entradas clasificadas, comparada exacta; con todo empatado comparten posición y en la primera son campeones ex aequo. La última semana de una temporada es la de su último lunes. §4.5: `seasonStandings`, `seasonChampions` e `isLastWeekOfSeason`. |
 | 2026-10-29 | 0.6.95 | **Tarea 7.3** (hueco G9 del plan 07). §2.10: el oído de oro correlaciona con la **puntuación** de las entradas que votó (no con la posición, que las sin clasificar no tienen), con ≥ 8 votos válidos, y recalcula la semana **como si no hubiera votado**: sin sus votos tampoco en la media `m`. Puntuaciones exactas, sin redondear; sin ρ definida no hay oído de oro. §4.5: `goldenEar(jurado, votosDeLaSemana)`. Anexo G: el caso de `RF-GAME-06` (no gana con ρ = 22/√1501, habría ganado con sus votos; gana cambiando una estrella). |

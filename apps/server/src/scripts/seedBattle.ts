@@ -181,6 +181,7 @@ async function newSample(title: string, bpm: number, musicalKey: string, root: n
     bpm,
     musicalKey,
     hasStems: false,
+    hasCover: true,
   })
 }
 const sample = await newSample('Lluvia en Gràcia', 92, 'Dm', 147)
