@@ -6,7 +6,8 @@ import { type Account, apiVote, battleContext, type Clock, signUp } from './batt
  * ella): el admin programa las semanas de los lunes `mondays` (la última, la del último lunes del trimestre: su
  * sellado cierra la temporada), cada productor sube su entrada las semanas que juega y el jurado vota; todo por la API,
  * con el reloj de la API en `clock.api`, así que el XP, los logros, las rachas y el campeón los escriben los ganchos de
- * la capa de juego. Al acabar, todas las semanas están selladas.
+ * la capa de juego. Al acabar, todas las semanas están selladas (con `seal: false`, todas menos la última, que queda
+ * votada y sin sellar). Con `submit`, una entrada se sube en la pantalla (el hito de la 7.33, con la de 13 semanas).
  *
  * - `producers` productores (8 por defecto: con ellos el jurado llega a los 8 votos del oído de oro). El 0 gana todas
  *   (`win`, `win_3`, `double`, `streak_3` y `season_champ`; descarga el sample, sube el primero de cada semana y
@@ -21,12 +22,32 @@ export interface SeasonPlayer extends Account {
   entries: (string | null)[]
 }
 
+export interface SeasonWeek {
+  slug: string
+  startsAt: number
+  submitEndsAt: number
+  voteEndsAt: number
+}
+
 export interface PlayedSeason {
   seasonId: string
-  weeks: { slug: string; startsAt: number; submitEndsAt: number; voteEndsAt: number }[]
+  weeks: SeasonWeek[]
   producers: SeasonPlayer[]
   jury: Account[]
+  /** La jefa que programó las semanas (el hito de la 7.33 re-sella con ella). */
+  admin: Account
 }
+
+/**
+ * Sube la entrada del productor `p` la semana `w` en la pantalla en lugar de por la API (el hito de la 7.33): devuelve
+ * su id, o `null` para subirla por la API como las demás. Las bases ya están aceptadas.
+ */
+export type SubmitInPage = (input: {
+  p: number
+  w: number
+  who: SeasonPlayer
+  week: SeasonWeek
+}) => Promise<string | null>
 
 function wav(seconds: number, frequency: number): Buffer {
   const rate = 8000
@@ -77,12 +98,20 @@ export async function playSeason(
     ip,
     clock,
     producers = 8,
+    submit,
+    seal = true,
   }: {
     mondays: readonly string[]
     run: string
     ip: (slot: number) => string
     clock: Clock
     producers?: number
+    submit?: SubmitInPage
+    /**
+     * `false`: la última semana se queda votada y sin sellar, con el reloj aún dentro de ella (el hito de la 7.33
+     * mira el XP antes y después del sellado); el campeón tampoco comparte su carta.
+     */
+    seal?: boolean
   },
 ): Promise<PlayedSeason> {
   const [year, month, day] = (mondays[0] as string).split('-').map(Number) as [number, number, number]
@@ -143,7 +172,6 @@ export async function playSeason(
     expect(created.ok(), await created.text()).toBe(true)
     weeks.push((await created.json()).data)
   }
-  await adminContext.close()
 
   const players: SeasonPlayer[] = []
   for (let p = 0; p < producers; p++) {
@@ -185,6 +213,13 @@ export async function playSeason(
           data: { kind: 'original' },
         })
         expect(download.ok(), await download.text()).toBe(true)
+      }
+      const inPage = submit ? await submit({ p, w, who, week }) : null
+      if (inPage) {
+        who.entries.push(inPage)
+        entries.push({ p, id: inPage })
+        clock.api += 60_000
+        continue
       }
       const audio = wav(31 + p, 180 + p * 40 + w * 7)
       const signed = await who.page.request.post('/api/uploads/sign', {
@@ -235,8 +270,11 @@ export async function playSeason(
       }
   }
 
+  const [ly, lm] = (mondays.at(-1) as string).split('-').map(Number) as [number, number]
+  const played = { seasonId: `${ly}-T${Math.ceil(lm / 3)}`, weeks, producers: players, jury, admin }
+  if (!seal) return played
   // La primera lectura de los resultados de la última, ya cerrada, la sella (y con ella, la temporada).
-  const last = weeks.at(-1) as PlayedSeason['weeks'][number]
+  const last = weeks.at(-1) as SeasonWeek
   clock.api = last.voteEndsAt + 60_000
   const results = await (players[0] as Account).page.request.get(`/api/weeks/${last.slug}/results`, {
     headers: headers(),
@@ -248,6 +286,5 @@ export async function playSeason(
     data: { achievement: 'share_card', card: { kind: 'producer' } },
   })
   expect(shared.ok(), await shared.text()).toBe(true)
-  const [ly, lm] = (mondays.at(-1) as string).split('-').map(Number) as [number, number]
-  return { seasonId: `${ly}-T${Math.ceil(lm / 3)}`, weeks, producers: players, jury }
+  return played
 }

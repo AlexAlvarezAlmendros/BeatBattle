@@ -159,19 +159,26 @@ function onShow(notice: RewardNotice): void {
 /**
  * Engancha la capa de juego a la sesión (una vez, en el marco): lo pendiente de cada `me` que llega y, al salir de la
  * cuenta o cambiar de cuenta, nada en vuelo ni en cola.
+ *
+ * Lo pendiente va a la cola en un efecto del marco, después de pintarlo con esa `me`, y no al llegar: los efectos de lo
+ * que va dentro del marco corren antes, así que lo que retiene los avisos a partir de la propia sesión ya está puesto
+ * (la ceremonia del campeón de temporada, `SeasonCeremonyHost`, §3.8.15). Al cargar la página, `me` llega después de
+ * pintar el marco, y sus logros sin ver salían antes que la ceremonia (tarea 7.33).
  */
 export function useGameRewards(): void {
+  const game = useSession((state) => state.me?.game)
   useEffect(() => {
     hudEffects.onShow = onShow
-    const first = useSession.getState().me
-    if (first) syncGameFromMe(first)
     const unsubscribe = useSession.subscribe((state, previous) => {
       if (state.me?.id !== previous.me?.id) useHud.getState().reset()
-      if (state.me && state.me.game !== previous.me?.game) syncGameFromMe(state.me)
     })
     return () => {
       unsubscribe()
       hudEffects.onShow = () => {}
     }
   }, [])
+  useEffect(() => {
+    const me = useSession.getState().me
+    if (game && me) syncGameFromMe(me)
+  }, [game])
 }
