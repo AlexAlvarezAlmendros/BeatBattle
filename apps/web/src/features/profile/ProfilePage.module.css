@@ -10,6 +10,45 @@
   width: 100%;
 }
 
+/*
+ * La carta y, con el Escenario, su pase de torneo (§3.4.4; tarea 7.23). Con el pase, el hueco de arriba es para el
+ * remache, la cinta y la pinza, y la carta baja a 320 px para que la pieza siga cabiendo hasta la barra. La vista del
+ * pase (`.passView`, la caja que sigue la `View` del lienzo) cubre el hueco, la carta y un margen para el vaivén y la
+ * sombra; cuando el Escenario ya la pinta, recibe el puntero (se arrastra) y la plana se queda transparente debajo,
+ * para el lector de pantalla.
+ */
+.cardSlot {
+  --pass-room: calc(var(--bb-space-16) + var(--bb-space-8));
+  position: relative;
+  display: grid;
+  justify-items: center;
+  width: 100%;
+}
+
+.cardSlot[data-pass-room] {
+  padding-top: var(--pass-room);
+}
+
+.cardSlot[data-pass-room] > [data-producer-card] {
+  width: min(100%, calc(var(--bb-space-16) * 5));
+}
+
+.passView {
+  position: absolute;
+  inset: 0 calc(-1 * var(--bb-space-12)) calc(-1 * var(--bb-space-4));
+  pointer-events: none;
+}
+
+.cardSlot[data-pass-live] .passView {
+  z-index: 1;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.cardSlot[data-pass-live] > [data-producer-card] {
+  opacity: 0;
+}
+
 /* «[C] Girar carta» y las variantes, en placas opacas (la cuña tiene trama, `RD-VIS-05`), como `05-perfil`. */
 .cardControls {
   display: grid;

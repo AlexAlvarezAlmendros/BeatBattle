@@ -78,6 +78,24 @@ export interface CardFront {
 }
 
 /**
+ * El reverso de la carta (§3.4.4): el número, el logo, el QR del perfil con su dirección escrita debajo y la fecha de
+ * alta, con el marco de su variante. Lo pinta la carta HTML (con `back`) y, con la 7.23, el lienzo por CPU de la cara de
+ * atrás de la 3D (`paintCardBack`).
+ */
+export interface CardBack extends Pick<CardFront, 'cardNumber' | 'since' | 'variant'> {
+  /** La dirección del perfil, entera (se escribe sin el protocolo). */
+  profileUrl: string
+}
+
+/** El reverso de un anverso, con la dirección de su perfil. */
+export const cardBack = (front: CardFront, profileUrl: string): CardBack => ({
+  cardNumber: front.cardNumber,
+  since: front.since,
+  variant: front.variant,
+  profileUrl,
+})
+
+/**
  * La carta de un perfil público (de su capa de juego: solo semanas selladas, hueco G1), con la variante más alta que
  * tiene ganada, las que puede enseñar y la foto del avatar (sin ella, el monograma).
  */

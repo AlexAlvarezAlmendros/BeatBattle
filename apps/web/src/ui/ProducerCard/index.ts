@@ -1,8 +1,10 @@
 export {
   CARD_VARIANTS,
+  type CardBack,
   type CardFacts,
   type CardFront,
   type CardVariant,
+  cardBack,
   cardNumberLabel,
   cardSince,
   cardStats,

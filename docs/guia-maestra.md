@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.138 · 2026-11-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.141 · 2026-11-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -752,7 +752,7 @@ batalla ciega, justo lo que §2.15 evita en el sitemap y en la imagen OG. Por es
 | `RF-GAME-04` | Rachas con bonus y comodín de temporada | Escenario: 4 semanas, falla la 5.ª (gasta el comodín), falla la 6.ª (se rompe) |
 | `RF-GAME-05` | Logros del Anexo C evaluados por eventos, sin duplicados | Cada logro tiene un test de su condición |
 | `RF-GAME-06` | Oído de oro con Spearman excluyendo el propio voto | Caso de prueba del Anexo G |
-| `RF-GAME-07` | Carta de productor y pase 3D en el perfil, con alternativa estática | Con `prefers-reduced-motion` o sin WebGL se ve la carta plana |
+| `RF-GAME-07` | Carta de productor y pase 3D en el perfil, con alternativa estática | Con `prefers-reduced-motion` o sin WebGL se ve la carta plana (y en los demás casos sin pase de §3.4.4); con WebGL, la carta cuelga de su pase, se arrastra y la plana sigue en el árbol accesible |
 | `RF-GAME-08` | HUD con medidor de XP y XP flotante | Votar muestra «+5 XP» y el medidor sube |
 | `RF-GAME-09` | Subir de nivel lanza la animación de nivel (§3.8.8) una sola vez | Recargar no la repite (`level_seen`) |
 | `RF-GAME-10` | El XP y los logros **nunca** influyen en la clasificación ni en el peso del voto | Revisión de código + test: dos votantes de nivel 1 y 20 pesan igual |
@@ -1640,10 +1640,10 @@ física propios; no es el `Lanyard` del sello).
   (ha ganado alguna semana: lámina que sigue la inclinación, acotada a rojo, blanco y granate) y
   **campeón** (campeón de temporada: lámina roja con corona; dorada si se aprueba la excepción, §7).
 - Tecla C gira la carta; D la exporta para *stories*. Sin WebGL o con «reducir movimiento», carta plana
-  (`RF-GAME-07`).
+  (`RF-GAME-07`; todos los casos, en «El pase de torneo», abajo).
 - **La carta en 2D** (tarea 7.22, `ProducerCard`): es la carta de la bienvenida, de Ajustes → Perfil y del perfil, y
-  la **carta plana** de `RF-GAME-07` (la 3D de la 7.23 la deja tal cual sin WebGL, con «reducir movimiento» o con la
-  calidad apagada). Es HTML, no una imagen: su texto se lee, se amplía y pasa al contraste alto. Todo sale de lo
+  la **carta plana** de `RF-GAME-07` (la 3D de la 7.23 la deja tal cual cuando no hay pase: sin WebGL, con «reducir
+  movimiento», con la calidad apagada o baja, en modo serio, en contraste alto o en una columna). Es HTML, no una imagen: su texto se lee, se amplía y pasa al contraste alto. Todo sale de lo
   público del perfil (solo semanas selladas, §2.10): victorias, podios y semanas, del historial; la vitrina, de
   `showcase`; «Vitrina · 2 de 14», de los logros públicos.
   - **Variante**: la carta sale con la más alta que tiene ganada: **roja** desde el nivel 9 (el rango *Productor*,
@@ -1662,7 +1662,7 @@ física propios; no es el `Lanyard` del sello).
     la lámina brilla hacia él; C la gira media vuelta con el muelle (`--bb-dur-slow`, `--bb-ease-back`) y la cara que no
     se ve sale del árbol accesible y del foco (`inert`). **Sin movimiento, carta plana**: sin inclinación ni giro de −3°,
     la lámina quieta, y C cambia de cara con un fundido. En contraste alto, sin lámina ni trama, con el marco del
-    sistema. El giroscopio llega con la 3D (7.23).
+    sistema. El giroscopio es de la 3D (7.23).
   - C gira la carta desde cualquier parte del perfil con los atajos de una tecla encendidos y, apagados, con el foco en
     la pieza (WCAG 2.1.4); la barra de controles dice `[C] GIRAR CARTA`. En el perfil propio, D exporta la carta para
     *stories* con las mismas reglas («[D] Compartir mi carta» bajo la carta y `[D] PARA STORIES` en la barra; §2.15,
@@ -1672,11 +1672,52 @@ física propios; no es el `Lanyard` del sello).
     contexto 2D con `willReadFrequently: true` (§3.4.5: el PNG sale igual en cualquier máquina). La foto, si carga con
     CORS (si no, el monograma con su extrusión y contorno); la trama del retrato, la de `podiumFloor`; la lámina de la
     holo y la de campeón, quieta en su posición de reposo; la vitrina con el marco de rareza y el glifo de cada logro.
-    Es la carta de la tarjeta para *stories* (§2.15) y será la textura de la 3D (7.23). Un solo modelo del anverso
+    Es la carta de la tarjeta para *stories* (§2.15) y la textura de la 3D (7.23). Un solo modelo del anverso
     para las tres (`CardFront` en `cardModel`, y `profileCard` para sacarlo de un perfil público): la carta HTML lo
     recibe como props y el lienzo lo pinta con sus imágenes ya cargadas (`loadCardFace`, y `cardFaceCanvas` o
     `paintCardFace` a cualquier ancho). Las variantes son una regla compartida con la imagen OG del perfil: viven en
-    `@beatbattle/rules` (`card`, §4.5).
+    `@beatbattle/rules` (`card`, §4.5). Para la 3D (7.23), el mismo pintor por capas y el reverso: `paintCardFace(…,
+    'art')` (el marco y el retrato, sin lámina), `paintFoilSheet` (la lámina sola, sobre negro y con margen para
+    desplazarla) y `paintCardFace(…, 'marks')` (lo que va encima: placas, sello, corona, etiqueta, nombre, cifras,
+    vitrina y pie); en modo `screen`, las tres juntas dan la carta entera. El reverso, `paintCardBack` desde `CardBack`
+    (`cardModel`: número, fecha de alta, variante y dirección del perfil) con el QR ya decodificado: número, logo,
+    el QR en su papel blanco (o «QR NO DISPONIBLE»), la dirección y el pie con la pegatina, sobre granate oscuro.
+- **El pase de torneo** (tarea 7.23; decisión «Pase de la carta» cerrada por el usuario el 2026-11-03: la cinta propia
+  con física, no el expositor giratorio). En el perfil, la carta 3D cuelga en una **vista anclada del Escenario** (§3.5
+  capa 1, en el lienzo único) justo donde está la plana, con su ancho y su giro de −3°: el relevo no salta. Arriba, un
+  **remache** metálico (cabeza hexagonal con su arandela); de él baja una **cinta roja** corta en Λ, con un filete
+  granate a cada lado y «OTP.» impreso en blanco a lo largo (display cursiva; es una sola cinta doblada en el remache,
+  así que en un tramo se lee subiendo y en el otro bajando), hasta las dos ranuras de una **pinza** ancha con chaflanes
+  que muerde el canto de arriba de la carta. El metal es un degradado de blanco a negro, plano: sin luces ni reflejos de
+  entorno; la carta lleva la sombra dura de la plana (`--bb-shadow-drop`). Todo cabe en la columna de la pieza: nada
+  baja desde fuera de la pantalla. **No es el `Lanyard` del sello** (§3.1): aquel es una tira larga que entra desde
+  arriba de la pantalla, cuerda 3D con rótula, carta y mosquetón de un modelo con material físico y entorno de luces.
+  - **Física** (`@react-three/rapier`, con `@dimforge/rapier3d-compat`, versiones fijadas, §4.1): un péndulo de cadena
+    en el plano, sin choques: el remache fijo, la cinta en tres tramos de cuerda (se comba, no se estira) y la carta
+    colgada del ojal de su pinza, descentrado para que cuelgue a −3° sin muelles. Se **agarra** la carta (o la pinza) con
+    el puntero y se lleva hasta donde da la cinta, sin subir por encima del remache ni salir de la vista; al soltarla se
+    balancea y vuelve a −3° en un par de vaivenes. **C** la gira media vuelta con el muelle de interacción
+    (`spring.interaction`) y le da un vaivén; la pinza lleva giratorio, así que la Λ no se cruza. La cara se inclina con
+    la velocidad (y, en las tabletas en apaisado, con el giroscopio, en pasos de un grado) hasta el doble del giro de la
+    carta, y la lámina de la holo y de la de campeón se desplaza con ella. **Bajo demanda**: mientras algo se mueve, el
+    Escenario pinta a 60 fps; quieta, la física se duerme y no pide fotogramas.
+  - **La textura** es la de `cardCanvas` (arriba): el mismo modelo y el mismo pintor por CPU que la tarjeta para
+    *stories*, al ancho de la plana y a la densidad del lienzo (hasta 2), por capas para que la lámina se mueva sin
+    repintar. Se repinta al cambiar de variante; el reverso, también cuando llega el QR (que se pide, como en la plana,
+    la primera vez que se gira la carta). Hasta tener las fuentes y las imágenes no se pinta nada del pase.
+  - **Accesibilidad**: la plana sigue debajo, transparente, en el árbol accesible y en el foco (su nombre, la cara que
+    no se ve con `inert`, C y las variantes); la vista del pase es decorativa (`aria-hidden`) y es la que recibe el
+    puntero.
+  - **Sin pase, la carta plana** (`RF-GAME-07`): sin WebGL; con «reducir movimiento»; con la calidad apagada o baja (con
+    la baja, el 3D es solo de las ceremonias, §3.5); en modo serio (el pase es espectáculo); en contraste alto (el lienzo
+    no toma los colores del sistema); y **en una columna** (el móvil y las tabletas en vertical): ahí la diagonal de la
+    arena, que va por encima del lienzo, cruzaría la carta, y una carta a todo el ancho que se arrastra con el dedo le
+    quitaría a la página el desplazamiento. Lo que aún no se sabe (la sonda de calidad, si hay WebGL) cuenta como sí: el
+    hueco del pase se reserva desde el principio y la carta no salta al llegar la 3D. Para mirar cómo quedaría en una
+    columna, `localStorage['bb:pass']` = `on` (pruebas y depuración, como `bb:stage`; lo demás manda igual).
+  - **Su trozo**: la vista, Rapier y su WASM van en un trozo diferido propio que el Escenario pide solo cuando una
+    pantalla registra el pase (el perfil a dos columnas), después de la primera pintura (`RNF-PERF-04`); en el del
+    Escenario no cabe (§4.17).
 
 #### 3.4.5 Portadas generativas
 
@@ -2599,7 +2640,7 @@ con el DOM. Las versiones se fijan en la tarea 0.1, alineadas con las de Orchard
 | UI | **React 19** + CSS (tokens + CSS Modules) + **React Router 7** (modo librería) | React Router es lo que usa la web del sello |
 | Estado | **Zustand** (reproductor, audio, HUD, Escenario, interfaz) + **TanStack Query** (datos del servidor) | Query aporta caché, reintentos y actualizaciones optimistas (el voto) que Orchard no necesitaba |
 | Animación de UI | **Motion** (`motion`) | Muelles, *layout animations* y secuencias; ya lo usa el sello |
-| 3D y efectos | **three.js** + **@react-three/fiber** + **drei** (`View`) + **@react-three/rapier** (pase de la carta) + **GLSL propio** | Un solo canvas con vistas ancladas al DOM: la arena (trama en *shader*), el vinilo-sol, el podio y la carta con su pase |
+| 3D y efectos | **three.js** + **@react-three/fiber** + **drei** (`View`) + **@react-three/rapier** (pase de la carta; 2.2.0 con `@dimforge/rapier3d-compat` 0.19.2, la suya, fijadas: la física del pase la monta su API, y el test la corre en Node) + **GLSL propio** | Un solo canvas con vistas ancladas al DOM: la arena (trama en *shader*), el vinilo-sol, el podio y la carta con su pase |
 | Audio | **Web Audio nativo** (reproductor, analizador, efectos, kit) + **Tone.js** (música de sala) | Patrón de Orchard: Tone solo para música; lo que suena a menudo, en nodos nativos |
 | Análisis de audio | Motor de BPM y tonalidad de **Other People portado a TS** (`packages/audio`) en un Web Worker | Ya está validado con su batería de pistas sintéticas |
 | Validación | **Zod 4** | Esquemas compartidos de API y formularios |
@@ -3553,7 +3594,8 @@ negocio en el panel de admin (participantes, votos, escuchas por semana) y Verce
 | INP | < 200 ms |
 | CLS | < 0,05 |
 | JS inicial (sin Escenario) | < 200 kB gz, contando la entrada con sus importaciones estáticas y también la primera pintura de la home (175 y 185 kB gz al cerrar la Fase 0; con la arena, 179 y 193 kB gz con Motion por el pulsado del botón y 159 y 172 kB gz sin él, 2026-10-03) |
-| Escenario (trozo diferido) | < 250 kB gz (243,8 kB gz con three + R3F y la capa 0, tarea 1.1; 249,1 kB gz con `View` de drei, las vistas y las partículas, tarea 1.3; **249,8 kB gz** con la reactividad, tarea 1.6: sin margen, lo próximo que entre en el trozo obliga a partirlo) |
+| Escenario (trozo diferido) | < 250 kB gz (243,8 kB gz con three + R3F y la capa 0, tarea 1.1; 249,1 kB gz con `View` de drei, las vistas y las partículas, tarea 1.3; **249,8 kB gz** con la reactividad, tarea 1.6: sin margen, lo próximo que entre en el trozo obliga a partirlo. Medido el 2026-11-03: **252,6 kB gz** en `main` con la 7.28, y **253,5** con la 7.23, que solo le añade el `lazy` del pase y `suspend` de `suspend-react`, compartido por R3F y Rapier: por encima del presupuesto, partirlo queda para la 7.34) |
+| Pase de la carta (trozo diferido propio, tarea 7.23) | Sin presupuesto propio: **856,4 kB gz** (Rapier con su WASM, 2,2 MB sin comprimir; `@react-three/rapier`, 22 kB; el pase, 17 kB). Solo se pide en el perfil a dos columnas con el pase (§3.4.4), después de la primera pintura (`RNF-PERF-04`), nunca en la home ni en la ficha |
 | Fuentes (subconjunto latino) | ≈ 127 KB: Anybody cursiva 62, Chakra Petch 5 × ~10, Oxanium 14; precarga solo de Chakra Petch 700 (§3.2). Medido el 2026-10-03 (perfil de `RNF-PERF-02`, cinco cargas intercaladas): con Anybody y Chakra 600 precargadas, LCP 2,00 s y CLS 0,0002; sin precargas, 1,60 s y 0,0036; solo Chakra 700, 1,64 s y 0,0034 |
 | FPS | 60 en escritorio con GPU integrada; ≥ 45 en un Android de gama media con calidad automática (tarea 1.11: 60 en escritorio a dpr 1 y 2 con la arena, el vinilo y 4.000 partículas; 60 en un Android **emulado** con CPU ×4, a falta de un dispositivo real; `docs/planning/evidence/f1/banco/`) |
 | Inicio de reproducción tras el clic | < 600 ms en 4G |
@@ -3902,7 +3944,7 @@ Valores por defecto que la guía ya asume; se confirman o se cambian (y se regis
 | Modelo de semana | Envíos y votos a la vez (§2.1) | Revisable tras la beta |
 | Fecha de lanzamiento y primera temporada | Primera semana completa tras cerrar la Fase 10 | Fase 10 |
 | Dorado como excepción | **Cerrada (2026-10-13): sin dorado.** Medallas, carta de campeón y semana dorada en la paleta (§3.2, «Medallas») | Antes de la Fase 6 (podio y medallas) |
-| Pase de la carta | Cinta propia con física (§3.4.4); alternativa, un expositor giratorio si se percibe como pieza del sello | Fase 7 (carta) |
+| Pase de la carta | **Cerrada (2026-11-03): la cinta propia con física** (§3.4.4), no el expositor giratorio, mirando las capturas de `docs/planning/evidence/f7/pase/` | Fase 7 (carta) |
 
 Cerrada en la v0.6: «Ajustes visuales propuestos por el jurado de la prueba del sello» (tarea 1.12). Ya
 no aplica: BeatBattle deja de copiar la web del sello (§3.1).
@@ -4325,6 +4367,8 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-11-03 | 0.6.141 | **Tarea 7.23, cierre** (decisión del usuario). §3.4.4 y §7: la decisión «Pase de la carta» se cierra con la cinta propia con física (el valor por defecto), mirando las capturas de `docs/planning/evidence/f7/pase/`. El expositor giratorio queda descartado. |
+| 2026-11-03 | 0.6.140 | **Tarea 7.23** (el pase de torneo; la decisión abierta «Pase de la carta» sigue abierta: se ha hecho su valor por defecto y la cierra el usuario con las capturas de `docs/planning/evidence/f7/pase/`). §3.4.4, «El pase de torneo», nueva: la carta 3D cuelga en una vista anclada del Escenario donde está la plana (mismo ancho y −3°), de un remache hexagonal por una cinta roja corta en Λ con «OTP.» impreso y una pinza ancha que muerde el canto, todo plano y en la paleta, dentro de la columna de la pieza (lo que la separa del `Lanyard` del sello); física de péndulo de cadena en el plano con Rapier (la carta cuelga a −3° por el ojal descentrado), se arrastra con el puntero hasta donde da la cinta, C la gira con `spring.interaction` y un vaivén, la cara se inclina con la velocidad y el giroscopio, y quieta no pide fotogramas. **Sin pase, la carta plana**, también con la calidad baja, en modo serio, en contraste alto y **en una columna** (la diagonal de la arena va por encima del lienzo y cruzaría la carta; el arrastre le quitaría a la página el desplazamiento con el dedo); `bb:pass` = `on` lo enseña en una columna para mirarlo. La plana se queda debajo, transparente, en el árbol accesible y en el foco. §3.4.4, lienzo por CPU: un solo pintor para las *stories* y la 3D; `paintCardFace` pinta por capas (`'art'`, `'marks'`) y `paintFoilSheet` da la lámina sola para moverla con la inclinación (en `screen`, las tres juntas son la carta entera); el reverso, `paintCardBack` desde `CardBack` (`cardModel`). `RF-GAME-07`: el criterio cuenta los demás casos sin pase y el pase con WebGL. §4.1: `@react-three/rapier` 2.2.0 y `@dimforge/rapier3d-compat` 0.19.2, fijadas. §4.17: el trozo del pase (856,4 kB gz, solo en el perfil a dos columnas tras la primera pintura) y el del Escenario medido: 252,6 kB gz ya en `main`, 253,5 con la 7.23 (partirlo, en la 7.34). |
 | 2026-11-03 | 0.6.138 | **Tareas 7.20 y 7.22** (al cerrar la 7.27): había dos insignias de logro con el marco de su rareza, la de la placa de los avisos (7.20, con una estrella) y la de cada logro con su glifo (7.22, la del perfil y la vitrina), y dos componentes llamados `AchievementBadge`. §3.8.8: la placa de logro lleva **la insignia del logro** (la de §3.8.10, con el glifo de su familia, a la vista), la misma en los avisos, en «¡JURADO COMPLETO!» y en la bienvenida; en contraste alto, la insignia con los colores del sistema (el holo del épico y el rojo del legendario no se quedan; la rareza, en palabra). En el código, la placa es `ui/AchievementPlate` y compone `ui/AchievementBadge`. |
 | 2026-10-29 | 0.6.137 | **Tarea 7.27** (hueco G6 del plan 07, resuelto: la ceremonia corta del campeón de temporada). §3.8.15, nueva: una capa modal de ≈ 6 s con su línea de tiempo (`SEASON_CEREMONY_TIMELINE`): la placa «FIN DE TEMPORADA · T4 DE 2026», a los 0,4 s la carta de campeón (`ProducerCard`, variante campeón) estampada en el acorde de `cer.season` con «¡CAMPEÓN DE TEMPORADA!» (o «¡CAMPEONES…!» con ex aequo) y un destello de confeti por el limitador, a 1 s las cifras («¡Eres el campeón…!» a quien lo es; «312 PTS · 4 victorias · 9 podios») y se cierra sola a los 6 s. Sale **una vez** por cuenta (`me.game.seasonCeremony`; `POST /api/me/seen` con `season_champion` al acabar o al saltarla; sin red, sigue pendiente; sin campeón con perfil, vista sin enseñarla), con sesión, en el menú principal cuando no queda delante otra capa (tras la pantalla de título, la revelación del drop y la oferta de la ceremonia de la semana) y en los resultados de una semana de esa temporada (al abrirlos o encadenada tras su ceremonia); en ninguna otra pantalla. Saltable con cualquier tecla, toque o clic pasados 280 ms (M además silencia); lo de detrás, `inert`. Retiene los avisos de logro y de nivel mientras está pendiente en sus pantallas y mientras dura (también al pasar de la oferta del menú a los resultados): el «¡LOGRO LEGENDARIO!» de `season_champ` sale después. Sin movimiento, fundidos y carta plana, sin estampa ni confeti; en modo serio, sin anunciador, estampa ni confeti; con la calidad apagada o sin WebGL, igual (DOM y carta 2D); con poco alto y ventana apaisada, la carta a la izquierda y el texto a la derecha. §2.9 la enlaza (la ven todas las cuentas; el campeón, dicha a él); §3.6 la suma a las ceremonias; §3.7.3 y **Anexo D**: `cer.season`, fanfarria de metal sintético en la tríada de la tónica (2,4 s, −8 dB; «ta-ta» en la quinta y el acorde rasgueado a los 0,4 s con un paso bajo que sigue a cada nota, bombo, bajo y platillo); §3.8.8, los avisos esperan también a esta ceremonia; §3.9, su rótulo del anunciador; **Anexo E**, su fila |
 | 2026-10-29 | 0.6.133 | **Tarea 7.30** (`season.wrap`). §2.12 y §2.12.7: «Tu temporada en cifras» se encola en el `batch` que cierra la temporada (el sellado de su última semana o el primer `tick` tras el trimestre sin semana el último lunes; el `tick` no resume una temporada cerrada hace más de una semana) a cada cuenta verificada que participó o votó, una por cuenta y temporada; puesto, campeones, semanas, mejor puesto, votos que contaron, logros de la temporada (con los del propio `batch`) y la carta del trimestre; nada de la temporada siguiente. §4.19.5 y `RF-NOTIF-12`: la carta es la imagen OG pública del perfil, sin parámetros y sin registrar la petición. `RF-NOTIF-15` concreta su aceptación. §4.11: `season.wrap` en los dos `batch` del cierre. Anexo H: el asunto del campeón y el contenido. |
