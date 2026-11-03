@@ -53,6 +53,14 @@ export async function entryLoader({ params, request }: LoaderFunctionArgs): Prom
  * votos y escuchas, sin la media (§2.7). Tras el sellado (`RF-PLAY-08`, tarea 6.16), el productor, la posición
  * con su medalla, la puntuación, los votos y el histograma de 5 barras, y el enlace a los resultados.
  */
+
+/** Lo que ve quien abre su propia entrada sin sellar: cuántos votos y escuchas lleva, con su plural. */
+export function ownStatsText(stats: { votes: number; plays: number }): string {
+  return t('entryPage.ownStats', {
+    votes: t('entryPage.ownVotes', { count: stats.votes }),
+    plays: t('entryPage.ownPlays', { count: stats.plays }),
+  })
+}
 export function EntryPage() {
   const initial = useLoaderData() as PublicEntry
   const { data: entry = initial } = useQuery({
@@ -186,9 +194,7 @@ export function EntryPage() {
         <p className={styles.note}>{t('entryPage.equalized')}</p>
 
         {own ? (
-          <p className={styles.own}>
-            {stats ? t('entryPage.ownStats', { votes: stats.votes, plays: stats.plays }) : t('entryPage.own')}
-          </p>
+          <p className={styles.own}>{stats ? ownStatsText(stats) : t('entryPage.own')}</p>
         ) : votable ? (
           <Stars
             className={styles.stars}
