@@ -3,9 +3,9 @@ import { Navigate } from 'react-router'
 import { paths } from '../../app/paths'
 import { ScreenPage } from '../../app/ScreenPage'
 import { t } from '../../i18n'
+import { AchievementPlate } from '../../ui/AchievementPlate'
 import { Button } from '../../ui/Button'
 import { ProducerCard } from '../../ui/ProducerCard'
-import { AchievementBadge } from '../game/AchievementBadge'
 import { initialsOf, playerOf, useSession } from './session'
 import styles from './WelcomePage.module.css'
 
@@ -63,7 +63,7 @@ export function WelcomePage() {
             {t('account.welcome.goalTitle')}
           </h2>
           {/* El primero por ganar del catálogo (Anexo C), con su insignia, como en el aviso de logro (§3.8.9). */}
-          <AchievementBadge id={FIRST_ACHIEVEMENT} className={styles.goalBadge} />
+          <AchievementPlate id={FIRST_ACHIEVEMENT} className={styles.goalBadge} />
           <p className={styles.goalHow}>{t('account.welcome.goalHow')}</p>
         </section>
         <Button to="/" fullWidth keyHint={t('frame.keys.glyph.enter')}>

@@ -96,11 +96,23 @@
   line-height: 1;
 }
 
-/* Contraste alto: el marco del sistema y el glifo en el color del texto. */
+/*
+ * Contraste alto: el marco del sistema y el glifo en el color del texto. El holo del épico y el rojo del legendario son
+ * fondos de las capas del chaflán que el modo no toca (`frame.css` las pinta con los colores del sistema, pero con menos
+ * peso que las reglas de rareza): aquí se igualan, y la rareza queda en palabra al lado, como siempre.
+ */
 @media (forced-colors: active) {
   .badge {
     border: var(--bb-stroke) solid CanvasText;
     color: CanvasText;
+  }
+
+  .badge[data-rarity]::before {
+    background: CanvasText;
+  }
+
+  .badge[data-rarity]::after {
+    background: Canvas;
   }
 
   .badge[data-locked] {
