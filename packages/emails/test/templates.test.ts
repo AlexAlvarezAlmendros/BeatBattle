@@ -113,6 +113,23 @@ describe('plantillas de email (§3.8.12, §4.19.4)', () => {
     expect(long).toMatch(/…· 92 BPM · Re menor$|… · 92 BPM · Re menor$/)
   })
 
+  it('RF-ADM-01: battle.drop y battle.monday sin portada del sample: la tarjeta del drop va sin imagen', async () => {
+    const drop = TEMPLATES['battle.drop']
+    const options = { publicUrl: PUBLIC_URL, family: 'battle' as const }
+    const covered = await renderEmail(drop, drop.fixture, options)
+    const bare = await renderEmail(drop, { ...drop.fixture, coverUrl: null }, options)
+    expect(covered.html).toContain(drop.fixture.coverUrl as string)
+    expect(bare.html).not.toContain('Portada de «')
+    expect(bare.html).toContain(`${PUBLIC_URL}/api/email/countdown/2026-w41.gif`)
+    const monday = TEMPLATES['battle.monday']
+    const mondayBare = await renderEmail(
+      monday,
+      { ...monday.fixture, drop: { ...monday.fixture.drop, coverUrl: null } },
+      options,
+    )
+    expect(mondayBare.html).not.toContain('Portada de «')
+  })
+
   it('battle.drop: a quien solo dejó su email se le invita a crear cuenta; a una cuenta, no', async () => {
     const drop = TEMPLATES['battle.drop']
     const subscriber = await renderEmail(drop, drop.fixture, { publicUrl: PUBLIC_URL, family: 'battle' })

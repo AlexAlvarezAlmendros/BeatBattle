@@ -20,8 +20,8 @@ export interface BattleDropPayload {
   musicalKey: string | null
   genre: string | null
   challenge: string | null
-  /** Portada cuadrada (Cloudinary, sin parámetros por persona). */
-  coverUrl: string
+  /** Portada cuadrada (Cloudinary, sin parámetros por persona); `null` si el sample no tiene (§2.4). */
+  coverUrl: string | null
   /** Cierre de envíos en palabras («domingo 11 de octubre a las 20:00»). */
   closesText: string
   /** `true` para quien solo dejó su email: se le invita a crear cuenta (§2.12.3). */
@@ -41,13 +41,15 @@ export function DropCard({ p }: { p: BattleDropPayload }) {
   return (
     <Card>
       <Kicker>Semana #{p.weekNumber} · nuevo drop</Kicker>
-      <Img
-        src={p.coverUrl}
-        width="512"
-        height="512"
-        alt={`Portada de «${p.title}»`}
-        style={{ display: 'block', width: '100%', maxWidth: '512px', height: 'auto', margin: '0 0 16px' }}
-      />
+      {p.coverUrl ? (
+        <Img
+          src={p.coverUrl}
+          width="512"
+          height="512"
+          alt={`Portada de «${p.title}»`}
+          style={{ display: 'block', width: '100%', maxWidth: '512px', height: 'auto', margin: '0 0 16px' }}
+        />
+      ) : null}
       <Heading>{p.title}</Heading>
       <Paragraph muted>{p.credits}</Paragraph>
       {chips ? (

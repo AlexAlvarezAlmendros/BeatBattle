@@ -188,6 +188,7 @@ async function newSample(title: string, bpm: number, musicalKey: string, root: n
     bpm,
     musicalKey,
     hasStems: false,
+    hasCover: true,
   })
 }
 if (SEASON) {

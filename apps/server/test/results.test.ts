@@ -256,6 +256,35 @@ describe('archivo y ceremonia (6.7, 6.8)', () => {
     expect(page3.next).toBeNull()
   })
 
+  it('RF-ARC-01 / RF-ADM-01: en el archivo, un sample sin portada da sampleCoverUrl null', async () => {
+    b = await battle({ producers: 0, voters: 0 })
+    const [s] = await b.t.db.select().from(sample)
+    const startsAt = Date.UTC(2020, 0, 6)
+    await b.t.db.insert(week).values({
+      id: 'old-0',
+      number: 100,
+      slug: '2020-w01x',
+      seasonId: '2020-T1',
+      sampleId: s?.id as string,
+      rulesVersion: 1,
+      startsAt,
+      submitEndsAt: startsAt + 1000,
+      voteEndsAt: startsAt + 2000,
+      sealedAt: startsAt + 3000,
+      resultRevision: 1,
+      createdBy: 'admin',
+      createdAt: 0,
+    })
+    const archived = async () =>
+      (await b.t.app.inject({ method: 'GET', url: '/api/weeks' })).json().data.weeks.at(-1).sampleCoverUrl
+    expect(await archived()).toEqual(expect.any(String))
+    await b.t.db
+      .update(sample)
+      .set({ coverPublicId: null })
+      .where(eq(sample.id, s?.id as string))
+    expect(await archived()).toBeNull()
+  })
+
   it('RF-RES-09: la ceremonia se marca vista una vez por cuenta y semana, solo con la semana sellada', async () => {
     b = await battle({ producers: 1, voters: 1 })
     const voter = b.voters[0] as Battle['voters'][0]

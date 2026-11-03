@@ -286,19 +286,28 @@ for (const { width, height } of [
       const problems: string[] = []
       for (let step = 0; step < 6; step++) {
         await page.keyboard.press('ArrowDown')
-        await page.evaluate(
-          () => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))),
-        )
-        const problem = await page.evaluate(() => {
-          const focused = document.activeElement as HTMLElement
-          const bar = document.querySelector('footer')!
-          const box = focused.getBoundingClientRect()
-          const sticky = getComputedStyle(bar).position === 'sticky'
-          const covered = sticky ? Math.max(0, box.bottom - bar.getBoundingClientRect().top) : 0
-          const inside = box.top >= 0 && box.bottom <= innerHeight
-          return covered > 0.5 || !inside
-            ? `${focused.textContent?.slice(0, 20)}: tapado ${covered}, entero=${inside}`
-            : null
+        const problem = await page.evaluate(async () => {
+          const check = () => {
+            const focused = document.activeElement as HTMLElement
+            const bar = document.querySelector('footer')!
+            const box = focused.getBoundingClientRect()
+            const sticky = getComputedStyle(bar).position === 'sticky'
+            const covered = sticky ? Math.max(0, box.bottom - bar.getBoundingClientRect().top) : 0
+            const inside = box.top >= 0 && box.bottom <= innerHeight
+            return covered > 0.5 || !inside
+              ? `${focused.textContent?.slice(0, 20)}: tapado ${covered}, entero=${inside}`
+              : null
+          }
+          // Al enfocar, la página se desplaza hasta la placa; en una máquina lenta tarda más de dos fotogramas.
+          // Lo que se exige es dónde acaba la placa: se espera a que el desplazamiento se asiente (hasta 1,5 s).
+          const until = performance.now() + 1500
+          await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
+          let last = check()
+          while (last && performance.now() < until) {
+            await new Promise((done) => requestAnimationFrame(done))
+            last = check()
+          }
+          return last
         })
         if (problem) problems.push(problem)
       }

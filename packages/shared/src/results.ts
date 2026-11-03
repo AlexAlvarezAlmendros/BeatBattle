@@ -85,7 +85,8 @@ export const ArchiveWeekSchema = z
     number: z.number().int(),
     label: z.string(),
     sampleTitle: z.string(),
-    sampleCoverUrl: z.string(),
+    /** `null` si el sample no tiene portada (§2.4): el archivo enseña el vinilo-sol. */
+    sampleCoverUrl: z.string().nullable(),
     sealedAt: z.number().int(),
     entries: z.number().int().min(0),
     /** Hasta tres: el podio (con ex aequo, los que compartan posición entran mientras quepan). */

@@ -101,14 +101,22 @@ async function signUp(
 }
 
 /** Sube un sample por la API con la firma, como el panel (el audio va al almacenamiento, no a la API). */
-async function apiSample(page: Page, baseURL: string, title: string, seed: number, now: number) {
+async function apiSample(
+  page: Page,
+  baseURL: string,
+  title: string,
+  seed: number,
+  now: number,
+  { cover = true } = {},
+) {
   const headers = { origin: baseURL, 'x-bb-test-now': String(now) }
   const files = sampleFiles(seed)
   let sampleId: string | undefined
-  for (const [part, name, buffer, mimeType] of [
+  const parts = [
     ['original', 'sample.wav', files.wav, 'audio/wav'],
     ['cover', 'cover.png', files.png, 'image/png'],
-  ] as const) {
+  ] as const
+  for (const [part, name, buffer, mimeType] of cover ? parts : parts.slice(0, 1)) {
     const signed = await page.request.post('/api/admin/samples/sign', {
       headers,
       data: sampleId ? { part, sampleId } : { part },
@@ -131,9 +139,11 @@ async function apiSample(page: Page, baseURL: string, title: string, seed: numbe
       licenseText: 'Uso libre en la batalla.',
       bpm: 90,
       musicalKey: 'Am',
+      hasCover: cover,
     },
   })
   expect(created.ok(), await created.text()).toBe(true)
+  return (await created.json()).data as { id: string; coverUrl: string | null }
 }
 
 test('hito de la Fase 3: admin, calendario, cambio de semana en la frontera, bases, revelación y email del drop', async ({
@@ -184,7 +194,9 @@ test('hito de la Fase 3: admin, calendario, cambio de semana en la frontera, bas
     await expect(admin.getByText('Chops guardados.')).toBeVisible()
   })
   await apiSample(admin, base, 'Neón de marzo', 40, BEFORE)
-  await apiSample(admin, base, 'Siesta de abril', 80, BEFORE)
+  // RF-ADM-01: la portada es opcional; este va sin ella.
+  const bare = await apiSample(admin, base, 'Siesta de abril', 80, BEFORE, { cover: false })
+  expect(bare.coverUrl).toBeNull()
 
   await test.step('RF-ADM-02: programar 3 semanas; la del cambio de hora dura 167 h', async () => {
     await admin.goto('/admin')
