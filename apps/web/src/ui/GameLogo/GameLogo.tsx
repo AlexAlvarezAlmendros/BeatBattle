@@ -14,7 +14,7 @@ interface LogoLine {
   red: boolean
 }
 
-interface LogoLayout {
+export interface LogoLayout {
   /** Caja del lienzo en unidades del logo: origen y tamaño (el `viewBox` de las maquetas). */
   box: readonly [x: number, y: number, width: number, height: number]
   lines: readonly LogoLine[]
@@ -98,7 +98,7 @@ function fillPattern(ctx: CanvasRenderingContext2D, scale: number): CanvasPatter
  * (las dilataciones del filtro de la maqueta) son trazos de toda la pila de capas; luego la extrusión de
  * 12 capas desplazadas (0,9; 1,1) con la trama de relleno, y encima la cara con su degradado.
  */
-function paintLogo(
+export function paintLogo(
   ctx: CanvasRenderingContext2D,
   layout: LogoLayout,
   scale: number,

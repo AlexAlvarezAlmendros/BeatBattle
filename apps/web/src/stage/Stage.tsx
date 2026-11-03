@@ -1,6 +1,6 @@
 import { color } from '@beatbattle/shared/tokens'
 import { advance, Canvas, useFrame, useThree } from '@react-three/fiber'
-import { useEffect, useMemo, useRef } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef } from 'react'
 import { type Mesh, PlaneGeometry, RawShaderMaterial } from 'three'
 import { neededFps, useStageActivity } from './activity'
 import { defaultGrid, SHAPE_INDEX, type StageShapeName, type Vec2 } from './arenaMath'
@@ -299,14 +299,26 @@ function RenderPass() {
   return null
 }
 
-/** Las vistas ancladas que han pedido las pantallas (`useStageView`). */
+/**
+ * La carta con su pase (§3.4.4, tarea 7.23): su física (Rapier, con su WASM) va en un trozo propio que se pide desde
+ * aquí, y solo cuando una pantalla registra el pase (`useStagePass`, el perfil). En el trozo del Escenario no cabe.
+ */
+const PassView = lazy(() => import('./pass/PassView'))
+
+/** Las vistas ancladas que han pedido las pantallas (`useStageView`, `useStagePass`). */
 function StageViews() {
   const anchors = useStageRuntime((state) => state.anchors)
+  const pass = useStageRuntime((state) => state.pass)
   return (
     <>
       {anchors.map((anchor) => (
         <VinylView key={anchor.id} anchor={anchor} stats={debug?.views ?? null} />
       ))}
+      {pass && (
+        <Suspense fallback={null}>
+          <PassView pass={pass} stats={debug?.views ?? null} />
+        </Suspense>
+      )}
       {/* La ceremonia de resultados (§3.8.6), cuando la hay. */}
       <CeremonyView />
     </>

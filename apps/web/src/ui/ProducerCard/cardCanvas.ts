@@ -3,8 +3,9 @@ import { angle, color, length, texture } from '@beatbattle/shared/tokens'
 import { t } from '../../i18n'
 import { ACHIEVEMENT_GLYPHS, glyphShapes } from '../AchievementBadge'
 import { HALFTONE_SHAPES, paintHalftone } from '../arena/halftone'
+import { LOGO_LAYOUTS, paintLogo } from '../GameLogo/GameLogo'
 import { OTP_SLAP } from '../OtpSlap'
-import { type CardFront, cardNumberLabel } from './cardModel'
+import { type CardBack, type CardFront, type CardVariant, cardNumberLabel } from './cardModel'
 
 /**
  * La carta de productor pintada en un lienzo 2D **por CPU** (guía §3.4.4, §3.4.5; tarea 7.28): el anverso de
@@ -17,6 +18,12 @@ import { type CardFront, cardNumberLabel } from './cardModel'
  * Uso: `profileCard(perfil)` (o cualquier `CardFront`) → `loadCardFace(anverso, avatarUrl)` (fuentes, foto y
  * pegatina) → `cardFaceCanvas(cara, ancho)` para un lienzo nuevo o `paintCardFace(ctx, cara, ancho)` sobre uno propio
  * (la textura que se repinta al cambiar de variante).
+ *
+ * La 3D (tarea 7.23) lo pinta por capas para que la lámina se mueva con la inclinación sin repintar la carta:
+ * `paintCardFace(ctx, cara, ancho, 'art')` (marco y retrato, sin lámina), `paintFoilSheet` (la lámina sola, sobre negro,
+ * con margen para desplazarla) y `paintCardFace(ctx, cara, ancho, 'marks')` (lo que va encima: placas, sello, nombre,
+ * cifras, vitrina y pie). En modo `screen`, las tres juntas dan lo mismo que la carta entera. El reverso, con
+ * `paintCardBack` (`CardBack` de `cardModel`, con el QR ya decodificado).
  *
  * El contexto se pide con `willReadFrequently: true` (rasterizado por CPU, como las portadas): el PNG sale igual en
  * cualquier máquina. Sin movimiento: la lámina queda quieta, en su posición de reposo.
@@ -49,7 +56,7 @@ const TAU = Math.PI * 2
 export async function loadCardFonts(): Promise<void> {
   if (!document.fonts) return
   await Promise.all(
-    [DISPLAY(32), DISPLAY(32, 'extra-expanded'), UI(12), NUM(16)].map((font) =>
+    [DISPLAY(32), DISPLAY(32, 'extra-expanded'), UI(12), UI(12, 600), NUM(16)].map((font) =>
       document.fonts.load(font).catch(() => []),
     ),
   )
@@ -133,8 +140,11 @@ export function cpuCanvas(width: number, height: number): [HTMLCanvasElement, Ca
   return [canvas, ctx]
 }
 
-/** La lámina de la holo y de la de campeón, en reposo: una banda roja, blanca y granate a 118° y líneas finas. */
-function foil(ctx: CanvasRenderingContext2D, w: number, h: number, u: number, strength: number) {
+/**
+ * La lámina de la holo y de la de campeón, en reposo: una banda roja, blanca y granate a 118° y líneas finas, sobre el
+ * retrato de `w × h` y `bleed` px más a cada lado (la hoja de la 3D, que se desplaza con la inclinación).
+ */
+function foil(ctx: CanvasRenderingContext2D, w: number, h: number, u: number, strength: number, bleed = 0) {
   const rad = ((118 - 90) * Math.PI) / 180
   const dx = Math.cos(rad) * w
   const dy = Math.sin(rad) * w
@@ -150,12 +160,13 @@ function foil(ctx: CanvasRenderingContext2D, w: number, h: number, u: number, st
   ctx.globalCompositeOperation = 'screen'
   ctx.globalAlpha = strength
   ctx.fillStyle = band
-  ctx.fillRect(0, 0, w, h)
+  ctx.fillRect(-bleed, 0, w + 2 * bleed, h)
   ctx.globalAlpha = 0.08
   ctx.strokeStyle = color.white
   ctx.lineWidth = length.stroke * u
   const step = 8 * u
-  for (let x = -h; x < w + h; x += step) {
+  // Las líneas salen de la misma rejilla con margen o sin él: la hoja de la 3D enseña en reposo lo mismo que la plana.
+  for (let x = -h - Math.ceil(bleed / step) * step; x < w + h + bleed; x += step) {
     ctx.beginPath()
     ctx.moveTo(x, 0)
     ctx.lineTo(x - h * Math.tan(rad), h)
@@ -249,21 +260,25 @@ function badge(
   ctx.restore()
 }
 
-/**
- * Pinta el anverso de la carta en `ctx`, desde (0, 0) y a `width` px de ancho (el alto, `cardHeight`). No borra lo que
- * hay debajo (las esquinas del chaflán quedan como estaban): para repintar el mismo lienzo, `clearRect` antes.
- */
-export function paintCardFace(ctx: CanvasRenderingContext2D, face: CardFace, width: number): void {
+/** Lo que se pinta del anverso: entero, o por capas para la 3D (debajo y encima de la lámina). */
+export type CardFacePart = 'all' | 'art' | 'marks'
+
+/** Fuerza de la lámina de cada variante (la holo brilla más que la de campeón); sin lámina, 0. */
+export const foilStrength = (variant: CardVariant) =>
+  variant === 'holo' ? 0.5 : variant === 'champion' ? 0.3 : 0
+
+/** El retrato de una carta de `width` px: la mitad de arriba, dentro del marco (donde va la lámina). */
+export function cardArtBox(width: number): { x: number; y: number; w: number; h: number } {
+  const stroke = length.strokeCursor * (width / CARD_BASE_WIDTH)
+  return { x: stroke, y: stroke, w: width - 2 * stroke, h: Math.round(cardHeight(width) * 0.5) }
+}
+
+/** El marco de una cara: borde (rojo en la roja y la de campeón; en la holo, lámina de colores) y relleno. */
+function frame(ctx: CanvasRenderingContext2D, variant: CardVariant, width: number, fill: string) {
   const u = width / CARD_BASE_WIDTH
   const height = cardHeight(width)
   const stroke = length.strokeCursor * u
   const cut = length.cutLg * u
-  const { variant } = face
-  ctx.save()
-  ctx.textBaseline = 'alphabetic'
-  ctx.textAlign = 'left'
-
-  // El marco: borde (holo: lámina de colores) y relleno negro.
   if (variant === 'holo') {
     const holo = ctx.createConicGradient(((200 - 90) * Math.PI) / 180, width / 2, height / 2)
     const stops = [color.red, color.white, color.wine, color.red, color.white, color.wine, color.red]
@@ -272,12 +287,36 @@ export function paintCardFace(ctx: CanvasRenderingContext2D, face: CardFace, wid
   } else ctx.fillStyle = variant === 'red' || variant === 'champion' ? color.red : color.white
   chamfer(ctx, 0, 0, width, height, cut)
   ctx.fill()
-  ctx.fillStyle = color.black
+  ctx.fillStyle = fill
   chamfer(ctx, stroke, stroke, width - 2 * stroke, height - 2 * stroke, cut - stroke * 0.586)
   ctx.fill()
+}
 
-  // El retrato: la mitad de arriba, recortada con el chaflán, con su fondo, la trama y la lámina.
-  const art = { x: stroke, y: stroke, w: width - 2 * stroke, h: Math.round(height * 0.5) }
+/**
+ * Pinta el anverso de la carta en `ctx`, desde (0, 0) y a `width` px de ancho (el alto, `cardHeight`). No borra lo que
+ * hay debajo (las esquinas del chaflán quedan como estaban): para repintar el mismo lienzo, `clearRect` antes. Con
+ * `part`, solo una capa (la 3D, tarea 7.23): `'art'`, el marco y el retrato sin la lámina; `'marks'`, lo que va encima
+ * de ella, sobre transparente.
+ */
+export function paintCardFace(
+  ctx: CanvasRenderingContext2D,
+  face: CardFace,
+  width: number,
+  part: CardFacePart = 'all',
+): void {
+  if (part !== 'marks') paintArt(ctx, face, width, part === 'all')
+  if (part !== 'art') paintMarks(ctx, face, width)
+}
+
+/** El marco y el retrato: la mitad de arriba, recortada con el chaflán, con su fondo, la trama y la foto o el monograma. */
+function paintArt(ctx: CanvasRenderingContext2D, face: CardFace, width: number, withFoil: boolean) {
+  const u = width / CARD_BASE_WIDTH
+  const stroke = length.strokeCursor * u
+  const cut = length.cutLg * u
+  const { variant } = face
+  frame(ctx, variant, width, color.black)
+
+  const art = cardArtBox(width)
   const artCut = cut - stroke * 0.586
   ctx.save()
   ctx.beginPath()
@@ -328,8 +367,41 @@ export function paintCardFace(ctx: CanvasRenderingContext2D, face: CardFace, wid
     )
     ctx.drawImage(face.photo, sx, sy, side, side)
   } else monogram(ctx, face.initials, { x: art.w * 0.18, y: art.h * 0.16, w: art.w * 0.64 })
-  if (variant === 'holo' || variant === 'champion') foil(ctx, art.w, art.h, u, variant === 'holo' ? 0.5 : 0.3)
+  if (withFoil && foilStrength(variant) > 0) foil(ctx, art.w, art.h, u, foilStrength(variant))
   ctx.restore()
+}
+
+/**
+ * La lámina sola de la holo y de la de campeón (tarea 7.23), para la 3D: la de `paintCardFace` en su posición de
+ * reposo, sobre negro, a la medida del retrato de una carta de `width` px y con `bleed` px de más a cada lado (la textura
+ * se desplaza con la inclinación). Puesta en modo `screen` sobre la capa `'art'`, da lo mismo que la carta entera: el
+ * negro no cambia nada. El lienzo mide `cardArtBox(width).w + 2 * bleed` × `cardArtBox(width).h`.
+ */
+export function paintFoilSheet(
+  ctx: CanvasRenderingContext2D,
+  variant: CardVariant,
+  width: number,
+  bleed: number,
+): void {
+  const u = width / CARD_BASE_WIDTH
+  const art = cardArtBox(width)
+  ctx.save()
+  ctx.fillStyle = color.black
+  ctx.fillRect(0, 0, art.w + 2 * bleed, art.h)
+  ctx.translate(bleed, 0)
+  if (foilStrength(variant) > 0) foil(ctx, art.w, art.h, u, foilStrength(variant), bleed)
+  ctx.restore()
+}
+
+/** Lo que va encima de la lámina: número, sello de nivel, corona, etiqueta de variante y el cuerpo de la carta. */
+function paintMarks(ctx: CanvasRenderingContext2D, face: CardFace, width: number) {
+  const u = width / CARD_BASE_WIDTH
+  const stroke = length.strokeCursor * u
+  const { variant } = face
+  const art = cardArtBox(width)
+  ctx.save()
+  ctx.textBaseline = 'alphabetic'
+  ctx.textAlign = 'left'
 
   // El número, en su placa opaca.
   ctx.font = NUM(Math.max(12, 4.2 * 3.52) * u)
@@ -485,15 +557,37 @@ export function paintCardFace(ctx: CanvasRenderingContext2D, face: CardFace, wid
     )
 
   // El pie: «Beat Battle · desde 03/2026» y la pegatina.
-  const footY = height - 12 * u - stroke
+  footer(ctx, t('ui.producerCard.since', { since: face.since }), face.slap, width)
+  ctx.restore()
+}
+
+/** Dónde acaba el pie de una carta de `width` px (anverso y reverso). */
+const footBottom = (width: number) => {
+  const u = width / CARD_BASE_WIDTH
+  return cardHeight(width) - 12 * u - length.strokeCursor * u
+}
+
+/** El pie de las dos caras: su texto en rótulo y la pegatina OTP a la derecha (sin ella, «OTP.» en display). */
+function footer(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  slap: CanvasImageSource | null | undefined,
+  width: number,
+) {
+  const u = width / CARD_BASE_WIDTH
+  const pad = 16 * u
+  const footY = footBottom(width)
+  ctx.save()
+  ctx.textAlign = 'left'
   ctx.fillStyle = color.text3
   ctx.font = UI(12 * u)
-  ctx.fillText(t('ui.producerCard.since', { since: face.since }).toUpperCase(), pad, footY - 8 * u)
+  ctx.letterSpacing = `${1.5 * u}px`
+  ctx.fillText(text.toUpperCase(), pad, footY - 8 * u)
   ctx.letterSpacing = '0px'
-  if (face.slap) {
+  if (slap) {
     const slapH = 30 * u
     const slapW = (slapH * Number(OTP_SLAP.width)) / Number(OTP_SLAP.height)
-    ctx.drawImage(face.slap, width - pad - slapW, footY - slapH, slapW, slapH)
+    ctx.drawImage(slap, width - pad - slapW, footY - slapH, slapW, slapH)
   } else {
     ctx.fillStyle = color.red
     ctx.font = DISPLAY(20 * u)
@@ -508,4 +602,94 @@ export function cardFaceCanvas(face: CardFace, width: number): HTMLCanvasElement
   const [canvas, ctx] = cpuCanvas(Math.round(width), cardHeight(width))
   paintCardFace(ctx, face, Math.round(width))
   return canvas
+}
+
+/** El reverso con sus imágenes ya decodificadas: el QR del perfil (el PNG del servidor) y la pegatina. */
+export interface CardBackFace extends CardBack {
+  /** El QR ya decodificado; mientras llega, su papel blanco. */
+  qr?: CanvasImageSource | null
+  /** El QR no ha llegado: «QR NO DISPONIBLE» en su papel (la dirección va escrita de todos modos). */
+  qrFailed?: boolean
+  slap?: CanvasImageSource | null
+}
+
+/**
+ * Pinta el reverso de la carta (§3.4.4; tarea 7.23: la cara de atrás de la 3D) en `ctx`, desde (0, 0) y a `width` px
+ * de ancho, desde `CardBack` y con las medidas del reverso de `ProducerCard` escaladas: el número, el logo del juego, el
+ * QR en su papel blanco (el PNG del servidor, a píxel), la dirección del perfil y el pie «EN LA BATALLA DESDE 03/2026»
+ * con la pegatina, sobre granate oscuro y con el marco de su variante. Como `paintCardFace`, no borra lo de debajo.
+ */
+export function paintCardBack(ctx: CanvasRenderingContext2D, back: CardBackFace, width: number): void {
+  const u = width / CARD_BASE_WIDTH
+  ctx.save()
+  ctx.textBaseline = 'alphabetic'
+  ctx.textAlign = 'left'
+  frame(ctx, back.variant, width, color.wine3)
+
+  const pad = 16 * u
+  const inner = width - 2 * pad
+  const gap = 12 * u
+  const top = 20 * u
+  const numberSize = Math.max(12, 4.2 * 3.52) * u
+  const numberH = numberSize * 1.45
+  const [bx, by, boxW, boxH] = LOGO_LAYOUTS.compact.box
+  const logoW = inner * 0.86
+  const logoH = (logoW * boxH) / boxW
+  const qr = inner * 0.52
+  const lineH = 12 * 1.45 * u
+  const footH = 30 * u
+  // El QR y el pie llevan `margin-top: auto`: se reparten a medias lo que sobra de la columna.
+  const fixed = numberH + gap + logoH + gap + qr + gap + lineH + gap
+  const free = Math.max(0, footBottom(width) - footH - top - fixed) / 2
+
+  let y = top
+  ctx.font = NUM(numberSize)
+  ctx.letterSpacing = `${0.06 * numberSize}px`
+  ctx.fillStyle = color.red
+  ctx.fillText(cardNumberLabel(back.cardNumber), pad, y + numberH * 0.75)
+  ctx.letterSpacing = '0px'
+  y += numberH + gap
+
+  // El logo se pinta en su lienzo (su pintor limpia su caja) y se pega encima.
+  const scale = logoW / boxW
+  const [logo, logoCtx] = cpuCanvas(Math.max(1, Math.round(logoW)), Math.max(1, Math.round(logoH)))
+  logoCtx.setTransform(scale, 0, 0, scale, -bx * scale, -by * scale)
+  paintLogo(logoCtx, LOGO_LAYOUTS.compact, scale, {
+    beat: t('ui.gameLogo.beat'),
+    battle: t('ui.gameLogo.battle'),
+  })
+  ctx.drawImage(logo, pad + (inner - logoW) / 2, y, logoW, logoH)
+  y += logoH + gap + free
+
+  const qx = pad + (inner - qr) / 2
+  ctx.fillStyle = color.white
+  ctx.fillRect(qx, y, qr, qr)
+  if (back.qr) {
+    ctx.save()
+    ctx.imageSmoothingEnabled = false
+    ctx.drawImage(back.qr, qx, y, qr, qr)
+    ctx.restore()
+  } else if (back.qrFailed) {
+    ctx.font = UI(12 * u)
+    ctx.letterSpacing = `${1.5 * u}px`
+    ctx.fillStyle = color.black
+    ctx.textAlign = 'center'
+    ctx.fillText(
+      clip(ctx, t('ui.producerCard.qrUnavailable').toUpperCase(), qr - 16 * u),
+      qx + qr / 2,
+      y + qr / 2 + 4 * u,
+    )
+    ctx.letterSpacing = '0px'
+    ctx.textAlign = 'left'
+  }
+  y += qr + gap
+
+  ctx.font = UI(12 * u, 600)
+  ctx.fillStyle = color.text2
+  ctx.textAlign = 'center'
+  ctx.fillText(clip(ctx, back.profileUrl.replace(/^https?:\/\//, ''), inner), width / 2, y + lineH * 0.75)
+  ctx.textAlign = 'left'
+
+  footer(ctx, t('ui.producerCard.joined', { since: back.since }), back.slap, width)
+  ctx.restore()
 }
