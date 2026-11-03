@@ -123,7 +123,9 @@ test('RF-GAME-01, RF-ARC-02, RF-ARC-05: una temporada jugada deja rangos, logros
     await expect(ceremony.locator('[data-producer-card][data-variant="champion"]')).toContainText(
       champion.username,
     )
-    await expect(ceremony.getByText('¡Eres el campeón de la temporada T1 de 2034!')).toBeVisible()
+    await expect(
+      ceremony.getByText('¡Eres el campeón de la temporada T1 de 2034!', { exact: true }),
+    ).toBeVisible()
     await expect(ceremony).toContainText('4 victorias')
     // §3.8.8: mientras dura, ningún aviso de logro ni de nivel (los tiene pendientes: el sellado le dio varios).
     await expect(page.locator('[data-notice]')).toHaveCount(0)

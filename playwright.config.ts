@@ -88,7 +88,13 @@ export default defineConfig({
     { name: 'warmup', testMatch: /\.setup\.ts$/ },
     {
       name: 'e2e',
-      testIgnore: [/\.setup\.ts$/, /\.perf\.ts$/, /results\.spec\.ts$/, /game-data\.spec\.ts$/],
+      testIgnore: [
+        /\.setup\.ts$/,
+        /\.perf\.ts$/,
+        /results\.spec\.ts$/,
+        /game-data\.spec\.ts$/,
+        /game-milestone\.spec\.ts$/,
+      ],
       dependencies: ['warmup'],
     },
     // El hito de la Fase 6 sella con el reloj de prueba: su tick sella TODAS las semanas cerradas en ese
@@ -97,11 +103,13 @@ export default defineConfig({
     // La temporada de la capa de juego (tarea 7.32) sella en 2034, después de todo lo demás: su primera lectura
     // de resultados sellaría las semanas que el hito de la Fase 6 aún está votando.
     { name: 'e2e-game', testMatch: /game-data\.spec\.ts$/, dependencies: ['e2e-sealing'] },
+    // El hito de la Fase 7 (tarea 7.33): una temporada de 13 semanas en 2035, la última en sellar de todas.
+    { name: 'e2e-game-milestone', testMatch: /game-milestone\.spec\.ts$/, dependencies: ['e2e-game'] },
     // Rendimiento contra la build de producción, cuando ya han terminado los E2E (sin competir por la CPU).
     {
       name: 'perf',
       testMatch: /\.perf\.ts$/,
-      dependencies: ['e2e', 'e2e-sealing', 'e2e-game'],
+      dependencies: ['e2e', 'e2e-sealing', 'e2e-game', 'e2e-game-milestone'],
       use: { baseURL: previewOrigin },
     },
   ],

@@ -140,7 +140,10 @@ Con la calidad apagada, sin sonido (`bb:sound` = `off`), con «reducir movimient
    iban solas a los 4 s y ya estaban marcadas vistas: no las veía nadie. Ahora una capa a pantalla completa que llega
    con avisos a la vista los devuelve a la cola, delante, y salen al cerrarse sin volver a decirse ni a marcarse vistos
    (`hudStore.hold`). Test en `hudStore.test.ts` y mirado con la siembra: ningún aviso mientras dura la ceremonia y los
-   tres salen después.
+   tres salen después. La 7.33 (#124, fusionada aquí) encontró lo mismo y lo arregla desde el principio para la
+   ceremonia del campeón (lo pendiente de `me` entra en la cola después de que el marco ponga la retención); lo de aquí
+   vale además para cualquier capa que llegue con avisos ya a la vista (la revelación del drop, una ceremonia que se
+   abre mientras salen).
 
 **Sin verificar con lector real.** Las regiones vivas (recompensas, ceremonia del campeón, avisos del marco, reloj)
 están comprobadas con Testing Library y Playwright (existen vacías desde el principio, su `aria-live`, su texto, una vez

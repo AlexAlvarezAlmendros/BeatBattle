@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { EMPTY_ME_GAME } from '../../test/game'
 import { useSession } from '../account/session'
 import { useHud } from './hudStore'
+import { useGameRewards } from './rewards'
 import { SeasonCeremonyHost } from './SeasonCeremonyHost'
 import { resultsSeasonOf, SeasonCeremonyCue, useSeasonCeremony } from './seasonCeremony'
 
@@ -77,16 +78,21 @@ function renderFrame(path: string, { cue = true } = {}) {
       {withCue && <SeasonCeremonyCue />}
     </>
   )
-  // Como `RootLayout`: el anfitrión en el marco, que no se desmonta al cambiar de pantalla.
+  // Como `RootLayout`: el marco engancha lo ganado a la sesión y lleva el anfitrión, que no se desmonta al cambiar de
+  // pantalla.
+  function Frame() {
+    useGameRewards()
+    return (
+      <>
+        <Outlet />
+        <SeasonCeremonyHost />
+      </>
+    )
+  }
   const router = createMemoryRouter(
     [
       {
-        element: (
-          <>
-            <Outlet />
-            <SeasonCeremonyHost />
-          </>
-        ),
+        element: <Frame />,
         children: [
           { path: '/', element: screenOf('menú', cue) },
           { path: '/semana/:slug/resultados', element: screenOf('resultados', cue) },
@@ -133,6 +139,37 @@ describe('la ceremonia del campeón de temporada en el marco (7.27, §3.8.15)', 
     fireEvent.click(screen.getByRole('button', { name: 'acabar' }))
     // Al cerrarse, el «¡LOGRO LEGENDARIO!» de `season_champ`, después de ella.
     expect(useHud.getState().holds).toBe(0)
+    expect(useHud.getState().big).toMatchObject({ kind: 'achievement', id: 'season_champ' })
+  })
+
+  it('§3.8.8: con la sesión que llega después de pintar el marco (la carga de la página), sus avisos pendientes esperan a la ceremonia', async () => {
+    // Como al cargar los resultados: el marco se pinta sin sesión y `GET /api/me` llega después, con la ceremonia
+    // pendiente y sus logros sin ver; ninguno puede salir antes que ella.
+    useSession.setState({ status: 'loading', me: null })
+    renderFrame('/semana/2026-w39/resultados', { cue: false })
+    act(() =>
+      useSession.setState({
+        status: 'signedIn',
+        me: { ...ME, game: { ...ME.game, level: 3, unseenAchievements: ['podium', 'win', 'season_champ'] } },
+      }),
+    )
+    expect(useHud.getState().holds).toBe(1)
+    expect(useHud.getState().plates).toEqual([])
+    expect(useHud.getState().big).toBeNull()
+    expect(useHud.getState().queue.map((notice) => notice.kind)).toEqual([
+      'achievement',
+      'achievement',
+      'achievement',
+      'level',
+    ])
+    act(() => useSeasonCeremony.setState((state) => ({ cues: state.cues + 1 })))
+    fireEvent.click(await screen.findByRole('button', { name: 'acabar' }))
+    // Al cerrarse, salen en orden: las placas y el legendario.
+    expect(useHud.getState().holds).toBe(0)
+    expect(useHud.getState().plates.map((notice) => notice.kind === 'achievement' && notice.id)).toEqual([
+      'podium',
+      'win',
+    ])
     expect(useHud.getState().big).toMatchObject({ kind: 'achievement', id: 'season_champ' })
   })
 
