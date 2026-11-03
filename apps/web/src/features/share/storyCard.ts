@@ -1,10 +1,11 @@
 import { coverContext, paintCover } from '@beatbattle/covers'
 import { angle, color } from '@beatbattle/shared/tokens'
+import { t } from '../../i18n'
 import { type CardFace, cardFaceCanvas, cardHeight, loadCardFonts } from '../../ui/ProducerCard/cardCanvas'
 
 /**
  * Tarjetas para stories (§2.15, `RF-SHARE-03`; tarea 6.14): un PNG de 1080 × 1920 que se pinta en el navegador
- * (contexto 2D por CPU, como las portadas) con las fuentes del juego. «Estoy en la batalla #N» (la propia
+ * (contexto 2D por CPU, como las portadas) con las fuentes del juego y los textos de `stories.*`. «Estoy en la batalla #N» (la propia
  * entrada, sin sellar: dice «Escúchala y vota», nunca «Vota a X», §2.15), «He quedado N.º» (tras el sellado) y «Mi
  * carta de productor» (tarea 7.28: la carta pintada por CPU desde `cardModel`, `cardCanvas`, con lo público del perfil).
  */
@@ -116,20 +117,20 @@ export async function drawStory(canvas: HTMLCanvasElement, card: StoryCard): Pro
   // Arriba: el juego y la semana.
   ctx.fillStyle = color.red
   ctx.font = UI(44)
-  ctx.fillText(`BEAT BATTLE · SEMANA #${card.weekNumber}`, MARGIN, 190)
+  ctx.fillText(t('stories.week', { number: card.weekNumber }).toUpperCase(), MARGIN, 190)
 
   // El titular.
   ctx.fillStyle = color.white
   if (card.kind === 'battle') {
     ctx.font = DISPLAY(124)
-    ctx.fillText('ESTOY EN', MARGIN, 350)
-    ctx.fillText('LA BATALLA', MARGIN, 480)
+    ctx.fillText(t('stories.battle.line1').toUpperCase(), MARGIN, 350)
+    ctx.fillText(t('stories.battle.line2').toUpperCase(), MARGIN, 480)
   } else {
     ctx.font = DISPLAY(124)
-    ctx.fillText('HE QUEDADO', MARGIN, 350)
+    ctx.fillText(t('stories.result.line1').toUpperCase(), MARGIN, 350)
     ctx.fillStyle = card.position === 1 ? color.red : color.white
     ctx.font = DISPLAY(150)
-    ctx.fillText(`${card.position}.º`, MARGIN, 500)
+    ctx.fillText(t('stories.result.position', { position: card.position }), MARGIN, 500)
   }
 
   // La portada, con su marco.
@@ -152,13 +153,13 @@ export async function drawStory(canvas: HTMLCanvasElement, card: StoryCard): Pro
   ctx.fillText(card.kind === 'battle' ? card.alias : card.producer, MARGIN, ty + 10)
   ctx.fillStyle = color.text3
   ctx.font = UI(36, 600)
-  ctx.fillText(`Sample: ${card.sampleTitle}`, MARGIN, ty + 70)
+  ctx.fillText(t('stories.sample', { title: card.sampleTitle }), MARGIN, ty + 70)
 
   // Abajo: la llamada (o las cifras) y la firma.
   const foot = STORY_HEIGHT - 170
   if (card.kind === 'battle') {
     ctx.font = UI(48)
-    const label = 'ESCÚCHALA Y VOTA'
+    const label = t('stories.battle.call').toUpperCase()
     const w = ctx.measureText(label).width + 64
     ctx.fillStyle = color.redCta
     ctx.fillRect(MARGIN, foot - 66, w, 90)
@@ -224,12 +225,16 @@ function foot(ctx: CanvasRenderingContext2D, call: string, url: string) {
 function drawProducer(ctx: CanvasRenderingContext2D, card: Extract<StoryCard, { kind: 'producer' }>) {
   ctx.fillStyle = color.red
   ctx.font = UI(44)
-  ctx.fillText('BEAT BATTLE · CARTA DE PRODUCTOR', MARGIN, 190)
+  ctx.fillText(t('stories.producer.kicker').toUpperCase(), MARGIN, 190)
   ctx.fillStyle = color.white
-  headline(ctx, 'MI CARTA', 124)
-  ctx.fillText('MI CARTA', MARGIN, 340)
-  headline(ctx, 'DE PRODUCTOR', 124)
-  ctx.fillText('DE PRODUCTOR', MARGIN, 470)
+  for (const [key, y] of [
+    ['stories.producer.line1', 340],
+    ['stories.producer.line2', 470],
+  ] as const) {
+    const line = t(key).toUpperCase()
+    headline(ctx, line, 124)
+    ctx.fillText(line, MARGIN, y)
+  }
 
   const face = cardFaceCanvas(card.card, CARD_WIDTH)
   const height = cardHeight(CARD_WIDTH)
@@ -241,7 +246,7 @@ function drawProducer(ctx: CanvasRenderingContext2D, card: Extract<StoryCard, { 
   ctx.drawImage(face, -CARD_WIDTH / 2, -height / 2)
   ctx.restore()
 
-  foot(ctx, 'ENTRA EN LA BATALLA', card.url)
+  foot(ctx, t('stories.producer.call').toUpperCase(), card.url)
 }
 
 /** La tarjeta como PNG. */

@@ -4,7 +4,7 @@ import { t } from '../../i18n'
 import { ACHIEVEMENT_GLYPHS, glyphShapes } from '../AchievementBadge'
 import { HALFTONE_SHAPES, paintHalftone } from '../arena/halftone'
 import { OTP_SLAP } from '../OtpSlap'
-import { type CardVariant, cardNumberLabel } from './cardModel'
+import { type CardFront, cardNumberLabel } from './cardModel'
 
 /**
  * La carta de productor pintada en un lienzo 2D **por CPU** (guía §3.4.4, §3.4.5; tarea 7.28): el anverso de
@@ -14,27 +14,16 @@ import { type CardVariant, cardNumberLabel } from './cardModel'
  * medidas son las de la carta de 352 px del perfil, escaladas). Lo usan la tarjeta para *stories* («Mi carta de
  * productor») y, con la 7.23, la textura de la carta 3D.
  *
+ * Uso: `profileCard(perfil)` (o cualquier `CardFront`) → `loadCardFace(anverso, avatarUrl)` (fuentes, foto y
+ * pegatina) → `cardFaceCanvas(cara, ancho)` para un lienzo nuevo o `paintCardFace(ctx, cara, ancho)` sobre uno propio
+ * (la textura que se repinta al cambiar de variante).
+ *
  * El contexto se pide con `willReadFrequently: true` (rasterizado por CPU, como las portadas): el PNG sale igual en
  * cualquier máquina. Sin movimiento: la lámina queda quieta, en su posición de reposo.
  */
 
-/** Lo que pinta la carta: lo mismo que enseña `ProducerCard` (de lo público del perfil, hueco G1). */
-export interface CardFace {
-  name: string
-  initials: string
-  cardNumber: number
-  level: number
-  /** Fracción del nivel en curso, `[0, 1]` (el arco del sello). */
-  levelFraction: number
-  /** El rango, ya en palabras («Beatmaker»). */
-  rank: string
-  stats: { wins: number; podiums: number; weeks: number }
-  showcase: readonly AchievementId[]
-  /** Logros públicos: «Vitrina · 2 de 14». */
-  achievements?: number
-  /** «03/2026». */
-  since: string
-  variant: CardVariant
+/** Lo que pinta el lienzo: el anverso de `cardModel` (el mismo de `ProducerCard`) con sus imágenes ya decodificadas. */
+export interface CardFace extends CardFront {
   /** La foto del avatar ya decodificada (del mismo origen o con CORS); sin ella, el monograma. */
   photo?: CanvasImageSource | null
   /** La pegatina OTP ya decodificada; sin ella, «OTP.» en display. */
@@ -87,6 +76,11 @@ export async function loadCardAssets(avatarUrl?: string | null) {
     loadImage(OTP_SLAP.png2x),
   ])
   return { photo, slap }
+}
+
+/** El anverso listo para pintar: con las fuentes cargadas, la foto (si la hay y deja CORS) y la pegatina. */
+export async function loadCardFace(front: CardFront, avatarUrl?: string | null): Promise<CardFace> {
+  return { ...front, ...(await loadCardAssets(avatarUrl)) }
 }
 
 /** Alto de la carta a un ancho. */
@@ -255,7 +249,10 @@ function badge(
   ctx.restore()
 }
 
-/** Pinta el anverso de la carta en `ctx`, desde (0, 0) y a `width` px de ancho (el alto, `cardHeight`). */
+/**
+ * Pinta el anverso de la carta en `ctx`, desde (0, 0) y a `width` px de ancho (el alto, `cardHeight`). No borra lo que
+ * hay debajo (las esquinas del chaflán quedan como estaban): para repintar el mismo lienzo, `clearRect` antes.
+ */
 export function paintCardFace(ctx: CanvasRenderingContext2D, face: CardFace, width: number): void {
   const u = width / CARD_BASE_WIDTH
   const height = cardHeight(width)

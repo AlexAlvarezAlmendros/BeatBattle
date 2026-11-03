@@ -12,7 +12,7 @@ import { ProfilePage, profileLoader } from './ProfilePage'
 // La tarjeta para stories se pinta en un lienzo (jsdom no tiene) y carga imágenes: aquí solo se mira quién la pide.
 vi.mock('../share/shareStory', () => ({ shareStory: vi.fn(async () => 'downloaded') }))
 vi.mock('../../ui/ProducerCard/cardCanvas', () => ({
-  loadCardAssets: vi.fn(async () => ({ photo: null, slap: null })),
+  loadCardFace: vi.fn(async (front: object) => ({ ...front, photo: null, slap: null })),
 }))
 
 const PROFILE = {

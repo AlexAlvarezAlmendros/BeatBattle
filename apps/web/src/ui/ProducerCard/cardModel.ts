@@ -1,11 +1,19 @@
-import type { AchievementUnlock, ProfileGame } from '@beatbattle/shared'
-import { formatDate } from '../../i18n'
+import {
+  type AchievementId,
+  type CardVariant,
+  cardVariant,
+  levelProgress,
+  rankTitle,
+  unlockedVariants,
+} from '@beatbattle/rules'
+import { type AchievementUnlock, initialsOf, type ProfileGame, type PublicProfile } from '@beatbattle/shared'
+import { formatDate, t } from '../../i18n'
 
 /**
  * Lo que la carta de productor dice de su dueño (guía §3.4.4, §2.10; tarea 7.22), sacado de lo público del perfil
- * (`GET /api/profiles/:username`, solo semanas selladas: hueco G1). Puro: lo usan la carta plana, la vista previa de
- * Ajustes → Perfil, el lienzo 2D de la carta (`cardCanvas`: la tarjeta para *stories* de la 7.28 y, con la 7.23, la
- * textura 3D).
+ * (`GET /api/profiles/:username`, solo semanas selladas: hueco G1). Puro: es el único modelo de la carta, y lo pintan
+ * la carta plana (`ProducerCard`, también en la vista previa de Ajustes → Perfil) y el lienzo 2D por CPU
+ * (`cardCanvas`: la tarjeta para *stories* de la 7.28 y, con la 7.23, la textura de la carta 3D).
  */
 
 /**
@@ -44,3 +52,54 @@ export function cardSince(joinedAt: number): string {
 
 /** «#0042»: el número de carta (orden de registro) con cuatro cifras. */
 export const cardNumberLabel = (cardNumber: number) => `#${String(cardNumber).padStart(4, '0')}`
+
+/**
+ * El anverso de la carta, ya en palabras y cifras: lo mismo para la carta HTML (`ProducerCard`), el lienzo por CPU
+ * (`paintCardFace`) y la textura de la 3D.
+ */
+export interface CardFront {
+  name: string
+  initials: string
+  cardNumber: number
+  level: number
+  /** Fracción del nivel en curso, `[0, 1]` (el arco del sello). */
+  levelFraction: number
+  /** El rango, ya en palabras («Beatmaker»). */
+  rank: string
+  stats: { wins: number; podiums: number; weeks: number }
+  /** Hasta tres logros de la vitrina (conseguidos); los huecos van en silueta. */
+  showcase: readonly AchievementId[]
+  /** Logros conseguidos que enseña el perfil: «Vitrina · 3 de 14». Sin el dato, solo «Vitrina». */
+  achievements?: number
+  /** «03/2026»: mes y año de alta. */
+  since: string
+  /** Variante (§3.4.4): estándar, roja, holo o de campeón. */
+  variant: CardVariant
+}
+
+/**
+ * La carta de un perfil público (de su capa de juego: solo semanas selladas, hueco G1), con la variante más alta que
+ * tiene ganada, las que puede enseñar y la foto del avatar (sin ella, el monograma).
+ */
+export function profileCard(
+  profile: PublicProfile,
+): CardFront & { avatarUrl: string | null; unlocked: CardVariant[] } {
+  const progress = levelProgress(profile.xp)
+  const stats = cardStats(profile.game.history)
+  const facts = { level: progress.level, wins: stats.wins, champion: isChampion(profile.game.achievements) }
+  return {
+    name: profile.displayUsername,
+    initials: initialsOf(profile.displayUsername),
+    cardNumber: profile.cardNumber,
+    level: progress.level,
+    levelFraction: progress.fraction,
+    rank: t(`rank.${rankTitle(progress.level)}`),
+    stats,
+    showcase: profile.game.showcase,
+    achievements: profile.game.achievements.length,
+    since: cardSince(profile.joinedAt),
+    avatarUrl: profile.avatarUrl,
+    variant: cardVariant(facts),
+    unlocked: unlockedVariants(facts),
+  }
+}

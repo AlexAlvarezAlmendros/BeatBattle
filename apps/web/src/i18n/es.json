@@ -2175,7 +2175,24 @@
   "stories": {
     "button": "Tarjeta para stories",
     "shareTitle": "Beat Battle",
-    "producerFile": "beatbattle-carta-{username}.png"
+    "producerFile": "beatbattle-carta-{username}.png",
+    "week": "Beat Battle · Semana #{number}",
+    "sample": "Sample: {title}",
+    "battle": {
+      "line1": "Estoy en",
+      "line2": "la batalla",
+      "call": "Escúchala y vota"
+    },
+    "result": {
+      "line1": "He quedado",
+      "position": "{position}.º"
+    },
+    "producer": {
+      "kicker": "Beat Battle · Carta de productor",
+      "line1": "Mi carta",
+      "line2": "de productor",
+      "call": "Entra en la batalla"
+    }
   },
   "ceremony": {
     "label": "Ceremonia de resultados de la semana {number}",

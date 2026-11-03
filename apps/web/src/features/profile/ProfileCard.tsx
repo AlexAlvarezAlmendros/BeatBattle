@@ -1,4 +1,3 @@
-import { levelProgress, rankTitle } from '@beatbattle/rules'
 import type { PublicProfile } from '@beatbattle/shared'
 import { useEffect, useId, useRef, useState } from 'react'
 import { useControlKeys } from '../../app/layout/screen'
@@ -10,53 +9,26 @@ import {
   CARD_VARIANTS,
   type CardSide,
   type CardVariant,
-  cardSince,
-  cardStats,
-  cardVariant,
-  isChampion,
   ProducerCard,
-  unlockedVariants,
+  profileCard,
 } from '../../ui/ProducerCard'
-import { loadCardAssets } from '../../ui/ProducerCard/cardCanvas'
+import { loadCardFace } from '../../ui/ProducerCard/cardCanvas'
 import { singleKeyAllowed, useShortcuts } from '../../ui/shortcuts'
-import { initialsOf, useSession } from '../account/session'
+import { useSession } from '../account/session'
 import { StoryButton } from '../share/StoryButton'
 import { shareStory } from '../share/shareStory'
 import type { StoryCard } from '../share/storyCard'
 import styles from './ProfilePage.module.css'
-
-/** Lo que la carta de un perfil público necesita, sacado de su capa de juego (solo semanas selladas, hueco G1). */
-export function profileCardProps(profile: PublicProfile) {
-  const progress = levelProgress(profile.xp)
-  const stats = cardStats(profile.game.history)
-  const facts = { level: progress.level, wins: stats.wins, champion: isChampion(profile.game.achievements) }
-  return {
-    name: profile.displayUsername,
-    initials: initialsOf(profile.displayUsername),
-    cardNumber: profile.cardNumber,
-    level: progress.level,
-    levelFraction: progress.fraction,
-    rank: t(`rank.${rankTitle(progress.level)}`),
-    stats,
-    showcase: profile.game.showcase,
-    achievements: profile.game.achievements.length,
-    since: cardSince(profile.joinedAt),
-    avatarUrl: profile.avatarUrl,
-    variant: cardVariant(facts),
-    unlocked: unlockedVariants(facts),
-  }
-}
 
 /**
  * «Mi carta de productor» para *stories* (§2.15, §3.4.4; tarea 7.28): la carta pintada por CPU desde `cardModel` con lo
  * público del perfil, en la variante que se está viendo, y la dirección del perfil.
  */
 export async function producerStory(profile: PublicProfile, variant?: CardVariant): Promise<StoryCard> {
-  const { unlocked: _unlocked, variant: best, avatarUrl, ...card } = profileCardProps(profile)
-  const assets = await loadCardAssets(avatarUrl)
+  const { unlocked: _unlocked, avatarUrl, ...front } = profileCard(profile)
   return {
     kind: 'producer',
-    card: { ...card, variant: variant ?? best, ...assets },
+    card: await loadCardFace({ ...front, variant: variant ?? front.variant }, avatarUrl),
     url: `${window.location.origin}${paths.profile(profile.username)}`,
   }
 }
@@ -73,7 +45,7 @@ export const producerStoryFile = (username: string) => t('stories.producerFile',
  * movimiento» se queda esta (`RF-GAME-07`).
  */
 export function ProfileCard({ profile }: { profile: PublicProfile }) {
-  const { unlocked, variant, ...card } = profileCardProps(profile)
+  const { unlocked, variant, ...card } = profileCard(profile)
   const [side, setSide] = useState<CardSide>('front')
   const [shown, setShown] = useState<CardVariant>(variant)
   const [described, setDescribed] = useState<CardVariant>(variant)
