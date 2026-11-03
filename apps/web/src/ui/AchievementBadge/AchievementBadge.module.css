@@ -1,0 +1,109 @@
+/*
+ * Insignia de logro (§3.8.8): la rareza es el tratamiento del marco (`Frame`, chaflán `md`), con el glifo en
+ * medio. Cuadrada; el tamaño lo pone quien la usa (la vitrina de la carta, la rejilla del perfil).
+ */
+.badge {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  --frame-fill: var(--bb-panel);
+  color: var(--bb-white);
+}
+
+.glyph {
+  width: 52%;
+  height: 52%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.solid {
+  fill: currentColor;
+  stroke: none;
+}
+
+/* Común: borde blanco al 32 %. */
+.badge[data-rarity="common"] {
+  --frame-border: var(--bb-line-strong);
+}
+
+/* Rara: borde rojo, glifo rojo. */
+.badge[data-rarity="rare"] {
+  --frame-border: var(--bb-red);
+  color: var(--bb-red);
+}
+
+/* Épica: borde holo rojo-blanco-granate. */
+.badge[data-rarity="epic"]::before {
+  background: conic-gradient(
+    from 30deg,
+    var(--bb-red),
+    var(--bb-white),
+    var(--bb-wine),
+    var(--bb-red),
+    var(--bb-white),
+    var(--bb-wine),
+    var(--bb-red)
+  );
+}
+
+/* Legendaria: relleno rojo con trama (la de relleno, §3.2) y borde blanco; glifo negro. */
+.badge[data-rarity="legendary"] {
+  --frame-border: var(--bb-white);
+  --frame-fill: var(--bb-red-cta);
+  color: var(--bb-black);
+}
+
+.badge[data-rarity="legendary"]::after {
+  background:
+    radial-gradient(circle, var(--bb-red-shade) 0 var(--bb-tex-fill-dot), transparent var(--bb-tex-fill-dot))
+    0 0 / var(--bb-tex-fill-cell) var(--bb-tex-fill-cell),
+    var(--frame-fill);
+}
+
+/* Sin conseguir: en silueta (borde tenue, sin relleno de rareza, glifo apagado). */
+.badge[data-locked] {
+  --frame-border: var(--bb-line);
+  --frame-fill: var(--bb-panel);
+  color: var(--bb-text-4);
+}
+
+/* Mismo peso que las reglas de rareza y después: la silueta tapa el holo y la trama. */
+.badge[data-locked]::before {
+  background: var(--frame-border);
+}
+
+.badge[data-locked]::after {
+  background: var(--frame-fill);
+}
+
+.badge[data-locked] .glyph {
+  opacity: 0.55;
+}
+
+/* Oculta y sin conseguir: «???» en display. */
+.secret {
+  color: var(--bb-text-3);
+  font-family: var(--bb-font-display);
+  font-size: var(--bb-fs-xs);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: 1;
+}
+
+/* Contraste alto: el marco del sistema y el glifo en el color del texto. */
+@media (forced-colors: active) {
+  .badge {
+    border: var(--bb-stroke) solid CanvasText;
+    color: CanvasText;
+  }
+
+  .badge[data-locked] {
+    border-style: dashed;
+  }
+}

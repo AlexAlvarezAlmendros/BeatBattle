@@ -1,43 +1,215 @@
 /*
- * Carta de productor (§3.4.4), anverso plano: 63 × 88, inclinada −3°, negra (variante estándar) con marco
- * blanco y chaflán, en la paleta.
+ * Carta de productor (§3.4.4; tarea 7.22): 63 × 88, inclinada −3°, con su marco de chaflán y en la paleta. Es un
+ * contenedor (`container-type`): sus medidas internas van en `cqi` (con 12 px como poco en el texto, `RD-VIS-05`), así
+ * la misma carta sirve a 352 px en el perfil y más pequeña en la bienvenida y en Ajustes → Perfil.
+ *
+ * Capas: `.card` (el giro de −3° y la sombra) › `.flipper` (la inclinación que sigue al puntero y el giro de la
+ * tecla C, con muelle) › las dos caras, apiladas en la misma celda.
  */
 .card {
+  container-type: inline-size;
+  position: relative;
   display: grid;
-  /* Una columna que no crece con su contenido: un nombre largo se ajusta, no ensancha la carta. */
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto 1fr auto auto auto auto auto;
-  gap: var(--bb-space-2);
-  width: min(100%, calc(var(--bb-space-16) * 4.2));
+  width: min(100%, calc(var(--bb-space-16) * 5.5));
   aspect-ratio: 63 / 88;
-  /* Marco blanco que sigue el chaflán (`Frame`): con `border` + `clip-path` el trazo se cortaba en las esquinas. */
+  color: var(--bb-white);
+  rotate: var(--bb-tilt-card);
+  filter: drop-shadow(var(--bb-shadow-drop));
+}
+
+.flipper {
+  display: grid;
+  min-width: 0;
+  transform-style: preserve-3d;
+  transform: perspective(calc(var(--bb-space-16) * 14)) rotateY(var(--card-turn, 0turn));
+  transition: transform var(--bb-dur-slow) var(--bb-ease-back);
+}
+
+.back {
+  transform: rotateY(0.5turn);
+}
+
+/* La inclinación (Anexo E): hasta el doble del giro de la carta, hacia donde está el puntero. */
+.card[data-tilt] .flipper {
+  transform: perspective(calc(var(--bb-space-16) * 14))
+    rotateX(calc(var(--card-py, 0) * var(--bb-tilt-card) * 2))
+    rotateY(calc(var(--card-px, 0) * var(--bb-tilt-card) * -2 + var(--card-turn, 0turn)));
+}
+
+/* La tecla C: media vuelta, con el muelle de las estampas. */
+.card[data-side="back"] {
+  --card-turn: 0.5turn;
+}
+
+.face {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  backface-visibility: hidden;
+  --frame-cut: var(--bb-cut-lg);
   --frame-border: var(--bb-white);
   --frame-fill: var(--bb-black);
   --frame-stroke: var(--bb-stroke-cursor);
-  padding: var(--bb-space-4);
-  color: var(--bb-white);
+  --art-cut: calc(var(--bb-cut-lg) - var(--bb-stroke-cursor) * 0.586);
+}
+
+/* El reverso: centrado, sobre granate oscuro. */
+.back {
+  align-items: center;
+  gap: var(--bb-space-3);
+  padding: var(--bb-space-5) var(--bb-space-4) var(--bb-space-3);
+  --frame-fill: var(--bb-wine-3);
+}
+
+/*
+ * Carta plana (`RF-GAME-07`, «reducir movimiento»): ni inclinación ni giro. Las caras se cambian con un fundido
+ * (§3.6: como mucho 200 ms) y la que no se ve no se pinta.
+ */
+.card[data-flat] {
+  rotate: none;
+}
+
+.card[data-flat] .flipper,
+.card[data-flat] .back {
+  transform: none;
+  transition: none;
+}
+
+.card[data-flat] .face {
+  transition: opacity var(--bb-dur-fast) var(--bb-ease-out);
+}
+
+.card[data-flat][data-side="front"] .back,
+.card[data-flat][data-side="back"] .front {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* ── Anverso ─────────────────────────────────────────────────────────────────────────────── */
+
+/* El retrato: la mitad de arriba, recortada con el chaflán del marco, sobre granate y con trama. */
+.art {
+  position: relative;
+  flex: 0 0 50%;
+  margin: var(--bb-stroke-cursor) var(--bb-stroke-cursor) 0;
+  overflow: hidden;
+  background: linear-gradient(to bottom, var(--bb-wine-2), var(--bb-wine-3) 70%, var(--bb-black));
+  clip-path: polygon(var(--art-cut) 0, 100% 0, 100% 100%, 0 100%, 0 var(--art-cut));
+}
+
+.halftone {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.portrait {
+  position: absolute;
+  inset: 16% 18% 12%;
+  display: grid;
+  place-items: center;
+}
+
+/* La foto, en duotono (`data-duotone`) y con su marco; el monograma, suelto sobre la trama. */
+.portrait[data-duotone] {
+  inset: 18% 24% 16%;
+  border: var(--bb-stroke) solid var(--bb-white);
+}
+
+.monogram {
+  width: 100%;
+  height: auto;
+  overflow: visible;
   rotate: var(--bb-tilt-card);
 }
 
-.top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.monogram text {
+  font-family: var(--bb-font-display);
+  font-size: 96px;
+  font-stretch: var(--bb-stretch-display);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
+  paint-order: stroke;
+  stroke-linejoin: round;
+}
+
+.monogramDepth {
+  fill: var(--bb-red-cta);
+  stroke: var(--bb-black);
+  stroke-width: 10;
+}
+
+.monogramFace {
+  fill: var(--bb-white);
+  stroke: var(--bb-black);
+  stroke-width: 10;
+}
+
+/* La lámina (holo y campeón): rojo, blanco y granate, y una trama de líneas; sigue al puntero. */
+.foil {
+  --foil-red: 0.38;
+  --foil-white: 0.42;
+  --foil-wine: 0.6;
+  --foil-lines: 0.08;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background:
+    linear-gradient(
+      118deg,
+      transparent 22%,
+      rgb(from var(--bb-red) r g b / var(--foil-red)) 32%,
+      rgb(from var(--bb-white) r g b / var(--foil-white)) 38%,
+      rgb(from var(--bb-wine) r g b / var(--foil-wine)) 45%,
+      rgb(from var(--bb-red) r g b / var(--foil-red)) 52%,
+      transparent 62%
+    ),
+    repeating-linear-gradient(
+      118deg,
+      rgb(from var(--bb-white) r g b / var(--foil-lines)) 0 var(--bb-stroke),
+      transparent var(--bb-stroke) var(--bb-space-2)
+    );
+  background-size:
+    200% 100%,
+    auto;
+  background-position:
+    calc(50% - var(--card-px, 0) * 80%) 0,
+    0 0;
+}
+
+/* La de campeón: solo roja. */
+.card[data-variant="champion"] .foil {
+  --foil-white: 0.18;
+  --foil-wine: 0.3;
 }
 
 .number {
-  color: var(--bb-red);
+  position: absolute;
+  top: var(--bb-space-4);
+  left: var(--bb-space-4);
+  padding: var(--bb-space-1) var(--bb-space-2);
+  border: var(--bb-stroke) solid var(--bb-line-strong);
+  background: var(--bb-black);
   font-family: var(--bb-font-num);
-  font-size: var(--bb-fs-md);
+  font-size: max(var(--bb-fs-xs), 4.2cqi);
   font-weight: var(--bb-weight-extrabold);
+  letter-spacing: calc(var(--bb-tracking-label) / 2);
+  line-height: 1;
 }
 
-/* Sello de nivel: círculo con el arco de progreso en rojo. */
+/* Sello de nivel: círculo negro con el arco de progreso en rojo (§3.4.4). */
 .seal {
+  position: absolute;
+  top: var(--bb-space-3);
+  right: var(--bb-space-3);
   display: grid;
   place-items: center;
-  width: var(--bb-space-10);
-  height: var(--bb-space-10);
+  width: max(var(--bb-space-12), 17.6cqi);
+  aspect-ratio: 1;
   border-radius: 50%;
   background: conic-gradient(var(--bb-red) var(--seal-arc), var(--bb-ink-4) 0);
 }
@@ -46,39 +218,64 @@
   display: grid;
   place-items: center;
   align-content: center;
-  line-height: 1;
   width: calc(100% - 2 * var(--bb-stroke-cursor));
   height: calc(100% - 2 * var(--bb-stroke-cursor));
   border-radius: 50%;
   background: var(--bb-black);
-  font-family: var(--bb-font-num);
-  font-size: var(--bb-fs-md);
-  font-weight: var(--bb-weight-extrabold);
+  line-height: 0.9;
+}
+
+.sealLevel {
+  font-family: var(--bb-font-display);
+  font-size: max(var(--bb-fs-lg), 6.8cqi);
+  font-stretch: var(--bb-stretch-plate);
+  font-style: italic;
+  font-weight: var(--bb-weight-black);
 }
 
 .sealLabel {
-  font-family: var(--bb-font-ui);
+  color: var(--bb-text-2);
   font-size: var(--bb-fs-xs);
   font-weight: var(--bb-weight-bold);
   letter-spacing: var(--bb-tracking-label);
   text-transform: uppercase;
 }
 
-/* El retrato nunca cede su alto a un nombre largo: como poco, el de una placa del menú. */
-.portrait {
-  display: grid;
-  place-items: center;
-  min-height: var(--bb-plate-h);
-  border: var(--bb-stroke) solid var(--bb-line-strong);
-  background: var(--bb-wine-2);
+/* La etiqueta de variante: una pegatina en paralelogramo al pie del retrato. */
+.tag {
+  position: absolute;
+  bottom: var(--bb-space-3);
+  left: var(--bb-space-4);
+  max-width: calc(100% - var(--bb-space-8));
+  overflow: hidden;
+  rotate: var(--bb-tilt-card);
+  text-overflow: ellipsis;
 }
 
-.monogram {
-  font-family: var(--bb-font-display);
-  font-size: var(--bb-fs-3xl);
-  font-style: italic;
-  font-weight: var(--bb-weight-black);
-  text-shadow: var(--bb-shadow-hard);
+.crown {
+  position: absolute;
+  top: var(--bb-space-2);
+  left: 50%;
+  width: 16cqi;
+  translate: -50% 0;
+  fill: var(--bb-red);
+  stroke: var(--bb-black);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--bb-space-2);
+  min-height: 0;
+  padding: var(--bb-space-3) var(--bb-space-4) var(--bb-space-3);
+}
+
+/* Nada del cuerpo cede su alto (el rango se cortaba bajo las cifras): lo que sobra queda antes del pie. */
+.body > * {
+  flex-shrink: 0;
 }
 
 /* Una línea (`useFitText` baja la anchura y el cuerpo); puede desbordar en horizontal para medirse. */
@@ -86,27 +283,31 @@
   min-width: 0;
   overflow-x: clip;
   overflow-y: visible;
-  font-size: var(--bb-fs-xl);
+  font-size: clamp(var(--bb-fs-lg), 9cqi, var(--bb-fs-2xl));
+  font-stretch: var(--bb-stretch-plate);
   line-height: 1;
   white-space: nowrap;
 }
 
 .rank {
+  overflow: hidden;
   color: var(--bb-red);
   font-size: var(--bb-fs-xs);
   font-weight: var(--bb-weight-bold);
   letter-spacing: var(--bb-tracking-label);
+  text-overflow: ellipsis;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
+/* Como `05-perfil`: tres columnas iguales entre filetes, la cifra grande centrada y el rótulo debajo. */
 .stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--bb-space-2);
   margin: 0;
+  border-block: var(--bb-stroke-hair) solid var(--bb-line);
 }
 
-/* Como `05-perfil`: tres columnas iguales con filete, la cifra grande centrada y el rótulo debajo. */
 .stats div {
   display: flex;
   flex-direction: column-reverse;
@@ -122,23 +323,33 @@
 }
 
 .stats dt {
+  max-width: 100%;
+  overflow: hidden;
   color: var(--bb-text-3);
   font-size: var(--bb-fs-xs);
-  letter-spacing: var(--bb-tracking-label);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: calc(var(--bb-tracking-label) / 2);
+  text-overflow: ellipsis;
   text-transform: uppercase;
 }
 
 .stats dd {
   margin: 0;
   font-family: var(--bb-font-num);
-  font-size: var(--bb-fs-xl);
-  line-height: 1;
+  font-size: max(var(--bb-fs-lg), 6.4cqi);
   font-weight: var(--bb-weight-extrabold);
+  line-height: 1;
+}
+
+.case {
+  display: flex;
+  align-items: center;
+  gap: var(--bb-space-3);
+  min-width: 0;
 }
 
 .showcase {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
   gap: var(--bb-space-2);
   padding: 0;
   margin: 0;
@@ -146,31 +357,164 @@
 }
 
 .slot {
-  min-height: var(--bb-space-8);
-  border: var(--bb-stroke) solid var(--bb-line-strong);
+  display: grid;
+  width: max(var(--bb-space-8), 12cqi);
+  aspect-ratio: 1;
+}
+
+.badge {
+  width: 100%;
 }
 
 /* Hueco vacío: la silueta (borde discontinuo). */
 .slot[data-empty] {
-  border-style: dashed;
+  border: var(--bb-stroke) dashed var(--bb-line-strong);
 }
 
-.footer {
+.caseLabel {
+  display: grid;
+  min-width: 0;
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  line-height: var(--bb-leading-label);
+  text-transform: uppercase;
+}
+
+.footer,
+.backFooter {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: var(--bb-space-2);
-  white-space: nowrap;
-  font-stretch: var(--bb-stretch-min);
+  margin-top: auto;
   color: var(--bb-text-3);
   font-size: var(--bb-fs-xs);
+  font-stretch: var(--bb-stretch-min);
   font-weight: var(--bb-weight-bold);
   letter-spacing: var(--bb-tracking-label);
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
-@media (prefers-reduced-motion: reduce) {
+/* ── Reverso ─────────────────────────────────────────────────────────────────────────────── */
+
+.backNumber {
+  align-self: flex-start;
+  color: var(--bb-red);
+  font-family: var(--bb-font-num);
+  font-size: max(var(--bb-fs-xs), 4.2cqi);
+  font-weight: var(--bb-weight-extrabold);
+  letter-spacing: calc(var(--bb-tracking-label) / 2);
+}
+
+.backLogo {
+  width: 86%;
+}
+
+/* El QR en su papel blanco: lo que mejor leen las cámaras, aunque la carta sea oscura. */
+.qrBox {
+  display: grid;
+  width: 52%;
+  aspect-ratio: 1;
+  margin-top: auto;
+}
+
+/* El papel blanco del QR: el mismo mientras llega, con el PNG y si falla. */
+.qr {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background: var(--bb-white);
+}
+
+.qrImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.qr[data-qr="loading"] .qrImage {
+  opacity: 0;
+}
+
+.qrFallback {
+  padding: var(--bb-space-2);
+  color: var(--bb-black);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-bold);
+  letter-spacing: var(--bb-tracking-label);
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.backUrl {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--bb-text-2);
+  font-size: var(--bb-fs-xs);
+  font-weight: var(--bb-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.backFooter {
+  align-self: stretch;
+}
+
+/* ── Variantes (§3.4.4), todas en la paleta ─────────────────────────────────────────────── */
+
+/* Roja (rango ≥ Productor): marco rojo y el retrato en rojo con la trama de relleno (puntos `--bb-red-shade`). */
+.card[data-variant="red"] .face {
+  --frame-border: var(--bb-red);
+}
+
+.card[data-variant="red"] .art {
+  background: var(--bb-red-cta);
+}
+
+/* Holo (ha ganado alguna semana): el marco también es lámina. */
+.card[data-variant="holo"] .face::before {
+  background: conic-gradient(
+    from 200deg,
+    var(--bb-red),
+    var(--bb-white),
+    var(--bb-wine),
+    var(--bb-red),
+    var(--bb-white),
+    var(--bb-wine),
+    var(--bb-red)
+  );
+}
+
+/* Campeón de temporada: marco rojo, lámina roja y corona. */
+.card[data-variant="champion"] .face {
+  --frame-border: var(--bb-red);
+}
+
+.card[data-variant="champion"] .art {
+  background: linear-gradient(to bottom, var(--bb-red-shade), var(--bb-wine-2) 60%, var(--bb-black));
+}
+
+/* Contraste alto: sin láminas ni trama; el marco del sistema. */
+@media (forced-colors: active) {
   .card {
-    rotate: none;
+    filter: none;
+  }
+
+  .foil,
+  .halftone {
+    display: none;
+  }
+
+  .face {
+    border: var(--bb-stroke-cursor) solid CanvasText;
+  }
+
+  .seal {
+    border: var(--bb-stroke) solid CanvasText;
   }
 }

@@ -1,9 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { t } from '../../i18n'
+import { EMPTY_PROFILE_GAME } from '../../test/game'
 import { useSession } from '../account/session'
 import { ProfileSettingsPage } from './ProfileSettings'
 
@@ -85,8 +86,11 @@ describe('Ajustes → Perfil (§2.3)', () => {
     })
     await userEvent.clear(screen.getByLabelText('Spotify'))
     await userEvent.click(screen.getByRole('button', { name: new RegExp(t('settings.profile.save')) }))
+    // La línea de estado de la carta (la de la vitrina, debajo, sigue vacía).
     await waitFor(() =>
-      expect(screen.getAllByRole('status').at(-1)).toHaveTextContent(t('settings.profile.saved')),
+      expect(screen.getAllByRole('status').map((status) => status.textContent)).toContain(
+        t('settings.profile.saved'),
+      ),
     )
     expect(calls.at(-1)?.body).toEqual({ city: 'Girona', accent: 'wine' })
   })
@@ -113,5 +117,54 @@ describe('Ajustes → Perfil (§2.3)', () => {
     expect(
       await screen.findByText(/Ya lo cambiaste hace menos de 30.días\. Podrás el 7 de noviembre de 2026\./),
     ).toBeInTheDocument()
+  })
+
+  it('RF-PRF-01 / §2.3: la vitrina se elige entre los logros conseguidos, hasta tres y en el orden marcado', async () => {
+    const calls = mockApi(({ method, path, body }) => {
+      if (path === '/api/me/profile' && method === 'GET')
+        return { body: { data: { ...PROFILE, showcase: ['win'] } } }
+      if (path === '/api/profiles/aina')
+        return {
+          body: {
+            data: {
+              ...PROFILE,
+              game: {
+                ...EMPTY_PROFILE_GAME,
+                achievements: ['first_vote', 'streak_3', 'podium', 'win'].map((id) => ({
+                  id,
+                  unlockedAt: 1,
+                })),
+                showcase: ['win'],
+              },
+            },
+          },
+        }
+      return { body: { data: { ...PROFILE, ...(body as object) } } }
+    })
+    useSession.setState({ status: 'signedIn', me: null })
+    renderPage()
+    const list = await screen.findByRole('list', { name: t('settings.profile.showcase.list') })
+    // Solo los conseguidos (los públicos), en el orden del catálogo.
+    expect(
+      within(list)
+        .getAllByRole('button')
+        .map((button) => button.textContent?.replace(/\d\.º$/, '')),
+    ).toEqual(['Primer veredicto', 'En racha', 'Al podio', 'Disco de oro'])
+    expect(within(list).getByRole('button', { name: /Disco de oro/ })).toHaveAttribute('aria-pressed', 'true')
+    await userEvent.click(within(list).getByRole('button', { name: /Al podio/ }))
+    await userEvent.click(within(list).getByRole('button', { name: /En racha/ }))
+    await userEvent.click(within(list).getByRole('button', { name: /Primer veredicto/ }))
+    expect(screen.getByText(t('settings.profile.showcase.full', { max: 3 }))).toBeInTheDocument()
+    expect(within(list).getByRole('button', { name: /Primer veredicto/ })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    )
+    await userEvent.click(screen.getByRole('button', { name: t('settings.profile.showcase.save') }))
+    await waitFor(() => expect(calls.some((call) => call.method === 'PUT')).toBe(true))
+    expect(calls.find((call) => call.method === 'PUT')?.body).toEqual({
+      showcase: ['win', 'podium', 'streak_3'],
+    })
+    // El perfil público (la carta de la cuña, la vitrina) se vuelve a pedir.
+    await waitFor(() => expect(calls.at(-1)?.path).toBe('/api/profiles/aina'))
   })
 })

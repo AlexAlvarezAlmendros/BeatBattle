@@ -36,7 +36,7 @@ describe('avisos de logro y de subida de nivel (§3.8.8, tarea 7.20)', () => {
         .notify([{ kind: 'achievement', id: 'jury_full', rarity: 'rare', xp: 75, pending: 0 }]),
     )
     expect(screen.getByText(t('achievement.jury_full.name'))).toBeInTheDocument()
-    expect(screen.getByText(t('achievement.jury_full.desc'))).toBeInTheDocument()
+    expect(screen.getByText(t('achievement.jury_full.description'))).toBeInTheDocument()
     expect(screen.getByText(t('game.rarity.rare'))).toBeInTheDocument()
     expect(screen.getByText(plain(t('game.notice.xp', { xp: 75 })))).toBeInTheDocument()
     expect(play).toHaveBeenCalledWith('ach.rare')
