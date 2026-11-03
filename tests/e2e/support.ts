@@ -68,7 +68,7 @@ export const ROUTES = [
   { path: '/subir', heading: 'Subir mi beat' },
   { path: '/p/aina', heading: 'aina' },
   { path: '/salon-de-la-fama', heading: 'Salón de la fama' },
-  { path: '/temporada/t4', heading: 'Temporada' },
+  { path: '/temporada/2026-T4', heading: 'Temporada T4 de 2026' },
   { path: '/como-funciona', heading: 'Cómo se juega' },
   { path: '/ajustes/cuenta', heading: 'Cuenta' },
   { path: '/entrar', heading: 'Entrar' },

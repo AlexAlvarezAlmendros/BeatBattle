@@ -66,6 +66,18 @@ export const devRoutes: RouteObject[] = import.meta.env.DEV
         lazy: async () => ({ Component: (await import('../ui/gallery/CoversBenchPage')).CoversBenchPage }),
       },
       {
+        // Banco de la carta de productor (7.22): las cuatro variantes, anverso y reverso.
+        path: 'dev/carta',
+        handle: {
+          access: 'public',
+          screen: {
+            ...simpleScreen({ kicker: 'frame.plates.dev', title: 'dev.card.title' }, ['back', 'sound']),
+            rays: false,
+          },
+        },
+        lazy: async () => ({ Component: (await import('../ui/gallery/CardBenchPage')).CardBenchPage }),
+      },
+      {
         // Banco de la capa de juego del HUD (7.18–7.20): sesión de muestra, «+XP», avisos de logro y nivel.
         path: 'dev/recompensas',
         handle: {

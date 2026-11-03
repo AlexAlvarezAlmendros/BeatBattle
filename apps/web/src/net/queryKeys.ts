@@ -27,6 +27,10 @@ export const queryKeys = {
   ticker: (slug: string) => ['ticker', slug] as const,
   results: (slug: string) => ['results', slug] as const,
   archive: () => ['archive'] as const,
+  /** Perfil público (`GET /api/profiles/:username`), el salón de la fama y la clasificación de una temporada. */
+  profile: (username: string) => ['profiles', username] as const,
+  hallOfFame: () => ['hallOfFame'] as const,
+  season: (id: string) => ['seasons', id] as const,
   admin: {
     all: ['admin'] as const,
     samples: () => ['admin', 'samples'] as const,
