@@ -1,5 +1,5 @@
 import { type Browser, expect } from '@playwright/test'
-import { type Account, apiVote, battleContext, type Clock, signUp } from './battle'
+import { type Account, apiVote, battleContext, type Clock, CRON_SECRET, signUp } from './battle'
 
 /**
  * Una temporada jugada para los E2E de la capa de juego (tarea 7.32; la 7.33 y las capturas de la 7.35 se apoyan en
@@ -81,6 +81,25 @@ function pngHeader(): Buffer {
   png.writeUInt32BE(1200, 16)
   png.writeUInt32BE(1200, 20)
   return png
+}
+
+/**
+ * Espera a que la entrada esté activa (se pueda escuchar y votar). Si la medición no cabe en su presupuesto (§4.8.4, con
+ * la máquina muy cargada), la entrada queda en `processing` y la completa el `tick`, como en producción.
+ */
+async function untilActive(who: Account, weekSlug: string, clock: Clock) {
+  for (let i = 0; i < 10; i++) {
+    const res = await who.page.request.get(`/api/weeks/${weekSlug}/entries/mine`, {
+      headers: { 'x-bb-test-now': String(clock.api) },
+    })
+    expect(res.ok(), await res.text()).toBe(true)
+    if ((await res.json()).data.status === 'active') return
+    const tick = await who.page.request.get('/api/cron/tick', {
+      headers: { authorization: `Bearer ${CRON_SECRET}`, 'x-bb-test-now': String(clock.api) },
+    })
+    expect(tick.ok(), await tick.text()).toBe(true)
+  }
+  throw new Error(`la entrada de ${who.username} en la ${weekSlug} no se ha activado`)
 }
 
 /** La calidad (las estrellas que le da el jurado 0) de la entrada del productor `p` en la semana `w`. */
@@ -216,6 +235,7 @@ export async function playSeason(
       }
       const inPage = submit ? await submit({ p, w, who, week }) : null
       if (inPage) {
+        await untilActive(who, week.slug, clock)
         who.entries.push(inPage)
         entries.push({ p, id: inPage })
         clock.api += 60_000
@@ -254,6 +274,7 @@ export async function playSeason(
       })
       expect(entry.ok(), await entry.text()).toBe(true)
       const id = (await entry.json()).data.id as string
+      await untilActive(who, week.slug, clock)
       who.entries.push(id)
       entries.push({ p, id })
       clock.api += 60_000

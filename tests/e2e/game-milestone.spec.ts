@@ -102,14 +102,29 @@ function sums(rows: readonly LedgerRow[]): Record<string, number> {
   return out
 }
 
-/** Llama al `tick` con el reloj `now` hasta que `done` diga que ya está (la BD es compartida: cada pasada envía 40). */
-async function tickUntil(request: APIRequestContext, now: number, done: () => Promise<boolean>, tries = 60) {
+/** Un día: el `tick` del día siguiente a la misma hora (las 19:00, fuera de las horas de silencio). */
+const DAY_MS = 24 * 60 * 60 * 1000
+
+/**
+ * Llama al `tick` con el reloj `now` hasta que `done` diga que ya está y devuelve el instante del último. La BD de los E2E
+ * es compartida y esto va lo último: la cola trae lo que dejaron los demás, cada pasada envía 40 por prioridad (el
+ * resumen de temporada va de los últimos) y, si se agota el cupo de 24 h (`RF-NOTIF-17`), lo que queda se aplaza; entonces
+ * el siguiente `tick` es el del día siguiente.
+ */
+async function tickUntil(
+  request: APIRequestContext,
+  now: number,
+  done: () => Promise<boolean>,
+  tries = 60,
+): Promise<number> {
+  let at = now
   for (let i = 0; i < tries; i++) {
     const tick = await request.get('/api/cron/tick', {
-      headers: { authorization: `Bearer ${CRON_SECRET}`, 'x-bb-test-now': String(now) },
+      headers: { authorization: `Bearer ${CRON_SECRET}`, 'x-bb-test-now': String(at) },
     })
     expect(tick.ok(), await tick.text()).toBe(true)
-    if (await done()) return
+    if (await done()) return at
+    if (((await tick.json()).data.drain?.deferred ?? 0) > 0) at += DAY_MS
   }
   throw new Error('el tick no ha enviado lo esperado')
 }
@@ -132,7 +147,8 @@ test('hito de la Fase 7: XP de la subida y del sellado, temporada de 13 semanas 
   browser,
   baseURL,
 }) => {
-  test.setTimeout(600_000)
+  // Unos 2 min en local; en la CI, con la CPU modesta y el render por software, bastante más.
+  test.setTimeout(900_000)
   const base = baseURL as string
   const clock: Clock = { api: 0 }
   const headers = () => ({ origin: base, 'x-bb-test-now': String(clock.api) })
@@ -267,6 +283,11 @@ test('hito de la Fase 7: XP de la subida y del sellado, temporada de 13 semanas 
     // tres meses y los avisos no se van de la pantalla).
     const context = await battleContext(browser, base, testIp(251), clock)
     const page = await context.newPage()
+    // Si la ceremonia no sale (no ha podido cargar la clasificación o la carta), lo dice la consola.
+    const logs: string[] = []
+    page.on('console', (message) => {
+      if (message.type() === 'warning' || message.type() === 'error') logs.push(message.text())
+    })
     const signedIn = await page.request.post('/api/auth/sign-in/email', {
       headers: headers(),
       data: { email: hero.email, password: PASSWORD },
@@ -278,8 +299,11 @@ test('hito de la Fase 7: XP de la subida y del sellado, temporada de 13 semanas 
     )
     await page.goto(`/semana/${last.slug}/resultados`)
     const ceremony = page.getByRole('dialog', { name: 'Ceremonia del campeón de la temporada T2 de 2035' })
-    await expect(ceremony).toBeVisible({ timeout: 15_000 })
-    await expect(ceremony.getByText('¡Eres el campeón de la temporada T2 de 2035!')).toBeVisible()
+    // Con la máquina muy cargada, el trozo diferido de la ceremonia (en desarrollo, módulo a módulo) tarda.
+    await expect(ceremony, logs.join('\n')).toBeVisible({ timeout: 30_000 })
+    await expect(
+      ceremony.getByText('¡Eres el campeón de la temporada T2 de 2035!', { exact: true }),
+    ).toBeVisible()
     await expect(ceremony).toContainText('13 victorias')
     // §3.8.8: los avisos esperan a que se cierre.
     await expect(page.locator('[data-notice]')).toHaveCount(0)
@@ -294,11 +318,15 @@ test('hito de la Fase 7: XP de la subida y del sellado, temporada de 13 semanas 
       timeout: 60_000,
     })
     expect((await levelSeen).ok()).toBe(true)
+    // Todo visto en el servidor: cada aviso lo marca al salir (con la máquina cargada, los últimos tardan).
     await expect
-      .poll(async () => {
-        const { game } = await data(hero, '/api/me')
-        return [game.unseenAchievements, game.levelSeen, game.seasonCeremony]
-      })
+      .poll(
+        async () => {
+          const { game } = await data(hero, '/api/me')
+          return [game.unseenAchievements, game.levelSeen, game.seasonCeremony]
+        },
+        { timeout: 20_000 },
+      )
       .toEqual([[], sealed.hero.level, null])
     // «TU RESULTADO» del campeón: 1.º, el XP del sellado y sus puntos de temporada.
     const mine = page.getByRole('region', { name: 'Tu resultado' })
@@ -317,7 +345,7 @@ test('hito de la Fase 7: XP de la subida y del sellado, temporada de 13 semanas 
   await test.step('RF-NOTIF-15 / RF-NOTIF-03: el tick de las 19:00 manda «Tu temporada en cifras» y el progreso del día (capturado)', async () => {
     clock.api = PROGRESS_AT
     const request = hero.page.request
-    await tickUntil(request, clock.api, async () => {
+    clock.api = await tickUntil(request, clock.api, async () => {
       const wrap = await mailbox(request, hero.email, { contains: '¡Campeón de la T2 de 2035!' })
       const juryWrap = await mailbox(request, juror.email, { contains: 'Tu T2 de 2035 en cifras' })
       const progress = await mailbox(request, hero.email, { text: 'Tu progreso del' })
@@ -344,7 +372,7 @@ test('hito de la Fase 7: XP de la subida y del sellado, temporada de 13 semanas 
   })
 
   await test.step('RF-RES-06 / RF-GAME-01: re-sellar sin cambios no toca el XP, los logros, el campeón ni los emails', async () => {
-    clock.api = PROGRESS_AT + 5 * 60_000
+    clock.api += 5 * 60_000
     const before = await data(hero, `/api/weeks/${last.slug}/results`)
     const resealed = await season.admin.page.request.post(`/api/admin/weeks/${last.slug}/reseal`, {
       headers: headers(),
