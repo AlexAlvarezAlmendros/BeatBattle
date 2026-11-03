@@ -9,8 +9,9 @@ import { reprocessGame } from '../game/reprocess'
 
 /**
  * Solo con `NODE_ENV=test` y el `Mailer` en memoria (los E2E, guía §4.15): `GET /api/test/mailbox?to=` da
- * el último email a esa dirección (asunto y texto), para seguir enlaces de verificación sin un buzón real;
- * con `&contains=`, el último cuyo asunto lleve ese texto.
+ * el último email a esa dirección (asunto, texto y HTML, y cuántos hay), para seguir enlaces de verificación sin un
+ * buzón real; con `&contains=`, el último cuyo asunto lleve ese texto, y con `&text=`, el último cuyo texto plano lo
+ * lleve (el hito de la Fase 7 cuenta así su `season.wrap` y captura su `game.progress`).
  * `GET /api/test/unsubscribe-link?to=&kind=` da el enlace de baja (la página) que llevaría un aviso de ese
  * tipo: los avisos de la batalla aún no salen (Fase 3), y el E2E del hito prueba la baja con él.
  * `POST /api/test/role { email, role }` da o quita el rol de admin (los E2E del panel, Fase 3: en producción
@@ -37,17 +38,28 @@ export function testingRoutes(
   })
   const memory = mailer as MemoryMailer | null
   if (!memory || typeof memory.lastTo !== 'function') return
-  app.get<{ Querystring: { to?: string; contains?: string } }>('/api/test/mailbox', async (req) => {
-    const to = String(req.query.to ?? '').toLowerCase()
-    const contains = req.query.contains
-    // `contains`: el último cuyo asunto lleve ese texto (cuando a la misma dirección salen varios).
-    const last = contains
-      ? [...memory.sent]
-          .reverse()
-          .find((mail) => mail.to.toLowerCase() === to && mail.subject.includes(contains))
-      : memory.lastTo(to)
-    return { data: last ? { subject: last.subject, text: last.text } : null }
-  })
+  app.get<{ Querystring: { to?: string; contains?: string; text?: string } }>(
+    '/api/test/mailbox',
+    async (req) => {
+      const to = String(req.query.to ?? '').toLowerCase()
+      const { contains } = req.query
+      const text = req.query.text?.toLowerCase()
+      // `contains`: el asunto lleva ese texto; `text`: el texto plano lo lleva, sin distinguir mayúsculas (cuando a la
+      // misma dirección salen varios). `count`: cuántos de esa dirección lo cumplen (lo que sale una sola vez).
+      const matching = memory.sent.filter(
+        (mail) =>
+          mail.to.toLowerCase() === to &&
+          (!contains || mail.subject.includes(contains)) &&
+          (!text || mail.text.toLowerCase().includes(text)),
+      )
+      const last = matching.at(-1)
+      return {
+        data: last
+          ? { subject: last.subject, text: last.text, html: last.html, count: matching.length }
+          : null,
+      }
+    },
+  )
   app.get<{ Querystring: { to?: string; kind?: string } }>('/api/test/unsubscribe-link', async (req) => {
     const kind = (req.query.kind ?? 'battle.reminder') as EmailKind
     if (!(kind in EMAIL_CATALOG)) return { data: null }
