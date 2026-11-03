@@ -1,5 +1,5 @@
 import { levelProgress, rankTitle } from '@beatbattle/rules'
-import { type Me, MeSchema, type SeasonSummary } from '@beatbattle/shared'
+import { initialsOf, type Me, MeSchema, type SeasonSummary } from '@beatbattle/shared'
 import { create } from 'zustand'
 import { formatNumber, t } from '../../i18n'
 import { ApiClientError, apiFetch } from '../../net/api'
@@ -45,11 +45,7 @@ export const useSession = create<SessionState>((set) => ({
 }))
 
 /** Iniciales del nombre para la placa del HUD («LilBru» → «LB»; «kairo.wav» → «KW»). */
-export function initialsOf(name: string): string {
-  const parts = name.match(/[A-Z][a-z0-9]*|[a-z0-9]+/g) ?? [name]
-  const letters = parts.length > 1 ? parts.slice(0, 2).map((part) => part[0]) : [name[0], name[1]]
-  return letters.filter(Boolean).join('').toUpperCase()
-}
+export { initialsOf }
 
 /** La tesela de la temporada del HUD (§3.4.1): «Temporada T4» · «12 PTS · 9.º» (sin puesto, solo los puntos). */
 export function seasonTileOf(season: SeasonSummary): NonNullable<MenuPlayer['season']> {

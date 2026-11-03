@@ -20,14 +20,15 @@ export interface GameRoutesDeps {
  * Los logros que ocurren en el navegador (guía §4.10, Anexo C; tarea 7.14, hueco G5): `POST /api/me/achievements`
  * con un logro de la lista blanca (`BROWSER_ACHIEVEMENTS`: en la Fase 7, `share_card`), con sesión y como mucho 10
  * por hora. Da el logro y su XP, nada más (y `level_20` si ese XP cruza el nivel, como cualquier hecho); repetirlo no
- * suma. Un logro fuera de la lista → 422 (`VALIDATION_FAILED`).
+ * suma. Un logro fuera de la lista → 422 (`VALIDATION_FAILED`). `share_card` dice qué tarjeta se ha compartido
+ * (`card`, tarea 7.28): la de la batalla lleva la semana de su entrada (§2.10).
  */
 export function gameRoutes(app: FastifyInstance, deps: GameRoutesDeps): void {
   app.post(
     '/api/me/achievements',
     { preHandler: requireSession },
     async (req): Promise<DataEnvelope<GameDelta>> => {
-      const { achievement } = DeclaredAchievementSchema.parse(req.body)
+      const declared = DeclaredAchievementSchema.parse(req.body)
       const userId = req.user?.id as string
       await deps.rateLimiter.enforce({
         key: `achievement:user:${userId}`,
@@ -35,7 +36,7 @@ export function gameRoutes(app: FastifyInstance, deps: GameRoutesDeps): void {
         windowMs: HOUR_MS,
         now: req.now,
       })
-      const plan = await deps.game.declared(userId, { achievement, now: req.now })
+      const plan = await deps.game.declared(userId, { declared, now: req.now })
       await runBatch(deps.db, plan.statements)
       return { data: plan.delta }
     },

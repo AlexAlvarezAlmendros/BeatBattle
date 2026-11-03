@@ -1,7 +1,8 @@
 import { paintCover } from '@beatbattle/covers'
-import { musicalKeyName } from '@beatbattle/emails'
+import { musicalKeyName, RANK_NAMES } from '@beatbattle/emails'
 import { color } from '@beatbattle/shared/tokens'
 import type { OgData } from '../modules/share/og'
+import { cardNode } from './cardOg'
 import { type Child, dataUri, h, medalSvg, type Node, renderPng, renderSvg, scoreText } from './ogKit'
 import { SvgCanvas } from './svgCanvas'
 
@@ -15,6 +16,8 @@ import { SvgCanvas } from './svgCanvas'
 export const OG_WIDTH = 1200
 export const OG_HEIGHT = 630
 const COVER_SIZE = 440
+/** Ancho de la carta en la imagen OG del perfil: con su giro de −3°, cabe en el alto del panel. */
+const PROFILE_CARD_WIDTH = 352
 
 const chips = (bpm: number | null, key: string | null) =>
   [bpm ? `${Math.round(bpm)} BPM` : null, key ? musicalKeyName(key) : null].filter(Boolean).join(' · ')
@@ -239,7 +242,7 @@ function tree(data: OgData): Node {
       )
     }
     case 'profile': {
-      const initial = (data.displayName.trim()[0] ?? '?').toUpperCase()
+      // La carta de productor (tarea 7.28): el anverso de la carta, inclinado, y al lado lo que dice en grande.
       const stat = (name: string, value: string) =>
         h(
           'div',
@@ -251,33 +254,76 @@ function tree(data: OgData): Node {
             value,
           ),
         )
-      return frame(
+      const card = data.card
+      const wins = card.wins
+      return h(
+        'div',
+        { width: OG_WIDTH, height: OG_HEIGHT, backgroundColor: color.black, padding: 32 },
         h(
           'div',
           {
-            width: COVER_SIZE,
-            height: COVER_SIZE,
-            borderRadius: COVER_SIZE / 2,
-            backgroundColor: color.wine,
-            border: `6px solid ${color.red}`,
+            flex: 1,
+            backgroundColor: color.panel,
+            border: `2px solid ${color.lineStrong}`,
+            padding: '0 44px 0 52px',
             alignItems: 'center',
-            justifyContent: 'center',
           },
-          h('span', { fontFamily: 'Anybody', fontWeight: 900, fontSize: 220, color: color.white }, initial),
-        ),
-        [
-          kicker('PRODUCTOR · BEAT BATTLE'),
-          title(data.displayName),
-          line(`@${data.username}`, color.text3),
+          cardNode(
+            {
+              name: data.displayName,
+              number: card.number,
+              initials: card.initials,
+              since: card.since,
+              level: card.level,
+              levelFraction: card.levelFraction,
+              rank: card.rank,
+              variant: card.variant,
+              stats: { wins, podiums: data.podiums, weeks: data.weeks },
+              showcase: card.showcase.length,
+              achievements: card.achievements,
+            },
+            PROFILE_CARD_WIDTH,
+          ),
           h(
             'div',
-            { marginTop: 28 },
-            stat('SEMANAS', String(data.weeks)),
-            stat('PODIOS', String(data.podiums)),
-            stat('MEJOR', data.best ? `${data.best}.º` : '—'),
+            {
+              flex: 1,
+              height: '100%',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              padding: '40px 0 40px 56px',
+            },
+            h(
+              'div',
+              { flexDirection: 'column' },
+              kicker('CARTA DE PRODUCTOR · BEAT BATTLE'),
+              title(data.displayName),
+              line(`@${data.username}`, color.text3),
+              line(`${RANK_NAMES[card.rank] ?? card.rank} · Nivel ${card.level}`, color.red, 32),
+              h(
+                'div',
+                { marginTop: 28 },
+                stat('VICTORIAS', String(wins)),
+                stat('PODIOS', String(data.podiums)),
+                stat('SEMANAS', String(data.weeks)),
+              ),
+            ),
+            h(
+              'div',
+              { justifyContent: 'flex-end', alignItems: 'flex-end' },
+              h(
+                'div',
+                { flexDirection: 'column', alignItems: 'flex-end' },
+                h(
+                  'span',
+                  { fontFamily: 'Chakra Petch', fontWeight: 700, fontSize: 28, color: color.text3 },
+                  'BEAT BATTLE',
+                ),
+                h('span', { fontFamily: 'Anybody', fontWeight: 900, fontSize: 40, color: color.red }, 'OTP.'),
+              ),
+            ),
           ),
-        ],
-        null,
+        ),
       )
     }
   }

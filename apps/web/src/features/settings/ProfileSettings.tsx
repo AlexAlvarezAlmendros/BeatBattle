@@ -23,11 +23,10 @@ import { queryKeys } from '../../net/queryKeys'
 import { AchievementBadge, achievementName } from '../../ui/AchievementBadge'
 import { Button } from '../../ui/Button'
 import { TextAreaField, TextField } from '../../ui/Field'
-import { cardSince, ProducerCard } from '../../ui/ProducerCard'
+import { cardSince, ProducerCard, profileCard } from '../../ui/ProducerCard'
 import { Done, PaperNotice } from '../account/FormBits'
 import { RequireSession } from '../account/RequireSession'
 import { initialsOf, useSession } from '../account/session'
-import { profileCardProps } from '../profile/profileCardProps'
 import { avatarProblem, deleteAvatar, uploadAvatar } from './avatarUpload'
 import { SettingsGroup, SettingsSection, SettingsStatus } from './SettingsSection'
 import styles from './SettingsSection.module.css'
@@ -520,7 +519,7 @@ function CardPiece() {
   const data = profile.data
   const progress = levelProgress(data.xp)
   const { unlocked: _unlocked, ...card } = pub.data
-    ? profileCardProps(pub.data)
+    ? profileCard(pub.data)
     : {
         unlocked: [],
         name: data.displayUsername,

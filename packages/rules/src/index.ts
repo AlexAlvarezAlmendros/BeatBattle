@@ -33,11 +33,13 @@
 //              de una cuenta en orden de calendario, la base del reprocesado (tarea 7.16)
 //   season     `seasonStandings` (desempates y ex aequo) y `seasonChampions`; `isLastWeekOfSeason` en `calendar`
 //   achievements  el catálogo del Anexo C como datos y `evaluate(evento, contexto)`
+//   card       las variantes de la carta de productor (tareas 7.22 y 7.28: la web y la imagen OG del perfil)
 
 export * from './achievements'
 export * from './alias'
 export * from './balance'
 export * from './calendar'
+export * from './card'
 export * from './entryAudio'
 export * from './fair'
 export * from './goldenEar'

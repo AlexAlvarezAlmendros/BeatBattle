@@ -13,11 +13,12 @@ import {
   XP_VOTE_MAX_VOTES_PER_WEEK,
   xpFor,
 } from '@beatbattle/rules'
-import type { BrowserAchievement, GameDelta } from '@beatbattle/shared'
+import type { DeclaredAchievement, GameDelta } from '@beatbattle/shared'
 import { and, count, eq, gte, lt, ne, sql } from 'drizzle-orm'
 import type { BatchStatement } from '../../db/batch'
 import type { Db } from '../../db/client'
 import { entry, vote, week, type XpEventKind } from '../../db/schema'
+import { appError } from '../../lib/errors'
 import { sealDueWeeks } from '../weeks/seal'
 import {
   achievementXp,
@@ -420,14 +421,23 @@ export function createGameService(deps: GameDeps) {
 
     /**
      * Un logro que declara el navegador (tarea 7.14): solo los de la lista blanca, y solo su logro (sin XP de ningún
-     * evento del Anexo B). `share_card` es «compartir una tarjeta» (`cardShared`).
+     * evento del Anexo B). `share_card` es «compartir una tarjeta» (`cardShared`). La tarjeta «Estoy en la batalla» es de
+     * una entrada propia y el logro lleva la semana de la entrada (§2.10, «Lo público y lo propio»; tarea 7.28): ganado
+     * en una semana ciega, el perfil público no lo enseña hasta el sellado. La del puesto y la carta no son de ninguna
+     * semana. Una entrada que no existe o no es suya → 404.
      */
-    declared(userId: string, input: { achievement: BrowserAchievement; now: number }): Promise<GamePlan> {
-      const events: Record<BrowserAchievement, AchievementEvent> = { share_card: { kind: 'cardShared' } }
-      return plan(userId, {
-        events: [{ event: events[input.achievement], ref: null, weekId: null }],
-        now: input.now,
-      })
+    async declared(userId: string, input: { declared: DeclaredAchievement; now: number }): Promise<GamePlan> {
+      const { card } = input.declared
+      let trigger: AchievementTrigger = { event: { kind: 'cardShared' }, ref: null, weekId: null }
+      if (card.kind === 'battle') {
+        const [own] = await db
+          .select({ weekId: entry.weekId })
+          .from(entry)
+          .where(and(eq(entry.id, card.entryId), eq(entry.userId, userId)))
+        if (!own) throw appError('NOT_FOUND', 'Esa entrada no es tuya.')
+        trigger = { ...trigger, ref: card.entryId, weekId: own.weekId }
+      }
+      return plan(userId, { events: [trigger], now: input.now })
     },
 
     /** El perfil guardado, con lo que queda en él (`profile_done`: avatar, bio y un enlace; tarea 7.9). */

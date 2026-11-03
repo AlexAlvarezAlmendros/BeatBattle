@@ -1,12 +1,14 @@
 export {
   CARD_VARIANTS,
   type CardFacts,
+  type CardFront,
   type CardVariant,
   cardNumberLabel,
   cardSince,
   cardStats,
   cardVariant,
   isChampion,
+  profileCard,
   RED_CARD_LEVEL,
   unlockedVariants,
 } from './cardModel'

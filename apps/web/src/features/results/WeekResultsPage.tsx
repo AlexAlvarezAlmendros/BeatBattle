@@ -180,6 +180,7 @@ export function WeekResultsPage() {
             <StoryButton
               size="sm"
               fileName={`beatbattle-semana-${week.number}.png`}
+              shared={{ kind: 'result' }}
               card={{
                 kind: 'result',
                 weekNumber: week.number,

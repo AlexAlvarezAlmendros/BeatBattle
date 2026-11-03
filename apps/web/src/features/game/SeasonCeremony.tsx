@@ -12,9 +12,8 @@ import { Button } from '../../ui/Button'
 import { flash } from '../../ui/flash'
 import { useReducedMotion } from '../../ui/hooks/useReducedMotion'
 import { OtpSlapImage } from '../../ui/OtpSlap'
-import { ProducerCard } from '../../ui/ProducerCard'
+import { ProducerCard, profileCard } from '../../ui/ProducerCard'
 import { TitlePlate } from '../../ui/TitlePlate'
-import { profileCardProps } from '../profile/profileCardProps'
 import styles from './SeasonCeremony.module.css'
 import { seasonLabel } from './season'
 
@@ -33,7 +32,7 @@ export const SEASON_CEREMONY_TIMELINE = {
 /** Piezas del confeti. */
 const CONFETTI = 20
 
-type Card = Omit<ReturnType<typeof profileCardProps>, 'unlocked'>
+type Card = Omit<ReturnType<typeof profileCard>, 'unlocked'>
 
 /** Lo que cuenta la ceremonia: la temporada, las cifras de la primera fila y la carta de cada campeón con perfil. */
 export interface SeasonChampionsView {
@@ -74,7 +73,7 @@ export async function loadSeasonChampions(
   )
   const champions = profiles.flatMap((profile) => {
     if (!profile) return []
-    const { unlocked: _unlocked, ...card } = profileCardProps(profile)
+    const { unlocked: _unlocked, ...card } = profileCard(profile)
     return [{ name: profile.displayUsername, card: { ...card, variant: 'champion' as const } }]
   })
   if (champions.length === 0) return null

@@ -1,11 +1,14 @@
-import type { ProfileHistoryRow } from '@beatbattle/shared'
+import { levelProgress } from '@beatbattle/rules'
+import type { ProfileHistoryRow, PublicProfile } from '@beatbattle/shared'
 import { describe, expect, it } from 'vitest'
+import { EMPTY_PROFILE_GAME } from '../../test/game'
 import {
   cardNumberLabel,
   cardSince,
   cardStats,
   cardVariant,
   isChampion,
+  profileCard,
   RED_CARD_LEVEL,
   unlockedVariants,
 } from './cardModel'
@@ -55,5 +58,48 @@ describe('carta de productor: lo que dice de su dueño (§3.4.4)', () => {
     expect(cardSince(Date.UTC(2026, 2, 10))).toBe('03/2026')
     // El 31 de diciembre a las 23:30 UTC ya es enero en Madrid.
     expect(cardSince(Date.UTC(2026, 11, 31, 23, 30))).toBe('01/2027')
+  })
+
+  it('§3.4.4: el anverso de un perfil sale de lo público (el mismo para la carta HTML, el lienzo por CPU y la 3D)', () => {
+    const xp = 2400
+    const profile: PublicProfile = {
+      username: 'kairo.wav',
+      displayUsername: 'Kairo.wav',
+      cardNumber: 42,
+      joinedAt: Date.UTC(2026, 2, 10),
+      xp,
+      bio: null,
+      city: null,
+      links: {},
+      accent: 'red',
+      avatarUrl: 'https://res.cloudinary.com/demo/avatar.png',
+      game: {
+        ...EMPTY_PROFILE_GAME,
+        history: [row(40, 1), row(39, 2)],
+        achievements: [
+          { id: 'win', unlockedAt: 1 },
+          { id: 'podium', unlockedAt: 1 },
+        ],
+        showcase: ['win'],
+      },
+    }
+    const progress = levelProgress(xp)
+    const card = profileCard(profile)
+    expect(card).toMatchObject({
+      name: 'Kairo.wav',
+      initials: 'KW',
+      cardNumber: 42,
+      level: progress.level,
+      levelFraction: progress.fraction,
+      stats: { wins: 1, podiums: 2, weeks: 2 },
+      showcase: ['win'],
+      achievements: 2,
+      since: '03/2026',
+      avatarUrl: 'https://res.cloudinary.com/demo/avatar.png',
+    })
+    expect(card.variant).toBe(cardVariant({ level: progress.level, wins: 1, champion: false }))
+    expect(card.unlocked).toEqual(unlockedVariants({ level: progress.level, wins: 1, champion: false }))
+    expect(card.unlocked).toContain('holo')
+    expect(card.rank).not.toBe('')
   })
 })

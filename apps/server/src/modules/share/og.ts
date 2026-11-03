@@ -1,14 +1,25 @@
 import { createHash } from 'node:crypto'
-import { phaseOf } from '@beatbattle/rules'
+import {
+  type AchievementId,
+  type CardVariant,
+  cardVariant,
+  levelProgress,
+  phaseOf,
+  type RankId,
+  rankTitle,
+} from '@beatbattle/rules'
+import { initialsOf } from '@beatbattle/shared'
 import { and, eq, inArray, isNotNull } from 'drizzle-orm'
 import type { Db } from '../../db/client'
-import { entry, result, sample, user, week } from '../../db/schema'
+import { entry, producerProfile, result, sample, user, week } from '../../db/schema'
+import { parseShowcase, publicUnlocks, publicXp } from '../game/public'
 
 /**
  * Lo que enseña cada imagen OG (§2.15, §4.15; tarea 6.11): la semana, una entrada, los resultados y un perfil.
  * Solo datos públicos **en ese instante**: antes del sellado, ni autoría en semanas ciegas ni medias, votos o
  * posiciones (`RF-SHARE-04`, `RF-PLAY-05`); un perfil solo cuenta semanas selladas (si contara las abiertas,
- * diría quién está en una batalla ciega). La versión (`v`) es el hash de estos datos: la URL cambia cuando
+ * diría quién está en una batalla ciega), también su carta (tarea 7.28: nivel, variante y vitrina con el XP y los
+ * logros públicos, §2.10). La versión (`v`) es el hash de estos datos: la URL cambia cuando
  * cambia lo que se ve, así la imagen se cachea como inmutable (`RF-SHARE-02`).
  */
 
@@ -67,6 +78,23 @@ export type OgData =
       weeks: number
       podiums: number
       best: number | null
+      /** La carta de productor (§3.4.4; tarea 7.28): lo mismo que la carta del perfil, de lo público. */
+      card: {
+        number: number
+        initials: string
+        /** «03/2026»: mes y año de alta, en Madrid. */
+        since: string
+        level: number
+        /** Fracción del nivel en curso, a la centésima (el arco del sello). */
+        levelFraction: number
+        /** Id del rango (Anexo B). */
+        rank: RankId
+        variant: CardVariant
+        wins: number
+        /** La vitrina (solo logros públicos) y cuántos logros públicos tiene. */
+        showcase: AchievementId[]
+        achievements: number
+      }
     }
 
 const nameOf = (p: { username: string | null; displayUsername: string | null; name: string }) =>
@@ -213,6 +241,16 @@ async function resultsData(db: Db, slug: string): Promise<OgData | null> {
   }
 }
 
+/** «03/2026»: mes y año de un instante en Madrid (el pie de la carta, como `cardSince` de la web). */
+export function madridMonthYear(ms: number): string {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', month: 'numeric', year: 'numeric' })
+      .formatToParts(ms)
+      .map((part) => [part.type, part.value]),
+  )
+  return `${String(parts.month).padStart(2, '0')}/${parts.year}`
+}
+
 async function profileData(db: Db, username: string): Promise<OgData | null> {
   const [person] = await db
     .select({
@@ -221,8 +259,12 @@ async function profileData(db: Db, username: string): Promise<OgData | null> {
       displayUsername: user.displayUsername,
       name: user.name,
       banned: user.banned,
+      createdAt: user.createdAt,
+      cardNumber: producerProfile.cardNumber,
+      showcase: producerProfile.showcase,
     })
     .from(user)
+    .innerJoin(producerProfile, eq(producerProfile.userId, user.id))
     .where(eq(user.username, username.toLowerCase()))
   // Como el perfil público: una cuenta bloqueada no tiene página (§2.3).
   if (!person?.username || person.banned) return null
@@ -235,13 +277,33 @@ async function profileData(db: Db, username: string): Promise<OgData | null> {
     .where(eq(entry.userId, person.id))
   const current = rows.filter((r) => r.revision === r.current)
   const positions = current.map((r) => r.position).filter((p): p is number => p !== null)
+  // La carta, con lo público de la capa de juego (§2.10: el XP y los logros de semanas selladas o sin semana).
+  const progress = levelProgress(await publicXp(db, person.id))
+  const unlocks = await publicUnlocks(db, person.id)
+  const visible = new Set(unlocks.map((u) => u.id))
+  const wins = positions.filter((p) => p === 1).length
+  const displayName = nameOf(person)
   return {
     kind: 'profile',
     username: person.username,
-    displayName: nameOf(person),
+    displayName,
     weeks: current.length,
     podiums: positions.filter((p) => p <= 3).length,
     best: positions.length ? Math.min(...positions) : null,
+    card: {
+      number: person.cardNumber,
+      initials: initialsOf(displayName),
+      since: madridMonthYear(person.createdAt.getTime()),
+      level: progress.level,
+      levelFraction: Math.round(progress.fraction * 100) / 100,
+      rank: rankTitle(progress.level),
+      variant: cardVariant({ level: progress.level, wins, champion: visible.has('season_champ') }),
+      wins,
+      showcase: parseShowcase(person.showcase)
+        .filter((id) => visible.has(id))
+        .slice(0, 3),
+      achievements: unlocks.length,
+    },
   }
 }
 

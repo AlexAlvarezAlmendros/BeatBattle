@@ -15,6 +15,7 @@ import type { Db } from '../../db/client'
 import { achievementUnlock, entry, result, streakState, user, week, xpEvent } from '../../db/schema'
 import type { WeekSnapshot } from '../results/snapshot'
 import { championUnlock, seasonChampionChange } from '../seasons/closing'
+import { seasonWrapStatements } from '../seasons/wrap'
 import {
   achievementXp,
   type Guard,
@@ -40,7 +41,9 @@ import {
  *   se ganó en una de ellas y ya no se cumple en ninguna semana sellada, se retira con su XP;
  * - la racha guardada (`streak_state`) queda la que dan las semanas selladas;
  * - si con esta semana su temporada queda cerrada (o ya lo estaba y se re-sella), sus campeones ganan `season_champ`
- *   y quien deja de serlo de toda temporada cerrada lo pierde con su XP (tarea 7.11, `seasonChampionChange`).
+ *   y quien deja de serlo de toda temporada cerrada lo pierde con su XP (tarea 7.11, `seasonChampionChange`);
+ * - si es este sellado el que la cierra, `season.wrap` a quien participó o votó en ella (tarea 7.30), con los logros
+ *   que este mismo `batch` da o quita.
  *
  * Todo condicionado a que la semana quede sellada con esa revisión en el mismo `batch`. Re-ejecutarlo no cambia nada
  * (`RF-GAME-01`): lo escrito ya es lo que da la revisión vigente. La clasificación llega calculada (`WeekSnapshot`, sin
@@ -226,6 +229,11 @@ export async function sealingStatements(db: Db, input: SealingInput): Promise<Ba
     WHERE week.id = ${weekId} AND week.sealed_at IS NOT NULL AND week.result_revision = ${revision}
   )`
   const statements: BatchStatement[] = []
+  // Lo que este `batch` da y quita de logros, por cuenta: el resumen de la temporada que cierra los cuenta (7.30).
+  const granted = new Map<string, { id: AchievementId; weekId: string | null }[]>()
+  const withdrawn = new Map<string, AchievementId[]>()
+  const note = <T>(map: Map<string, T[]>, userId: string, item: T) =>
+    map.set(userId, [...(map.get(userId) ?? []), item])
   for (const userId of [...accounts].sort()) {
     const facts: SealedWeekFacts[] = weeks.map((w) => ({
       weekId: w.id,
@@ -281,6 +289,7 @@ export async function sealingStatements(db: Db, input: SealingInput): Promise<Ba
     const has = owned.get(userId) ?? new Map<string, string | null>()
     for (const id of SEALING_ACHIEVEMENTS) {
       const wId = first.get(id)
+      if (!has.has(id) && wId !== undefined) note(granted, userId, { id, weekId: wId })
       if (!has.has(id) && wId !== undefined)
         mine.push(
           ...unlockStatements(
@@ -291,11 +300,15 @@ export async function sealingStatements(db: Db, input: SealingInput): Promise<Ba
           ),
         )
       const from = has.get(id)
-      if (has.has(id) && !anywhere.has(id) && from != null && touched.has(from))
+      if (has.has(id) && !anywhere.has(id) && from != null && touched.has(from)) {
+        note(withdrawn, userId, id)
         mine.push(...withdrawStatements(db, { userId, achievementId: id }, guard))
+      }
     }
 
     // Campeón de la temporada que cierra (o que deja de serlo al re-sellar).
+    if (champions && grantChamp.has(userId))
+      note(granted, userId, { id: 'season_champ', weekId: champions.lastWeekId })
     if (champions && grantChamp.has(userId))
       mine.push(
         ...championUnlock(
@@ -304,8 +317,10 @@ export async function sealingStatements(db: Db, input: SealingInput): Promise<Ba
           guard,
         ),
       )
-    if (withdrawChamp.has(userId))
+    if (withdrawChamp.has(userId)) {
+      note(withdrawn, userId, 'season_champ')
       mine.push(...withdrawStatements(db, { userId, achievementId: 'season_champ' }, guard))
+    }
 
     if (mine.length > 0)
       statements.push(
@@ -324,5 +339,18 @@ export async function sealingStatements(db: Db, input: SealingInput): Promise<Ba
     if (before ? !sameStreak(before, final) : final.best > 0 || final.jokerSeason !== null)
       statements.push(streakStatement(db, userId, final, guard))
   }
+
+  // Este sellado cierra la temporada: su resumen, a quien participó o votó (`season.wrap`, tarea 7.30).
+  if (champions?.closing)
+    statements.push(
+      ...(await seasonWrapStatements(db, {
+        seasonId: champions.seasonId,
+        fresh: { weekId, snapshot },
+        granted,
+        withdrawn,
+        now,
+        newId,
+      })),
+    )
   return statements
 }
