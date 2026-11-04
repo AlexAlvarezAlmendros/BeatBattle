@@ -36,10 +36,10 @@ recorrido del usuario: cuenta → sample → subir → votar → resultados.
 | 5 | Escuchar y votar | ✅ Cerrada (2026-10-13) | [05-escuchar-votar.md](plans/05-escuchar-votar.md) | Todas las reglas `RF-VOTE-*` en verde; Modo Jurado con teclado; recordatorio y llamada al jurado |
 | 6 | Cierre, resultados y ceremonia | ✅ Cerrada (2026-10-15) | [06-resultados.md](plans/06-resultados.md) | Sellado determinista, ceremonia, re-sellado idéntico; Lunes de batalla por email |
 | — | **Beta cerrada** | 🔄 En curso (online y anuncio el domingo 15 de noviembre; primera ronda el lunes 16) | [beta-cerrada.md](plans/beta-cerrada.md) | 15–25 productores, 3 semanas reales (16 de noviembre – 6 de diciembre) |
-| 7 | Capa de juego | 🔄 En curso (plan creado el 2026-10-29) | [07-capa-de-juego.md](plans/07-capa-de-juego.md) | XP, niveles, rachas, logros, temporadas y carta con su pase de torneo |
-| 8 | Sorpresas y pulido audiovisual | 🔒 Bloqueada (F7) | — | Anexo F completo con variantes accesibles; kit de la semana |
+| 7 | Capa de juego | ✅ Cerrada (2026-11-04; el «en producción» del hito, cuando el usuario despliegue) | [07-capa-de-juego.md](plans/07-capa-de-juego.md) | XP, niveles, rachas, logros, temporadas y carta con su pase de torneo |
+| 8 | Sorpresas y pulido audiovisual | ⬜ Pendiente (sin plan; la F7 ya está cerrada) | — | Anexo F completo con variantes accesibles; kit de la semana |
 | 9 | Integración con Other People y email marketing | ⬜ Pendiente (sin plan; desde el 2026-10-29 no espera a la beta) | — | PR en `ReactOtpWeb` con widget y menú; campaña real a un segmento con consentimiento; alta en la newsletter del sello |
-| 10 | Moderación, legal y lanzamiento | 🔒 Bloqueada (F7–F9) | — | Legal publicado; auditorías sin hallazgos altos; presupuestos cumplidos |
+| 10 | Moderación, legal y lanzamiento | 🔒 Bloqueada (F8–F9) | — | Legal publicado; auditorías sin hallazgos altos; presupuestos cumplidos |
 
 ## Foco actual
 
@@ -49,8 +49,11 @@ la fecha anterior, el 19 de octubre, pasó sin semanas programadas). El calendar
 [plan de la beta](plans/beta-cerrada.md#calendario). Lo próximo, hasta el domingo 1 de noviembre: el cupo de Gmail a
 450, desplegar `main` (producción sirve todavía la PR #99) y la prueba de humo con un email real.
 
-En paralelo a la preparación de la beta, el desarrollo sigue con la **Fase 7** (capa de juego,
-[plan 07](plans/07-capa-de-juego.md)): el usuario abrió F7–F10 el 2026-10-29 y desplegar sigue siendo decisión suya.
+En paralelo a la preparación de la beta, el desarrollo sigue con F7–F10 (el usuario las abrió el 2026-10-29 y desplegar
+sigue siendo decisión suya). La **Fase 7** (capa de juego, [plan 07](plans/07-capa-de-juego.md)) se cerró el
+2026-11-04; su «en producción» llega cuando el usuario despliegue `main`, con el reprocesado (7.16) confirmado por él.
+Lo siguiente: la **Fase 8** (sorpresas y pulido audiovisual) y la **Fase 9** (Other People y email marketing), sin plan
+todavía.
 
 La **Fase 2** tiene su hito cumplido y solo le falta el IMAP real (2.11, con el Gmail de producción) para su cierre (2.26).
 La **Fase 3** se cerró el 2026-10-29.
@@ -228,6 +231,7 @@ Cada una tiene un valor por defecto que la guía ya asume (§7).
 
 | Fecha | Fase | Notas |
 |-------|------|-------|
+| 2026-11-04 | F7 | **Fase 7 cerrada** (7.36): los criterios 1–9 con la CI en verde y todos los ids con su test; el 10 («en producción», con el reprocesado de la 7.16) espera al despliegue del usuario. Jurado visual (7.35) con A1 resuelto por decisión del usuario (la carta escalada en la ceremonia en móviles bajos); quedan tres hallazgos bajos. Para el usuario: escuchar `cer.season`, Web Share en un teléfono y, en la F10, el lector de pantalla y el JS inicial de la home. |
 | 2026-11-03 | F7 | **7.23 hecha** (el pase de torneo): el usuario cierra «Pase de la carta» con la cinta con física. Guía v0.6.141. |
 | 2026-11-03 | F7 | **7.23** (el pase de torneo): hecho y verificado el valor por defecto de «Pase de la carta» (cinta con física en una vista anclada del Escenario, en su trozo propio); queda `🔄` hasta la conformidad del usuario. Guía v0.6.140. |
 | 2026-11-03 | F3 | **3.23** (tras el cierre, decisión del usuario): la portada del sample pasa a ser opcional. Guía v0.6.127. La fase sigue cerrada. |
