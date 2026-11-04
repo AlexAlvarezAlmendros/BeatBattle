@@ -286,10 +286,17 @@ test('hito de la Fase 3: admin, calendario, cambio de semana en la frontera, bas
   })
 
   await test.step('RF-NOTIF-09: el tick del lunes a las 08:00 manda el drop, también al suscriptor sin cuenta', async () => {
-    const toFan = await tickUntilMail(fan.request, DROP_MAIL_AT, fanEmail, 'Nuevo drop')
+    // Por el nombre del sample: la BD es la de toda la tanda, y el tick de otra prueba puede mandarle a este suscriptor el
+    // drop de su semana (p. ej. «Resultados de la #5 · Nuevo drop: Lluvia en Gràcia») antes que el de esta.
+    const toFan = await tickUntilMail(fan.request, DROP_MAIL_AT, fanEmail, 'Nuevo drop: Lluvia de marzo')
     expect(toFan?.subject).toBe('Nuevo drop: Lluvia de marzo · 92 BPM · Re menor')
     expect(toFan?.text).toContain('crea la tuya')
-    const toProducer = await tickUntilMail(fan.request, DROP_MAIL_AT, producerEmail, 'Nuevo drop')
+    const toProducer = await tickUntilMail(
+      fan.request,
+      DROP_MAIL_AT,
+      producerEmail,
+      'Nuevo drop: Lluvia de marzo',
+    )
     expect(toProducer?.subject).toBe('Nuevo drop: Lluvia de marzo · 92 BPM · Re menor')
     expect(toProducer?.text).not.toContain('crea la tuya')
   })
