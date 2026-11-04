@@ -2224,10 +2224,11 @@
       "headlineYou": "¡Eres el campeón de la temporada {season}!",
       "headlineYouTie": "¡Eres campeón ex aequo de la temporada {season}!",
       "stats": "{points} PTS · {wins} · {podiums}",
-      "wins_one": "{count} victoria",
-      "wins_other": "{count} victorias",
-      "podiums_one": "{count} podio",
-      "podiums_other": "{count} podios",
+      "line": "{names} · {stats}",
+      "wins_one": "{count} victoria",
+      "wins_other": "{count} victorias",
+      "podiums_one": "{count} podio",
+      "podiums_other": "{count} podios",
       "live": "{headline}: {names}. {stats}."
     }
   },

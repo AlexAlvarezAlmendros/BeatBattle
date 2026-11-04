@@ -4,7 +4,8 @@ Tres lentes (marca, juego y uso) sobre la capa de juego: el HUD con XP y teselas
 logro y de subida de nivel, la carta (anverso, reverso y variantes; 3D con su pase y plana) y sus otros sitios
 (bienvenida y Ajustes → Perfil), el perfil, el salón de la fama, la temporada (cerrada y en curso), la ceremonia del
 campeón de temporada, los emails `game.progress` y `season.wrap`, las tarjetas para *stories* y la imagen OG del perfil.
-Contra `main` (f5773ab, con la 7.34: `StageCanvas` y la caja nueva de la carta), 2026-11-03, guía v0.6.147 → v0.6.148.
+Contra `main` (f5773ab, con la 7.34: `StageCanvas` y la caja nueva de la carta), 2026-11-03 y 2026-11-04 (A1, tras la
+decisión del usuario), guía v0.6.147 → v0.6.149.
 
 **Cómo.** API con `seedBattle.ts … season` (la T3 de 2026 cerrada con su campeona, `prod01`; cuatro semanas selladas de
 la T4 y la de este lunes abierta) en el puerto 3701 y la web en el 5774. Chrome del sistema con la GPU (ANGLE sobre
@@ -18,14 +19,15 @@ Vulkan) y `--disable-lcd-text`:
   calidad apagada y en modo serio. En táctil, la página se recorre desplazándola (`-p2`, `-p3`…): la captura de página
   entera de Chrome deja la barra de controles fija a media página y no es lo que se ve.
 - `tools/shot/pase-f7.mjs` (el pase: reposo, arrastre, holo, reverso, foco, las cinco planas, el detalle y el móvil),
-  `tools/shot/season-ceremony-f7.mjs` (ahora también a 1024 × 768, 320 × 568, 360 × 640 y 375 × 667),
+  `tools/shot/season-ceremony-f7.mjs` (ahora también a 1024 × 768, 320 × 568, 360 × 640 y 375 × 667, y con ex aequo:
+  pasada `exaequo`, que hace 1.ª la segunda fila de la clasificación),
   `tools/shot/flow-f7-compartir.mjs` (perfil propio, D y «Altavoz») y `tools/shot/emails.mjs` (galería de emails a 600 y
   390 px, con las cartas de ejemplo de `apps/server/src/scripts/emailWaveforms.ts`).
 
-**Miradas:** las 233 capturas de esta carpeta (y las intermedias de cada arreglo, que no se guardan), abiertas una a
+**Miradas:** las 236 capturas de esta carpeta (y las intermedias de cada arreglo, que no se guardan), abiertas una a
 una o en hojas de contacto a media escala, con recortes a escala real para la letra pequeña. Por superficie: HUD 9 ·
 recompensas 45 · avisos al cargar 2 · carta del banco 13 · bienvenida y Ajustes → Perfil 10 · perfil 40 (el propio, 8)
-· pase 14 · salón 18 · temporada 27 · ceremonia del campeón 31 · emails 10 · *stories* 5 · OG del perfil 5 · `antes-*`
+· pase 14 · salón 18 · temporada 27 · ceremonia del campeón 34 (3 con ex aequo) · emails 10 · *stories* 5 · OG del perfil 5 · `antes-*`
 4 (el estado previo a un arreglo). Las idénticas píxel a píxel (la carta del banco con la calidad apagada y en modo
 serio es la de siempre: no lleva Escenario ni movimiento) no se guardan.
 
@@ -39,12 +41,12 @@ serio es la de siempre: no lleva Escenario ni movimiento) no se guardan.
 | J4 | Uso | **La carta plana estrecha se desbordaba** (efecto de la caja nueva de la 7.34, que ya no crece con lo de dentro): por debajo de ~300 px el cuerpo no cabía en su mitad y el pie y la pegatina pisaban el marco (bienvenida y Ajustes → Perfil a 1024 × 768; el perfil a 320, por poco) y, en la ceremonia del campeón a 360 × 640 y 375 × 667, el pie de la carta pisaba «¡ERES EL CAMPEÓN…!» | Cede el retrato (de su 50 % hasta un 25 % de la carta) y el cuerpo nunca se sale; a 352 px, la carta de siempre (el retrato, 54 %). Medido en el banco de 150 a 352 px: sin desbordarse desde 200 px (`bienvenida-1024x768.png`, `ajustes-perfil-1024x768.png`, `7.27-campeona-cifras-360x640-touch.png`). Guía §3.4.4 |
 | J5 | Uso | **Placa de logro a 320 px**: el XP a la derecha le quitaba ~70 px al texto y el rótulo partía en tres líneas, una empezando por «·» («LOGRO / DESBLOQUEADO / · COMÚN»; `antes-recompensas-logros-320x568-tactil.png`) | Hasta 360 px el XP va bajo el texto y el punto va pegado al rótulo: «LOGRO DESBLOQUEADO ·» y la rareza debajo, el nombre en una línea (`recompensas-logros-320x568-tactil.png`, `recompensas-legendario-320x568-tactil.png`). Guía §3.8.8 |
 | J6 | Marca | En la galería de emails, la `season.wrap` de la campeona enseñaba la carta holo de otra cuenta, sin corona, bajo «Tu carta ya lleva la corona» (las tres variantes compartían `profile-card.png`) | Herramienta, no app: cada ejemplo tiene su carta en su variante (`card-<nombre>.png`: holo, campeón y estándar) y `emails.mjs` la sirve por nombre |
+| J7 | Uso | **La ceremonia del campeón en un móvil de poco alto** (era A1, alta). En una columna, el hueco de la carta se quedaba en 137 px a 320 × 568, 226 a 360 × 640 y 247 a 375 × 667 (y ~150 por carta con ex aequo en el móvil); la carta necesita 288 px para su texto a 12 px: a 320 se desmontaba y su pie pisaba las cifras; a 360 y 375 se cortaban los rótulos y el pie y la pegatina se salían. **Decisión del usuario del 2026-11-04** (la opción (a) de las tres que se le dieron; descartadas la ceremonia sin carta y la capa con desplazamiento) | Con el hueco por debajo de 288 px, la carta se maqueta a 288 px y se **escala como un dibujo** (CSS: `min(1, tan(atan2(hueco, 288 px)))`, sin JavaScript): la composición entera, sin cortes ni nada que se salga; su letra baja de 12 px, como excepción escrita en `RD-VIS-05`. La línea de las cifras lleva el nombre del campeón («prod01 · 287 PTS · 8 victorias · 13 podios»; con ex aequo, «prod01 y prod02 · …»), y el número va pegado a su palabra. Con el hueco de 288 px o más (390 × 844, 1024 × 768, 1366 × 657, 1440 × 900) nada cambia. Capturas `7.27-campeona-cifras-{320x568,360x640,375x667,390x844}-touch.png`, `7.27-exaequo-cifras-{360x640-touch,390x844-touch,1440x900}.png`. Guía v0.6.149 (§3.8.15, `RD-VIS-05`, §3.9) y decisión en el ROADMAP; test `RD-VIS-05 (excepción…)` en `SeasonCeremony.test.tsx` y el paso de quien no es campeón de `game-data.spec.ts`, a 375 × 667 (la carta maquetada a 288 px, escalada y sin pisar la línea, que lleva el nombre) |
 
 ## Abierto
 
 | Id | Gravedad | Hallazgo | Nota |
 |---|---|---|---|
-| A1 | **Alta** | **La ceremonia del campeón en un móvil de poco alto.** En una columna (§3.8.15), la carta se queda con el alto que dejan la placa, el anunciador, las cifras y «Saltar»: 137 px de ancho a 320 × 568, 226 a 360 × 640 y 247 a 375 × 667 (los dos últimos, móviles corrientes). A esos anchos su texto a 12 px no cabe: a 320 la carta se desmonta y su pie pisa las cifras (`7.27-campeona-cifras-320x568-touch.png`); a 360 y 375, con J4 ya no pisa nada, pero los rótulos se cortan («VICTORI…», «CAMPEÓN DE TE…»), el retrato se aplasta bajo su etiqueta y el pie y la pegatina se salen por la derecha (`7.27-campeona-cifras-360x640-touch.png`, `…-375x667-touch.png`). Con **ex aequo**, en cualquier móvil (dos cartas en una fila, ~150 px cada una) | **Decisión de diseño** (la composición de §3.8.15 frente a `RD-VIS-05`): la carta necesita ~280 px y, con su texto a 12 px, la ceremonia entera no cabe en 568–667 px de alto. Opciones: **(a)** en ventana baja y vertical, la carta como dibujo, escalada desde 280 px (su letra baja de 12 px, como en una imagen), y el nombre del campeón también en la línea de las cifras, para que no se pierda (hoy, quien no es campeón solo lo lee en la carta); **(b)** sin carta en esas ventanas: placa, anunciador, nombre y cifras; **(c)** la capa se desplaza y solo «Saltar» la cierra (hoy un toque la cierra). Recomendación: **(a)**, que es la que menos cambia la ceremonia. Hasta que se decida, la 7.36 no puede cerrar la fase (criterio 7: ningún hallazgo alto abierto) |
 | A2 | Baja | Los avisos tapan lo que hay debajo mientras duran: en el móvil, la placa de nivel y «¡NIVEL 8!» van sobre el título de la pantalla («¡NIVEL 8! …ENSAS»), y entre placa y placa asoma un trozo de lo de debajo (`recompensas-nivel-390x844-tactil.png`, `pendientes-al-cargar-1440x900.png`) | Duran 4 s, no bloquean y no paran el ratón (§3.8.8: «ninguna placa tapa un control más de lo que dura»). Un velo detrás sería una pieza nueva; se deja |
 | A3 | Baja | Las tarjetas para *stories* (las tres; también las de la F6): el rótulo de arriba (~170 px) y la placa «ENTRA EN LA BATALLA» con el enlace (~1730–1830 px) caen en las franjas que tapan las interfaces de *stories* (~250 px arriba y ~340 abajo); en «Mi carta de productor» queda además un hueco vacío entre la carta y la placa (`stories-*.png`) | La guía no pide margen seguro. Propuesta: 250 px arriba y 340 abajo en las tres, con la carta más grande en el hueco. Para decidir (o para la F10) |
 | A4 | Baja | Contraste alto: la trama de la arena (el lienzo) sigue roja sobre el blanco del sistema detrás del menú, el perfil, el salón y la temporada (`hud-menu-contraste-1440x900.png`, `perfil-campeona-contraste-1440x900.png`) | Ningún texto va encima: los paneles pasan a `Canvas`. Es de antes de la F7 (en la ceremonia de resultados se quitó, J3 de la F6). Para la auditoría de accesibilidad de la F10 |
@@ -63,13 +65,14 @@ serio es la de siempre: no lleva Escenario ni movimiento) no se guardan.
   una a tres palabras: «¡NIVEL 8!», «¡LOGRO LEGENDARIO!», «¡CAMPEÓN DE TEMPORADA!»; ningún texto de §3.9 («K.O.»,
   «YOU WIN», «GANA A…»…). El HUD lleva el medidor segmentado con «XP 5.200 · NV 10 · 5.950» y las teselas «TEMPORADA T4 ·
   14 PTS · 9.º» y «RACHA ×7»; en el móvil táctil, plegado (sin cifras ni teselas, §3.4.1).
-- **Uso.** Texto ≥ 12 px en la web (la carta, tras J4, también estrecha; la placa, tras J5, a 320) y nunca sobre trama:
+- **Uso.** Texto ≥ 12 px en la web (la carta, tras J4, también estrecha; la placa, tras J5, a 320; la única excepción,
+  la carta escalada de la ceremonia en el móvil bajo, J7, con lo que dice repetido en la línea) y nunca sobre trama:
   las placas, el «+5 XP» (en su placa negra), la carta y los paneles son opacos, y la ceremonia va sobre velo opaco. A
   390 y 320 todo se lee y se llega desplazando (pantallas de contenido, §3.8.14); lo que queda bajo el pliegue a
   1366 × 657 y 1024 × 768 (la carta grande del perfil, la tira del salón) se alcanza igual. Contraste alto legible (la
   carta con el marco del sistema, sin lámina ni trama). Sin movimiento, la carta plana y fundidos; con la calidad
   apagada, en modo serio y sin WebGL, la carta plana (sin pase) y, en modo serio, sin anunciador ni estampa. Ninguna
-  pantalla se rompe salvo A1.
+  pantalla se rompe (A1, la ceremonia en el móvil bajo, pasó a J7 con la carta escalada).
 
 ## Notas
 

@@ -147,16 +147,40 @@ test('RF-GAME-01, RF-ARC-02, RF-ARC-05: una temporada jugada deja rangos, logros
     await expect(page.locator('[data-season-ceremony]')).toHaveCount(0)
   })
 
-  await test.step('RF-ARC-05 / §3.8.15: quien no es campeón la ve igual, dicha del campeón, y una tecla la salta', async () => {
+  await test.step('RF-ARC-05 / §3.8.15 / RD-VIS-05 (excepción): quien no es campeón la ve igual, dicha del campeón; en un móvil bajo, la carta escalada y el nombre en la línea; una tecla la salta', async () => {
     const page = second.page
     const me = (await (await page.request.get('/api/me', { headers: headers() })).json()).data
     expect(me.game.seasonCeremony).toEqual({ seasonId: '2034-T1', champion: false })
+    // Una ventana baja y vertical (375 × 667): el hueco de la carta no llega a 288 px (decisión del 2026-11-04).
+    await page.setViewportSize({ width: 375, height: 667 })
     await page.goto('/')
     const ceremony = page.getByRole('dialog', { name: 'Ceremonia del campeón de la temporada T1 de 2034' })
     await expect(ceremony.getByText('Campeón de la temporada T1 de 2034', { exact: true })).toBeVisible({
       timeout: 15_000,
     })
-    await expect(ceremony.locator('[data-producer-card]')).toContainText(champion.username)
+    const card = ceremony.locator('[data-producer-card]')
+    await expect(card).toContainText(champion.username)
+    // El nombre también en la línea de las cifras, a su tamaño: en la carta escalada no se leería.
+    await expect(ceremony.getByText(new RegExp(`^${champion.username}\\s·\\s\\d+\\sPTS`))).toBeVisible()
+    // La carta se maqueta a 288 px (su texto cabe) y se ve escalada en su hueco, sin pisar la línea de debajo.
+    const box = await card.evaluate((element) => {
+      const shown = element.getBoundingClientRect()
+      const slot = element.closest('li')?.getBoundingClientRect()
+      const headline = [...document.querySelectorAll('[data-season-ceremony] p:not([aria-live])')].find((p) =>
+        p.textContent?.startsWith('Campeón de la temporada'),
+      )
+      return {
+        layout: (element as HTMLElement).offsetWidth,
+        shown: shown.width,
+        bottom: shown.bottom,
+        slotWidth: slot?.width ?? 0,
+        lineTop: headline?.getBoundingClientRect().top ?? 0,
+      }
+    })
+    expect(box.layout).toBe(288)
+    expect(box.slotWidth).toBeLessThan(288)
+    expect(box.shown).toBeLessThan(288)
+    expect(box.bottom).toBeLessThanOrEqual(box.lineTop)
     await page.keyboard.press('ArrowDown')
     await expect(ceremony).toHaveCount(0)
     await expect

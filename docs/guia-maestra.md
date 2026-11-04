@@ -1,6 +1,6 @@
 # BeatBattle — Guía maestra (especificación funcional, de diseño y técnica)
 
-> Versión 0.6.148 · 2026-11-03 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
+> Versión 0.6.149 · 2026-11-04 · Estado: **borrador para validar** · Es la fuente de verdad del proyecto (SDD)
 >
 > Competición semanal de beats a partir de un sample, con los colores y la firma de Other People
 > Records y alma de recreativa de lucha.
@@ -1657,9 +1657,9 @@ física propios; no es el `Lanyard` del sello).
     el monograma del retrato es un dibujo (SVG con extrusión roja en capas, como el logo).
   - **Estrecha** (jurado de la 7.35): su texto no baja de 12 px, así que por debajo de ~300 px de ancho ya no cabe en la
     mitad de abajo; entonces **cede el retrato** (hasta un cuarto de la carta) y el cuerpo nunca se sale de ella (en la
-    bienvenida y en Ajustes → Perfil a 1024 px el pie pisaba el marco). Por debajo de ~280 px, ni así: los rótulos se
-    cortan con puntos suspensivos y el pie no cabe. Ninguna pantalla debería pintarla más estrecha (hallazgo abierto de
-    la ceremonia del campeón en el móvil, §3.8.15).
+    bienvenida y en Ajustes → Perfil a 1024 px el pie pisaba el marco). Por debajo de **288 px**, ni así: los rótulos se
+    cortan con puntos suspensivos y el pie se sale. Ninguna pantalla la maqueta más estrecha: la ceremonia del campeón,
+    donde el hueco puede ser menor, la maqueta a 288 px y la escala como un dibujo (§3.8.15, excepción de `RD-VIS-05`).
   - **Reverso**: número, logo del juego, el QR del perfil (módulos negros sobre blanco, con su margen de silencio), la
     dirección del perfil escrita debajo y el pie «EN LA BATALLA DESDE 03/2026» con la pegatina OTP. El QR es el PNG que
     pinta el servidor (`GET /api/profiles/:username/qr.png`, §4.10: `qrcode` solo vive allí, §4.1), una imagen con su
@@ -2550,14 +2550,24 @@ movimiento; pero dura unos segundos y no tiene podio: la protagonista es **la ca
      «¡CAMPEÓN DE TEMPORADA!» («¡CAMPEONES DE TEMPORADA!» si son ex aequo) y salta el confeti: **un** destello pedido
      al limitador (`RD-MOT-04`). La región viva dice quién es y sus cifras.
   3. **Las cifras** (1 s): bajo la carta, por fundido, «Campeón de la temporada T4 de 2026» (o «¡Eres el campeón de la
-     temporada T4 de 2026!» si es quien mira) y la línea de su clasificación: «312 PTS · 4 victorias · 9 podios».
+     temporada T4 de 2026!» si es quien mira) y la línea de su clasificación con el nombre del campeón (o de los ex
+     aequo): «kairo.wav · 312 PTS · 4 victorias · 9 podios». El nombre va en la línea porque la carta puede ir escalada
+     (abajo, «Composición») y entonces su letra no se lee.
   4. **Cierre** (6 s): la capa se va sola y queda la pantalla de debajo.
-- **Ex aequo**: las cartas entran a la vez, una al lado de otra (en el móvil se encogen para caber en una fila); las
-  cifras son las mismas (empatan en todo, §2.9).
+- **Ex aequo**: las cartas entran a la vez, una al lado de otra (en el móvil, escaladas para caber en una fila, como
+  abajo); las cifras son las mismas (empatan en todo, §2.9) y la línea lleva los dos nombres («kairo.wav y aina · …»).
 - **Composición**: en una columna (placa, anunciador, carta, cifras y, abajo, la firma *OTP.* y «Saltar»), con la carta
   tan grande como deje el alto (hasta la del perfil). Con poco alto y la ventana apaisada (1366 × 657, un móvil
   tumbado), la carta a la izquierda con todo el alto y lo demás a su derecha: en una columna no cabría con su texto a
   12 px (`RD-VIS-05`). El foco de luz va solo detrás de la carta, nunca detrás de un texto; el velo es opaco.
+  - **La carta escalada** (decisión del usuario del 2026-11-04, hallazgo A1 del jurado de la 7.35). La carta necesita
+    **288 px** de ancho (4,5 × `--bb-space-16`) para que su texto, a 12 px, quepa sin cortarse ni salirse (§3.4.4). Si
+    su hueco es más estrecho —una ventana baja y vertical (a 320 × 568 se queda en ~137 px; a 360 × 640, en ~226; a
+    375 × 667, en ~247) o ex aequo en el móvil—, la carta se maqueta a 288 px y se **escala como un dibujo** hasta
+    caber en él: su composición no cambia y su letra baja de 12 px (excepción de `RD-VIS-05`). Lo que dice no se pierde:
+    el nombre y las cifras van en la línea de debajo, a su tamaño, y la región viva lo dice entero. Con el hueco de
+    288 px o más (390 × 844, 1024 × 768, el escritorio, la ventana apaisada) la escala es 1 y nada cambia. Es CSS
+    (`.cardBox` en `SeasonCeremony.module.css`: `min(1, tan(atan2(hueco, 288 px)))`), sin medir con JavaScript.
 - **Saltable sin bloquear** (`RD-MOT-01`): Esc, Intro, espacio, cualquier otra tecla (salvo Tab y las de
   modificador), un toque, un clic o «Saltar» la cierran en cualquier momento, pasados los primeros 280 ms
   (`--bb-dur-slam`: la tecla que cerró la capa anterior no se la lleva; «Saltar», que tiene el foco, vale desde el
@@ -2593,7 +2603,7 @@ movimiento; pero dura unos segundos y no tiene podio: la protagonista es **la ca
 | Cierre de envíos | «¡TIEMPO!» | «Envíos cerrados · votos hasta las 23:59» |
 | Sellado | «¡SELLADO!» | «Contando votos…» |
 | 1.º de la ceremonia | «¡CAMPEÓN!» | Nombre, puntuación y votos |
-| Campeón de temporada (ceremonia corta, §3.8.15) | «¡CAMPEÓN DE TEMPORADA!» («¡CAMPEONES DE TEMPORADA!» con ex aequo) | «Campeón de la temporada T4 de 2026» y «312 PTS · 4 victorias · 9 podios» |
+| Campeón de temporada (ceremonia corta, §3.8.15) | «¡CAMPEÓN DE TEMPORADA!» («¡CAMPEONES DE TEMPORADA!» con ex aequo) | «Campeón de la temporada T4 de 2026» y «kairo.wav · 312 PTS · 4 victorias · 9 podios» |
 | Subida terminada | «¡NUEVO BEAT EN LA BATALLA!» | «Ya estás en la batalla #41» |
 | Nueva semana | «SEMANA 41» | Título del sample, BPM y tonalidad |
 
@@ -2618,7 +2628,7 @@ modo serio: se pierde espectáculo, nunca información ni función (`RNF-A11Y-03
 | `RD-VIS-02` | **Prueba de marca y de juego.** Cada pantalla: (a) usa solo la paleta del sello y sus derivados de §3.2; (b) lleva la firma *OTP.* visible (barra de controles, lockup o placa); (c) no contiene ninguna pieza de la lista «Lo que nunca se imita» (§3.1); (d) se recorre entera con teclado como un menú de juego (foco = cursor, flechas, Intro, Esc) y enseña sus teclas; (e) la aprueba un jurado visual de tres lentes (marca, juego, accesibilidad) | (a) test de capturas (Chrome con `--disable-lcd-text`, sin imágenes de usuario): como el granate es casi 0,25 · rojo + 0,05 · blanco, toda la paleta vive en el plano negro–rojo–blanco; ≤ 0,1 % de píxeles fuera de ese triángulo (tolerancia 8/255 y 0,03 en los pesos), y ≥ 60 % de píxeles con luminancia relativa < 0,06; (b) E2E: `[data-otp-signature]` visible en cada ruta; (c) lint de componentes prohibidos (`GlassSurface`, `MarqueeBand`, `AmbientOrbs`, `SiteHeader` de isla, Montserrat y JetBrains Mono) dentro de `pnpm lint:tokens` —la lista de excepciones temporales del cambio de dirección quedó vacía en la 0.27— y revisión de capturas; (d) E2E de teclado por pantalla; (e) acta del jurado en `docs/planning/evidence/` en cada fase con UI |
 | `RD-VIS-03` | Galería de componentes con todos los estados de §3.3, con y sin movimiento y en modo serio | `/dev/galeria` + E2E de la galería |
 | `RD-VIS-04` | Integridad de las portadas: misma tinta y misma luminancia, pintadas por CPU (§3.4.5) | Test en el Chrome del sistema con la GPU real (las opciones de `tools/shot`) y el contexto 2D de §3.4.5: 48 semillas, proporción de rojo y luminancia media a ±5 % de la media; revisión manual de 200 semillas al cambiar el generador |
-| `RD-VIS-05` | Texto legible: nunca sobre trama, rayos ni líneas de barrido; mínimo 12 px y escalable | Test de capturas con máscara de zonas de texto + test de tamaño mínimo de fuente en cada ruta |
+| `RD-VIS-05` | Texto legible: nunca sobre trama, rayos ni líneas de barrido; mínimo 12 px y escalable. **Excepción** (decisión del usuario del 2026-11-04): la carta de productor en la ceremonia del campeón de temporada (§3.8.15), cuando su hueco mide menos de **288 px** de ancho (ventanas bajas y verticales, ex aequo en el móvil), va como dibujo escalado desde 288 px y su letra puede bajar de 12 px; su nombre y sus cifras van también en la línea de debajo, a ≥ 12 px, y en la región viva. Con el hueco de 288 px o más, no hay excepción. Solo vale para esa carta | Test de capturas con máscara de zonas de texto + test de tamaño mínimo de fuente en cada ruta; la excepción, E2E `game-data.spec.ts` (a 375 × 667, la carta maquetada a 288 px y escalada sin pisar la línea, que lleva el nombre) y test `RD-VIS-05 (excepción…)` de `SeasonCeremony.test.tsx` |
 | `RD-MOT-01` | Toda animación > 400 ms se salta con Esc o cualquier tecla y no bloquea | Test por ceremonia y por puerta |
 | `RD-MOT-02` | Impactos visuales sincronizados con el sonido (desfase < 20 ms) | Medición en la ceremonia con el reloj de audio |
 | `RD-MOT-03` | Variante de «reducir movimiento» para cada entrada del Anexo E | Revisión del catálogo + capturas con la preferencia emulada |
@@ -4387,6 +4397,7 @@ lista completa vive en `packages/rules/alias.ts` y no incluye palabras ofensivas
 
 | Fecha | Versión | Cambios |
 |---|---|---|
+| 2026-11-04 | 0.6.149 | **Tarea 7.35, hallazgo A1** (decisión del usuario del 2026-11-04, la opción (a) del acta). §3.8.15: si el hueco de la carta de la ceremonia del campeón mide menos de 288 px (ventanas bajas y verticales; ex aequo en el móvil), la carta se maqueta a 288 px y se escala como un dibujo; la línea de las cifras lleva el nombre del campeón (o de los ex aequo). `RD-VIS-05`: esa carta es la única excepción al mínimo de 12 px, con su umbral, y lo que dice va también en texto. §3.4.4: 288 px es el ancho mínimo de la carta con su texto. §3.9: el texto que acompaña al anunciador del campeón de temporada lleva el nombre. |
 | 2026-11-03 | 0.6.148 | **Tarea 7.35** (jurado visual de la Fase 7; acta en `docs/planning/evidence/f7/jurado/`). §2.12.7, §4.10, §4.19.5, `RF-NOTIF-12` y Anexo H: la «Carta del trimestre» de `season.wrap` es la **carta sola** del perfil, en vertical (`GET /api/og/profile/:username/card.png`, 608 × 828, a 376 px como mucho): con la imagen OG apaisada, en el móvil su letra bajaba a 3–6 px. §4.10: el id de las imágenes OG y de las páginas compartibles admite el punto de los nombres de productor (`kairo.wav`, `RF-AUTH-06`): `/p/kairo.wav` salía con 404 y sin metadatos y su imagen OG, y la carta de su `season.wrap`, con 404. §3.4.4: en una carta estrecha cede el retrato y el cuerpo no se sale de ella; por debajo de ~280 px no cabe (la ceremonia del campeón en el móvil la pinta así: hallazgo abierto, A1 del acta). §3.8.14: los récords del salón, en columnas alineadas; en el móvil estrecho, la cifra bajo el nombre. §3.8.8: en el móvil estrecho el XP de la placa de logro va bajo el texto. |
 | 2026-11-03 | 0.6.147 | **Tarea 7.34** (accesibilidad y rendimiento de la capa de juego). §4.7.5 y §4.17: el lienzo del Escenario es `StageCanvas` (`createRoot` de R3F con el catálogo justo de three, `stage/catalogue.ts`) en vez del `<Canvas>`, que registraba el espacio de nombres entero: el trozo baja de 253,5 a **208,2 kB gz** (< 250) con el mismo lienzo único y la primera pintura igual, y `pnpm budget` lo comprueba en la CI. §4.17, JS inicial: medido 211,8 kB gz (289,6 la 1.ª pintura de la home), por encima de los 200 desde antes de la Fase 7 (201,4 y 278,0 al empezarla); queda escrito (con él, el LCP local del proyecto `perf`, 3,0 s, también en `main`) y su arreglo, para la auditoría de la Fase 10. §4.17, FPS: el perfil con la carta, 60 fps; el primer giro de la carta ya no tropieza (la caja de la carta, con `aspect-ratio`, unidades `cqi` y una fila `auto`, costaba ~60 ms en cada maquetación de la página; con una celda `minmax(0, 1fr)`, ~1 ms). §3.4.1: la región viva de las recompensas es un registro (`role="log"`): cada mensaje se lee una vez y en su orden, también los que salen a la vez (antes solo se oía el último). §3.8.8, «Cuándo»: una capa a pantalla completa que llega cuando ya hay avisos a la vista (la revelación del drop, una ceremonia que se abre mientras salen) los devuelve a la cola y salen al cerrarse, sin volver a decirse: se quedaban debajo de la capa, vistos sin verse (lo encontró el recorrido con la ceremonia del campeón, que la 0.6.143 arregla además desde el principio: su retención va antes que lo pendiente de `me`). |
 | 2026-11-03 | 0.6.143 | **Tarea 7.33** (E2E del hito de la Fase 7). §3.8.8 («Cuándo»): la retención de la ceremonia del campeón de temporada vale también para lo que trae la `me` que llega al cargar su pantalla. El E2E destapó que, al cargar el menú o los resultados con la ceremonia pendiente, los primeros logros sin ver (hasta tres placas y el legendario) salían a la vez que ella: la web ponía en cola lo pendiente de `me` al llegar, antes de que el marco pusiera la retención; ahora lo pone en cola después de pintar el marco con esa sesión. §4.16: el buzón de los E2E (`GET /api/test/mailbox`) filtra también por el texto plano (`&text=`) y da el HTML y cuántos emails cumplen el filtro (el hito cuenta su `season.wrap` y captura su `game.progress`). |

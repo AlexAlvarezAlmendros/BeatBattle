@@ -201,6 +201,11 @@ paralelo con ella; la F8 sigue esperando a la F7 y la F10, a la F7–F9.
 - 2026-11-03 — **Pase de la carta: la cinta propia con física** (decisión del usuario, mirando las capturas de la 7.23
   en `docs/planning/evidence/f7/pase/`): cinta roja corta con «OTP.», remache y pinza, Rapier en su trozo propio (856 kB gz,
   solo en el perfil a dos columnas y tras la primera pintura). Descartado el expositor giratorio. Guía v0.6.141.
+- 2026-11-04 — **La carta escalada en la ceremonia del campeón** (decisión del usuario, hallazgo A1 del jurado de la
+  7.35, `docs/planning/evidence/f7/jurado/`): en ventanas bajas y verticales y con ex aequo en el móvil, donde el hueco de
+  la carta no llega a 288 px, la carta va como dibujo escalado desde 288 px y su letra puede bajar de 12 px (única
+  excepción de `RD-VIS-05`); el nombre del campeón va también en la línea de las cifras. Descartadas la ceremonia sin
+  carta en esas ventanas y la capa con desplazamiento. Guía v0.6.149 (§3.8.15, `RD-VIS-05`).
 
 ## Decisiones abiertas
 
