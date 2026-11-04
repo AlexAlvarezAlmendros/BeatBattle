@@ -84,7 +84,7 @@ describe('ceremonia del campeón de temporada (7.27, §3.8.15)', () => {
     expect(screen.queryByText(t('ceremony.season.headline', { season: 'T3 de 2026' }))).toBeNull()
     act(() => vi.advanceTimersByTime(SEASON_CEREMONY_TIMELINE.line - SEASON_CEREMONY_TIMELINE.card))
     expect(screen.getByText(t('ceremony.season.headline', { season: 'T3 de 2026' }))).toBeInTheDocument()
-    expect(screen.getByText(plain('287 PTS · 8 victorias · 13 podios'))).toBeInTheDocument()
+    expect(screen.getByText(plain('kairo.wav · 287 PTS · 8 victorias · 13 podios'))).toBeInTheDocument()
     expect(onDone).not.toHaveBeenCalled()
     act(() => vi.advanceTimersByTime(SEASON_CEREMONY_TIMELINE.total - SEASON_CEREMONY_TIMELINE.line))
     expect(onDone).toHaveBeenCalledTimes(1)
@@ -123,6 +123,22 @@ describe('ceremonia del campeón de temporada (7.27, §3.8.15)', () => {
     expect(cards).toHaveLength(2)
     for (const item of cards) expect(item).toHaveAttribute('data-variant', 'champion')
     expect(document.querySelector('[aria-live="polite"]')).toHaveTextContent('kairo.wav y aina')
+  })
+
+  it('RD-VIS-05 (excepción de la carta escalada, 2026-11-04): la línea de las cifras dice también quién es el campeón (y los ex aequo), y cada carta va en su caja de escala', () => {
+    // En una ventana baja y vertical, o con ex aequo en el móvil, la carta se escala como un dibujo y su letra baja de
+    // 12 px (`.cardBox`, CSS): lo que dice no se pierde, porque el nombre va también en la línea, a su tamaño.
+    const { unmount } = render(<SeasonCeremonyLayer view={VIEW} you={false} onDone={() => {}} />)
+    act(() => vi.advanceTimersByTime(SEASON_CEREMONY_TIMELINE.line))
+    expect(screen.getByText(plain('kairo.wav · 287 PTS · 8 victorias · 13 podios'))).toBeInTheDocument()
+    expect(document.querySelector('[data-card-box] > [data-producer-card]')).not.toBeNull()
+    unmount()
+    render(<SeasonCeremonyLayer view={TIE} you onDone={() => {}} />)
+    act(() => vi.advanceTimersByTime(SEASON_CEREMONY_TIMELINE.line))
+    expect(
+      screen.getByText(plain('kairo.wav y aina · 287 PTS · 8 victorias · 13 podios')),
+    ).toBeInTheDocument()
+    expect(document.querySelectorAll('[data-card-box] > [data-producer-card]')).toHaveLength(2)
   })
 
   it('RD-MOT-01: cualquier tecla la salta sin llegar a la pantalla de detrás, pero no la que cerró la capa anterior (los primeros 280 ms)', () => {

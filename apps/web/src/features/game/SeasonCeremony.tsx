@@ -169,6 +169,9 @@ export function SeasonCeremonyLayer({
   const tie = view.champions.length > 1
   const headline = headlineOf(view, you)
   const stats = statsOf(view)
+  const names = new Intl.ListFormat(LOCALE, { type: 'conjunction' }).format(
+    view.champions.map((item) => item.name),
+  )
 
   // Modal: lo de detrás, `inert`; el foco vuelve a donde estaba al cerrarse.
   useEffect(() => {
@@ -192,9 +195,6 @@ export function SeasonCeremonyLayer({
     const timers = [
       window.setTimeout(() => {
         setStep('card')
-        const names = new Intl.ListFormat(LOCALE, { type: 'conjunction' }).format(
-          view.champions.map((item) => item.name),
-        )
         setLive(t('ceremony.season.live', { headline, names, stats }))
         if (reduced) return
         // Un destello, con el área y la opacidad que autoriza el limitador (en modo serio, ninguno).
@@ -295,7 +295,10 @@ export function SeasonCeremonyLayer({
           >
             {view.champions.map(({ name, card }) => (
               <li key={`${card.cardNumber}-${name}`} className={styles.slot}>
-                <ProducerCard {...card} />
+                {/* Escalada como un dibujo si su hueco no llega a 288 px (`RD-VIS-05`, excepción; `.cardBox`). */}
+                <div className={styles.cardBox} data-card-box="">
+                  <ProducerCard {...card} />
+                </div>
               </li>
             ))}
           </ul>
@@ -307,7 +310,8 @@ export function SeasonCeremonyLayer({
             <p className={styles.headline} data-you={you || undefined}>
               {headline}
             </p>
-            <p className={styles.stats}>{stats}</p>
+            {/* Con el nombre del campeón (o los ex aequo): si la carta va escalada, su letra no se lee (`RD-VIS-05`). */}
+            <p className={styles.stats}>{t('ceremony.season.line', { names, stats })}</p>
           </>
         )}
       </div>

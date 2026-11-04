@@ -61,3 +61,23 @@
   font-weight: var(--bb-weight-bold);
   white-space: nowrap;
 }
+
+/*
+ * En el móvil estrecho (hasta 360 px; jurado de la 7.35), el XP baja bajo el texto: a su derecha le quitaba ~70 px y a
+ * 320 × 568 el rótulo partía en tres líneas («LOGRO / DESBLOQUEADO · / COMÚN») y tres placas llenaban la pantalla.
+ */
+@media (max-width: 22.5em) {
+  .insignia {
+    grid-row: 1 / span 2;
+    align-self: start;
+  }
+
+  .text {
+    grid-column: 2 / -1;
+  }
+
+  .xp {
+    grid-row: 2;
+    grid-column: 2 / -1;
+  }
+}

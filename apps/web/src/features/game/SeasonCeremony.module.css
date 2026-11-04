@@ -76,16 +76,40 @@
 }
 
 .slot {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: min(
+  /* El hueco de la carta: hasta el ancho de la del perfil, lo que deje el alto y, con ex aequo, su parte de la fila. */
+  --card-fit: min(
     calc(var(--bb-space-16) * 5.5),
     calc(100cqh * 63 / 88 - var(--bb-space-4)),
     calc((100cqw - (var(--cards) - 1) * var(--bb-space-5)) / var(--cards) - var(--bb-space-5))
   );
+  /*
+   * Lo más estrecha que se pinta la carta con su texto a 12 px sin cortar nada ni salirse (288 px; medido en el banco:
+   * por debajo, los rótulos se cortan y el pie se sale). Si el hueco es más pequeño (una ventana baja y vertical, o ex
+   * aequo en el móvil), la carta se pinta a este ancho y se **escala** como un dibujo hasta caber: su letra baja de
+   * 12 px (excepción de `RD-VIS-05`, decisión del usuario del 2026-11-04) y lo que dice va también en la línea de las
+   * cifras y en la región viva.
+   */
+  --card-min: calc(var(--bb-space-16) * 4.5);
+  position: relative;
+  width: var(--card-fit);
+  aspect-ratio: 63 / 88;
   /* La carta cae estampada en el acorde de `cer.season` (escala 1,25 → 1 con el muelle de las estampas). */
   animation: bb-scer-slam var(--bb-dur-slam) var(--bb-ease-back) both;
+}
+
+/*
+ * La carta, centrada en su hueco: a su ancho (o, si el hueco es más estrecho, a `--card-min`) y escalada lo que haga
+ * falta. `tan(atan2(a, b))` es `a / b` sin unidades: la escala sale del propio CSS y con el hueco de 288 px o más es 1.
+ */
+.cardBox {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: max(var(--card-fit), var(--card-min));
+  translate: -50% -50%;
+  scale: min(1, tan(atan2(var(--card-fit), var(--card-min))));
 }
 
 /*

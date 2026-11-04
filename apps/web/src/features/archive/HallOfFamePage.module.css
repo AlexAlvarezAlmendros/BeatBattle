@@ -43,9 +43,14 @@
 
 /* ── Récords: puesto en display, rótulo, quién y la cifra en Oxanium ─────────────────────── */
 
+/*
+ * Las columnas son de la lista y cada fila las toma con `subgrid` (jurado de la 7.35): con una rejilla por fila, la
+ * cifra (`auto`) medía distinto en cada una y el nombre bailaba de una fila a otra; una tabla de récords va en columnas.
+ */
 .records {
   display: grid;
-  gap: var(--bb-space-2);
+  grid-template-columns: var(--bb-space-10) minmax(0, 1.1fr) minmax(0, 1fr) auto;
+  gap: var(--bb-space-2) var(--bb-space-4);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -53,7 +58,8 @@
 
 .record {
   display: grid;
-  grid-template-columns: var(--bb-space-10) minmax(0, 1.1fr) minmax(0, 1fr) auto;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
   align-items: center;
   gap: var(--bb-space-2) var(--bb-space-4);
   min-height: var(--bb-space-14);
@@ -319,6 +325,12 @@ a.recordHolder:hover {
     width: var(--bb-space-8);
   }
 
+  /* En el móvil cada fila lleva su rejilla (sin `subgrid`): el rótulo va arriba y el nombre comparte línea con su cifra,
+     que mide lo suyo; con las columnas de la lista, «10 victorias» le quitaba sitio a «PROD01» de las otras filas. */
+  .records {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .record {
     grid-template-columns: var(--bb-space-8) minmax(0, 1fr) auto;
   }
@@ -339,5 +351,20 @@ a.recordHolder:hover {
   .recordEmpty {
     grid-column: 2 / 4;
     justify-self: start;
+  }
+}
+
+/*
+ * En el móvil estrecho (hasta 360 px; jurado de la 7.35) el nombre no comparte línea con la cifra: al lado de «10
+ * victorias», «PROD01» partía por la mitad («PRO / D01»). El nombre arriba y la cifra debajo, los dos enteros.
+ */
+@media (max-width: 22.5em) {
+  .recordHolder,
+  .recordValue {
+    grid-column: 2 / 4;
+  }
+
+  .recordValue {
+    text-align: left;
   }
 }

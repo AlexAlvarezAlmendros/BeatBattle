@@ -17,7 +17,9 @@ import { type OgData, ogData } from './og'
  */
 
 const CACHE = 'public, s-maxage=60, stale-while-revalidate=600'
-const ID = /^[\w-]{1,64}$/
+// Un slug, un uuid o un nombre de productor, que puede llevar puntos («kairo.wav», `RF-AUTH-06`): sin el punto,
+// `/p/kairo.wav` salía con 404 y sin metadatos (jurado de la 7.35).
+const ID = /^[\w.-]{1,64}$/
 
 /** Lee el `index.html` de la web construida una vez: en Vercel va dentro de la función (`includeFiles`). */
 export function indexHtmlLoader(

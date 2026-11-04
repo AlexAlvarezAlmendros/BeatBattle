@@ -119,7 +119,7 @@ describe('season.wrap (7.30, §2.12.7)', () => {
     const champion = sent.find((mail) => mail.to === 'prod0@example.com')
     expect(champion?.subject).toBe('¡Campeón de la T4 de 2026!')
     expect(champion?.text).toMatch(/Tu carta del trimestre/i)
-    expect(champion?.html).toContain('/api/og/profile/prod0.png')
+    expect(champion?.html).toContain('/api/og/profile/prod0/card.png')
     expect(sent.find((mail) => mail.to === 'oido@example.com')?.subject).toBe('Tu T4 de 2026 en cifras')
     // Baja en un clic (RFC 8058): el transporte la pone en `List-Unsubscribe` con `List-Unsubscribe-Post`.
     expect(champion?.unsubscribeUrl).toMatch(/\/api\/unsubscribe/)

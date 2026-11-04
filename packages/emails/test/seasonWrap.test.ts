@@ -36,8 +36,10 @@ describe('season.wrap (§2.12.7)', () => {
       expect(content).toContain(`${PUBLIC_URL}/p/mar_beats`)
       expect(content).toContain('Darme de baja')
     }
-    // La carta del trimestre: la imagen OG del perfil (pública, de semanas selladas), con su texto alternativo.
-    expect(email.html).toContain(`src="${PUBLIC_URL}/api/og/profile/mar_beats.png"`)
+    // La carta del trimestre: la carta sola del perfil, en vertical (pública, de semanas selladas; jurado de la 7.35:
+    // la OG apaisada se leía a 3–6 px en el móvil), con su texto alternativo.
+    expect(email.html).toContain(`src="${PUBLIC_URL}/api/og/profile/mar_beats/card.png"`)
+    expect(email.html).toMatch(/width="376"[^>]*max-width:376px|max-width:376px[^>]*width="376"/)
     expect(email.html).toContain('alt="Carta de productor de mar_beats, 3.º de la temporada T4 de 2026"')
   })
 

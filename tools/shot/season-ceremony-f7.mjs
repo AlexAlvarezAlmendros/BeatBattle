@@ -5,19 +5,24 @@
 // aquí con un 204 sin llegar a la API, así cada pasada la vuelve a ver. Uso:
 //   node tools/shot/season-ceremony-f7.mjs <origen> <carpeta> [pasadas]
 // `pasadas`: lista separada por comas de `alta`, `apagada`, `movil`, `reducido`, `serio`, `contraste`, `jurado`,
-// `resultados` y `bajo` (por defecto, todas).
+// `resultados`, `bajo`, `tableta` (1024 × 768), `pequeno` (320 × 568 táctil), `telefonos` (360 × 640 y 375 × 667
+// táctiles) y `exaequo` (dos campeones: la 2.ª fila pasa a 1.ª; a 1440 × 900, 390 × 844 y 360 × 640) (por defecto,
+// todas).
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { chromium } from '@playwright/test'
 
 const [origin = 'http://localhost:5185', out = '.', only = ''] = process.argv.slice(2)
-const ALL = 'alta,apagada,movil,reducido,serio,contraste,jurado,resultados,bajo'
+const ALL =
+  'alta,apagada,movil,reducido,serio,contraste,jurado,resultados,bajo,tableta,pequeno,telefonos,exaequo'
 const runs = new Set((only || ALL).split(','))
 mkdirSync(out, { recursive: true })
 
 const DESKTOP = { name: '1440x900', width: 1440, height: 900 }
 const LOW = { name: '1366x657', width: 1366, height: 657 }
 const PHONE = { name: '390x844-touch', width: 390, height: 844, touch: true }
+const TABLET = { name: '1024x768', width: 1024, height: 768 }
+const SMALL = { name: '320x568-touch', width: 320, height: 568, touch: true }
 
 const browser = await chromium.launch({
   channel: 'chrome',
@@ -91,7 +96,14 @@ async function frames(
   let release
   const asked = new Promise((resolve) => {
     page.route('**/api/seasons/*/standings', (route) => {
-      release = () => route.continue()
+      release = async () => {
+        if (!options.tie) return route.continue()
+        // Ex aequo (7.35): la segunda fila, también 1.ª (la ceremonia enseña la carta de cada campeón con perfil).
+        const response = await route.fetch()
+        const body = await response.json()
+        if (body.data.rows[1]) body.data.rows[1].position = 1
+        return route.fulfill({ response, json: body })
+      }
       resolve()
     })
   })
@@ -152,6 +164,32 @@ if (runs.has('movil')) {
   const run = await frames(PHONE, 'campeona', { account: 'prod01' })
   await done(run, 'movil')
 }
+
+// Los tamaños del jurado de la F7 (7.35) que faltaban: la ventana mediana y el móvil pequeño.
+if (runs.has('tableta')) {
+  const run = await frames(TABLET, 'campeona', { account: 'prod01' })
+  await done(run, 'tableta')
+}
+
+if (runs.has('pequeno')) {
+  const run = await frames(SMALL, 'campeona', { account: 'prod01' })
+  await done(run, 'pequeno')
+}
+
+if (runs.has('telefonos'))
+  for (const size of [
+    { name: '360x640-touch', width: 360, height: 640, touch: true },
+    { name: '375x667-touch', width: 375, height: 667, touch: true },
+  ]) {
+    const run = await frames(size, 'campeona', { account: 'prod01' }, '/', [['cifras', 1700]])
+    await done(run, 'telefonos')
+  }
+
+if (runs.has('exaequo'))
+  for (const size of [DESKTOP, PHONE, { name: '360x640-touch', width: 360, height: 640, touch: true }]) {
+    const run = await frames(size, 'exaequo', { account: 'jurado1', tie: true }, '/', [['cifras', 1700]])
+    await done(run, 'exaequo')
+  }
 
 if (runs.has('reducido')) {
   const run = await frames(DESKTOP, 'campeona-sin-movimiento', { account: 'prod01', reduced: true })
